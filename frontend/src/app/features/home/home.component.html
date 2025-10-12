@@ -1,0 +1,112 @@
+<nav class="navbar navbar-expand-lg navbar-light bg-white fixed-top shadow-sm">
+  <div class="container">
+    <a class="navbar-brand d-flex align-items-center" routerLink="/">
+      <div class="logo-placeholder me-2">
+        <i class="bi bi-plus-circle-fill text-primary"></i>
+      </div>
+      <span class="h5 mb-0">Fetan<span class="text-primary">Care</span></span>
+    </a>
+    <button
+      class="navbar-toggler"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#navbarNav"
+    >
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav mx-auto">
+        <li class="nav-item">
+          <a class="nav-link px-3 active" routerLink="/">Home</a>
+        </li>
+        <li class="nav-item" *ngIf="currentUser()">
+          <a class="nav-link px-3" (click)="navigateToDashboard()" style="cursor: pointer">Dashboard</a>
+        </li>
+      </ul>
+      <div class="d-flex align-items-center gap-3">
+        <ng-container *ngIf="!currentUser(); else loggedIn">
+          <a routerLink="/login" class="btn btn-outline-primary px-4">Login</a>
+          <a routerLink="/register" class="btn btn-primary px-4">Signup</a>
+        </ng-container>
+        <ng-template #loggedIn>
+          <span class="me-3">Welcome, {{ currentUser()?.firstName }}!</span>
+          <button (click)="logout()" class="btn btn-outline-primary px-4">Logout</button>
+        </ng-template>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<section class="hero d-flex align-items-center">
+  <div class="container text-white">
+    <div class="row">
+      <div class="col-lg-8 col-xl-6">
+        <h1 class="display-4 fw-bold mb-4 animate__animated animate__fadeInUp">
+          Your Health, Your Priority.
+        </h1>
+        <p class="lead mb-4 animate__animated animate__fadeInUp animate__delay-1s">
+          Welcome to FetanCare – the most convenient way to book appointments with trusted healthcare
+          providers at your fingertips.
+        </p>
+        <div class="animate__animated animate__fadeInUp animate__delay-2s">
+          <button class="btn btn-primary btn-lg px-5 py-3" (click)="navigateToDashboard()">
+            Book Appointment Now
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="bg-dark text-light py-5">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-lg-4">
+        <h3 class="h4 mb-4">FetanCare</h3>
+        <p class="text-muted mb-4">Your trusted healthcare booking platform.</p>
+        <div class="social-links">
+          <a href="#" class="btn btn-outline-light btn-sm me-2">
+            <i class="bi bi-facebook"></i>
+          </a>
+          <a href="#" class="btn btn-outline-light btn-sm me-2">
+            <i class="bi bi-twitter"></i>
+          </a>
+          <a href="#" class="btn btn-outline-light btn-sm me-2">
+            <i class="bi bi-instagram"></i>
+          </a>
+          <a href="#" class="btn btn-outline-light btn-sm">
+            <i class="bi bi-linkedin"></i>
+          </a>
+        </div>
+      </div>
+      <div class="col-lg-4">
+        <h5 class="mb-4">Contact Info</h5>
+        <ul class="list-unstyled">
+          <li class="mb-3">
+            <i class="bi bi-envelope me-2"></i>
+            <a href="mailto:info@fetancare.com" class="text-muted text-decoration-none"
+              >info&#64;fetancare.com</a
+            >
+          </li>
+          <li class="mb-3">
+            <i class="bi bi-telephone me-2"></i> +251-123-456-789
+          </li>
+          <li class="mb-3">
+            <i class="bi bi-geo-alt me-2"></i> Addis Ababa, Ethiopia
+          </li>
+        </ul>
+      </div>
+      <div class="col-lg-4">
+        <h5 class="mb-4">Quick Links</h5>
+        <ul class="list-unstyled">
+          <li class="mb-2"><a href="#" class="text-muted text-decoration-none">About Us</a></li>
+          <li class="mb-2"><a href="#" class="text-muted text-decoration-none">Our Services</a></li>
+          <li class="mb-2">
+            <a href="#" class="text-muted text-decoration-none">Book Appointment</a>
+          </li>
+          <li class="mb-2"><a href="#" class="text-muted text-decoration-none">Contact</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</footer>

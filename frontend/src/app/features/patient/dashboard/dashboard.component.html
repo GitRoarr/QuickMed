@@ -1,0 +1,82 @@
+<app-sidebar title="Patient Dashboard" [menuItems]="menuItems"></app-sidebar>
+
+<div class="main-content">
+  <div class="container-fluid">
+    <h2 class="mb-4">Welcome to Your Dashboard</h2>
+
+    <div class="row g-4 mb-4">
+      <div class="col-md-4">
+        <div class="card stat-card">
+          <div class="card-body">
+            <h5 class="card-title">Total Appointments</h5>
+            <h2 class="mb-0">{{ appointments.length }}</h2>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card stat-card">
+          <div class="card-body">
+            <h5 class="card-title">Upcoming</h5>
+            <h2 class="mb-0">
+              {{ (appointments | filter: 'status':'confirmed').length }}
+            </h2>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card stat-card">
+          <div class="card-body">
+            <h5 class="card-title">Completed</h5>
+            <h2 class="mb-0">
+              {{ (appointments | filter: 'status':'completed').length }}
+            </h2>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Recent Appointments</h5>
+        <a routerLink="/patient/appointments" class="btn btn-sm btn-primary">View All</a>
+      </div>
+      <div class="card-body">
+        <div *ngIf="isLoading" class="text-center py-5">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+        </div>
+
+        <div *ngIf="!isLoading && appointments.length === 0" class="text-center py-5">
+          <p class="text-muted">No appointments yet</p>
+          <a routerLink="/patient/doctors" class="btn btn-primary">Book Your First Appointment</a>
+        </div>
+
+        <div *ngIf="!isLoading && appointments.length > 0" class="table-responsive">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>Doctor</th>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let appointment of appointments">
+                <td>Dr. {{ appointment.doctor?.firstName }} {{ appointment.doctor?.lastName }}</td>
+                <td>{{ appointment.appointmentDate | date: 'mediumDate' }}</td>
+                <td>{{ appointment.appointmentTime }}</td>
+                <td>
+                  <span [class]="getStatusClass(appointment.status)">
+                    {{ appointment.status | titlecase }}
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

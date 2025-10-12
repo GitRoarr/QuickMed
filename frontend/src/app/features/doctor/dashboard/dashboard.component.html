@@ -1,0 +1,92 @@
+<app-sidebar title="Doctor Dashboard" [menuItems]="menuItems"></app-sidebar>
+
+<div class="main-content">
+  <div class="container-fluid">
+    <h2 class="mb-4">Doctor Dashboard</h2>
+
+    <div class="row g-4 mb-4">
+      <div class="col-md-3">
+        <div class="card stat-card">
+          <div class="card-body">
+            <h5 class="card-title">Total Appointments</h5>
+            <h2 class="mb-0">{{ appointments.length }}</h2>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card stat-card">
+          <div class="card-body">
+            <h5 class="card-title">Pending</h5>
+            <h2 class="mb-0">
+              {{ (appointments | filter: 'status':'pending').length }}
+            </h2>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card stat-card">
+          <div class="card-body">
+            <h5 class="card-title">Confirmed</h5>
+            <h2 class="mb-0">
+              {{ (appointments | filter: 'status':'confirmed').length }}
+            </h2>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card stat-card">
+          <div class="card-body">
+            <h5 class="card-title">Completed</h5>
+            <h2 class="mb-0">
+              {{ (appointments | filter: 'status':'completed').length }}
+            </h2>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0">Today's Appointments</h5>
+      </div>
+      <div class="card-body">
+        <div *ngIf="isLoading" class="text-center py-5">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+        </div>
+
+        <div *ngIf="!isLoading && appointments.length === 0" class="text-center py-5">
+          <p class="text-muted">No appointments scheduled</p>
+        </div>
+
+        <div *ngIf="!isLoading && appointments.length > 0" class="table-responsive">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>Patient</th>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Status</th>
+                <th>Notes</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let appointment of appointments.slice(0, 10)">
+                <td>{{ appointment.patient?.firstName }} {{ appointment.patient?.lastName }}</td>
+                <td>{{ appointment.appointmentDate | date: 'mediumDate' }}</td>
+                <td>{{ appointment.appointmentTime }}</td>
+                <td>
+                  <span [class]="getStatusClass(appointment.status)">
+                    {{ appointment.status | titlecase }}
+                  </span>
+                </td>
+                <td>{{ appointment.notes || '-' }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,58 @@
+<app-sidebar title="Patient Dashboard" [menuItems]="menuItems"></app-sidebar>
+
+<div class="main-content">
+  <div class="container-fluid">
+    <h2 class="mb-4">My Appointments</h2>
+
+    <div class="card">
+      <div class="card-body">
+        <div *ngIf="isLoading" class="text-center py-5">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+        </div>
+
+        <div *ngIf="!isLoading && appointments.length === 0" class="text-center py-5">
+          <p class="text-muted">No appointments found</p>
+        </div>
+
+        <div *ngIf="!isLoading && appointments.length > 0" class="table-responsive">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>Doctor</th>
+                <th>Specialty</th>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let appointment of appointments">
+                <td>Dr. {{ appointment.doctor?.firstName }} {{ appointment.doctor?.lastName }}</td>
+                <td>{{ appointment.doctor?.specialty }}</td>
+                <td>{{ appointment.appointmentDate | date: 'mediumDate' }}</td>
+                <td>{{ appointment.appointmentTime }}</td>
+                <td>
+                  <span [class]="getStatusClass(appointment.status)">
+                    {{ appointment.status | titlecase }}
+                  </span>
+                </td>
+                <td>
+                  <button
+                    *ngIf="appointment.status !== 'cancelled' && appointment.status !== 'completed'"
+                    (click)="cancelAppointment(appointment.id)"
+                    class="btn btn-sm btn-danger"
+                  >
+                    Cancel
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,22 @@
+<div class="sidebar">
+  <div class="mb-4">
+    <h5 class="text-white mb-3">{{ title }}</h5>
+    <div class="text-white-50 small" *ngIf="currentUser()">
+      {{ currentUser()?.firstName }} {{ currentUser()?.lastName }}
+    </div>
+  </div>
+  <ul class="sidebar-menu">
+    <li *ngFor="let item of menuItems">
+      <a [routerLink]="item.route" routerLinkActive="active">
+        <i class="bi {{ item.icon }}"></i>
+        {{ item.label }}
+      </a>
+    </li>
+    <li>
+      <a (click)="logout()" style="cursor: pointer">
+        <i class="bi bi-box-arrow-right"></i>
+        Logout
+      </a>
+    </li>
+  </ul>
+</div>
