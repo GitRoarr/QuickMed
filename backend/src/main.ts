@@ -20,7 +20,6 @@ async function bootstrap() {
     }),
   )
 
-  // Set global prefix for API routes
   app.setGlobalPrefix("api")
 
   const port = process.env.PORT || 3000

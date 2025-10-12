@@ -1,37 +1,34 @@
-import { Module } from "@nestjs/common"
-import { ConfigModule, ConfigService } from "@nestjs/config"
-import { TypeOrmModule } from "@nestjs/typeorm"
-import { AuthModule } from "./auth/auth.module"
-import { UsersModule } from "./users/users.module"
-import { DoctorsModule } from "./doctors/doctors.module"
-import { AppointmentsModule } from "./appointments/appointments.module"
+import { Module } from "@nestjs/common";
+import { ConfigModule, ConfigService } from "@nestjs/config";
+import { TypeOrmModule } from "@nestjs/typeorm";
+import { AuthModule } from "./auth/auth.module";
+import { UsersModule } from "./users/users.module";
+import { DoctorsModule } from "./doctors/doctors.module";
+import { AppointmentsModule } from "./appointments/appointments.module";
 
 @Module({
   imports: [
-    // Configuration module
     ConfigModule.forRoot({
-      isGlobal: true,
+      isGlobal: true,   // make .env available globally
       envFilePath: ".env",
     }),
 
-    // TypeORM PostgreSQL configuration
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
+      inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         type: "postgres",
-        host: configService.get("DB_HOST", "localhost"),
-        port: configService.get("DB_PORT", 5432),
-        username: configService.get("DB_USERNAME", "postgres"),
-        password: configService.get("DB_PASSWORD", "postgres"),
-        database: configService.get("DB_NAME", "carehub"),
+        host: configService.get<string>("DATABASE_HOST"),
+        port: configService.get<number>("DATABASE_PORT"),
+        username: configService.get<string>("DATABASE_USER"),
+        password: configService.get<string>("DATABASE_PASSWORD"),
+        database: configService.get<string>("DATABASE_NAME"),
         entities: [__dirname + "/**/*.entity{.ts,.js}"],
-        synchronize: configService.get("NODE_ENV") !== "production",
-        logging: configService.get("NODE_ENV") === "development",
+        synchronize: configService.get<string>("NODE_ENV") !== "production",
+        logging: configService.get<string>("NODE_ENV") === "development",
       }),
-      inject: [ConfigService],
     }),
 
-    // Feature modules
     AuthModule,
     UsersModule,
     DoctorsModule,
