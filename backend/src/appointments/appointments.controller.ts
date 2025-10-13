@@ -1,11 +1,11 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from "@nestjs/common"
-import type { AppointmentsService } from "./appointments.service"
-import type { CreateAppointmentDto } from "./dto/create-appointment.dto"
-import type { UpdateAppointmentDto } from "./dto/update-appointment.dto"
+import  { AppointmentsService } from "./appointments.service"
+import  { CreateAppointmentDto } from "./dto/create-appointment.dto"
+import  { UpdateAppointmentDto } from "./dto/update-appointment.dto"
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard"
 import { RolesGuard } from "../auth/guards/roles.guard"
 import { CurrentUser } from "../auth/decorators/current-user.decorator"
-import { type User, UserRole } from "../users/entities/user.entity"
+import { User, UserRole } from "../users/entities/user.entity"
 
 @Controller("appointments")
 @UseGuards(JwtAuthGuard)
