@@ -14,7 +14,7 @@ export class AuthService {
   ) {}
 
   async register(registerDto: RegisterDto): Promise<{ user: Partial<User>; token: string }> {
-    const { email, password, firstName, lastName, phoneNumber, medicalHistory } = registerDto;
+    const { email, password, firstName, lastName, phoneNumber, } = registerDto;
 
     const existingUser = await this.usersService.findByEmail(email);
     if (existingUser) {
@@ -29,7 +29,6 @@ export class AuthService {
       email,
       password: hashedPassword,
       phoneNumber,
-      medicalHistory,
     });
 
     const token = this.generateToken(user);

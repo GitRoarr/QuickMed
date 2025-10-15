@@ -1,8 +1,62 @@
 .stat-card {
-  border-left: 4px solid var(--primary-color);
+  background: #0a0a0a;
+  border: 1px solid #1a1a1a;
+  border-left: 4px solid #00ff00;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 255, 0, 0.15);
 }
 
 .stat-card h2 {
-  color: var(--primary-color);
+  color: #00ff00;
   font-weight: bold;
+}
+
+.stat-card h5 {
+  color: #888888;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.card {
+  background: #0a0a0a;
+  border: 1px solid #1a1a1a;
+}
+
+.card-header {
+  background: #0a0a0a;
+  border-bottom: 1px solid #1a1a1a;
+  color: #00ff00;
+}
+
+.table {
+  color: #ffffff;
+}
+
+.table thead th {
+  background: #0a0a0a;
+  color: #00ff00;
+  border-bottom: 2px solid #1a1a1a;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  letter-spacing: 0.5px;
+}
+
+.table tbody tr {
+  border-bottom: 1px solid #1a1a1a;
+  transition: background-color 0.2s;
+}
+
+.table tbody tr:hover {
+  background: #0f0f0f;
+}
+
+.table tbody td {
+  color: #cccccc;
+  padding: 1rem;
 }

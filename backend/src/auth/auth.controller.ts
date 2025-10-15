@@ -9,13 +9,13 @@ export class AuthController {
 
   @Post("register")
   @HttpCode(HttpStatus.CREATED)
-  async register(@Body() registerDto: RegisterDto) { // <-- add @Body()
+  async register(@Body() registerDto: RegisterDto) { 
     return this.authService.register(registerDto)
   }
 
   @Post("login")
   @HttpCode(HttpStatus.OK)
-  async login(@Body() loginDto: LoginDto) { // <-- add @Body()
+  async login(@Body() loginDto: LoginDto) { 
     return this.authService.login(loginDto)
   }
 }

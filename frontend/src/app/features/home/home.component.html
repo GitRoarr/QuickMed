@@ -1,10 +1,10 @@
-<nav class="navbar navbar-expand-lg navbar-light bg-white fixed-top shadow-sm">
+<nav class="navbar navbar-expand-lg fixed-top">
   <div class="container">
     <a class="navbar-brand d-flex align-items-center" routerLink="/">
-      <div class="logo-placeholder me-2">
-        <i class="bi bi-plus-circle-fill text-primary"></i>
+      <div class="logo-icon me-2">
+        <i class="bi bi-plus-circle-fill"></i>
       </div>
-      <span class="h5 mb-0">Fetan<span class="text-primary">Care</span></span>
+      <span class="brand-name">QuickMed</span>
     </a>
     <button
       class="navbar-toggler"
@@ -17,96 +17,396 @@
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav mx-auto">
         <li class="nav-item">
-          <a class="nav-link px-3 active" routerLink="/">Home</a>
+          <a class="nav-link" routerLink="/">Features</a>
         </li>
-        <li class="nav-item" *ngIf="currentUser()">
-          <a class="nav-link px-3" (click)="navigateToDashboard()" style="cursor: pointer">Dashboard</a>
+        <li class="nav-item">
+          <a class="nav-link" href="#how-it-works">How It Works</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#testimonials">Testimonials</a>
         </li>
       </ul>
       <div class="d-flex align-items-center gap-3">
         <ng-container *ngIf="!currentUser(); else loggedIn">
-          <a routerLink="/login" class="btn btn-outline-primary px-4">Login</a>
-          <a routerLink="/register" class="btn btn-primary px-4">Signup</a>
+          <a routerLink="/login" class="btn btn-outline-light px-4">Log In</a>
+          <a routerLink="/register" class="btn btn-primary px-4">Get Started</a>
         </ng-container>
         <ng-template #loggedIn>
-          <span class="me-3">Welcome, {{ currentUser()?.firstName }}!</span>
-          <button (click)="logout()" class="btn btn-outline-primary px-4">Logout</button>
+          <span class="me-3 text-light">Welcome, {{ currentUser()?.firstName }}!</span>
+          <button (click)="logout()" class="btn btn-outline-light px-4">Logout</button>
         </ng-template>
       </div>
     </div>
   </div>
 </nav>
 
-<section class="hero d-flex align-items-center">
-  <div class="container text-white">
-    <div class="row">
-      <div class="col-lg-8 col-xl-6">
-        <h1 class="display-4 fw-bold mb-4 animate__animated animate__fadeInUp">
-          Your Health, Your Priority.
-        </h1>
-        <p class="lead mb-4 animate__animated animate__fadeInUp animate__delay-1s">
-          Welcome to FetanCare – the most convenient way to book appointments with trusted healthcare
-          providers at your fingertips.
-        </p>
-        <div class="animate__animated animate__fadeInUp animate__delay-2s">
-          <button class="btn btn-primary btn-lg px-5 py-3" (click)="navigateToDashboard()">
-            Book Appointment Now
-          </button>
+ Hero Section 
+<section class="hero-section">
+  <div class="container">
+    <div class="row align-items-center">
+      <div class="col-lg-6">
+        <div class="hero-content">
+          <h1 class="hero-title">
+            Your Health,<br>
+            <span class="text-primary">Your Priority</span>
+          </h1>
+          <p class="hero-description">
+            Book appointments in seconds, connect with top doctors instantly, and manage your health journey with a smile. Because healthcare should feel good.
+          </p>
+          <div class="hero-actions">
+            <button class="btn btn-primary btn-lg px-5" (click)="navigateToDashboard()">
+              Book Your First Appointment
+              <i class="bi bi-arrow-right ms-2"></i>
+            </button>
+            <a href="#how-it-works" class="btn btn-link text-light">
+              Watch Demo
+              <i class="bi bi-play-circle ms-2"></i>
+            </a>
+          </div>
+          <div class="hero-stats">
+            <div class="stat-item">
+              <div class="stat-icon">
+                <i class="bi bi-people-fill"></i>
+              </div>
+              <div>
+                <div class="stat-number">50,000+</div>
+                <div class="stat-label">Happy Patients</div>
+              </div>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+              <div class="stat-icon">
+                <i class="bi bi-star-fill"></i>
+              </div>
+              <div>
+                <div class="stat-number">4.9/5</div>
+                <div class="stat-label">Rating</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="hero-image">
+          <div class="image-card">
+            <img src="/placeholder.svg?height=500&width=500" alt="Healthcare professionals" class="img-fluid">
+            <div class="floating-badge badge-1">
+              <i class="bi bi-heart-pulse-fill"></i>
+              <span>Health Tracking</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="hero-decoration"></div>
+</section>
+
+ Features Section 
+<section class="features-section">
+  <div class="container">
+    <div class="feature-cards">
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="bi bi-calendar-check"></i>
+        </div>
+        <h3>Instant Booking</h3>
+        <p>Book in 30 seconds</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="bi bi-camera-video"></i>
+        </div>
+        <h3>Video Consultations</h3>
+        <p>Meet doctors online</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="bi bi-shield-check"></i>
+        </div>
+        <h3>100% Secure</h3>
+        <p>HIPAA compliant</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+ Everything You Need Section 
+<section class="benefits-section">
+  <div class="container">
+    <div class="section-header text-center">
+      <h2 class="section-title">Everything you need, nothing you don't</h2>
+      <p class="section-subtitle">Powerful, reliable, fast. Make healthcare management feel like a breeze.</p>
+    </div>
+    <div class="row g-4">
+      <div class="col-md-6 col-lg-3">
+        <div class="benefit-card">
+          <div class="benefit-icon">
+            <i class="bi bi-clock-history"></i>
+          </div>
+          <h4>Smart Scheduling</h4>
+          <p>Easy one-click tool and ultra-sleek UI for instant appointment booking.</p>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-3">
+        <div class="benefit-card">
+          <div class="benefit-icon">
+            <i class="bi bi-alarm"></i>
+          </div>
+          <h4>Zero Wait Times</h4>
+          <p>Get matched with a doctor in your city. No more waiting in queues.</p>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-3">
+        <div class="benefit-card">
+          <div class="benefit-icon">
+            <i class="bi bi-camera-video-fill"></i>
+          </div>
+          <h4>Telemedicine Ready</h4>
+          <p>Video calls with doctors, secure screen sharing, and digital prescriptions.</p>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-3">
+        <div class="benefit-card">
+          <div class="benefit-icon">
+            <i class="bi bi-file-medical"></i>
+          </div>
+          <h4>Health Records</h4>
+          <p>All your medical history in one secure and accessible place.</p>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-3">
+        <div class="benefit-card">
+          <div class="benefit-icon">
+            <i class="bi bi-bell"></i>
+          </div>
+          <h4>Instant Reminders</h4>
+          <p>Never miss an appointment with smart notifications.</p>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-3">
+        <div class="benefit-card">
+          <div class="benefit-icon">
+            <i class="bi bi-lock-fill"></i>
+          </div>
+          <h4>Privacy First</h4>
+          <p>Bank-level encryption keeps your data safe and private.</p>
         </div>
       </div>
     </div>
   </div>
 </section>
 
-<footer class="bg-dark text-light py-5">
+ How It Works Section 
+<section class="how-it-works-section" id="how-it-works">
+  <div class="container">
+    <div class="section-header text-center">
+      <h2 class="section-title">Get started in 3 simple steps</h2>
+      <p class="section-subtitle">It's so easy you'll wonder why healthcare wasn't always like this</p>
+    </div>
+    <div class="row g-5">
+      <div class="col-md-4">
+        <div class="step-card">
+          <div class="step-number">1</div>
+          <div class="step-icon">
+            <i class="bi bi-person-plus-fill"></i>
+          </div>
+          <h3>Create Your Profile</h3>
+          <p>Sign up in seconds. Add your health info, insurance, and preferences.</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="step-card">
+          <div class="step-number">2</div>
+          <div class="step-icon">
+            <i class="bi bi-search"></i>
+          </div>
+          <h3>Find Your Doctor</h3>
+          <p>Browse specialists, read reviews, and pick the perfect match for you.</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="step-card">
+          <div class="step-number">3</div>
+          <div class="step-icon">
+            <i class="bi bi-calendar-check-fill"></i>
+          </div>
+          <h3>Book & Meet</h3>
+          <p>Choose a time slot, confirm instantly, and meet your doctor online or in-person.</p>
+        </div>
+      </div>
+    </div>
+    <div class="text-center mt-5">
+      <button class="btn btn-primary btn-lg px-5" (click)="navigateToDashboard()">
+        Start Your Journey
+        <i class="bi bi-arrow-right ms-2"></i>
+      </button>
+    </div>
+  </div>
+</section>
+
+ Testimonials Section 
+<section class="testimonials-section" id="testimonials">
+  <div class="container">
+    <div class="section-header text-center">
+      <h2 class="section-title">Loved by patients and doctors</h2>
+      <p class="section-subtitle">Don't just take our word for it</p>
+    </div>
+    <div class="row g-4">
+      <div class="col-md-4">
+        <div class="testimonial-card">
+          <div class="stars">
+            <i class="bi bi-star-fill"></i>
+            <i class="bi bi-star-fill"></i>
+            <i class="bi bi-star-fill"></i>
+            <i class="bi bi-star-fill"></i>
+            <i class="bi bi-star-fill"></i>
+          </div>
+          <p class="testimonial-text">"Finally, a healthcare app that doesn't make me want to pull my hair out. I've never booked an appointment this fast in my life!"</p>
+          <div class="testimonial-author">
+            <div class="author-avatar">
+              <i class="bi bi-person-circle"></i>
+            </div>
+            <div>
+              <div class="author-name">Sarah Johnson</div>
+              <div class="author-role">Patient</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="testimonial-card">
+          <div class="stars">
+            <i class="bi bi-star-fill"></i>
+            <i class="bi bi-star-fill"></i>
+            <i class="bi bi-star-fill"></i>
+            <i class="bi bi-star-fill"></i>
+            <i class="bi bi-star-fill"></i>
+          </div>
+          <p class="testimonial-text">"My patients love it and so do I. The interface is clean, and everything just works. It's changed my practice."</p>
+          <div class="testimonial-author">
+            <div class="author-avatar">
+              <i class="bi bi-person-circle"></i>
+            </div>
+            <div>
+              <div class="author-name">Dr. Michael Chen</div>
+              <div class="author-role">Cardiologist</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="testimonial-card">
+          <div class="stars">
+            <i class="bi bi-star-fill"></i>
+            <i class="bi bi-star-fill"></i>
+            <i class="bi bi-star-fill"></i>
+            <i class="bi bi-star-fill"></i>
+            <i class="bi bi-star-fill"></i>
+          </div>
+          <p class="testimonial-text">"I booked a video consultation at 2 AM when I was sick. Had a prescription within 15 minutes. Life-changing!"</p>
+          <div class="testimonial-author">
+            <div class="author-avatar">
+              <i class="bi bi-person-circle"></i>
+            </div>
+            <div>
+              <div class="author-name">Emily Rodriguez</div>
+              <div class="author-role">Patient</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+ CTA Section 
+<section class="cta-section">
+  <div class="container">
+    <div class="cta-content text-center">
+      <h2 class="cta-title">Ready to feel better?</h2>
+      <p class="cta-subtitle">Join thousands of happy patients who've discovered a better way to manage their health</p>
+      <button class="btn btn-primary btn-lg px-5" (click)="navigateToDashboard()">
+        Get Started for Free
+        <i class="bi bi-arrow-right ms-2"></i>
+      </button>
+      <p class="cta-note">No credit card required. Free forever.</p>
+    </div>
+  </div>
+</section>
+
+ Footer 
+<footer class="footer">
   <div class="container">
     <div class="row g-4">
       <div class="col-lg-4">
-        <h3 class="h4 mb-4">FetanCare</h3>
-        <p class="text-muted mb-4">Your trusted healthcare booking platform.</p>
-        <div class="social-links">
-          <a href="#" class="btn btn-outline-light btn-sm me-2">
-            <i class="bi bi-facebook"></i>
-          </a>
-          <a href="#" class="btn btn-outline-light btn-sm me-2">
-            <i class="bi bi-twitter"></i>
-          </a>
-          <a href="#" class="btn btn-outline-light btn-sm me-2">
-            <i class="bi bi-instagram"></i>
-          </a>
-          <a href="#" class="btn btn-outline-light btn-sm">
-            <i class="bi bi-linkedin"></i>
-          </a>
+        <div class="footer-brand">
+          <div class="d-flex align-items-center mb-3">
+            <div class="logo-icon me-2">
+              <i class="bi bi-plus-circle-fill"></i>
+            </div>
+            <span class="brand-name">QuickMed</span>
+          </div>
+          <p class="footer-description">Your trusted healthcare booking platform. Making healthcare accessible, one appointment at a time.</p>
+          <div class="social-links">
+            <a href="#" class="social-link">
+              <i class="bi bi-facebook"></i>
+            </a>
+            <a href="#" class="social-link">
+              <i class="bi bi-twitter"></i>
+            </a>
+            <a href="#" class="social-link">
+              <i class="bi bi-instagram"></i>
+            </a>
+            <a href="#" class="social-link">
+              <i class="bi bi-linkedin"></i>
+            </a>
+          </div>
         </div>
       </div>
-      <div class="col-lg-4">
-        <h5 class="mb-4">Contact Info</h5>
-        <ul class="list-unstyled">
-          <li class="mb-3">
+      <div class="col-lg-2 col-md-4">
+        <h5 class="footer-title">Product</h5>
+        <ul class="footer-links">
+          <li><a href="#">Features</a></li>
+          <li><a href="#">Pricing</a></li>
+          <li><a href="#">Security</a></li>
+          <li><a href="#">Roadmap</a></li>
+        </ul>
+      </div>
+      <div class="col-lg-2 col-md-4">
+        <h5 class="footer-title">Company</h5>
+        <ul class="footer-links">
+          <li><a href="#">About Us</a></li>
+          <li><a href="#">Careers</a></li>
+          <li><a href="#">Blog</a></li>
+          <li><a href="#">Press</a></li>
+        </ul>
+      </div>
+      <div class="col-lg-2 col-md-4">
+        <h5 class="footer-title">Resources</h5>
+        <ul class="footer-links">
+          <li><a href="#">Help Center</a></li>
+          <li><a href="#">Contact</a></li>
+          <li><a href="#">Privacy</a></li>
+          <li><a href="#">Terms</a></li>
+        </ul>
+      </div>
+      <div class="col-lg-2 col-md-12">
+        <h5 class="footer-title">Contact</h5>
+        <ul class="footer-contact">
+          <li>
             <i class="bi bi-envelope me-2"></i>
-            <a href="mailto:info@fetancare.com" class="text-muted text-decoration-none"
-              >info&#64;fetancare.com</a
-            >
+            <a href="mailto:hello@quickmed.com">hello&#64;quickmed.com</a>
           </li>
-          <li class="mb-3">
-            <i class="bi bi-telephone me-2"></i> +251-123-456-789
-          </li>
-          <li class="mb-3">
-            <i class="bi bi-geo-alt me-2"></i> Addis Ababa, Ethiopia
+          <li>
+            <i class="bi bi-telephone me-2"></i>
+            <span>1-800-QUICKMED</span>
           </li>
         </ul>
       </div>
-      <div class="col-lg-4">
-        <h5 class="mb-4">Quick Links</h5>
-        <ul class="list-unstyled">
-          <li class="mb-2"><a href="#" class="text-muted text-decoration-none">About Us</a></li>
-          <li class="mb-2"><a href="#" class="text-muted text-decoration-none">Our Services</a></li>
-          <li class="mb-2">
-            <a href="#" class="text-muted text-decoration-none">Book Appointment</a>
-          </li>
-          <li class="mb-2"><a href="#" class="text-muted text-decoration-none">Contact</a></li>
-        </ul>
-      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2025 QuickMed. All rights reserved. Built with <i class="bi bi-heart-fill text-primary"></i></p>
     </div>
   </div>
 </footer>
