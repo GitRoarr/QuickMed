@@ -55,21 +55,31 @@ export const routes: Routes = [
   },
   {
     path: "admin",
-    canActivate: [authGuard, roleGuard],
-    data: { roles: ["admin"] },
     children: [
       {
-        path: "dashboard",
-        loadComponent: () => import("./features/admin/dashboard/dashboard.component").then((m) => m.DashboardComponent),
+        path: "login",
+        loadComponent: () => import("./features/admin/login/login.component").then((m) => m.AdminLoginComponent),
       },
       {
-        path: "doctors",
-        loadComponent: () => import("./features/admin/doctors/doctors.component").then((m) => m.DoctorsComponent),
-      },
-      {
-        path: "appointments",
-        loadComponent: () =>
-          import("./features/admin/appointments/appointments.component").then((m) => m.AppointmentsComponent),
+        path: "",
+        canActivate: [authGuard, roleGuard],
+        data: { roles: ["admin"] },
+        children: [
+          {
+            path: "dashboard",
+            loadComponent: () =>
+              import("./features/admin/overview/overview.component").then((m) => m.OverviewComponent),
+          },
+          {
+            path: "doctors",
+            loadComponent: () => import("./features/admin/doctors/doctors.component").then((m) => m.DoctorsComponent),
+          },
+          {
+            path: "appointments",
+            loadComponent: () =>
+              import("./features/admin/appointments/appointments.component").then((m) => m.AppointmentsComponent),
+          },
+        ],
       },
     ],
   },

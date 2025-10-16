@@ -35,6 +35,27 @@ export class User extends BaseEntity {
   @Column({ type: "text", nullable: true })
   medicalHistory: string
 
+  @Column({ nullable: true })
+  patientId: string
+
+  @Column({ type: "date", nullable: true })
+  dateOfBirth: Date
+
+  @Column({ nullable: true })
+  bloodType: string
+
+  @Column({ type: "simple-array", nullable: true })
+  allergies: string[]
+
+  @Column({ type: "int", default: 0 })
+  activeMedicationsCount: number
+
+  @Column({ type: "int", default: 0 })
+  medicalRecordsCount: number
+
+  @Column({ type: "int", default: 0 })
+  testResultsCount: number
+
   // Doctor-specific fields
   @Column({ nullable: true })
   specialty: string
@@ -53,6 +74,9 @@ export class User extends BaseEntity {
 
   @Column({ nullable: true })
   endTime: string
+
+  @Column({ nullable: true })
+  department: string
 
   @OneToMany(
     () => Appointment,

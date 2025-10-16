@@ -1,12 +1,32 @@
 :root {
+  /* Updated to light theme with green primary color */
+  --primary-color: #16a34a;
+  --primary-hover: #15803d;
+  --primary-light: #d1fae5;
+  --sidebar-bg: #f9fafb;
+  --background-light: #ffffff;
+  --background-gray: #f3f4f6;
+  --background-mint: #d1fae5;
+  --text-dark: #111827;
+  --text-gray: #6b7280;
+  --text-muted: #9ca3af;
+  --border-color: #e5e7eb;
+  --card-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+}
+
+.dark-theme {
   --primary-color: #00ff00;
   --primary-hover: #00cc00;
-  --sidebar-bg: #1a1a1a;
-  --background-dark: #000000;
-  --background-card: #0a0a0a;
-  --text-light: #ffffff;
-  --text-muted: #999999;
-  --border-color: #222222;
+  --primary-light: #1a3a1a;
+  --sidebar-bg: #0a0a0a;
+  --background-light: #000000;
+  --background-gray: #0a0a0a;
+  --background-mint: #1a3a1a;
+  --text-dark: #ffffff;
+  --text-gray: #d1d5db;
+  --text-muted: #9ca3af;
+  --border-color: #1f2937;
+  --card-shadow: 0 1px 3px 0 rgb(0 255 0 / 0.1);
 }
 
 * {
@@ -17,21 +37,21 @@
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  background-color: var(--background-dark);
-  color: var(--text-light);
+  background-color: var(--background-light);
+  color: var(--text-dark);
 }
 
 .btn-primary {
   background-color: var(--primary-color);
   border-color: var(--primary-color);
-  color: #000000;
+  color: #ffffff;
   font-weight: 600;
 }
 
 .btn-primary:hover {
   background-color: var(--primary-hover);
   border-color: var(--primary-hover);
-  color: #000000;
+  color: #ffffff;
 }
 
 .btn-outline-primary {
@@ -42,7 +62,7 @@ body {
 .btn-outline-primary:hover {
   background-color: var(--primary-color);
   border-color: var(--primary-color);
-  color: #000000;
+  color: #ffffff;
 }
 
 .text-primary {
@@ -58,12 +78,37 @@ body {
   width: 250px;
   padding: 20px;
   z-index: 100;
+  border-right: 1px solid var(--border-color);
 }
 
 .main-content {
   margin-left: 250px;
   padding: 20px;
   min-height: 100vh;
+}
+
+.theme-toggle {
+  background: transparent;
+  border: 2px solid var(--border-color);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: var(--text-dark);
+}
+
+.theme-toggle:hover {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+  transform: rotate(180deg);
+}
+
+.theme-toggle i {
+  font-size: 1.2rem;
 }
 
 @media (max-width: 768px) {

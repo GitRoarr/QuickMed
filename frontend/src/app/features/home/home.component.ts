@@ -1,7 +1,8 @@
 import { Component } from "@angular/core"
 import { CommonModule } from "@angular/common"
-import {  Router, RouterLink } from "@angular/router"
-import  { AuthService } from "@core/services/auth.service"
+import { Router, RouterLink } from "@angular/router"
+import { AuthService } from "@core/services/auth.service"
+import { ThemeService } from "@core/services/theme.service"
 
 @Component({
   selector: "app-home",
@@ -12,10 +13,12 @@ import  { AuthService } from "@core/services/auth.service"
 })
 export class HomeComponent {
   currentUser = this.authService.currentUser
+  isDarkMode = this.themeService.isDarkMode
 
   constructor(
     private authService: AuthService,
     private router: Router,
+    private themeService: ThemeService,
   ) {}
 
   logout(): void {
@@ -40,5 +43,9 @@ export class HomeComponent {
         this.router.navigate(["/admin/dashboard"])
         break
     }
+  }
+
+  toggleTheme(): void {
+    this.themeService.toggleTheme()
   }
 }

@@ -1,58 +1,63 @@
-import { Component, OnInit } from "@angular/core"
+import { Component,  OnInit } from "@angular/core"
 import { CommonModule } from "@angular/common"
 import { RouterLink } from "@angular/router"
-import { SidebarComponent } from "@app/shared/components/sidebar/sidebar.component"
-import { AppointmentService } from "@core/services/appointment.service"
-import { Appointment } from "@core/models/appointment.model"
-import { FilterPipe } from "@app/shared/pipes/filter.pipe"
+import  { AppointmentService } from "@core/services/appointment.service"
+import  { AuthService } from "@core/services/auth.service"
+import  { Appointment } from "@core/models/appointment.model"
+import  { ThemeService } from "@core/services/theme.service"
+import  { User } from "@core/models/user.model"
 
 @Component({
   selector: "app-patient-dashboard",
   standalone: true,
-  imports: [CommonModule, RouterLink, SidebarComponent, FilterPipe],
+  imports: [CommonModule, RouterLink],
   templateUrl: "./dashboard.component.html",
   styleUrls: ["./dashboard.component.css"],
 })
 export class DashboardComponent implements OnInit {
   appointments: Appointment[] = []
   isLoading = true
+  activeTab = "appointments"
+  currentUser: User | null = null
+  upcomingCount = 0
 
-  menuItems = [
-    { label: "Dashboard", icon: "bi-house", route: "/patient/dashboard" },
-    { label: "My Appointments", icon: "bi-calendar-check", route: "/patient/appointments" },
-    { label: "Find Doctors", icon: "bi-people", route: "/patient/doctors" },
-  ]
-
-  constructor(private appointmentService: AppointmentService) {}
+  constructor(
+    private appointmentService: AppointmentService,
+    private authService: AuthService,
+    private themeService: ThemeService,
+  ) {}
 
   ngOnInit(): void {
+    this.loadCurrentUser()
     this.loadAppointments()
+  }
+
+  loadCurrentUser(): void {
+    this.currentUser = this.authService.currentUser()
   }
 
   loadAppointments(): void {
     this.appointmentService.getMyAppointments().subscribe({
       next: (data) => {
-        this.appointments = data.slice(0, 5) // Show only recent 5
+        this.appointments = data.filter((apt) => apt.status === "confirmed" || apt.status === "pending")
+        this.upcomingCount = this.appointments.length
         this.isLoading = false
       },
-      error: () => {
+      error: (error: any) => {
+        console.error("Error loading appointments:", error)
         this.isLoading = false
       },
     })
   }
 
-  getStatusClass(status: string): string {
-    switch (status) {
-      case "confirmed":
-        return "badge bg-success"
-      case "pending":
-        return "badge bg-warning"
-      case "cancelled":
-        return "badge bg-danger"
-      case "completed":
-        return "badge bg-secondary"
-      default:
-        return "badge bg-secondary"
-    }
+  getInitials(user: any): string {
+    if (!user) return "?"
+    const firstInitial = user.firstName?.charAt(0) || ""
+    const lastInitial = user.lastName?.charAt(0) || ""
+    return (firstInitial + lastInitial).toUpperCase()
+  }
+
+  toggleTheme(): void {
+    this.themeService.toggleTheme()
   }
 }

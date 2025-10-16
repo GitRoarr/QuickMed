@@ -1,0 +1,74 @@
+<app-admin-layout>
+  <div class="overview-container">
+    <!-- Stats Grid -->
+    <div class="stats-grid">
+      <div class="stat-card" *ngFor="let stat of stats">
+        <div class="stat-icon" [style.background]="stat.iconBg">
+          {{ stat.icon }}
+        </div>
+        <div class="stat-content">
+          <div class="stat-label">{{ stat.label }}</div>
+          <div class="stat-value">{{ stat.value }}</div>
+          <div class="stat-change" [class.positive]="stat.change.includes('+')">
+            {{ stat.change }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="content-grid">
+      <!-- Appointments Overview Chart -->
+      <div class="chart-section">
+        <div class="section-header">
+          <h3>Appointments Overview</h3>
+          <p>Monthly appointment trends</p>
+        </div>
+        <div class="chart-container">
+          <svg viewBox="0 0 600 300" class="area-chart">
+            <defs>
+              <linearGradient id="areaGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" style="stop-color:#9ca3af;stop-opacity:0.3" />
+                <stop offset="100%" style="stop-color:#9ca3af;stop-opacity:0" />
+              </linearGradient>
+            </defs>
+            <path d="M 50 250 L 150 200 L 250 180 L 350 160 L 450 140 L 550 100 L 550 300 L 50 300 Z" 
+                  fill="url(#areaGradient)" />
+            <path d="M 50 250 L 150 200 L 250 180 L 350 160 L 450 140 L 550 100" 
+                  stroke="#6b7280" stroke-width="2" fill="none" />
+            <text x="50" y="280" font-size="12" fill="#9ca3af">Jan</text>
+            <text x="150" y="280" font-size="12" fill="#9ca3af">Feb</text>
+            <text x="250" y="280" font-size="12" fill="#9ca3af">Mar</text>
+            <text x="350" y="280" font-size="12" fill="#9ca3af">Apr</text>
+            <text x="450" y="280" font-size="12" fill="#9ca3af">May</text>
+            <text x="550" y="280" font-size="12" fill="#9ca3af">Jun</text>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Doctor Schedule -->
+      <div class="schedule-section">
+        <div class="section-header">
+          <h3>Doctor Schedule</h3>
+          <p>Today's on-duty doctors</p>
+        </div>
+        <div class="doctor-list">
+          <div class="doctor-item" *ngFor="let doctor of doctorSchedules">
+            <div class="doctor-avatar" [style.background]="doctor.bgColor">
+              {{ doctor.initials }}
+            </div>
+            <div class="doctor-info">
+              <div class="doctor-name">{{ doctor.name }}</div>
+              <div class="doctor-specialty">{{ doctor.specialty }}</div>
+              <div class="doctor-schedule">{{ doctor.schedule }}</div>
+            </div>
+            <div class="doctor-status">
+              <span class="status-badge active">{{ doctor.status }}</span>
+              <div class="patient-count">{{ doctor.patientCount }} patients</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</app-admin-layout>

@@ -18,6 +18,13 @@ export interface User {
   availableDays?: string[]
   startTime?: string
   endTime?: string
+  patientId?: string
+  dateOfBirth?: string
+  bloodType?: string
+  allergies?: string[]
+  activeMedicationsCount?: number
+  medicalRecordsCount?: number
+  testResultsCount?: number
   createdAt: Date
   updatedAt: Date
 }

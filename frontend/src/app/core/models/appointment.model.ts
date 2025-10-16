@@ -17,6 +17,11 @@ export interface Appointment {
   doctorId: string
   patient?: User
   doctor?: User
+  appointmentType?: string
+  duration?: number
+  reason?: string
+  location?: string
+  isVideoConsultation?: boolean
   createdAt: Date
   updatedAt: Date
 }

@@ -1,0 +1,111 @@
+.patients-page {
+  max-width: 1400px;
+}
+
+.page-title {
+  font-size: 28px;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 24px;
+}
+
+.patients-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.patient-card {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  display: grid;
+  grid-template-columns: 2fr 1.5fr 1.5fr auto auto;
+  align-items: center;
+  gap: 24px;
+  border: 1px solid #e5e7eb;
+  transition: all 0.2s;
+}
+
+.patient-card:hover {
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+}
+
+.patient-info {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.patient-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 16px;
+  color: #16a34a;
+}
+
+.patient-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 4px;
+}
+
+.patient-meta {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.label {
+  font-size: 12px;
+  color: #6b7280;
+  margin-bottom: 4px;
+}
+
+.value {
+  font-size: 14px;
+  font-weight: 500;
+  color: #111827;
+}
+
+.status-badge {
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.status-badge.active {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.status-badge.inactive {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+.patient-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.icon-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 6px;
+  color: #6b7280;
+  transition: all 0.2s;
+}
+
+.icon-btn:hover {
+  background: #f3f4f6;
+  color: #111827;
+}

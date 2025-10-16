@@ -1,5 +1,5 @@
 import { Controller, Get, UseGuards } from "@nestjs/common"
-import { UsersService } from "./users.service"
+import type { UsersService } from "./users.service"
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard"
 
 @Controller("users")
@@ -15,5 +15,10 @@ export class UsersController {
   @Get("doctors")
   findDoctors() {
     return this.usersService.findDoctors()
+  }
+
+  @Get("patients")
+  findPatients() {
+    return this.usersService.findPatients()
   }
 }
