@@ -1,43 +1,55 @@
-<nav class="navbar navbar-expand-lg fixed-top">
+<nav class="navbar navbar-expand-lg fixed-top" [ngClass]="{'bg-light text-dark': !isDarkMode(), 'bg-dark text-white': isDarkMode()}">
     <div class="container">
         <a class="navbar-brand d-flex align-items-center" routerLink="/">
-            <div class="d-flex align-items-center gap-3">
-                <img src="assets/images/QuickMed-Logo.png" alt="QuickMed" width="100" height="100" class="rounded-3" />
-                <span class="text-dark fw-bold fs-5">QuickMed</span>
-            </div>
+            <img src="assets/images/QuickMed-Logo.png" alt="QuickMed" width="60" height="60" class="rounded-3 me-2" />
+            <span class="fw-bold fs-5">QuickMed</span>
         </a>
-
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
       <span class="navbar-toggler-icon"></span>
     </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav mx-auto">
-                <li class="nav-item">
-                    <a class="nav-link" routerLink="/">Features</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#how-it-works">How It Works</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#testimonials">Testimonials</a>
-                </li>
+                <li class="nav-item"><a class="nav-link fw-medium" routerLink="/">Features</a></li>
+                <li class="nav-item"><a class="nav-link fw-medium" href="#how-it-works">How It Works</a></li>
+                <li class="nav-item"><a class="nav-link fw-medium" href="#testimonials">Testimonials</a></li>
             </ul>
             <div class="d-flex align-items-center gap-3">
-                <button class="theme-toggle" (click)="toggleTheme()" [attr.aria-label]="isDarkMode() ? 'Switch to light mode' : 'Switch to dark mode'">
-          <i [class]="isDarkMode() ? 'bi bi-sun-fill' : 'bi bi-moon-fill'"></i>
+                <button class="theme-toggle" (click)="toggleTheme()" [attr.aria-label]="isDarkMode() ? 'Switch to Light Mode' : 'Switch to Dark Mode'" [ngClass]="{'dark': isDarkMode()}">
+          <div class="icon-wrapper sun-wrapper" *ngIf="!isDarkMode()">
+            <img
+              src="https://img.icons8.com/?size=100&id=6Z2mGj6qDVv4&format=png&color=000000"
+              alt="Sun Icon"
+              class="theme-icon"
+            />
+          </div>
+          <div class="icon-wrapper moon-wrapper" *ngIf="isDarkMode()">
+            <img
+              src="https://img.icons8.com/?size=100&id=6DXM8bs2tFSU&format=png&color=ffffff"
+              alt="Moon Icon"
+              class="theme-icon"
+            />
+          </div>
         </button>
                 <ng-container *ngIf="!currentUser(); else loggedIn">
-                    <a routerLink="/login" class="btn btn-outline-light px-4">Log In</a>
+                    <a routerLink="/login" class="btn px-4" [ngClass]="{'btn-outline-dark text-dark': !isDarkMode(), 'btn-outline-light text-white': isDarkMode()}">Log In</a>
                     <a routerLink="/register" class="btn btn-primary px-4">Get Started</a>
                 </ng-container>
                 <ng-template #loggedIn>
-                    <span class="me-3 text-light">Welcome, {{ currentUser()?.firstName }}!</span>
-                    <button (click)="logout()" class="btn btn-outline-light px-4">Logout</button>
+                    <span class="me-3">Welcome, {{ currentUser()?.firstName }}!</span>
+                    <button (click)="logout()" class="btn px-4" [ngClass]="{
+    'btn-outline-danger text-danger': !isDarkMode(),
+    'btn-danger text-white': isDarkMode()
+  }">
+  Logout
+</button>
                 </ng-template>
             </div>
         </div>
     </div>
 </nav>
+
+
+
 
 <section class="hero-section">
     <div class="container">
