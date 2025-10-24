@@ -1,22 +1,115 @@
-<div class="sidebar">
-  <div class="mb-4">
-    <h5 class="text-white mb-3">{{ title }}</h5>
-    <div class="text-white-50 small" *ngIf="currentUser()">
-      {{ currentUser()?.firstName }} {{ currentUser()?.lastName }}
+<div class="sidebar" [class.collapsed]="isCollapsed">
+  <!-- Sidebar Header -->
+  <div class="sidebar-header">
+    <div class="logo-section">
+      <div class="logo-container">
+        <div class="logo-icon">
+          <svg width="28" height="28" viewBox="0 0 40 40" fill="none">
+            <rect width="40" height="40" rx="8" fill="url(#gradient)"/>
+            <path d="M20 10L28 16V24L20 30L12 24V16L20 10Z" fill="white"/>
+            <defs>
+              <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+                <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <div class="brand-info" *ngIf="!isCollapsed">
+          <h3 class="brand-name">QuickMed</h3>
+          <p class="brand-subtitle">{{ title }}</p>
+        </div>
+      </div>
+      <button class="collapse-btn" (click)="toggleCollapse()">
+        <i class="bi" [class.bi-chevron-left]="!isCollapsed" [class.bi-chevron-right]="isCollapsed"></i>
+      </button>
     </div>
   </div>
-  <ul class="sidebar-menu">
-    <li *ngFor="let item of menuItems">
-      <a [routerLink]="item.route" routerLinkActive="active">
-        <i class="bi {{ item.icon }}"></i>
-        {{ item.label }}
-      </a>
-    </li>
-    <li>
-      <a (click)="logout()" style="cursor: pointer">
+
+  <!-- User Profile Section -->
+  <div class="user-section" *ngIf="currentUser()">
+    <div class="user-avatar">
+      <div class="avatar-circle">
+        {{ getInitials(currentUser()?.firstName, currentUser()?.lastName) }}
+      </div>
+      <div class="status-indicator online"></div>
+    </div>
+    <div class="user-info" *ngIf="!isCollapsed">
+      <h4 class="user-name">{{ currentUser()?.firstName }} {{ currentUser()?.lastName }}</h4>
+      <p class="user-role">{{ getUserRole() }}</p>
+    </div>
+  </div>
+
+  <!-- Navigation Menu -->
+  <nav class="sidebar-nav">
+    <ul class="nav-list">
+      <li class="nav-item" *ngFor="let item of menuItems; let i = index">
+        <a 
+          [routerLink]="item.route" 
+          routerLinkActive="active" 
+          class="nav-link"
+          [class.has-submenu]="item.submenu"
+          (click)="toggleSubmenu(i)"
+        >
+          <div class="nav-icon">
+            <i class="bi {{ item.icon }}"></i>
+          </div>
+          <span class="nav-label" *ngIf="!isCollapsed">{{ item.label }}</span>
+          <i 
+            class="bi bi-chevron-down submenu-arrow" 
+            *ngIf="item.submenu && !isCollapsed"
+            [class.rotated]="item.expanded"
+          ></i>
+        </a>
+        
+        <!-- Submenu -->
+        <ul class="submenu" *ngIf="item.submenu && item.expanded && !isCollapsed">
+          <li class="submenu-item" *ngFor="let subItem of item.submenu">
+            <a [routerLink]="subItem.route" class="submenu-link">
+              <i class="bi {{ subItem.icon }}"></i>
+              {{ subItem.label }}
+            </a>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </nav>
+
+  <!-- Quick Actions -->
+  <div class="quick-actions" *ngIf="!isCollapsed">
+    <h6 class="section-title">Quick Actions</h6>
+    <div class="action-buttons">
+      <button class="action-btn" (click)="quickAction('new-appointment')">
+        <i class="bi bi-plus-circle"></i>
+        <span>New Appointment</span>
+      </button>
+      <button class="action-btn" (click)="quickAction('search')">
+        <i class="bi bi-search"></i>
+        <span>Search</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Sidebar Footer -->
+  <div class="sidebar-footer">
+    <div class="footer-actions">
+      <button class="footer-btn" (click)="toggleTheme()" title="Toggle Theme">
+        <i class="bi" [class.bi-sun]="!isDarkMode" [class.bi-moon]="isDarkMode"></i>
+        <span *ngIf="!isCollapsed">Theme</span>
+      </button>
+      <button class="footer-btn" (click)="openSettings()" title="Settings">
+        <i class="bi bi-gear"></i>
+        <span *ngIf="!isCollapsed">Settings</span>
+      </button>
+      <button class="footer-btn logout-btn" (click)="logout()" title="Logout">
         <i class="bi bi-box-arrow-right"></i>
-        Logout
-      </a>
-    </li>
-  </ul>
+        <span *ngIf="!isCollapsed">Logout</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Floating Action Button for Mobile -->
+  <button class="fab" (click)="toggleCollapse()" *ngIf="isCollapsed">
+    <i class="bi bi-list"></i>
+  </button>
 </div>

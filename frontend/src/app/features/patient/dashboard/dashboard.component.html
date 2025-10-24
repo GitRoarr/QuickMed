@@ -1,29 +1,170 @@
 <div class="dashboard-container">
-    <!-- Header -->
-    <header class="dashboard-header">
-        <div class="header-content">
+    <!-- Amazing Sidebar -->
+    <aside class="amazing-sidebar">
+        <div class="sidebar-header">
             <div class="logo-section">
-                <img src="/assets/images/doctors-illustration.jpg" alt="QuickMed" class="logo-img" />
-                <div>
-                    <h1 class="logo-title">QuickMed</h1>
-                    <p class="logo-subtitle">Patient Portal</p>
+                <div class="logo-container">
+                    <div class="logo-icon">
+                        <svg width="32" height="32" viewBox="0 0 40 40" fill="none">
+                            <rect width="40" height="40" rx="8" fill="url(#patientGradient)"/>
+                            <path d="M20 10L28 16V24L20 30L12 24V16L20 10Z" fill="white"/>
+                            <defs>
+                                <linearGradient id="patientGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" style="stop-color:#10b981;stop-opacity:1" />
+                                    <stop offset="100%" style="stop-color:#059669;stop-opacity:1" />
+                                </linearGradient>
+                            </defs>
+                        </svg>
+                    </div>
+                    <div class="brand-info">
+                        <h3 class="brand-name">QuickMed</h3>
+                        <p class="brand-subtitle">Patient Portal</p>
+                    </div>
                 </div>
-            </div>
-
-            <div class="header-actions">
-                <button class="icon-btn" (click)="toggleTheme()" title="Toggle theme">
-          <i class="bi bi-sun-fill"></i>
-        </button>
-                <button class="emergency-btn">
-          <i class="bi bi-telephone-fill"></i>
-          Emergency
-        </button>
-                <div class="profile-icon">
-                    <i class="bi bi-person-circle"></i>
-                </div>
+                <button class="sidebar-toggle" (click)="toggleSidebar()">
+                    <i class="bi" [class.bi-chevron-left]="!sidebarCollapsed" [class.bi-chevron-right]="sidebarCollapsed"></i>
+                </button>
             </div>
         </div>
-    </header>
+
+        <!-- User Profile Section -->
+        <div class="user-section">
+            <div class="user-avatar">
+                <div class="avatar-circle">
+                    {{ getInitials(currentUser?.firstName, currentUser?.lastName) }}
+                </div>
+                <div class="status-indicator online"></div>
+            </div>
+            <div class="user-info" *ngIf="!sidebarCollapsed">
+                <h4 class="user-name">{{ currentUser?.firstName }} {{ currentUser?.lastName }}</h4>
+                <p class="user-role">Patient</p>
+                <p class="user-id">ID: {{ currentUser?.patientId || '#12345' }}</p>
+            </div>
+        </div>
+
+        <!-- Navigation Menu -->
+        <nav class="sidebar-nav">
+            <div class="nav-section">
+                <div class="nav-section-title" *ngIf="!sidebarCollapsed">Dashboard</div>
+                <a routerLink="/patient/dashboard" routerLinkActive="active" class="nav-item">
+                    <span class="nav-icon">
+                        <i class="bi bi-house"></i>
+                    </span>
+                    <span class="nav-label" *ngIf="!sidebarCollapsed">Dashboard</span>
+                </a>
+                <a routerLink="/patient/appointments" routerLinkActive="active" class="nav-item">
+                    <span class="nav-icon">
+                        <i class="bi bi-calendar-check"></i>
+                    </span>
+                    <span class="nav-label" *ngIf="!sidebarCollapsed">Appointments</span>
+                </a>
+                <a routerLink="/patient/doctors" routerLinkActive="active" class="nav-item">
+                    <span class="nav-icon">
+                        <i class="bi bi-people"></i>
+                    </span>
+                    <span class="nav-label" *ngIf="!sidebarCollapsed">Find Doctors</span>
+                </a>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title" *ngIf="!sidebarCollapsed">Health</div>
+                <a routerLink="/patient/records" routerLinkActive="active" class="nav-item">
+                    <span class="nav-icon">
+                        <i class="bi bi-file-medical"></i>
+                    </span>
+                    <span class="nav-label" *ngIf="!sidebarCollapsed">Medical Records</span>
+                </a>
+                <a routerLink="/patient/prescriptions" routerLinkActive="active" class="nav-item">
+                    <span class="nav-icon">
+                        <i class="bi bi-prescription"></i>
+                    </span>
+                    <span class="nav-label" *ngIf="!sidebarCollapsed">Prescriptions</span>
+                </a>
+                <a routerLink="/patient/test-results" routerLinkActive="active" class="nav-item">
+                    <span class="nav-icon">
+                        <i class="bi bi-clipboard-data"></i>
+                    </span>
+                    <span class="nav-label" *ngIf="!sidebarCollapsed">Test Results</span>
+                </a>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title" *ngIf="!sidebarCollapsed">Support</div>
+                <a routerLink="/patient/emergency" routerLinkActive="active" class="nav-item emergency">
+                    <span class="nav-icon">
+                        <i class="bi bi-telephone-fill"></i>
+                    </span>
+                    <span class="nav-label" *ngIf="!sidebarCollapsed">Emergency</span>
+                </a>
+                <a routerLink="/patient/support" routerLinkActive="active" class="nav-item">
+                    <span class="nav-icon">
+                        <i class="bi bi-headset"></i>
+                    </span>
+                    <span class="nav-label" *ngIf="!sidebarCollapsed">Support</span>
+                </a>
+            </div>
+        </nav>
+
+        <!-- Quick Actions -->
+        <div class="quick-actions" *ngIf="!sidebarCollapsed">
+            <h6 class="section-title">Quick Actions</h6>
+            <div class="action-buttons">
+                <button class="action-btn" (click)="bookAppointment()">
+                    <i class="bi bi-plus-circle"></i>
+                    <span>Book Appointment</span>
+                </button>
+                <button class="action-btn" (click)="downloadRecords()">
+                    <i class="bi bi-download"></i>
+                    <span>Download Records</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Sidebar Footer -->
+        <div class="sidebar-footer">
+            <div class="footer-actions">
+                <button class="footer-btn" (click)="toggleTheme()" title="Toggle Theme">
+                    <i class="bi" [class.bi-sun]="!isDarkMode" [class.bi-moon]="isDarkMode"></i>
+                    <span *ngIf="!sidebarCollapsed">Theme</span>
+                </button>
+                <button class="footer-btn" (click)="openSettings()" title="Settings">
+                    <i class="bi bi-gear"></i>
+                    <span *ngIf="!sidebarCollapsed">Settings</span>
+                </button>
+                <button class="footer-btn logout-btn" (click)="logout()" title="Logout">
+                    <i class="bi bi-box-arrow-right"></i>
+                    <span *ngIf="!sidebarCollapsed">Logout</span>
+                </button>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <div class="main-content" [class.sidebar-collapsed]="sidebarCollapsed">
+        <!-- Header -->
+        <header class="dashboard-header">
+            <div class="header-content">
+                <div class="header-info">
+                    <h1 class="page-title">Welcome back, {{ currentUser?.firstName }}!</h1>
+                    <p class="page-subtitle">Manage your health and appointments</p>
+                </div>
+
+                <div class="header-actions">
+                    <div class="search-bar">
+                        <i class="bi bi-search"></i>
+                        <input type="text" placeholder="Search appointments, doctors..." [(ngModel)]="searchQuery">
+                    </div>
+                    <button class="emergency-btn" (click)="callEmergency()">
+                        <i class="bi bi-telephone-fill"></i>
+                        Emergency
+                    </button>
+                    <div class="notification-btn" (click)="toggleNotifications()">
+                        <i class="bi bi-bell"></i>
+                        <span class="notification-badge" *ngIf="notificationCount > 0">{{ notificationCount }}</span>
+                    </div>
+                </div>
+            </div>
+        </header>
 
     <div class="dashboard-content">
         <!-- Welcome Section -->

@@ -18,20 +18,18 @@ import { RolesGuard } from "./auth/guards/roles.guard";
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => {
+        const databaseUrl = configService.get<string>('DATABASE_URL');
+
         console.log('=== Database Config Debug ===');
-        console.log('DB Host:', configService.get<string>('DATABASE_HOST'));
-        console.log('DB Port:', configService.get<string>('DATABASE_PORT'));
-        console.log('DB User:', configService.get<string>('DATABASE_USER'));
-        console.log('DB Name:', configService.get<string>('DATABASE_NAME'));
+        console.log('Database URL:', databaseUrl);
         console.log('NODE_ENV:', configService.get<string>('NODE_ENV'));
 
         return {
           type: 'postgres',
-          host: configService.get<string>('DATABASE_HOST'),
-          port: Number(configService.get<string>('DATABASE_PORT')),
-          username: configService.get<string>('DATABASE_USER'),
-          password: configService.get<string>('DATABASE_PASSWORD'),
-          database: configService.get<string>('DATABASE_NAME'),
+          url: databaseUrl,
+          ssl: {
+            rejectUnauthorized: false, // required for Railway SSL
+          },
           entities: [__dirname + '/**/*.entity{.ts,.js}'],
           synchronize: configService.get<string>('NODE_ENV') !== 'production',
           logging: configService.get<string>('NODE_ENV') === 'development',

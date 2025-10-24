@@ -212,6 +212,125 @@
   color: #991b1b;
 }
 
+/* Admin Login Styles */
+.portal-label.admin-active {
+  color: #dc2626;
+  font-weight: 600;
+}
+
+.shortcut-hint {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 8px;
+  padding: 8px 16px;
+  background: rgba(22, 163, 74, 0.1);
+  border: 1px solid rgba(22, 163, 74, 0.2);
+  border-radius: 20px;
+  color: var(--primary-color);
+  font-size: 0.85rem;
+  font-weight: 500;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+.auth-card.admin-mode {
+  border-color: #dc2626;
+  box-shadow: 0 0 0 1px rgba(220, 38, 38, 0.1), var(--card-shadow);
+  background: linear-gradient(135deg, #fef2f2 0%, #ffffff 100%);
+}
+
+.user-icon.admin-icon {
+  background: linear-gradient(135deg, #dc2626, #ef4444);
+  color: white;
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+}
+
+/* Admin Login Notification */
+.admin-login-notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: linear-gradient(135deg, #dc2626, #ef4444);
+  color: white;
+  padding: 16px 20px;
+  border-radius: 12px;
+  box-shadow: 0 8px 25px rgba(220, 38, 38, 0.3);
+  z-index: 10000;
+  animation: slideInRight 0.3s ease;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.notification-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.notification-content i {
+  font-size: 18px;
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Keyboard Shortcut Indicators */
+.form-control:focus {
+  position: relative;
+}
+
+.form-control:focus::after {
+  content: 'Ctrl+Enter to submit';
+  position: absolute;
+  bottom: -20px;
+  right: 0;
+  font-size: 10px;
+  color: var(--text-muted);
+  background: var(--background-light);
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid var(--border-color);
+}
+
+/* Enhanced form interactions */
+.form-group {
+  position: relative;
+}
+
+.form-group:hover .form-label {
+  color: var(--primary-color);
+  transition: color 0.2s ease;
+}
+
+/* Loading state enhancements */
+.btn-submit:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-submit:not(:disabled):hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3);
+}
+
+/* Responsive enhancements */
 @media (max-width: 576px) {
   .auth-card {
     padding: 1.5rem;
@@ -219,5 +338,31 @@
 
   .auth-title {
     font-size: 1.5rem;
+  }
+
+  .shortcut-hint {
+    font-size: 0.8rem;
+    padding: 6px 12px;
+  }
+
+  .admin-login-notification {
+    top: 10px;
+    right: 10px;
+    left: 10px;
+    padding: 12px 16px;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .auth-card.admin-mode {
+    background: linear-gradient(135deg, #1f1f1f 0%, #2a2a2a 100%);
+    border-color: #dc2626;
+  }
+
+  .shortcut-hint {
+    background: rgba(220, 38, 38, 0.1);
+    border-color: rgba(220, 38, 38, 0.3);
+    color: #fca5a5;
   }
 }

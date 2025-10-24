@@ -2,55 +2,237 @@
 
 <div class="main-content">
   <div class="container-fluid">
-    <h2 class="mb-4">My Appointments</h2>
+    <!-- Header Section -->
+    <div class="page-header">
+      <div class="header-content">
+        <div class="header-info">
+          <h1 class="page-title">My Appointments</h1>
+          <p class="page-subtitle">Manage your medical appointments</p>
+        </div>
+        <div class="header-actions">
+          <button class="btn btn-primary" (click)="bookNewAppointment()">
+            <i class="bi bi-plus-circle"></i>
+            Book Appointment
+          </button>
+        </div>
+      </div>
+    </div>
 
-    <div class="card">
-      <div class="card-body">
-        <div *ngIf="isLoading" class="text-center py-5">
-          <div class="spinner-border text-primary" role="status">
-            <span class="visually-hidden">Loading...</span>
+    <!-- Stats Cards -->
+    <div class="stats-grid" *ngIf="!isLoading()">
+      <div class="stat-card">
+        <div class="stat-icon total">
+          <i class="bi bi-calendar3"></i>
+        </div>
+        <div class="stat-content">
+          <div class="stat-number">{{ getAppointmentStats().total }}</div>
+          <div class="stat-label">Total</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon pending">
+          <i class="bi bi-clock"></i>
+        </div>
+        <div class="stat-content">
+          <div class="stat-number">{{ getAppointmentStats().pending }}</div>
+          <div class="stat-label">Pending</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon confirmed">
+          <i class="bi bi-check-circle"></i>
+        </div>
+        <div class="stat-content">
+          <div class="stat-number">{{ getAppointmentStats().confirmed }}</div>
+          <div class="stat-label">Confirmed</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon completed">
+          <i class="bi bi-check2-all"></i>
+        </div>
+        <div class="stat-content">
+          <div class="stat-number">{{ getAppointmentStats().completed }}</div>
+          <div class="stat-label">Completed</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Search and Filter Section -->
+    <div class="search-filter-section">
+      <div class="search-bar">
+        <div class="search-input-wrapper">
+          <i class="bi bi-search search-icon"></i>
+          <input 
+            type="text" 
+            placeholder="Search appointments, doctors, or notes..." 
+            [(ngModel)]="searchQuery"
+            (ngModelChange)="onSearchChange()"
+            class="search-input"
+          >
+        </div>
+        <button class="filter-toggle-btn" (click)="toggleFilters()">
+          <i class="bi bi-funnel"></i>
+          Filters
+        </button>
+      </div>
+
+      <!-- Advanced Filters -->
+      <div class="advanced-filters" *ngIf="showFilters()">
+        <div class="filter-group">
+          <label class="filter-label">Status</label>
+          <div class="filter-options">
+            <button 
+              *ngFor="let option of filterOptions"
+              [class]="'filter-btn ' + (selectedFilter() === option.value ? 'active' : '')"
+              (click)="selectedFilter.set(option.value); onFilterChange()"
+            >
+              <i class="bi {{ option.icon }}"></i>
+              {{ option.label }}
+            </button>
           </div>
         </div>
 
-        <div *ngIf="!isLoading && appointments.length === 0" class="text-center py-5">
-          <p class="text-muted">No appointments found</p>
+        <div class="filter-group">
+          <label class="filter-label">Sort By</label>
+          <div class="sort-controls">
+            <select [(ngModel)]="sortBy" (ngModelChange)="onSortChange()" class="sort-select">
+              <option *ngFor="let option of sortOptions" [value]="option.value">
+                {{ option.label }}
+              </option>
+            </select>
+            <button class="sort-order-btn" (click)="toggleSortOrder()">
+              <i class="bi" [class.bi-sort-alpha-down]="sortOrder() === 'desc'" [class.bi-sort-alpha-up]="sortOrder() === 'asc'"></i>
+            </button>
+          </div>
         </div>
+      </div>
+    </div>
 
-        <div *ngIf="!isLoading && appointments.length > 0" class="table-responsive">
-          <table class="table table-hover">
-            <thead>
-              <tr>
-                <th>Doctor</th>
-                <th>Specialty</th>
-                <th>Date</th>
-                <th>Time</th>
-                <th>Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let appointment of appointments">
-                <td>Dr. {{ appointment.doctor?.firstName }} {{ appointment.doctor?.lastName }}</td>
-                <td>{{ appointment.doctor?.specialty }}</td>
-                <td>{{ appointment.appointmentDate | date: 'mediumDate' }}</td>
-                <td>{{ appointment.appointmentTime }}</td>
-                <td>
-                  <span [class]="getStatusClass(appointment.status)">
-                    {{ appointment.status | titlecase }}
-                  </span>
-                </td>
-                <td>
-                  <button
-                    *ngIf="appointment.status !== 'cancelled' && appointment.status !== 'completed'"
-                    (click)="cancelAppointment(appointment.id)"
-                    class="btn btn-sm btn-danger"
-                  >
-                    Cancel
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+    <!-- Upcoming Appointments -->
+    <div class="upcoming-section" *ngIf="getUpcomingAppointments().length > 0">
+      <h3 class="section-title">
+        <i class="bi bi-calendar-check"></i>
+        Upcoming Appointments
+      </h3>
+      <div class="upcoming-grid">
+        <div 
+          *ngFor="let appointment of getUpcomingAppointments()" 
+          class="upcoming-card"
+          (click)="viewAppointmentDetails(appointment)"
+        >
+          <div class="appointment-time">
+            <div class="time-badge">
+              <i class="bi bi-clock"></i>
+              {{ appointment.appointmentTime }}
+            </div>
+            <div class="date-info">
+              {{ appointment.appointmentDate | date: 'MMM dd, yyyy' }}
+            </div>
+          </div>
+          <div class="appointment-details">
+            <h4 class="doctor-name">Dr. {{ appointment.doctor?.firstName }} {{ appointment.doctor?.lastName }}</h4>
+            <p class="specialty">{{ appointment.doctor?.specialty }}</p>
+            <div class="status-badge" [class]="getStatusClass(appointment.status)">
+              <i class="bi" [class]="getStatusIcon(appointment.status)"></i>
+              {{ appointment.status | titlecase }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Appointments List -->
+    <div class="appointments-section">
+      <div class="section-header">
+        <h3 class="section-title">
+          <i class="bi bi-list-ul"></i>
+          All Appointments
+        </h3>
+        <div class="results-count">
+          {{ filteredAppointments.length }} appointment(s) found
+        </div>
+      </div>
+
+      <!-- Loading State -->
+      <div *ngIf="isLoading()" class="loading-state">
+        <div class="loading-spinner">
+          <div class="spinner"></div>
+        </div>
+        <p class="loading-text">Loading appointments...</p>
+      </div>
+
+      <!-- Empty State -->
+      <div *ngIf="!isLoading() && filteredAppointments.length === 0" class="empty-state">
+        <div class="empty-icon">
+          <i class="bi bi-calendar-x"></i>
+        </div>
+        <h3 class="empty-title">No appointments found</h3>
+        <p class="empty-description">
+          {{ searchQuery() ? 'Try adjusting your search criteria' : 'You don\'t have any appointments yet' }}
+        </p>
+        <button class="btn btn-primary" (click)="bookNewAppointment()" *ngIf="!searchQuery()">
+          <i class="bi bi-plus-circle"></i>
+          Book Your First Appointment
+        </button>
+      </div>
+
+      <!-- Appointments Grid -->
+      <div *ngIf="!isLoading() && filteredAppointments.length > 0" class="appointments-grid">
+        <div 
+          *ngFor="let appointment of filteredAppointments" 
+          class="appointment-card"
+          [class.upcoming]="appointment.status === 'confirmed' || appointment.status === 'pending'"
+        >
+          <div class="appointment-header">
+            <div class="appointment-time">
+              <div class="time-display">{{ appointment.appointmentTime }}</div>
+              <div class="date-display">{{ appointment.appointmentDate | date: 'MMM dd, yyyy' }}</div>
+            </div>
+            <div class="status-badge" [class]="getStatusClass(appointment.status)">
+              <i class="bi" [class]="getStatusIcon(appointment.status)"></i>
+              {{ appointment.status | titlecase }}
+            </div>
+          </div>
+
+          <div class="appointment-body">
+            <div class="doctor-info">
+              <div class="doctor-avatar">
+                {{ appointment.doctor?.firstName?.charAt(0) }}{{ appointment.doctor?.lastName?.charAt(0) }}
+              </div>
+              <div class="doctor-details">
+                <h4 class="doctor-name">Dr. {{ appointment.doctor?.firstName }} {{ appointment.doctor?.lastName }}</h4>
+                <p class="specialty">{{ appointment.doctor?.specialty }}</p>
+              </div>
+            </div>
+
+            <div class="appointment-notes" *ngIf="appointment.notes">
+              <p class="notes-text">{{ appointment.notes }}</p>
+            </div>
+          </div>
+
+          <div class="appointment-actions">
+            <button class="action-btn view-btn" (click)="viewAppointmentDetails(appointment)">
+              <i class="bi bi-eye"></i>
+              View Details
+            </button>
+            <button 
+              *ngIf="appointment.status === 'pending' || appointment.status === 'confirmed'"
+              class="action-btn reschedule-btn" 
+              (click)="rescheduleAppointment(appointment)"
+            >
+              <i class="bi bi-calendar-event"></i>
+              Reschedule
+            </button>
+            <button 
+              *ngIf="appointment.status !== 'cancelled' && appointment.status !== 'completed'"
+              class="action-btn cancel-btn" 
+              (click)="cancelAppointment(appointment.id)"
+            >
+              <i class="bi bi-x-circle"></i>
+              Cancel
+            </button>
+          </div>
         </div>
       </div>
     </div>

@@ -7,18 +7,28 @@
                 </div>
                 <h1 class="logo-text">QuickMed</h1>
             </div>
-            <p class="portal-label">Patient Portal</p>
+            <p class="portal-label" [class.admin-active]="showAdminLogin">
+                {{ showAdminLogin ? 'Admin Portal' : 'Patient Portal' }}
+            </p>
+            <div class="shortcut-hint" *ngIf="!showAdminLogin">
+                <i class="bi bi-keyboard"></i>
+                <span>{{ getShortcutHint() }}</span>
+            </div>
         </div>
 
-        <div class="auth-card">
+        <div class="auth-card" [class.admin-mode]="showAdminLogin">
             <div class="auth-card-header">
                 <div class="user-icon-wrapper">
-                    <div class="user-icon">
-                        <i class="bi bi-person"></i>
+                    <div class="user-icon" [class.admin-icon]="showAdminLogin">
+                        <i class="bi" [class.bi-person]="!showAdminLogin" [class.bi-shield-check]="showAdminLogin"></i>
                     </div>
                 </div>
-                <h2 class="auth-title">Welcome Back</h2>
-                <p class="auth-subtitle">Sign in to access your health records</p>
+                <h2 class="auth-title">
+                    {{ showAdminLogin ? 'Admin Access' : 'Welcome Back' }}
+                </h2>
+                <p class="auth-subtitle">
+                    {{ showAdminLogin ? 'Secure admin authentication required' : 'Sign in to access your health records' }}
+                </p>
             </div>
 
             <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
