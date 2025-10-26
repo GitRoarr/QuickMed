@@ -10,6 +10,7 @@
           <p class="page-subtitle">Manage your patient appointments and schedule</p>
         </div>
         <div class="header-actions">
+          <app-notification-center></app-notification-center>
           <button class="view-toggle-btn" (click)="toggleViewMode()">
             <i class="bi" [class.bi-grid]="viewMode() === 'grid'" [class.bi-calendar3]="viewMode() === 'calendar'"></i>
             {{ viewMode() === 'grid' ? 'Calendar View' : 'Grid View' }}

@@ -6,6 +6,8 @@ import { AuthModule } from "./auth/auth.module";
 import { UsersModule } from "./users/users.module";
 import { DoctorsModule } from "./doctors/doctors.module";
 import { AppointmentsModule } from "./appointments/appointments.module";
+import { NotificationsModule } from "./notifications/notifications.module";
+import { AdminModule } from "./admin/admin.module";
 import { RolesGuard } from "./auth/guards/roles.guard";
 
 @Module({
@@ -40,6 +42,8 @@ import { RolesGuard } from "./auth/guards/roles.guard";
     UsersModule,
     DoctorsModule,
     AppointmentsModule,
+    NotificationsModule,
+    AdminModule,
   ],
   providers: [
     {

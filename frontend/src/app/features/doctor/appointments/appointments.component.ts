@@ -3,6 +3,7 @@ import { CommonModule } from "@angular/common"
 import { FormsModule } from "@angular/forms"
 import { Router } from "@angular/router"
 import { SidebarComponent } from "@app/shared/components/sidebar/sidebar.component"
+import { NotificationCenterComponent } from "@app/shared/components/notification-center/notification-center.component"
 import { AppointmentService } from "@core/services/appointment.service"
 import { Appointment, AppointmentStatus } from "@core/models/appointment.model"
 
@@ -15,7 +16,7 @@ interface AppointmentFilter {
 @Component({
   selector: "app-doctor-appointments",
   standalone: true,
-  imports: [CommonModule, SidebarComponent, FormsModule],
+  imports: [CommonModule, SidebarComponent, FormsModule, NotificationCenterComponent],
   templateUrl: "./appointments.component.html",
   styleUrls: ["./appointments.component.css"],
 })
