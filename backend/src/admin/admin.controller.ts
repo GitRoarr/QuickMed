@@ -19,24 +19,27 @@ import { CreateUserDto } from '../users/dto/create-user.dto';
 import { UpdateUserDto } from '../users/dto/update-user.dto';
 import { CreateAppointmentDto } from '../appointments/dto/create-appointment.dto';
 import { UpdateAppointmentDto } from '../appointments/dto/update-appointment.dto';
+import { UserRole } from '../../src/common/index';
 
 @Controller('admin')
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles('admin')
 export class AdminController {
   constructor(private readonly adminService: AdminService) {}
 
   @Get('dashboard')
+  @Roles(UserRole.ADMIN)
   async getDashboardData() {
     return await this.adminService.getDashboardData();
   }
 
   @Get('stats')
+  @Roles(UserRole.ADMIN)
   async getAdminStats() {
     return await this.adminService.getAdminStats();
   }
 
   @Get('users')
+  @Roles(UserRole.ADMIN)
   async getAllUsers(
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 10,
@@ -46,17 +49,20 @@ export class AdminController {
   }
 
   @Get('users/:id')
+  @Roles(UserRole.ADMIN)
   async getUserById(@Param('id') id: string) {
     return await this.adminService.getUserById(id);
   }
 
   @Post('users')
   @HttpCode(HttpStatus.CREATED)
+  @Roles(UserRole.ADMIN)
   async createUser(@Body() createUserDto: CreateUserDto) {
     return await this.adminService.createUser(createUserDto);
   }
 
   @Put('users/:id')
+  @Roles(UserRole.ADMIN)
   async updateUser(
     @Param('id') id: string,
     @Body() updateUserDto: UpdateUserDto,
@@ -66,11 +72,13 @@ export class AdminController {
 
   @Delete('users/:id')
   @HttpCode(HttpStatus.NO_CONTENT)
+  @Roles(UserRole.ADMIN)
   async deleteUser(@Param('id') id: string) {
     await this.adminService.deleteUser(id);
   }
 
   @Get('appointments')
+  @Roles(UserRole.ADMIN)
   async getAllAppointments(
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 10,
@@ -80,17 +88,20 @@ export class AdminController {
   }
 
   @Get('appointments/:id')
+  @Roles(UserRole.ADMIN)
   async getAppointmentById(@Param('id') id: string) {
     return await this.adminService.getAppointmentById(id);
   }
 
   @Post('appointments')
   @HttpCode(HttpStatus.CREATED)
+  @Roles(UserRole.ADMIN)
   async createAppointment(@Body() createAppointmentDto: CreateAppointmentDto) {
     return await this.adminService.createAppointment(createAppointmentDto);
   }
 
   @Put('appointments/:id')
+  @Roles(UserRole.ADMIN)
   async updateAppointment(
     @Param('id') id: string,
     @Body() updateAppointmentDto: UpdateAppointmentDto,
@@ -100,26 +111,31 @@ export class AdminController {
 
   @Delete('appointments/:id')
   @HttpCode(HttpStatus.NO_CONTENT)
+  @Roles(UserRole.ADMIN)
   async deleteAppointment(@Param('id') id: string) {
     await this.adminService.deleteAppointment(id);
   }
 
   @Get('system/health')
+  @Roles(UserRole.ADMIN)
   async getSystemHealth() {
     return await this.adminService.getSystemHealth();
   }
 
   @Get('notifications')
+  @Roles(UserRole.ADMIN)
   async getSystemNotifications() {
     return await this.adminService.getSystemNotifications();
   }
 
   @Get('users/:id/export')
+  @Roles(UserRole.ADMIN)
   async exportUserData(@Param('id') id: string) {
     return await this.adminService.exportUserData(id);
   }
 
   @Post('reports')
+  @Roles(UserRole.ADMIN)
   async generateReport(
     @Body() reportRequest: {
       type: 'users' | 'appointments' | 'revenue';

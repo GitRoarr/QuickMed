@@ -1,4 +1,5 @@
 import { IsString, IsEnum, IsOptional, IsBoolean, IsDateString, IsObject } from 'class-validator';
+import { NotificationType, NotificationPriority } from '../../common/index';
 
 export class CreateNotificationDto {
   @IsString()
@@ -7,11 +8,11 @@ export class CreateNotificationDto {
   @IsString()
   message: string;
 
-  @IsEnum(['info', 'success', 'warning', 'error', 'appointment', 'prescription', 'test_result', 'system'])
-  type: string;
+  @IsEnum(NotificationType)
+  type: NotificationType;
 
-  @IsEnum(['low', 'medium', 'high', 'urgent'])
-  priority: string;
+  @IsEnum(NotificationPriority)
+  priority: NotificationPriority;
 
   @IsOptional()
   @IsBoolean()
@@ -44,4 +45,3 @@ export class CreateNotificationDto {
   @IsObject()
   metadata?: Record<string, any>;
 }
-
