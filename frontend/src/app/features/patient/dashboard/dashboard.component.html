@@ -164,54 +164,121 @@
         </header>
 
     <div class="dashboard-content">
-        <!-- Welcome Section -->
         <div class="welcome-section">
             <h2 class="welcome-title">Welcome back, {{ currentUser?.firstName }} {{ currentUser?.lastName }}</h2>
             <p class="welcome-subtitle">Manage your appointments and health records</p>
         </div>
 
-        <!-- Stats Cards -->
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-icon stat-icon-green">
-                    <i class="bi bi-calendar-check"></i>
-                </div>
-                <div class="stat-content">
-                    <p class="stat-label">Upcoming</p>
-                    <h3 class="stat-value">{{ upcomingCount }}</h3>
-                </div>
-            </div>
+       <!-- Stats Cards -->
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-icon stat-icon-green">
+      <i class="bi bi-calendar-check"></i>
+    </div>
+    <div class="stat-content">
+      <p class="stat-label">Upcoming</p>
+<h3 class="stat-value">{{ dashboardStats().upcomingAppointments }}</h3>
+    </div>
+  </div>
 
-            <div class="stat-card">
-                <div class="stat-icon stat-icon-green">
-                    <i class="bi bi-capsule"></i>
-                </div>
-                <div class="stat-content">
-                    <p class="stat-label">Active Meds</p>
-                    <h3 class="stat-value">{{ currentUser?.activeMedicationsCount || 0 }}</h3>
-                </div>
-            </div>
+  <div class="stat-card">
+    <div class="stat-icon stat-icon-green">
+      <i class="bi bi-capsule"></i>
+    </div>
+    <div class="stat-content">
+      <p class="stat-label">Active Meds</p>
+      <h3 class="stat-value">{{ currentUser?.activeMedicationsCount || 0 }}</h3>
+    </div>
+  </div>
 
-            <div class="stat-card">
-                <div class="stat-icon stat-icon-green">
-                    <i class="bi bi-file-earmark-text"></i>
-                </div>
-                <div class="stat-content">
-                    <p class="stat-label">Records</p>
-                    <h3 class="stat-value">{{ currentUser?.medicalRecordsCount || 0 }}</h3>
-                </div>
-            </div>
+  <div class="stat-card">
+    <div class="stat-icon stat-icon-green">
+      <i class="bi bi-file-earmark-text"></i>
+    </div>
+    <div class="stat-content">
+      <p class="stat-label">Records</p>
+      <h3 class="stat-value">{{ currentUser?.medicalRecordsCount || 0 }}</h3>
+    </div>
+  </div>
 
-            <div class="stat-card">
-                <div class="stat-icon stat-icon-orange">
-                    <i class="bi bi-activity"></i>
-                </div>
-                <div class="stat-content">
-                    <p class="stat-label">Test Results</p>
-                    <h3 class="stat-value">{{ currentUser?.testResultsCount || 0 }}</h3>
-                </div>
-            </div>
+  <div class="stat-card">
+    <div class="stat-icon stat-icon-orange">
+      <i class="bi bi-activity"></i>
+    </div>
+    <div class="stat-content">
+      <p class="stat-label">Test Results</p>
+      <h3 class="stat-value">{{ currentUser?.testResultsCount || 0 }}</h3>
+    </div>
+  </div>
+</div>
+
+<!-- Appointments List -->
+<div *ngIf="activeTab === 'appointments'" class="appointments-section">
+  <div class="section-header">
+    <h3 class="section-title">Upcoming Appointments</h3>
+    <button class="book-btn" (click)="bookAppointment()">
+      <i class="bi bi-plus-lg"></i>
+      Book Appointment
+    </button>
+  </div>
+
+  <div *ngIf="isLoading()" class="loading-state">
+    <div class="spinner"></div>
+  </div>
+
+  <div *ngIf="!isLoading() && getUpcomingAppointments().length === 0" class="empty-state">
+    <p>No upcoming appointments</p>
+    <button class="book-btn" (click)="bookAppointment()">Book Your First Appointment</button>
+  </div>
+
+  <div *ngIf="!isLoading() && getUpcomingAppointments().length > 0" class="appointments-list">
+    <div *ngFor="let appointment of getUpcomingAppointments()" class="appointment-card">
+      <div class="appointment-header">
+        <div class="doctor-info">
+          <div class="doctor-avatar">
+            {{ getInitials(appointment.doctor) }}
+          </div>
+          <div>
+            <h4 class="doctor-name">Dr. {{ appointment.doctor?.firstName }} {{ appointment.doctor?.lastName }}</h4>
+            <p class="doctor-specialty">{{ appointment.doctor?.specialty }}</p>
+          </div>
         </div>
+        <span class="status-badge" [class]="'status-' + appointment.status">
+          {{ appointment.status }}
+        </span>
+      </div>
+
+      <div class="appointment-details">
+        <div class="detail-item">
+          <i class="bi bi-calendar3"></i>
+          <span>{{ appointment.appointmentDate | date: 'yyyy-MM-dd' }}</span>
+        </div>
+        <div class="detail-item">
+          <i class="bi bi-clock"></i>
+          <span>{{ appointment.appointmentTime }}</span>
+        </div>
+        <div *ngIf="appointment.location" class="detail-item">
+          <i class="bi bi-geo-alt"></i>
+          <span>{{ appointment.location }}</span>
+        </div>
+        <div *ngIf="appointment.isVideoConsultation" class="detail-item">
+          <i class="bi bi-camera-video"></i>
+          <span>Video Consultation</span>
+        </div>
+      </div>
+
+      <div class="appointment-actions">
+        <button *ngIf="appointment.isVideoConsultation && appointment.status === 'confirmed'" class="action-btn action-btn-primary">
+          <i class="bi bi-camera-video"></i>
+          Join Call
+        </button>
+        <button class="action-btn action-btn-secondary">Reschedule</button>
+        <button class="action-btn action-btn-danger">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 
         <div class="main-grid">
             <!-- Main Content -->
@@ -256,6 +323,7 @@
                             <div class="appointment-header">
                                 <div class="doctor-info">
                                     <div class="doctor-avatar">
+                                        <!-- Fixed getInitials call to pass User object directly -->
                                         {{ getInitials(appointment.doctor) }}
                                     </div>
                                     <div>
@@ -313,6 +381,7 @@
 
                     <div class="profile-header">
                         <div class="profile-avatar-large">
+                            <!-- Fixed getInitials call to pass User object directly -->
                             {{ getInitials(currentUser) }}
                         </div>
                         <div>
@@ -355,9 +424,6 @@
     </span>
                         </div>
                     </div>
-
-
-
 
                     <button class="edit-profile-btn">Edit Profile</button>
                 </div>

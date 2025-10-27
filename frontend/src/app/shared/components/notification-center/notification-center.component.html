@@ -29,26 +29,30 @@
       </button>
     </div>
   </div>
-
-  <!-- Filters -->
-  <div class="notification-filters">
-    <div class="filter-group">
-      <label class="filter-label">Type</label>
-      <select class="filter-select" [(ngModel)]="selectedFilter" (change)="onFilterChange()">
-        <option *ngFor="let option of filterOptions" [value]="option.value">
-          {{ option.label }}
-        </option>
-      </select>
-    </div>
-    <div class="filter-group">
-      <label class="filter-label">Priority</label>
-      <select class="filter-select" [(ngModel)]="selectedPriority" (change)="onPriorityChange()">
-        <option *ngFor="let option of priorityOptions" [value]="option.value">
-          {{ option.label }}
-        </option>
-      </select>
-    </div>
+<!-- Filters -->
+<div class="notification-filters">
+  <div class="filter-group">
+    <label class="filter-label">Type</label>
+    <select class="filter-select"
+            [ngModel]="selectedFilter()"
+            (ngModelChange)="selectedFilter.set($event); onFilterChange()">
+      <option *ngFor="let option of filterOptions" [value]="option.value">
+        {{ option.label }}
+      </option>
+    </select>
   </div>
+  <div class="filter-group">
+    <label class="filter-label">Priority</label>
+    <select class="filter-select"
+            [ngModel]="selectedPriority()"
+            (ngModelChange)="selectedPriority.set($event); onPriorityChange()">
+      <option *ngFor="let option of priorityOptions" [value]="option.value">
+        {{ option.label }}
+      </option>
+    </select>
+  </div>
+</div>
+
 
   <!-- Stats -->
   <div class="notification-stats" *ngIf="stats()">
@@ -68,7 +72,6 @@
 
   <!-- Notifications List -->
   <div class="notifications-list">
-    <!-- Loading State -->
     <div *ngIf="isLoading()" class="loading-state">
       <div class="loading-spinner">
         <i class="bi bi-arrow-clockwise bi-spin"></i>
@@ -76,14 +79,12 @@
       <p>Loading notifications...</p>
     </div>
 
-    <!-- Empty State -->
     <div *ngIf="!isLoading() && getFilteredNotifications().length === 0" class="empty-state">
       <i class="bi bi-bell-slash"></i>
       <h4>No notifications</h4>
       <p>You're all caught up! No new notifications.</p>
     </div>
 
-    <!-- Notifications -->
     <div *ngIf="!isLoading() && getFilteredNotifications().length > 0" class="notifications-container">
       <div 
         *ngFor="let notification of getFilteredNotifications()" 
@@ -137,7 +138,6 @@
       </div>
     </div>
 
-    <!-- Load More -->
     <div *ngIf="hasMore() && !isLoading()" class="load-more">
       <button class="load-more-btn" (click)="loadMoreNotifications()" [disabled]="isLoading()">
         <i class="bi bi-arrow-down"></i>
@@ -168,4 +168,3 @@
     </div>
   </div>
 </div>
-
