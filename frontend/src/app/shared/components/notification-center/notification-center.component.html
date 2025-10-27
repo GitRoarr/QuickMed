@@ -1,4 +1,3 @@
-<!-- Notification Bell -->
 <div class="notification-bell" (click)="toggleNotificationCenter()">
   <i class="bi bi-bell"></i>
   <span class="notification-badge" *ngIf="hasUnreadNotifications()">
@@ -6,12 +5,9 @@
   </span>
 </div>
 
-<!-- Notification Center Overlay -->
 <div class="notification-overlay" *ngIf="isOpen()" (click)="closeNotificationCenter()"></div>
 
-<!-- Notification Center -->
 <div class="notification-center" *ngIf="isOpen()" [class.open]="isOpen()">
-  <!-- Header -->
   <div class="notification-header">
     <div class="header-info">
       <h3 class="notification-title">Notifications</h3>
@@ -29,32 +25,26 @@
       </button>
     </div>
   </div>
-<!-- Filters -->
-<div class="notification-filters">
-  <div class="filter-group">
-    <label class="filter-label">Type</label>
-    <select class="filter-select"
-            [ngModel]="selectedFilter()"
-            (ngModelChange)="selectedFilter.set($event); onFilterChange()">
-      <option *ngFor="let option of filterOptions" [value]="option.value">
-        {{ option.label }}
-      </option>
-    </select>
-  </div>
-  <div class="filter-group">
-    <label class="filter-label">Priority</label>
-    <select class="filter-select"
-            [ngModel]="selectedPriority()"
-            (ngModelChange)="selectedPriority.set($event); onPriorityChange()">
-      <option *ngFor="let option of priorityOptions" [value]="option.value">
-        {{ option.label }}
-      </option>
-    </select>
-  </div>
-</div>
 
+  <div class="notification-filters">
+    <div class="filter-group">
+      <label class="filter-label">Type</label>
+      <select class="filter-select" [ngModel]="selectedFilter()" (ngModelChange)="selectedFilter.set($event); onFilterChange()">
+        <option *ngFor="let option of filterOptions" [value]="option.value">
+          {{ option.label }}
+        </option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label class="filter-label">Priority</label>
+      <select class="filter-select" [ngModel]="selectedPriority()" (ngModelChange)="selectedPriority.set($event); onPriorityChange()">
+        <option *ngFor="let option of priorityOptions" [value]="option.value">
+          {{ option.label }}
+        </option>
+      </select>
+    </div>
+  </div>
 
-  <!-- Stats -->
   <div class="notification-stats" *ngIf="stats()">
     <div class="stat-item">
       <span class="stat-label">Total</span>
@@ -70,7 +60,6 @@
     </div>
   </div>
 
-  <!-- Notifications List -->
   <div class="notifications-list">
     <div *ngIf="isLoading()" class="loading-state">
       <div class="loading-spinner">
@@ -133,38 +122,37 @@
             title="Delete notification"
           >
             <i class="bi bi-trash"></i>
-          </button>
+          </div>
         </div>
+      </div>
+
+      <div *ngIf="hasMore() && !isLoading()" class="load-more">
+        <button class="load-more-btn" (click)="loadMoreNotifications()" [disabled]="isLoading()">
+          <i class="bi bi-arrow-down"></i>
+          Load More Notifications
+        </button>
       </div>
     </div>
 
-    <div *ngIf="hasMore() && !isLoading()" class="load-more">
-      <button class="load-more-btn" (click)="loadMoreNotifications()" [disabled]="isLoading()">
-        <i class="bi bi-arrow-down"></i>
-        Load More Notifications
-      </button>
-    </div>
-  </div>
-
-  <!-- Footer -->
-  <div class="notification-footer">
-    <div class="footer-stats">
-      <span class="footer-stat">
-        <i class="bi bi-info-circle"></i>
-        {{ getStatsByType('info') }} Info
-      </span>
-      <span class="footer-stat">
-        <i class="bi bi-check-circle"></i>
-        {{ getStatsByType('success') }} Success
-      </span>
-      <span class="footer-stat">
-        <i class="bi bi-exclamation-triangle"></i>
-        {{ getStatsByType('warning') }} Warning
-      </span>
-      <span class="footer-stat">
-        <i class="bi bi-x-circle"></i>
-        {{ getStatsByType('error') }} Error
-      </span>
+    <div class="notification-footer">
+      <div class="footer-stats">
+        <span class="footer-stat">
+          <i class="bi bi-info-circle"></i>
+          {{ getStatsByType('info') }} Info
+        </span>
+        <span class="footer-stat">
+          <i class="bi bi-check-circle"></i>
+          {{ getStatsByType('success') }} Success
+        </span>
+        <span class="footer-stat">
+          <i class="bi bi-exclamation-triangle"></i>
+          {{ getStatsByType('warning') }} Warning
+        </span>
+        <span class="footer-stat">
+          <i class="bi bi-x-circle"></i>
+          {{ getStatsByType('error') }} Error
+        </span>
+      </div>
     </div>
   </div>
 </div>

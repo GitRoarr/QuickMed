@@ -32,12 +32,12 @@ export class DashboardComponent implements OnInit {
   isLoading = signal(true)
   activeTab = "appointments"
   currentUser: User | null = null
-  searchQuery = signal('')
+  searchQuery = signal("")
   sidebarCollapsed = signal(false)
   isDarkMode = signal(false)
   showNotifications = signal(false)
   notificationCount = signal(0)
-  
+
   dashboardStats = signal<DashboardStats>({
     upcomingAppointments: 0,
     totalAppointments: 0,
@@ -45,38 +45,38 @@ export class DashboardComponent implements OnInit {
     cancelledAppointments: 0,
     medicalRecords: 0,
     prescriptions: 0,
-    testResults: 0
+    testResults: 0,
   })
 
   notifications = [
     {
       id: 1,
-      title: 'Appointment Reminder',
-      message: 'You have an appointment with Dr. Smith tomorrow at 2:00 PM',
-      time: '2 hours ago',
-      read: false
+      title: "Appointment Reminder",
+      message: "You have an appointment with Dr. Smith tomorrow at 2:00 PM",
+      time: "2 hours ago",
+      read: false,
     },
     {
       id: 2,
-      title: 'Test Results Available',
-      message: 'Your blood test results are now available',
-      time: '1 day ago',
-      read: false
+      title: "Test Results Available",
+      message: "Your blood test results are now available",
+      time: "1 day ago",
+      read: false,
     },
     {
       id: 3,
-      title: 'Prescription Ready',
-      message: 'Your prescription is ready for pickup',
-      time: '2 days ago',
-      read: true
-    }
+      title: "Prescription Ready",
+      message: "Your prescription is ready for pickup",
+      time: "2 days ago",
+      read: true,
+    },
   ]
 
   constructor(
     private appointmentService: AppointmentService,
     private authService: AuthService,
     private themeService: ThemeService,
-    private router: Router
+    private router: Router,
   ) {}
 
   ngOnInit(): void {
@@ -96,9 +96,7 @@ export class DashboardComponent implements OnInit {
     this.appointmentService.getMyAppointments().subscribe({
       next: (data) => {
         this.appointments = data
-        this.filteredAppointments = data.filter((apt) => 
-          apt.status === "confirmed" || apt.status === "pending"
-        )
+        this.filteredAppointments = data.filter((apt) => apt.status === "confirmed" || apt.status === "pending")
         this.isLoading.set(false)
       },
       error: (error: any) => {
@@ -112,51 +110,50 @@ export class DashboardComponent implements OnInit {
     this.appointmentService.getMyAppointments().subscribe({
       next: (appointments) => {
         const stats: DashboardStats = {
-          upcomingAppointments: appointments.filter(a => 
-            (a.status === 'confirmed' || a.status === 'pending') && 
-            new Date(a.appointmentDate) >= new Date()
+          upcomingAppointments: appointments.filter(
+            (a) => (a.status === "confirmed" || a.status === "pending") && new Date(a.appointmentDate) >= new Date(),
           ).length,
           totalAppointments: appointments.length,
-          completedAppointments: appointments.filter(a => a.status === 'completed').length,
-          cancelledAppointments: appointments.filter(a => a.status === 'cancelled').length,
+          completedAppointments: appointments.filter((a) => a.status === "completed").length,
+          cancelledAppointments: appointments.filter((a) => a.status === "cancelled").length,
           medicalRecords: this.currentUser?.medicalRecordsCount || 0,
-          prescriptions: this.currentUser?.prescriptionsCount || 0,
-          testResults: this.currentUser?.testResultsCount || 0
+          prescriptions: 0,
+          testResults: this.currentUser?.testResultsCount || 0,
         }
         this.dashboardStats.set(stats)
-      }
+      },
     })
   }
 
   setupTheme(): void {
-    this.isDarkMode.set(localStorage.getItem('dark-mode') === 'true')
+    this.isDarkMode.set(localStorage.getItem("dark-mode") === "true")
     if (this.isDarkMode()) {
-      document.body.classList.add('dark')
+      document.body.classList.add("dark")
     }
   }
 
   toggleSidebar(): void {
-    this.sidebarCollapsed.update(collapsed => !collapsed)
-    localStorage.setItem('sidebar-collapsed', this.sidebarCollapsed().toString())
+    this.sidebarCollapsed.update((collapsed) => !collapsed)
+    localStorage.setItem("sidebar-collapsed", this.sidebarCollapsed().toString())
   }
 
   toggleTheme(): void {
-    this.isDarkMode.update(dark => !dark)
-    localStorage.setItem('dark-mode', this.isDarkMode().toString())
-    document.body.classList.toggle('dark')
+    this.isDarkMode.update((dark) => !dark)
+    localStorage.setItem("dark-mode", this.isDarkMode().toString())
+    document.body.classList.toggle("dark")
   }
 
   toggleNotifications(): void {
-    this.showNotifications.update(show => !show)
+    this.showNotifications.update((show) => !show)
   }
 
   updateNotificationCount(): void {
-    const unreadCount = this.notifications.filter(n => !n.read).length
+    const unreadCount = this.notifications.filter((n) => !n.read).length
     this.notificationCount.set(unreadCount)
   }
 
   markNotificationAsRead(notificationId: number): void {
-    const notification = this.notifications.find(n => n.id === notificationId)
+    const notification = this.notifications.find((n) => n.id === notificationId)
     if (notification && !notification.read) {
       notification.read = true
       this.updateNotificationCount()
@@ -164,21 +161,19 @@ export class DashboardComponent implements OnInit {
   }
 
   bookAppointment(): void {
-    this.router.navigate(['/patient/appointments/new'])
+    this.router.navigate(["/patient/appointments/new"])
   }
 
   downloadRecords(): void {
-    // Implement download functionality
-    console.log('Downloading medical records...')
+    console.log("Downloading medical records...")
   }
 
   callEmergency(): void {
-    // Implement emergency call functionality
-    window.open('tel:911', '_self')
+    window.open("tel:911", "_self")
   }
 
   openSettings(): void {
-    this.router.navigate(['/patient/settings'])
+    this.router.navigate(["/patient/settings"])
   }
 
   logout(): void {
@@ -192,10 +187,13 @@ export class DashboardComponent implements OnInit {
 
   getUpcomingAppointments(): Appointment[] {
     const today = new Date()
-    return this.appointments.filter(appointment => 
-      new Date(appointment.appointmentDate) >= today && 
-      (appointment.status === 'confirmed' || appointment.status === 'pending')
-    ).slice(0, 3)
+    return this.appointments
+      .filter(
+        (appointment) =>
+          new Date(appointment.appointmentDate) >= today &&
+          (appointment.status === "confirmed" || appointment.status === "pending"),
+      )
+      .slice(0, 3)
   }
 
   getRecentAppointments(): Appointment[] {
@@ -206,46 +204,47 @@ export class DashboardComponent implements OnInit {
 
   getAppointmentStatusClass(status: string): string {
     switch (status) {
-      case 'confirmed':
-        return 'status-confirmed'
-      case 'pending':
-        return 'status-pending'
-      case 'completed':
-        return 'status-completed'
-      case 'cancelled':
-        return 'status-cancelled'
+      case "confirmed":
+        return "status-confirmed"
+      case "pending":
+        return "status-pending"
+      case "completed":
+        return "status-completed"
+      case "cancelled":
+        return "status-cancelled"
       default:
-        return 'status-default'
+        return "status-default"
     }
   }
 
   getAppointmentStatusIcon(status: string): string {
     switch (status) {
-      case 'confirmed':
-        return 'bi-check-circle'
-      case 'pending':
-        return 'bi-clock'
-      case 'completed':
-        return 'bi-check2-all'
-      case 'cancelled':
-        return 'bi-x-circle'
+      case "confirmed":
+        return "bi-check-circle"
+      case "pending":
+        return "bi-clock"
+      case "completed":
+        return "bi-check2-all"
+      case "cancelled":
+        return "bi-x-circle"
       default:
-        return 'bi-question-circle'
+        return "bi-question-circle"
     }
   }
 
   onSearchChange(): void {
     const query = this.searchQuery().toLowerCase()
     if (query) {
-      this.filteredAppointments = this.appointments.filter(appointment => 
-        appointment.doctor?.firstName?.toLowerCase().includes(query) ||
-        appointment.doctor?.lastName?.toLowerCase().includes(query) ||
-        appointment.doctor?.specialty?.toLowerCase().includes(query) ||
-        appointment.notes?.toLowerCase().includes(query)
+      this.filteredAppointments = this.appointments.filter(
+        (appointment) =>
+          appointment.doctor?.firstName?.toLowerCase().includes(query) ||
+          appointment.doctor?.lastName?.toLowerCase().includes(query) ||
+          appointment.doctor?.specialty?.toLowerCase().includes(query) ||
+          appointment.notes?.toLowerCase().includes(query),
       )
     } else {
-      this.filteredAppointments = this.appointments.filter((apt) => 
-        apt.status === "confirmed" || apt.status === "pending"
+      this.filteredAppointments = this.appointments.filter(
+        (apt) => apt.status === "confirmed" || apt.status === "pending",
       )
     }
   }
