@@ -21,6 +21,7 @@ import { UpdateNotificationDto } from './dto/update-notification.dto';
 import { CreateNotificationTemplateDto } from './dto/create-notification-template.dto';
 import { UpdateNotificationTemplateDto } from './dto/update-notification-template.dto';
 import { NotificationPreferencesDto } from './dto/notification-preferences.dto';
+import { UserRole } from '../common/index'; 
 
 @Controller('notifications')
 @UseGuards(JwtAuthGuard)
@@ -51,7 +52,7 @@ export class NotificationsController {
 
   @Post()
   @UseGuards(RolesGuard)
-  @Roles('admin')
+  @Roles(UserRole.ADMIN) // Fixed: Changed from 'admin' to UserRole.ADMIN
   @HttpCode(HttpStatus.CREATED)
   async create(@Body() createNotificationDto: CreateNotificationDto) {
     return await this.notificationsService.create(createNotificationDto);
@@ -118,7 +119,7 @@ export class NotificationsController {
 
   @Post('send')
   @UseGuards(RolesGuard)
-  @Roles('admin')
+  @Roles(UserRole.ADMIN) // Fixed: Changed from 'admin' to UserRole.ADMIN
   @HttpCode(HttpStatus.CREATED)
   async sendToUser(
     @Body() body: { userId: string; notification: Partial<CreateNotificationDto> },
@@ -131,7 +132,7 @@ export class NotificationsController {
 
   @Post('send-bulk')
   @UseGuards(RolesGuard)
-  @Roles('admin')
+  @Roles(UserRole.ADMIN) // Fixed: Changed from 'admin' to UserRole.ADMIN
   @HttpCode(HttpStatus.CREATED)
   async sendToUsers(
     @Body() body: { userIds: string[]; notification: Partial<CreateNotificationDto> },
@@ -144,7 +145,7 @@ export class NotificationsController {
 
   @Post('send-role')
   @UseGuards(RolesGuard)
-  @Roles('admin')
+  @Roles(UserRole.ADMIN) // Fixed: Changed from 'admin' to UserRole.ADMIN
   @HttpCode(HttpStatus.CREATED)
   async sendToRole(
     @Body() body: { role: string; notification: Partial<CreateNotificationDto> },
@@ -162,7 +163,7 @@ export class NotificationsController {
 
   @Post('templates')
   @UseGuards(RolesGuard)
-  @Roles('admin')
+  @Roles(UserRole.ADMIN) // Fixed: Changed from 'admin' to UserRole.ADMIN
   @HttpCode(HttpStatus.CREATED)
   async createTemplate(@Body() createTemplateDto: CreateNotificationTemplateDto) {
     return await this.notificationsService.createTemplate(createTemplateDto);
@@ -170,7 +171,7 @@ export class NotificationsController {
 
   @Put('templates/:id')
   @UseGuards(RolesGuard)
-  @Roles('admin')
+  @Roles(UserRole.ADMIN) // Fixed: Changed from 'admin' to UserRole.ADMIN
   async updateTemplate(
     @Param('id') id: string,
     @Body() updateTemplateDto: UpdateNotificationTemplateDto,
@@ -180,7 +181,7 @@ export class NotificationsController {
 
   @Delete('templates/:id')
   @UseGuards(RolesGuard)
-  @Roles('admin')
+  @Roles(UserRole.ADMIN) // Fixed: Changed from 'admin' to UserRole.ADMIN
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteTemplate(@Param('id') id: string) {
     await this.notificationsService.deleteTemplate(id);
@@ -199,7 +200,7 @@ export class NotificationsController {
 
   @Get('analytics')
   @UseGuards(RolesGuard)
-  @Roles('admin')
+  @Roles(UserRole.ADMIN) // Fixed: Changed from 'admin' to UserRole.ADMIN
   async getAnalytics(
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string,
@@ -211,7 +212,7 @@ export class NotificationsController {
 
   @Post('cleanup')
   @UseGuards(RolesGuard)
-  @Roles('admin')
+  @Roles(UserRole.ADMIN) // Fixed: Changed from 'admin' to UserRole.ADMIN
   @HttpCode(HttpStatus.NO_CONTENT)
   async cleanupExpired() {
     await this.notificationsService.cleanupExpiredNotifications();

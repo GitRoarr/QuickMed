@@ -19,7 +19,7 @@ import { CreateUserDto } from '../users/dto/create-user.dto';
 import { UpdateUserDto } from '../users/dto/update-user.dto';
 import { CreateAppointmentDto } from '../appointments/dto/create-appointment.dto';
 import { UpdateAppointmentDto } from '../appointments/dto/update-appointment.dto';
-import { UserRole } from '../../src/common/index';
+import { UserRole } from '../common/index';
 
 @Controller('admin')
 @UseGuards(JwtAuthGuard, RolesGuard)

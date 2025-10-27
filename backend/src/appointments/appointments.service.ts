@@ -1,11 +1,12 @@
 import { Injectable, NotFoundException, BadRequestException, ForbiddenException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
-import { Appointment, AppointmentStatus } from "./entities/appointment.entity";
+import { Appointment} from "./entities/appointment.entity";
+import {AppointmentStatus,UserRole} from '../common/index'
 import { CreateAppointmentDto } from "./dto/create-appointment.dto";
 import { UpdateAppointmentDto } from "./dto/update-appointment.dto";
 import { UsersService } from "../users/users.service";
-import { User, UserRole } from "../users/entities/user.entity";
+import { User} from "../users/entities/user.entity";
 
 @Injectable()
 export class AppointmentsService {

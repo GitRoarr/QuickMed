@@ -5,7 +5,9 @@ import  { UpdateAppointmentDto } from "./dto/update-appointment.dto"
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard"
 import { RolesGuard } from "../auth/guards/roles.guard"
 import { CurrentUser } from "../auth/decorators/current-user.decorator"
-import { User, UserRole } from "../users/entities/user.entity"
+import { User} from "../users/entities/user.entity"
+import { UserRole } from "../common/index"
+
 
 @Controller("appointments")
 @UseGuards(JwtAuthGuard)

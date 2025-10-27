@@ -1,92 +1,80 @@
-import { Entity, Column, OneToMany } from "typeorm"
-import { BaseEntity } from "../../common/entities/base.entity"
-import { Appointment } from "../../appointments/entities/appointment.entity"
+import { Entity, Column, OneToMany } from 'typeorm';
+import { BaseEntity } from '../../common/entities/base.entity';
+import { Appointment } from '../../appointments/entities/appointment.entity';
+import { UserRole } from "../../common/index";
 
-export enum UserRole {
-  PATIENT = "patient",
-  DOCTOR = "doctor",
-  ADMIN = "admin",
-}
-
-@Entity("users")
+@Entity('users')
 export class User extends BaseEntity {
   @Column()
-  firstName: string
+  firstName: string;
 
   @Column()
-  lastName: string
+  lastName: string;
 
   @Column({ unique: true })
-  email: string
+  email: string;
 
   @Column()
-  password: string
+  password: string;
 
   @Column({
-    type: "enum",
+    type: 'enum',
     enum: UserRole,
     default: UserRole.PATIENT,
   })
-  role: UserRole
+  role: UserRole;
 
   @Column({ nullable: true })
-  phoneNumber: string
+  phoneNumber: string;
 
-  @Column({ type: "text", nullable: true })
-  medicalHistory: string
-
-  @Column({ nullable: true })
-  patientId: string
-
-  @Column({ type: "date", nullable: true })
-  dateOfBirth: Date
+  @Column({ type: 'text', nullable: true })
+  medicalHistory: string;
 
   @Column({ nullable: true })
-  bloodType: string
+  patientId: string;
 
-  @Column({ type: "simple-array", nullable: true })
-  allergies: string[]
-
-  @Column({ type: "int", default: 0 })
-  activeMedicationsCount: number
-
-  @Column({ type: "int", default: 0 })
-  medicalRecordsCount: number
-
-  @Column({ type: "int", default: 0 })
-  testResultsCount: number
-
-  // Doctor-specific fields
-  @Column({ nullable: true })
-  specialty: string
-
-  @Column({ type: "text", nullable: true })
-  bio: string
+  @Column({ type: 'date', nullable: true })
+  dateOfBirth: Date;
 
   @Column({ nullable: true })
-  licenseNumber: string
+  bloodType: string;
 
-  @Column({ type: "simple-array", nullable: true })
-  availableDays: string[]
+  @Column({ type: 'simple-array', nullable: true })
+  allergies: string[];
+
+  @Column({ type: 'int', default: 0 })
+  activeMedicationsCount: number;
+
+  @Column({ type: 'int', default: 0 })
+  medicalRecordsCount: number;
+
+  @Column({ type: 'int', default: 0 })
+  testResultsCount: number;
 
   @Column({ nullable: true })
-  startTime: string
+  specialty: string;
+
+  @Column({ type: 'text', nullable: true })
+  bio: string;
 
   @Column({ nullable: true })
-  endTime: string
+  licenseNumber: string;
+
+  @Column({ type: 'simple-array', nullable: true })
+  availableDays: string[];
 
   @Column({ nullable: true })
-  department: string
+  startTime: string;
 
-  @OneToMany(
-    () => Appointment,
-    (appointment) => appointment.patient,
-  )
-  patientAppointments: Appointment[]
+  @Column({ nullable: true })
+  endTime: string;
 
-  @OneToMany(
-    () => Appointment,
-    (appointment) => appointment.doctor,
-  )
-  doctorAppointments: Appointment[]
+  @Column({ nullable: true })
+  department: string;
+
+  @OneToMany(() => Appointment, (appointment) => appointment.patient)
+  patientAppointments: Appointment[];
+
+  @OneToMany(() => Appointment, (appointment) => appointment.doctor)
+  doctorAppointments: Appointment[];
 }

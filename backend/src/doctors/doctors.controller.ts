@@ -5,7 +5,7 @@ import { UpdateDoctorDto } from "./dto/update-doctor.dto"
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard"
 import { RolesGuard } from "../auth/guards/roles.guard"
 import { Roles } from "../auth/decorators/roles.decorator"
-import { UserRole } from "../users/entities/user.entity"
+import { UserRole } from "@/common"
 
 @Controller("doctors")
 export class DoctorsController {

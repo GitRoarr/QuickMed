@@ -1,5 +1,5 @@
 import { IsString, IsOptional, IsDateString, IsEnum } from "class-validator"
-import { AppointmentStatus } from "../entities/appointment.entity"
+import { AppointmentStatus } from "../../common/index"
 
 export class UpdateAppointmentDto {
   @IsDateString()

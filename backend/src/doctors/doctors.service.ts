@@ -1,10 +1,11 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { Repository } from "typeorm";
-import { User, UserRole } from "../users/entities/user.entity";
+import { User} from "../users/entities/user.entity";
 import { CreateDoctorDto } from "./dto/create-doctor.dto";
 import { UpdateDoctorDto } from "./dto/update-doctor.dto";
 import * as bcrypt from "bcrypt";
 import { InjectRepository } from "@nestjs/typeorm";
+import { UserRole } from "@/common";
 
 @Injectable()
 export class DoctorsService {
