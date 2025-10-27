@@ -2,21 +2,22 @@ import { Injectable } from '@nestjs/common';
 import { NotificationsService } from './notifications.service';
 import { Appointment } from '../appointments/entities/appointment.entity';
 import { User } from '../users/entities/user.entity';
+import { NotificationType, NotificationPriority, UserRole } from '../common/index';
+import { Notification } from './entities/notification.entity';
 
 @Injectable()
 export class NotificationIntegrationService {
   constructor(private readonly notificationsService: NotificationsService) {}
 
-  // Appointment-related notifications
   async createAppointmentNotification(
     appointment: Appointment,
     type: 'created' | 'confirmed' | 'cancelled' | 'rescheduled' | 'reminder',
     patient?: User,
     doctor?: User,
   ): Promise<void> {
-    const notificationData = {
-      type: 'appointment',
-      priority: 'medium',
+    const notificationData: Partial<Notification> = {
+      type: NotificationType.APPOINTMENT,
+      priority: NotificationPriority.MEDIUM,
       relatedEntityId: appointment.id,
       relatedEntityType: 'appointment',
       metadata: {
@@ -32,59 +33,52 @@ export class NotificationIntegrationService {
       case 'created':
         notificationData.title = 'New Appointment Created';
         notificationData.message = `A new appointment has been created for ${appointment.appointmentDate} at ${appointment.appointmentTime}`;
-        notificationData.priority = 'medium';
+        notificationData.priority = NotificationPriority.MEDIUM;
         break;
       case 'confirmed':
         notificationData.title = 'Appointment Confirmed';
         notificationData.message = `Your appointment with Dr. ${doctor?.firstName} ${doctor?.lastName} has been confirmed for ${appointment.appointmentDate} at ${appointment.appointmentTime}`;
-        notificationData.priority = 'medium';
+        notificationData.priority = NotificationPriority.MEDIUM;
         break;
       case 'cancelled':
         notificationData.title = 'Appointment Cancelled';
         notificationData.message = `Your appointment scheduled for ${appointment.appointmentDate} at ${appointment.appointmentTime} has been cancelled`;
-        notificationData.priority = 'high';
+        notificationData.priority = NotificationPriority.HIGH;
         break;
       case 'rescheduled':
         notificationData.title = 'Appointment Rescheduled';
         notificationData.message = `Your appointment has been rescheduled to ${appointment.appointmentDate} at ${appointment.appointmentTime}`;
-        notificationData.priority = 'medium';
+        notificationData.priority = NotificationPriority.MEDIUM;
         break;
       case 'reminder':
         notificationData.title = 'Appointment Reminder';
         notificationData.message = `You have an appointment with Dr. ${doctor?.firstName} ${doctor?.lastName} tomorrow at ${appointment.appointmentTime}`;
-        notificationData.priority = 'high';
+        notificationData.priority = NotificationPriority.HIGH;
         break;
     }
 
-    // Send to patient
     if (patient) {
-      await this.notificationsService.sendToUser(patient.id, {
-        ...notificationData,
-        userId: patient.id,
-      });
+      await this.notificationsService.sendToUser(patient.id, notificationData as Notification);
     }
 
-    // Send to doctor
     if (doctor) {
       await this.notificationsService.sendToUser(doctor.id, {
         ...notificationData,
-        userId: doctor.id,
         title: `Patient Appointment - ${notificationData.title}`,
         message: `Patient ${patient?.firstName} ${patient?.lastName} - ${notificationData.message}`,
-      });
+      } as Notification);
     }
   }
 
-  // Prescription-related notifications
   async createPrescriptionNotification(
     prescriptionId: string,
     patientId: string,
     type: 'ready' | 'refill' | 'expired',
     medicationName?: string,
   ): Promise<void> {
-    const notificationData = {
-      type: 'prescription',
-      priority: 'medium',
+    const notificationData: Partial<Notification> = {
+      type: NotificationType.PRESCRIPTION,
+      priority: NotificationPriority.MEDIUM,
       relatedEntityId: prescriptionId,
       relatedEntityType: 'prescription',
       metadata: {
@@ -97,36 +91,32 @@ export class NotificationIntegrationService {
       case 'ready':
         notificationData.title = 'Prescription Ready';
         notificationData.message = `Your prescription for ${medicationName || 'medication'} is ready for pickup`;
-        notificationData.priority = 'medium';
+        notificationData.priority = NotificationPriority.MEDIUM;
         break;
       case 'refill':
         notificationData.title = 'Prescription Refill Needed';
         notificationData.message = `Your prescription for ${medicationName || 'medication'} needs to be refilled`;
-        notificationData.priority = 'high';
+        notificationData.priority = NotificationPriority.HIGH;
         break;
       case 'expired':
         notificationData.title = 'Prescription Expired';
         notificationData.message = `Your prescription for ${medicationName || 'medication'} has expired`;
-        notificationData.priority = 'high';
+        notificationData.priority = NotificationPriority.HIGH;
         break;
     }
 
-    await this.notificationsService.sendToUser(patientId, {
-      ...notificationData,
-      userId: patientId,
-    });
+    await this.notificationsService.sendToUser(patientId, notificationData as Notification);
   }
 
-  // Test result notifications
   async createTestResultNotification(
     testResultId: string,
     patientId: string,
     type: 'available' | 'abnormal' | 'normal',
     testName?: string,
   ): Promise<void> {
-    const notificationData = {
-      type: 'test_result',
-      priority: 'high',
+    const notificationData: Partial<Notification> = {
+      type: NotificationType.TEST_RESULT,
+      priority: NotificationPriority.HIGH,
       relatedEntityId: testResultId,
       relatedEntityType: 'test_result',
       metadata: {
@@ -139,27 +129,23 @@ export class NotificationIntegrationService {
       case 'available':
         notificationData.title = 'Test Results Available';
         notificationData.message = `Your ${testName || 'test'} results are now available`;
-        notificationData.priority = 'high';
+        notificationData.priority = NotificationPriority.HIGH;
         break;
       case 'abnormal':
         notificationData.title = 'Abnormal Test Results';
         notificationData.message = `Your ${testName || 'test'} results require immediate attention. Please contact your doctor.`;
-        notificationData.priority = 'urgent';
+        notificationData.priority = NotificationPriority.URGENT;
         break;
       case 'normal':
         notificationData.title = 'Test Results Normal';
         notificationData.message = `Your ${testName || 'test'} results are within normal range`;
-        notificationData.priority = 'medium';
+        notificationData.priority = NotificationPriority.MEDIUM;
         break;
     }
 
-    await this.notificationsService.sendToUser(patientId, {
-      ...notificationData,
-      userId: patientId,
-    });
+    await this.notificationsService.sendToUser(patientId, notificationData as Notification);
   }
 
-  // System notifications
   async createSystemNotification(
     userId: string,
     title: string,
@@ -167,15 +153,14 @@ export class NotificationIntegrationService {
     priority: 'low' | 'medium' | 'high' | 'urgent' = 'medium',
   ): Promise<void> {
     await this.notificationsService.sendToUser(userId, {
-      type: 'system',
-      priority,
+      type: NotificationType.SYSTEM,
+      priority: priority as NotificationPriority,
       title,
       message,
       userId,
-    });
+    } as Notification);
   }
 
-  // Bulk system notifications
   async createBulkSystemNotification(
     userIds: string[],
     title: string,
@@ -183,45 +168,43 @@ export class NotificationIntegrationService {
     priority: 'low' | 'medium' | 'high' | 'urgent' = 'medium',
   ): Promise<void> {
     await this.notificationsService.sendToUsers(userIds, {
-      type: 'system',
-      priority,
+      type: NotificationType.SYSTEM,
+      priority: priority as NotificationPriority,
       title,
       message,
-    });
+    } as Notification);
   }
 
-  // Role-based notifications
   async createRoleBasedNotification(
-    role: string,
+    role: UserRole,
     title: string,
     message: string,
     priority: 'low' | 'medium' | 'high' | 'urgent' = 'medium',
   ): Promise<void> {
     await this.notificationsService.sendToRole(role, {
-      type: 'system',
-      priority,
+      type: NotificationType.SYSTEM,
+      priority: priority as NotificationPriority,
       title,
       message,
-    });
+    } as Notification);
   }
 
-  // Appointment reminder service
   async sendAppointmentReminders(): Promise<void> {
-    // This would typically be called by a cron job
-    // Implementation would query for appointments tomorrow and send reminders
-    console.log('Sending appointment reminders...');
+    const tomorrow = new Date('2025-10-28T00:11:00Z'); // 12:11 AM EAT, October 28, 2025
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setHours(0, 0, 0, 0);
+
+    const appointments = await this.notificationsService.getTomorrowAppointments(tomorrow);
+    for (const appointment of appointments) {
+      await this.createAppointmentNotification(appointment, 'reminder', appointment.patient, appointment.doctor);
+    }
   }
 
-  // Cleanup expired notifications
   async cleanupExpiredNotifications(): Promise<void> {
     await this.notificationsService.cleanupExpiredNotifications();
   }
 
-  // Get notification analytics
   async getNotificationAnalytics(startDate?: Date, endDate?: Date): Promise<any> {
     return await this.notificationsService.getAnalytics(startDate, endDate);
   }
 }
-
-
-

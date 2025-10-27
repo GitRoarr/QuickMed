@@ -1,14 +1,9 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, Index } from 'typeorm';
+import { Entity, Column, CreateDateColumn } from 'typeorm';
+import { BaseEntity } from '../../common/entities/base.entity';
+import { NotificationPriority, NotificationType } from '@/common';
 
 @Entity('notifications')
-@Index(['userId', 'read'])
-@Index(['userId', 'type'])
-@Index(['userId', 'priority'])
-@Index(['createdAt'])
-export class Notification {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
-
+export class Notification extends BaseEntity {
   @Column()
   title: string;
 
@@ -17,20 +12,17 @@ export class Notification {
 
   @Column({
     type: 'enum',
-    enum: ['info', 'success', 'warning', 'error', 'appointment', 'prescription', 'test_result', 'system'],
-    default: 'info',
+    enum: NotificationType,
+    default: NotificationType.INFO,
   })
-  type: string;
+  type: NotificationType;
 
   @Column({
     type: 'enum',
-    enum: ['low', 'medium', 'high', 'urgent'],
-    default: 'medium',
+    enum: NotificationPriority,
+    default: NotificationPriority.MEDIUM,
   })
-  priority: string;
-
-  @Column({ default: false })
-  read: boolean;
+  priority: NotificationPriority;
 
   @Column()
   userId: string;
@@ -38,11 +30,7 @@ export class Notification {
   @Column({ nullable: true })
   relatedEntityId?: string;
 
-  @Column({
-    type: 'enum',
-    enum: ['appointment', 'prescription', 'test_result', 'user', 'system'],
-    nullable: true,
-  })
+  @Column({ nullable: true })
   relatedEntityType?: string;
 
   @Column({ nullable: true })
@@ -51,16 +39,12 @@ export class Notification {
   @Column({ nullable: true })
   actionText?: string;
 
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ type: 'timestamptz', nullable: true })
   expiresAt?: Date;
 
   @Column('jsonb', { nullable: true })
   metadata?: Record<string, any>;
 
-  @CreateDateColumn()
-  createdAt: Date;
-
-  @UpdateDateColumn()
-  updatedAt: Date;
+  @Column({ default: false })
+  read: boolean;
 }
-

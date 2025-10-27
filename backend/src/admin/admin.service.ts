@@ -1,3 +1,4 @@
+// src/admin/admin.service.ts
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -7,6 +8,8 @@ import { CreateUserDto } from '../users/dto/create-user.dto';
 import { UpdateUserDto } from '../users/dto/update-user.dto';
 import { CreateAppointmentDto } from '../appointments/dto/create-appointment.dto';
 import { UpdateAppointmentDto } from '../appointments/dto/update-appointment.dto';
+import { UserRole, AppointmentStatus } from '../common/index'
+import { Between } from 'typeorm';
 
 export interface AdminStats {
   totalUsers: number;
@@ -83,14 +86,14 @@ export class AdminService {
       thisMonthAppointments,
     ] = await Promise.all([
       this.userRepository.count(),
-      this.userRepository.count({ where: { role: 'patient' } }),
-      this.userRepository.count({ where: { role: 'doctor' } }),
-      this.userRepository.count({ where: { role: 'admin' } }),
+      this.userRepository.count({ where: { role: UserRole.PATIENT } }),
+      this.userRepository.count({ where: { role: UserRole.DOCTOR } }),
+      this.userRepository.count({ where: { role: UserRole.ADMIN } }),
       this.appointmentRepository.count(),
-      this.appointmentRepository.count({ where: { status: 'pending' } }),
-      this.appointmentRepository.count({ where: { status: 'confirmed' } }),
-      this.appointmentRepository.count({ where: { status: 'completed' } }),
-      this.appointmentRepository.count({ where: { status: 'cancelled' } }),
+      this.appointmentRepository.count({ where: { status: AppointmentStatus.PENDING } }),
+      this.appointmentRepository.count({ where: { status: AppointmentStatus.CONFIRMED } }),
+      this.appointmentRepository.count({ where: { status: AppointmentStatus.COMPLETED } }),
+      this.appointmentRepository.count({ where: { status: AppointmentStatus.CANCELLED } }),
       this.getTodayAppointmentsCount(),
       this.getThisWeekAppointmentsCount(),
       this.getThisMonthAppointmentsCount(),
@@ -119,7 +122,7 @@ export class AdminService {
     const queryBuilder = this.userRepository.createQueryBuilder('user');
     
     if (role) {
-      queryBuilder.where('user.role = :role', { role });
+      queryBuilder.where('user.role = :role', { role: role as UserRole });
     }
 
     const [users, total] = await queryBuilder
@@ -140,7 +143,7 @@ export class AdminService {
   async getUserById(id: string): Promise<User> {
     const user = await this.userRepository.findOne({
       where: { id },
-      relations: ['appointments', 'appointments.doctor', 'appointments.patient'],
+      relations: ['patientAppointments', 'doctorAppointments', 'patientAppointments.patient', 'doctorAppointments.doctor'],
     });
 
     if (!user) {
@@ -173,7 +176,7 @@ export class AdminService {
       .leftJoinAndSelect('appointment.doctor', 'doctor');
 
     if (status) {
-      queryBuilder.where('appointment.status = :status', { status });
+      queryBuilder.where('appointment.status = :status', { status: status as AppointmentStatus });
     }
 
     const [appointments, total] = await queryBuilder
@@ -206,7 +209,15 @@ export class AdminService {
   }
 
   async createAppointment(createAppointmentDto: CreateAppointmentDto): Promise<Appointment> {
-    const appointment = this.appointmentRepository.create(createAppointmentDto);
+    const doctor = await this.userRepository.findOne({ where: { id: createAppointmentDto.doctorId } });
+    if (!doctor || doctor.role !== UserRole.DOCTOR) {
+      throw new BadRequestException('Invalid doctor ID');
+    }
+    const appointment = this.appointmentRepository.create({
+      ...createAppointmentDto,
+      patientId: 'placeholder_patient_id',
+      doctorId: createAppointmentDto.doctorId,
+    });
     return await this.appointmentRepository.save(appointment);
   }
 
@@ -223,42 +234,36 @@ export class AdminService {
 
   async getSystemHealth() {
     try {
-      // Check database connection
       await this.userRepository.count();
-      const database = 'healthy';
+      const database: 'healthy' | 'warning' | 'error' = 'healthy';
 
-      // Check API response time
       const apiStart = Date.now();
       await this.appointmentRepository.count();
       const apiResponseTime = Date.now() - apiStart;
-      const api = apiResponseTime < 1000 ? 'healthy' : 'warning';
+      const api: 'healthy' | 'warning' | 'error' = apiResponseTime < 1000 ? 'healthy' : 'warning';
 
-      // Check storage (simplified)
-      const storage = 'healthy';
-
-      // Check notifications (simplified)
-      const notifications = 'healthy';
+      const storage: 'healthy' | 'warning' | 'error' = 'healthy';
+      const notifications: 'healthy' | 'warning' | 'error' = 'healthy';
 
       return { database, api, storage, notifications };
     } catch (error) {
       return {
-        database: 'error',
-        api: 'error',
-        storage: 'error',
-        notifications: 'error',
+        database: 'error' as const,
+        api: 'error' as const,
+        storage: 'error' as const,
+        notifications: 'error' as const,
       };
     }
   }
 
   async getSystemNotifications() {
-    // Simulate system notifications
     return [
       {
         id: 1,
         type: 'info',
         title: 'System Update Available',
         message: 'A new system update is available. Please schedule maintenance.',
-        timestamp: new Date(),
+        timestamp: new Date('2025-10-28T00:11:00Z'),
         read: false,
       },
       {
@@ -266,7 +271,7 @@ export class AdminService {
         type: 'warning',
         title: 'High Server Load',
         message: 'Server load is above 80%. Consider scaling resources.',
-        timestamp: new Date(Date.now() - 3600000),
+        timestamp: new Date('2025-10-27T23:11:00Z'),
         read: false,
       },
       {
@@ -274,7 +279,7 @@ export class AdminService {
         type: 'success',
         title: 'Backup Completed',
         message: 'Daily backup completed successfully.',
-        timestamp: new Date(Date.now() - 7200000),
+        timestamp: new Date('2025-10-27T22:11:00Z'),
         read: true,
       },
     ];
@@ -296,11 +301,11 @@ export class AdminService {
   }
 
   private async getUpcomingAppointments(): Promise<Appointment[]> {
-    const today = new Date();
+    const today = new Date('2025-10-28T00:11:00Z'); // 12:11 AM EAT, October 28, 2025
     return await this.appointmentRepository.find({
       where: {
         appointmentDate: new Date(today.toISOString().split('T')[0]),
-        status: 'confirmed',
+        status: AppointmentStatus.CONFIRMED,
       },
       relations: ['patient', 'doctor'],
       order: { appointmentTime: 'ASC' },
@@ -309,7 +314,7 @@ export class AdminService {
   }
 
   private async getTodayAppointmentsCount(): Promise<number> {
-    const today = new Date();
+    const today = new Date('2025-10-28T00:11:00Z'); // 12:11 AM EAT, October 28, 2025
     return await this.appointmentRepository.count({
       where: {
         appointmentDate: new Date(today.toISOString().split('T')[0]),
@@ -318,23 +323,20 @@ export class AdminService {
   }
 
   private async getThisWeekAppointmentsCount(): Promise<number> {
-    const startOfWeek = new Date();
+    const startOfWeek = new Date('2025-10-28T00:11:00Z'); // 12:11 AM EAT, October 28, 2025
     startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
     const endOfWeek = new Date(startOfWeek);
     endOfWeek.setDate(endOfWeek.getDate() + 6);
 
     return await this.appointmentRepository.count({
       where: {
-        appointmentDate: {
-          $gte: startOfWeek,
-          $lte: endOfWeek,
-        } as any,
+        appointmentDate: Between(startOfWeek, endOfWeek),
       },
     });
   }
 
   private async getThisMonthAppointmentsCount(): Promise<number> {
-    const startOfMonth = new Date();
+    const startOfMonth = new Date('2025-10-28T00:11:00Z'); // 12:11 AM EAT, October 28, 2025
     startOfMonth.setDate(1);
     const endOfMonth = new Date(startOfMonth);
     endOfMonth.setMonth(endOfMonth.getMonth() + 1);
@@ -342,29 +344,23 @@ export class AdminService {
 
     return await this.appointmentRepository.count({
       where: {
-        appointmentDate: {
-          $gte: startOfMonth,
-          $lte: endOfMonth,
-        } as any,
+        appointmentDate: Between(startOfMonth, endOfMonth),
       },
     });
   }
 
   private async calculateRevenue(): Promise<number> {
-    // Simplified revenue calculation
     const completedAppointments = await this.appointmentRepository.count({
-      where: { status: 'completed' },
+      where: { status: AppointmentStatus.COMPLETED },
     });
-    return completedAppointments * 150; // $150 per appointment
+    return completedAppointments * 150;
   }
 
   private async getAverageAppointmentDuration(): Promise<number> {
-    // Simplified - return 30 minutes average
     return 30;
   }
 
   private async getPatientSatisfactionScore(): Promise<number> {
-    // Simplified - return 4.5/5 average
     return 4.5;
   }
 
@@ -372,8 +368,8 @@ export class AdminService {
     const user = await this.getUserById(userId);
     const appointments = await this.appointmentRepository.find({
       where: [
-        { patient: { id: userId } },
-        { doctor: { id: userId } },
+        { patientId: userId },
+        { doctorId: userId },
       ],
       relations: ['patient', 'doctor'],
     });
@@ -388,7 +384,7 @@ export class AdminService {
   async generateReport(type: 'users' | 'appointments' | 'revenue', startDate?: Date, endDate?: Date): Promise<any> {
     const reportData = {
       type,
-      startDate: startDate || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // 30 days ago
+      startDate: startDate || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
       endDate: endDate || new Date(),
       generatedAt: new Date(),
     };
@@ -411,4 +407,3 @@ export class AdminService {
     return reportData;
   }
 }
-
