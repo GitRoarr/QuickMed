@@ -225,7 +225,6 @@ export class AdminService {
     return this.http.get(`${this.apiUrl}/analytics/revenue`, { params });
   }
 
-  // System Management
   getSystemLogs(page: number = 1, limit: number = 50, level?: string): Observable<PaginatedResponse<any>> {
     let params = new HttpParams()
       .set('page', page.toString())
