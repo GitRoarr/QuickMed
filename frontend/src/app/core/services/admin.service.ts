@@ -95,7 +95,6 @@ export class AdminService {
 
   constructor(private http: HttpClient) {}
 
-  // Dashboard Data
   getDashboardData(): Observable<AdminDashboardData> {
     return this.http.get<AdminDashboardData>(`${this.apiUrl}/dashboard`);
   }
@@ -112,7 +111,6 @@ export class AdminService {
     return this.http.get<Notification[]>(`${this.apiUrl}/notifications`);
   }
 
-  // User Management
   getAllUsers(page: number = 1, limit: number = 10, role?: string): Observable<PaginatedResponse<User>> {
     let params = new HttpParams()
       .set('page', page.toString())

@@ -1,9 +1,9 @@
-<div class="sidebar" [class.collapsed]="isCollapsed">
-  <!-- Sidebar Header -->
+<div class="sidebar" [class.collapsed]="isCollapsed()" [class.mobile-open]="isMobileOpen()">
+  <!-- Header -->
   <div class="sidebar-header">
     <div class="logo-section">
       <div class="logo-container">
-        <div class="logo-icon">
+        <div class="logo-icon" [@pulse]="isCollapsed() ? 'collapsed' : 'expanded'">
           <svg width="28" height="28" viewBox="0 0 40 40" fill="none">
             <rect width="40" height="40" rx="8" fill="url(#gradient)"/>
             <path d="M20 10L28 16V24L20 30L12 24V16L20 10Z" fill="white"/>
@@ -15,56 +15,65 @@
             </defs>
           </svg>
         </div>
-        <div class="brand-info" *ngIf="!isCollapsed">
+        <div class="brand-info" *ngIf="!isCollapsed()" [@fadeSlide]="!isCollapsed()">
           <h3 class="brand-name">QuickMed</h3>
           <p class="brand-subtitle">{{ title }}</p>
         </div>
       </div>
-      <button class="collapse-btn" (click)="toggleCollapse()">
-        <i class="bi" [class.bi-chevron-left]="!isCollapsed" [class.bi-chevron-right]="isCollapsed"></i>
+      <button class="collapse-btn" (click)="toggleCollapse()" [@rotate]="isCollapsed()">
+        <i class="bi" [class.bi-chevron-left]="!isCollapsed()" [class.bi-chevron-right]="isCollapsed()"></i>
       </button>
     </div>
   </div>
 
-  <!-- User Profile Section -->
-  <div class="user-section" *ngIf="currentUser()">
-    <div class="user-avatar">
+  <!-- User Section -->
+  <div class="user-section" *ngIf="currentUser()" [@fadeSlide]="!isCollapsed()">
+    <div class="user-avatar" [@bounceIn]="!isCollapsed()">
       <div class="avatar-circle">
         {{ getInitials(currentUser()?.firstName, currentUser()?.lastName) }}
       </div>
       <div class="status-indicator online"></div>
     </div>
-    <div class="user-info" *ngIf="!isCollapsed">
+    <div class="user-info" *ngIf="!isCollapsed()">
       <h4 class="user-name">{{ currentUser()?.firstName }} {{ currentUser()?.lastName }}</h4>
       <p class="user-role">{{ getUserRole() }}</p>
     </div>
   </div>
 
-  <!-- Navigation Menu -->
+  <!-- Navigation -->
   <nav class="sidebar-nav">
     <ul class="nav-list">
-      <li class="nav-item" *ngFor="let item of menuItems; let i = index">
+      <li 
+        class="nav-item" 
+        *ngFor="let item of menuItems; let i = index" 
+        [@stagger]="i"
+      >
         <a 
           [routerLink]="item.route" 
           routerLinkActive="active" 
           class="nav-link"
           [class.has-submenu]="item.submenu"
           (click)="toggleSubmenu(i)"
+          [@fadeInUp]
         >
           <div class="nav-icon">
             <i class="bi {{ item.icon }}"></i>
           </div>
-          <span class="nav-label" *ngIf="!isCollapsed">{{ item.label }}</span>
+          <span class="nav-label" *ngIf="!isCollapsed()">{{ item.label }}</span>
           <i 
             class="bi bi-chevron-down submenu-arrow" 
-            *ngIf="item.submenu && !isCollapsed"
-            [class.rotated]="item.expanded"
+            *ngIf="item.submenu && !isCollapsed()"
+            [@rotate180]="item.expanded"
           ></i>
         </a>
-        
-        <!-- Submenu -->
-        <ul class="submenu" *ngIf="item.submenu && item.expanded && !isCollapsed">
-          <li class="submenu-item" *ngFor="let subItem of item.submenu">
+
+        <!-- Submenu with slide animation -->
+        <ul 
+          class="submenu" 
+          *ngIf="item.submenu && item.expanded && !isCollapsed()"
+          [@slideDown]
+        >
+          <li class="submenu-item" *ngFor="let subItem of item.submenu" [@fadeInUp]>
             <a [routerLink]="subItem.route" class="submenu-link">
               <i class="bi {{ subItem.icon }}"></i>
               {{ subItem.label }}
@@ -76,40 +85,52 @@
   </nav>
 
   <!-- Quick Actions -->
-  <div class="quick-actions" *ngIf="!isCollapsed">
+  <div class="quick-actions" *ngIf="!isCollapsed()" [@fadeSlide]>
     <h6 class="section-title">Quick Actions</h6>
     <div class="action-buttons">
-      <button class="action-btn" (click)="quickAction('new-appointment')">
+      <button class="action-btn" (click)="quickAction('new-appointment')" [@pulseBtn]>
         <i class="bi bi-plus-circle"></i>
         <span>New Appointment</span>
       </button>
-      <button class="action-btn" (click)="quickAction('search')">
+      <button class="action-btn" (click)="quickAction('search')" [@pulseBtn]>
         <i class="bi bi-search"></i>
         <span>Search</span>
       </button>
     </div>
   </div>
 
-  <!-- Sidebar Footer -->
+  <!-- Footer -->
   <div class="sidebar-footer">
     <div class="footer-actions">
-      <button class="footer-btn" (click)="toggleTheme()" title="Toggle Theme">
-        <i class="bi" [class.bi-sun]="!isDarkMode" [class.bi-moon]="isDarkMode"></i>
-        <span *ngIf="!isCollapsed">Theme</span>
+      <button class="footer-btn" (click)="toggleTheme()" title="Toggle Theme" [@pulseBtn]>
+        <i class="bi" [class.bi-sun]="!isDarkMode()" [class.bi-moon]="isDarkMode()"></i>
+        <span *ngIf="!isCollapsed()">Theme</span>
       </button>
-      <button class="footer-btn" (click)="openSettings()" title="Settings">
+      <button class="footer-btn" (click)="openSettings()" title="Settings" [@pulseBtn]>
         <i class="bi bi-gear"></i>
-        <span *ngIf="!isCollapsed">Settings</span>
+        <span *ngIf="!isCollapsed()">Settings</span>
       </button>
-      <button class="footer-btn logout-btn" (click)="logout()" title="Logout">
+      <button class="footer-btn logout-btn" (click)="logout()" title="Logout" [@pulseBtn]>
         <i class="bi bi-box-arrow-right"></i>
-        <span *ngIf="!isCollapsed">Logout</span>
+        <span *ngIf="!isCollapsed()">Logout</span>
       </button>
     </div>
   </div>
 
-  <!-- Floating Action Button for Mobile -->
-  <button class="fab" (click)="toggleCollapse()" *ngIf="isCollapsed">
-    <i class="bi bi-list"></i>
-  </button>
+  <!-- FAB for Mobile -->
+ <button 
+  class="fab" 
+  (click)="toggleMobile()" 
+  *ngIf="isMobile() && isCollapsed()"
+  [@fabIn]
+>
+  <i class="bi bi-list"></i>
+</button>
 </div>
+
+<div 
+  class="mobile-overlay" 
+  *ngIf="isMobileOpen()" 
+  (click)="closeMobile()"
+  [@fade]
+></div>
