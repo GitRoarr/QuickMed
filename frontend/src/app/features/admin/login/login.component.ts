@@ -15,12 +15,13 @@ export class AdminLoginComponent {
   loginForm: FormGroup;
   errorMessage = "";
   isLoading = false;
-  showLoginForm = false; 
+  showLoginForm = false;
+  showPassword = false;
 
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
-    private router: Router,
+    private router: Router
   ) {
     this.loginForm = this.fb.group({
       email: ["", [Validators.required, Validators.email]],
@@ -28,36 +29,40 @@ export class AdminLoginComponent {
     });
   }
 
-@HostListener("window:keydown", ["$event"])
-handleKeyboardEvent(event: KeyboardEvent) {
-  if (event.ctrlKey && event.shiftKey && event.code === "KeyA") {
-    event.preventDefault();
-    this.showLoginForm = !this.showLoginForm;
+  /** Keyboard shortcut handler */
+  @HostListener("window:keydown", ["$event"])
+  handleKeyboardEvent(event: KeyboardEvent) {
+    if (event.ctrlKey && event.shiftKey && event.code === "KeyA") {
+      event.preventDefault();
+      this.showLoginForm = !this.showLoginForm;
+    }
+
+    if (event.code === "Escape" && this.showLoginForm) {
+      this.showLoginForm = false;
+    }
   }
 
-  if (event.code === "Escape" && this.showLoginForm) {
-    this.showLoginForm = false;
+  /** Toggle password visibility */
+  togglePassword(): void {
+    this.showPassword = !this.showPassword;
   }
-}
 
+  /** Submit admin login form */
+  onSubmit(): void {
+    if (this.loginForm.valid) {
+      this.isLoading = true;
+      this.errorMessage = "";
 
-
-onSubmit(): void {
-  if (this.loginForm.valid) {
-    this.isLoading = true;
-    this.errorMessage = "";
-
-    this.authService.loginAdmin(this.loginForm.value).subscribe({
-      next: (response) => {
-        this.router.navigate(['/admin/dashboard']);
-        this.isLoading = false;
-      },
-      error: (error) => {
-        this.errorMessage = error.error?.message || "Invalid credentials";
-        this.isLoading = false;
-      },
-    });
+      this.authService.loginAdmin(this.loginForm.value).subscribe({
+        next: () => {
+          this.isLoading = false;
+          this.router.navigate(["/admin/dashboard"]);
+        },
+        error: (error) => {
+          this.errorMessage = error.error?.message || "Invalid credentials";
+          this.isLoading = false;
+        },
+      });
+    }
   }
-}
-
 }
