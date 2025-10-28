@@ -30,9 +30,8 @@ export class AdminLoginComponent {
 
 @HostListener("window:keydown", ["$event"])
 handleKeyboardEvent(event: KeyboardEvent) {
-  // Ctrl + Shift + A (safe, rarely reserved)
   if (event.ctrlKey && event.shiftKey && event.code === "KeyA") {
-    event.preventDefault(); // prevents browser default
+    event.preventDefault();
     this.showLoginForm = !this.showLoginForm;
   }
 

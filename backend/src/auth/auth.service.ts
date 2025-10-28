@@ -70,4 +70,25 @@ export class AuthService {
     const payload = { sub: user.id, email: user.email, role: user.role };
     return this.jwtService.sign(payload);
   }
+  
+  async adminLogin(loginDto: { email: string; password: string }) {
+    const adminEmail = process.env.ADMIN_EMAIL;
+    const adminPassword = process.env.ADMIN_PASSWORD;
+
+    if (loginDto.email !== adminEmail) {
+      throw new UnauthorizedException('Invalid email or password');
+    }
+
+    const isMatch = loginDto.password === adminPassword; 
+    if (!isMatch) {
+      throw new UnauthorizedException('Invalid email or password');
+    }
+
+    const payload = { email: adminEmail, role: 'ADMIN' };
+    const token = this.jwtService.sign(payload);
+
+    return { access_token: token };
+  }
+  
+
 }

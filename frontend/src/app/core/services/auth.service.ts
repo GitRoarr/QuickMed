@@ -31,6 +31,13 @@ export class AuthService {
       .post<AuthResponse>(`${this.API_URL}/login`, data)
       .pipe(tap((response) => this.handleAuthSuccess(response)))
   }
+loginAdmin(credentials: { email: string; password: string }): Observable<{ access_token: string }> {
+  return this.http.post<{ access_token: string }>(`${this.API_URL}/admin/login`, credentials).pipe(
+    tap((response) => {
+      localStorage.setItem('admin_token', response.access_token)
+    })
+  )
+}
 
   logout(): void {
     localStorage.removeItem(this.TOKEN_KEY)

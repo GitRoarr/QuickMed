@@ -32,7 +32,6 @@ export class LoginComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    // Listen for keyboard shortcuts
     this.setupKeyboardShortcuts()
   }
 
@@ -44,32 +43,26 @@ export class LoginComponent implements OnInit, OnDestroy {
 
   @HostListener('document:keydown', ['$event'])
   handleKeyboardEvent(event: KeyboardEvent) {
-    // Check for admin sequence
     if (event.key.toLowerCase() === this.adminSequence[this.adminKeySequence.length]) {
       this.adminKeySequence.push(event.key.toLowerCase())
       
-      // Clear timeout if it exists
       if (this.keySequenceTimeout) {
         clearTimeout(this.keySequenceTimeout)
       }
       
-      // Set new timeout
       this.keySequenceTimeout = setTimeout(() => {
         this.adminKeySequence = []
       }, 2000)
       
-      // Check if sequence is complete
       if (this.adminKeySequence.length === this.adminSequence.length) {
         this.showAdminLogin = true
         this.adminKeySequence = []
         this.showAdminLoginNotification()
       }
     } else {
-      // Reset sequence if wrong key
       this.adminKeySequence = []
     }
 
-    // Global shortcuts
     if (event.ctrlKey || event.metaKey) {
       switch (event.key.toLowerCase()) {
         case 'enter':
@@ -89,7 +82,6 @@ export class LoginComponent implements OnInit, OnDestroy {
   }
 
   setupKeyboardShortcuts() {
-    // Add visual indicator for shortcuts
     console.log('Keyboard shortcuts available:')
     console.log('- Type "admin" to access admin login')
     console.log('- Ctrl/Cmd + Enter: Submit form')
@@ -98,7 +90,6 @@ export class LoginComponent implements OnInit, OnDestroy {
   }
 
   showAdminLoginNotification() {
-    // Create a beautiful notification
     const notification = document.createElement('div')
     notification.className = 'admin-login-notification'
     notification.innerHTML = `
@@ -109,7 +100,6 @@ export class LoginComponent implements OnInit, OnDestroy {
     `
     document.body.appendChild(notification)
     
-    // Remove after 3 seconds
     setTimeout(() => {
       notification.remove()
     }, 3000)
@@ -128,7 +118,6 @@ export class LoginComponent implements OnInit, OnDestroy {
         this.isLoading = false
         const user = response.user
 
-        // Redirect based on role
         switch (user.role) {
           case "patient":
             this.router.navigate(["/patient/dashboard"])
