@@ -37,11 +37,12 @@
             class="eye-icon"
             [src]="
               showPassword
-                ? 'https://img.icons8.com/?size=100&id=N3ft0cEVp9ui&format=png&color=000000'
-                : 'https://img.icons8.com/?size=100&id=85035&format=png&color=000000'
+                ? 'https://img.icons8.com/ios-filled/50/000000/invisible.png'
+                : 'https://img.icons8.com/ios-filled/50/000000/visible.png'
             "
             alt="Toggle password visibility"
             (click)="togglePassword()"
+            [class.blink]="isBlinking"
           />
         </div>
       </div>

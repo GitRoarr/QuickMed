@@ -17,6 +17,7 @@ export class AdminLoginComponent {
   isLoading = false;
   showLoginForm = false;
   showPassword = false;
+  isBlinking = false;
 
   constructor(
     private fb: FormBuilder,
@@ -29,7 +30,6 @@ export class AdminLoginComponent {
     });
   }
 
-  /** Keyboard shortcut handler */
   @HostListener("window:keydown", ["$event"])
   handleKeyboardEvent(event: KeyboardEvent) {
     if (event.ctrlKey && event.shiftKey && event.code === "KeyA") {
@@ -42,12 +42,14 @@ export class AdminLoginComponent {
     }
   }
 
-  /** Toggle password visibility */
   togglePassword(): void {
+    this.isBlinking = true;
     this.showPassword = !this.showPassword;
+
+    // stop blink animation after 250ms
+    setTimeout(() => (this.isBlinking = false), 250);
   }
 
-  /** Submit admin login form */
   onSubmit(): void {
     if (this.loginForm.valid) {
       this.isLoading = true;
