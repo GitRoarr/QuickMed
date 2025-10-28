@@ -42,26 +42,22 @@ handleKeyboardEvent(event: KeyboardEvent) {
 
 
 
-  onSubmit(): void {
-    if (this.loginForm.valid) {
-      this.isLoading = true;
-      this.errorMessage = "";
+onSubmit(): void {
+  if (this.loginForm.valid) {
+    this.isLoading = true;
+    this.errorMessage = "";
 
-      this.authService.login(this.loginForm.value).subscribe({
-        next: (response) => {
-          if (response.user.role === "admin") {
-            this.router.navigate(["/admin/dashboard"]);
-          } else {
-            this.errorMessage = "Access denied. Admin credentials required.";
-            this.authService.logout();
-          }
-          this.isLoading = false;
-        },
-        error: (error) => {
-          this.errorMessage = error.error?.message || "Invalid credentials";
-          this.isLoading = false;
-        },
-      });
-    }
+    this.authService.loginAdmin(this.loginForm.value).subscribe({
+      next: (response) => {
+        this.router.navigate(['/admin/dashboard']);
+        this.isLoading = false;
+      },
+      error: (error) => {
+        this.errorMessage = error.error?.message || "Invalid credentials";
+        this.isLoading = false;
+      },
+    });
   }
+}
+
 }
