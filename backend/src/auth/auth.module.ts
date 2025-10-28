@@ -9,7 +9,8 @@ import { JwtStrategy } from "./strategies/jwt.strategy";
 
 @Module({
   imports: [
-    UsersModule, 
+    ConfigModule.forRoot({ isGlobal: true }),
+    UsersModule,
     PassportModule.register({ defaultStrategy: "jwt" }),
     JwtModule.registerAsync({
       imports: [ConfigModule],
@@ -17,7 +18,7 @@ import { JwtStrategy } from "./strategies/jwt.strategy";
       useFactory: (configService: ConfigService) => ({
         secret: configService.get<string>("JWT_SECRET") || "defaultSecret",
         signOptions: {
-          expiresIn: "3600s", 
+          expiresIn: "3600s",
         },
       }),
     }),
@@ -27,3 +28,4 @@ import { JwtStrategy } from "./strategies/jwt.strategy";
   exports: [AuthService, JwtStrategy, PassportModule],
 })
 export class AuthModule {}
+
