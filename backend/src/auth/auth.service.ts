@@ -4,7 +4,8 @@ import * as bcrypt from "bcrypt";
 import { UsersService } from "../users/users.service";
 import { RegisterDto } from "./dto/register.dto";
 import { LoginDto } from "./dto/login.dto";
-import { User } from "../users/entities/user.entity";
+import { User} from "../users/entities/user.entity";
+import { UserRole } from "../../src/common/index";
 
 @Injectable()
 export class AuthService {
@@ -14,7 +15,7 @@ export class AuthService {
   ) {}
 
   async register(registerDto: RegisterDto): Promise<{ user: Partial<User>; token: string }> {
-    const { email, password, firstName, lastName, phoneNumber, } = registerDto;
+    const { email, password, firstName, lastName, phoneNumber } = registerDto;
 
     const existingUser = await this.usersService.findByEmail(email);
     if (existingUser) {
@@ -29,17 +30,28 @@ export class AuthService {
       email,
       password: hashedPassword,
       phoneNumber,
+      role: UserRole.PATIENT,
     });
 
     const token = this.generateToken(user);
-
     const { password: _, ...userWithoutPassword } = user;
-
     return { user: userWithoutPassword, token };
   }
 
   async login(loginDto: LoginDto): Promise<{ user: Partial<User>; token: string }> {
     const { email, password } = loginDto;
+
+    const adminEmail = process.env.ADMIN_EMAIL;
+    const adminPassword = process.env.ADMIN_PASSWORD;
+
+    if (email === adminEmail && password === adminPassword) {
+      const payload = { sub: 'admin', email: adminEmail, role: UserRole.ADMIN };
+      const token = this.jwtService.sign(payload);
+      return {
+        user: { email: adminEmail, role: UserRole.ADMIN },
+        token,
+      };
+    }
 
     const user = await this.usersService.findByEmail(email);
     if (!user) {
@@ -52,9 +64,7 @@ export class AuthService {
     }
 
     const token = this.generateToken(user);
-
     const { password: _, ...userWithoutPassword } = user;
-
     return { user: userWithoutPassword, token };
   }
 
@@ -70,23 +80,4 @@ export class AuthService {
     const payload = { sub: user.id, email: user.email, role: user.role };
     return this.jwtService.sign(payload);
   }
-  
- async adminLogin(loginDto: { email: string; password: string }) {
-  const adminEmail = process.env.ADMIN_EMAIL;
-  const adminPassword = process.env.ADMIN_PASSWORD;
-
-  if (loginDto.email !== adminEmail || loginDto.password !== adminPassword) {
-    throw new UnauthorizedException('Invalid email or password');
-  }
-
-  const payload = { sub: 'admin', email: adminEmail, role: 'admin' };
-  const token = this.jwtService.sign(payload);
-
-  return {
-    user: { email: adminEmail, role: 'admin' },
-    token
-  };
-}
-  
-
 }
