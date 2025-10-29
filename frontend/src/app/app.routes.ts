@@ -1,6 +1,6 @@
-import type { Routes } from "@angular/router"
-import { authGuard } from "./core/guards/auth.guard"
-import { roleGuard } from "./core/guards/role.guard"
+import type { Routes } from "@angular/router";
+import { authGuard } from "./core/guards/auth.guard";
+import { roleGuard } from "./core/guards/role.guard";
 
 export const routes: Routes = [
   {
@@ -55,31 +55,22 @@ export const routes: Routes = [
   },
   {
     path: "admin",
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ["admin"] },
     children: [
       {
-        path: "login",
-        loadComponent: () => import("./features/admin/login/login.component").then((m) => m.AdminLoginComponent),
+        path: "dashboard",
+        loadComponent: () =>
+          import("./features/admin/overview/overview.component").then((m) => m.OverviewComponent),
       },
       {
-        path: "",
-        canActivate: [authGuard, roleGuard],
-        data: { roles: ["admin"] },
-        children: [
-          {
-            path: "dashboard",
-            loadComponent: () =>
-              import("./features/admin/overview/overview.component").then((m) => m.OverviewComponent),
-          },
-          {
-            path: "doctors",
-            loadComponent: () => import("./features/admin/doctors/doctors.component").then((m) => m.DoctorsComponent),
-          },
-          {
-            path: "appointments",
-            loadComponent: () =>
-              import("./features/admin/appointments/appointments.component").then((m) => m.AppointmentsComponent),
-          },
-        ],
+        path: "doctors",
+        loadComponent: () => import("./features/admin/doctors/doctors.component").then((m) => m.DoctorsComponent),
+      },
+      {
+        path: "appointments",
+        loadComponent: () =>
+          import("./features/admin/appointments/appointments.component").then((m) => m.AppointmentsComponent),
       },
     ],
   },
@@ -87,4 +78,4 @@ export const routes: Routes = [
     path: "**",
     redirectTo: "",
   },
-]
+];

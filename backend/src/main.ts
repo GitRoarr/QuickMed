@@ -10,7 +10,6 @@ async function bootstrap() {
     credentials: true,
   })
 
-  // Enable validation pipes globally
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,

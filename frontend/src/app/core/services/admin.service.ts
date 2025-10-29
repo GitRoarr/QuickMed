@@ -139,7 +139,6 @@ export class AdminService {
     return this.http.delete<void>(`${this.apiUrl}/users/${id}`);
   }
 
-  // Appointment Management
   getAllAppointments(page: number = 1, limit: number = 10, status?: string): Observable<PaginatedResponse<Appointment>> {
     let params = new HttpParams()
       .set('page', page.toString())
@@ -168,14 +167,12 @@ export class AdminService {
     return this.http.delete<void>(`${this.apiUrl}/appointments/${id}`);
   }
 
-  // Data Export
   exportUserData(userId: string): Observable<any> {
     return this.http.get(`${this.apiUrl}/users/${userId}/export`, {
       responseType: 'blob'
     });
   }
 
-  // Reports
   generateReport(type: 'users' | 'appointments' | 'revenue', startDate?: Date, endDate?: Date): Observable<any> {
     const reportData = {
       type,
@@ -188,7 +185,6 @@ export class AdminService {
     });
   }
 
-  // Analytics
   getUserAnalytics(startDate?: Date, endDate?: Date): Observable<any> {
     let params = new HttpParams();
     if (startDate) {
@@ -241,7 +237,6 @@ export class AdminService {
     return this.http.get(`${this.apiUrl}/system/metrics`);
   }
 
-  // Backup Management
   createBackup(): Observable<any> {
     return this.http.post(`${this.apiUrl}/system/backup`, {});
   }
@@ -254,7 +249,6 @@ export class AdminService {
     return this.http.post(`${this.apiUrl}/system/backup/${backupId}/restore`, {});
   }
 
-  // Settings Management
   getSystemSettings(): Observable<any> {
     return this.http.get(`${this.apiUrl}/settings`);
   }
@@ -263,7 +257,6 @@ export class AdminService {
     return this.http.put(`${this.apiUrl}/settings`, settings);
   }
 
-  // Notification Management
   markNotificationAsRead(notificationId: number): Observable<void> {
     return this.http.put<void>(`${this.apiUrl}/notifications/${notificationId}/read`, {});
   }
@@ -272,7 +265,6 @@ export class AdminService {
     return this.http.put<void>(`${this.apiUrl}/notifications/read-all`, {});
   }
 
-  // Bulk Operations
   bulkUpdateUsers(userIds: string[], updateData: Partial<User>): Observable<any> {
     return this.http.put(`${this.apiUrl}/users/bulk-update`, {
       userIds,
