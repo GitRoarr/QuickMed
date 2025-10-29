@@ -46,7 +46,6 @@ export class AdminLoginComponent {
     this.isBlinking = true;
     this.showPassword = !this.showPassword;
 
-    // stop blink animation after 250ms
     setTimeout(() => (this.isBlinking = false), 250);
   }
 
