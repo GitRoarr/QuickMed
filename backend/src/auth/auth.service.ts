@@ -5,8 +5,7 @@ import { UsersService } from "../users/users.service";
 import { RegisterDto } from "./dto/register.dto";
 import { LoginDto } from "./dto/login.dto";
 import { User} from "../users/entities/user.entity";
-import { UserRole } from "../../src/common/index";
-
+import { UserRole } from "@/common";
 @Injectable()
 export class AuthService {
   constructor(

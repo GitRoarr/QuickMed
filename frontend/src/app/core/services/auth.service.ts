@@ -29,12 +29,6 @@ export class AuthService {
       .pipe(tap((res) => this.handleAuthSuccess(res)));
   }
 
-  loginAdmin(credentials: { email: string; password: string }): Observable<AuthResponse> {
-    return this.http
-      .post<AuthResponse>(`${this.API_URL}/admin/login`, credentials)
-      .pipe(tap((res) => this.handleAuthSuccess(res)));
-  }
-
   logout(): void {
     localStorage.removeItem(this.TOKEN_KEY);
     localStorage.removeItem(this.USER_KEY);
@@ -57,7 +51,7 @@ export class AuthService {
 
   private handleAuthSuccess(response: AuthResponse): void {
     const token = response.token || (response as any).access_token;
-    const user = response.user || { email: (response as any).email, role: "admin" };
+    const user = response.user;
 
     localStorage.setItem(this.TOKEN_KEY, token);
     localStorage.setItem(this.USER_KEY, JSON.stringify(user));
