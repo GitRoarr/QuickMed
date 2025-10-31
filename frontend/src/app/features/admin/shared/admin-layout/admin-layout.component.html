@@ -1,5 +1,4 @@
 <div class="admin-layout">
-  <!-- Sidebar -->
   <aside class="sidebar">
     <div class="sidebar-header">
       <div class="logo-section">
@@ -41,7 +40,6 @@
       </div>
     </div>
 
-    <!-- Navigation -->
     <nav class="sidebar-nav">
       <div class="nav-section">
         <div class="nav-section-title">Main</div>
@@ -65,7 +63,6 @@
         </a>
       </div>
 
-      <!-- Submenu -->
       <div class="submenu" *ngFor="let item of menuItems">
         <div *ngIf="item.submenu && item.expanded" class="submenu-items">
           <a
@@ -81,7 +78,6 @@
       </div>
     </nav>
 
-    <!-- Sidebar Footer -->
     <div class="sidebar-footer">
       <div class="user-info">
         <div class="user-avatar">{{ getInitials(currentUser()?.firstName, currentUser()?.lastName) }}</div>
@@ -93,9 +89,7 @@
     </div>
   </aside>
 
-  <!-- Main Content -->
   <div class="main-wrapper">
-    <!-- Top Header -->
     <header class="top-header">
       <div class="search-bar">
         <i class="bi bi-search search-icon"></i>
@@ -110,7 +104,6 @@
       </div>
 
       <div class="header-actions">
-        <!-- Quick Actions -->
         <div class="quick-actions">
           <button class="quick-action-btn" (click)="createNewAppointment()" title="New Appointment (Ctrl+N)">
             <i class="bi bi-plus-circle"></i>
@@ -120,7 +113,6 @@
           </button>
         </div>
 
-        <!-- Notifications -->
         <div class="notification-dropdown">
           <button 
             class="notification-btn" 
@@ -131,7 +123,6 @@
             <span class="notification-badge" *ngIf="unreadCount() > 0">{{ unreadCount() }}</span>
           </button>
 
-          <!-- Notification Panel -->
           <div class="notification-panel" *ngIf="showNotifications()">
             <div class="notification-header">
               <h3>Notifications</h3>
@@ -159,7 +150,6 @@
           </div>
         </div>
 
-        <!-- User Menu -->
         <div class="user-dropdown">
           <button class="user-btn" (click)="toggleUserMenu()">
             <div class="user-avatar">{{ getInitials(currentUser()?.firstName, currentUser()?.lastName) }}</div>
@@ -170,7 +160,6 @@
             <i class="bi bi-chevron-down"></i>
           </button>
 
-          <!-- User Menu Panel -->
           <div class="user-menu" *ngIf="showUserMenu()">
             <a class="user-menu-item" (click)="navigateToProfile()">
               <i class="bi bi-person"></i>
@@ -190,12 +179,28 @@
       </div>
     </header>
 
-    <!-- Main Content Area -->
     <main class="main-content">
       <ng-content></ng-content>
     </main>
   </div>
 
-  <!-- Backdrop for mobile -->
   <div class="backdrop" *ngIf="showNotifications() || showUserMenu()" (click)="showNotifications.set(false); showUserMenu.set(false)"></div>
+
+  
+<div class="profile-modal" *ngIf="showProfileModal">
+  <div class="profile-modal-content">
+    <h3>Edit Profile</h3>
+    <label>First Name</label>
+    <input [(ngModel)]="editFirstName" type="text" class="form-control" />
+
+    <label>Last Name</label>
+    <input [(ngModel)]="editLastName" type="text" class="form-control" />
+
+    <div class="modal-actions">
+      <button (click)="saveProfile()">Save</button>
+      <button (click)="cancelProfileEdit()">Cancel</button>
+    </div>
+  </div>
+</div>
+
 </div>

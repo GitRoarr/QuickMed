@@ -13,7 +13,6 @@ export class DoctorsService {
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>
   ) {}
-
   async create(createDoctorDto: CreateDoctorDto): Promise<User> {
     const hashedPassword = await bcrypt.hash(createDoctorDto.password, 10);
 

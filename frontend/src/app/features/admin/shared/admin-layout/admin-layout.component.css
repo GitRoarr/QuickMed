@@ -6,9 +6,8 @@
   position: relative;
 }
 
-/* Sidebar */
 .sidebar {
-  width: 280px;
+  width: 400px;
   background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
   color: white;
   display: flex;
@@ -779,4 +778,57 @@
 :host-context(.dark) .user-menu-item:hover {
   background: #334155;
   color: white;
+}
+.profile-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.profile-modal-content {
+  background: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  width: 300px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.profile-modal-content h3 {
+  margin: 0 0 10px;
+  color: #111;
+}
+
+.profile-modal-content .form-control {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.modal-actions button {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  background: #dc2626;
+  color: white;
+}
+
+.modal-actions button:last-child {
+  background: gray;
 }
