@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards } from "@nestjs/common"
+import { Controller, Get, Post, UseGuards } from "@nestjs/common"
 import  { UsersService } from "./users.service"
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard"
 
@@ -20,5 +20,7 @@ export class UsersController {
   @Get("patients")
   findPatients() {
     return this.usersService.findPatients()
+
   }
+
 }

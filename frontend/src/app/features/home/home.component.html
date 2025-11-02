@@ -36,9 +36,11 @@
                 </ng-container>
                 <ng-template #loggedIn>
                     <span class="me-3">Welcome, {{ currentUser()?.firstName }}!</span>
+                    <span>class</span>
                     <button (click)="logout()" class="btn px-4" [ngClass]="{
     'btn-outline-danger text-danger': !isDarkMode(),
-    'btn-danger text-white': isDarkMode()
+    'btn-danger text-white'
+    : isDarkMode()
   }">
   Logout
 </button>

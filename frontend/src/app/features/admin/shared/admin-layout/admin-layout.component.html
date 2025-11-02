@@ -186,21 +186,7 @@
 
   <div class="backdrop" *ngIf="showNotifications() || showUserMenu()" (click)="showNotifications.set(false); showUserMenu.set(false)"></div>
 
-  
-<div class="profile-modal" *ngIf="showProfileModal">
-  <div class="profile-modal-content">
-    <h3>Edit Profile</h3>
-    <label>First Name</label>
-    <input [(ngModel)]="editFirstName" type="text" class="form-control" />
 
-    <label>Last Name</label>
-    <input [(ngModel)]="editLastName" type="text" class="form-control" />
 
-    <div class="modal-actions">
-      <button (click)="saveProfile()">Save</button>
-      <button (click)="cancelProfileEdit()">Cancel</button>
-    </div>
-  </div>
-</div>
 
 </div>
