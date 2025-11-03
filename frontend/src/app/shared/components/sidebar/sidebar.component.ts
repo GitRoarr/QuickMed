@@ -35,7 +35,6 @@ interface SubMenuItem {
   templateUrl: './sidebar.component.html',
   styleUrls: ['./sidebar.component.css'],
   animations: [
-    // Collapse state
     trigger('pulse', [
       state('collapsed', style({ transform: 'scale(0.9)' })),
       state('expanded', style({ transform: 'scale(1)' })),
@@ -111,14 +110,17 @@ interface SubMenuItem {
   ]
 })
 export class SidebarComponent implements OnInit {
-  @Input() title = 'Dashboard';
-  @Input() menuItems: MenuItem[] = [];
+  @Input() 
+  title = 'Dashboard';
+
+  @Input() 
+  menuItems: MenuItem[] = [];
 
   private authService = inject(AuthService);
   private router = inject(Router);
 
   currentUser = this.authService.currentUser;
-  isCollapsed = signal(false);
+  isCollapsed = signal(true);
   isDarkMode = signal(false);
   isMobile = signal(false);
   isMobileOpen = signal(false);

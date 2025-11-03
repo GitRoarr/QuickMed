@@ -86,7 +86,6 @@
   transform: rotate(15deg);
 }
 
-/* User Section */
 .user-section {
   padding: 20px;
   display: flex;
@@ -133,7 +132,6 @@
   font-size: 12px;
 }
 
-/* Navigation */
 .sidebar-nav {
   padding: 16px 0;
 }
@@ -234,7 +232,6 @@
   transform: translateY(-2px);
 }
 
-/* Footer */
 .sidebar-footer {
   padding: 20px;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
@@ -268,7 +265,6 @@
   background: rgba(255, 107, 107, 0.15);
 }
 
-/* Floating Button for Mobile */
 .fab {
   position: fixed;
   top: 20px;
@@ -290,7 +286,6 @@
   transform: scale(1.1);
 }
 
-/* Mobile View */
 @media (max-width: 768px) {
   .sidebar {
     transform: translateX(-100%);
@@ -315,7 +310,6 @@
   z-index: 999;
 }
 
-/* Dark Mode */
 :host-context(.dark) .sidebar {
   background: linear-gradient(145deg, #0f172a, #1e293b);
 }
@@ -323,7 +317,6 @@
   background: linear-gradient(135deg, #06b6d4, #3b82f6);
 }
 
-/* Animation Enhancement */
 .nav-item {
   animation: fadeInUp 0.4s ease both;
 }

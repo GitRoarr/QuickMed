@@ -40,7 +40,6 @@
     </div>
   </div>
 
-  <!-- Navigation -->
   <nav class="sidebar-nav">
     <ul class="nav-list">
       <li 
@@ -67,7 +66,6 @@
           ></i>
         </a>
 
-        <!-- Submenu with slide animation -->
         <ul 
           class="submenu" 
           *ngIf="item.submenu && item.expanded && !isCollapsed()"
@@ -99,7 +97,6 @@
     </div>
   </div>
 
-  <!-- Footer -->
   <div class="sidebar-footer">
     <div class="footer-actions">
       <button class="footer-btn" (click)="toggleTheme()" title="Toggle Theme" [@pulseBtn]>
@@ -117,7 +114,6 @@
     </div>
   </div>
 
-  <!-- FAB for Mobile -->
  <button 
   class="fab" 
   (click)="toggleMobile()" 

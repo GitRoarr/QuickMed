@@ -146,6 +146,7 @@ export class DashboardComponent implements OnInit {
   toggleNotifications(): void {
     this.showNotifications.update((show) => !show)
   }
+ 
 
   updateNotificationCount(): void {
     const unreadCount = this.notifications.filter((n) => !n.read).length
@@ -175,11 +176,12 @@ export class DashboardComponent implements OnInit {
   openSettings(): void {
     this.router.navigate(["/patient/settings"])
   }
+ 
 
   logout(): void {
     this.authService.logout()
   }
-
+  
   getInitials(firstName?: string, lastName?: string): string {
     if (!firstName || !lastName) return "P"
     return (firstName.charAt(0) + lastName.charAt(0)).toUpperCase()

@@ -2,10 +2,10 @@
 
 <div class="main-content">
   <div class="container-fluid">
-    <!-- Header Section -->
     <div class="page-header">
       <div class="header-content">
         <div class="header-info">
+
           <h1 class="page-title">My Appointments</h1>
           <p class="page-subtitle">Manage your medical appointments</p>
         </div>
@@ -18,7 +18,6 @@
       </div>
     </div>
 
-    <!-- Stats Cards -->
     <div class="stats-grid" *ngIf="!isLoading()">
       <div class="stat-card">
         <div class="stat-icon total">
@@ -28,6 +27,7 @@
           <div class="stat-number">{{ getAppointmentStats().total }}</div>
           <div class="stat-label">Total</div>
         </div>
+
       </div>
       <div class="stat-card">
         <div class="stat-icon pending">
@@ -58,7 +58,6 @@
       </div>
     </div>
 
-    <!-- Search and Filter Section -->
     <div class="search-filter-section">
       <div class="search-bar">
         <div class="search-input-wrapper">
@@ -77,8 +76,10 @@
         </button>
       </div>
 
-      <!-- Advanced Filters -->
+
+
       <div class="advanced-filters" *ngIf="showFilters()">
+
         <div class="filter-group">
           <label class="filter-label">Status</label>
           <div class="filter-options">
@@ -109,7 +110,6 @@
       </div>
     </div>
 
-    <!-- Upcoming Appointments -->
     <div class="upcoming-section" *ngIf="getUpcomingAppointments().length > 0">
       <h3 class="section-title">
         <i class="bi bi-calendar-check"></i>
@@ -142,7 +142,6 @@
       </div>
     </div>
 
-    <!-- Appointments List -->
     <div class="appointments-section">
       <div class="section-header">
         <h3 class="section-title">
@@ -154,7 +153,6 @@
         </div>
       </div>
 
-      <!-- Loading State -->
       <div *ngIf="isLoading()" class="loading-state">
         <div class="loading-spinner">
           <div class="spinner"></div>
@@ -162,7 +160,6 @@
         <p class="loading-text">Loading appointments...</p>
       </div>
 
-      <!-- Empty State -->
       <div *ngIf="!isLoading() && filteredAppointments.length === 0" class="empty-state">
         <div class="empty-icon">
           <i class="bi bi-calendar-x"></i>
@@ -177,7 +174,6 @@
         </button>
       </div>
 
-      <!-- Appointments Grid -->
       <div *ngIf="!isLoading() && filteredAppointments.length > 0" class="appointments-grid">
         <div 
           *ngFor="let appointment of filteredAppointments" 

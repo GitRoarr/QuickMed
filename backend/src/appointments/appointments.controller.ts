@@ -11,6 +11,7 @@ import { UserRole } from "../common/index"
 
 @Controller("appointments")
 @UseGuards(JwtAuthGuard)
+
 export class AppointmentsController {
   constructor(private readonly appointmentsService: AppointmentsService) {}
 
@@ -19,6 +20,8 @@ export class AppointmentsController {
   create(createAppointmentDto: CreateAppointmentDto, @CurrentUser() user: User) {
     return this.appointmentsService.create(createAppointmentDto, user.id)
   }
+  
+  
 
   @Get()
   @UseGuards(RolesGuard)

@@ -12,6 +12,7 @@ export class CreateNotificationTemplateDto {
 
   @IsString()
   message: string;
+  
 
   @IsOptional()
   @IsArray()

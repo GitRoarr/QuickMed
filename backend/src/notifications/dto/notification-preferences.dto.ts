@@ -37,15 +37,14 @@ export class NotificationPreferencesDto {
   @IsNumber()
   @Min(5)
   @Max(1440)
-  reminderTime?: number; // minutes before appointment
+  reminderTime?: number;
 
   @IsOptional()
   @IsString()
-  quietHoursStart?: string; // HH:mm format
-
+  quietHoursStart?: string;
   @IsOptional()
   @IsString()
-  quietHoursEnd?: string; // HH:mm format
+  quietHoursEnd?: string; 
 
   @IsOptional()
   @IsString()

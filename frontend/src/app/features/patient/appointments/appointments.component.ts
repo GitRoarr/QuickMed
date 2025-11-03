@@ -12,6 +12,7 @@ interface AppointmentFilter {
   doctor: string
 }
 
+
 @Component({
   selector: "app-patient-appointments",
   standalone: true,
@@ -19,6 +20,9 @@ interface AppointmentFilter {
   templateUrl: "./appointments.component.html",
   styleUrls: ["./appointments.component.css"],
 })
+
+
+
 export class AppointmentsComponent implements OnInit {
   appointments: Appointment[] = []
   filteredAppointments: Appointment[] = []
@@ -79,7 +83,6 @@ export class AppointmentsComponent implements OnInit {
   applyFilters(): void {
     let filtered = [...this.appointments]
 
-    // Search filter
     if (this.searchQuery()) {
       const query = this.searchQuery().toLowerCase()
       filtered = filtered.filter(appointment => 
@@ -90,14 +93,12 @@ export class AppointmentsComponent implements OnInit {
       )
     }
 
-    // Status filter
     if (this.selectedFilter() !== 'all') {
       filtered = filtered.filter(appointment => 
         appointment.status === this.selectedFilter()
       )
     }
 
-    // Sort
     filtered.sort((a, b) => {
       let comparison = 0
       
@@ -127,7 +128,6 @@ export class AppointmentsComponent implements OnInit {
   onSearchChange(): void {
     this.applyFilters()
   }
-
   onFilterChange(): void {
     this.applyFilters()
   }

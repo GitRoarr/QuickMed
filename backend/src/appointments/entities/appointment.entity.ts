@@ -7,6 +7,7 @@ import { AppointmentStatus, AppointmentType } from '../../common/index';
 export class Appointment extends BaseEntity {
   @Column({ type: 'date' })
   appointmentDate: Date;
+  
 
   @Column({ type: 'time' })
   appointmentTime: string;

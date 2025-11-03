@@ -28,6 +28,9 @@ export interface AdminStats {
   patientSatisfactionScore: number;
 }
 
+
+
+
 export interface AdminDashboardData {
   stats: AdminStats;
   recentAppointments: Appointment[];
@@ -44,7 +47,7 @@ export interface AdminDashboardData {
 
 @Injectable()
 export class AdminService {
-  constructor(
+ constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,
     @InjectRepository(Appointment)
@@ -151,6 +154,7 @@ export class AdminService {
 
     return user;
   }
+  
 
   async createUser(createUserDto: CreateUserDto): Promise<User> {
     const user = this.userRepository.create(createUserDto);
@@ -226,7 +230,7 @@ export class AdminService {
     return await this.appointmentRepository.save(appointment);
   }
 
-  async deleteAppointment(id: string): Promise<void> {
+  async deleteAppointment (id: string): Promise<void> {
     const appointment = await this.getAppointmentById(id);
     await this.appointmentRepository.remove(appointment);
   }
@@ -300,7 +304,7 @@ export class AdminService {
   }
 
   private async getUpcomingAppointments(): Promise<Appointment[]> {
-    const today = new Date('2025-10-28T00:11:00Z'); // 12:11 AM EAT, October 28, 2025
+    const today = new Date('2025-10-28T00:11:00Z');
     return await this.appointmentRepository.find({
       where: {
         appointmentDate: new Date(today.toISOString().split('T')[0]),
@@ -313,7 +317,7 @@ export class AdminService {
   }
 
   private async getTodayAppointmentsCount(): Promise<number> {
-    const today = new Date('2025-10-28T00:11:00Z'); // 12:11 AM EAT, October 28, 2025
+    const today = new Date('2025-10-28T00:11:00Z'); 
     return await this.appointmentRepository.count({
       where: {
         appointmentDate: new Date(today.toISOString().split('T')[0]),
@@ -322,7 +326,7 @@ export class AdminService {
   }
 
   private async getThisWeekAppointmentsCount(): Promise<number> {
-    const startOfWeek = new Date('2025-10-28T00:11:00Z'); // 12:11 AM EAT, October 28, 2025
+    const startOfWeek = new Date('2025-10-28T00:11:00Z');
     startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
     const endOfWeek = new Date(startOfWeek);
     endOfWeek.setDate(endOfWeek.getDate() + 6);
@@ -335,7 +339,7 @@ export class AdminService {
   }
 
   private async getThisMonthAppointmentsCount(): Promise<number> {
-    const startOfMonth = new Date('2025-10-28T00:11:00Z'); // 12:11 AM EAT, October 28, 2025
+    const startOfMonth = new Date('2025-10-28T00:11:00Z'); 
     startOfMonth.setDate(1);
     const endOfMonth = new Date(startOfMonth);
     endOfMonth.setMonth(endOfMonth.getMonth() + 1);
@@ -387,6 +391,7 @@ export class AdminService {
       endDate: endDate || new Date(),
       generatedAt: new Date(),
     };
+
 
     switch (type) {
       case 'users':

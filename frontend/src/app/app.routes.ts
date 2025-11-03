@@ -1,4 +1,4 @@
-import type { Routes } from "@angular/router";
+import { GuardsCheckEnd, type Routes } from "@angular/router";
 import { authGuard } from "./core/guards/auth.guard";
 import { roleGuard } from "./core/guards/role.guard";
 
@@ -36,6 +36,10 @@ export const routes: Routes = [
       },
     ],
   },
+
+
+
+
   {
     path: "doctor",
     canActivate: [authGuard, roleGuard],
@@ -51,6 +55,7 @@ export const routes: Routes = [
         loadComponent: () =>
           import("./features/doctor/appointments/appointments.component").then((m) => m.AppointmentsComponent),
       },
+      
     ],
   },
   {

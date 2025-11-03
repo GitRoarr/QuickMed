@@ -25,6 +25,8 @@ export class DoctorsComponent implements OnInit {
     { label: "My Appointments", icon: "bi-calendar-check", route: "/patient/appointments" },
     { label: "Find Doctors", icon: "bi-people", route: "/patient/doctors" },
   ]
+ 
+
 
   constructor(
     private doctorService: DoctorService,
@@ -33,6 +35,7 @@ export class DoctorsComponent implements OnInit {
   ) {
     this.appointmentForm = this.fb.group({
       appointmentDate: ["", Validators.required],
+      
       appointmentTime: ["", Validators.required],
       notes: [""],
     })
