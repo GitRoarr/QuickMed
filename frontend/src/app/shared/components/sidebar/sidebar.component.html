@@ -1,4 +1,5 @@
 <div class="sidebar" [class.collapsed]="isCollapsed()" [class.mobile-open]="isMobileOpen()">
+
   <!-- Header -->
   <div class="sidebar-header">
     <div class="logo-section">
@@ -17,7 +18,7 @@
         </div>
         <div class="brand-info" *ngIf="!isCollapsed()" [@fadeSlide]="!isCollapsed()">
           <h3 class="brand-name">QuickMed</h3>
-          <p class="brand-subtitle">{{ title }}</p>
+          <p class="brand-subtitle">{{ currentUser()?.role | titlecase }} Portal</p>
         </div>
       </div>
       <button class="collapse-btn" (click)="toggleCollapse()" [@rotate]="isCollapsed()">
@@ -28,49 +29,39 @@
 
   <!-- User Section -->
   <div class="user-section" *ngIf="currentUser()" [@fadeSlide]="!isCollapsed()">
-    <div class="user-avatar" [@bounceIn]="!isCollapsed()">
+    <label class="user-avatar" [@bounceIn]="!isCollapsed()">
+      <input type="file" accept="image/*" (change)="onAvatarChange($event)" hidden />
       <div class="avatar-circle">
-        {{ getInitials(currentUser()?.firstName, currentUser()?.lastName) }}
+        <ng-container *ngIf="currentUser()?.avatar; else initials">
+          <img [src]="currentUser()?.avatar" alt="avatar" />
+        </ng-container>
+        <ng-template #initials>
+          {{ getInitials(currentUser()?.firstName, currentUser()?.lastName) }}
+        </ng-template>
       </div>
       <div class="status-indicator online"></div>
-    </div>
+    </label>
     <div class="user-info" *ngIf="!isCollapsed()">
       <h4 class="user-name">{{ currentUser()?.firstName }} {{ currentUser()?.lastName }}</h4>
-      <p class="user-role">{{ getUserRole() }}</p>
+      <p class="user-role">{{ currentUser()?.role | titlecase }}</p>
     </div>
   </div>
 
+  <!-- Navigation Menu -->
   <nav class="sidebar-nav">
     <ul class="nav-list">
-      <li 
-        class="nav-item" 
-        *ngFor="let item of menuItems; let i = index" 
-        [@stagger]="i"
-      >
-        <a 
-          [routerLink]="item.route" 
-          routerLinkActive="active" 
-          class="nav-link"
-          [class.has-submenu]="item.submenu"
-          (click)="toggleSubmenu(i)"
-          [@fadeInUp]
-        >
+      <li class="nav-item" *ngFor="let item of getRoleMenuItems(); let i = index" [@stagger]="i">
+        <a [routerLink]="item.route" routerLinkActive="active" class="nav-link"
+           [class.has-submenu]="item.submenu" (click)="toggleSubmenu(i)" [@fadeInUp]>
           <div class="nav-icon">
             <i class="bi {{ item.icon }}"></i>
           </div>
           <span class="nav-label" *ngIf="!isCollapsed()">{{ item.label }}</span>
-          <i 
-            class="bi bi-chevron-down submenu-arrow" 
-            *ngIf="item.submenu && !isCollapsed()"
-            [@rotate180]="item.expanded"
-          ></i>
+          <i class="bi bi-chevron-down submenu-arrow" *ngIf="item.submenu && !isCollapsed()"
+             [@rotate180]="item.expanded"></i>
         </a>
 
-        <ul 
-          class="submenu" 
-          *ngIf="item.submenu && item.expanded && !isCollapsed()"
-          [@slideDown]
-        >
+        <ul class="submenu" *ngIf="item.submenu && item.expanded && !isCollapsed()" [@slideDown]>
           <li class="submenu-item" *ngFor="let subItem of item.submenu" [@fadeInUp]>
             <a [routerLink]="subItem.route" class="submenu-link">
               <i class="bi {{ subItem.icon }}"></i>
@@ -86,7 +77,7 @@
   <div class="quick-actions" *ngIf="!isCollapsed()" [@fadeSlide]>
     <h6 class="section-title">Quick Actions</h6>
     <div class="action-buttons">
-      <button class="action-btn" (click)="quickAction('new-appointment')" [@pulseBtn]>
+      <button *ngIf="currentUser()?.role !== 'admin'" class="action-btn" (click)="quickAction('new-appointment')" [@pulseBtn]>
         <i class="bi bi-plus-circle"></i>
         <span>New Appointment</span>
       </button>
@@ -97,6 +88,7 @@
     </div>
   </div>
 
+  <!-- Footer -->
   <div class="sidebar-footer">
     <div class="footer-actions">
       <button class="footer-btn" (click)="toggleTheme()" title="Toggle Theme" [@pulseBtn]>
@@ -114,19 +106,9 @@
     </div>
   </div>
 
- <button 
-  class="fab" 
-  (click)="toggleMobile()" 
-  *ngIf="isMobile() && isCollapsed()"
-  [@fabIn]
->
-  <i class="bi bi-list"></i>
-</button>
+  <button class="fab" (click)="toggleMobile()" *ngIf="isMobile() && isCollapsed()" [@fabIn]>
+    <i class="bi bi-list"></i>
+  </button>
 </div>
 
-<div 
-  class="mobile-overlay" 
-  *ngIf="isMobileOpen()" 
-  (click)="closeMobile()"
-  [@fade]
-></div>
+<div class="mobile-overlay" *ngIf="isMobileOpen()" (click)="closeMobile()" [@fade]></div>

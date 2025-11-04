@@ -35,4 +35,11 @@ export class UserService {
   delete(id: string): Observable<void> {
     return this.http.delete<void>(`${this.API_URL}/${id}`)
   }
+   updateAvatar(userId: string, file: File): Observable<User> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.patch<User>(`${this.API_URL}/${userId}/avatar`, formData);
+  }
+
+  
 }
