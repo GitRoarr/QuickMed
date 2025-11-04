@@ -1,3 +1,4 @@
+// dashboard.component.ts
 import { Component, OnInit, signal } from "@angular/core"
 import { CommonModule } from "@angular/common"
 import { RouterLink, Router } from "@angular/router"
@@ -5,9 +6,9 @@ import { FormsModule } from "@angular/forms"
 import { AppointmentService } from "@core/services/appointment.service"
 import { AuthService } from "@core/services/auth.service"
 import { Appointment } from "@core/models/appointment.model"
-import { ThemeService } from "@core/services/theme.service"
 import { User } from "@core/models/user.model"
 import { NotificationCenterComponent } from "@app/shared/components/notification-center/notification-center.component"
+import { SidebarComponent } from "@app/shared/components/sidebar/sidebar.component"
 
 interface DashboardStats {
   upcomingAppointments: number
@@ -22,7 +23,7 @@ interface DashboardStats {
 @Component({
   selector: "app-patient-dashboard",
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule, NotificationCenterComponent],
+  imports: [CommonModule, RouterLink, FormsModule, NotificationCenterComponent, SidebarComponent],
   templateUrl: "./dashboard.component.html",
   styleUrls: ["./dashboard.component.css"],
 })
@@ -75,7 +76,6 @@ export class DashboardComponent implements OnInit {
   constructor(
     private appointmentService: AppointmentService,
     private authService: AuthService,
-    private themeService: ThemeService,
     private router: Router,
   ) {}
 
@@ -146,7 +146,6 @@ export class DashboardComponent implements OnInit {
   toggleNotifications(): void {
     this.showNotifications.update((show) => !show)
   }
- 
 
   updateNotificationCount(): void {
     const unreadCount = this.notifications.filter((n) => !n.read).length
@@ -176,12 +175,11 @@ export class DashboardComponent implements OnInit {
   openSettings(): void {
     this.router.navigate(["/patient/settings"])
   }
- 
 
   logout(): void {
     this.authService.logout()
   }
-  
+
   getInitials(firstName?: string, lastName?: string): string {
     if (!firstName || !lastName) return "P"
     return (firstName.charAt(0) + lastName.charAt(0)).toUpperCase()
