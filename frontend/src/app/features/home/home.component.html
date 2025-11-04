@@ -35,20 +35,42 @@
                     <a routerLink="/register" class="btn btn-primary px-4">Get Started</a>
                 </ng-container>
                 <ng-template #loggedIn>
-<div class="user-avatar-wrapper d-flex align-items-center gap-2">
-  <img 
-    [src]="currentUser()?.avatar || 'assets/images/profile-placeholder.png'" 
-    alt="{{ currentUser()?.firstName }}" 
-    class="rounded-circle" 
-    width="40" 
-    height="40"
-  />
-  <span *ngIf="currentUser()" class="fw-medium">
-    {{ currentUser()?.firstName }}
-  </span>
+<div 
+  class="user-avatar-wrapper d-flex align-items-center gap-2" 
+  style="cursor: pointer;" 
+  (click)="navigateToDashboard()"
+>
+  <ng-container *ngIf="currentUser(); let user">
+    <img 
+      *ngIf="user.avatar; else initialsAvatar"
+      [src]="user.avatar"
+      alt="{{ user.firstName }}"
+      class="rounded-circle"
+      width="40"
+      height="40"
+    />
+
+    <ng-template #initialsAvatar>
+      <div 
+        class="placeholder-avatar d-flex align-items-center justify-content-center rounded-circle text-white fw-bold"
+        style="
+          width: 40px;
+          height: 40px;
+          background-color: #1DB954;
+          font-size: 16px;
+          text-transform: uppercase;
+        "
+      >
+        {{ getInitials(user.firstName, user.lastName) }}
+      </div>
+    </ng-template>
+
+    <span class="fw-medium">{{ user.firstName }}</span>
+  </ng-container>
 </div>
-                    <span>class</span>
-                    <button (click)="logout()" class="btn px-4" [ngClass]="{
+
+
+    <button (click)="logout()" class="btn px-4" [ngClass]="{
     'btn-outline-danger text-danger': !isDarkMode(),
     'btn-danger text-white'
     : isDarkMode()

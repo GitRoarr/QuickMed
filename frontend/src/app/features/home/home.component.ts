@@ -52,5 +52,12 @@ export class HomeComponent {
   const user = this.currentUser()
   return user?.avatar || 'assets/images/profile-placeholder.png'
 }
+getInitials(firstName?: string, lastName?: string): string {
+  if (!firstName && !lastName) return '?'
+  const firstInitial = firstName ? firstName.charAt(0).toUpperCase() : ''
+  const lastInitial = lastName ? lastName.charAt(0).toUpperCase() : ''
+  return `${firstInitial}${lastInitial}`
+}
+
 
 }
