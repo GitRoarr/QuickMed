@@ -11,6 +11,7 @@ export interface User {
   email: string
   role: UserRole
   phoneNumber?: string
+  avatar?:string
   medicalHistory?: string
   specialty?: string
   bio?: string

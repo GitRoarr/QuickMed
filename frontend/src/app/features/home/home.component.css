@@ -4,7 +4,10 @@
     padding: 1rem 0;
     transition: all 0.3s ease;
 }
-
+.user-avatar-wrapper img {
+  object-fit: cover;
+  border: 2px solid #ccc;
+}
 .theme-toggle {
     width: 50px;
     height: 50px;

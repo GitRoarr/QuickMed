@@ -35,7 +35,18 @@
                     <a routerLink="/register" class="btn btn-primary px-4">Get Started</a>
                 </ng-container>
                 <ng-template #loggedIn>
-                    <span class="me-3">Welcome, {{ currentUser()?.firstName }}!</span>
+<div class="user-avatar-wrapper d-flex align-items-center gap-2">
+  <img 
+    [src]="currentUser()?.avatar || 'assets/images/profile-placeholder.png'" 
+    alt="{{ currentUser()?.firstName }}" 
+    class="rounded-circle" 
+    width="40" 
+    height="40"
+  />
+  <span *ngIf="currentUser()" class="fw-medium">
+    {{ currentUser()?.firstName }}
+  </span>
+</div>
                     <span>class</span>
                     <button (click)="logout()" class="btn px-4" [ngClass]="{
     'btn-outline-danger text-danger': !isDarkMode(),

@@ -48,4 +48,9 @@ export class HomeComponent {
   toggleTheme(): void {
     this.themeService.toggleTheme()
   }
+ getUserAvatar(): string {
+  const user = this.currentUser()
+  return user?.avatar || 'assets/images/profile-placeholder.png'
+}
+
 }
