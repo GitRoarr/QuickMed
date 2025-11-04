@@ -24,6 +24,8 @@
         "bcrypt": "^6.0.0",
         "class-transformer": "^0.5.1",
         "class-validator": "^0.14.2",
+        "cloudinary": "^2.8.0",
+        "multer": "^2.0.2",
         "passport": "^0.7.0",
         "passport-jwt": "^4.0.1",
         "pg": "^8.11.3",
@@ -35,6 +37,7 @@
     "devDependencies": {
         "@nestjs/cli": "^11.0.10",
         "@types/bcrypt": "^6.0.0",
+        "@types/multer": "^2.0.0",
         "@types/node": "^24.7.2",
         "@types/passport-jwt": "^4.0.1",
         "typescript": "^5.9.3"
