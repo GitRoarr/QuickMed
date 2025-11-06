@@ -208,3 +208,4 @@ export class NotificationIntegrationService {
     return await this.notificationsService.getAnalytics(startDate, endDate);
   }
 }
+

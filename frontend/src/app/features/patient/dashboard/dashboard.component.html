@@ -1,441 +1,331 @@
 <div class="dashboard-container">
-    <aside class="amazing-sidebar">
-        <div class="sidebar-header">
-            <div class="logo-section">
-                <div class="logo-container">
-                    <div class="logo-icon">
-                        <svg width="32" height="32" viewBox="0 0 40 40" fill="none">
-                            <rect width="40" height="40" rx="8" fill="url(#patientGradient)"/>
-                            <path d="M20 10L28 16V24L20 30L12 24V16L20 10Z" fill="white"/>
-                            <defs>
-                                <linearGradient id="patientGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                                    <stop offset="0%" style="stop-color:#10b981;stop-opacity:1" />
-                                    <stop offset="100%" style="stop-color:#059669;stop-opacity:1" />
-                                </linearGradient>
-                            </defs>
-                        </svg>
-                    </div>
-                    <div class="brand-info">
-                        <h3 class="brand-name">QuickMed</h3>
-                        <p class="brand-subtitle">Patient Portal</p>
-                    </div>
-                </div>
-                <button class="sidebar-toggle" (click)="toggleSidebar()">
-                    <i class="bi" [class.bi-chevron-left]="!sidebarCollapsed" [class.bi-chevron-right]="sidebarCollapsed"></i>
-                </button>
-            </div>
+  <!-- Header with Logo, Search, and Actions -->
+  <header class="dashboard-header">
+    <div class="header-left">
+      <div class="logo-section">
+        <div class="logo-icon">
+          <svg width="32" height="32" viewBox="0 0 40 40" fill="none">
+            <rect width="40" height="40" rx="8" fill="url(#patientGradient)"/>
+            <path d="M20 10L28 16V24L20 30L12 24V16L20 10Z" fill="white"/>
+            <defs>
+              <linearGradient id="patientGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#10b981;stop-opacity:1" />
+                <stop offset="100%" style="stop-color:#059669;stop-opacity:1" />
+              </linearGradient>
+            </defs>
+          </svg>
         </div>
-
-        <div class="user-section">
-            <div class="user-avatar">
-                <div class="avatar-circle">
-                    {{ getInitials(currentUser?.firstName, currentUser?.lastName) }}
-                </div>
-                <div class="status-indicator online"></div>
-            </div>
-            <div class="user-info" *ngIf="!sidebarCollapsed">
-                <h4 class="user-name">{{ currentUser?.firstName }} {{ currentUser?.lastName }}</h4>
-                <p class="user-role">Patient</p>
-                <p class="user-id">ID: {{ currentUser?.patientId || '#12345' }}</p>
-            </div>
+        <div class="brand-info">
+          <h3 class="brand-name">QuickMed</h3>
+          <p class="brand-subtitle">Patient Portal</p>
         </div>
-
-        <nav class="sidebar-nav">
-            <div class="nav-section">
-                <div class="nav-section-title" *ngIf="!sidebarCollapsed">Dashboard</div>
-                <a routerLink="/patient/dashboard" routerLinkActive="active" class="nav-item">
-                    <span class="nav-icon">
-                        <i class="bi bi-house"></i>
-                    </span>
-                    <span class="nav-label" *ngIf="!sidebarCollapsed">Dashboard</span>
-                </a>
-                <a routerLink="/patient/appointments" routerLinkActive="active" class="nav-item">
-                    <span class="nav-icon">
-                        <i class="bi bi-calendar-check"></i>
-                    </span>
-                    <span class="nav-label" *ngIf="!sidebarCollapsed">Appointments</span>
-                </a>
-                <a routerLink="/patient/doctors" routerLinkActive="active" class="nav-item">
-                    <span class="nav-icon">
-                        <i class="bi bi-people"></i>
-                    </span>
-                    <span class="nav-label" *ngIf="!sidebarCollapsed">Find Doctors</span>
-                </a>
-            </div>
-
-            <div class="nav-section">
-                <div class="nav-section-title" *ngIf="!sidebarCollapsed">Health</div>
-                <a routerLink="/patient/records" routerLinkActive="active" class="nav-item">
-                    <span class="nav-icon">
-                        <i class="bi bi-file-medical"></i>
-                    </span>
-                    <span class="nav-label" *ngIf="!sidebarCollapsed">Medical Records</span>
-                </a>
-                <a routerLink="/patient/prescriptions" routerLinkActive="active" class="nav-item">
-                    <span class="nav-icon">
-                        <i class="bi bi-prescription"></i>
-                    </span>
-                    <span class="nav-label" *ngIf="!sidebarCollapsed">Prescriptions</span>
-                </a>
-                <a routerLink="/patient/test-results" routerLinkActive="active" class="nav-item">
-                    <span class="nav-icon">
-                        <i class="bi bi-clipboard-data"></i>
-                    </span>
-                    <span class="nav-label" *ngIf="!sidebarCollapsed">Test Results</span>
-                </a>
-            </div>
-
-            <div class="nav-section">
-                <div class="nav-section-title" *ngIf="!sidebarCollapsed">Support</div>
-                <a routerLink="/patient/emergency" routerLinkActive="active" class="nav-item emergency">
-                    <span class="nav-icon">
-                        <i class="bi bi-telephone-fill"></i>
-                    </span>
-                    <span class="nav-label" *ngIf="!sidebarCollapsed">Emergency</span>
-                </a>
-                <a routerLink="/patient/support" routerLinkActive="active" class="nav-item">
-                    <span class="nav-icon">
-                        <i class="bi bi-headset"></i>
-                    </span>
-                    <span class="nav-label" *ngIf="!sidebarCollapsed">Support</span>
-                </a>
-            </div>
-        </nav>
-
-        <div class="quick-actions" *ngIf="!sidebarCollapsed">
-            <h6 class="section-title">Quick Actions</h6>
-            <div class="action-buttons">
-                <button class="action-btn" (click)="bookAppointment()">
-                    <i class="bi bi-plus-circle"></i>
-                    <span>Book Appointment</span>
-                </button>
-                <button class="action-btn" (click)="downloadRecords()">
-                    <i class="bi bi-download"></i>
-                    <span>Download Records</span>
-                </button>
-            </div>
-        </div>
-
-        <div class="sidebar-footer">
-            <div class="footer-actions">
-                <button class="footer-btn" (click)="toggleTheme()" title="Toggle Theme">
-                    <i class="bi" [class.bi-sun]="!isDarkMode" [class.bi-moon]="isDarkMode"></i>
-                    <span *ngIf="!sidebarCollapsed">Theme</span>
-                </button>
-                <button class="footer-btn" (click)="openSettings()" title="Settings">
-                    <i class="bi bi-gear"></i>
-                    <span *ngIf="!sidebarCollapsed">Settings</span>
-                </button>
-                <button class="footer-btn logout-btn" (click)="logout()" title="Logout">
-                    <i class="bi bi-box-arrow-right"></i>
-                    <span *ngIf="!sidebarCollapsed">Logout</span>
-                </button>
-            </div>
-        </div>
-    </aside>
-
-    <div class="main-content" [class.sidebar-collapsed]="sidebarCollapsed">
-        <header class="dashboard-header">
-            <div class="header-content">
-                <div class="header-info">
-                    <h1 class="page-title">Welcome back, {{ currentUser?.firstName }}!</h1>
-                    <p class="page-subtitle">Manage your health and appointments</p>
-                </div>
-
-                <div class="header-actions">
-                    <div class="search-bar">
-                        <i class="bi bi-search"></i>
-                        <input type="text" placeholder="Search appointments, doctors..." [(ngModel)]="searchQuery" (ngModelChange)="onSearchChange()">
-                    </div>
-                    <button class="emergency-btn" (click)="callEmergency()">
-                        <i class="bi bi-telephone-fill"></i>
-                        Emergency
-                    </button>
-                    <app-notification-center></app-notification-center>
-                </div>
-            </div>
-        </header>
-
-        <div class="dashboard-content">
-            <div class="welcome-section">
-                <h2 class="welcome-title">Welcome back, {{ currentUser?.firstName }} {{ currentUser?.lastName }}</h2>
-                <p class="welcome-subtitle">Manage your appointments and health records</p>
-            </div>
-
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-icon stat-icon-green">
-                        <i class="bi bi-calendar-check"></i>
-                    </div>
-                    <div class="stat-content">
-                        <p class="stat-label">Upcoming</p>
-                        <h3 class="stat-value">{{ dashboardStats().upcomingAppointments }}</h3>
-                    </div>
-                </div>
-
-                <div class="stat-card">
-                    <div class="stat-icon stat-icon-green">
-                        <i class="bi bi-capsule"></i>
-                    </div>
-                    <div class="stat-content">
-                        <p class="stat-label">Active Meds</p>
-                        <h3 class="stat-value">{{ currentUser?.activeMedicationsCount || 0 }}</h3>
-                    </div>
-                </div>
-
-                <div class="stat-card">
-                    <div class="stat-icon stat-icon-green">
-                        <i class="bi bi-file-earmark-text"></i>
-                    </div>
-                    <div class="stat-content">
-                        <p class="stat-label">Records</p>
-                        <h3 class="stat-value">{{ currentUser?.medicalRecordsCount || 0 }}</h3>
-                    </div>
-                </div>
-
-                <div class="stat-card">
-                    <div class="stat-icon stat-icon-orange">
-                        <i class="bi bi-activity"></i>
-                    </div>
-                    <div class="stat-content">
-                        <p class="stat-label">Test Results</p>
-                        <h3 class="stat-value">{{ currentUser?.testResultsCount || 0 }}</h3>
-                    </div>
-                </div>
-            </div>
-
-            <div *ngIf="activeTab === 'appointments'" class="appointments-section">
-                <div class="section-header">
-                    <h3 class="section-title">Upcoming Appointments</h3>
-                    <button class="book-btn" (click)="bookAppointment()">
-                        <i class="bi bi-plus-lg"></i>
-                        Book Appointment
-                    </button>
-                </div>
-
-                <div *ngIf="isLoading()" class="loading-state">
-                    <div class="spinner"></div>
-                </div>
-
-                <div *ngIf="!isLoading() && getUpcomingAppointments().length === 0" class="empty-state">
-                    <p>No upcoming appointments</p>
-                    <button class="book-btn" (click)="bookAppointment()">Book Your First Appointment</button>
-                </div>
-
-                <div *ngIf="!isLoading() && getUpcomingAppointments().length > 0" class="appointments-list">
-                    <div *ngFor="let appointment of getUpcomingAppointments()" class="appointment-card">
-                        <div class="appointment-header">
-                            <div class="doctor-info">
-                                <div class="doctor-avatar">
-                                    {{ getInitials(appointment.doctor?.firstName, appointment.doctor?.lastName) }}
-                                </div>
-                                <div>
-                                    <h4 class="doctor-name">Dr. {{ appointment.doctor?.firstName }} {{ appointment.doctor?.lastName }}</h4>
-                                    <p class="doctor-specialty">{{ appointment.doctor?.specialty }}</p>
-                                </div>
-                            </div>
-                            <span class="status-badge" [class]="'status-' + appointment.status">
-                                {{ appointment.status }}
-                            </span>
-                        </div>
-
-                        <div class="appointment-details">
-                            <div class="detail-item">
-                                <i class="bi bi-calendar3"></i>
-                                <span>{{ appointment.appointmentDate | date: 'yyyy-MM-dd' }}</span>
-                            </div>
-                            <div class="detail-item">
-                                <i class="bi bi-clock"></i>
-                                <span>{{ appointment.appointmentTime }}</span>
-                            </div>
-                            <div *ngIf="appointment.location" class="detail-item">
-                                <i class="bi bi-geo-alt"></i>
-                                <span>{{ appointment.location }}</span>
-                            </div>
-                            <div *ngIf="appointment.isVideoConsultation" class="detail-item">
-                                <i class="bi bi-camera-video"></i>
-                                <span>Video Consultation</span>
-                            </div>
-                        </div>
-
-                        <div class="appointment-actions">
-                            <button *ngIf="appointment.isVideoConsultation && appointment.status === 'confirmed'" class="action-btn action-btn-primary">
-                                <i class="bi bi-camera-video"></i>
-                                Join Call
-                            </button>
-                            <button class="action-btn action-btn-secondary">Reschedule</button>
-                            <button class="action-btn action-btn-danger">Cancel</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="main-grid">
-                <div class="main-section">
-                    <div class="tabs">
-                        <button class="tab-btn" [class.active]="activeTab === 'appointments'" (click)="activeTab = 'appointments'">
-                            Appointments
-                        </button>
-                        <button class="tab-btn" [class.active]="activeTab === 'history'" (click)="activeTab = 'history'">
-                            Medical History
-                        </button>
-                        <button class="tab-btn" [class.active]="activeTab === 'prescriptions'" (click)="activeTab = 'prescriptions'">
-                            Prescriptions
-                        </button>
-                        <button class="tab-btn" [class.active]="activeTab === 'tests'" (click)="activeTab = 'tests'">
-                            Test Results
-                        </button>
-                    </div>
-
-                    <div *ngIf="activeTab === 'appointments'" class="appointments-section">
-                        <div class="section-header">
-                            <h3 class="section-title">Upcoming Appointments</h3>
-                            <button class="book-btn" (click)="bookAppointment()">
-                                <i class="bi bi-plus-lg"></i>
-                                Book Appointment
-                            </button>
-                        </div>
-
-                        <div *ngIf="isLoading()" class="loading-state">
-                            <div class="spinner"></div>
-                        </div>
-
-                        <div *ngIf="!isLoading() && appointments.length === 0" class="empty-state">
-                            <p>No upcoming appointments</p>
-                            <button class="book-btn" (click)="bookAppointment()">Book Your First Appointment</button>
-                        </div>
-
-                        <div *ngIf="!isLoading() && appointments.length > 0" class="appointments-list">
-                            <div *ngFor="let appointment of appointments" class="appointment-card">
-                                <div class="appointment-header">
-                                    <div class="doctor-info">
-                                        <div class="doctor-avatar">
-                                            {{ getInitials(appointment.doctor?.firstName, appointment.doctor?.lastName) }}
-                                        </div>
-                                        <div>
-                                            <h4 class="doctor-name">
-                                                Dr. {{ appointment.doctor?.firstName }} {{ appointment.doctor?.lastName }}
-                                            </h4>
-                                            <p class="doctor-specialty">{{ appointment.doctor?.specialty }}</p>
-                                        </div>
-                                    </div>
-                                    <span class="status-badge" [class]="'status-' + appointment.status">
-                                        {{ appointment.status }}
-                                    </span>
-                                </div>
-
-                                <div class="appointment-details">
-                                    <div class="detail-item">
-                                        <i class="bi bi-calendar3"></i>
-                                        <span>{{ appointment.appointmentDate | date: 'yyyy-MM-dd' }}</span>
-                                    </div>
-                                    <div class="detail-item">
-                                        <i class="bi bi-clock"></i>
-                                        <span>{{ appointment.appointmentTime }}</span>
-                                    </div>
-                                    <div *ngIf="appointment.location" class="detail-item">
-                                        <i class="bi bi-geo-alt"></i>
-                                        <span>{{ appointment.location }}</span>
-                                    </div>
-                                    <div *ngIf="appointment.isVideoConsultation" class="detail-item">
-                                        <i class="bi bi-camera-video"></i>
-                                        <span>Video Consultation</span>
-                                    </div>
-                                </div>
-
-                                <div class="appointment-actions">
-                                    <button *ngIf="appointment.isVideoConsultation && appointment.status === 'confirmed'" class="action-btn action-btn-primary">
-                                        <i class="bi bi-camera-video"></i>
-                                        Join Call
-                                    </button>
-                                    <button class="action-btn action-btn-secondary">Reschedule</button>
-                                    <button class="action-btn action-btn-danger">Cancel</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div *ngIf="activeTab !== 'appointments'" class="tab-content">
-                        <p class="text-muted">Content for {{ activeTab }} will be displayed here.</p>
-                    </div>
-                </div>
-
-                <aside class="sidebar">
-                    <div class="profile-card">
-                        <h3 class="card-title">Profile Information</h3>
-
-                        <div class="profile-header">
-                            <div class="profile-avatar-large">
-                                {{ getInitials(currentUser?.firstName, currentUser?.lastName) }}
-                            </div>
-                            <div>
-                                <h4 class="profile-name">{{ currentUser?.firstName }} {{ currentUser?.lastName }}</h4>
-                                <p class="profile-id">Patient ID: {{ currentUser?.patientId || '#12345' }}</p>
-                            </div>
-                        </div>
-
-                        <div class="profile-details">
-                            <div class="profile-detail-item">
-                                <i class="bi bi-envelope"></i>
-                                <span>{{ currentUser?.email }}</span>
-                            </div>
-                            <div class="profile-detail-item">
-                                <i class="bi bi-telephone"></i>
-                                <span>{{ currentUser?.phoneNumber || '+1 (555) 123-4567' }}</span>
-                            </div>
-                            <div class="profile-detail-item">
-                                <i class="bi bi-person"></i>
-                                <span>
-                                    DOB:
-                                    {{
-                                        currentUser?.dateOfBirth
-                                            ? (currentUser?.dateOfBirth | date: 'MMMM d, yyyy')
-                                            : 'Not provided'
-                                    }}
-                                </span>
-                            </div>
-
-                            <div class="profile-detail-item">
-                                <i class="bi bi-droplet"></i>
-                                <span>Blood Type: {{ currentUser?.bloodType || 'O+' }}</span>
-                            </div>
-                        </div>
-                        <div *ngIf="(currentUser?.allergies?.length ?? 0) > 0" class="allergies-section">
-                            <h5 class="allergies-title">Allergies</h5>
-                            <div class="allergies-list">
-                                <span *ngFor="let allergy of currentUser?.allergies" class="allergy-badge">
-                                    {{ allergy }}
-                                </span>
-                            </div>
-                        </div>
-
-                        <button class="edit-profile-btn">Edit Profile</button>
-                    </div>
-
-                    <div class="quick-actions-card">
-                        <h3 class="card-title">Quick Actions</h3>
-
-                        <div class="quick-actions-list">
-                            <button class="quick-action-btn" (click)="bookAppointment()">
-                                <i class="bi bi-calendar-plus"></i>
-                                <span>Book Appointment</span>
-                            </button>
-                            <button class="quick-action-btn" (click)="downloadRecords()">
-                                <i class="bi bi-download"></i>
-                                <span>Download Records</span>
-                            </button>
-                            <button class="quick-action-btn">
-                                <i class="bi bi-prescription2"></i>
-                                <span>Request Prescription</span>
-                            </button>
-                            <button class="quick-action-btn">
-                                <i class="bi bi-telephone"></i>
-                                <span>Contact Support</span>
-                            </button>
-                        </div>
-                    </div>
-                </aside>
-            </div>
-        </div>
+      </div>
     </div>
+
+    <div class="header-right">
+      <div class="search-bar">
+        <i class="bi bi-search"></i>
+        <input type="text" placeholder="Search appointments, doctors..." [(ngModel)]="searchQuery" (ngModelChange)="onSearchChange()">
+      </div>
+      <button class="emergency-btn" (click)="callEmergency()">
+        <i class="bi bi-telephone-fill"></i>
+        Emergency
+      </button>
+      <app-notification-center></app-notification-center>
+      <div class="profile-avatar">
+        <div class="avatar-circle">
+          {{ getInitials(currentUser?.firstName, currentUser?.lastName) }}
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="dashboard-content">
+    <!-- Welcome Section -->
+    <div class="welcome-section">
+      <h2 class="welcome-title">Welcome back, {{ currentUser?.firstName }} {{ currentUser?.lastName }}</h2>
+      <p class="welcome-subtitle">Manage your appointments and health records</p>
+    </div>
+
+    <!-- Stats Grid -->
+    <!-- Updated stat cards with badge-style labels -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon stat-icon-green">
+          <i class="bi bi-calendar-check"></i>
+        </div>
+        <div class="stat-content">
+          <p class="stat-label">Upcoming</p>
+          <h3 class="stat-value"><span class="stat-badge stat-badge-green">{{ dashboardStats().upcomingAppointments }}</span></h3>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon stat-icon-green">
+          <i class="bi bi-capsule"></i>
+        </div>
+        <div class="stat-content">
+          <p class="stat-label">Active Meds</p>
+          <!-- Replaced inline filter with method call -->
+          <h3 class="stat-value"><span class="stat-badge stat-badge-green">{{ getActivePrescriptionsCount() }}</span></h3>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon stat-icon-green">
+          <i class="bi bi-file-earmark-text"></i>
+        </div>
+        <div class="stat-content">
+          <p class="stat-label">Records</p>
+          <!-- Changed from signal to length for stability -->
+          <h3 class="stat-value"><span class="stat-badge stat-badge-blue">{{ medicalHistory.length }}</span></h3>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon stat-icon-orange">
+          <i class="bi bi-activity"></i>
+        </div>
+        <div class="stat-content">
+          <p class="stat-label">Test Results</p>
+          <!-- Changed from signal to length for stability -->
+          <h3 class="stat-value"><span class="stat-badge stat-badge-blue">{{ testResults.length }}</span></h3>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Grid with Tabs and Sidebar -->
+    <div class="main-grid">
+      <!-- Left Column - Tabs and Content -->
+      <div class="main-section">
+        <!-- Updated tabs styling with blue background -->
+        <div class="tabs">
+          <!-- Replaced direct assignment with method call and updated to use signal -->
+          <button class="tab-btn" [class.active]="activeTab() === 'appointments'" (click)="setActiveTab('appointments')">
+            Appointments
+          </button>
+          <button class="tab-btn" [class.active]="activeTab() === 'history'" (click)="setActiveTab('history')">
+            Medical History
+          </button>
+          <button class="tab-btn" [class.active]="activeTab() === 'prescriptions'" (click)="setActiveTab('prescriptions')">
+            Prescriptions
+          </button>
+          <button class="tab-btn" [class.active]="activeTab() === 'tests'" (click)="setActiveTab('tests')">
+            Test Results
+          </button>
+        </div>
+
+        <!-- Appointments Tab -->
+        <!-- Updated activeTab to signal call -->
+        <div *ngIf="activeTab() === 'appointments'" class="tab-section appointments-section">
+          <!-- Section header now has blue background -->
+          <div class="section-header blue-header">
+            <h3 class="section-title">Upcoming Appointments</h3>
+            <button class="book-btn" (click)="bookAppointment()">
+              <i class="bi bi-plus-lg"></i>
+              Book Appointment
+            </button>
+          </div>
+
+          <div *ngIf="isLoading()" class="loading-state">
+            <div class="spinner"></div>
+          </div>
+
+          <div *ngIf="!isLoading() && appointments.length === 0" class="empty-state">
+            <p>No upcoming appointments</p>
+            <button class="book-btn" (click)="bookAppointment()">Book Your First Appointment</button>
+          </div>
+
+          <div *ngIf="!isLoading() && appointments.length > 0" class="appointments-list">
+            <div *ngFor="let appointment of appointments" class="appointment-card">
+              <div class="appointment-header">
+                <div class="doctor-info">
+                  <div class="doctor-avatar">
+                    {{ getInitials(appointment.doctor?.firstName, appointment.doctor?.lastName) }}
+                  </div>
+                  <div>
+                    <h4 class="doctor-name">
+                      Dr. {{ appointment.doctor?.firstName }} {{ appointment.doctor?.lastName }}
+                    </h4>
+                    <p class="doctor-specialty">{{ appointment.doctor?.specialty }}</p>
+                  </div>
+                </div>
+                <span class="status-badge" [class]="'status-' + appointment.status">
+                  {{ appointment.status }}
+                </span>
+              </div>
+
+              <div class="appointment-details">
+                <div class="detail-item">
+                  <i class="bi bi-calendar3"></i>
+                  <span>{{ appointment.appointmentDate | date: 'yyyy-MM-dd' }}</span>
+                </div>
+                <div class="detail-item">
+                  <i class="bi bi-clock"></i>
+                  <span>{{ appointment.appointmentTime }}</span>
+                </div>
+                <div *ngIf="appointment.location" class="detail-item">
+                  <i class="bi bi-geo-alt"></i>
+                  <span>{{ appointment.location }}</span>
+                </div>
+              </div>
+
+              <div class="appointment-actions">
+                <button *ngIf="appointment.isVideoConsultation && appointment.status === 'confirmed'" class="action-btn action-btn-primary">
+                  <i class="bi bi-camera-video"></i>
+                  Join Call
+                </button>
+                <button class="action-btn action-btn-secondary">Reschedule</button>
+                <button class="action-btn action-btn-danger">Cancel</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Medical History Tab -->
+        <!-- Updated activeTab to signal call -->
+        <div *ngIf="activeTab() === 'history'" class="tab-section">
+          <div class="section-header blue-header">
+            <h3 class="section-title">Medical History</h3>
+          </div>
+          <div class="tab-content">
+            <div class="history-list">
+              <div *ngFor="let record of medicalHistory" class="history-card">
+                <div class="history-header">
+                  <div>
+                    <h4 class="history-title">{{ record.diagnosis }}</h4>
+                    <p class="history-doctor">{{ record.doctor }}</p>
+                  </div>
+                  <span class="history-date">{{ record.date }}</span>
+                </div>
+                <p class="history-notes">{{ record.notes }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Prescriptions Tab -->
+        <!-- Updated activeTab to signal call -->
+        <div *ngIf="activeTab() === 'prescriptions'" class="tab-section">
+          <div class="section-header blue-header">
+            <h3 class="section-title">Active Prescriptions</h3>
+          </div>
+          <div class="tab-content">
+            <div class="prescriptions-list">
+              <div *ngFor="let prescription of prescriptions" class="prescription-card">
+                <div class="prescription-header">
+                  <div>
+                    <h4 class="prescription-name">{{ prescription.medication }}</h4>
+                    <p class="prescription-dosage">{{ prescription.dosage }}</p>
+                  </div>
+                  <span class="status-badge" [class]="'status-' + prescription.status">
+                    {{ prescription.status }}
+                  </span>
+                </div>
+                <div class="prescription-details">
+                  <div class="detail-row">
+                    <span>Prescribed by:</span>
+                    <span class="detail-value">{{ prescription.prescribedBy }}</span>
+                  </div>
+                  <div class="detail-row">
+                    <span>Start Date:</span>
+                    <span class="detail-value">{{ prescription.startDate }}</span>
+                  </div>
+                  <div class="detail-row">
+                    <span>Refills Remaining:</span>
+                    <span class="detail-value">{{ prescription.refills }}</span>
+                  </div>
+                </div>
+                <button *ngIf="prescription.status === 'active'" class="request-refill-btn" (click)="requestRefill(prescription)">
+                  Request Refill
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Test Results Tab -->
+        <!-- Updated activeTab to signal call -->
+        <div *ngIf="activeTab() === 'tests'" class="tab-section">
+          <div class="section-header blue-header">
+            <h3 class="section-title">Recent Test Results</h3>
+          </div>
+          <div class="tab-content">
+            <div class="tests-list">
+              <div *ngFor="let test of testResults" class="test-card">
+                <div class="test-header">
+                  <div>
+                    <h4 class="test-name">{{ test.test }}</h4>
+                    <p class="test-doctor">Ordered by {{ test.orderedBy }}</p>
+                  </div>
+                  <span class="status-badge" [class]="getStatusBadgeClass(test.status)">
+                    {{ test.status }}
+                  </span>
+                </div>
+                <div class="test-footer">
+                  <span class="test-date">{{ test.date }}</span>
+                  <button class="view-details-btn" (click)="viewDetails(test)">View Details</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column - Profile Sidebar -->
+      <aside class="sidebar">
+        <div class="profile-card">
+          <h3 class="card-title">Profile Information</h3>
+
+          <div class="profile-header">
+            <div class="profile-avatar-large">
+              {{ getInitials(currentUser?.firstName, currentUser?.lastName) }}
+            </div>
+            <div>
+              <h4 class="profile-name">{{ currentUser?.firstName }} {{ currentUser?.lastName }}</h4>
+              <p class="profile-id">Patient ID: {{ currentUser?.patientId || '#12345' }}</p>
+            </div>
+          </div>
+
+          <div class="profile-details">
+            <div class="profile-detail-item">
+              <i class="bi bi-envelope"></i>
+              <span>{{ currentUser?.email }}</span>
+            </div>
+            <div class="profile-detail-item">
+              <i class="bi bi-telephone"></i>
+              <span>{{ currentUser?.phoneNumber || '+1 (555) 123-4567' }}</span>
+            </div>
+            <div class="profile-detail-item">
+              <i class="bi bi-person"></i>
+              <span>
+                DOB:
+                {{
+                  currentUser?.dateOfBirth
+                    ? (currentUser?.dateOfBirth | date: 'MMMM d, yyyy')
+                    : 'Not provided'
+                }}
+              </span>
+            </div>
+
+            <div class="profile-detail-item">
+              <i class="bi bi-droplet"></i>
+              <span>Blood Type: {{ currentUser?.bloodType || 'O+' }}</span>
+            </div>
+          </div>
+
+          <div *ngIf="(currentUser?.allergies?.length ?? 0) > 0" class="allergies-section">
+            <h5 class="allergies-title">Allergies</h5>
+            <div class="allergies-list">
+              <span *ngFor="let allergy of currentUser?.allergies" class="allergy-badge">
+                {{ allergy }}
+              </span>
+            </div>
+          </div>
+
+          <button class="edit-profile-btn">Edit Profile</button>
+        </div>
+      </aside>
+    </div>
+  </div>
 </div>

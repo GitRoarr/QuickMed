@@ -1,9 +1,19 @@
-import { Component,  OnInit } from "@angular/core"
+import { Component, OnInit } from "@angular/core"
 import { CommonModule } from "@angular/common"
-import  { AppointmentService } from "@core/services/appointment.service"
-import  { Appointment } from "@core/models/appointment.model"
+import { AppointmentService } from "@core/services/appointment.service"
+import { Appointment } from "@core/models/appointment.model"
 import  { ThemeService } from "@core/services/theme.service"
-import { AppointmentStatus } from "@core/models/appointment.model"
+
+interface AppointmentData {
+  id: number
+  time: string
+  patient: string
+  age: number
+  type: string
+  status: string
+  reason: string
+  duration: string
+}
 
 @Component({
   selector: "app-doctor-dashboard",
@@ -24,6 +34,27 @@ export class DashboardComponent implements OnInit {
   doctorSpecialty = "Cardiologist"
   doctorDepartment = "Cardiology Department"
   doctorLicense = "MD-12345"
+
+  todayAppointments: AppointmentData[] = [
+    {
+      id: 1,
+      time: "09:00 AM",
+      patient: "Sarah Johnson",
+      age: 38,
+      type: "Follow-up",
+      status: "completed",
+      reason: "Hypertension checkup",
+      duration: "30 min",
+    },
+  ]
+
+  todayStats = {
+    totalAppointments: 12,
+    completed: 7,
+    pending: 3,
+    patients: 12,
+    cancelled: 2,
+  }
 
   weekStats = {
     totalPatients: 48,
@@ -59,38 +90,32 @@ export class DashboardComponent implements OnInit {
   }
 
   getTodayTotal(): number {
-    return this.appointments.length
+    return this.todayStats.totalAppointments
   }
 
   getCompletedCount(): number {
-    return this.appointments.filter((a) => a.status === "completed").length
+    return this.todayStats.completed
   }
 
   getPendingCount(): number {
-    return this.appointments.filter(
-      (a) => a.status === AppointmentStatus.PENDING || a.status === AppointmentStatus.CONFIRMED!,
-    ).length
+    return this.todayStats.pending
   }
 
   getPatientCount(): number {
-    const uniquePatients = new Set(this.appointments.map((a) => a.patientId))
-    return uniquePatients.size
+    return this.todayStats.patients
   }
 
   getCancelledCount(): number {
-    return this.appointments.filter((a) => a.status === "cancelled").length
+    return this.todayStats.cancelled
   }
 
-  getInitials(patient: any): string {
-    if (!patient) return "??"
-    const first = patient.firstName?.charAt(0) || ""
-    const last = patient.lastName?.charAt(0) || ""
-    return (first + last).toUpperCase()
-  }
-
-  getPatientAge(patient: any): number {
-    // Mock age calculation - would use actual birthdate in real app
-    return Math.floor(Math.random() * 50) + 20
+  getInitials(name: string): string {
+    if (!name) return "??"
+    return name
+      .split(" ")
+      .map((n) => n.charAt(0))
+      .join("")
+      .toUpperCase()
   }
 
   getStatusClass(status: string): string {
@@ -129,11 +154,9 @@ export class DashboardComponent implements OnInit {
 
   viewRecords(appointment: Appointment): void {
     console.log("[v0] Viewing records for:", appointment)
-    // Implementation for viewing records
   }
 
   addNotes(appointment: Appointment): void {
     console.log("[v0] Adding notes for:", appointment)
-    // Implementation for adding notes
   }
 }
