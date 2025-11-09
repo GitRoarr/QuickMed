@@ -1,331 +1,319 @@
-<div class="dashboard-container">
-  <!-- Header with Logo, Search, and Actions -->
-  <header class="dashboard-header">
-    <div class="header-left">
-      <div class="logo-section">
-        <div class="logo-icon">
-          <svg width="32" height="32" viewBox="0 0 40 40" fill="none">
-            <rect width="40" height="40" rx="8" fill="url(#patientGradient)"/>
-            <path d="M20 10L28 16V24L20 30L12 24V16L20 10Z" fill="white"/>
-            <defs>
-              <linearGradient id="patientGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" style="stop-color:#10b981;stop-opacity:1" />
-                <stop offset="100%" style="stop-color:#059669;stop-opacity:1" />
-              </linearGradient>
-            </defs>
-          </svg>
-        </div>
-        <div class="brand-info">
-          <h3 class="brand-name">QuickMed</h3>
-          <p class="brand-subtitle">Patient Portal</p>
-        </div>
+<div class="container-fluid py-4">
+
+  <!-- ==================== HEADER ==================== -->
+  <header class="bg-white shadow-sm rounded-3 mb-4 p-3 d-flex align-items-center justify-content-between">
+    <div class="d-flex align-items-center gap-3">
+      <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center" style="width:44px;height:44px;">
+        <i class="bi bi-shield-fill"></i>
+      </div>
+      <div>
+        <h3 class="mb-0 fw-bold">QuickMed</h3>
+        <small class="text-muted">Patient Portal</small>
       </div>
     </div>
 
-    <div class="header-right">
-      <div class="search-bar">
-        <i class="bi bi-search"></i>
-        <input type="text" placeholder="Search appointments, doctors..." [(ngModel)]="searchQuery" (ngModelChange)="onSearchChange()">
+    <div class="d-flex align-items-center gap-3">
+      <div class="position-relative d-none d-md-block">
+        <i class="bi bi-search position-absolute top-50 start-3 translate-middle-y text-muted"></i>
+        <input [(ngModel)]="searchQuery" class="form-control ps-5" placeholder="Search appointments, doctors..." style="width:300px;">
       </div>
-      <button class="emergency-btn" (click)="callEmergency()">
-        <i class="bi bi-telephone-fill"></i>
-        Emergency
+
+      <button class="btn btn-danger d-flex align-items-center gap-2" (click)="callEmergency()">
+        <i class="bi bi-telephone-fill"></i> Emergency
       </button>
-      <app-notification-center></app-notification-center>
-      <div class="profile-avatar">
-        <div class="avatar-circle">
-          {{ getInitials(currentUser?.firstName, currentUser?.lastName) }}
-        </div>
+
+      <div class="position-relative">
+        <i class="bi bi-bell fs-4 text-muted"></i>
+        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">2</span>
+      </div>
+
+      <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center fw-bold"
+           style="width:40px;height:40px;">
+        {{ getInitials(user()?.firstName, user()?.lastName) }}
       </div>
     </div>
   </header>
 
-  <div class="dashboard-content">
-    <!-- Welcome Section -->
-    <div class="welcome-section">
-      <h2 class="welcome-title">Welcome back, {{ currentUser?.firstName }} {{ currentUser?.lastName }}</h2>
-      <p class="welcome-subtitle">Manage your appointments and health records</p>
-    </div>
+  <!-- ==================== WELCOME ==================== -->
+  <section class="mb-4">
+    <h2 class="fw-bold">Welcome back, {{ user()?.firstName }} {{ user()?.lastName }}</h2>
+    <p class="text-muted">Manage your appointments and health records</p>
+  </section>
 
-    <!-- Stats Grid -->
-    <!-- Updated stat cards with badge-style labels -->
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-icon stat-icon-green">
-          <i class="bi bi-calendar-check"></i>
-        </div>
-        <div class="stat-content">
-          <p class="stat-label">Upcoming</p>
-          <h3 class="stat-value"><span class="stat-badge stat-badge-green">{{ dashboardStats().upcomingAppointments }}</span></h3>
-        </div>
-      </div>
-
-      <div class="stat-card">
-        <div class="stat-icon stat-icon-green">
-          <i class="bi bi-capsule"></i>
-        </div>
-        <div class="stat-content">
-          <p class="stat-label">Active Meds</p>
-          <!-- Replaced inline filter with method call -->
-          <h3 class="stat-value"><span class="stat-badge stat-badge-green">{{ getActivePrescriptionsCount() }}</span></h3>
-        </div>
-      </div>
-
-      <div class="stat-card">
-        <div class="stat-icon stat-icon-green">
-          <i class="bi bi-file-earmark-text"></i>
-        </div>
-        <div class="stat-content">
-          <p class="stat-label">Records</p>
-          <!-- Changed from signal to length for stability -->
-          <h3 class="stat-value"><span class="stat-badge stat-badge-blue">{{ medicalHistory.length }}</span></h3>
-        </div>
-      </div>
-
-      <div class="stat-card">
-        <div class="stat-icon stat-icon-orange">
-          <i class="bi bi-activity"></i>
-        </div>
-        <div class="stat-content">
-          <p class="stat-label">Test Results</p>
-          <!-- Changed from signal to length for stability -->
-          <h3 class="stat-value"><span class="stat-badge stat-badge-blue">{{ testResults.length }}</span></h3>
+  <!-- ==================== STATS ==================== -->
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body d-flex align-items-center gap-3">
+          <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center" style="width:50px;height:50px;">
+            <i class="bi bi-calendar-check"></i>
+          </div>
+          <div>
+            <p class="mb-0 text-muted small">Upcoming</p>
+            <h4 class="mb-0 fw-bold">
+              <span class="badge bg-success fs-5">{{ stats().upcomingAppointments }}</span>
+            </h4>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- Main Grid with Tabs and Sidebar -->
-    <div class="main-grid">
-      <!-- Left Column - Tabs and Content -->
-      <div class="main-section">
-        <!-- Updated tabs styling with blue background -->
-        <div class="tabs">
-          <!-- Replaced direct assignment with method call and updated to use signal -->
-          <button class="tab-btn" [class.active]="activeTab() === 'appointments'" (click)="setActiveTab('appointments')">
-            Appointments
-          </button>
-          <button class="tab-btn" [class.active]="activeTab() === 'history'" (click)="setActiveTab('history')">
-            Medical History
-          </button>
-          <button class="tab-btn" [class.active]="activeTab() === 'prescriptions'" (click)="setActiveTab('prescriptions')">
-            Prescriptions
-          </button>
-          <button class="tab-btn" [class.active]="activeTab() === 'tests'" (click)="setActiveTab('tests')">
-            Test Results
-          </button>
+    <div class="col-6 col-lg-3">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body d-flex align-items-center gap-3">
+          <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center" style="width:50px;height:50px;">
+            <i class="bi bi-capsule"></i>
+          </div>
+          <div>
+            <p class="mb-0 text-muted small">Active Meds</p>
+            <h4 class="mb-0 fw-bold">
+              <span class="badge bg-success fs-5">{{ stats().activeMeds }}</span>
+            </h4>
+          </div>
         </div>
+      </div>
+    </div>
 
-        <!-- Appointments Tab -->
-        <!-- Updated activeTab to signal call -->
-        <div *ngIf="activeTab() === 'appointments'" class="tab-section appointments-section">
-          <!-- Section header now has blue background -->
-          <div class="section-header blue-header">
-            <h3 class="section-title">Upcoming Appointments</h3>
-            <button class="book-btn" (click)="bookAppointment()">
-              <i class="bi bi-plus-lg"></i>
-              Book Appointment
+    <div class="col-6 col-lg-3">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body d-flex align-items-center gap-3">
+          <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width:50px;height:50px;">
+            <i class="bi bi-file-earmark-text"></i>
+          </div>
+          <div>
+            <p class="mb-0 text-muted small">Records</p>
+            <h4 class="mb-0 fw-bold">
+              <span class="badge bg-primary fs-5">{{ stats().records }}</span>
+            </h4>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-6 col-lg-3">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body d-flex align-items-center gap-3">
+          <div class="bg-warning text-dark rounded-circle d-flex align-items-center justify-content-center" style="width:50px;height:50px;">
+            <i class="bi bi-activity"></i>
+          </div>
+          <div>
+            <p class="mb-0 text-muted small">Test Results</p>
+            <h4 class="mb-0 fw-bold">
+              <span class="badge bg-primary fs-5">{{ stats().testResults }}</span>
+            </h4>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MAIN GRID ==================== -->
+  <div class="row g-4">
+
+    <!-- LEFT: TABS + CONTENT -->
+    <div class="col-lg-8">
+
+      <!-- TABS -->
+      <ul class="nav nav-tabs mb-3">
+        <li class="nav-item">
+          <button class="nav-link" [class.active]="activeTab() === 'appointments'" (click)="setTab('appointments')">Appointments</button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-link" [class.active]="activeTab() === 'history'" (click)="setTab('history')">Medical History</button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-link" [class.active]="activeTab() === 'prescriptions'" (click)="setTab('prescriptions')">Prescriptions</button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-link" [class.active]="activeTab() === 'tests'" (click)="setTab('tests')">Test Results</button>
+        </li>
+      </ul>
+
+      <!-- TAB CONTENT -->
+      <div class="card border-0 shadow-sm">
+
+        <!-- APPOINTMENTS -->
+        <div *ngIf="activeTab() === 'appointments'" class="card-body">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="mb-0 fw-bold">Upcoming Appointments</h5>
+            <button class="btn btn-success btn-sm d-flex align-items-center gap-1" (click)="bookAppointment()">
+              <i class="bi bi-plus-lg"></i> Book Appointment
             </button>
           </div>
 
-          <div *ngIf="isLoading()" class="loading-state">
-            <div class="spinner"></div>
+          <div *ngIf="isLoading()" class="text-center py-5">
+            <div class="spinner-border text-success" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
           </div>
 
-          <div *ngIf="!isLoading() && appointments.length === 0" class="empty-state">
-            <p>No upcoming appointments</p>
-            <button class="book-btn" (click)="bookAppointment()">Book Your First Appointment</button>
+          <div *ngIf="!isLoading() && appointments().length === 0" class="text-center py-5 text-muted">
+            <p class="mb-3">No upcoming appointments</p>
+            <button class="btn btn-success" (click)="bookAppointment()">Book Your First Appointment</button>
           </div>
 
-          <div *ngIf="!isLoading() && appointments.length > 0" class="appointments-list">
-            <div *ngFor="let appointment of appointments" class="appointment-card">
-              <div class="appointment-header">
-                <div class="doctor-info">
-                  <div class="doctor-avatar">
-                    {{ getInitials(appointment.doctor?.firstName, appointment.doctor?.lastName) }}
-                  </div>
-                  <div>
-                    <h4 class="doctor-name">
-                      Dr. {{ appointment.doctor?.firstName }} {{ appointment.doctor?.lastName }}
-                    </h4>
-                    <p class="doctor-specialty">{{ appointment.doctor?.specialty }}</p>
-                  </div>
+          <div *ngFor="let a of appointments()" class="border rounded-3 p-3 mb-3 bg-light">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <div class="d-flex align-items-center gap-3">
+                <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center fw-bold"
+                     style="width:40px;height:40px;">
+                  {{ getInitials(a.doctor.firstName, a.doctor.lastName) }}
                 </div>
-                <span class="status-badge" [class]="'status-' + appointment.status">
-                  {{ appointment.status }}
-                </span>
+                <div>
+                  <h6 class="mb-0">Dr. {{ a.doctor.firstName }} {{ a.doctor.lastName }}</h6>
+                  <small class="text-muted">{{ a.doctor.specialty }}</small>
+                </div>
               </div>
+              <span class="badge"
+                    [class.bg-success]="a.status === 'confirmed'"
+                    [class.bg-warning]="a.status === 'pending'">
+                {{ a.status }}
+              </span>
+            </div>
 
-              <div class="appointment-details">
-                <div class="detail-item">
-                  <i class="bi bi-calendar3"></i>
-                  <span>{{ appointment.appointmentDate | date: 'yyyy-MM-dd' }}</span>
-                </div>
-                <div class="detail-item">
-                  <i class="bi bi-clock"></i>
-                  <span>{{ appointment.appointmentTime }}</span>
-                </div>
-                <div *ngIf="appointment.location" class="detail-item">
-                  <i class="bi bi-geo-alt"></i>
-                  <span>{{ appointment.location }}</span>
-                </div>
-              </div>
+            <div class="row g-2 small text-muted mb-2">
+              <div class="col-auto"><i class="bi bi-calendar3"></i> {{ a.appointmentDate | date:'MMM d, yyyy' }}</div>
+              <div class="col-auto"><i class="bi bi-clock"></i> {{ a.appointmentTime }}</div>
+              <div class="col" *ngIf="a.location"><i class="bi bi-geo-alt"></i> {{ a.location }}</div>
+            </div>
 
-              <div class="appointment-actions">
-                <button *ngIf="appointment.isVideoConsultation && appointment.status === 'confirmed'" class="action-btn action-btn-primary">
-                  <i class="bi bi-camera-video"></i>
-                  Join Call
-                </button>
-                <button class="action-btn action-btn-secondary">Reschedule</button>
-                <button class="action-btn action-btn-danger">Cancel</button>
-              </div>
+            <div class="d-flex gap-2">
+              <button *ngIf="a.isVideoConsultation && a.status === 'confirmed'" class="btn btn-success btn-sm">
+                <i class="bi bi-camera-video"></i> Join Call
+              </button>
+              <button class="btn btn-outline-secondary btn-sm">Reschedule</button>
+              <button class="btn btn-outline-danger btn-sm">Cancel</button>
             </div>
           </div>
         </div>
 
-        <!-- Medical History Tab -->
-        <!-- Updated activeTab to signal call -->
-        <div *ngIf="activeTab() === 'history'" class="tab-section">
-          <div class="section-header blue-header">
-            <h3 class="section-title">Medical History</h3>
-          </div>
-          <div class="tab-content">
-            <div class="history-list">
-              <div *ngFor="let record of medicalHistory" class="history-card">
-                <div class="history-header">
-                  <div>
-                    <h4 class="history-title">{{ record.diagnosis }}</h4>
-                    <p class="history-doctor">{{ record.doctor }}</p>
-                  </div>
-                  <span class="history-date">{{ record.date }}</span>
-                </div>
-                <p class="history-notes">{{ record.notes }}</p>
+        <!-- MEDICAL HISTORY -->
+        <div *ngIf="activeTab() === 'history'" class="card-body">
+          <h5 class="mb-3 fw-bold">Medical History</h5>
+          <div *ngFor="let r of medicalHistory()" class="border rounded-3 p-3 mb-3 bg-light">
+            <div class="d-flex justify-content-between mb-1">
+              <div>
+                <h6 class="mb-0">{{ r.diagnosis }}</h6>
+                <small class="text-muted">{{ r.doctor }}</small>
               </div>
+              <small class="text-muted">{{ r.date | date:'MMM d, yyyy' }}</small>
+            </div>
+            <p class="mb-0 small text-muted">{{ r.notes }}</p>
+          </div>
+        </div>
+
+        <!-- PRESCRIPTIONS -->
+        <div *ngIf="activeTab() === 'prescriptions'" class="card-body">
+          <h5 class="mb-3 fw-bold">Active Prescriptions</h5>
+          <div *ngFor="let p of prescriptions()" class="border rounded-3 p-3 mb-3 bg-light">
+            <div class="d-flex justify-content-between mb-2">
+              <div>
+                <h6 class="mb-0">{{ p.medication }}</h6>
+                <small class="text-muted">{{ p.dosage }}</small>
+              </div>
+              <span class="badge"
+                    [class.bg-success]="p.status === 'active'"
+                    [class.bg-secondary]="p.status === 'completed'">
+                {{ p.status }}
+              </span>
+            </div>
+            <div class="small text-muted mb-2">
+              <div><strong>Prescribed by:</strong> {{ p.prescribedBy }}</div>
+              <div><strong>Start Date:</strong> {{ p.startDate | date:'MMM d, yyyy' }}</div>
+              <div><strong>Refills Remaining:</strong> {{ p.refills }}</div>
+            </div>
+            <button *ngIf="p.status === 'active'" class="btn btn-success w-100" (click)="requestRefill(p)">
+              Request Refill
+            </button>
+          </div>
+        </div>
+
+        <!-- TEST RESULTS -->
+        <div *ngIf="activeTab() === 'tests'" class="card-body">
+          <h5 class="mb-3 fw-bold">Recent Test Results</h5>
+          <div *ngFor="let t of testResults()" class="border rounded-3 p-3 mb-3 bg-light">
+            <div class="d-flex justify-content-between mb-2">
+              <div>
+                <h6 class="mb-0">{{ t.test }}</h6>
+                <small class="text-muted">Ordered by {{ t.orderedBy }}</small>
+              </div>
+              <span class="badge"
+                    [class.bg-success]="t.status === 'Normal'"
+                    [class.bg-warning]="t.status === 'Slightly Elevated'"
+                    [class.bg-info]="t.status.includes('Positive')">
+                {{ t.status }}
+              </span>
+            </div>
+            <div class="d-flex justify-content-between align-items-center">
+              <small class="text-muted">{{ t.date | date:'MMM d, yyyy' }}</small>
+              <button class="btn btn-outline-success btn-sm" (click)="viewTestDetails(t)">
+                View Details
+              </button>
             </div>
           </div>
         </div>
 
-        <!-- Prescriptions Tab -->
-        <!-- Updated activeTab to signal call -->
-        <div *ngIf="activeTab() === 'prescriptions'" class="tab-section">
-          <div class="section-header blue-header">
-            <h3 class="section-title">Active Prescriptions</h3>
-          </div>
-          <div class="tab-content">
-            <div class="prescriptions-list">
-              <div *ngFor="let prescription of prescriptions" class="prescription-card">
-                <div class="prescription-header">
-                  <div>
-                    <h4 class="prescription-name">{{ prescription.medication }}</h4>
-                    <p class="prescription-dosage">{{ prescription.dosage }}</p>
-                  </div>
-                  <span class="status-badge" [class]="'status-' + prescription.status">
-                    {{ prescription.status }}
-                  </span>
-                </div>
-                <div class="prescription-details">
-                  <div class="detail-row">
-                    <span>Prescribed by:</span>
-                    <span class="detail-value">{{ prescription.prescribedBy }}</span>
-                  </div>
-                  <div class="detail-row">
-                    <span>Start Date:</span>
-                    <span class="detail-value">{{ prescription.startDate }}</span>
-                  </div>
-                  <div class="detail-row">
-                    <span>Refills Remaining:</span>
-                    <span class="detail-value">{{ prescription.refills }}</span>
-                  </div>
-                </div>
-                <button *ngIf="prescription.status === 'active'" class="request-refill-btn" (click)="requestRefill(prescription)">
-                  Request Refill
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+      </div>
+    </div>
 
-        <!-- Test Results Tab -->
-        <!-- Updated activeTab to signal call -->
-        <div *ngIf="activeTab() === 'tests'" class="tab-section">
-          <div class="section-header blue-header">
-            <h3 class="section-title">Recent Test Results</h3>
-          </div>
-          <div class="tab-content">
-            <div class="tests-list">
-              <div *ngFor="let test of testResults" class="test-card">
-                <div class="test-header">
-                  <div>
-                    <h4 class="test-name">{{ test.test }}</h4>
-                    <p class="test-doctor">Ordered by {{ test.orderedBy }}</p>
-                  </div>
-                  <span class="status-badge" [class]="getStatusBadgeClass(test.status)">
-                    {{ test.status }}
-                  </span>
-                </div>
-                <div class="test-footer">
-                  <span class="test-date">{{ test.date }}</span>
-                  <button class="view-details-btn" (click)="viewDetails(test)">View Details</button>
-                </div>
-              </div>
+    <!-- RIGHT: SIDEBAR -->
+    <div class="col-lg-4">
+      <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+          <h5 class="fw-bold mb-3">Profile Information</h5>
+
+          <div class="d-flex align-items-center gap-3 mb-3">
+            <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center fw-bold"
+                 style="width:56px;height:56px;font-size:1.2rem;">
+              {{ getInitials(user()?.firstName, user()?.lastName) }}
+            </div>
+            <div>
+              <h6 class="mb-0">{{ user()?.firstName }} {{ user()?.lastName }}</h6>
+              <small class="text-muted">Patient ID: {{ user()?.patientId }}</small>
             </div>
           </div>
+
+          <div class="small text-muted">
+            <div class="d-flex align-items-center gap-2 mb-1"><i class="bi bi-envelope"></i> {{ user()?.email }}</div>
+            <div class="d-flex align-items-center gap-2 mb-1"><i class="bi bi-telephone"></i> {{ user()?.phoneNumber }}</div>
+            <div class="d-flex align-items-center gap-2 mb-1"><i class="bi bi-calendar"></i>
+              DOB: {{ user()?.dateOfBirth ? (user()?.dateOfBirth | date:'MMMM d, yyyy') : '—' }}
+            </div>
+            <div class="d-flex align-items-center gap-2 mb-3"><i class="bi bi-droplet"></i> Blood Type: {{ user()?.bloodType }}</div>
+          </div>
+          <div *ngIf="user()?.allergies?.length">
+  <strong class="d-block mb-1">Allergies</strong>
+  <div class="d-flex flex-wrap gap-1">
+    <span *ngFor="let a of user()!.allergies" class="badge bg-danger text-white">{{ a }}</span>
+  </div>
+</div>
+
+
+    
+
+
+          <button class="btn btn-success w-100 mt-3">Edit Profile</button>
         </div>
       </div>
 
-      <!-- Right Column - Profile Sidebar -->
-      <aside class="sidebar">
-        <div class="profile-card">
-          <h3 class="card-title">Profile Information</h3>
-
-          <div class="profile-header">
-            <div class="profile-avatar-large">
-              {{ getInitials(currentUser?.firstName, currentUser?.lastName) }}
-            </div>
-            <div>
-              <h4 class="profile-name">{{ currentUser?.firstName }} {{ currentUser?.lastName }}</h4>
-              <p class="profile-id">Patient ID: {{ currentUser?.patientId || '#12345' }}</p>
-            </div>
-          </div>
-
-          <div class="profile-details">
-            <div class="profile-detail-item">
-              <i class="bi bi-envelope"></i>
-              <span>{{ currentUser?.email }}</span>
-            </div>
-            <div class="profile-detail-item">
-              <i class="bi bi-telephone"></i>
-              <span>{{ currentUser?.phoneNumber || '+1 (555) 123-4567' }}</span>
-            </div>
-            <div class="profile-detail-item">
-              <i class="bi bi-person"></i>
-              <span>
-                DOB:
-                {{
-                  currentUser?.dateOfBirth
-                    ? (currentUser?.dateOfBirth | date: 'MMMM d, yyyy')
-                    : 'Not provided'
-                }}
-              </span>
-            </div>
-
-            <div class="profile-detail-item">
-              <i class="bi bi-droplet"></i>
-              <span>Blood Type: {{ currentUser?.bloodType || 'O+' }}</span>
-            </div>
-          </div>
-
-          <div *ngIf="(currentUser?.allergies?.length ?? 0) > 0" class="allergies-section">
-            <h5 class="allergies-title">Allergies</h5>
-            <div class="allergies-list">
-              <span *ngFor="let allergy of currentUser?.allergies" class="allergy-badge">
-                {{ allergy }}
-              </span>
-            </div>
-          </div>
-
-          <button class="edit-profile-btn">Edit Profile</button>
+      <!-- QUICK ACTIONS -->
+      <div class="card border-0 shadow-sm">
+        <div class="card-body">
+          <h5 class="fw-bold mb-3">Quick Actions</h5>
+          <button class="btn btn-outline-success w-100 mb-2 d-flex align-items-center justify-content-start gap-2">
+            <i class="bi bi-calendar-plus"></i> Book Appointment
+          </button>
+          <button class="btn btn-outline-success w-100 mb-2 d-flex align-items-center justify-content-start gap-2">
+            <i class="bi bi-cloud-download"></i> Download Records
+          </button>
+          <button class="btn btn-outline-success w-100 mb-2 d-flex align-items-center justify-content-start gap-2">
+            <i class="bi bi-prescription"></i> Request Prescription
+          </button>
+          <button class="btn btn-outline-success w-100 d-flex align-items-center justify-content-start gap-2">
+            <i class="bi bi-headset"></i> Contact Support
+          </button>
         </div>
-      </aside>
+      </div>
     </div>
   </div>
 </div>

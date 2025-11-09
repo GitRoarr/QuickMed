@@ -1,383 +1,202 @@
-// dashboard.component.ts
-import { Component,  OnInit, signal } from "@angular/core"
-import { CommonModule } from "@angular/common"
-import { RouterLink,  Router } from "@angular/router"
-import { FormsModule } from "@angular/forms"
-import  { AppointmentService } from "@core/services/appointment.service"
-import  { AuthService } from "@core/services/auth.service"
-import  { Appointment } from "@core/models/appointment.model"
-import  { User } from "@core/models/user.model"
-import { NotificationCenterComponent } from "@app/shared/components/notification-center/notification-center.component"
+import { Component, OnInit, inject, signal } from '@angular/core';
+import { CommonModule, DatePipe } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
+import { catchError, of, tap } from 'rxjs';
 
-interface DashboardStats {
-  upcomingAppointments: number
-  totalAppointments: number
-  completedAppointments: number
-  cancelledAppointments: number
-  medicalRecords: number
-  prescriptions: number
-  testResults: number
+interface User {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phoneNumber?: string;
+  dateOfBirth?: string;
+  bloodType?: string;
+  patientId?: string;
+  allergies?: string[];
+}
+
+interface Appointment {
+  id: string;
+  doctor: { firstName: string; lastName: string; specialty: string };
+  appointmentDate: string;
+  appointmentTime: string;
+  location?: string;
+  status: 'confirmed' | 'pending' | 'completed' | 'cancelled';
+  isVideoConsultation?: boolean;
 }
 
 interface MedicalRecord {
-  id: number
-  date: string
-  doctor: string
-  diagnosis: string
-  notes: string
+  id: string;
+  date: string;
+  doctor: string;
+  diagnosis: string;
+  notes: string;
 }
 
 interface Prescription {
-  id: number
-  medication: string
-  dosage: string
-  prescribedBy: string
-  startDate: string
-  refills: number
-  status: "active" | "completed"
+  id: string;
+  medication: string;
+  dosage: string;
+  prescribedBy: string;
+  startDate: string;
+  refills: number;
+  status: 'active' | 'completed';
 }
 
 interface TestResult {
-  id: number
-  test: string
-  date: string
-  status: string
-  orderedBy: string
+  id: string;
+  test: string;
+  date: string;
+  status: string;
+  orderedBy: string;
 }
 
 @Component({
-  selector: "app-patient-dashboard",
+  selector: 'app-patient-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule, NotificationCenterComponent],
-  templateUrl: "./dashboard.component.html",
-  styleUrls: ["./dashboard.component.css"],
+  imports: [CommonModule, FormsModule, DatePipe],
+  templateUrl : './dashboard.component.html',
+  styleUrls: ['./dashboard.component.css']
 })
 export class DashboardComponent implements OnInit {
-  appointments: Appointment[] = []
-  filteredAppointments: Appointment[] = []
-  isLoading = signal(true)
-  activeTab = signal("appointments")
-  currentUser: User | null = null
-  searchQuery = signal("")
-  sidebarCollapsed = signal(false)
-  isDarkMode = signal(false)
-  showNotifications = signal(false)
-  notificationCount = signal(0)
+  private http = inject(HttpClient);
+  private router = inject(Router);
 
-  dashboardStats = signal<DashboardStats>({
+  // Signals
+  isLoading = signal(true);
+  activeTab = signal<'appointments' | 'history' | 'prescriptions' | 'tests'>('appointments');
+  searchQuery = signal('');
+  user = signal<User | null>(null);
+
+  appointments = signal<Appointment[]>([]);
+  medicalHistory = signal<MedicalRecord[]>([]);
+  prescriptions = signal<Prescription[]>([]);
+  testResults = signal<TestResult[]>([]);
+
+  stats = signal({
     upcomingAppointments: 0,
-    totalAppointments: 0,
-    completedAppointments: 0,
-    cancelledAppointments: 0,
-    medicalRecords: 0,
-    prescriptions: 0,
-    testResults: 0,
-  })
-
-  medicalHistory: MedicalRecord[] = [
-    {
-      id: 1,
-      date: "2025-09-15",
-      doctor: "Dr. Michael Chen",
-      diagnosis: "Annual Checkup",
-      notes: "Blood pressure normal, cholesterol slightly elevated. Recommended dietary changes.",
-    },
-    {
-      id: 2,
-      date: "2025-08-03",
-      doctor: "Dr. Emily Rodriguez",
-      diagnosis: "Seasonal Allergies",
-      notes: "Prescribed antihistamines. Follow up if symptoms persist.",
-    },
-    {
-      id: 3,
-      date: "2025-06-20",
-      doctor: "Dr. James Wilson",
-      diagnosis: "Skin Consultation",
-      notes: "Minor eczema. Prescribed topical cream. Condition improving.",
-    },
-  ]
-
-  prescriptions: Prescription[] = [
-    {
-      id: 1,
-      medication: "Lisinopril 10mg",
-      dosage: "Once daily",
-      prescribedBy: "Dr. Michael Chen",
-      startDate: "2025-09-15",
-      refills: 3,
-      status: "active",
-    },
-    {
-      id: 2,
-      medication: "Cetirizine 10mg",
-      dosage: "Once daily as needed",
-      prescribedBy: "Dr. Emily Rodriguez",
-      startDate: "2025-08-03",
-      refills: 2,
-      status: "active",
-    },
-    {
-      id: 3,
-      medication: "Hydrocortisone Cream 1%",
-      dosage: "Apply twice daily",
-      prescribedBy: "Dr. James Wilson",
-      startDate: "2025-06-20",
-      refills: 1,
-      status: "completed",
-    },
-  ]
-
-  testResults: TestResult[] = [
-    {
-      id: 1,
-      test: "Complete Blood Count",
-      date: "2025-09-15",
-      status: "Normal",
-      orderedBy: "Dr. Michael Chen",
-    },
-    {
-      id: 2,
-      test: "Lipid Panel",
-      date: "2025-09-15",
-      status: "Slightly Elevated",
-      orderedBy: "Dr. Michael Chen",
-    },
-    {
-      id: 3,
-      test: "Allergy Test Panel",
-      date: "2025-08-03",
-      status: "Positive for Pollen",
-      orderedBy: "Dr. Emily Rodriguez",
-    },
-  ]
-
-  notifications = [
-    {
-      id: 1,
-      title: "Appointment Reminder",
-      message: "You have an appointment with Dr. Smith tomorrow at 2:00 PM",
-      time: "2 hours ago",
-      read: false,
-    },
-    {
-      id: 2,
-      title: "Test Results Available",
-      message: "Your blood test results are now available",
-      time: "1 day ago",
-      read: false,
-    },
-    {
-      id: 3,
-      title: "Prescription Ready",
-      message: "Your prescription is ready for pickup",
-      time: "2 days ago",
-      read: true,
-    },
-  ]
-
-  constructor(
-    private appointmentService: AppointmentService,
-    private authService: AuthService,
-    private router: Router,
-  ) {}
+    activeMeds: 0,
+    records: 0,
+    testResults: 0
+  });
 
   ngOnInit(): void {
-    this.loadCurrentUser()
-    this.loadAppointments()
-    this.loadDashboardStats()
-    this.setupTheme()
-    this.updateNotificationCount()
+    this.loadUser();
+    this.loadAppointments();
+    this.loadMedicalHistory();
+    this.loadPrescriptions();
+    this.loadTestResults();
   }
 
-  loadCurrentUser(): void {
-    this.currentUser = this.authService.currentUser()
-  }
-
-  loadAppointments(): void {
-    this.isLoading.set(true)
-    this.appointmentService.getMyAppointments().subscribe({
-      next: (data) => {
-        this.appointments = data
-        this.filteredAppointments = data.filter((apt) => apt.status === "confirmed" || apt.status === "pending")
-        this.isLoading.set(false)
-      },
-      error: (error: any) => {
-        console.error("Error loading appointments:", error)
-        this.isLoading.set(false)
-      },
-    })
-  }
-
-  loadDashboardStats(): void {
-    this.appointmentService.getMyAppointments().subscribe({
-      next: (appointments) => {
-        const stats: DashboardStats = {
-          upcomingAppointments: appointments.filter(
-            (a) => (a.status === "confirmed" || a.status === "pending") && new Date(a.appointmentDate) >= new Date(),
-          ).length,
-          totalAppointments: appointments.length,
-          completedAppointments: appointments.filter((a) => a.status === "completed").length,
-          cancelledAppointments: appointments.filter((a) => a.status === "cancelled").length,
-          medicalRecords: this.currentUser?.medicalRecordsCount || 0,
-          prescriptions: this.prescriptions.length,
-          testResults: this.currentUser?.testResultsCount || 0,
-        }
-        this.dashboardStats.set(stats)
-      },
-    })
-  }
-
-  setupTheme(): void {
-    this.isDarkMode.set(localStorage.getItem("dark-mode") === "true")
-    if (this.isDarkMode()) {
-      document.body.classList.add("dark")
-    }
-  }
-
-  toggleSidebar(): void {
-    this.sidebarCollapsed.update((collapsed) => !collapsed)
-    localStorage.setItem("sidebar-collapsed", this.sidebarCollapsed().toString())
-  }
-
-  toggleTheme(): void {
-    this.isDarkMode.update((dark) => !dark)
-    localStorage.setItem("dark-mode", this.isDarkMode().toString())
-    document.body.classList.toggle("dark")
-  }
-
-  toggleNotifications(): void {
-    this.showNotifications.update((show) => !show)
-  }
-
-  updateNotificationCount(): void {
-    const unreadCount = this.notifications.filter((n) => !n.read).length
-    this.notificationCount.set(unreadCount)
-  }
-
-  markNotificationAsRead(notificationId: number): void {
-    const notification = this.notifications.find((n) => n.id === notificationId)
-    if (notification && !notification.read) {
-      notification.read = true
-      this.updateNotificationCount()
-    }
-  }
-
-  bookAppointment(): void {
-    this.router.navigate(["/patient/appointments/new"])
-  }
-
-  downloadRecords(): void {
-    console.log("Downloading medical records...")
-  }
-
-  callEmergency(): void {
-    window.open("tel:911", "_self")
-  }
-
-  openSettings(): void {
-    this.router.navigate(["/patient/settings"])
-  }
-
-  logout(): void {
-    this.authService.logout()
-  }
-
-  getInitials(firstName?: string, lastName?: string): string {
-    if (!firstName || !lastName) return "P"
-    return (firstName.charAt(0) + lastName.charAt(0)).toUpperCase()
-  }
-
-  getUpcomingAppointments(): Appointment[] {
-    const today = new Date()
-    return this.appointments
-      .filter(
-        (appointment) =>
-          new Date(appointment.appointmentDate) >= today &&
-          (appointment.status === "confirmed" || appointment.status === "pending"),
+  // === REAL API CALLS ===
+  private loadUser() {
+    this.http.get<User>('/api/patient/profile')
+      .pipe(
+        catchError(err => {
+          console.error('Failed to load user', err);
+          return of(null);
+        })
       )
-      .slice(0, 3)
+      .subscribe(user => {
+        this.user.set(user);
+      });
   }
 
-  getRecentAppointments(): Appointment[] {
-    return this.appointments
-      .sort((a, b) => new Date(b.appointmentDate).getTime() - new Date(a.appointmentDate).getTime())
-      .slice(0, 5)
-  }
-
-  getAppointmentStatusClass(status: string): string {
-    switch (status) {
-      case "confirmed":
-        return "status-confirmed"
-      case "pending":
-        return "status-pending"
-      case "completed":
-        return "status-completed"
-      case "cancelled":
-        return "status-cancelled"
-      default:
-        return "status-default"
-    }
-  }
-
-  getAppointmentStatusIcon(status: string): string {
-    switch (status) {
-      case "confirmed":
-        return "bi-check-circle"
-      case "pending":
-        return "bi-clock"
-      case "completed":
-        return "bi-check2-all"
-      case "cancelled":
-        return "bi-x-circle"
-      default:
-        return "bi-question-circle"
-    }
-  }
-
-  onSearchChange(): void {
-    const query = this.searchQuery().toLowerCase()
-    if (query) {
-      this.filteredAppointments = this.appointments.filter(
-        (appointment) =>
-          appointment.doctor?.firstName?.toLowerCase().includes(query) ||
-          appointment.doctor?.lastName?.toLowerCase().includes(query) ||
-          appointment.doctor?.specialty?.toLowerCase().includes(query) ||
-          appointment.notes?.toLowerCase().includes(query),
+  private loadAppointments() {
+    this.http.get<Appointment[]>('/api/patient/appointments')
+      .pipe(
+        tap(() => this.recalcStats()),
+        catchError(err => {
+          console.error('Failed to load appointments', err);
+          return of([]);
+        })
       )
-    } else {
-      this.filteredAppointments = this.appointments.filter(
-        (apt) => apt.status === "confirmed" || apt.status === "pending",
+      .subscribe(appts => {
+        this.appointments.set(appts);
+        this.isLoading.set(false);
+      });
+  }
+
+  private loadMedicalHistory() {
+    this.http.get<MedicalRecord[]>('/api/patient/records')
+      .pipe(
+        tap(() => this.recalcStats()),
+        catchError(err => {
+          console.error('Failed to load medical history', err);
+          return of([]);
+        })
       )
-    }
+      .subscribe(records => {
+        this.medicalHistory.set(records);
+      });
   }
 
-  getStatusBadgeClass(status: string): string {
-    switch (status?.toLowerCase()) {
-      case "normal":
-        return "badge-success"
-      case "slightly elevated":
-        return "badge-warning"
-      case "positive for pollen":
-        return "badge-info"
-      default:
-        return "badge-default"
-    }
+  private loadPrescriptions() {
+    this.http.get<Prescription[]>('/api/patient/prescriptions')
+      .pipe(
+        tap(() => this.recalcStats()),
+        catchError(err => {
+          console.error('Failed to load prescriptions', err);
+          return of([]);
+        })
+      )
+      .subscribe(meds => {
+        this.prescriptions.set(meds);
+      });
   }
 
-  requestRefill(prescription: Prescription): void {
-    console.log("Requesting refill for:", prescription.medication)
+  private loadTestResults() {
+    this.http.get<TestResult[]>('/api/patient/tests')
+      .pipe(
+        tap(() => this.recalcStats()),
+        catchError(err => {
+          console.error('Failed to load test results', err);
+          return of([]);
+        })
+      )
+      .subscribe(tests => {
+        this.testResults.set(tests);
+      });
   }
 
-  viewDetails(testResult: TestResult): void {
-    console.log("Viewing details for:", testResult.test)
+  private recalcStats() {
+    const appts = this.appointments();
+    const activeMeds = this.prescriptions().filter(p => p.status === 'active').length;
+    this.stats.set({
+      upcomingAppointments: appts.filter(a => ['confirmed', 'pending'].includes(a.status)).length,
+      activeMeds,
+      records: this.medicalHistory().length,
+      testResults: this.testResults().length
+    });
   }
 
-  getActivePrescriptionsCount(): number {
-    return this.prescriptions.filter((p) => p.status === "active").length
+  // === ACTIONS ===
+  bookAppointment() {
+    this.router.navigate(['/patient/appointments/new']);
   }
 
-  setActiveTab(tab: string): void {
-    this.activeTab.set(tab)
+  requestRefill(p: Prescription) {
+    this.http.post('/api/patient/prescriptions/refill', { id: p.id })
+      .subscribe({
+        next: () => alert(`Refill requested for ${p.medication}`),
+        error: (err) => console.error('Refill failed', err)
+      });
+  }
+
+  viewTestDetails(t: TestResult) {
+    this.router.navigate(['/patient/tests', t.id]);
+  }
+
+  callEmergency() {
+    window.open('tel:911', '_self');
+  }
+
+  getInitials(first?: string, last?: string): string {
+    return first && last ? `${first[0]}${last[0]}`.toUpperCase() : 'P';
+  }
+
+  setTab(tab: 'appointments' | 'history' | 'prescriptions' | 'tests') {
+    this.activeTab.set(tab);
   }
 }
