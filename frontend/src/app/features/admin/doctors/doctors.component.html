@@ -1,48 +1,94 @@
-<app-sidebar title="Admin Dashboard" [menuItems]="menuItems"></app-sidebar>
+<app-sidebar title="QuickMed Admin Portal" [menuItems]="menuItems"></app-sidebar>
 
-<div class="main-content">
-  <div class="container-fluid">
-    <h2 class="mb-4">Manage Doctors</h2>
+<div class="ml-60 bg-gray-50 min-h-screen">
+  <!-- Header -->
+  <div class="bg-white border-b border-gray-200 px-8 py-4 flex justify-between items-center gap-8">
+    <div class="flex-1 max-w-md">
+      <input type="text" placeholder="Search patients, appointments..." class="w-full px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg text-sm text-gray-700 placeholder-gray-500">
+    </div>
+    <div class="flex items-center gap-6">
+      <div class="relative w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-sm text-gray-600 cursor-pointer">
+        🔔
+        <span class="absolute top-0 right-0 w-3 h-3 bg-red-500 rounded-full border-2 border-white"></span>
+      </div>
+      <button class="px-4 py-2 bg-green-500 text-white rounded-lg font-semibold hover:bg-green-600">New Appointment</button>
+    </div>
+  </div>
 
-    <div class="card">
-      <div class="card-body">
-        <div *ngIf="isLoading" class="text-center py-5">
-          <div class="spinner-border text-primary" role="status">
-            <span class="visually-hidden">Loading...</span>
+  <!-- Content -->
+  <div class="p-8 max-w-7xl">
+    <h2 class="text-2xl font-bold text-gray-900 mb-6">Manage Doctors</h2>
+
+    <div class="bg-white border border-gray-200 rounded-lg p-6">
+      <!-- Backend logic: Fetch doctors list from database -->
+      <div class="space-y-3">
+        <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-green-500 hover:shadow-md transition">
+          <div class="flex items-center gap-4 flex-1">
+            <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center font-bold text-green-700 flex-shrink-0">MC</div>
+            <div>
+              <div class="font-semibold text-gray-900">Dr. Michael Chen</div>
+              <div class="text-sm text-gray-600">Cardiology</div>
+            </div>
+          </div>
+          <div class="flex-1 text-sm">
+            <div class="text-gray-600">Email</div>
+            <div class="font-medium text-gray-900">michael.chen&#64;quickmed.com</div>
+          </div>
+          <div class="flex-1 text-sm">
+            <div class="text-gray-600">Phone</div>
+            <div class="font-medium text-gray-900">+1 (555) 234-5678</div>
+          </div>
+          <div class="flex gap-2 ml-4">
+            <button class="text-gray-400 hover:text-gray-600">📞</button>
+            <button class="text-gray-400 hover:text-gray-600">✉️</button>
+            <button class="text-gray-400 hover:text-gray-600">⋮</button>
           </div>
         </div>
 
-        <div *ngIf="!isLoading && doctors.length === 0" class="text-center py-5">
-          <p class="text-muted">No doctors found</p>
+        <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-green-500 hover:shadow-md transition">
+          <div class="flex items-center gap-4 flex-1">
+            <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center font-bold text-green-700 flex-shrink-0">ER</div>
+            <div>
+              <div class="font-semibold text-gray-900">Dr. Emily Rodriguez</div>
+              <div class="text-sm text-gray-600">Pediatrics</div>
+            </div>
+          </div>
+          <div class="flex-1 text-sm">
+            <div class="text-gray-600">Email</div>
+            <div class="font-medium text-gray-900">emily.r&#64;quickmed.com</div>
+          </div>
+          <div class="flex-1 text-sm">
+            <div class="text-gray-600">Phone</div>
+            <div class="font-medium text-gray-900">+1 (555) 345-6789</div>
+          </div>
+          <div class="flex gap-2 ml-4">
+            <button class="text-gray-400 hover:text-gray-600">📞</button>
+            <button class="text-gray-400 hover:text-gray-600">✉️</button>
+            <button class="text-gray-400 hover:text-gray-600">⋮</button>
+          </div>
         </div>
 
-        <div *ngIf="!isLoading && doctors.length > 0" class="table-responsive">
-          <table class="table table-hover">
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Specialty</th>
-                <th>Phone</th>
-                <th>License</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let doctor of doctors">
-                <td>Dr. {{ doctor.firstName }} {{ doctor.lastName }}</td>
-                <td>{{ doctor.email }}</td>
-                <td>{{ doctor.specialty }}</td>
-                <td>{{ doctor.phoneNumber }}</td>
-                <td>{{ doctor.licenseNumber }}</td>
-                <td>
-                  <button (click)="deleteDoctor(doctor.id)" class="btn btn-sm btn-danger">
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+        <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-green-500 hover:shadow-md transition">
+          <div class="flex items-center gap-4 flex-1">
+            <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center font-bold text-green-700 flex-shrink-0">ST</div>
+            <div>
+              <div class="font-semibold text-gray-900">Dr. Sarah Thompson</div>
+              <div class="text-sm text-gray-600">Orthopedics</div>
+            </div>
+          </div>
+          <div class="flex-1 text-sm">
+            <div class="text-gray-600">Email</div>
+            <div class="font-medium text-gray-900">sarah.t&#64;quickmed.com</div>
+          </div>
+          <div class="flex-1 text-sm">
+            <div class="text-gray-600">Phone</div>
+            <div class="font-medium text-gray-900">+1 (555) 456-7890</div>
+          </div>
+          <div class="flex gap-2 ml-4">
+            <button class="text-gray-400 hover:text-gray-600">📞</button>
+            <button class="text-gray-400 hover:text-gray-600">✉️</button>
+            <button class="text-gray-400 hover:text-gray-600">⋮</button>
+          </div>
         </div>
       </div>
     </div>

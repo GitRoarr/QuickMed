@@ -1,0 +1,5 @@
+:host-context(.active) a.active {
+  background-color: #f0fdf4; /* tailwind green-50 */
+  color: #16a34a;            /* tailwind green-600 */
+  border-left: 3px solid #22c55e; /* tailwind green-500 */
+}

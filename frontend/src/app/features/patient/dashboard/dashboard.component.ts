@@ -89,7 +89,6 @@ export class DashboardComponent implements OnInit {
     this.loadTestResults();
   }
 
-  // === REAL API CALLS ===
   private loadUser() {
     this.http.get<User>('/api/patient/profile')
       .pipe(
@@ -171,7 +170,6 @@ export class DashboardComponent implements OnInit {
     });
   }
 
-  // === ACTIONS ===
   bookAppointment() {
     this.router.navigate(['/patient/appointments/new']);
   }

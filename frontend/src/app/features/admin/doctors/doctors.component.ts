@@ -1,51 +1,43 @@
-import { Component,  OnInit } from "@angular/core"
-import { CommonModule } from "@angular/common"
-import { SidebarComponent } from "@app/shared/components/sidebar/sidebar.component"
-import  { DoctorService } from "@core/services/doctor.service"
-import  { User } from "@core/models/user.model"
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { SidebarComponent } from '../shared/sidebar';
+import { HeaderComponent } from '../shared/header';
+
+interface Doctor {
+  id: string;
+  firstName: string;
+  lastName: string;
+  specialty: string;
+  email: string;
+  phoneNumber: string;
+  licenseNumber: string;
+}
 
 @Component({
-  selector: "app-admin-doctors",
+  selector: 'app-doctors',
   standalone: true,
-  imports: [CommonModule, SidebarComponent],
-  templateUrl: "./doctors.component.html",
-  styleUrls: ["./doctors.component.css"],
+  imports: [CommonModule, SidebarComponent, HeaderComponent],
+  templateUrl: './doctors.component.html',
+  styleUrls: ['./doctors.component.css']
 })
 export class DoctorsComponent implements OnInit {
-  doctors: User[] = []
-  isLoading = true
+  doctors: Doctor[] = [];
 
   menuItems = [
-    { label: "Dashboard", icon: "bi-house", route: "/admin/dashboard" },
-    { label: "Doctors", icon: "bi-people", route: "/admin/doctors" },
-    { label: "Appointments", icon: "bi-calendar-check", route: "/admin/appointments" },
-  ]
+    { label: 'Overview', icon: 'grid', route: '/admin/overview' },
+    { label: 'Appointments', icon: 'calendar', route: '/admin/appointments' },
+    { label: 'Patients', icon: 'people', route: '/admin/patients' },
+    { label: 'Doctors', icon: 'stethoscope', route: '/admin/doctors' },
+    { label: 'User Management', icon: 'person-gear', route: '/admin/users' },
+    { label: 'Analytics', icon: 'bar-chart', route: '/admin/analytics' },
+    { label: 'Settings', icon: 'gear', route: '/admin/settings' }
+  ];
 
-  constructor(private doctorService: DoctorService) {}
-
-  ngOnInit(): void {
-    this.loadDoctors()
+  ngOnInit() {
+    // Fetch doctors from backend API
   }
 
-  loadDoctors(): void {
-    this.doctorService.getAll().subscribe({
-      next: (data) => {
-        this.doctors = data
-        this.isLoading = false
-      },
-      error: () => {
-        this.isLoading = false
-      },
-    })
-  }
-
-  deleteDoctor(id: string): void {
-    if (confirm("Are you sure you want to delete this doctor?")) {
-      this.doctorService.delete(id).subscribe({
-        next: () => {
-          this.loadDoctors()
-        },
-      })
-    }
+  getInitials(firstName: string, lastName: string): string {
+    return (firstName?.charAt(0) + lastName?.charAt(0)).toUpperCase();
   }
 }

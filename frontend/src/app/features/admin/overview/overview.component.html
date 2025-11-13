@@ -1,68 +1,245 @@
-<app-admin-layout>
-  <div class="overview-container">
-    <div class="stats-grid">
-      <div class="stat-card" *ngFor="let stat of stats()">
-        <div class="stat-icon" [style.background]="stat.iconBg">
-          <i class="bi bi-{{ stat.icon }}"></i>
+<app-sidebar title="QuickMed Admin Portal" [menuItems]="menuItems"></app-sidebar>
+
+<div class="ml-60 bg-gray-50 min-h-screen">
+  <app-header></app-header>
+
+  <div class="p-8 max-w-7xl">
+    <!-- Stats Grid -->
+    <div class="grid grid-cols-6 gap-4 mb-8">
+      <div class="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-lg transition">
+        <div class="flex justify-between items-center mb-3">
+          <span class="text-xs text-gray-600 font-medium">Total Appointments</span>
+          <span class="text-xl">📅</span>
         </div>
-        <div class="stat-content">
-          <div class="stat-label">{{ stat.label }}</div>
-          <div class="stat-value" [style.color]="stat.valueColor">{{ stat.value }}</div>
-          <div class="stat-change" [class.positive]="stat.change.includes('+')">
-            {{ stat.change }}
+        <div class="text-2xl font-bold text-gray-900">1,284</div>
+        <div class="text-xs text-green-600 font-medium">+18.2% from last month</div>
+      </div>
+
+      <div class="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-lg transition">
+        <div class="flex justify-between items-center mb-3">
+          <span class="text-xs text-gray-600 font-medium">Total Patients</span>
+          <span class="text-xl">👥</span>
+        </div>
+        <div class="text-2xl font-bold text-gray-900">892</div>
+        <div class="text-xs text-green-600 font-medium">+23.1% from last month</div>
+      </div>
+
+      <div class="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-lg transition">
+        <div class="flex justify-between items-center mb-3">
+          <span class="text-xs text-gray-600 font-medium">Revenue</span>
+          <span class="text-xl">💵</span>
+        </div>
+        <div class="text-2xl font-bold text-gray-900">$48,392</div>
+        <div class="text-xs text-green-600 font-medium">+23.1% from last month</div>
+      </div>
+
+      <div class="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-lg transition">
+        <div class="flex justify-between items-center mb-3">
+          <span class="text-xs text-gray-600 font-medium">Pending</span>
+          <span class="text-xl">⏱️</span>
+        </div>
+        <div class="text-2xl font-bold text-gray-900">24</div>
+        <div class="text-xs text-green-600 font-medium">-4.3% from last month</div>
+      </div>
+
+      <div class="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-lg transition">
+        <div class="flex justify-between items-center mb-3">
+          <span class="text-xs text-gray-600 font-medium">Completed Today</span>
+          <span class="text-xl">✅</span>
+        </div>
+        <div class="text-2xl font-bold text-gray-900">18</div>
+        <div class="text-xs text-green-600 font-medium">+6.1% from last month</div>
+      </div>
+
+      <div class="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-lg transition">
+        <div class="flex justify-between items-center mb-3">
+          <span class="text-xs text-gray-600 font-medium">Avg. Wait Time</span>
+          <span class="text-xl">📈</span>
+        </div>
+        <div class="text-2xl font-bold text-gray-900">12 min</div>
+        <div class="text-xs text-green-600 font-medium">-2.4% from last month</div>
+      </div>
+    </div>
+
+    <!-- Charts Grid -->
+    <div class="grid grid-cols-2 gap-6 mb-6">
+      <div class="bg-white border border-gray-200 rounded-lg p-6">
+        <div class="mb-6">
+          <h3 class="text-lg font-bold text-gray-900">Appointments Overview</h3>
+          <p class="text-sm text-gray-600">Monthly appointment trends</p>
+        </div>
+        <div class="h-48 flex items-end justify-center gap-3">
+          <div class="w-8 bg-gray-300 rounded" style="height: 60%"></div>
+          <div class="w-8 bg-gray-300 rounded" style="height: 75%"></div>
+          <div class="w-8 bg-gray-300 rounded" style="height: 85%"></div>
+          <div class="w-8 bg-gray-300 rounded" style="height: 90%"></div>
+          <div class="w-8 bg-gray-300 rounded" style="height: 95%"></div>
+          <div class="w-8 bg-gray-300 rounded" style="height: 100%"></div>
+        </div>
+      </div>
+
+      <div class="bg-white border border-gray-200 rounded-lg p-6">
+        <div class="mb-6">
+          <h3 class="text-lg font-bold text-gray-900">Doctor Schedule</h3>
+          <p class="text-sm text-gray-600">Today's on-duty doctors</p>
+        </div>
+        <div class="space-y-4">
+          <div class="flex items-start gap-4 pb-4 border-b border-gray-200">
+            <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center text-sm font-bold text-green-600">MI</div>
+            <div class="flex-1">
+              <div class="font-semibold text-gray-900">Dr. Michael Chen</div>
+              <div class="text-xs text-gray-600">Cardiology</div>
+              <div class="text-xs text-gray-600">08:00 AM - 04:00 PM</div>
+            </div>
+            <div class="text-right">
+              <span class="inline-block px-2 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-full">Active</span>
+              <div class="text-xs text-gray-600 mt-2">12 patients</div>
+            </div>
+          </div>
+
+          <div class="flex items-start gap-4 pb-4 border-b border-gray-200">
+            <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center text-sm font-bold text-green-600">EM</div>
+            <div class="flex-1">
+              <div class="font-semibold text-gray-900">Dr. Emily Rodriguez</div>
+              <div class="text-xs text-gray-600">Pediatrics</div>
+              <div class="text-xs text-gray-600">09:00 AM - 05:00 PM</div>
+            </div>
+            <div class="text-right">
+              <span class="inline-block px-2 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-full">Active</span>
+              <div class="text-xs text-gray-600 mt-2">15 patients</div>
+            </div>
+          </div>
+
+          <div class="flex items-start gap-4 pb-4 border-b border-gray-200">
+            <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center text-sm font-bold text-green-600">SA</div>
+            <div class="flex-1">
+              <div class="font-semibold text-gray-900">Dr. Sarah Thompson</div>
+              <div class="text-xs text-gray-600">Orthopedics</div>
+              <div class="text-xs text-gray-600">10:00 AM - 06:00 PM</div>
+            </div>
+            <div class="text-right">
+              <span class="inline-block px-2 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-full">Active</span>
+              <div class="text-xs text-gray-600 mt-2">8 patients</div>
+            </div>
+          </div>
+
+          <div class="flex items-start gap-4">
+            <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center text-sm font-bold text-green-600">JA</div>
+            <div class="flex-1">
+              <div class="font-semibold text-gray-900">Dr. James Wilson</div>
+              <div class="text-xs text-gray-600">Dermatology</div>
+              <div class="text-xs text-gray-600">01:00 PM - 09:00 PM</div>
+            </div>
+            <div class="text-right">
+              <span class="inline-block px-2 py-1 text-xs font-semibold text-orange-700 bg-orange-100 rounded-full">Scheduled</span>
+              <div class="text-xs text-gray-600 mt-2">10 patients</div>
+            </div>
           </div>
         </div>
       </div>
     </div>
 
-    <div class="content-grid">
-      <div class="chart-section">
-        <div class="section-header">
-          <h3>Appointments Overview</h3>
-          <p>Monthly appointment trends</p>
+    <!-- Today's Appointments -->
+    <div class="bg-white border border-gray-200 rounded-lg p-6">
+      <div class="flex justify-between items-center mb-6">
+        <div>
+          <h3 class="text-lg font-bold text-gray-900">Today's Appointments</h3>
+          <p class="text-sm text-gray-600">5 appointments scheduled</p>
         </div>
-        <div class="chart-container">
-          <svg viewBox="0 0 600 300" class="area-chart">
-            <defs>
-              <linearGradient id="areaGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" style="stop-color:#9ca3af;stop-opacity:0.3" />
-                <stop offset="100%" style="stop-color:#9ca3af;stop-opacity:0" />
-              </linearGradient>
-            </defs>
-            <path d="M 50 250 L 150 200 L 250 180 L 350 160 L 450 140 L 550 100 L 550 300 L 50 300 Z" fill="url(#areaGradient)" />
-            <path d="M 50 250 L 150 200 L 250 180 L 350 160 L 450 140 L 550 100" stroke="#6b7280" stroke-width="2" fill="none" />
-            <text x="50" y="280" font-size="12" fill="#9ca3af">Jan</text>
-            <text x="150" y="280" font-size="12" fill="#9ca3af">Feb</text>
-            <text x="250" y="280" font-size="12" fill="#9ca3af">Mar</text>
-            <text x="350" y="280" font-size="12" fill="#9ca3af">Apr</text>
-            <text x="450" y="280" font-size="12" fill="#9ca3af">May</text>
-            <text x="550" y="280" font-size="12" fill="#9ca3af">Jun</text>
-          </svg>
-        </div>
+        <a href="#" class="text-sm font-medium text-gray-700 hover:text-gray-900">View Calendar</a>
       </div>
 
-      <div class="schedule-section">
-        <div class="section-header">
-          <h3>Doctor Schedule</h3>
-          <p>Today's on-duty doctors</p>
-        </div>
-        <div class="doctor-list">
-          <div class="doctor-item" *ngFor="let doctor of doctorSchedules()">
-            <div class="doctor-avatar" [style.background]="doctor.bgColor">
-              {{ doctor.initials }}
-            </div>
-            <div class="doctor-info">
-              <div class="doctor-name">{{ doctor.name }}</div>
-              <div class="doctor-specialty">{{ doctor.specialty }}</div>
-              <div class="doctor-schedule">{{ doctor.schedule }}</div>
-            </div>
-            <div class="doctor-status">
-              <span class="status-badge active">{{ doctor.status }}</span>
-              <div class="patient-count">{{ doctor.patientCount }} patients</div>
+      <div class="space-y-4">
+        <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-green-500">
+          <div class="flex-1">
+            <div class="font-semibold text-gray-900">Sarah Johnson</div>
+            <div class="text-sm text-gray-600">Annual Checkup</div>
+            <div class="flex gap-2 text-xs text-gray-600 mt-1">
+              <span>📍 In-Person</span>
+              <span>•</span>
+              <span>Dr. Michael Chen</span>
             </div>
           </div>
+          <span class="px-2 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-full">confirmed</span>
+          <div class="text-right ml-6">
+            <div class="font-semibold text-gray-900">09:00 AM</div>
+            <div class="text-xs text-gray-600">Today</div>
+          </div>
+          <button class="ml-4 text-gray-400 hover:text-gray-600">⋮</button>
+        </div>
+
+        <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-green-500">
+          <div class="flex-1">
+            <div class="font-semibold text-gray-900">James Wilson</div>
+            <div class="text-sm text-gray-600">Follow-up Consultation</div>
+            <div class="flex gap-2 text-xs text-gray-600 mt-1">
+              <span>📹 Video Call</span>
+              <span>•</span>
+              <span>Dr. Emily Rodriguez</span>
+            </div>
+          </div>
+          <span class="px-2 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-full">confirmed</span>
+          <div class="text-right ml-6">
+            <div class="font-semibold text-gray-900">10:30 AM</div>
+            <div class="text-xs text-gray-600">Today</div>
+          </div>
+          <button class="ml-4 text-gray-400 hover:text-gray-600">⋮</button>
+        </div>
+
+        <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-green-500">
+          <div class="flex-1">
+            <div class="font-semibold text-gray-900">Maria Garcia</div>
+            <div class="text-sm text-gray-600">Lab Results Review</div>
+            <div class="flex gap-2 text-xs text-gray-600 mt-1">
+              <span>📍 In-Person</span>
+              <span>•</span>
+              <span>Dr. Michael Chen</span>
+            </div>
+          </div>
+          <span class="px-2 py-1 text-xs font-semibold text-orange-700 bg-orange-100 rounded-full">pending</span>
+          <div class="text-right ml-6">
+            <div class="font-semibold text-gray-900">11:00 AM</div>
+            <div class="text-xs text-gray-600">Today</div>
+          </div>
+          <button class="ml-4 text-gray-400 hover:text-gray-600">⋮</button>
+        </div>
+
+        <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-green-500">
+          <div class="flex-1">
+            <div class="font-semibold text-gray-900">Robert Brown</div>
+            <div class="text-sm text-gray-600">Physical Therapy</div>
+            <div class="flex gap-2 text-xs text-gray-600 mt-1">
+              <span>📍 In-Person</span>
+              <span>•</span>
+              <span>Dr. Sarah Thompson</span>
+            </div>
+          </div>
+          <span class="px-2 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-full">confirmed</span>
+          <div class="text-right ml-6">
+            <div class="font-semibold text-gray-900">02:00 PM</div>
+            <div class="text-xs text-gray-600">Today</div>
+          </div>
+          <button class="ml-4 text-gray-400 hover:text-gray-600">⋮</button>
+        </div>
+
+        <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-green-500">
+          <div class="flex-1">
+            <div class="font-semibold text-gray-900">Lisa Anderson</div>
+            <div class="text-sm text-gray-600">Prescription Renewal</div>
+            <div class="flex gap-2 text-xs text-gray-600 mt-1">
+              <span>📹 Video Call</span>
+              <span>•</span>
+              <span>Dr. Emily Rodriguez</span>
+            </div>
+          </div>
+          <span class="px-2 py-1 text-xs font-semibold text-blue-700 bg-blue-100 rounded-full">completed</span>
+          <div class="text-right ml-6">
+            <div class="font-semibold text-gray-900">03:30 PM</div>
+            <div class="text-xs text-gray-600">Today</div>
+          </div>
+          <button class="ml-4 text-gray-400 hover:text-gray-600">⋮</button>
         </div>
       </div>
     </div>
   </div>
-</app-admin-layout>
+</div>

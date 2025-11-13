@@ -1,306 +1,243 @@
-<div class="admin-dashboard">
-  <!-- Dashboard Header -->
-  <div class="dashboard-header">
-    <div class="header-content">
-      <div class="header-info">
-        <h1 class="page-title">Admin Dashboard</h1>
-        <p class="page-subtitle">System overview and management</p>
+<app-sidebar title="QuickMed Admin Portal" [menuItems]="menuItems"></app-sidebar>
+
+<div class="ml-60 bg-gray-50 min-h-screen">
+  <app-header></app-header>
+
+  <div class="p-8 max-w-7xl">
+    <!-- Stats Grid -->
+    <div class="grid grid-cols-6 gap-4 mb-8">
+      <div class="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-lg transition">
+        <div class="flex justify-between items-center mb-3">
+          <span class="text-xs text-gray-600 font-medium">Total Appointments</span>
+          <span class="text-xl">📅</span>
+        </div>
+        <div class="text-2xl font-bold text-gray-900">1,284</div>
+        <div class="text-xs text-green-600 font-medium">+18.2% from last month</div>
       </div>
-      <div class="header-actions">
-        <app-notification-center></app-notification-center>
-        <button class="refresh-btn" (click)="refreshData()" [disabled]="isLoading()">
-          <i class="bi bi-arrow-clockwise" [class.bi-spin]="isLoading()"></i>
-          Refresh
-        </button>
-        <button class="export-btn" (click)="navigateToReports()">
-          <i class="bi bi-download"></i>
-          Export Report
-        </button>
+
+      <div class="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-lg transition">
+        <div class="flex justify-between items-center mb-3">
+          <span class="text-xs text-gray-600 font-medium">Total Patients</span>
+          <span class="text-xl">👥</span>
+        </div>
+        <div class="text-2xl font-bold text-gray-900">892</div>
+        <div class="text-xs text-green-600 font-medium">+23.1% from last month</div>
       </div>
-    </div>
-  </div>
 
-  <!-- Loading State -->
-  <div *ngIf="isLoading()" class="loading-container">
-    <div class="loading-spinner">
-      <i class="bi bi-arrow-clockwise bi-spin"></i>
-    </div>
-    <p>Loading dashboard data...</p>
-  </div>
-
-  <!-- Dashboard Content -->
-  <div *ngIf="!isLoading()" class="dashboard-content">
-    <!-- Stats Overview -->
-    <div class="stats-section">
-      <h2 class="section-title">System Overview</h2>
-      <div class="stats-grid" *ngIf="stats()">
-        <!-- Users Stats -->
-        <div class="stat-card users">
-          <div class="stat-icon">
-            <i class="bi bi-people"></i>
-          </div>
-          <div class="stat-content">
-            <h3 class="stat-value">{{ stats()?.totalUsers || 0 }}</h3>
-            <p class="stat-label">Total Users</p>
-            <div class="stat-breakdown">
-              <span class="breakdown-item">
-                <i class="bi bi-person"></i>
-                {{ stats()?.totalPatients || 0 }} Patients
-              </span>
-              <span class="breakdown-item">
-                <i class="bi bi-person-badge"></i>
-                {{ stats()?.totalDoctors || 0 }} Doctors
-              </span>
-              <span class="breakdown-item">
-                <i class="bi bi-shield-check"></i>
-                {{ stats()?.totalAdmins || 0 }} Admins
-              </span>
-            </div>
-          </div>
+      <div class="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-lg transition">
+        <div class="flex justify-between items-center mb-3">
+          <span class="text-xs text-gray-600 font-medium">Revenue</span>
+          <span class="text-xl">💵</span>
         </div>
+        <div class="text-2xl font-bold text-gray-900">$48,392</div>
+        <div class="text-xs text-green-600 font-medium">+23.1% from last month</div>
+      </div>
 
-        <!-- Appointments Stats -->
-        <div class="stat-card appointments">
-          <div class="stat-icon">
-            <i class="bi bi-calendar-check"></i>
-          </div>
-          <div class="stat-content">
-            <h3 class="stat-value">{{ stats()?.totalAppointments || 0 }}</h3>
-            <p class="stat-label">Total Appointments</p>
-            <div class="stat-breakdown">
-              <span class="breakdown-item pending">
-                <i class="bi bi-clock"></i>
-                {{ stats()?.pendingAppointments || 0 }} Pending
-              </span>
-              <span class="breakdown-item confirmed">
-                <i class="bi bi-check-circle"></i>
-                {{ stats()?.confirmedAppointments || 0 }} Confirmed
-              </span>
-              <span class="breakdown-item completed">
-                <i class="bi bi-check2-all"></i>
-                {{ stats()?.completedAppointments || 0 }} Completed
-              </span>
-            </div>
-          </div>
+      <div class="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-lg transition">
+        <div class="flex justify-between items-center mb-3">
+          <span class="text-xs text-gray-600 font-medium">Pending</span>
+          <span class="text-xl">⏱️</span>
         </div>
+        <div class="text-2xl font-bold text-gray-900">24</div>
+        <div class="text-xs text-green-600 font-medium">-4.3% from last month</div>
+      </div>
 
-        <!-- Revenue Stats -->
-        <div class="stat-card revenue">
-          <div class="stat-icon">
-            <i class="bi bi-currency-dollar"></i>
-          </div>
-          <div class="stat-content">
-            <h3 class="stat-value">{{ formatCurrency(stats()?.revenue || 0) }}</h3>
-            <p class="stat-label">Total Revenue</p>
-            <div class="stat-breakdown">
-              <span class="breakdown-item">
-                <i class="bi bi-calendar-week"></i>
-                {{ stats()?.thisWeekAppointments || 0 }} This Week
-              </span>
-              <span class="breakdown-item">
-                <i class="bi bi-calendar-month"></i>
-                {{ stats()?.thisMonthAppointments || 0 }} This Month
-              </span>
-            </div>
-          </div>
+      <div class="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-lg transition">
+        <div class="flex justify-between items-center mb-3">
+          <span class="text-xs text-gray-600 font-medium">Completed Today</span>
+          <span class="text-xl">✅</span>
         </div>
+        <div class="text-2xl font-bold text-gray-900">18</div>
+        <div class="text-xs text-green-600 font-medium">+6.1% from last month</div>
+      </div>
 
-        <!-- Performance Stats -->
-        <div class="stat-card performance">
-          <div class="stat-icon">
-            <i class="bi bi-graph-up"></i>
-          </div>
-          <div class="stat-content">
-            <h3 class="stat-value">{{ stats()?.patientSatisfactionScore || 0 }}/5</h3>
-            <p class="stat-label">Satisfaction Score</p>
-            <div class="stat-breakdown">
-              <span class="breakdown-item">
-                <i class="bi bi-clock-history"></i>
-                {{ stats()?.averageAppointmentDuration || 0 }}min Avg
-              </span>
-              <span class="breakdown-item">
-                <i class="bi bi-calendar-day"></i>
-                {{ stats()?.todayAppointments || 0 }} Today
-              </span>
-            </div>
-          </div>
+      <div class="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-lg transition">
+        <div class="flex justify-between items-center mb-3">
+          <span class="text-xs text-gray-600 font-medium">Avg. Wait Time</span>
+          <span class="text-xl">📈</span>
         </div>
+        <div class="text-2xl font-bold text-gray-900">12 min</div>
+        <div class="text-xs text-green-600 font-medium">-2.4% from last month</div>
       </div>
     </div>
 
-    <!-- System Health -->
-    <div class="health-section" *ngIf="systemHealth()">
-      <h2 class="section-title">System Health</h2>
-      <div class="health-grid">
-        <div class="health-card" [class]="getHealthStatusClass(systemHealth()?.database || 'unknown')">
-          <div class="health-icon">
-            <i class="bi" [class]="getHealthIcon(systemHealth()?.database || 'unknown')"></i>
-          </div>
-          <div class="health-content">
-            <h4>Database</h4>
-            <p>{{ systemHealth()?.database || 'Unknown' }}</p>
-          </div>
+    <!-- Charts Grid -->
+    <div class="grid grid-cols-2 gap-6 mb-6">
+      <div class="bg-white border border-gray-200 rounded-lg p-6">
+        <div class="mb-6">
+          <h3 class="text-lg font-bold text-gray-900">Appointments Overview</h3>
+          <p class="text-sm text-gray-600">Monthly appointment trends</p>
         </div>
-
-        <div class="health-card" [class]="getHealthStatusClass(systemHealth()?.api || 'unknown')">
-          <div class="health-icon">
-            <i class="bi" [class]="getHealthIcon(systemHealth()?.api || 'unknown')"></i>
-          </div>
-          <div class="health-content">
-            <h4>API</h4>
-            <p>{{ systemHealth()?.api || 'Unknown' }}</p>
-          </div>
+        <div class="h-48 flex items-end justify-center gap-3">
+          <div class="w-8 bg-gray-300 rounded" style="height: 60%"></div>
+          <div class="w-8 bg-gray-300 rounded" style="height: 75%"></div>
+          <div class="w-8 bg-gray-300 rounded" style="height: 85%"></div>
+          <div class="w-8 bg-gray-300 rounded" style="height: 90%"></div>
+          <div class="w-8 bg-gray-300 rounded" style="height: 95%"></div>
+          <div class="w-8 bg-gray-300 rounded" style="height: 100%"></div>
         </div>
+      </div>
 
-        <div class="health-card" [class]="getHealthStatusClass(systemHealth()?.storage || 'unknown')">
-          <div class="health-icon">
-            <i class="bi" [class]="getHealthIcon(systemHealth()?.storage || 'unknown')"></i>
-          </div>
-          <div class="health-content">
-            <h4>Storage</h4>
-            <p>{{ systemHealth()?.storage || 'Unknown' }}</p>
-          </div>
+      <div class="bg-white border border-gray-200 rounded-lg p-6">
+        <div class="mb-6">
+          <h3 class="text-lg font-bold text-gray-900">Doctor Schedule</h3>
+          <p class="text-sm text-gray-600">Today's on-duty doctors</p>
         </div>
-
-        <div class="health-card" [class]="getHealthStatusClass(systemHealth()?.notifications || 'unknown')">
-          <div class="health-icon">
-            <i class="bi" [class]="getHealthIcon(systemHealth()?.notifications || 'unknown')"></i>
+        <div class="space-y-4">
+          <div class="flex items-start gap-4 pb-4 border-b border-gray-200">
+            <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center text-sm font-bold text-green-600">MI</div>
+            <div class="flex-1">
+              <div class="font-semibold text-gray-900">Dr. Michael Chen</div>
+              <div class="text-xs text-gray-600">Cardiology</div>
+              <div class="text-xs text-gray-600">08:00 AM - 04:00 PM</div>
+            </div>
+            <div class="text-right">
+              <span class="inline-block px-2 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-full">Active</span>
+              <div class="text-xs text-gray-600 mt-2">12 patients</div>
+            </div>
           </div>
-          <div class="health-content">
-            <h4>Notifications</h4>
-            <p>{{ systemHealth()?.notifications || 'Unknown' }}</p>
+
+          <div class="flex items-start gap-4 pb-4 border-b border-gray-200">
+            <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center text-sm font-bold text-green-600">EM</div>
+            <div class="flex-1">
+              <div class="font-semibold text-gray-900">Dr. Emily Rodriguez</div>
+              <div class="text-xs text-gray-600">Pediatrics</div>
+              <div class="text-xs text-gray-600">09:00 AM - 05:00 PM</div>
+            </div>
+            <div class="text-right">
+              <span class="inline-block px-2 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-full">Active</span>
+              <div class="text-xs text-gray-600 mt-2">15 patients</div>
+            </div>
+          </div>
+
+          <div class="flex items-start gap-4 pb-4 border-b border-gray-200">
+            <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center text-sm font-bold text-green-600">SA</div>
+            <div class="flex-1">
+              <div class="font-semibold text-gray-900">Dr. Sarah Thompson</div>
+              <div class="text-xs text-gray-600">Orthopedics</div>
+              <div class="text-xs text-gray-600">10:00 AM - 06:00 PM</div>
+            </div>
+            <div class="text-right">
+              <span class="inline-block px-2 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-full">Active</span>
+              <div class="text-xs text-gray-600 mt-2">8 patients</div>
+            </div>
+          </div>
+
+          <div class="flex items-start gap-4">
+            <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center text-sm font-bold text-green-600">JA</div>
+            <div class="flex-1">
+              <div class="font-semibold text-gray-900">Dr. James Wilson</div>
+              <div class="text-xs text-gray-600">Dermatology</div>
+              <div class="text-xs text-gray-600">01:00 PM - 09:00 PM</div>
+            </div>
+            <div class="text-right">
+              <span class="inline-block px-2 py-1 text-xs font-semibold text-orange-700 bg-orange-100 rounded-full">Scheduled</span>
+              <div class="text-xs text-gray-600 mt-2">10 patients</div>
+            </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Main Content Grid -->
-    <div class="main-grid">
-      <!-- Recent Appointments -->
-      <div class="content-card">
-        <div class="card-header">
-          <h3 class="card-title">Recent Appointments</h3>
-          <button class="view-all-btn" (click)="navigateToAppointments()">
-            View All
-            <i class="bi bi-arrow-right"></i>
-          </button>
+    <!-- Appointments List -->
+    <div class="bg-white border border-gray-200 rounded-lg p-6">
+      <div class="flex justify-between items-center mb-6">
+        <div>
+          <h3 class="text-lg font-bold text-gray-900">Today's Appointments</h3>
+          <p class="text-sm text-gray-600">5 appointments scheduled</p>
         </div>
-        <div class="card-content">
-          <div *ngIf="recentAppointments().length === 0" class="empty-state">
-            <i class="bi bi-calendar-x"></i>
-            <p>No recent appointments</p>
-          </div>
-          <div *ngFor="let appointment of recentAppointments()" class="appointment-item">
-            <div class="appointment-info">
-              <div class="patient-info">
-                <div class="patient-avatar">
-                  {{ getInitials(appointment.patient?.firstName, appointment.patient?.lastName) }}
-                </div>
-                <div class="patient-details">
-                  <h4>{{ appointment.patient?.firstName }} {{ appointment.patient?.lastName }}</h4>
-                  <p>with Dr. {{ appointment.doctor?.firstName }} {{ appointment.doctor?.lastName }}</p>
-                </div>
-              </div>
-              <div class="appointment-meta">
-                <span class="appointment-date">{{ formatDate(appointment.appointmentDate) }}</span>
-                <span class="appointment-time">{{ appointment.appointmentTime }}</span>
-                <span class="appointment-status" [class]="getAppointmentStatusClass(appointment.status)">
-                  <i class="bi" [class]="getAppointmentStatusIcon(appointment.status)"></i>
-                  {{ appointment.status | titlecase }}
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
+        <a href="#" class="text-sm font-medium text-gray-700 hover:text-gray-900">View Calendar</a>
       </div>
 
-      <!-- Recent Users -->
-      <div class="content-card">
-        <div class="card-header">
-          <h3 class="card-title">Recent Users</h3>
-          <button class="view-all-btn" (click)="navigateToUsers()">
-            View All
-            <i class="bi bi-arrow-right"></i>
-          </button>
-        </div>
-        <div class="card-content">
-          <div *ngIf="recentUsers().length === 0" class="empty-state">
-            <i class="bi bi-person-x"></i>
-            <p>No recent users</p>
-          </div>
-          <div *ngFor="let user of recentUsers()" class="user-item">
-            <div class="user-info">
-              <div class="user-avatar" [class]="getUserRoleClass(user.role)">
-                {{ getInitials(user.firstName, user.lastName) }}
-              </div>
-              <div class="user-details">
-                <h4>{{ user.firstName }} {{ user.lastName }}</h4>
-                <p>{{ user.email }}</p>
-                <span class="user-role" [class]="getUserRoleClass(user.role)">
-                  <i class="bi" [class]="getUserRoleIcon(user.role)"></i>
-                  {{ user.role | titlecase }}
-                </span>
-              </div>
-            </div>
-            <div class="user-meta">
-              <span class="user-date">{{ formatDate(user.createdAt) }}</span>
+      <div class="space-y-4">
+        <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-green-500">
+          <div class="flex-1">
+            <div class="font-semibold text-gray-900">Sarah Johnson</div>
+            <div class="text-sm text-gray-600">Annual Checkup</div>
+            <div class="flex gap-2 text-xs text-gray-600 mt-1">
+              <span>📍 In-Person</span>
+              <span>•</span>
+              <span>Dr. Michael Chen</span>
             </div>
           </div>
+          <span class="px-2 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-full">confirmed</span>
+          <div class="text-right ml-6">
+            <div class="font-semibold text-gray-900">09:00 AM</div>
+            <div class="text-xs text-gray-600">Today</div>
+          </div>
+          <button class="ml-4 text-gray-400 hover:text-gray-600">⋮</button>
         </div>
-      </div>
 
-      <!-- System Notifications -->
-      <div class="content-card">
-        <div class="card-header">
-          <h3 class="card-title">System Notifications</h3>
-        </div>
-        <div class="card-content">
-          <div *ngIf="notifications().length === 0" class="empty-state">
-            <i class="bi bi-bell-slash"></i>
-            <p>No notifications</p>
-          </div>
-          <div *ngFor="let notification of notifications()" 
-               class="notification-item" 
-               [class]="getNotificationClass(notification.type)"
-               [class.read]="notification.read"
-               (click)="markNotificationAsRead(notification.id)">
-            <div class="notification-icon">
-              <i class="bi" [class]="getNotificationIcon(notification.type)"></i>
-            </div>
-            <div class="notification-content">
-              <h4>{{ notification.title }}</h4>
-              <p>{{ notification.message }}</p>
-              <span class="notification-time">{{ formatTime(notification.timestamp) }}</span>
-            </div>
-            <div class="notification-status" *ngIf="!notification.read">
-              <div class="unread-indicator"></div>
+        <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-green-500">
+          <div class="flex-1">
+            <div class="font-semibold text-gray-900">James Wilson</div>
+            <div class="text-sm text-gray-600">Follow-up Consultation</div>
+            <div class="flex gap-2 text-xs text-gray-600 mt-1">
+              <span>📹 Video Call</span>
+              <span>•</span>
+              <span>Dr. Emily Rodriguez</span>
             </div>
           </div>
+          <span class="px-2 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-full">confirmed</span>
+          <div class="text-right ml-6">
+            <div class="font-semibold text-gray-900">10:30 AM</div>
+            <div class="text-xs text-gray-600">Today</div>
+          </div>
+          <button class="ml-4 text-gray-400 hover:text-gray-600">⋮</button>
         </div>
-      </div>
 
-      <!-- Upcoming Appointments -->
-      <div class="content-card">
-        <div class="card-header">
-          <h3 class="card-title">Today's Appointments</h3>
+        <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-green-500">
+          <div class="flex-1">
+            <div class="font-semibold text-gray-900">Maria Garcia</div>
+            <div class="text-sm text-gray-600">Lab Results Review</div>
+            <div class="flex gap-2 text-xs text-gray-600 mt-1">
+              <span>📍 In-Person</span>
+              <span>•</span>
+              <span>Dr. Michael Chen</span>
+            </div>
+          </div>
+          <span class="px-2 py-1 text-xs font-semibold text-orange-700 bg-orange-100 rounded-full">pending</span>
+          <div class="text-right ml-6">
+            <div class="font-semibold text-gray-900">11:00 AM</div>
+            <div class="text-xs text-gray-600">Today</div>
+          </div>
+          <button class="ml-4 text-gray-400 hover:text-gray-600">⋮</button>
         </div>
-        <div class="card-content">
-          <div *ngIf="upcomingAppointments().length === 0" class="empty-state">
-            <i class="bi bi-calendar-check"></i>
-            <p>No appointments today</p>
-          </div>
-          <div *ngFor="let appointment of upcomingAppointments()" class="upcoming-appointment">
-            <div class="appointment-time">
-              <span class="time">{{ appointment.appointmentTime }}</span>
-            </div>
-            <div class="appointment-details">
-              <h4>{{ appointment.patient?.firstName }} {{ appointment.patient?.lastName }}</h4>
-              <p>Dr. {{ appointment.doctor?.firstName }} {{ appointment.doctor?.lastName }}</p>
-              <span class="appointment-status" [class]="getAppointmentStatusClass(appointment.status)">
-                {{ appointment.status | titlecase }}
-              </span>
+
+        <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-green-500">
+          <div class="flex-1">
+            <div class="font-semibold text-gray-900">Robert Brown</div>
+            <div class="text-sm text-gray-600">Physical Therapy</div>
+            <div class="flex gap-2 text-xs text-gray-600 mt-1">
+              <span>📍 In-Person</span>
+              <span>•</span>
+              <span>Dr. Sarah Thompson</span>
             </div>
           </div>
+          <span class="px-2 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-full">confirmed</span>
+          <div class="text-right ml-6">
+            <div class="font-semibold text-gray-900">02:00 PM</div>
+            <div class="text-xs text-gray-600">Today</div>
+          </div>
+          <button class="ml-4 text-gray-400 hover:text-gray-600">⋮</button>
+        </div>
+
+        <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-green-500">
+          <div class="flex-1">
+            <div class="font-semibold text-gray-900">Lisa Anderson</div>
+            <div class="text-sm text-gray-600">Prescription Renewal</div>
+            <div class="flex gap-2 text-xs text-gray-600 mt-1">
+              <span>📹 Video Call</span>
+              <span>•</span>
+              <span>Dr. Emily Rodriguez</span>
+            </div>
+          </div>
+          <span class="px-2 py-1 text-xs font-semibold text-blue-700 bg-blue-100 rounded-full">completed</span>
+          <div class="text-right ml-6">
+            <div class="font-semibold text-gray-900">03:30 PM</div>
+            <div class="text-xs text-gray-600">Today</div>
+          </div>
+          <button class="ml-4 text-gray-400 hover:text-gray-600">⋮</button>
         </div>
       </div>
     </div>

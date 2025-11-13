@@ -1,3 +1,9 @@
+/* Tailwind directives: must be at the top so utilities are available */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom design tokens and overrides */
 :root {
     --primary-color: #1db954;
     --primary-hover: #169c43;
@@ -68,8 +74,6 @@ body {
     color: var(--primary-color) !important;
 }
 
-
-
 .sidebar {
     background-color: var(--sidebar-bg);
     min-height: 100vh;
@@ -121,4 +125,12 @@ body {
     .main-content {
         margin-left: 0;
     }
+}
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* existing variables and custom rules follow... */
+:root {
+  /* ... */
 }

@@ -1,6 +1,5 @@
 <div class="container-fluid py-4">
 
-  <!-- ==================== HEADER ==================== -->
   <header class="bg-white shadow-sm rounded-3 mb-4 p-3 d-flex align-items-center justify-content-between">
     <div class="d-flex align-items-center gap-3">
       <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center" style="width:44px;height:44px;">
@@ -34,13 +33,11 @@
     </div>
   </header>
 
-  <!-- ==================== WELCOME ==================== -->
   <section class="mb-4">
     <h2 class="fw-bold">Welcome back, {{ user()?.firstName }} {{ user()?.lastName }}</h2>
     <p class="text-muted">Manage your appointments and health records</p>
   </section>
 
-  <!-- ==================== STATS ==================== -->
   <div class="row g-3 mb-4">
     <div class="col-6 col-lg-3">
       <div class="card border-0 shadow-sm h-100">
@@ -107,13 +104,10 @@
     </div>
   </div>
 
-  <!-- ==================== MAIN GRID ==================== -->
   <div class="row g-4">
 
-    <!-- LEFT: TABS + CONTENT -->
     <div class="col-lg-8">
 
-      <!-- TABS -->
       <ul class="nav nav-tabs mb-3">
         <li class="nav-item">
           <button class="nav-link" [class.active]="activeTab() === 'appointments'" (click)="setTab('appointments')">Appointments</button>
@@ -129,10 +123,8 @@
         </li>
       </ul>
 
-      <!-- TAB CONTENT -->
       <div class="card border-0 shadow-sm">
 
-        <!-- APPOINTMENTS -->
         <div *ngIf="activeTab() === 'appointments'" class="card-body">
           <div class="d-flex justify-content-between align-items-center mb-3">
             <h5 class="mb-0 fw-bold">Upcoming Appointments</h5>
@@ -187,7 +179,6 @@
           </div>
         </div>
 
-        <!-- MEDICAL HISTORY -->
         <div *ngIf="activeTab() === 'history'" class="card-body">
           <h5 class="mb-3 fw-bold">Medical History</h5>
           <div *ngFor="let r of medicalHistory()" class="border rounded-3 p-3 mb-3 bg-light">
@@ -202,7 +193,6 @@
           </div>
         </div>
 
-        <!-- PRESCRIPTIONS -->
         <div *ngIf="activeTab() === 'prescriptions'" class="card-body">
           <h5 class="mb-3 fw-bold">Active Prescriptions</h5>
           <div *ngFor="let p of prescriptions()" class="border rounded-3 p-3 mb-3 bg-light">
@@ -228,7 +218,6 @@
           </div>
         </div>
 
-        <!-- TEST RESULTS -->
         <div *ngIf="activeTab() === 'tests'" class="card-body">
           <h5 class="mb-3 fw-bold">Recent Test Results</h5>
           <div *ngFor="let t of testResults()" class="border rounded-3 p-3 mb-3 bg-light">
@@ -256,7 +245,6 @@
       </div>
     </div>
 
-    <!-- RIGHT: SIDEBAR -->
     <div class="col-lg-4">
       <div class="card border-0 shadow-sm mb-4">
         <div class="card-body">
@@ -296,7 +284,6 @@
         </div>
       </div>
 
-      <!-- QUICK ACTIONS -->
       <div class="card border-0 shadow-sm">
         <div class="card-body">
           <h5 class="fw-bold mb-3">Quick Actions</h5>

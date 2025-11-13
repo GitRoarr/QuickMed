@@ -4,13 +4,13 @@ import { SidebarComponent } from '../shared/sidebar';
 import { HeaderComponent } from '../shared/header';
 
 @Component({
-  selector: 'app-appointments',
+  selector: 'app-user-management',
   standalone: true,
   imports: [CommonModule, SidebarComponent, HeaderComponent],
-  templateUrl: './appointments.component.html',
-  styleUrls: ['./appointments.component.css']
+  templateUrl: './user-management.component.html',
+  styleUrls: ['./user-management.component.css']
 })
-export class AppointmentsComponent implements OnInit {
+export class UserManagementComponent implements OnInit {
   menuItems = [
     { label: 'Overview', icon: 'grid', route: '/admin/overview' },
     { label: 'Appointments', icon: 'calendar', route: '/admin/appointments' },
@@ -22,6 +22,6 @@ export class AppointmentsComponent implements OnInit {
   ];
 
   ngOnInit() {
-    // Fetch appointments from backend API
+    // Load all users from backend API with role filtering
   }
 }

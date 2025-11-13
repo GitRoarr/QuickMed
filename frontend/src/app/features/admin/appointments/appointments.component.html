@@ -1,52 +1,109 @@
-<app-sidebar title="Admin Dashboard" [menuItems]="menuItems"></app-sidebar>
+<app-sidebar title="QuickMed Admin Portal" [menuItems]="menuItems"></app-sidebar>
 
-<div class="main-content">
-  <div class="container-fluid">
-    <h2 class="mb-4">All Appointments</h2>
+<div class="ml-60 bg-gray-50 min-h-screen">
+  <app-header></app-header>
 
-    <div class="card">
-      <div class="card-body">
-        <div *ngIf="isLoading" class="text-center py-5">
-          <div class="spinner-border text-primary" role="status">
-            <span class="visually-hidden">Loading...</span>
+  <div class="p-8 max-w-7xl">
+    <h2 class="text-2xl font-bold text-gray-900 mb-6">All Appointments</h2>
+
+    <div class="bg-white border border-gray-200 rounded-lg p-6">
+      <div class="flex justify-between items-center mb-6">
+        <div>
+          <h3 class="text-lg font-bold text-gray-900">All Appointments</h3>
+          <p class="text-sm text-gray-600">5 appointments scheduled</p>
+        </div>
+        <a href="#" class="text-sm font-medium text-gray-700 hover:text-gray-900">View Calendar</a>
+      </div>
+
+      <div class="space-y-3">
+        <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-green-500 hover:shadow-md transition">
+          <div class="flex-1">
+            <div class="font-semibold text-gray-900">Sarah Johnson</div>
+            <div class="text-sm text-gray-600">Annual Checkup</div>
+            <div class="flex gap-2 text-xs text-gray-600 mt-1">
+              <span>📍 In-Person</span>
+              <span>•</span>
+              <span>Dr. Michael Chen</span>
+            </div>
           </div>
+          <span class="px-2 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-full">confirmed</span>
+          <div class="text-right ml-6">
+            <div class="font-semibold text-gray-900">09:00 AM</div>
+            <div class="text-xs text-gray-600">Today</div>
+          </div>
+          <button class="ml-4 text-gray-400 hover:text-gray-600">⋮</button>
         </div>
 
-        <div *ngIf="!isLoading && appointments.length === 0" class="text-center py-5">
-          <p class="text-muted">No appointments found</p>
+        <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-green-500 hover:shadow-md transition">
+          <div class="flex-1">
+            <div class="font-semibold text-gray-900">James Wilson</div>
+            <div class="text-sm text-gray-600">Follow-up Consultation</div>
+            <div class="flex gap-2 text-xs text-gray-600 mt-1">
+              <span>📹 Video Call</span>
+              <span>•</span>
+              <span>Dr. Emily Rodriguez</span>
+            </div>
+          </div>
+          <span class="px-2 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-full">confirmed</span>
+          <div class="text-right ml-6">
+            <div class="font-semibold text-gray-900">10:30 AM</div>
+            <div class="text-xs text-gray-600">Today</div>
+          </div>
+          <button class="ml-4 text-gray-400 hover:text-gray-600">⋮</button>
         </div>
 
-        <div *ngIf="!isLoading && appointments.length > 0" class="table-responsive">
-          <table class="table table-hover">
-            <thead>
-              <tr>
-                <th>Patient</th>
-                <th>Doctor</th>
-                <th>Date</th>
-                <th>Time</th>
-                <th>Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let appointment of appointments">
-                <td>{{ appointment.patient?.firstName }} {{ appointment.patient?.lastName }}</td>
-                <td>Dr. {{ appointment.doctor?.firstName }} {{ appointment.doctor?.lastName }}</td>
-                <td>{{ appointment.appointmentDate | date: 'mediumDate' }}</td>
-                <td>{{ appointment.appointmentTime }}</td>
-                <td>
-                  <span [class]="getStatusClass(appointment.status)">
-                    {{ appointment.status | titlecase }}
-                  </span>
-                </td>
-                <td>
-                  <button (click)="deleteAppointment(appointment.id)" class="btn btn-sm btn-danger">
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+        <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-green-500 hover:shadow-md transition">
+          <div class="flex-1">
+            <div class="font-semibold text-gray-900">Maria Garcia</div>
+            <div class="text-sm text-gray-600">Lab Results Review</div>
+            <div class="flex gap-2 text-xs text-gray-600 mt-1">
+              <span>📍 In-Person</span>
+              <span>•</span>
+              <span>Dr. Michael Chen</span>
+            </div>
+          </div>
+          <span class="px-2 py-1 text-xs font-semibold text-orange-700 bg-orange-100 rounded-full">pending</span>
+          <div class="text-right ml-6">
+            <div class="font-semibold text-gray-900">11:00 AM</div>
+            <div class="text-xs text-gray-600">Today</div>
+          </div>
+          <button class="ml-4 text-gray-400 hover:text-gray-600">⋮</button>
+        </div>
+
+        <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-green-500 hover:shadow-md transition">
+          <div class="flex-1">
+            <div class="font-semibold text-gray-900">Robert Brown</div>
+            <div class="text-sm text-gray-600">Physical Therapy</div>
+            <div class="flex gap-2 text-xs text-gray-600 mt-1">
+              <span>📍 In-Person</span>
+              <span>•</span>
+              <span>Dr. Sarah Thompson</span>
+            </div>
+          </div>
+          <span class="px-2 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-full">confirmed</span>
+          <div class="text-right ml-6">
+            <div class="font-semibold text-gray-900">02:00 PM</div>
+            <div class="text-xs text-gray-600">Today</div>
+          </div>
+          <button class="ml-4 text-gray-400 hover:text-gray-600">⋮</button>
+        </div>
+
+        <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-green-500 hover:shadow-md transition">
+          <div class="flex-1">
+            <div class="font-semibold text-gray-900">Lisa Anderson</div>
+            <div class="text-sm text-gray-600">Prescription Renewal</div>
+            <div class="flex gap-2 text-xs text-gray-600 mt-1">
+              <span>📹 Video Call</span>
+              <span>•</span>
+              <span>Dr. Emily Rodriguez</span>
+            </div>
+          </div>
+          <span class="px-2 py-1 text-xs font-semibold text-blue-700 bg-blue-100 rounded-full">completed</span>
+          <div class="text-right ml-6">
+            <div class="font-semibold text-gray-900">03:30 PM</div>
+            <div class="text-xs text-gray-600">Today</div>
+          </div>
+          <button class="ml-4 text-gray-400 hover:text-gray-600">⋮</button>
         </div>
       </div>
     </div>
