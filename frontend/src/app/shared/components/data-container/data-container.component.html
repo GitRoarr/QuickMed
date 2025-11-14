@@ -1,0 +1,31 @@
+<div class="data-container card">
+  <div class="data-header">
+      <h4>{{ title }} <span class="count">{{ items.length || 0 }}</span></h4>
+    <div class="actions">
+      <button class="btn-outline" (click)="onRefresh()">Refresh</button>
+    </div>
+  </div>
+
+  <div class="data-body">
+    <div *ngIf="loading" class="loading">Loading…</div>
+
+    <div *ngIf="!loading && (!items || items.length === 0)" class="empty">
+      No items yet.
+    </div>
+
+    <ul *ngIf="!loading && items && items.length" class="items">
+      <li *ngFor="let it of items" class="item">
+        <div class="item-left">
+          <div class="item-avatar">{{ (it.title || it.name || '').charAt(0) }}</div>
+        </div>
+        <div class="item-main">
+          <div class="item-title">{{ it.title || it.name || 'Untitled' }}</div>
+          <div class="item-meta">{{ it.meta || it.date || it.description || '' }}</div>
+        </div>
+        <div class="item-actions">
+          <button class="btn-sm btn-outline">View</button>
+        </div>
+      </li>
+    </ul>
+  </div>
+</div>

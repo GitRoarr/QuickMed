@@ -18,6 +18,21 @@
     --card-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
 }
 
+/* Semantic tokens used across components (HSL triplets for components that call hsl(var(--...))) */
+:root {
+    --background: 0 0% 100%;           /* white -> used as hsl(var(--background)) */
+    --foreground: 220 13% 9%;          /* dark text */
+    --card: 0 0% 100%;                 /* card background */
+    --border: 220 12% 93%;             /* light border */
+    --muted-foreground: 215 15% 60%;   /* muted text */
+    --primary: 146 71% 41%;            /* green */
+    --primary-foreground: 0 0% 100%;   /* white for primary text */
+    --medical-green: 162 50% 35%;
+    --medical-orange: 24 90% 56%;
+    --destructive: 0 75% 60%;
+    --destructive-foreground: 0 0% 100%;
+}
+
 .dark-theme {
     --primary-color: #1db954;
     --primary-hover: #169c43;
@@ -30,6 +45,21 @@
     --text-muted: #9ca3af;
     --border-color: #333333;
     --card-shadow: 0 2px 5px rgba(29, 185, 84, 0.2);
+}
+
+/* Dark semantic tokens (used when body.dark or .dark-theme is set) */
+body.dark, .dark-theme {
+    --background: 220 12% 8%;         /* very dark navy */
+    --foreground: 220 11% 96%;        /* near-white */
+    --card: 220 14% 10%;               /* card surface */
+    --border: 220 14% 12%;             /* dark border */
+    --muted-foreground: 210 10% 60%;
+    --primary: 146 71% 41%;
+    --primary-foreground: 0 0% 100%;
+    --medical-green: 162 50% 35%;
+    --medical-orange: 24 90% 56%;
+    --destructive: 0 75% 60%;
+    --destructive-foreground: 0 0% 100%;
 }
 
 * {
@@ -111,6 +141,20 @@ body {
     color: var(--primary-color);
     transform: rotate(180deg);
 }
+
+/* Enhanced theme-toggle visuals that respond to semantic variables */
+.theme-toggle {
+    border-color: hsl(var(--border) / 0.6);
+    color: hsl(var(--foreground));
+    background: transparent;
+    box-shadow: 0 6px 20px -12px rgba(0,0,0,0.25);
+}
+.theme-toggle .moon, .theme-toggle .sun { transition: transform 0.35s ease, opacity 0.25s ease; }
+.theme-toggle.active { transform: rotate(0deg) scale(1.02); }
+.theme-toggle.active .sun { transform: scale(0.85); opacity: 0.0; }
+.theme-toggle.active .moon { transform: scale(1); opacity: 1; }
+.theme-toggle .moon { transform: scale(0.6); opacity: 0; }
+.theme-toggle .sun { transform: scale(1); opacity: 1; }
 
 .theme-toggle i {
     font-size: 1.2rem;
@@ -281,10 +325,6 @@ body.dark .navbar .theme-toggle {
 /* End dark theme overrides --------------------------------------------- */
 
 /* Ensure navbar layout is identical in dark mode (brand left, nav centered, actions right) */
-body.dark .navbar,
-.bg-dark.navbar {
-    /* keep same layout as light navbar */
-}
 
 /* container should be a flex row and spread items across */
 body.dark .navbar .container,

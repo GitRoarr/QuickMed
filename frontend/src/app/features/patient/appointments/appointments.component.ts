@@ -1,9 +1,7 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
-import { SidebarComponent } from '@app/shared/components/sidebar/sidebar.component';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 
 interface Appointment {
   id: string;
@@ -19,7 +17,7 @@ interface Appointment {
 @Component({
   selector: 'app-patient-appointments',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, SidebarComponent],
+  imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './appointments.component.html',
   styleUrls: ['./appointments.component.css']
 })

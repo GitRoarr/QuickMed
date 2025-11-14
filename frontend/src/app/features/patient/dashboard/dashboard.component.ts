@@ -1,9 +1,9 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
-import { CommonModule, DatePipe } from '@angular/common';
+import { Component, OnInit, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
-import { catchError, of, tap } from 'rxjs';
+import { RouterModule } from '@angular/router';
+import { ThemeService } from '../../../core/services/theme.service';
+import { DataContainerComponent } from '../../../shared/components/data-container/data-container.component';
 
 interface User {
   firstName: string;
@@ -26,175 +26,148 @@ interface Appointment {
   isVideoConsultation?: boolean;
 }
 
-interface MedicalRecord {
-  id: string;
-  date: string;
-  doctor: string;
-  diagnosis: string;
-  notes: string;
-}
-
-interface Prescription {
-  id: string;
-  medication: string;
-  dosage: string;
-  prescribedBy: string;
-  startDate: string;
-  refills: number;
-  status: 'active' | 'completed';
-}
-
-interface TestResult {
-  id: string;
-  test: string;
-  date: string;
-  status: string;
-  orderedBy: string;
+interface Stats {
+  upcomingAppointments: number;
+  activeMeds: number;
+  records: number;
+  testResults: number;
 }
 
 @Component({
   selector: 'app-patient-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, DatePipe],
-  templateUrl : './dashboard.component.html',
+  imports: [CommonModule, FormsModule, RouterModule, DataContainerComponent],
+  templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css']
 })
 export class DashboardComponent implements OnInit {
-  private http = inject(HttpClient);
-  private router = inject(Router);
-
-  // Signals
   isLoading = signal(true);
   activeTab = signal<'appointments' | 'history' | 'prescriptions' | 'tests'>('appointments');
   searchQuery = signal('');
-  user = signal<User | null>(null);
-
-  appointments = signal<Appointment[]>([]);
-  medicalHistory = signal<MedicalRecord[]>([]);
-  prescriptions = signal<Prescription[]>([]);
-  testResults = signal<TestResult[]>([]);
-
-  stats = signal({
-    upcomingAppointments: 0,
-    activeMeds: 0,
-    records: 0,
-    testResults: 0
+  sidebarCollapsed = signal(false);
+  
+  
+  user = signal<User>({
+    firstName: 'Sarah',
+    lastName: 'Johnson',
+    patientId: '#12345',
+    email: 'sarah.johnson@email.com',
+    phoneNumber: '+1 (555) 123-4567',
+    dateOfBirth: 'March 15, 1985',
+    bloodType: 'O+',
+    allergies: ['Penicillin', 'Peanuts']
   });
 
+  stats = signal<Stats>({
+    upcomingAppointments: 3,
+    activeMeds: 2,
+    records: 12,
+    testResults: 3
+  });
+
+  appointments = signal<Appointment[]>([
+    {
+      id: '1',
+      doctor: { firstName: 'Michael', lastName: 'Chen', specialty: 'Cardiologist' },
+      appointmentDate: '2025-10-16',
+      appointmentTime: '10:00 AM',
+      location: 'Building A, Room 302',
+      status: 'confirmed',
+      isVideoConsultation: false
+    },
+    {
+      id: '2',
+      doctor: { firstName: 'Emily', lastName: 'Rodriguez', specialty: 'General Physician' },
+      appointmentDate: '2025-10-20',
+      appointmentTime: '2:30 PM',
+      location: 'Video Consultation',
+      status: 'confirmed',
+      isVideoConsultation: true
+    },
+    {
+      id: '3',
+      doctor: { firstName: 'James', lastName: 'Wilson', specialty: 'Dermatologist' },
+      appointmentDate: '2025-10-25',
+      appointmentTime: '11:15 AM',
+      location: 'Building B, Room 105',
+      status: 'pending',
+      isVideoConsultation: false
+    }
+  ]);
+
+  menuItems = [
+    { icon: 'bi-house', label: 'Dashboard', route: '/patient/dashboard', active: true },
+    { icon: 'bi-calendar-check', label: 'Appointments', route: '/patient/appointments', active: false },
+    { icon: 'bi-people', label: 'Find Doctors', route: '/patient/doctors', active: false },
+    { icon: 'bi-file-medical', label: 'Medical Records', route: '/patient/records', active: false },
+    { icon: 'bi-gear', label: 'Settings', route: '/patient/settings', active: false }
+  ];
+
+  quickActions = [
+    { icon: 'bi-calendar-plus', label: 'Book Appointment' },
+    { icon: 'bi-download', label: 'Download Records' },
+    { icon: 'bi-capsule', label: 'Request Prescription' },
+    { icon: 'bi-telephone', label: 'Contact Support' }
+  ];
+
+  constructor(public theme: ThemeService) {}
+
   ngOnInit(): void {
-    this.loadUser();
-    this.loadAppointments();
-    this.loadMedicalHistory();
-    this.loadPrescriptions();
-    this.loadTestResults();
+    this.loadData();
   }
 
-  private loadUser() {
-    this.http.get<User>('/api/patient/profile')
-      .pipe(
-        catchError(err => {
-          console.error('Failed to load user', err);
-          return of(null);
-        })
-      )
-      .subscribe(user => {
-        this.user.set(user);
-      });
+  loadData(): void {
+    setTimeout(() => {
+      this.isLoading.set(false);
+    }, 1000);
   }
 
-  private loadAppointments() {
-    this.http.get<Appointment[]>('/api/patient/appointments')
-      .pipe(
-        tap(() => this.recalcStats()),
-        catchError(err => {
-          console.error('Failed to load appointments', err);
-          return of([]);
-        })
-      )
-      .subscribe(appts => {
-        this.appointments.set(appts);
-        this.isLoading.set(false);
-      });
+  toggleSidebar(): void {
+    this.sidebarCollapsed.set(!this.sidebarCollapsed());
   }
 
-  private loadMedicalHistory() {
-    this.http.get<MedicalRecord[]>('/api/patient/records')
-      .pipe(
-        tap(() => this.recalcStats()),
-        catchError(err => {
-          console.error('Failed to load medical history', err);
-          return of([]);
-        })
-      )
-      .subscribe(records => {
-        this.medicalHistory.set(records);
-      });
+  toggleTheme(): void {
+    this.theme.toggleTheme();
   }
 
-  private loadPrescriptions() {
-    this.http.get<Prescription[]>('/api/patient/prescriptions')
-      .pipe(
-        tap(() => this.recalcStats()),
-        catchError(err => {
-          console.error('Failed to load prescriptions', err);
-          return of([]);
-        })
-      )
-      .subscribe(meds => {
-        this.prescriptions.set(meds);
-      });
-  }
-
-  private loadTestResults() {
-    this.http.get<TestResult[]>('/api/patient/tests')
-      .pipe(
-        tap(() => this.recalcStats()),
-        catchError(err => {
-          console.error('Failed to load test results', err);
-          return of([]);
-        })
-      )
-      .subscribe(tests => {
-        this.testResults.set(tests);
-      });
-  }
-
-  private recalcStats() {
-    const appts = this.appointments();
-    const activeMeds = this.prescriptions().filter(p => p.status === 'active').length;
-    this.stats.set({
-      upcomingAppointments: appts.filter(a => ['confirmed', 'pending'].includes(a.status)).length,
-      activeMeds,
-      records: this.medicalHistory().length,
-      testResults: this.testResults().length
-    });
-  }
-
-  bookAppointment() {
-    this.router.navigate(['/patient/appointments/new']);
-  }
-
-  requestRefill(p: Prescription) {
-    this.http.post('/api/patient/prescriptions/refill', { id: p.id })
-      .subscribe({
-        next: () => alert(`Refill requested for ${p.medication}`),
-        error: (err) => console.error('Refill failed', err)
-      });
-  }
-
-  viewTestDetails(t: TestResult) {
-    this.router.navigate(['/patient/tests', t.id]);
-  }
-
-  callEmergency() {
-    window.open('tel:911', '_self');
-  }
-
-  getInitials(first?: string, last?: string): string {
-    return first && last ? `${first[0]}${last[0]}`.toUpperCase() : 'P';
-  }
-
-  setTab(tab: 'appointments' | 'history' | 'prescriptions' | 'tests') {
+  setActiveTab(tab: 'appointments' | 'history' | 'prescriptions' | 'tests'): void {
     this.activeTab.set(tab);
+  }
+
+  getInitials(firstName?: string, lastName?: string): string {
+    if (!firstName || !lastName) return 'SJ';
+    return `${firstName[0]}${lastName[0]}`;
+  }
+
+  callEmergency(): void {
+    window.location.href = 'tel:911';
+  }
+
+  bookAppointment(): void {
+    console.log('Book appointment clicked');
+  }
+
+  rescheduleAppointment(appointmentId: string): void {
+    console.log('Reschedule appointment:', appointmentId);
+  }
+
+  cancelAppointment(appointmentId: string): void {
+    console.log('Cancel appointment:', appointmentId);
+  }
+
+  joinVideoCall(appointmentId: string): void {
+    console.log('Join video call:', appointmentId);
+  }
+
+  editProfile(): void {
+    console.log('Edit profile clicked');
+  }
+
+  quickAction(action: string): void {
+    console.log('Quick action:', action);
+  }
+
+  logout(): void {
+    console.log('Logout clicked');
   }
 }
