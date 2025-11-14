@@ -135,3 +135,205 @@ body {
     padding: 20px;
     transition: box-shadow 0.3s ease;
 }
+
+/* Dark theme overrides (moved from home.component.css) ------------------- */
+body.dark,
+.bg-dark {
+    --qm-bg: #050505;
+    --qm-surface: rgba(10,11,12,0.7);
+    --qm-text: #e6f6ec;
+    --qm-muted: #98bfa8;
+    --qm-accent: #16a34a;
+}
+
+body.dark {
+    background: var(--qm-bg) !important;
+    color: var(--qm-text) !important;
+}
+
+/* Navbar */
+.bg-dark.navbar,
+body.dark .navbar {
+    background: #060606 !important;
+    border-bottom: 1px solid rgba(22,163,74,0.06) !important;
+}
+
+body.dark .navbar-brand .brand-name,
+body.dark .navbar-brand img {
+    filter: none !important;
+}
+
+body.dark .nav-link,
+.bg-dark .nav-link {
+    color: var(--qm-muted) !important;
+}
+
+body.dark .nav-link:hover,
+.bg-dark .nav-link:hover {
+    color: var(--qm-accent) !important;
+}
+
+/* Theme toggle / avatar */
+body.dark .theme-toggle {
+    background: rgba(255,255,255,0.03) !important;
+    box-shadow: 0 0 0 4px rgba(22,163,74,0.06) inset;
+}
+
+/* Hero */
+body.dark .hero-section {
+    background: linear-gradient(180deg, rgba(3,6,4,0.9) 0%, rgba(1,4,3,0.95) 100%) !important;
+}
+
+body.dark .hero-title {
+    color: #ffffff !important;
+}
+
+body.dark .text-primary {
+    color: var(--qm-accent) !important;
+}
+
+body.dark .hero-description,
+body.dark .stat-label,
+body.dark .stat-number {
+    color: var(--qm-muted) !important;
+}
+
+/* Buttons */
+body.dark .btn-primary,
+.bg-dark .btn-primary {
+    background: var(--qm-accent) !important;
+    border-color: rgba(22,163,74,0.95) !important;
+    color: #fff !important;
+    box-shadow: 0 10px 30px rgba(22,163,74,0.12) !important;
+}
+
+body.dark .btn-outline-light,
+.bg-dark .btn-outline-light {
+    color: #ffffff !important;
+    border-color: rgba(255,255,255,0.08) !important;
+    background: transparent !important;
+}
+
+/* Cards and panels */
+body.dark .feature-card,
+body.dark .benefit-card,
+body.dark .testimonial-card,
+body.dark .image-card {
+    background: linear-gradient(180deg, rgba(8,10,8,0.6), rgba(7,9,7,0.55)) !important;
+    border: 1px solid rgba(22,163,74,0.06) !important;
+    box-shadow: 0 20px 60px rgba(6,9,6,0.6) !important;
+    color: var(--qm-text) !important;
+}
+
+body.dark .stat-icon,
+body.dark .feature-icon {
+    background: rgba(22,163,74,0.06) !important;
+    color: var(--qm-accent) !important;
+}
+
+/* Testimonials and footer */
+body.dark .testimonial-text,
+body.dark .footer-description,
+body.dark .footer-links a,
+body.dark .footer-contact li {
+    color: var(--qm-muted) !important;
+}
+
+body.dark .footer {
+    background: #030403 !important;
+    border-top: 1px solid rgba(22,163,74,0.04) !important;
+}
+
+/* Floating badges, glows */
+body.dark .floating-badge,
+body.dark .badge-1 {
+    background: var(--qm-accent) !important;
+    color: #fff !important;
+    box-shadow: 0 10px 40px rgba(22,163,74,0.18) !important;
+}
+
+/* CTA section */
+body.dark .cta-section {
+    background: linear-gradient(135deg, rgba(9,40,16,0.6), rgba(7,20,12,0.9));
+    border-top: 1px solid rgba(22,163,74,0.06);
+}
+
+/* Ensure text contrast on small components */
+body.dark .btn-link,
+body.dark .btn {
+    color: #e6f6ec !important;
+}
+
+/* Make sure the navbar actions stay visible on dark */
+body.dark .navbar .btn,
+body.dark .navbar .user-avatar-wrapper,
+body.dark .navbar .theme-toggle {
+    z-index: 1500 !important;
+}
+
+/* small tweak for boxed layouts */
+@media (min-width: 992px) {
+    body.dark .navbar .container {
+        max-width: 1200px;
+    }
+}
+
+/* End dark theme overrides --------------------------------------------- */
+
+/* Ensure navbar layout is identical in dark mode (brand left, nav centered, actions right) */
+body.dark .navbar,
+.bg-dark.navbar {
+    /* keep same layout as light navbar */
+}
+
+/* container should be a flex row and spread items across */
+body.dark .navbar .container,
+.bg-dark .navbar .container {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 1rem !important;
+}
+
+/* keep brand left */
+body.dark .navbar-brand,
+.bg-dark .navbar-brand {
+    order: 0;
+}
+
+/* keep nav centered */
+body.dark .navbar-collapse,
+.bg-dark .navbar-collapse {
+    order: 1;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    flex: 1 1 auto !important;
+}
+
+body.dark .navbar-nav,
+.bg-dark .navbar-nav {
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 1.25rem !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+
+/* keep action group (theme toggle, buttons, avatar) on the right */
+body.dark .navbar .d-flex.align-items-center,
+.bg-dark .navbar .d-flex.align-items-center {
+    order: 2;
+    display: flex !important;
+    align-items: center !important;
+    gap: 1rem !important;
+}
+
+/* ensure toggler and buttons keep their size & position */
+body.dark .navbar .navbar-toggler,
+body.dark .navbar .theme-toggle,
+body.dark .navbar .btn {
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+}
