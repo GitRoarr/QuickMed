@@ -126,11 +126,12 @@ body {
         margin-left: 0;
     }
 }
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
 
-/* existing variables and custom rules follow... */
-:root {
-  /* ... */
+.card {
+    background-color: var(--background-light);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: var(--card-shadow);
+    padding: 20px;
+    transition: box-shadow 0.3s ease;
 }

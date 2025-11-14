@@ -30,11 +30,12 @@
             />
           </div>
         </button>
-                <ng-container *ngIf="!currentUser(); else loggedIn">
+                <ng-container *ngIf="!currentUser()">
                     <a routerLink="/login" class="btn px-4" [ngClass]="{'btn-outline-dark text-dark': !isDarkMode(), 'btn-outline-light text-white': isDarkMode()}">Log In</a>
                     <a routerLink="/register" class="btn btn-primary px-4">Get Started</a>
                 </ng-container>
-                <ng-template #loggedIn>
+
+                <ng-container *ngIf="currentUser(); else loggedOut">
 <div 
   class="user-avatar-wrapper d-flex align-items-center gap-2" 
   style="cursor: pointer;" 
@@ -77,7 +78,8 @@
   }">
   Logout
 </button>
-                </ng-template>
+                </ng-container>
+                <ng-template #loggedOut></ng-template>
             </div>
         </div>
     </div>
@@ -176,7 +178,6 @@
     </div>
 </section>
 
-<!-- Everything You Need Section -->
 <section class="benefits-section">
     <div class="container">
         <div class="section-header text-center">

@@ -21,6 +21,15 @@ export class HomeComponent {
     private themeService: ThemeService,
   ) {}
 
+  isHomePage(): boolean {
+    try {
+      const url = this.router.url || '';
+      return url === '/' || url === '' || url.startsWith('/?');
+    } catch (e) {
+      return false;
+    }
+  }
+
   logout(): void {
     this.authService.logout()
   }
