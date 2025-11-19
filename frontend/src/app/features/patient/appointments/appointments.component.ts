@@ -113,7 +113,46 @@ export class AppointmentsComponent implements OnInit {
           location: 'Building A, Room 105',
           status: 'cancelled',
           isVideoConsultation: false
+        },
+        {
+          id: '6',
+          doctor: { firstName: 'David', lastName: 'Lee', specialty: 'Pediatrician' },
+          appointmentDate: '2025-09-05',
+          appointmentTime: '3:00 PM',
+          location: 'Building A, Room 105',
+          status: 'cancelled',
+          isVideoConsultation: false
+        },
+         {
+          id: '7',
+          doctor: { firstName: 'David', lastName: 'Lee', specialty: 'Pediatrician' },
+          appointmentDate: '2025-09-05',
+          appointmentTime: '3:00 PM',
+          location: 'Building A, Room 105',
+          status: 'cancelled',
+          isVideoConsultation: false
+        },
+         {
+          id: '8',
+          doctor: { firstName: 'David', lastName: 'Lee', specialty: 'Pediatrician' },
+          appointmentDate: '2025-09-05',
+          appointmentTime: '3:00 PM',
+          location: 'Building A, Room 105',
+          status: 'cancelled',
+          isVideoConsultation: false
+        },
+         {
+          id: '9',
+          doctor: { firstName: 'David', lastName: 'Lee', specialty: 'Pediatrician' },
+          appointmentDate: '2025-09-05',
+          appointmentTime: '3:00 PM',
+          location: 'Building A, Room 105',
+          status: 'cancelled',
+          isVideoConsultation: false
         }
+
+
+
       ];
 
       this.appointments.set(mockAppointments);
