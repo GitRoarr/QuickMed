@@ -21,7 +21,9 @@ export class DashboardComponent implements OnInit {
     { label: 'Settings', icon: 'gear', route: '/admin/settings' }
   ];
 
+
   ngOnInit() {
     // Load dashboard data from backend API
   }
+
 }

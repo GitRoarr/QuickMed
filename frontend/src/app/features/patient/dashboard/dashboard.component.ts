@@ -1,7 +1,7 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { ThemeService } from '../../../core/services/theme.service';
 import { DataContainerComponent } from '../../../shared/components/data-container/data-container.component';
 
@@ -110,7 +110,7 @@ export class DashboardComponent implements OnInit {
     { icon: 'bi-telephone', label: 'Contact Support' }
   ];
 
-  constructor(public theme: ThemeService) {}
+  constructor(public theme: ThemeService, private router: Router) {}
 
   ngOnInit(): void {
     this.loadData();
@@ -120,6 +120,9 @@ export class DashboardComponent implements OnInit {
     setTimeout(() => {
       this.isLoading.set(false);
     }, 1000);
+  }
+   goHome() {
+    this.router.navigate(['/']); // Change '/' if your homepage route is different
   }
 
   toggleSidebar(): void {

@@ -1,7 +1,9 @@
 <aside class="w-60 bg-white border-r border-gray-200 fixed left-0 top-0 h-screen overflow-y-auto flex flex-col">
-  <div class="px-6 py-4 border-b border-gray-200">
+  <div class="px-6 py-4 border-b border-gray-200 cursor-pointer" (click)="goHome()">
+    <img src="assets/images/QuickMed-Logo.png" alt="QuickMed Logo" class="h-8 mb-2" />
     <h2 class="text-lg font-bold text-gray-900">{{ title }}</h2>
   </div>
+
   <nav class="flex-1 flex flex-col py-4">
     <a *ngFor="let item of menuItems" 
        [routerLink]="item.route" 

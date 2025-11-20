@@ -1,21 +1,21 @@
-import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
-
-interface MenuItem {
-  label: string;
-  icon: string;
-  route: string;
-}
+import { Component, Input } from '@angular/core';
+import { Router, RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-sidebar',
-  standalone: true,
-  imports: [CommonModule, RouterModule],
   templateUrl: './sidebar.component.html',
-  styleUrls: ['./sidebar.component.css']
+  standalone: true,
+  styleUrls: ['./sidebar.component.css'],
+  imports: [CommonModule, RouterModule],
 })
 export class SidebarComponent {
-  @Input() title: string = 'Admin Dashboard';
-  @Input() menuItems: MenuItem[] = [];
+  @Input() title: string = '';
+  @Input() menuItems: { label: string; icon: string; route: string }[] = [];
+
+  constructor(private router: Router) {}
+
+  goHome(): void {
+    this.router.navigate(['/']); 
+  }
 }

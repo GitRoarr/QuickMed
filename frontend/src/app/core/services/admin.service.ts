@@ -92,7 +92,6 @@ export class AdminService {
     return this.http.delete<void>(`${this.apiUrl}/appointments/${id}`);
   }
 
-  // Doctor-related backend logic integrated
   createDoctorInvitation(data: any): Observable<User> {
     return this.http.post<User>(`${this.apiUrl}/doctors`, data);
   }

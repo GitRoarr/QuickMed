@@ -12,6 +12,9 @@
     "license": "ISC",
     "description": "",
     "dependencies": {
+        "@angular/common": "^21.0.0",
+        "@angular/core": "^21.0.0",
+        "@angular/forms": "^21.0.0",
         "@nestjs/common": "^11.1.6",
         "@nestjs/config": "^4.0.2",
         "@nestjs/core": "^11.1.8",
