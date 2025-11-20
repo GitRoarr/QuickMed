@@ -1,4 +1,4 @@
-import {Controller,Get,Post,Put, Delete,Body,Param,Query,UseGuards,HttpStatus,HttpCode,} from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Patch, Body, Param, Query, UseGuards, HttpStatus, HttpCode } from '@nestjs/common';
 import { AdminService } from './admin.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
@@ -8,12 +8,18 @@ import { UpdateUserDto } from '../users/dto/update-user.dto';
 import { CreateAppointmentDto } from '../appointments/dto/create-appointment.dto';
 import { UpdateAppointmentDto } from '../appointments/dto/update-appointment.dto';
 import { UserRole } from '../common/index';
+import { DoctorsService } from '@/doctors/doctors.service';
+import { CreateDoctorDto } from '@/doctors/dto/create-doctor.dto';
 
 @Controller('admin')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class AdminController {
-  constructor(private readonly adminService: AdminService) {}
+  constructor(
+    private readonly adminService: AdminService,
+    private readonly doctorsService: DoctorsService
+  ) {}
 
+  // ---------------- Dashboard & Stats ----------------
   @Get('dashboard')
   @Roles(UserRole.ADMIN)
   async getDashboardData() {
@@ -26,12 +32,13 @@ export class AdminController {
     return await this.adminService.getAdminStats();
   }
 
+  // ---------------- Users ----------------
   @Get('users')
   @Roles(UserRole.ADMIN)
   async getAllUsers(
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 10,
-    @Query('role') role?: string,
+    @Query('role') role?: string
   ) {
     return await this.adminService.getAllUsers(page, limit, role);
   }
@@ -51,10 +58,7 @@ export class AdminController {
 
   @Put('users/:id')
   @Roles(UserRole.ADMIN)
-  async updateUser(
-    @Param('id') id: string,
-    @Body() updateUserDto: UpdateUserDto,
-  ) {
+  async updateUser(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     return await this.adminService.updateUser(id, updateUserDto);
   }
 
@@ -65,12 +69,19 @@ export class AdminController {
     await this.adminService.deleteUser(id);
   }
 
+  @Get('users/:id/export')
+  @Roles(UserRole.ADMIN)
+  async exportUserData(@Param('id') id: string) {
+    return await this.adminService.exportUserData(id);
+  }
+
+  // ---------------- Appointments ----------------
   @Get('appointments')
   @Roles(UserRole.ADMIN)
   async getAllAppointments(
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 10,
-    @Query('status') status?: string,
+    @Query('status') status?: string
   ) {
     return await this.adminService.getAllAppointments(page, limit, status);
   }
@@ -90,10 +101,7 @@ export class AdminController {
 
   @Put('appointments/:id')
   @Roles(UserRole.ADMIN)
-  async updateAppointment(
-    @Param('id') id: string,
-    @Body() updateAppointmentDto: UpdateAppointmentDto,
-  ) {
+  async updateAppointment(@Param('id') id: string, @Body() updateAppointmentDto: UpdateAppointmentDto) {
     return await this.adminService.updateAppointment(id, updateAppointmentDto);
   }
 
@@ -104,6 +112,7 @@ export class AdminController {
     await this.adminService.deleteAppointment(id);
   }
 
+  // ---------------- System Health & Notifications ----------------
   @Get('system/health')
   @Roles(UserRole.ADMIN)
   async getSystemHealth() {
@@ -116,29 +125,44 @@ export class AdminController {
     return await this.adminService.getSystemNotifications();
   }
 
-  @Get('users/:id/export')
-  @Roles(UserRole.ADMIN)
-  async exportUserData(@Param('id') id: string) {
-    return await this.adminService.exportUserData(id);
-  }
-
+  // ---------------- Reports ----------------
   @Post('reports')
   @Roles(UserRole.ADMIN)
-  async generateReport(
-    @Body() reportRequest: {
-      type: 'users' | 'appointments' | 'revenue';
-      startDate?: string;
-      endDate?: string;
-    },
-  ) {
+  async generateReport(@Body() reportRequest: { type: 'users' | 'appointments' | 'revenue'; startDate?: string; endDate?: string }) {
     const startDate = reportRequest.startDate ? new Date(reportRequest.startDate) : undefined;
     const endDate = reportRequest.endDate ? new Date(reportRequest.endDate) : undefined;
-    
-    return await this.adminService.generateReport(
-      reportRequest.type,
-      startDate,
-      endDate,
-    );
+    return await this.adminService.generateReport(reportRequest.type, startDate, endDate);
+  }
+
+  // ---------------- Doctor Management ----------------
+  @Post('doctors')
+  @Roles(UserRole.ADMIN)
+  @HttpCode(HttpStatus.CREATED)
+  async addDoctor(@Body() createDoctorDto: CreateDoctorDto) {
+    return this.doctorsService.createDoctorInvite(createDoctorDto);
+  }
+
+  @Patch('doctors/:id/validate-license')
+  @Roles(UserRole.ADMIN)
+  async validateDoctorLicense(@Param('id') doctorId: string) {
+    return this.doctorsService.validateLicense(doctorId);
+  }
+
+  @Patch('doctors/:id/confirm-employment')
+  @Roles(UserRole.ADMIN)
+  async confirmDoctorEmployment(@Param('id') doctorId: string) {
+    return this.doctorsService.confirmEmployment(doctorId);
+  }
+
+  @Patch('doctors/:id/activate')
+  @Roles(UserRole.ADMIN)
+  async activateDoctor(@Param('id') doctorId: string) {
+    return this.doctorsService.activateDoctor(doctorId);
+  }
+
+  @Get('doctors')
+  @Roles(UserRole.ADMIN)
+  async getAllDoctors() {
+    return this.doctorsService.findAll();
   }
 }
-

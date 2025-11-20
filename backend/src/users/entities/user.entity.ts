@@ -16,10 +16,9 @@ export class User extends BaseEntity {
 
   @Column()
   password: string;
-  
+
   @Column({ nullable: true })
   avatar: string;
-
 
   @Column({
     type: 'enum',
@@ -81,4 +80,19 @@ export class User extends BaseEntity {
 
   @OneToMany(() => Appointment, (appointment) => appointment.doctor)
   doctorAppointments: Appointment[];
+
+  @Column({ type: 'boolean', default: true })
+  isActive: boolean;
+
+  @Column({ nullable: true })
+  inviteToken: string;
+
+  @Column({ type: 'timestamp', nullable: true })
+  inviteExpiresAt: Date;
+
+  @Column({ type: 'boolean', default: false })
+  licenseValidated: boolean;
+
+  @Column({ type: 'boolean', default: false })
+  employmentConfirmed: boolean;
 }

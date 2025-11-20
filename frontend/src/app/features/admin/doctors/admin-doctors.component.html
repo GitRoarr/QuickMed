@@ -1,0 +1,27 @@
+<div class="ml-60 bg-gray-50 min-h-screen p-8">
+  <h2 class="text-2xl font-bold mb-6">Manage Doctors</h2>
+  <div class="bg-white border rounded-lg p-6">
+    <div class="flex justify-between items-center mb-6">
+      <h1 class="text-2xl font-semibold">Doctors</h1>
+      <button class="btn btn-primary animate-pulse" (click)="onAdd()">+ Add Doctor</button>
+    </div>
+
+    <div *ngIf="loading" class="text-gray-500">Loading...</div>
+    <div *ngIf="!loading && doctors.length === 0" class="text-gray-500">No doctors yet</div>
+
+    <div *ngFor="let d of doctors" class="card p-4 mb-3 flex justify-between items-center border rounded">
+      <div>
+        <div class="font-semibold">{{ d.firstName }} {{ d.lastName }}</div>
+        <div class="text-sm text-gray-500">{{ d.specialty || 'No Specialty' }}</div>
+      </div>
+      <div class="flex items-center gap-3">
+        <span [ngClass]="{
+          'badge-warning': !d.isActive,
+          'badge-success': d.isActive
+        }">{{ d.isActive ? 'ACTIVE' : 'PENDING' }}</span>
+        <button class="btn" (click)="onVerify(d.id)">Verify</button>
+        <button class="btn btn-danger" (click)="onDelete(d.id)">Delete</button>
+      </div>
+    </div>
+  </div>
+</div>

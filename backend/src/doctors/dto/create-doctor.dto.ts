@@ -1,47 +1,32 @@
-import { IsEmail, IsString, IsNotEmpty, MinLength, IsOptional, IsArray } from "class-validator"
+// create-doctor.dto.ts
+import { IsEmail, IsString, IsNotEmpty } from "class-validator";
 
 export class CreateDoctorDto {
   @IsString()
   @IsNotEmpty()
-  firstName: string
+  firstName: string;
 
   @IsString()
   @IsNotEmpty()
-  lastName: string
+  lastName: string;
 
   @IsEmail()
   @IsNotEmpty()
-  email: string
-
-  @IsString()
-  @MinLength(6)
-  password: string
+  email: string;
 
   @IsString()
   @IsNotEmpty()
-  phoneNumber: string
+  phoneNumber: string;
 
   @IsString()
   @IsNotEmpty()
-  specialty: string
-
-  @IsString()
-  @IsOptional()
-  bio?: string
+  specialty: string;
 
   @IsString()
   @IsNotEmpty()
-  licenseNumber: string
-
-  @IsArray()
-  @IsOptional()
-  availableDays?: string[]
+  licenseNumber: string;
 
   @IsString()
-  @IsOptional()
-  startTime?: string
-
-  @IsString()
-  @IsOptional()
-  endTime?: string
+  @IsNotEmpty()
+  bio: string; 
 }

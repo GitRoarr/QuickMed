@@ -1,35 +1,15 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, Between } from 'typeorm';
 import { User } from '../users/entities/user.entity';
 import { Appointment } from '../appointments/entities/appointment.entity';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { UpdateUserDto } from '../users/dto/update-user.dto';
 import { CreateAppointmentDto } from '../appointments/dto/create-appointment.dto';
 import { UpdateAppointmentDto } from '../appointments/dto/update-appointment.dto';
-import { UserRole, AppointmentStatus } from '../common/index'
-import { Between } from 'typeorm';
-
-export interface AdminStats {
-  totalUsers: number;
-  totalPatients: number;
-  totalDoctors: number;
-  totalAdmins: number;
-  totalAppointments: number;
-  pendingAppointments: number;
-  confirmedAppointments: number;
-  completedAppointments: number;
-  cancelledAppointments: number;
-  todayAppointments: number;
-  thisWeekAppointments: number;
-  thisMonthAppointments: number;
-  revenue: number;
-  averageAppointmentDuration: number;
-  patientSatisfactionScore: number;
-}
-
-
-
+import { UserRole, AppointmentStatus } from '../common/index';
+import { AdminStatsService, AdminStats } from './admin.stats.service';
+import { DoctorsService } from '../doctors/doctors.service';
 
 export interface AdminDashboardData {
   stats: AdminStats;
@@ -47,99 +27,82 @@ export interface AdminDashboardData {
 
 @Injectable()
 export class AdminService {
- constructor(
+  constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,
     @InjectRepository(Appointment)
     private appointmentRepository: Repository<Appointment>,
+    private readonly statsService: AdminStatsService,
+    private readonly doctorsService: DoctorsService
   ) {}
 
+  // -------------------- Dashboard --------------------
   async getDashboardData(): Promise<AdminDashboardData> {
-    const stats = await this.getAdminStats();
+    const stats = await this.statsService.getAdminStats();
     const recentAppointments = await this.getRecentAppointments();
     const recentUsers = await this.getRecentUsers();
     const upcomingAppointments = await this.getUpcomingAppointments();
     const systemHealth = await this.getSystemHealth();
     const notifications = await this.getSystemNotifications();
 
-    return {
-      stats,
-      recentAppointments,
-      recentUsers,
-      upcomingAppointments,
-      systemHealth,
-      notifications,
-    };
+    return { stats, recentAppointments, recentUsers, upcomingAppointments, systemHealth, notifications };
+    
   }
 
   async getAdminStats(): Promise<AdminStats> {
-    const [
-      totalUsers,
-      totalPatients,
-      totalDoctors,
-      totalAdmins,
-      totalAppointments,
-      pendingAppointments,
-      confirmedAppointments,
-      completedAppointments,
-      cancelledAppointments,
-      todayAppointments,
-      thisWeekAppointments,
-      thisMonthAppointments,
-    ] = await Promise.all([
-      this.userRepository.count(),
-      this.userRepository.count({ where: { role: UserRole.PATIENT } }),
-      this.userRepository.count({ where: { role: UserRole.DOCTOR } }),
-      this.userRepository.count({ where: { role: UserRole.ADMIN } }),
-      this.appointmentRepository.count(),
-      this.appointmentRepository.count({ where: { status: AppointmentStatus.PENDING } }),
-      this.appointmentRepository.count({ where: { status: AppointmentStatus.CONFIRMED } }),
-      this.appointmentRepository.count({ where: { status: AppointmentStatus.COMPLETED } }),
-      this.appointmentRepository.count({ where: { status: AppointmentStatus.CANCELLED } }),
-      this.getTodayAppointmentsCount(),
-      this.getThisWeekAppointmentsCount(),
-      this.getThisMonthAppointmentsCount(),
-    ]);
-
-    return {
-      totalUsers,
-      totalPatients,
-      totalDoctors,
-      totalAdmins,
-      totalAppointments,
-      pendingAppointments,
-      confirmedAppointments,
-      completedAppointments,
-      cancelledAppointments,
-      todayAppointments,
-      thisWeekAppointments,
-      thisMonthAppointments,
-      revenue: await this.calculateRevenue(),
-      averageAppointmentDuration: await this.getAverageAppointmentDuration(),
-      patientSatisfactionScore: await this.getPatientSatisfactionScore(),
-    };
+    return this.statsService.getAdminStats();
   }
 
-  async getAllUsers(page: number = 1, limit: number = 10, role?: string) {
-    const queryBuilder = this.userRepository.createQueryBuilder('user');
-    
-    if (role) {
-      queryBuilder.where('user.role = :role', { role: role as UserRole });
-    }
+  async exportUserData(userId: string) {
+    const user = await this.getUserById(userId);
+    const appointments = await this.appointmentRepository.find({
+      where: [{ patientId: userId }, { doctorId: userId }],
+      relations: ['patient', 'doctor'],
+    });
+    return { user, appointments, exportDate: new Date() };
+  }
 
-    const [users, total] = await queryBuilder
+  async generateReport(
+    type: 'users' | 'appointments' | 'revenue',
+    startDate?: Date,
+    endDate?: Date
+  ) {
+    const reportData: any = {
+      type,
+      startDate: startDate || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // default last 30 days
+      endDate: endDate || new Date(),
+      generatedAt: new Date(),
+    };
+
+    const stats = await this.statsService.getAdminStats();
+
+    switch (type) {
+      case 'users':
+        reportData['userStats'] = stats;
+        break;
+      case 'appointments':
+        reportData['appointmentStats'] = stats;
+        break;
+      case 'revenue':
+        reportData['revenueStats'] = {
+          totalRevenue: stats.revenue,
+          averageRevenue: stats.revenue / 30,
+        };
+        break;
+    }
+    return reportData;
+  }
+
+  // -------------------- Users --------------------
+  async getAllUsers(page = 1, limit = 10, role?: string) {
+    const query = this.userRepository.createQueryBuilder('user');
+    if (role) query.where('user.role = :role', { role });
+    const [users, total] = await query
       .orderBy('user.createdAt', 'DESC')
       .skip((page - 1) * limit)
       .take(limit)
       .getManyAndCount();
-
-    return {
-      users,
-      total,
-      page,
-      limit,
-      totalPages: Math.ceil(total / limit),
-    };
+    return { users, total, page, limit, totalPages: Math.ceil(total / limit) };
   }
 
   async getUserById(id: string): Promise<User> {
@@ -147,267 +110,141 @@ export class AdminService {
       where: { id },
       relations: ['patientAppointments', 'doctorAppointments', 'patientAppointments.patient', 'doctorAppointments.doctor'],
     });
-
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
-
+    if (!user) throw new NotFoundException('User not found');
     return user;
   }
-  
 
-  async createUser(createUserDto: CreateUserDto): Promise<User> {
-    const user = this.userRepository.create(createUserDto);
-    return await this.userRepository.save(user);
+  async createUser(dto: CreateUserDto) {
+    const user = this.userRepository.create(dto);
+    return this.userRepository.save(user);
   }
 
-  async updateUser(id: string, updateUserDto: UpdateUserDto): Promise<User> {
+  async updateUser(id: string, dto: UpdateUserDto) {
     const user = await this.getUserById(id);
-    Object.assign(user, updateUserDto);
-    return await this.userRepository.save(user);
+    Object.assign(user, dto);
+    return this.userRepository.save(user);
   }
 
-  async deleteUser(id: string): Promise<void> {
+  async deleteUser(id: string) {
     const user = await this.getUserById(id);
     await this.userRepository.remove(user);
   }
 
-  async getAllAppointments(page: number = 1, limit: number = 10, status?: string) {
-    const queryBuilder = this.appointmentRepository
+  // -------------------- Appointments --------------------
+  async getAllAppointments(page = 1, limit = 10, status?: string) {
+    const query = this.appointmentRepository
       .createQueryBuilder('appointment')
       .leftJoinAndSelect('appointment.patient', 'patient')
       .leftJoinAndSelect('appointment.doctor', 'doctor');
-
-    if (status) {
-      queryBuilder.where('appointment.status = :status', { status: status as AppointmentStatus });
-    }
-
-    const [appointments, total] = await queryBuilder
+    if (status) query.where('appointment.status = :status', { status });
+    const [appointments, total] = await query
       .orderBy('appointment.appointmentDate', 'DESC')
       .addOrderBy('appointment.appointmentTime', 'ASC')
       .skip((page - 1) * limit)
       .take(limit)
       .getManyAndCount();
-
-    return {
-      appointments,
-      total,
-      page,
-      limit,
-      totalPages: Math.ceil(total / limit),
-    };
+    return { appointments, total, page, limit, totalPages: Math.ceil(total / limit) };
   }
 
-  async getAppointmentById(id: string): Promise<Appointment> {
+  async getAppointmentById(id: string) {
     const appointment = await this.appointmentRepository.findOne({
       where: { id },
       relations: ['patient', 'doctor'],
     });
-
-    if (!appointment) {
-      throw new NotFoundException('Appointment not found');
-    }
-
+    if (!appointment) throw new NotFoundException('Appointment not found');
     return appointment;
   }
 
-  async createAppointment(createAppointmentDto: CreateAppointmentDto): Promise<Appointment> {
-    const doctor = await this.userRepository.findOne({ where: { id: createAppointmentDto.doctorId } });
-    if (!doctor || doctor.role !== UserRole.DOCTOR) {
-      throw new BadRequestException('Invalid doctor ID');
-    }
-    const appointment = this.appointmentRepository.create({
-      ...createAppointmentDto,
-      patientId: 'placeholder_patient_id',
-      doctorId: createAppointmentDto.doctorId,
-    });
-    return await this.appointmentRepository.save(appointment);
+  async createAppointment(dto: CreateAppointmentDto) {
+    const doctor = await this.userRepository.findOne({ where: { id: dto.doctorId } });
+    if (!doctor || doctor.role !== UserRole.DOCTOR) throw new BadRequestException('Invalid doctor ID');
+    const appointment = this.appointmentRepository.create({ ...dto, patientId: 'placeholder_patient_id' });
+    return this.appointmentRepository.save(appointment);
   }
 
-  async updateAppointment(id: string, updateAppointmentDto: UpdateAppointmentDto): Promise<Appointment> {
+  async updateAppointment(id: string, dto: UpdateAppointmentDto) {
     const appointment = await this.getAppointmentById(id);
-    Object.assign(appointment, updateAppointmentDto);
-    return await this.appointmentRepository.save(appointment);
+    Object.assign(appointment, dto);
+    return this.appointmentRepository.save(appointment);
   }
 
-  async deleteAppointment (id: string): Promise<void> {
+  async deleteAppointment(id: string) {
     const appointment = await this.getAppointmentById(id);
     await this.appointmentRepository.remove(appointment);
   }
+async getSystemHealth(): Promise<{
+  database: 'healthy' | 'warning' | 'error';
+  api: 'healthy' | 'warning' | 'error';
+  storage: 'healthy' | 'warning' | 'error';
+  notifications: 'healthy' | 'warning' | 'error';
+}> {
+  try {
+    await this.userRepository.count();
+    const database: 'healthy' | 'warning' | 'error' = 'healthy';
 
-  async getSystemHealth() {
-    try {
-      await this.userRepository.count();
-      const database: 'healthy' | 'warning' | 'error' = 'healthy';
+    const apiStart = Date.now();
+    await this.appointmentRepository.count();
+    const apiResponseTime = Date.now() - apiStart;
+    const api: 'healthy' | 'warning' | 'error' = apiResponseTime < 1000 ? 'healthy' : 'warning';
 
-      const apiStart = Date.now();
-      await this.appointmentRepository.count();
-      const apiResponseTime = Date.now() - apiStart;
-      const api: 'healthy' | 'warning' | 'error' = apiResponseTime < 1000 ? 'healthy' : 'warning';
+    const storage: 'healthy' | 'warning' | 'error' = 'healthy';
+    const notifications: 'healthy' | 'warning' | 'error' = 'healthy';
 
-      const storage: 'healthy' | 'warning' | 'error' = 'healthy';
-      const notifications: 'healthy' | 'warning' | 'error' = 'healthy';
-
-      return { database, api, storage, notifications };
-    } catch (error) {
-      return {
-        database: 'error' as const,
-        api: 'error' as const,
-        storage: 'error' as const,
-        notifications: 'error' as const,
-      };
-    }
+    return { database, api, storage, notifications };
+  } catch (error) {
+    return {
+      database: 'error' as 'error',
+      api: 'error' as 'error',
+      storage: 'error' as 'error',
+      notifications: 'error' as 'error',
+    };
   }
+}
+
 
   async getSystemNotifications() {
     return [
-      {
-        id: 1,
-        type: 'info',
-        title: 'System Update Available',
-        message: 'A new system update is available. Please schedule maintenance.',
-        timestamp: new Date('2025-10-28T00:11:00Z'),
-        read: false,
-      },
-      {
-        id: 2,
-        type: 'warning',
-        title: 'High Server Load',
-        message: 'Server load is above 80%. Consider scaling resources.',
-        timestamp: new Date('2025-10-27T23:11:00Z'),
-        read: false,
-      },
-      {
-        id: 3,
-        type: 'success',
-        title: 'Backup Completed',
-        message: 'Daily backup completed successfully.',
-        timestamp: new Date('2025-10-27T22:11:00Z'),
-        read: true,
-      },
+      { id: 1, type: 'info', title: 'Update Available', message: 'New update available.', timestamp: new Date(), read: false },
+      { id: 2, type: 'warning', title: 'High Load', message: 'Server load >80%.', timestamp: new Date(), read: false },
+      { id: 3, type: 'success', title: 'Backup Done', message: 'Backup completed.', timestamp: new Date(), read: true },
     ];
   }
 
-  private async getRecentAppointments(): Promise<Appointment[]> {
-    return await this.appointmentRepository.find({
-      relations: ['patient', 'doctor'],
-      order: { createdAt: 'DESC' },
-      take: 5,
-    });
+  private async getRecentAppointments() {
+    return this.appointmentRepository.find({ relations: ['patient', 'doctor'], order: { createdAt: 'DESC' }, take: 5 });
   }
 
-  private async getRecentUsers(): Promise<User[]> {
-    return await this.userRepository.find({
-      order: { createdAt: 'DESC' },
-      take: 5,
-    });
+  private async getRecentUsers() {
+    return this.userRepository.find({ order: { createdAt: 'DESC' }, take: 5 });
   }
 
-  private async getUpcomingAppointments(): Promise<Appointment[]> {
-    const today = new Date('2025-10-28T00:11:00Z');
-    return await this.appointmentRepository.find({
-      where: {
-        appointmentDate: new Date(today.toISOString().split('T')[0]),
-        status: AppointmentStatus.CONFIRMED,
-      },
+  private async getUpcomingAppointments() {
+    const today = new Date();
+    return this.appointmentRepository.find({
+      where: { appointmentDate: today, status: AppointmentStatus.CONFIRMED },
       relations: ['patient', 'doctor'],
       order: { appointmentTime: 'ASC' },
       take: 10,
     });
   }
 
-  private async getTodayAppointmentsCount(): Promise<number> {
-    const today = new Date('2025-10-28T00:11:00Z'); 
-    return await this.appointmentRepository.count({
-      where: {
-        appointmentDate: new Date(today.toISOString().split('T')[0]),
-      },
-    });
+  async addDoctor(dto: any) {
+    return this.doctorsService.createDoctorInvite(dto);
   }
 
-  private async getThisWeekAppointmentsCount(): Promise<number> {
-    const startOfWeek = new Date('2025-10-28T00:11:00Z');
-    startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
-    const endOfWeek = new Date(startOfWeek);
-    endOfWeek.setDate(endOfWeek.getDate() + 6);
-
-    return await this.appointmentRepository.count({
-      where: {
-        appointmentDate: Between(startOfWeek, endOfWeek),
-      },
-    });
+  async activateDoctor(id: string) {
+    return this.doctorsService.activateDoctor(id);
   }
 
-  private async getThisMonthAppointmentsCount(): Promise<number> {
-    const startOfMonth = new Date('2025-10-28T00:11:00Z'); 
-    startOfMonth.setDate(1);
-    const endOfMonth = new Date(startOfMonth);
-    endOfMonth.setMonth(endOfMonth.getMonth() + 1);
-    endOfMonth.setDate(0);
-
-    return await this.appointmentRepository.count({
-      where: {
-        appointmentDate: Between(startOfMonth, endOfMonth),
-      },
-    });
+  async validateDoctor(id: string) {
+    return this.doctorsService.validateLicense(id);
   }
 
-  private async calculateRevenue(): Promise<number> {
-    const completedAppointments = await this.appointmentRepository.count({
-      where: { status: AppointmentStatus.COMPLETED },
-    });
-    return completedAppointments * 150;
+  async confirmDoctorEmployment(id: string) {
+    return this.doctorsService.confirmEmployment(id);
   }
 
-  private async getAverageAppointmentDuration(): Promise<number> {
-    return 30;
-  }
-
-  private async getPatientSatisfactionScore(): Promise<number> {
-    return 4.5;
-  }
-
-  async exportUserData(userId: string): Promise<any> {
-    const user = await this.getUserById(userId);
-    const appointments = await this.appointmentRepository.find({
-      where: [
-        { patientId: userId },
-        { doctorId: userId },
-      ],
-      relations: ['patient', 'doctor'],
-    });
-
-    return {
-      user,
-      appointments,
-      exportDate: new Date(),
-    };
-  }
-
-  async generateReport(type: 'users' | 'appointments' | 'revenue', startDate?: Date, endDate?: Date): Promise<any> {
-    const reportData = {
-      type,
-      startDate: startDate || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
-      endDate: endDate || new Date(),
-      generatedAt: new Date(),
-    };
-
-
-    switch (type) {
-      case 'users':
-        reportData['userStats'] = await this.getAdminStats();
-        break;
-      case 'appointments':
-        reportData['appointmentStats'] = await this.getAdminStats();
-        break;
-      case 'revenue':
-        reportData['revenueStats'] = {
-          totalRevenue: await this.calculateRevenue(),
-          averageRevenue: await this.calculateRevenue() / 30,
-        };
-        break;
-    }
-
-    return reportData;
+  async getAllDoctors() {
+    return this.doctorsService.findAll();
   }
 }

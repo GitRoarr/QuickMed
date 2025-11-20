@@ -1,0 +1,20 @@
+<div class="ml-60 p-8 bg-gray-50 min-h-screen">
+  <button class="btn mb-4" (click)="back()">Back</button>
+  <h2 class="text-xl font-bold mb-6">Add New Doctor</h2>
+
+  <div *ngIf="message" [ngClass]="{'text-green-600': type==='success','text-red-600': type==='error'}" class="mb-4">
+    {{ message }}
+  </div>
+
+  <form [formGroup]="form" (ngSubmit)="submit()" class="bg-white p-6 rounded shadow-md space-y-4">
+    <div class="flex gap-4">
+      <input formControlName="firstName" placeholder="First Name" class="input-field" />
+      <input formControlName="lastName" placeholder="Last Name" class="input-field" />
+    </div>
+    <input formControlName="email" placeholder="Email" class="input-field w-full" />
+    <input formControlName="specialty" placeholder="Specialty" class="input-field w-full" />
+    <input formControlName="licenseNumber" placeholder="License Number" class="input-field w-full" />
+    <input formControlName="phoneNumber" placeholder="Phone Number" class="input-field w-full" />
+    <button type="submit" class="btn btn-primary w-full animate-bounce">Invite Doctor</button>
+  </form>
+</div>
