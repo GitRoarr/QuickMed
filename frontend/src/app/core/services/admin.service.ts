@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
 export interface User {
@@ -52,11 +52,28 @@ export class AdminService {
 
   constructor(private http: HttpClient) {}
 
-  getAllUsers(page: number = 1, limit: number = 10, role?: string): Observable<PaginatedResponse<User>> {
-    let params = new HttpParams().set('page', page.toString()).set('limit', limit.toString());
-    if (role) params = params.set('role', role);
-    return this.http.get<PaginatedResponse<User>>(`${this.apiUrl}/users`, { params });
+ggetAllUsers(page: number = 1, limit: number = 10, role?: string): Observable<PaginatedResponse<User>> {
+  let params = new HttpParams().set('page', page.toString()).set('limit', limit.toString());
+  if (role) params = params.set('role', role);
+
+  const token = localStorage.getItem('carehub_token') || '';
+  if (token) {
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      console.log('Admin token payload:', payload);
+    } catch (err) {
+      console.error('Failed to parse token payload', err);
+    }
   }
+
+  return this.http.get<PaginatedResponse<User>>(`${this.apiUrl}/users`, {
+    params,
+    headers: { Authorization: `Bearer ${token}` }
+  });
+}
+
+
+
 
   getUserById(id: string): Observable<User> {
     return this.http.get<User>(`${this.apiUrl}/users/${id}`);

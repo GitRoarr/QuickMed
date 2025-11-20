@@ -19,7 +19,6 @@ export class AdminController {
     private readonly doctorsService: DoctorsService
   ) {}
 
-  // ---------------- Dashboard & Stats ----------------
   @Get('dashboard')
   @Roles(UserRole.ADMIN)
   async getDashboardData() {
@@ -32,7 +31,6 @@ export class AdminController {
     return await this.adminService.getAdminStats();
   }
 
-  // ---------------- Users ----------------
   @Get('users')
   @Roles(UserRole.ADMIN)
   async getAllUsers(

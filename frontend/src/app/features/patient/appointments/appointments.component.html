@@ -1,9 +1,9 @@
 <div class="appointments-container">
   <aside class="sidebar" [class.collapsed]="sidebarCollapsed()">
     <div class="sidebar-header">
-      <div class="logo" *ngIf="!sidebarCollapsed()">
+      <div class="logo" *ngIf="!sidebarCollapsed()" (click)="goHome()" style="cursor:pointer">
         <div class="logo-icon">
-          <i class="bi bi-activity"></i>
+          <img src="assets/images/QuickMed-Logo.png" alt="QuickMed Logo" class="h-8 mb-2" />
         </div>
         <div class="logo-text">
           <h3>QuickMed</h3>
@@ -14,7 +14,6 @@
         <i class="bi" [class.bi-chevron-right]="sidebarCollapsed()" [class.bi-chevron-left]="!sidebarCollapsed()"></i>
       </button>
     </div>
-
     <nav class="sidebar-nav">
       <a *ngFor="let item of menuItems" 
          [routerLink]="item.route" 
@@ -52,7 +51,6 @@
           <div class="stat-label">Total</div>
         </div>
       </div>
-      
       <div class="stat-card stat-pending">
         <div class="stat-icon">
           <i class="bi bi-clock"></i>
@@ -62,7 +60,6 @@
           <div class="stat-label">Pending</div>
         </div>
       </div>
-      
       <div class="stat-card stat-confirmed">
         <div class="stat-icon">
           <i class="bi bi-check-circle"></i>
@@ -72,7 +69,6 @@
           <div class="stat-label">Confirmed</div>
         </div>
       </div>
-      
       <div class="stat-card stat-completed">
         <div class="stat-icon">
           <i class="bi bi-check2-all"></i>
@@ -149,7 +145,6 @@
               {{ apt.status }}
             </span>
           </div>
-          
           <div class="appointment-info">
             <div class="info-item">
               <i class="bi bi-calendar"></i>
@@ -164,12 +159,10 @@
               <span>{{ apt.location }}</span>
             </div>
           </div>
-          
           <div class="appointment-notes" *ngIf="apt.notes">
             <i class="bi bi-chat-left-text"></i>
             <span>{{ apt.notes }}</span>
           </div>
-
           <div class="appointment-actions">
             <button *ngIf="apt.isVideoConsultation && apt.status === 'confirmed'" 
                     class="btn-primary btn-sm" 

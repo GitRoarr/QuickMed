@@ -67,6 +67,16 @@ getInitials(firstName?: string, lastName?: string): string {
   const lastInitial = lastName ? lastName.charAt(0).toUpperCase() : ''
   return `${firstInitial}${lastInitial}`
 }
+navbarClasses() {
+    return {
+      "bg-light": !this.isDarkMode(),
+      "bg-dark": this.isDarkMode(),
+      "navbar-light": !this.isDarkMode(),
+      "navbar-dark": this.isDarkMode(),
+      "text-dark": !this.isDarkMode(),
+      "text-white": this.isDarkMode(),
+    };
+  }
 
 
 }

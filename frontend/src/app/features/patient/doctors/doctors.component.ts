@@ -1,7 +1,7 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 
 interface Doctor {
   id: string;
@@ -51,7 +51,7 @@ export class DoctorsComponent implements OnInit {
     { value: 'pediatrics', label: 'Pediatrics' }
   ];
 
-  constructor(private fb: FormBuilder) {
+  constructor(private fb: FormBuilder, private router: Router) {
     this.appointmentForm = this.fb.group({
       appointmentDate: ['', Validators.required],
       appointmentTime: ['', Validators.required],
@@ -210,13 +210,14 @@ export class DoctorsComponent implements OnInit {
     return Array(5).fill(0).map((_, i) => i < Math.floor(rating) ? 1 : 0);
   }
 
-  /** Return the initial letter for currently selected doctor (safe for template) */
   getSelectedDoctorInitial(): string {
     const d = this.selectedDoctor();
     return d?.firstName?.charAt(0) ?? '';
   }
+  goHome(){
+    this.router.navigate(['/']);
+  }
 
-  /** Return today's date in YYYY-MM-DD for date input min attribute */
   getCurrentDate(): string {
     const today = new Date();
     const yyyy = today.getFullYear();

@@ -1,89 +1,71 @@
-<nav class="navbar navbar-expand-lg fixed-top" [ngClass]="{'bg-light text-dark': !isDarkMode(), 'bg-dark text-white': isDarkMode()}">
-    <div class="container">
-        <a class="navbar-brand d-flex align-items-center" routerLink="/">
-            <img src="assets/images/QuickMed-Logo.png" alt="QuickMed" width="60" height="60" class="rounded-3 me-2" />
-            <span class="fw-bold fs-5">QuickMed</span>
-        </a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav mx-auto">
-                <li class="nav-item"><a class="nav-link fw-medium" routerLink="/">Features</a></li>
-                <li class="nav-item"><a class="nav-link fw-medium" href="#how-it-works">How It Works</a></li>
-                <li class="nav-item"><a class="nav-link fw-medium" href="#testimonials">Testimonials</a></li>
-            </ul>
-            <div class="d-flex align-items-center gap-3">
-                <button class="theme-toggle" (click)="toggleTheme()" [attr.aria-label]="isDarkMode() ? 'Switch to Light Mode' : 'Switch to Dark Mode'" [ngClass]="{'dark': isDarkMode()}">
+<nav class="navbar navbar-expand-lg fixed-top" 
+    [ngClass]="{
+  'bg-light navbar-light': !isDarkMode(),
+  'bg-dark navbar-dark': isDarkMode()
+}">
+  <div class="container">
+    <a class="navbar-brand d-flex align-items-center" routerLink="/">
+      <img src="assets/images/QuickMed-Logo.png" alt="QuickMed" width="60" height="60" class="rounded-3 me-2" />
+      <span class="fw-bold fs-5">QuickMed</span>
+    </a>
+
+    
+
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav mx-auto">
+        <li class="nav-item"><a class="nav-link fw-medium" routerLink="/">Features</a></li>
+        <li class="nav-item"><a class="nav-link fw-medium" href="#how-it-works">How It Works</a></li>
+        <li class="nav-item"><a class="nav-link fw-medium" href="#testimonials">Testimonials</a></li>
+      </ul>
+
+      <div class="d-flex align-items-center gap-3">
+        <button 
+          class="theme-toggle" 
+          (click)="toggleTheme()"
+          [attr.aria-label]="isDarkMode() ? 'Switch to Light Mode' : 'Switch to Dark Mode'"
+          [ngClass]="{ 'dark': isDarkMode() }">
           <div class="icon-wrapper sun-wrapper" *ngIf="!isDarkMode()">
-            <img
-              src="https://img.icons8.com/?size=100&id=6Z2mGj6qDVv4&format=png&color=000000"
-              alt="Sun Icon"
-              class="theme-icon"
-            />
+            <img src="https://img.icons8.com/?size=100&id=6Z2mGj6qDVv4&format=png&color=000000" alt="Sun" />
           </div>
           <div class="icon-wrapper moon-wrapper" *ngIf="isDarkMode()">
-            <img
-              src="https://img.icons8.com/?size=100&id=6DXM8bs2tFSU&format=png&color=ffffff"
-              alt="Moon Icon"
-              class="theme-icon"
-            />
+            <img src="https://img.icons8.com/?size=100&id=6DXM8bs2tFSU&format=png&color=ffffff" alt="Moon" />
           </div>
         </button>
-                <ng-container *ngIf="!currentUser()">
-                    <a routerLink="/login" class="btn px-4" [ngClass]="{'btn-outline-dark text-dark': !isDarkMode(), 'btn-outline-light text-white': isDarkMode()}">Log In</a>
-                    <a routerLink="/register" class="btn btn-primary px-4">Get Started</a>
-                </ng-container>
 
-                <ng-container *ngIf="currentUser(); else loggedOut">
-<div 
-  class="user-avatar-wrapper d-flex align-items-center gap-2" 
-  style="cursor: pointer;" 
-  (click)="navigateToDashboard()"
->
-  <ng-container *ngIf="currentUser(); let user">
-    <img 
-      *ngIf="user.avatar; else initialsAvatar"
-      [src]="user.avatar"
-      alt="{{ user.firstName }}"
-      class="rounded-circle"
-      width="40"
-      height="40"
-    />
+        <ng-container *ngIf="!currentUser(); else loggedIn">
+          <a routerLink="/login" class="btn px-4 btn-outline-primary">Log In</a>
+          <a routerLink="/register" class="btn btn-success px-4">Get Started</a>
+        </ng-container>
 
-    <ng-template #initialsAvatar>
-      <div 
-        class="placeholder-avatar d-flex align-items-center justify-content-center rounded-circle text-white fw-bold"
-        style="
-          width: 40px;
-          height: 40px;
-          background-color: #1DB954;
-          font-size: 16px;
-          text-transform: uppercase;
-        "
-      >
-        {{ getInitials(user.firstName, user.lastName) }}
-      </div>
-    </ng-template>
-
-    <span class="fw-medium">{{ user.firstName }}</span>
-  </ng-container>
-</div>
-
-
-    <button (click)="logout()" class="btn px-4" [ngClass]="{
-    'btn-outline-danger text-danger': !isDarkMode(),
-    'btn-danger text-white'
-    : isDarkMode()
-  }">
-  Logout
-</button>
-                </ng-container>
-                <ng-template #loggedOut></ng-template>
+        <ng-template #loggedIn>
+          <div class="d-flex align-items-center gap-3">
+            <div class="user-avatar-wrapper d-flex align-items-center gap-2" style="cursor: pointer;" (click)="navigateToDashboard()">
+              <img 
+                *ngIf="currentUser()?.avatar; else initialsAvatar"
+                [src]="currentUser()?.avatar!" 
+                alt="Avatar" 
+                class="rounded-circle" 
+                width="40" height="40" />
+              <ng-template #initialsAvatar>
+                <div class="placeholder-avatar rounded-circle text-white fw-bold d-flex align-items-center justify-content-center"
+                     style="width: 40px; height: 40px; background-color: #16a34a; font-size: 16px;">
+                  {{ getInitials(currentUser()?.firstName, currentUser()?.lastName) }}
+                </div>
+              </ng-template>
+              <span class="fw-medium">{{ currentUser()?.firstName }}</span>
             </div>
-        </div>
+
+            <button (click)="logout()" class="btn px-4" 
+                    [ngClass]="isDarkMode() ? 'btn-outline-light' : 'btn-outline-danger'">
+              Logout
+            </button>
+          </div>
+        </ng-template>
+      </div>
     </div>
+  </div>
 </nav>
+
 
 
 

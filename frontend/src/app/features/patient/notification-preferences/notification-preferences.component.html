@@ -1,8 +1,10 @@
 <div class="preferences-container">
   <aside class="sidebar" [class.collapsed]="sidebarCollapsed()">
     <div class="sidebar-header">
-      <div class="logo" *ngIf="!sidebarCollapsed()">
-        <div class="logo-icon"><i class="bi bi-activity"></i></div>
+      <div class="logo" *ngIf="!sidebarCollapsed()" (click)="goHome()" style="cursor:pointer">
+        <div class="logo-icon">
+          <img src="assets/images/QuickMed-Logo.png" alt="QuickMed Logo" class="h-8 mb-2" />
+        </div>
         <div class="logo-text">
           <h3>QuickMed</h3>
           <p>Patient Portal</p>

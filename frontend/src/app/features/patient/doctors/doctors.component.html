@@ -1,9 +1,9 @@
 <div class="doctors-container">
   <aside class="sidebar" [class.collapsed]="sidebarCollapsed()">
     <div class="sidebar-header">
-      <div class="logo" *ngIf="!sidebarCollapsed()">
+      <div class="logo" *ngIf="!sidebarCollapsed()" (click)="goHome()" style="cursor:pointer">
         <div class="logo-icon">
-          <i class="bi bi-activity"></i>
+          <img src="assets/images/QuickMed-Logo.png" alt="QuickMed Logo" class="h-8 mb-2" />
         </div>
         <div class="logo-text">
           <h3>QuickMed</h3>
@@ -14,7 +14,6 @@
         <i class="bi" [class.bi-chevron-right]="sidebarCollapsed()" [class.bi-chevron-left]="!sidebarCollapsed()"></i>
       </button>
     </div>
-
     <nav class="sidebar-nav">
       <a *ngFor="let item of menuItems" 
          [routerLink]="item.route" 
@@ -43,7 +42,6 @@
           class="search-input"
         />
       </div>
-
       <div class="specialty-filter">
         <label>Specialty:</label>
         <select [(ngModel)]="selectedSpecialty" (ngModelChange)="onSpecialtyChange()" class="specialty-select">
@@ -68,20 +66,16 @@
             {{ doctor.available ? 'Available' : 'Unavailable' }}
           </div>
         </div>
-
         <div class="doctor-info">
           <h3>Dr. {{ doctor.firstName }} {{ doctor.lastName }}</h3>
           <p class="specialty">{{ doctor.specialty }}</p>
-          
           <div class="rating">
             <span *ngFor="let star of getStarArray(doctor.rating || 0)" class="star">
               <i class="bi bi-star-fill"></i>
             </span>
             <span class="rating-text">{{ doctor.rating }} ({{ doctor.experience }}+ years)</span>
           </div>
-
           <p class="bio">{{ doctor.bio }}</p>
-
           <div class="contact-info">
             <div class="contact-item">
               <i class="bi bi-telephone"></i>
@@ -93,7 +87,6 @@
             </div>
           </div>
         </div>
-
         <button 
           class="book-btn" 
           (click)="selectDoctor(doctor)"
@@ -124,7 +117,6 @@
           <i class="bi bi-x-lg"></i>
         </button>
       </div>
-
       <div class="modal-body" *ngIf="selectedDoctor()">
         <div class="doctor-summary">
           <div class="doctor-avatar-small">
@@ -135,7 +127,6 @@
             <p>{{ selectedDoctor()?.specialty }}</p>
           </div>
         </div>
-
         <form [formGroup]="appointmentForm" (ngSubmit)="bookAppointment()">
           <div class="form-group">
             <label for="appointmentDate">Appointment Date</label>
@@ -150,7 +141,6 @@
               Please select a date
             </div>
           </div>
-
           <div class="form-group">
             <label for="appointmentTime">Appointment Time</label>
             <input 
@@ -163,7 +153,6 @@
               Please select a time
             </div>
           </div>
-
           <div class="form-group">
             <label for="notes">Notes (Optional)</label>
             <textarea 
@@ -174,7 +163,6 @@
               placeholder="Add any notes or special requests..."
             ></textarea>
           </div>
-
           <div class="modal-actions">
             <button type="button" class="btn-outline" (click)="closeBookingForm()">
               Cancel

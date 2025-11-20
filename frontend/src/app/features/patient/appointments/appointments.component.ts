@@ -261,4 +261,7 @@ export class AppointmentsComponent implements OnInit {
   toggleSidebar(): void {
     this.sidebarCollapsed.set(!this.sidebarCollapsed());
   }
+  goHome(){
+    this.router.navigate(['/']);
+  }
 }

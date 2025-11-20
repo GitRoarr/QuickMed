@@ -121,12 +121,12 @@ export class DashboardComponent implements OnInit {
       this.isLoading.set(false);
     }, 1000);
   }
-   goHome() {
-    this.router.navigate(['/']); // Change '/' if your homepage route is different
-  }
 
   toggleSidebar(): void {
     this.sidebarCollapsed.set(!this.sidebarCollapsed());
+  }
+  goHome(){
+    this.router.navigate(['/']);
   }
 
   toggleTheme(): void {

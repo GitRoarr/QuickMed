@@ -24,11 +24,23 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     })
   }
 
-  async validate(payload: JwtPayload) {
-    const user = await this.usersService.findOne(payload.sub)
-    if (!user) {
-      throw new UnauthorizedException()
-    }
-    return user
+async validate(payload: JwtPayload) {
+  if (payload.role === "admin" && payload.sub === "admin") {
+    return payload; 
   }
+
+  const user = await this.usersService.findOne(payload.sub);
+  if (!user) {
+    throw new UnauthorizedException();
+  }
+
+  if (user.role !== payload.role) {
+    throw new UnauthorizedException("Role mismatch");
+  }
+  return {
+    ...user,
+    role: payload.role,
+  };
+}
+
 }
