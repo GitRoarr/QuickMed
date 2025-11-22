@@ -1,14 +1,13 @@
 import { Injectable, UnauthorizedException } from "@nestjs/common"
 import { PassportStrategy } from "@nestjs/passport"
 import { ExtractJwt, Strategy } from "passport-jwt"
-import { ConfigService } from "@nestjs/config"        
-import { UsersService } from "../../users/users.service" 
+import { ConfigService } from "@nestjs/config"
+import { UsersService } from "../../users/users.service"
 
 export interface JwtPayload {
   sub: string
   email: string
   role: string
-
 }
 
 @Injectable()
@@ -24,23 +23,30 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     })
   }
 
-async validate(payload: JwtPayload) {
-  if (payload.role === "admin" && payload.sub === "admin") {
-    return payload; 
-  }
+  async validate(payload: JwtPayload) {
+    const userRole = String(payload.role).toLowerCase()
 
-  const user = await this.usersService.findOne(payload.sub);
-  if (!user) {
-    throw new UnauthorizedException();
-  }
+    if (userRole === "admin") {
+      console.log("[v0] JWT Strategy - Admin user validated:", {
+        id: payload.sub,
+        email: payload.email,
+        role: userRole,
+      })
+      return {
+        id: payload.sub,
+        email: payload.email,
+        role: userRole,
+      }
+    }
 
-  if (user.role !== payload.role) {
-    throw new UnauthorizedException("Role mismatch");
-  }
-  return {
-    ...user,
-    role: payload.role,
-  };
-}
+    const user = await this.usersService.findOne(payload.sub)
+    if (!user) throw new UnauthorizedException("User not found")
 
+    if (user.role !== userRole) throw new UnauthorizedException("Role mismatch")
+
+    return {
+      ...user,
+      role: userRole,
+    }
+  }
 }

@@ -1,47 +1,67 @@
-import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
-import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { Component,  OnInit } from "@angular/core"
+import  { Router } from "@angular/router"
+import { CommonModule } from "@angular/common"
+import { FormsModule, ReactiveFormsModule } from "@angular/forms"
+import { SidebarComponent } from "../shared/sidebar"
+import { HeaderComponent } from "../shared/header"
 
-import { AdminService, User } from '@app/core/services/admin.service';
+import  { AdminService, User } from "@app/core/services/admin.service"
 
 @Component({
-  selector: 'app-admin-doctors',
+  selector: "app-admin-doctors",
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, SidebarComponent, HeaderComponent],
 
-  templateUrl: './admin-doctors.component.html',
-  styleUrls: ['./admin-doctors.component.scss']
+  templateUrl: "./admin-doctors.component.html",
+  styleUrls: ["./admin-doctors.component.scss"],
 })
 export class AdminDoctorsComponent implements OnInit {
-  doctors: User[] = [];
-  loading = false;
+  doctors: User[] = []
+  loading = false
+  menuItems = [
+    { label: "Overview", icon: "grid", route: "/admin/overview" },
+    { label: "Appointments", icon: "calendar", route: "/admin/appointments" },
+    { label: "Patients", icon: "people", route: "/admin/patients" },
+    { label: "Doctors", icon: "stethoscope", route: "/admin/doctors" },
+    { label: "User Management", icon: "person-gear", route: "/admin/users" },
+    { label: "Analytics", icon: "bar-chart", route: "/admin/analytics" },
+    { label: "Settings", icon: "gear", route: "/admin/settings" },
+  ]
 
-  constructor(private adminService: AdminService, private router: Router) {}
+  constructor(
+    private adminService: AdminService,
+    private router: Router,
+  ) {}
 
   ngOnInit(): void {
-    this.loadDoctors();
+    this.loadDoctors()
   }
 
   loadDoctors() {
-    this.loading = true;
-    this.adminService.getAllUsers(1, 100, 'doctor').subscribe(res => {
-      this.doctors = res.data;
-      this.loading = false;
-    }, () => this.loading = false);
+    this.loading = true
+    this.adminService.getAllUsers(1, 100, "doctor").subscribe({
+      next: (res: { data: User[] }) => {
+        this.doctors = res.data
+        this.loading = false
+      },
+      error: (err: any) => {
+        console.error("Failed to load doctors:", err)
+        this.loading = false
+      },
+    })
   }
 
   onAdd() {
-    this.router.navigate(['/admin/doctors/add']);
+    this.router.navigate(["/admin/doctors/add"])
   }
 
   onVerify(id: string) {
-    this.router.navigate(['/admin/doctors', id, 'verify']);
+    this.router.navigate(["/admin/doctors", id, "verify"])
   }
 
   onDelete(id: string) {
-    if (confirm('Are you sure you want to delete this doctor?')) {
-      this.adminService.deleteUser(id).subscribe(() => this.loadDoctors());
+    if (confirm("Are you sure you want to delete this doctor?")) {
+      this.adminService.deleteUser(id).subscribe(() => this.loadDoctors())
     }
   }
 }

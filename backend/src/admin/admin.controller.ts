@@ -73,7 +73,6 @@ export class AdminController {
     return await this.adminService.exportUserData(id);
   }
 
-  // ---------------- Appointments ----------------
   @Get('appointments')
   @Roles(UserRole.ADMIN)
   async getAllAppointments(
