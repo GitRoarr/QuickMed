@@ -29,7 +29,7 @@
   <div class="notification-filters">
     <div class="filter-group">
       <label class="filter-label">Type</label>
-      <select class="filter-select" [ngModel]="selectedFilter()" (ngModelChange)="selectedFilter.set($event); onFilterChange()">
+      <select class="filter-select" [value]="selectedFilter()" (change)="selectedFilter.set($any($event.target).value); onFilterChange()">
         <option *ngFor="let option of filterOptions" [value]="option.value">
           {{ option.label }}
         </option>
@@ -37,7 +37,7 @@
     </div>
     <div class="filter-group">
       <label class="filter-label">Priority</label>
-      <select class="filter-select" [ngModel]="selectedPriority()" (ngModelChange)="selectedPriority.set($event); onPriorityChange()">
+      <select class="filter-select" [value]="selectedPriority()" (change)="selectedPriority.set($any($event.target).value); onPriorityChange()">
         <option *ngFor="let option of priorityOptions" [value]="option.value">
           {{ option.label }}
         </option>
