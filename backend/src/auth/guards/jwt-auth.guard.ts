@@ -1,33 +1,36 @@
-import { Injectable, UnauthorizedException, type ExecutionContext } from "@nestjs/common"
+import { Injectable, UnauthorizedException, ExecutionContext } from "@nestjs/common"
 import { AuthGuard } from "@nestjs/passport"
-import type { Observable } from "rxjs"
+import { isObservable, lastValueFrom } from "rxjs"
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard("jwt") {
-  canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
-    return super.canActivate(context)
+  canActivate(context: ExecutionContext): Promise<boolean> {
+    const result = super.canActivate(context)
+
+    if (isObservable(result)) {
+      return lastValueFrom(result).then(() => {
+        const req = context.switchToHttp().getRequest()
+        console.log("[v0] JwtAuthGuard - User:", req.user)
+        return true
+      })
+    }
+
+    if (result instanceof Promise) {
+      return result.then((res) => {
+        const req = context.switchToHttp().getRequest()
+        console.log("[v0] JwtAuthGuard - User:", req.user)
+        return res
+      })
+    }
+
+    const req = context.switchToHttp().getRequest()
+    console.log("[v0] JwtAuthGuard - User:", req.user)
+    return Promise.resolve(result)
   }
 
-  handleRequest(err: any, user: any, info: any, context?: ExecutionContext) {
-    console.log("[v0] JwtAuthGuard handleRequest:", { err, user, info })
-
-    if (err) {
-      console.log("[v0] JwtAuthGuard Error:", err.message || err)
-      throw err
-    }
-
-    if (!user) {
-      console.log("[v0] JwtAuthGuard No User - Unauthorized")
-      throw new UnauthorizedException("Unauthorized")
-    }
-
-    if (context) {
-      const request = context.switchToHttp().getRequest()
-      request.user = user
-      console.log("[v0] JwtAuthGuard User attached to request:", user)
-    }
-
-    console.log("[v0] JwtAuthGuard Success - Returning User:", user)
+  handleRequest(err: any, user: any) {
+    if (err) throw err
+    if (!user) throw new UnauthorizedException("Unauthorized")
     return user
   }
 }
