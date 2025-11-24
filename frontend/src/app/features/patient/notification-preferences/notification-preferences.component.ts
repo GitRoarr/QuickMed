@@ -96,3 +96,6 @@ export class NotificationPreferencesComponent implements OnInit {
     this.sidebarCollapsed.set(!this.sidebarCollapsed());
   }
 }
+
+
+

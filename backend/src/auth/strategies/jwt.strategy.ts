@@ -1,13 +1,14 @@
-import { Injectable, UnauthorizedException } from "@nestjs/common"
-import { PassportStrategy } from "@nestjs/passport"
-import { ExtractJwt, Strategy } from "passport-jwt"
-import { ConfigService } from "@nestjs/config"
-import { UsersService } from "../../users/users.service"
+import { Injectable, UnauthorizedException } from "@nestjs/common";
+import { PassportStrategy } from "@nestjs/passport";
+import { ExtractJwt, Strategy } from "passport-jwt";
+import { ConfigService } from "@nestjs/config";
+import { UsersService } from "../../users/users.service";
+import { UserRole } from "@/common";
 
 export interface JwtPayload {
-  sub: string
-  email: string
-  role: string
+  sub: string;
+  email: string;
+  role: string;
 }
 
 @Injectable()
@@ -20,33 +21,26 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
       secretOrKey: configService.get<string>("JWT_SECRET") || "defaultSecret",
-    })
+    });
   }
 
   async validate(payload: JwtPayload) {
-    const userRole = String(payload.role).toLowerCase()
-
-    if (userRole === "admin") {
-      console.log("[v0] JWT Strategy - Admin user validated:", {
-        id: payload.sub,
-        email: payload.email,
-        role: userRole,
-      })
+    if (payload.role === UserRole.ADMIN) {
       return {
         id: payload.sub,
         email: payload.email,
-        role: userRole,
-      }
+        role: payload.role, 
+      };
     }
 
-    const user = await this.usersService.findOne(payload.sub)
-    if (!user) throw new UnauthorizedException("User not found")
+    const user = await this.usersService.findOne(payload.sub);
+    if (!user) throw new UnauthorizedException("User not found");
 
-    if (user.role !== userRole) throw new UnauthorizedException("Role mismatch")
+    if (user.role !== payload.role) throw new UnauthorizedException("Role mismatch");
 
     return {
       ...user,
-      role: userRole,
-    }
+      role: payload.role,
+    };
   }
 }
