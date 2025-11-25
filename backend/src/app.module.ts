@@ -1,7 +1,6 @@
 import { Module } from "@nestjs/common";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
-import { APP_GUARD } from "@nestjs/core";
 
 import { AuthModule } from "./auth/auth.module";
 import { UsersModule } from "./users/users.module";
@@ -9,7 +8,6 @@ import { DoctorsModule } from "./doctors/doctors.module";
 import { AppointmentsModule } from "./appointments/appointments.module";
 import { NotificationsModule } from "./notifications/notifications.module";
 import { AdminModule } from "./admin/admin.module";
-import { RolesGuard } from "./auth/guards/roles.guard";
 
 @Module({
   imports: [
@@ -38,13 +36,6 @@ import { RolesGuard } from "./auth/guards/roles.guard";
     AppointmentsModule,
     NotificationsModule,
     AdminModule,
-  ],
-
-  providers: [
-    {
-      provide: APP_GUARD,
-      useClass: RolesGuard,
-    },
   ],
 })
 export class AppModule {}

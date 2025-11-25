@@ -94,9 +94,17 @@ export class AdminService {
   }
 
   // -------------------- Users --------------------
-  async getAllUsers(page = 1, limit = 10, role?: string) {
+  async getAllUsers(page = 1, limit = 10, role?: string, search?: string) {
     const query = this.userRepository.createQueryBuilder('user');
-    if (role) query.where('user.role = :role', { role });
+    if (role) query.andWhere('user.role = :role', { role });
+
+    if (search) {
+      const likeTerm = `%${search.toLowerCase()}%`;
+      query.andWhere(
+        '(LOWER(user.firstName) LIKE :likeTerm OR LOWER(user.lastName) LIKE :likeTerm OR LOWER(user.email) LIKE :likeTerm OR LOWER(user.patientId) LIKE :likeTerm)',
+        { likeTerm },
+      );
+    }
     const [users, total] = await query
       .orderBy('user.createdAt', 'DESC')
       .skip((page - 1) * limit)

@@ -5,14 +5,13 @@
   </div>
 
   <nav class="flex-1 flex flex-col py-4">
-    <a *ngFor="let item of menuItems" 
-       [routerLink]="item.route" 
-       routerLinkActive="active" 
-       class="flex items-center gap-3 px-6 py-2.5 text-gray-600 no-underline text-sm font-medium transition-all border-l-3 border-transparent hover:bg-gray-50 hover:text-gray-900"
-       [class.active]="false"
-       [class.bg-green-50]="false"
-       [class.text-green-600]="false"
-       [class.border-green-500]="false">
+    <a
+      *ngFor="let item of menuItems"
+      [routerLink]="item.route"
+      routerLinkActive="active"
+      [routerLinkActiveOptions]="{ exact: true }"
+      class="nav-link"
+    >
       <i class="bi w-5 text-center text-base" [class]="'bi-' + item.icon"></i>
       <span>{{ item.label }}</span>
     </a>

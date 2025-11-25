@@ -21,6 +21,13 @@ export const routes: Routes = [
       ),
   },
   {
+    path: "set-password",
+    loadComponent: () =>
+      import("./features/auth/set-password/set-password.component").then(
+        (m) => m.SetPasswordComponent
+      ),
+  },
+  {
     path: "patient",
     canActivate: [authGuard, roleGuard],
     data: { roles: ["patient"] },
@@ -114,6 +121,18 @@ export const routes: Routes = [
           import("./features/admin/appointments/appointments.component").then(
             (m) => m.AppointmentsComponent
           ),
+      },
+      {
+        path: "patients",
+        loadComponent: () =>
+          import("./features/admin/patients/patients.component").then(
+            (m) => m.PatientsComponent
+          ),
+      },
+      {
+        path: "",
+        pathMatch: "full",
+        redirectTo: "dashboard",
       },
     ],
   },

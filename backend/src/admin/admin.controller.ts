@@ -34,11 +34,14 @@ export class AdminController {
   @Get('users')
   @Roles(UserRole.ADMIN)
   async getAllUsers(
-    @Query('page') page: number = 1,
-    @Query('limit') limit: number = 10,
-    @Query('role') role?: string
+    @Query('page') page: number | string = 1,
+    @Query('limit') limit: number | string = 10,
+    @Query('role') role?: string,
+    @Query('search') search?: string,
   ) {
-    return await this.adminService.getAllUsers(page, limit, role);
+    const safePage = Math.max(1, Number(page) || 1);
+    const safeLimit = Math.max(1, Math.min(50, Number(limit) || 10));
+    return await this.adminService.getAllUsers(safePage, safeLimit, role, search);
   }
 
   @Get('users/:id')

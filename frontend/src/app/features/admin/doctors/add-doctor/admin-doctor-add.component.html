@@ -2,19 +2,45 @@
   <button class="btn mb-4" (click)="back()">Back</button>
   <h2 class="text-xl font-bold mb-6">Add New Doctor</h2>
 
-  <div *ngIf="message" [ngClass]="{'text-green-600': type==='success','text-red-600': type==='error'}" class="mb-4">
+  <div
+    *ngIf="message"
+    [ngClass]="{
+      'bg-green-100 text-green-700 border-green-300': type === 'success',
+      'bg-red-100 text-red-700 border-red-300': type === 'error'
+    }"
+    class="border px-4 py-3 rounded mb-4"
+  >
     {{ message }}
   </div>
 
   <form [formGroup]="form" (ngSubmit)="submit()" class="bg-white p-6 rounded shadow-md space-y-4">
-    <div class="flex gap-4">
-      <input formControlName="firstName" placeholder="First Name" class="input-field" />
-      <input formControlName="lastName" placeholder="Last Name" class="input-field" />
+    <div class="flex gap-4 flex-wrap">
+      <input formControlName="firstName" placeholder="First Name" class="input-field flex-1" />
+      <input formControlName="lastName" placeholder="Last Name" class="input-field flex-1" />
     </div>
-    <input formControlName="email" placeholder="Email" class="input-field w-full" />
+    <input formControlName="email" type="email" placeholder="Email" class="input-field w-full" />
     <input formControlName="specialty" placeholder="Specialty" class="input-field w-full" />
     <input formControlName="licenseNumber" placeholder="License Number" class="input-field w-full" />
-    <input formControlName="phoneNumber" placeholder="Phone Number" class="input-field w-full" />
-    <button type="submit" class="btn btn-primary w-full animate-bounce">Invite Doctor</button>
+    <input formControlName="phoneNumber" type="tel" placeholder="Phone Number" class="input-field w-full" />
+    <textarea formControlName="bio" placeholder="Bio/Description" rows="4" class="input-field w-full"></textarea>
+    <button
+      type="submit"
+      [disabled]="form.invalid || loading"
+      class="btn btn-primary w-full"
+    >
+      <span *ngIf="!loading">Invite Doctor</span>
+      <span *ngIf="loading">Sending Invitation...</span>
+    </button>
   </form>
+
+  <div *ngIf="inviteLink" class="mt-6 bg-white border border-dashed border-green-300 rounded p-4">
+    <h3 class="text-lg font-semibold text-green-700 mb-2">Share Invite Link</h3>
+    <p class="text-sm text-gray-600 mb-3">
+      Copy this link and share it with the doctor to complete their onboarding.
+    </p>
+    <div class="flex items-center gap-3 flex-wrap">
+      <input type="text" [value]="inviteLink" readonly class="input-field flex-1" />
+      <button class="btn btn-primary" (click)="copyInviteLink()">Copy Link</button>
+    </div>
+  </div>
 </div>

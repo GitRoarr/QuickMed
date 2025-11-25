@@ -1,123 +1,159 @@
 <app-sidebar title="QuickMed Admin Portal" [menuItems]="menuItems"></app-sidebar>
 
 <div class="ml-60 bg-gray-50 min-h-screen">
-  <!-- Header -->
-  <div class="bg-white border-b border-gray-200 px-8 py-4 flex justify-between items-center gap-8">
-    <div class="flex-1 max-w-md">
-      <input type="text" placeholder="Search patients, appointments..." class="w-full px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg text-sm text-gray-700 placeholder-gray-500">
+  <div class="bg-white border-b border-gray-200 px-8 py-5 flex flex-wrap gap-4 items-center">
+    <div class="flex-1 max-w-2xl relative">
+      <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+        <i class="bi bi-search"></i>
+      </span>
+      <input
+        type="text"
+        placeholder="Search patients by name or ID..."
+        class="w-full pl-10 pr-4 py-2.5 bg-gray-100 border border-gray-200 rounded-lg text-sm text-gray-700 placeholder-gray-500 focus:border-[#1DB954] focus:ring-[#1DB954]/30"
+        (input)="onSearch($event)"
+      />
     </div>
-    <div class="flex items-center gap-6">
-      <div class="relative w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-sm text-gray-600 cursor-pointer">
-        🔔
-        <span class="absolute top-0 right-0 w-3 h-3 bg-red-500 rounded-full border-2 border-white"></span>
-      </div>
-      <button class="px-4 py-2 bg-green-500 text-white rounded-lg font-semibold hover:bg-green-600">New Appointment</button>
+    <div class="flex items-center gap-3">
+      <button class="pill-btn" (click)="changeFilter('all')" [class.active]="statusFilter === 'all'">All</button>
+      <button class="pill-btn" (click)="changeFilter('active')" [class.active]="statusFilter === 'active'">Active</button>
+      <button class="pill-btn" (click)="changeFilter('pending')" [class.active]="statusFilter === 'pending'">Pending</button>
+    </div>
+    <div class="flex items-center gap-3">
+      <button class="ghost-btn" (click)="refresh()">Refresh</button>
+      <button class="cta-btn">
+        <i class="bi bi-person-plus-fill text-base"></i>
+        Add New Patient
+      </button>
     </div>
   </div>
 
-  <!-- Content -->
   <div class="p-8 max-w-7xl">
-    <h2 class="text-2xl font-bold text-gray-900 mb-6">Patient Management</h2>
-
-    <div class="bg-white border border-gray-200 rounded-lg p-6">
-      <!-- Backend logic: Fetch patients from database and render list -->
-      <div class="space-y-3">
-        <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-green-500 hover:shadow-md transition">
-          <div class="flex items-center gap-4 flex-1">
-            <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center font-bold text-green-700 flex-shrink-0">SJ</div>
-            <div>
-              <div class="font-semibold text-gray-900">Sarah Johnson</div>
-              <div class="text-sm text-gray-600">34 years • Female</div>
-            </div>
-          </div>
-          <div class="flex-1 text-sm">
-            <div class="text-gray-600">Condition</div>
-            <div class="font-medium text-gray-900">Hypertension</div>
-          </div>
-          <div class="flex-1 text-sm">
-            <div class="text-gray-600">Last Visit</div>
-            <div class="font-medium text-gray-900">2024-01-10</div>
-          </div>
-          <span class="px-3 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-full">active</span>
-          <div class="flex gap-2 ml-4">
-            <button class="text-gray-400 hover:text-gray-600">📞</button>
-            <button class="text-gray-400 hover:text-gray-600">✉️</button>
-            <button class="text-gray-400 hover:text-gray-600">⋮</button>
-          </div>
-        </div>
-
-        <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-green-500 hover:shadow-md transition">
-          <div class="flex items-center gap-4 flex-1">
-            <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center font-bold text-blue-700 flex-shrink-0">JW</div>
-            <div>
-              <div class="font-semibold text-gray-900">James Wilson</div>
-              <div class="text-sm text-gray-600">45 years • Male</div>
-            </div>
-          </div>
-          <div class="flex-1 text-sm">
-            <div class="text-gray-600">Condition</div>
-            <div class="font-medium text-gray-900">Diabetes Type 2</div>
-          </div>
-          <div class="flex-1 text-sm">
-            <div class="text-gray-600">Last Visit</div>
-            <div class="font-medium text-gray-900">2024-01-08</div>
-          </div>
-          <span class="px-3 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-full">active</span>
-          <div class="flex gap-2 ml-4">
-            <button class="text-gray-400 hover:text-gray-600">📞</button>
-            <button class="text-gray-400 hover:text-gray-600">✉️</button>
-            <button class="text-gray-400 hover:text-gray-600">⋮</button>
-          </div>
-        </div>
-
-        <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-green-500 hover:shadow-md transition">
-          <div class="flex items-center gap-4 flex-1">
-            <div class="w-12 h-12 bg-pink-100 rounded-full flex items-center justify-center font-bold text-pink-700 flex-shrink-0">MG</div>
-            <div>
-              <div class="font-semibold text-gray-900">Maria Garcia</div>
-              <div class="text-sm text-gray-600">28 years • Female</div>
-            </div>
-          </div>
-          <div class="flex-1 text-sm">
-            <div class="text-gray-600">Condition</div>
-            <div class="font-medium text-gray-900">Asthma</div>
-          </div>
-          <div class="flex-1 text-sm">
-            <div class="text-gray-600">Last Visit</div>
-            <div class="font-medium text-gray-900">2024-01-05</div>
-          </div>
-          <span class="px-3 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-full">active</span>
-          <div class="flex gap-2 ml-4">
-            <button class="text-gray-400 hover:text-gray-600">📞</button>
-            <button class="text-gray-400 hover:text-gray-600">✉️</button>
-            <button class="text-gray-400 hover:text-gray-600">⋮</button>
-          </div>
-        </div>
-
-        <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-green-500 hover:shadow-md transition">
-          <div class="flex items-center gap-4 flex-1">
-            <div class="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center font-bold text-amber-700 flex-shrink-0">RB</div>
-            <div>
-              <div class="font-semibold text-gray-900">Robert Brown</div>
-              <div class="text-sm text-gray-600">52 years • Male</div>
-            </div>
-          </div>
-          <div class="flex-1 text-sm">
-            <div class="text-gray-600">Condition</div>
-            <div class="font-medium text-gray-900">Arthritis</div>
-          </div>
-          <div class="flex-1 text-sm">
-            <div class="text-gray-600">Last Visit</div>
-            <div class="font-medium text-gray-900">2023-12-28</div>
-          </div>
-          <span class="px-3 py-1 text-xs font-semibold text-gray-600 bg-gray-100 rounded-full">inactive</span>
-          <div class="flex gap-2 ml-4">
-            <button class="text-gray-400 hover:text-gray-600">📞</button>
-            <button class="text-gray-400 hover:text-gray-600">✉️</button>
-            <button class="text-gray-400 hover:text-gray-600">⋮</button>
-          </div>
-        </div>
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+      <div *ngFor="let card of summaryCards()" class="metric-card" [ngClass]="card.tone">
+        <div class="text-sm text-gray-500">{{ card.label }}</div>
+        <div class="text-3xl font-bold text-gray-900 mt-2">{{ card.value }}</div>
       </div>
     </div>
+
+    <div
+      *ngIf="errorMessage(); else patientBoard"
+      class="bg-red-50 border border-red-200 text-red-700 px-6 py-4 rounded-lg flex justify-between items-center"
+    >
+      <span>{{ errorMessage() }}</span>
+      <button class="px-4 py-2 bg-red-600 text-white rounded-md text-sm" (click)="refresh()">Retry</button>
+    </div>
+
+    <ng-template #patientBoard>
+      <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        <div class="xl:col-span-2 space-y-4">
+          <div *ngIf="isLoading()" class="bg-white border border-gray-200 rounded-lg p-8 text-center text-gray-500">
+            Loading patient records…
+          </div>
+
+          <div
+            class="patient-card"
+            *ngFor="let patient of visiblePatients()"
+            (click)="selectPatient(patient)"
+          >
+            <div class="flex items-center gap-4 flex-1">
+              <div class="avatar">{{ patient.initials }}</div>
+              <div>
+                <div class="text-lg font-semibold text-gray-900 flex items-center gap-3">
+                  {{ patient.fullName }}
+                  <span class="status-pill" [class.active]="patient.status === 'active'" [class.pending]="patient.status === 'pending'">
+                    {{ patient.status }}
+                  </span>
+                </div>
+                <div class="text-sm text-gray-500">ID: {{ patient.patientId }}</div>
+                <div class="text-sm text-gray-500">Age: {{ patient.ageLabel }} • {{ patient.genderLabel }}</div>
+              </div>
+            </div>
+            <div class="patient-meta">
+              <div>
+                <div class="label">Last Visit</div>
+                <div class="value">{{ patient.lastVisit }}</div>
+              </div>
+              <div>
+                <div class="label">Next Appointment</div>
+                <div class="value">{{ patient.nextAppointment }}</div>
+              </div>
+              <div>
+                <div class="label">Contact</div>
+                <div class="value">
+                  <span class="flex items-center gap-2">
+                    <i class="bi bi-telephone text-gray-400"></i>
+                    {{ patient.phone || "N/A" }}
+                  </span>
+                  <span class="flex items-center gap-2 mt-1 text-xs text-gray-500">
+                    <i class="bi bi-envelope"></i>{{ patient.email }}
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <button class="outline-btn">View Details</button>
+              <button class="spotify-btn">Schedule</button>
+            </div>
+          </div>
+
+          <div *ngIf="!visiblePatients().length && !isLoading()" class="bg-white border border-dashed border-gray-300 rounded-lg p-8 text-center text-gray-500">
+            No patients match the selected filters.
+          </div>
+
+          <div class="flex items-center justify-between">
+            <button class="ghost-btn" (click)="goToPage('prev')" [disabled]="page() === 1">Previous</button>
+            <span class="text-sm text-gray-500">Page {{ page() }} / {{ totalPages() }}</span>
+            <button class="ghost-btn" (click)="goToPage('next')" [disabled]="page() === totalPages()">Next</button>
+          </div>
+        </div>
+
+        <div class="bg-white border border-gray-200 rounded-lg p-6" *ngIf="highlightedPatient() as detail; else noSelection">
+          <div class="flex items-center gap-4 mb-6">
+            <div class="avatar avatar-lg">{{ detail.initials }}</div>
+            <div>
+              <div class="text-2xl font-bold text-gray-900">{{ detail.fullName }}</div>
+              <div class="text-sm text-gray-500">{{ detail.email }}</div>
+            </div>
+          </div>
+
+          <div class="detail-grid">
+            <div>
+              <span class="label">Patient ID</span>
+              <span class="value">{{ detail.patientId }}</span>
+            </div>
+            <div>
+              <span class="label">Status</span>
+              <span class="value capitalize">{{ detail.status }}</span>
+            </div>
+            <div>
+              <span class="label">Primary Condition</span>
+              <span class="value">{{ detail.condition }}</span>
+            </div>
+            <div>
+              <span class="label">Last Visit</span>
+              <span class="value">{{ detail.lastVisit }}</span>
+            </div>
+            <div>
+              <span class="label">Phone</span>
+              <span class="value">{{ detail.phone || "Not provided" }}</span>
+            </div>
+            <div>
+              <span class="label">Next Appointment</span>
+              <span class="value">{{ detail.nextAppointment }}</span>
+            </div>
+          </div>
+
+          <div class="mt-6 flex flex-wrap gap-3">
+            <button class="spotify-btn flex-1">Message Patient</button>
+            <button class="outline-btn flex-1">Open Timeline</button>
+          </div>
+        </div>
+        <ng-template #noSelection>
+          <div class="bg-white border border-dashed border-gray-300 rounded-lg p-6 text-gray-500 text-center">
+            Select a patient card to view full profile.
+          </div>
+        </ng-template>
+      </div>
+    </ng-template>
   </div>
 </div>

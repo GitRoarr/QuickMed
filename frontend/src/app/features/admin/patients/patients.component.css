@@ -1,0 +1,172 @@
+.pill-btn {
+  padding: 0.4rem 1rem;
+  border-radius: 9999px;
+  border: 1px solid transparent;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #475569;
+  background: #f8fafc;
+  transition: all 0.2s ease;
+}
+
+.pill-btn.active {
+  background: #e9f9ee;
+  color: #0f172a;
+  border-color: #1db954;
+}
+
+.ghost-btn {
+  padding: 0.45rem 1rem;
+  border-radius: 9999px;
+  border: 1px solid #cbd5f5;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #475569;
+  background: white;
+  transition: all 0.2s ease;
+}
+
+.ghost-btn:hover:not(:disabled) {
+  color: #0f172a;
+  border-color: #1db954;
+}
+
+.ghost-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.cta-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: #1db954;
+  color: white;
+  font-weight: 600;
+  padding: 0.55rem 1.4rem;
+  border-radius: 9999px;
+  border: none;
+  box-shadow: 0 10px 20px rgba(29, 185, 84, 0.2);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.cta-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 22px rgba(29, 185, 84, 0.3);
+}
+
+.metric-card {
+  border-radius: 1rem;
+  padding: 1.5rem;
+  border: 1px solid #e2e8f0;
+  background: white;
+}
+
+.patient-card {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding: 1.25rem;
+  border-radius: 1rem;
+  border: 1px solid #e2e8f0;
+  background: white;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.patient-card:hover {
+  border-color: #1db954;
+  box-shadow: 0 12px 35px rgba(15, 23, 42, 0.08);
+}
+
+.avatar {
+  width: 3.2rem;
+  height: 3.2rem;
+  border-radius: 9999px;
+  background: #e0f2fe;
+  color: #0f172a;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.avatar-lg {
+  width: 4rem;
+  height: 4rem;
+}
+
+.patient-meta {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.75rem;
+  flex: 1;
+}
+
+.label {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.value {
+  display: block;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.status-pill {
+  text-transform: capitalize;
+  font-size: 0.75rem;
+  padding: 0.15rem 0.65rem;
+  border-radius: 9999px;
+  font-weight: 600;
+}
+
+.status-pill.active {
+  color: #0f5132;
+  background: #d1fae5;
+}
+
+.status-pill.pending {
+  color: #92400e;
+  background: #fef3c7;
+}
+
+.spotify-btn {
+  background: #1db954;
+  color: white;
+  font-weight: 600;
+  padding: 0.55rem 1.4rem;
+  border-radius: 9999px;
+  border: none;
+  transition: background 0.2s ease;
+}
+
+.spotify-btn:hover {
+  background: #19a24a;
+}
+
+.outline-btn {
+  padding: 0.55rem 1.4rem;
+  border-radius: 9999px;
+  border: 1px solid #e2e8f0;
+  font-weight: 600;
+  color: #475569;
+  background: white;
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  font-size: 0.9rem;
+  color: #475569;
+}
+
+@media (max-width: 1024px) {
+  .patient-card {
+    flex-direction: column;
+  }
+}
+

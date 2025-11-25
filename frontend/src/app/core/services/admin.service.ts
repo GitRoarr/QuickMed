@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core"
-import {  HttpClient, HttpParams } from "@angular/common/http"
-import  { Observable } from "rxjs"
+import { HttpClient, HttpParams } from "@angular/common/http"
+import { Observable } from "rxjs"
 import { environment } from "../../../environments/environment"
 
 export interface User {
@@ -13,6 +13,8 @@ export interface User {
   dateOfBirth?: string
   bloodType?: string
   allergies?: string[]
+  medicalHistory?: string
+  patientId?: string
   specialty?: string
   licenseNumber?: string
   isActive: boolean
@@ -44,6 +46,55 @@ export interface PaginatedResponse<T> {
   totalPages: number
 }
 
+export interface DoctorInvitationResponse {
+  doctor: User
+  emailSent: boolean
+  inviteLink?: string
+}
+
+export interface SystemHealthStatus {
+  database: "healthy" | "warning" | "error"
+  api: "healthy" | "warning" | "error"
+  storage: "healthy" | "warning" | "error"
+  notifications: "healthy" | "warning" | "error"
+}
+
+export interface AdminStats {
+  totalUsers: number
+  totalPatients: number
+  totalDoctors: number
+  totalAdmins: number
+  totalAppointments: number
+  pendingAppointments: number
+  confirmedAppointments: number
+  completedAppointments: number
+  cancelledAppointments: number
+  todayAppointments: number
+  thisWeekAppointments: number
+  thisMonthAppointments: number
+  revenue: number
+  averageAppointmentDuration: number
+  patientSatisfactionScore: number
+}
+
+export interface DashboardNotification {
+  id: number
+  type: "info" | "warning" | "success" | "error"
+  title: string
+  message: string
+  timestamp: string
+  read: boolean
+}
+
+export interface AdminDashboardResponse {
+  stats: AdminStats
+  recentAppointments: Appointment[]
+  recentUsers: User[]
+  upcomingAppointments: Appointment[]
+  systemHealth: SystemHealthStatus
+  notifications: DashboardNotification[]
+}
+
 @Injectable({
   providedIn: "root",
 })
@@ -52,9 +103,10 @@ export class AdminService {
 
   constructor(private http: HttpClient) {}
 
-  getAllUsers(page = 1, limit = 10, role?: string): Observable<PaginatedResponse<User>> {
+  getAllUsers(page = 1, limit = 10, role?: string, search?: string): Observable<PaginatedResponse<User>> {
     let params = new HttpParams().set("page", page.toString()).set("limit", limit.toString())
     if (role) params = params.set("role", role)
+    if (search) params = params.set("search", search)
 
     const token = localStorage.getItem("carehub_token") || ""
     if (token) {
@@ -105,8 +157,8 @@ export class AdminService {
     return this.http.delete<void>(`${this.apiUrl}/appointments/${id}`)
   }
 
-  createDoctorInvitation(data: any): Observable<User> {
-    return this.http.post<User>(`${this.apiUrl}/doctors`, data)
+  createDoctorInvitation(data: any): Observable<DoctorInvitationResponse> {
+    return this.http.post<DoctorInvitationResponse>(`${this.apiUrl}/doctors`, data)
   }
 
   validateDoctorLicense(id: string): Observable<User> {
@@ -127,5 +179,13 @@ export class AdminService {
 
   deleteDoctor(id: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/doctors/${id}`)
+  }
+
+  getDashboardData(): Observable<AdminDashboardResponse> {
+    return this.http.get<AdminDashboardResponse>(`${this.apiUrl}/dashboard`)
+  }
+
+  getPatients(page = 1, limit = 12, search?: string): Observable<PaginatedResponse<User>> {
+    return this.getAllUsers(page, limit, "patient", search)
   }
 }

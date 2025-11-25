@@ -34,20 +34,42 @@ export class AuthService {
 
   async login(loginDto: LoginDto): Promise<{ user: Partial<User>; token: string }> {
     const { email, password } = loginDto;
-    const adminEmail = process.env.ADMIN_EMAIL;
-    const adminPassword = process.env.ADMIN_PASSWORD;
-    if (email === adminEmail && password === adminPassword) {
-      const payload = { sub: 'admin', email: adminEmail, role: UserRole.ADMIN };
-      const token = this.jwtService.sign(payload);
-      return { user: { id: 'admin', email: adminEmail, role: UserRole.ADMIN }, token };
-    }
+    
     const user = await this.usersService.findByEmail(email);
-    if (!user) throw new UnauthorizedException("Invalid email or password");
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) throw new UnauthorizedException("Invalid email or password");
+    if (!user) {
+      console.log(`[Auth] Login failed: User not found with email: ${email}`);
+      throw new UnauthorizedException("Invalid email or password");
+    }
+    
+    console.log(`[Auth] User found: ${user.email}`);
+    console.log(`[Auth] User role: ${user.role}`);
+    console.log(`[Auth] Password exists: ${!!user.password}`);
+    
+    if (!user.password) {
+      console.log('[Auth] No password set for user');
+      throw new UnauthorizedException("Invalid email or password");
+    }
+    
+    try {
+      const isPasswordValid = await bcrypt.compare(password, user.password);
+      console.log(`[Auth] Password validation ${isPasswordValid ? 'succeeded' : 'failed'}`);
+      
+      if (!isPasswordValid) {
+        throw new UnauthorizedException("Invalid email or password");
+      }
+    } catch (error) {
+      console.log(`[Auth] Password comparison error:`, error.message);
+      throw new UnauthorizedException("Invalid email or password");
+    }
+    
     const token = this.generateToken(user);
     const { password: _, ...userWithoutPassword } = user;
-    return { user: userWithoutPassword, token };
+    
+    console.log(`[Auth] Login successful for user: ${user.email}`);
+    return { 
+      user: userWithoutPassword, 
+      token 
+    };
   }
 
   async validateUser(userId: string): Promise<User> {

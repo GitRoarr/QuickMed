@@ -1,13 +1,13 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { User } from '../users/entities/user.entity';
-import { CreateDoctorDto } from './dto/create-doctor.dto';
-import { UpdateDoctorDto } from './dto/update-doctor.dto';
-import * as bcrypt from 'bcrypt';
-import { v4 as uuidv4 } from 'uuid';
-import { UserRole } from '../common/index';
-import { EmailService } from '../common/services/email.service';
+import { Injectable, NotFoundException, BadRequestException } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Repository } from "typeorm";
+import { User } from "../users/entities/user.entity";
+import { CreateDoctorDto } from "./dto/create-doctor.dto";
+import { UpdateDoctorDto } from "./dto/update-doctor.dto";
+import * as bcrypt from "bcrypt";
+import { v4 as uuidv4 } from "uuid";
+import { UserRole } from "../common/index";
+import { EmailService } from "../common/services/email.service";
 
 @Injectable()
 export class DoctorsService {
@@ -17,28 +17,53 @@ export class DoctorsService {
     private readonly emailService: EmailService
   ) {}
 
-  async createDoctorInvite(createDoctorDto: CreateDoctorDto): Promise<User> {
-    const existingUser = await this.usersRepository.findOne({ where: { email: createDoctorDto.email } });
-    if (existingUser) throw new BadRequestException("Email already exists");
+  private sanitizeDoctor(doctor: User) {
+    const { password, inviteToken, inviteExpiresAt, ...safeDoctor } = doctor;
+    return safeDoctor;
+  }
 
-    const inviteToken = uuidv4();
-    const inviteExpiresAt = new Date();
-    inviteExpiresAt.setDate(inviteExpiresAt.getDate() + 7);
+  async createDoctorInvite(createDoctorDto: CreateDoctorDto): Promise<{
+    doctor: Partial<User>;
+    emailSent: boolean;
+    inviteLink?: string;
+  }> {
+    try {
+      console.log("[DoctorsService] Creating doctor invite for", createDoctorDto.email);
+      const existingUser = await this.usersRepository.findOne({ where: { email: createDoctorDto.email } });
+      if (existingUser) {
+        console.log("[DoctorsService] Email already exists:", createDoctorDto.email);
+        throw new BadRequestException("Email already exists");
+      }
 
-    const doctor = this.usersRepository.create({
-      ...createDoctorDto,
-      role: UserRole.DOCTOR,
-      isActive: false,
-      inviteToken,
-      inviteExpiresAt,
-      licenseValidated: false,
-      employmentConfirmed: false,
-    });
+      const inviteToken = uuidv4();
+      const inviteExpiresAt = new Date();
+      inviteExpiresAt.setDate(inviteExpiresAt.getDate() + 7);
 
-    const savedDoctor = await this.usersRepository.save(doctor);
-    const inviteLink = `${process.env.FRONTEND_URL}/set-password?token=${inviteToken}&uid=${savedDoctor.id}`;
-    await this.emailService.sendDoctorInvite(savedDoctor.email, inviteLink);
-    return savedDoctor;
+      const doctor = this.usersRepository.create({
+        ...createDoctorDto,
+        role: UserRole.DOCTOR,
+        isActive: false,
+        inviteToken,
+        inviteExpiresAt,
+        licenseValidated: false,
+        employmentConfirmed: false,
+      });
+
+      const savedDoctor = await this.usersRepository.save(doctor);
+      const inviteLink = `${process.env.FRONTEND_URL || "http://localhost:4200"}/set-password?token=${inviteToken}&uid=${savedDoctor.id}`;
+      const emailResult = await this.emailService.sendDoctorInvite(savedDoctor.email, inviteLink);
+
+      console.log("[DoctorsService] Doctor invite created", { id: savedDoctor.id, emailSent: emailResult.sent });
+
+      return {
+        doctor: this.sanitizeDoctor(savedDoctor),
+        emailSent: emailResult.sent,
+        inviteLink: emailResult.sent ? undefined : emailResult.fallbackLink || inviteLink,
+      };
+    } catch (error) {
+      console.error("[DoctorsService] Failed to create doctor invite:", error);
+      throw error;
+    }
   }
 
   async setDoctorPassword(uid: string, token: string, password: string): Promise<User> {

@@ -25,19 +25,30 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: JwtPayload) {
+    console.log('[JwtStrategy] Validating payload:', { sub: payload.sub, email: payload.email, role: payload.role });
+    
     if (payload.role === UserRole.ADMIN) {
-      return {
+      const adminUser = {
         id: payload.sub,
         email: payload.email,
         role: payload.role, 
       };
+      console.log('[JwtStrategy] Admin user validated:', adminUser);
+      return adminUser;
     }
 
     const user = await this.usersService.findOne(payload.sub);
-    if (!user) throw new UnauthorizedException("User not found");
+    if (!user) {
+      console.log('[JwtStrategy] User not found:', payload.sub);
+      throw new UnauthorizedException("User not found");
+    }
 
-    if (user.role !== payload.role) throw new UnauthorizedException("Role mismatch");
+    if (user.role !== payload.role) {
+      console.log('[JwtStrategy] Role mismatch:', { userRole: user.role, payloadRole: payload.role });
+      throw new UnauthorizedException("Role mismatch");
+    }
 
+    console.log('[JwtStrategy] User validated:', { id: user.id, email: user.email, role: user.role });
     return {
       ...user,
       role: payload.role,

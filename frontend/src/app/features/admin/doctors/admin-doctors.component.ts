@@ -40,8 +40,9 @@ export class AdminDoctorsComponent implements OnInit {
   loadDoctors() {
     this.loading = true
     this.adminService.getAllUsers(1, 100, "doctor").subscribe({
-      next: (res: { data: User[] }) => {
-        this.doctors = res.data
+      next: (res: any) => {
+        // Backend returns { users, total, page, limit, totalPages }
+        this.doctors = res.users || res.data || []
         this.loading = false
       },
       error: (err: any) => {
@@ -52,7 +53,7 @@ export class AdminDoctorsComponent implements OnInit {
   }
 
   onAdd() {
-    this.router.navigate(["/admin/doctors/add"])
+    this.router.navigate(["/admin/doctors/add-doctor"])
   }
 
   onVerify(id: string) {

@@ -1,5 +1,28 @@
-:host-context(.active) a.active {
-  background-color: #f0fdf4; /* tailwind green-50 */
-  color: #16a34a;            /* tailwind green-600 */
-  border-left: 3px solid #22c55e; /* tailwind green-500 */
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.65rem 1.5rem;
+  color: #4b5563;
+  text-decoration: none;
+  font-size: 0.925rem;
+  font-weight: 500;
+  border-left: 3px solid transparent;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.nav-link:hover {
+  background: #f3f4f6;
+  color: #0f172a;
+}
+
+.nav-link.active {
+  background: #e9f9ee;
+  color: #0f172a;
+  border-left-color: #1db954;
+  font-weight: 600;
+}
+
+.nav-link.active .bi {
+  color: #1db954;
 }
