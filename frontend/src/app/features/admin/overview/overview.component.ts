@@ -1,5 +1,6 @@
 import { Component, OnInit, DestroyRef, inject, signal } from "@angular/core"
 import { CommonModule, DatePipe } from "@angular/common"
+import { AlertMessageComponent } from '@app/shared/components/alert-message/alert-message.component';
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop"
 import { SidebarComponent } from "../shared/sidebar"
 import { HeaderComponent } from "../shared/header"
@@ -41,7 +42,7 @@ interface AppointmentCard {
 @Component({
   selector: "app-admin-overview",
   standalone: true,
-  imports: [CommonModule, SidebarComponent, HeaderComponent, DatePipe],
+  imports: [CommonModule, SidebarComponent, HeaderComponent, DatePipe, AlertMessageComponent],
   templateUrl: "./overview.component.html",
   styleUrls: ["./overview.component.css"],
 })

@@ -22,9 +22,7 @@
       </div>
 
       <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
-        <div class="alert alert-danger" *ngIf="errorMessage">
-          {{ errorMessage }}
-        </div>
+        <app-alert-message #alert [message]="errorMessage" type="error" [autoDismiss]="true" [duration]="5000" *ngIf="errorMessage"></app-alert-message>
 
         <div class="form-group">
           <label for="email" class="form-label">

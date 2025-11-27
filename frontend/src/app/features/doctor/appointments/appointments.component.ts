@@ -2,8 +2,8 @@ import { Component, OnInit, signal } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { FormsModule } from "@angular/forms";
 import { Router } from "@angular/router";
-import { SidebarComponent } from "@app/shared/components/sidebar/sidebar.component";
-import { NotificationCenterComponent } from "@app/shared/components/notification-center/notification-center.component";
+import { SidebarComponent } from "../../admin/shared/sidebar/sidebar.component";
+import { NotificationCenterComponent } from "../../../shared/components/notification-center/notification-center.component";
 import { AppointmentService } from "@core/services/appointment.service";
 import { Appointment, AppointmentStatus } from "@core/models/appointment.model";
 

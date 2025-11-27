@@ -1,13 +1,14 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, ViewChild } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from "@angular/forms";
 import { Router, RouterLink } from "@angular/router";
 import { AuthService } from "@core/services/auth.service";
+import { AlertMessageComponent } from '@app/shared/components/alert-message/alert-message.component';
 
 @Component({
   selector: "app-login",
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, AlertMessageComponent],
   templateUrl: "./login.component.html",
   styleUrls: ["./login.component.css"],
 })
@@ -15,6 +16,7 @@ export class LoginComponent implements OnInit {
   loginForm: FormGroup;
   errorMessage = "";
   isLoading = false;
+  @ViewChild('alert') alertRef?: AlertMessageComponent;
 
   constructor(
     private fb: FormBuilder,
@@ -56,7 +58,15 @@ export class LoginComponent implements OnInit {
       },
       error: (error) => {
         this.isLoading = false;
-        this.errorMessage = error.error?.message || "Invalid email or password";
+        const msg = error.error?.message || "Invalid email or password";
+        this.errorMessage = msg;
+        setTimeout(() => {
+          if (this.alertRef) {
+            this.alertRef.message = msg;
+            this.alertRef.type = 'error';
+            this.alertRef.show();
+          }
+        }, 0);
       },
     });
   }

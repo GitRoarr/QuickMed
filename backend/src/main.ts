@@ -6,8 +6,12 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule)
 
   app.enableCors({
-    origin: true,     
+    origin: true,
     credentials: true,
+    // Ensure the browser can send the Authorization header in CORS requests
+    allowedHeaders: ['Authorization', 'Content-Type', 'Accept'],
+    methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
+    exposedHeaders: ['Authorization'],
   })
 
   app.useGlobalPipes(

@@ -2,15 +2,8 @@
   <button class="btn mb-4" (click)="back()">Back</button>
   <h2 class="text-xl font-bold mb-6">Add New Doctor</h2>
 
-  <div
-    *ngIf="message"
-    [ngClass]="{
-      'bg-green-100 text-green-700 border-green-300': type === 'success',
-      'bg-red-100 text-red-700 border-red-300': type === 'error'
-    }"
-    class="border px-4 py-3 rounded mb-4"
-  >
-    {{ message }}
+  <div *ngIf="message" class="mb-4">
+    <app-alert-message [message]="message" [type]="type || 'success'" [visible]="true" [autoDismiss]="true" [duration]="5000"></app-alert-message>
   </div>
 
   <form [formGroup]="form" (ngSubmit)="submit()" class="bg-white p-6 rounded shadow-md space-y-4">

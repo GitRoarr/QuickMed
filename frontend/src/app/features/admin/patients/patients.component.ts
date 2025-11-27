@@ -6,6 +6,7 @@ import { takeUntilDestroyed } from "@angular/core/rxjs-interop"
 
 import { SidebarComponent } from "../shared/sidebar"
 import { HeaderComponent } from "../shared/header"
+import { AlertMessageComponent } from '@app/shared/components/alert-message/alert-message.component';
 import { AdminService, type User } from "@app/core/services/admin.service"
 
 interface PatientRow {
@@ -27,7 +28,7 @@ interface PatientRow {
 @Component({
   selector: "app-patients",
   standalone: true,
-  imports: [CommonModule, SidebarComponent, HeaderComponent, FormsModule],
+  imports: [CommonModule, SidebarComponent, HeaderComponent, FormsModule, AlertMessageComponent],
   templateUrl: "./patients.component.html",
   styleUrls: ["./patients.component.css"],
 })

@@ -3,11 +3,12 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AdminService, User } from '@app/core/services/admin.service';
+import { AlertMessageComponent } from '@app/shared/components/alert-message/alert-message.component';
 
 @Component({
   selector: 'app-admin-doctor-verify',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, AlertMessageComponent],
   templateUrl: './admin-doctor-verify.component.html',
   styleUrls: ['./admin-doctor-verify.component.scss'],
 })

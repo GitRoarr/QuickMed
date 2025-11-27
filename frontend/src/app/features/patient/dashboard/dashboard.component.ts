@@ -63,18 +63,18 @@ export class DashboardComponent implements OnInit {
   appointments = signal<AppointmentModel[]>([]);
 
   menuItems = [
-    { icon: 'bi-house', label: 'Dashboard', route: '/patient/dashboard', active: true },
-    { icon: 'bi-calendar-check', label: 'Appointments', route: '/patient/appointments', active: false },
-    { icon: 'bi-people', label: 'Find Doctors', route: '/patient/doctors', active: false },
-    { icon: 'bi-file-medical', label: 'Medical Records', route: '/patient/records', active: false },
-    { icon: 'bi-gear', label: 'Settings', route: '/patient/settings', active: false }
+    { iconUrl: 'https://img.icons8.com/ios-filled/24/000000/home.png', label: 'Dashboard', route: '/patient/dashboard', active: true },
+    { iconUrl: 'https://img.icons8.com/ios-filled/24/000000/calendar.png', label: 'Appointments', route: '/patient/appointments', active: false },
+    { iconUrl: 'https://img.icons8.com/ios-filled/24/000000/doctor-male.png', label: 'Find Doctors', route: '/patient/doctors', active: false },
+    { iconUrl: 'https://img.icons8.com/ios-filled/24/000000/medical-records.png', label: 'Medical Records', route: '/patient/records', active: false },
+    { iconUrl: 'https://img.icons8.com/ios-filled/24/000000/settings.png', label: 'Settings', route: '/patient/settings', active: false }
   ];
 
   quickActions = [
-    { icon: 'bi-calendar-plus', label: 'Book Appointment' },
-    { icon: 'bi-download', label: 'Download Records' },
-    { icon: 'bi-capsule', label: 'Request Prescription' },
-    { icon: 'bi-telephone', label: 'Contact Support' }
+    { iconUrl: 'https://img.icons8.com/ios-filled/20/000000/add-calendar.png', label: 'Book Appointment' },
+    { iconUrl: 'https://img.icons8.com/ios-filled/20/000000/download.png', label: 'Download Records' },
+    { iconUrl: 'https://img.icons8.com/ios-filled/20/000000/pills.png', label: 'Request Prescription' },
+    { iconUrl: 'https://img.icons8.com/ios-filled/20/000000/phone.png', label: 'Contact Support' }
   ];
 
   constructor(

@@ -3,11 +3,12 @@ import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AdminService, DoctorInvitationResponse } from '@app/core/services/admin.service';
+import { AlertMessageComponent } from '@app/shared/components/alert-message/alert-message.component';
 
 @Component({
   selector: 'app-admin-doctor-add',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, AlertMessageComponent],
   templateUrl: './admin-doctor-add.component.html',
   styleUrls: ['./admin-doctor-add.component.scss']
 })

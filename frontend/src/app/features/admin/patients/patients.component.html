@@ -45,15 +45,13 @@
       </div>
 
       <div *ngIf="patientFormMessage()" class="mb-4">
-        <div
-          class="px-4 py-2 rounded-lg text-sm font-medium"
-          [ngClass]="{
-            'bg-green-50 text-green-700 border border-green-200': patientFormMessage()?.type === 'success',
-            'bg-red-50 text-red-700 border border-red-200': patientFormMessage()?.type === 'error'
-          }"
-        >
-          {{ patientFormMessage()?.text }}
-        </div>
+        <app-alert-message
+          [message]="patientFormMessage()?.text || ''"
+          [type]="patientFormMessage()?.type || 'success'"
+          [visible]="!!patientFormMessage()"
+          [autoDismiss]="true"
+          [duration]="5000"
+        ></app-alert-message>
       </div>
 
       <form class="grid grid-cols-1 md:grid-cols-2 gap-4" (ngSubmit)="createPatient()">
@@ -94,13 +92,12 @@
       </form>
     </div>
 
-    <div
-      *ngIf="errorMessage(); else patientBoard"
-      class="bg-red-50 border border-red-200 text-red-700 px-6 py-4 rounded-lg flex justify-between items-center"
-    >
-      <span>{{ errorMessage() }}</span>
-      <button class="px-4 py-2 bg-red-600 text-white rounded-md text-sm" (click)="refresh()">Retry</button>
-    </div>
+    <ng-container *ngIf="errorMessage(); else patientBoard">
+      <app-alert-message [message]="errorMessage()" type="error" [visible]="true" [autoDismiss]="false"></app-alert-message>
+      <div class="mt-3">
+        <button class="px-4 py-2 bg-red-600 text-white rounded-md text-sm" (click)="refresh()">Retry</button>
+      </div>
+    </ng-container>
 
     <ng-template #patientBoard>
       <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">

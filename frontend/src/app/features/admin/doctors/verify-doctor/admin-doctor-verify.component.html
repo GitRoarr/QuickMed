@@ -2,10 +2,8 @@
   <button class="btn" (click)="back()">Back</button>
   <h2 class="text-xl my-4">Doctor Approval</h2>
 
-  <div *ngIf="message" 
-       [ngClass]="{'text-green-600': type==='success','text-red-600': type==='error'}" 
-       class="mb-4">
-    {{ message }}
+  <div *ngIf="message" class="mb-4">
+    <app-alert-message [message]="message" [type]="type || 'success'" [visible]="true" [autoDismiss]="true" [duration]="4000"></app-alert-message>
   </div>
 
   <div *ngIf="doctor" class="card p-4 mb-4">

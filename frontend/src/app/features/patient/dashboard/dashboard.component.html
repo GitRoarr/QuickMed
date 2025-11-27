@@ -21,7 +21,7 @@
          [routerLink]="item.route" 
          class="nav-item"
          [class.active]="item.active">
-        <i class="bi" [class]="'bi ' + item.icon"></i>
+        <img *ngIf="item.iconUrl" [src]="item.iconUrl" alt="" class="menu-icon" />
         <span *ngIf="!sidebarCollapsed()">{{ item.label }}</span>
       </a>
     </nav>
@@ -67,8 +67,8 @@
 
       <div class="stats-grid">
         <div class="stat-card stat-primary">
-          <div class="stat-icon">
-            <i class="bi bi-calendar-check"></i>
+            <div class="stat-icon">
+            <img src="https://img.icons8.com/ios-filled/20/000000/calendar.png" alt="" />
           </div>
           <div class="stat-content">
             <p class="stat-label">Upcoming</p>
@@ -78,7 +78,7 @@
 
         <div class="stat-card stat-success">
           <div class="stat-icon">
-            <i class="bi bi-capsule"></i>
+            <img src="https://img.icons8.com/ios-filled/20/000000/pills.png" alt="" />
           </div>
           <div class="stat-content">
             <p class="stat-label">Active Meds</p>
@@ -88,7 +88,7 @@
 
         <div class="stat-card stat-info">
           <div class="stat-icon">
-            <i class="bi bi-file-text"></i>
+            <img src="https://img.icons8.com/ios-filled/20/000000/medical-records.png" alt="" />
           </div>
           <div class="stat-content">
             <p class="stat-label">Records</p>
@@ -98,7 +98,7 @@
 
         <div class="stat-card stat-warning">
           <div class="stat-icon">
-            <i class="bi bi-activity"></i>
+            <img src="https://img.icons8.com/ios-filled/20/000000/activity-history.png" alt="" />
           </div>
           <div class="stat-content">
             <p class="stat-label">Test Results</p>
@@ -158,15 +158,16 @@
                 </div>
                 <div class="appointment-info">
                   <div class="info-item">
-                    <i class="bi bi-calendar"></i>
-                    <span>{{ apt.appointmentDate }}</span>
-                  </div>
+                      <img src="https://img.icons8.com/ios-filled/16/000000/calendar.png" alt="" />
+                      <span>{{ apt.appointmentDate }}</span>
+                    </div>
+                    <div class="info-item">
+                      <img src="https://img.icons8.com/ios-filled/16/000000/clock.png" alt="" />
+                      <span>{{ apt.appointmentTime }}</span>
+                    </div>
                   <div class="info-item">
-                    <i class="bi bi-clock"></i>
-                    <span>{{ apt.appointmentTime }}</span>
-                  </div>
-                  <div class="info-item">
-                    <i class="bi" [class.bi-camera-video]="apt.isVideoConsultation" [class.bi-geo-alt]="!apt.isVideoConsultation"></i>
+                    <img *ngIf="apt.isVideoConsultation" src="https://img.icons8.com/ios-filled/16/000000/video-call.png" alt="" />
+                    <img *ngIf="!apt.isVideoConsultation" src="https://img.icons8.com/ios-filled/16/000000/marker.png" alt="" />
                     <span>{{ apt.location }}</span>
                   </div>
                 </div>
@@ -174,7 +175,7 @@
                   <button *ngIf="apt.isVideoConsultation && apt.status === 'confirmed'" 
                           class="btn-primary btn-sm" 
                           (click)="joinVideoCall(apt.id)">
-                    <i class="bi bi-camera-video"></i>
+                    <img src="https://img.icons8.com/ios-filled/14/ffffff/video-call.png" alt="" />
                     Join Call
                   </button>
                   <button class="btn-outline btn-sm" (click)="rescheduleAppointment(apt.id)">
@@ -200,8 +201,8 @@
             <h3>Profile Information</h3>
             <div class="profile-header">
               <div class="profile-avatar">
-                <i class="bi bi-person"></i>
-              </div>
+                  <img src="https://img.icons8.com/ios-filled/24/000000/user-male-circle.png" alt="" />
+                </div>
               <div>
                 <h4>{{ user()?.firstName || '—' }} {{ user()?.lastName || '' }}</h4>
                 <p>Patient ID: {{ user()?.patientId || '—' }}</p>
@@ -241,12 +242,12 @@
           <div class="quick-actions-card">
             <h3>Quick Actions</h3>
             <div class="actions-list">
-              <button *ngFor="let action of quickActions" 
-                      class="action-btn" 
-                      (click)="quickAction(action.label)">
-                <i class="bi" [class]="'bi ' + action.icon"></i>
-                <span>{{ action.label }}</span>
-              </button>
+                  <button *ngFor="let action of quickActions" 
+                    class="action-btn" 
+                    (click)="quickAction(action.label)">
+                  <img *ngIf="action.iconUrl" [src]="action.iconUrl" alt="" class="action-icon" />
+                  <span>{{ action.label }}</span>
+                </button>
             </div>
           </div>
         </div>

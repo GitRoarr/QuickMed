@@ -1,10 +1,9 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { MedicalRecordService } from '../../../core/services/medical-record.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { MedicalRecord } from '../../../core/models/medical-record.model';
-
 @Component({
   selector: 'app-patient-records',
   standalone: true,
@@ -13,6 +12,14 @@ import { MedicalRecord } from '../../../core/models/medical-record.model';
   styleUrls: ['./medical-records.component.css']
 })
 export class MedicalRecordsComponent implements OnInit {
+  menuItems = [
+    { icon: 'bi-house', label: 'Dashboard', route: '/patient/dashboard', active: false },
+    { icon: 'bi-calendar-check', label: 'Appointments', route: '/patient/appointments', active: false },
+    { icon: 'bi-people', label: 'Find Doctors', route: '/patient/doctors', active: false },
+    { icon: 'bi-file-medical', label: 'Medical Records', route: '/patient/records', active: true },
+    { icon: 'bi-gear', label: 'Settings', route: '/patient/settings', active: false }
+  ];
+  sidebarCollapsed = signal(false);
   records = signal<MedicalRecord[]>([]);
   isLoading = signal(true);
   totalRecords = signal(0);
@@ -21,7 +28,15 @@ export class MedicalRecordsComponent implements OnInit {
   imagingCount = signal(0);
   diagnosisCount = signal(0);
 
-  constructor(private recordsService: MedicalRecordService, private auth: AuthService) {}
+  constructor(private recordsService: MedicalRecordService, private auth: AuthService, private router: Router) {}
+
+  toggleSidebar(): void {
+    this.sidebarCollapsed.set(!this.sidebarCollapsed());
+  }
+
+  goHome(): void {
+    this.router.navigate(['/']);
+  }
 
   ngOnInit(): void {
     this.loadRecords();
