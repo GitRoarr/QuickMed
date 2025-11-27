@@ -8,6 +8,7 @@ import { UserService } from '../../../core/services/user.service';
 import { AppointmentService } from '../../../core/services/appointment.service';
 import { Appointment as AppointmentModel } from '../../../core/models/appointment.model';
 import { DataContainerComponent } from '../../../shared/components/data-container/data-container.component';
+import { AvatarUploaderComponent } from '../../../shared/components/avatar-uploader/avatar-uploader.component';
 
 interface User {
   firstName: string;
@@ -18,6 +19,8 @@ interface User {
   bloodType?: string;
   patientId?: string;
   allergies?: string[];
+  id?: string;
+  avatar?: string;
 }
 
 interface Appointment {
@@ -40,7 +43,7 @@ interface Stats {
 @Component({
   selector: 'app-patient-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, DataContainerComponent],
+  imports: [CommonModule, FormsModule, RouterModule, DataContainerComponent, AvatarUploaderComponent],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css']
 })

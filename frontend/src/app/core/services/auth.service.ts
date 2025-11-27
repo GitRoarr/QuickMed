@@ -36,6 +36,13 @@ export class AuthService {
     this.router.navigate(["/login"]);
   }
 
+  /** Replace stored user (and keep token untouched). Useful after profile updates. */
+  setUser(user: User): void {
+    if (!user) return;
+    localStorage.setItem(this.USER_KEY, JSON.stringify(user));
+    this.currentUser.set(user);
+  }
+
   getToken(): string | null {
     return localStorage.getItem(this.TOKEN_KEY);
   }

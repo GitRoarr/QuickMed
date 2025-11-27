@@ -1,0 +1,16 @@
+<div class="avatar-uploader">
+  <div class="avatar-preview" *ngIf="avatarUrl; else initialsTpl">
+    <img [src]="avatarUrl" alt="User avatar" />
+  </div>
+
+  <ng-template #initialsTpl>
+    <div class="avatar-initials">👤</div>
+  </ng-template>
+
+  <div class="upload-controls">
+    <input type="file" accept="image/*" #fileInput (change)="onSelectFile($event)" hidden />
+    <button class="btn-upload" (click)="triggerFileInput(fileInput)" [disabled]="isUploading()">
+      {{ isUploading() ? 'Uploading...' : 'Change' }}
+    </button>
+  </div>
+</div>

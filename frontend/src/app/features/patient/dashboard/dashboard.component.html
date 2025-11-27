@@ -54,7 +54,7 @@
         </div>
 
         <div class="user-avatar">
-          {{ getInitials(user()?.firstName, user()?.lastName) }}
+          <app-avatar-uploader [userId]="user()?.id" [avatarUrl]="user()?.avatar"></app-avatar-uploader>
         </div>
       </div>
     </header>
@@ -201,7 +201,7 @@
             <h3>Profile Information</h3>
             <div class="profile-header">
               <div class="profile-avatar">
-                  <img src="https://img.icons8.com/ios-filled/24/000000/user-male-circle.png" alt="" />
+                  <app-avatar-uploader [userId]="user()?.id" [avatarUrl]="user()?.avatar"></app-avatar-uploader>
                 </div>
               <div>
                 <h4>{{ user()?.firstName || '—' }} {{ user()?.lastName || '' }}</h4>
