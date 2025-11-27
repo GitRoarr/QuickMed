@@ -1,5 +1,5 @@
 <div class="patient-form">
-  <app-alert-message *ngIf="message()" [type]="message()?.type" [message]="message()?.text"></app-alert-message>
+  <app-alert-message *ngIf="message()" [type]="message()!.type" [message]="message()!.text"></app-alert-message>
 
   <div class="form-row">
     <input [(ngModel)]="model().firstName" name="firstName" placeholder="First name" />

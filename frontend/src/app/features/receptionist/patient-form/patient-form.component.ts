@@ -17,7 +17,7 @@ export class PatientFormComponent implements OnInit {
 
   model = signal<any>({ firstName: '', lastName: '', email: '', phoneNumber: '', dateOfBirth: '', medicalHistory: '' });
   isSaving = signal(false);
-  message = signal<{ type: 'success' | 'error'; text: string } | null>(null);
+  message = signal<{ type: 'success' | 'error' | 'info'; text: string } | null>(null);
 
   ngOnInit(): void {}
 
