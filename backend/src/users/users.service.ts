@@ -4,6 +4,7 @@ import { Repository } from "typeorm";
 import { User } from "./entities/user.entity";
 import { UserRole } from "../common/index";
 import { CloudinaryService } from "@/profile/cloudinary.service";
+import * as fs from 'fs/promises'
 
 @Injectable()
 export class UsersService {
@@ -68,7 +69,19 @@ export class UsersService {
 
     const uploadRes = await this.cloudinaryService.uploadImage(file)
     user.avatar = uploadRes.secure_url
-    return this.usersRepository.save(user)
+    const saved = await this.usersRepository.save(user)
+
+    // Clean up temporary uploaded file if present
+    try {
+      if (file && (file as any).path) {
+        await fs.unlink((file as any).path)
+      }
+    } catch (err) {
+      // non-fatal
+      console.warn('[UsersService] failed to remove temp file', err?.message || err)
+    }
+
+    return saved
 
 
   }

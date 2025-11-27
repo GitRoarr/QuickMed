@@ -45,7 +45,7 @@ export class NotificationCenterComponent implements OnInit, OnDestroy {
   ]
 
   constructor(
-    private notificationService: NotificationService,
+    public notificationService: NotificationService,
     private router: Router,
   ) {}
 

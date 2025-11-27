@@ -123,7 +123,28 @@ export class AdminService {
   }
 
   async createUser(dto: CreateUserDto) {
-    const user = this.userRepository.create(dto);
+    // prevent duplicate emails
+    const existing = await this.userRepository.findOne({ where: { email: dto.email } });
+    if (existing) {
+      throw new BadRequestException('User with this email already exists');
+    }
+
+    // ensure role defaults to PATIENT when not provided
+    if (!dto.role) dto.role = UserRole.PATIENT;
+
+    const user = this.userRepository.create({
+      ...dto,
+    });
+
+    // If admin did not provide a password, create an invite token instead of setting a password
+    if (!dto.password) {
+      user.password = null;
+      user.inviteToken = Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
+      const expires = new Date();
+      expires.setDate(expires.getDate() + 7); // invite valid 7 days
+      user.inviteExpiresAt = expires;
+    }
+
     return this.userRepository.save(user);
   }
 

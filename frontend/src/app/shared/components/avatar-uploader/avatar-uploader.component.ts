@@ -11,7 +11,7 @@ import { AuthService } from '@core/services/auth.service';
   styleUrls: ['./avatar-uploader.component.css']
 })
 export class AvatarUploaderComponent {
-  @Input() userId!: string;
+  @Input() userId?: string;
   @Input() avatarUrl?: string;
 
   isUploading = signal(false);
@@ -26,7 +26,6 @@ export class AvatarUploaderComponent {
     this.isUploading.set(true);
     this.userService.updateAvatar(this.userId, file).subscribe({
       next: (user) => {
-        // update stored user in auth service so UI updates across app
         this.authService.setUser(user as any);
         this.isUploading.set(false);
       },
