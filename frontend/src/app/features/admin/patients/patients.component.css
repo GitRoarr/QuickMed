@@ -7,6 +7,7 @@
   color: #475569;
   background: #f8fafc;
   transition: all 0.2s ease;
+  cursor: pointer;
 }
 
 .pill-btn.active {
@@ -24,6 +25,7 @@
   color: #475569;
   background: white;
   transition: all 0.2s ease;
+  cursor: pointer;
 }
 
 .ghost-btn:hover:not(:disabled) {
@@ -48,6 +50,7 @@
   border: none;
   box-shadow: 0 10px 20px rgba(29, 185, 84, 0.2);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
 }
 
 .cta-btn:hover {
@@ -71,6 +74,7 @@
   border: 1px solid #e2e8f0;
   background: white;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
 }
 
 .patient-card:hover {
@@ -88,6 +92,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .avatar-lg {
@@ -141,10 +146,16 @@
   border-radius: 9999px;
   border: none;
   transition: background 0.2s ease;
+  cursor: pointer;
 }
 
 .spotify-btn:hover {
   background: #19a24a;
+}
+
+.spotify-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .outline-btn {
@@ -154,6 +165,13 @@
   font-weight: 600;
   color: #475569;
   background: white;
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+}
+
+.outline-btn:hover {
+  border-color: #1db954;
+  color: #1db954;
 }
 
 .detail-grid {
@@ -164,9 +182,45 @@
   color: #475569;
 }
 
+.form-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #1f2937;
+  margin-bottom: 0.5rem;
+}
+
+.form-control {
+  width: 100%;
+  padding: 0.625rem 0.75rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: #1db954;
+  box-shadow: 0 0 0 3px rgba(29, 185, 84, 0.1);
+}
+
 @media (max-width: 1024px) {
   .patient-card {
     flex-direction: column;
   }
+
+  .patient-meta {
+    grid-template-columns: 1fr;
+  }
 }
 
+@media (max-width: 768px) {
+  .detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ml-60 {
+    margin-left: 0;
+  }
+}

@@ -17,7 +17,7 @@ export class AppointmentsController {
 
   @Post()
   @UseGuards(RolesGuard)
-  create(createAppointmentDto: CreateAppointmentDto, @CurrentUser() user: User) {
+  create(@Body() createAppointmentDto: CreateAppointmentDto, @CurrentUser() user: User) {
     return this.appointmentsService.create(createAppointmentDto, user.id)
   }
   

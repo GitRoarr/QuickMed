@@ -8,6 +8,7 @@ import { DoctorsModule } from "./doctors/doctors.module";
 import { AppointmentsModule } from "./appointments/appointments.module";
 import { NotificationsModule } from "./notifications/notifications.module";
 import { AdminModule } from "./admin/admin.module";
+import { MedicalRecordsModule } from "./medical-records/medical-records.module";
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { AdminModule } from "./admin/admin.module";
     DoctorsModule,
     AppointmentsModule,
     NotificationsModule,
+    MedicalRecordsModule,
     AdminModule,
   ],
 })

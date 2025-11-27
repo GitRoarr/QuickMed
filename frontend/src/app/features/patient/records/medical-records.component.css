@@ -1,0 +1,20 @@
+.records-page { padding: 2rem; }
+.page-header h1 { margin:0; font-size:2rem }
+.page-header p { color: #6b7280; margin:0.25rem 0 1.5rem 0 }
+.stats-row { display:flex; gap:1rem; margin-bottom:1.5rem }
+.stat-card { background:var(--card); padding:1rem 1.25rem; border-radius:0.6rem; box-shadow:0 1px 2px rgba(0,0,0,0.03); min-width:140px }
+.stat-label { font-size:0.85rem; color: #6b7280 }
+.stat-value { font-size:1.5rem; font-weight:700 }
+.records-list { display:flex; flex-direction:column; gap:1rem }
+.record-item { display:flex; justify-content:space-between; align-items:center; background:var(--card); padding:1rem; border-radius:0.6rem; box-shadow:0 4px 10px rgba(0,0,0,0.03) }
+.record-left { display:flex; gap:1rem; align-items:center }
+.record-icon { width:3rem; height:3rem; background: #eef2ff; border-radius:0.5rem; display:flex; align-items:center; justify-content:center }
+.record-meta h3 { margin:0; font-size:1.1rem }
+.meta-sub { margin:0; color:#6b7280; font-size:0.9rem }
+.tag { background:#eef2f0; color:#0a7f3a; padding:0.25rem 0.6rem; border-radius:9999px; text-transform:capitalize; font-size:0.8rem; margin-right:1rem }
+.actions { display:flex; gap:0.5rem }
+.btn-spotify { background:#1DB954; color:white; border:none; padding:0.45rem 0.75rem; border-radius:0.5rem; cursor:pointer }
+.btn-outline { background:transparent; border:1px solid rgba(0,0,0,0.08); padding:0.45rem 0.75rem; border-radius:0.5rem; cursor:pointer }
+.loading-state { display:flex; flex-direction:column; align-items:center; padding:3rem }
+.spinner { width:2.5rem; height:2.5rem; border:3px solid rgba(0,0,0,0.08); border-top-color:#1DB954; border-radius:50%; animation:spin 0.8s linear infinite }
+@keyframes spin { to { transform:rotate(360deg) } }

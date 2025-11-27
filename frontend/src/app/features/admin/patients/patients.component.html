@@ -19,10 +19,10 @@
       <button class="pill-btn" (click)="changeFilter('pending')" [class.active]="statusFilter === 'pending'">Pending</button>
     </div>
     <div class="flex items-center gap-3">
-      <button class="ghost-btn" (click)="refresh()">Refresh</button>
-      <button class="cta-btn">
+      <button class="ghost-btn" type="button" (click)="refresh()">Refresh</button>
+      <button class="cta-btn" type="button" (click)="toggleAddPatientForm()">
         <i class="bi bi-person-plus-fill text-base"></i>
-        Add New Patient
+        {{ showAddPatientForm() ? "Close" : "Add New Patient" }}
       </button>
     </div>
   </div>
@@ -33,6 +33,65 @@
         <div class="text-sm text-gray-500">{{ card.label }}</div>
         <div class="text-3xl font-bold text-gray-900 mt-2">{{ card.value }}</div>
       </div>
+    </div>
+
+    <div *ngIf="showAddPatientForm()" class="bg-white border border-gray-200 rounded-xl p-6 mb-8 shadow-sm">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h3 class="text-lg font-bold text-gray-900">Add New Patient</h3>
+          <p class="text-sm text-gray-500">Capture essential patient details to get them onboard quickly.</p>
+        </div>
+        <button class="ghost-btn" type="button" (click)="toggleAddPatientForm()">Close</button>
+      </div>
+
+      <div *ngIf="patientFormMessage()" class="mb-4">
+        <div
+          class="px-4 py-2 rounded-lg text-sm font-medium"
+          [ngClass]="{
+            'bg-green-50 text-green-700 border border-green-200': patientFormMessage()?.type === 'success',
+            'bg-red-50 text-red-700 border border-red-200': patientFormMessage()?.type === 'error'
+          }"
+        >
+          {{ patientFormMessage()?.text }}
+        </div>
+      </div>
+
+      <form class="grid grid-cols-1 md:grid-cols-2 gap-4" (ngSubmit)="createPatient()">
+        <div>
+          <label class="form-label">First Name</label>
+          <input type="text" class="form-control" [(ngModel)]="newPatient.firstName" name="firstName" required />
+        </div>
+        <div>
+          <label class="form-label">Last Name</label>
+          <input type="text" class="form-control" [(ngModel)]="newPatient.lastName" name="lastName" required />
+        </div>
+        <div>
+          <label class="form-label">Email</label>
+          <input type="email" class="form-control" [(ngModel)]="newPatient.email" name="email" required />
+        </div>
+        <div>
+          <label class="form-label">Phone Number</label>
+          <input type="tel" class="form-control" [(ngModel)]="newPatient.phoneNumber" name="phoneNumber" required />
+        </div>
+        <div>
+          <label class="form-label">Date of Birth</label>
+          <input type="date" class="form-control" [(ngModel)]="newPatient.dateOfBirth" name="dateOfBirth" />
+        </div>
+        <div>
+          <label class="form-label">Blood Type</label>
+          <input type="text" class="form-control" [(ngModel)]="newPatient.bloodType" name="bloodType" placeholder="A+, O-, etc." />
+        </div>
+        <div class="md:col-span-2">
+          <label class="form-label">Medical History Notes</label>
+          <textarea class="form-control" rows="2" [(ngModel)]="newPatient.medicalHistory" name="medicalHistory"></textarea>
+        </div>
+        <div class="md:col-span-2 flex justify-end gap-3 mt-2">
+          <button class="ghost-btn" type="button" (click)="resetPatientForm()">Clear</button>
+          <button class="spotify-btn" type="submit" [disabled]="isSavingPatient()">
+            {{ isSavingPatient() ? "Saving..." : "Save Patient" }}
+          </button>
+        </div>
+      </form>
     </div>
 
     <div

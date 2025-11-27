@@ -280,7 +280,6 @@ export class NotificationService {
     }
   }
 
-  // Create appointment notification
   createAppointmentNotification(
     appointmentId: string,
     type: "reminder" | "confirmation" | "cancellation" | "reschedule",

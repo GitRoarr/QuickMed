@@ -36,10 +36,7 @@
 
   <main class="main-content">
     <header class="top-header">
-      <div class="header-left">
-
-
-      </div>
+      <div class="header-left"></div>
 
       <div class="header-right">
         <button class="theme-toggle" [class.active]="theme.isDarkMode()" (click)="toggleTheme()">
@@ -57,18 +54,18 @@
         </div>
 
         <div class="user-avatar">
-          {{ getInitials(user().firstName, user().lastName) }}
+          {{ getInitials(user()?.firstName, user()?.lastName) }}
         </div>
       </div>
     </header>
 
     <div class="content-wrapper">
       <div class="page-header">
-        <h2>Welcome back, {{ user().firstName }} {{ user().lastName }}</h2>
+        <h2>Welcome back, {{ user()?.firstName || 'Patient' }} {{ user()?.lastName || '' }}</h2>
         <p>Manage your appointments and health records</p>
       </div>
 
-  <div class="stats-grid">
+      <div class="stats-grid">
         <div class="stat-card stat-primary">
           <div class="stat-icon">
             <i class="bi bi-calendar-check"></i>
@@ -110,12 +107,11 @@
         </div>
       </div>
 
-      <!-- sample data container (can be fed from server) -->
       <app-data-container
         title="Recent Activities"
         [items]="[
-          { title: 'Appointment booked', meta: 'Dr. Chen · 2025-10-16' },
-          { title: 'Prescription updated', meta: 'Cardiology · 2025-09-21' }
+          { title: 'Appointment booked', meta: '—' },
+          { title: 'Prescription updated', meta: '—' }
         ]"
         (refresh)="loadData()">
       </app-data-container>
@@ -148,13 +144,13 @@
           <div class="appointments-list">
             <div *ngFor="let apt of appointments()" class="appointment-card">
               <div class="doctor-avatar">
-                {{ apt.doctor.firstName[0] }}
+                {{ apt.doctor?.firstName?.[0] || '?' }}
               </div>
               <div class="appointment-details">
                 <div class="appointment-header">
                   <div>
-                    <h4>Dr. {{ apt.doctor.firstName }} {{ apt.doctor.lastName }}</h4>
-                    <p class="specialty">{{ apt.doctor.specialty }}</p>
+                    <h4>Dr. {{ apt.doctor?.firstName || '' }} {{ apt.doctor?.lastName || '' }}</h4>
+                    <p class="specialty">{{ apt.doctor?.specialty || '' }}</p>
                   </div>
                   <span class="status-badge" [class]="'status-' + apt.status">
                     {{ apt.status }}
@@ -190,6 +186,12 @@
                 </div>
               </div>
             </div>
+
+            <div *ngIf="appointments().length === 0 && !isLoading()" class="empty-state">
+              <h3>No upcoming appointments</h3>
+              <p>Book a new appointment to get started</p>
+              <button class="btn-primary" (click)="bookAppointment()">Book Appointment</button>
+            </div>
           </div>
         </div>
 
@@ -201,32 +203,32 @@
                 <i class="bi bi-person"></i>
               </div>
               <div>
-                <h4>{{ user().firstName }} {{ user().lastName }}</h4>
-                <p>Patient ID: {{ user().patientId }}</p>
+                <h4>{{ user()?.firstName || '—' }} {{ user()?.lastName || '' }}</h4>
+                <p>Patient ID: {{ user()?.patientId || '—' }}</p>
               </div>
             </div>
             <div class="profile-details">
               <div class="detail-item">
                 <span>📧</span>
-                <span>{{ user().email }}</span>
+                <span>{{ user()?.email || '—' }}</span>
               </div>
               <div class="detail-item">
                 <span>📱</span>
-                <span>{{ user().phoneNumber }}</span>
+                <span>{{ user()?.phoneNumber || '—' }}</span>
               </div>
               <div class="detail-item">
                 <span>🎂</span>
-                <span>DOB: {{ user().dateOfBirth }}</span>
+                <span>DOB: {{ user()?.dateOfBirth || '—' }}</span>
               </div>
               <div class="detail-item">
                 <span>🩸</span>
-                <span>Blood Type: {{ user().bloodType }}</span>
+                <span>Blood Type: {{ user()?.bloodType || '—' }}</span>
               </div>
             </div>
             <div class="allergies-section">
               <h5>Allergies</h5>
               <div class="allergies-tags">
-                <span *ngFor="let allergy of user().allergies" class="allergy-tag">
+                <span *ngFor="let allergy of (user()?.allergies || [])" class="allergy-tag">
                   {{ allergy }}
                 </span>
               </div>

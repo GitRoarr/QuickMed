@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core"
 import { HttpClient, HttpParams } from "@angular/common/http"
-import { Observable } from "rxjs"
+import { Observable, map } from "rxjs"
 import { environment } from "../../../environments/environment"
 
 export interface User {
@@ -20,6 +20,8 @@ export interface User {
   isActive: boolean
   createdAt: Date
   updatedAt: Date
+  password?: string
+  
 }
 
 export interface Appointment {
@@ -118,9 +120,22 @@ export class AdminService {
       }
     }
 
-    return this.http.get<PaginatedResponse<User>>(`${this.apiUrl}/users`, {
-      params,
-    })
+    return this.http.get<any>(`${this.apiUrl}/users`, { params }).pipe(
+      map((res) => {
+        const data = res.users ?? res.data ?? []
+        const total = res.total ?? res.count ?? (res.users?.length ?? 0)
+        const resLimit = res.limit ?? limit
+        const computedTotalPages = Math.max(1, Math.ceil((total ?? 0) / (resLimit ?? limit)))
+
+        return {
+          data,
+          total,
+          page: res.page ?? page,
+          limit: resLimit,
+          totalPages: res.totalPages ?? computedTotalPages,
+        }
+      })
+    )
   }
 
   getUserById(id: string): Observable<User> {
@@ -141,8 +156,23 @@ export class AdminService {
 
   getAllAppointments(page = 1, limit = 10, status?: string): Observable<PaginatedResponse<Appointment>> {
     let params = new HttpParams().set("page", page.toString()).set("limit", limit.toString())
-    if (status) params = params.set("status", status)
-    return this.http.get<PaginatedResponse<Appointment>>(`${this.apiUrl}/appointments`, { params })
+    if (status && status !== "all") params = params.set("status", status)
+    return this.http.get<any>(`${this.apiUrl}/appointments`, { params }).pipe(
+      map((res) => {
+        const data = res.appointments ?? []
+        const total = res.total ?? 0
+        const resLimit = res.limit ?? limit
+        const computedTotalPages = Math.max(1, Math.ceil((total ?? 0) / (resLimit ?? limit)))
+
+        return {
+          data,
+          total,
+          page: res.page ?? page,
+          limit: resLimit,
+          totalPages: res.totalPages ?? computedTotalPages,
+        }
+      })
+    )
   }
 
   createAppointment(appointmentData: Partial<Appointment>): Observable<Appointment> {
@@ -159,6 +189,16 @@ export class AdminService {
 
   createDoctorInvitation(data: any): Observable<DoctorInvitationResponse> {
     return this.http.post<DoctorInvitationResponse>(`${this.apiUrl}/doctors`, data)
+  }
+
+  createPatient(payload: Partial<User> & { password?: string }): Observable<User> {
+    const password = payload.password ?? this.generateTempPassword()
+    const body: Partial<User> = {
+      ...payload,
+      password,
+      role: "patient",
+    }
+    return this.createUser(body)
   }
 
   validateDoctorLicense(id: string): Observable<User> {
@@ -187,5 +227,14 @@ export class AdminService {
 
   getPatients(page = 1, limit = 12, search?: string): Observable<PaginatedResponse<User>> {
     return this.getAllUsers(page, limit, "patient", search)
+  }
+
+  private generateTempPassword(length = 10): string {
+    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@$"
+    let pwd = ""
+    for (let i = 0; i < length; i++) {
+      pwd += chars[Math.floor(Math.random() * chars.length)]
+    }
+    return pwd
   }
 }

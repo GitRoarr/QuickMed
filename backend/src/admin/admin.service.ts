@@ -7,7 +7,7 @@ import { CreateUserDto } from '../users/dto/create-user.dto';
 import { UpdateUserDto } from '../users/dto/update-user.dto';
 import { CreateAppointmentDto } from '../appointments/dto/create-appointment.dto';
 import { UpdateAppointmentDto } from '../appointments/dto/update-appointment.dto';
-import { UserRole, AppointmentStatus } from '../common/index';
+import { UserRole, AppointmentStatus, AppointmentType } from '../common/index';
 import { AdminStatsService, AdminStats } from './admin.stats.service';
 import { DoctorsService } from '../doctors/doctors.service';
 
@@ -164,10 +164,19 @@ export class AdminService {
   }
 
   async createAppointment(dto: CreateAppointmentDto) {
-    const doctor = await this.userRepository.findOne({ where: { id: dto.doctorId } });
-    if (!doctor || doctor.role !== UserRole.DOCTOR) throw new BadRequestException('Invalid doctor ID');
-    const appointment = this.appointmentRepository.create({ ...dto, patientId: 'placeholder_patient_id' });
-    return this.appointmentRepository.save(appointment);
+    const doctor = await this.userRepository.findOne({ where: { id: dto.doctorId, role: UserRole.DOCTOR } })
+    if (!doctor) throw new BadRequestException("Invalid doctor ID")
+
+    const patient = await this.userRepository.findOne({ where: { id: dto.patientId, role: UserRole.PATIENT } })
+    if (!patient) throw new BadRequestException("Invalid patient ID")
+
+    const appointment = this.appointmentRepository.create({
+      ...dto,
+      status: dto.status ?? AppointmentStatus.PENDING,
+      appointmentType: dto.appointmentType ?? AppointmentType.CONSULTATION,
+    })
+
+    return this.appointmentRepository.save(appointment)
   }
 
   async updateAppointment(id: string, dto: UpdateAppointmentDto) {

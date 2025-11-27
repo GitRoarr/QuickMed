@@ -30,6 +30,12 @@ export interface User {
   updatedAt: Date
 }
 
+export interface Doctor extends User {
+  available: boolean;
+  rating: number;
+  experience: number;
+}
+
 export interface AuthResponse {
   user: User
   token: string

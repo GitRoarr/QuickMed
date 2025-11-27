@@ -1,0 +1,55 @@
+<div class="records-page">
+  <div class="page-header">
+    <h1>Medical Records</h1>
+    <p>View and manage patient medical records</p>
+  </div>
+
+  <div class="stats-row" *ngIf="!isLoading()">
+    <div class="stat-card">
+      <div class="stat-label">Total Records</div>
+      <div class="stat-value">{{ totalRecords() }}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Lab Results</div>
+      <div class="stat-value">{{ labCount() }}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Prescriptions</div>
+      <div class="stat-value">{{ prescriptionCount() }}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Imaging</div>
+      <div class="stat-value">{{ imagingCount() }}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Diagnoses</div>
+      <div class="stat-value">{{ diagnosisCount() }}</div>
+    </div>
+  </div>
+
+  <div class="records-list" *ngIf="!isLoading()">
+    <div *ngFor="let r of records()" class="record-item">
+      <div class="record-left">
+        <div class="record-icon">
+          <i class="bi bi-file-earmark-text"></i>
+        </div>
+        <div class="record-meta">
+          <h3>{{ r.title }}</h3>
+          <p class="meta-sub">{{ r.patientId }} • {{ r.recordDate | date }}</p>
+        </div>
+      </div>
+      <div class="record-right">
+        <span class="tag">{{ r.type }}</span>
+        <div class="actions">
+          <button class="btn-spotify" (click)="viewRecord(r)">View</button>
+          <button class="btn-outline" (click)="downloadRecord(r)">Download</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="isLoading()" class="loading-state">
+    <div class="spinner"></div>
+    <p>Loading records...</p>
+  </div>
+</div>

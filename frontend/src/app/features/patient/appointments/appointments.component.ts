@@ -2,6 +2,9 @@ import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
+import { AppointmentService } from '../../../core/services/appointment.service';
+import { AuthService } from '../../../core/services/auth.service';
+import { Appointment as AppointmentModel } from '../../../core/models/appointment.model';
 
 interface Appointment {
   id: string;
@@ -22,8 +25,8 @@ interface Appointment {
   styleUrls: ['./appointments.component.css']
 })
 export class AppointmentsComponent implements OnInit {
-  appointments = signal<Appointment[]>([]);
-  filteredAppointments = signal<Appointment[]>([]);
+  appointments = signal<AppointmentModel[]>([]);
+  filteredAppointments = signal<AppointmentModel[]>([]);
   isLoading = signal(true);
   searchQuery = signal('');
   selectedFilter = signal('all');
@@ -55,7 +58,7 @@ export class AppointmentsComponent implements OnInit {
     { value: 'time', label: 'Time' }
   ];
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, private appointmentService: AppointmentService, private authService: AuthService) {}
 
   ngOnInit(): void {
     this.loadAppointments();
@@ -63,140 +66,63 @@ export class AppointmentsComponent implements OnInit {
 
   loadAppointments(): void {
     this.isLoading.set(true);
-    
-    setTimeout(() => {
-      const mockAppointments: Appointment[] = [
-        {
-          id: '1',
-          doctor: { firstName: 'Michael', lastName: 'Chen', specialty: 'Cardiologist' },
-          appointmentDate: '2025-10-16',
-          appointmentTime: '10:00 AM',
-          location: 'Building A, Room 302',
-          status: 'confirmed',
-          isVideoConsultation: false,
-          notes: 'Follow-up checkup'
-        },
-        {
-          id: '2',
-          doctor: { firstName: 'Emily', lastName: 'Rodriguez', specialty: 'General Physician' },
-          appointmentDate: '2025-10-20',
-          appointmentTime: '2:30 PM',
-          location: 'Video Consultation',
-          status: 'confirmed',
-          isVideoConsultation: true,
-          notes: 'Annual physical exam'
-        },
-        {
-          id: '3',
-          doctor: { firstName: 'James', lastName: 'Wilson', specialty: 'Dermatologist' },
-          appointmentDate: '2025-10-25',
-          appointmentTime: '11:15 AM',
-          location: 'Building B, Room 105',
-          status: 'pending',
-          isVideoConsultation: false,
-          notes: 'Skin consultation'
-        },
-        {
-          id: '4',
-          doctor: { firstName: 'Sarah', lastName: 'Martinez', specialty: 'Orthopedist' },
-          appointmentDate: '2025-09-10',
-          appointmentTime: '9:00 AM',
-          location: 'Building C, Room 201',
-          status: 'completed',
-          isVideoConsultation: false
-        },
-        {
-          id: '5',
-          doctor: { firstName: 'David', lastName: 'Lee', specialty: 'Pediatrician' },
-          appointmentDate: '2025-09-05',
-          appointmentTime: '3:00 PM',
-          location: 'Building A, Room 105',
-          status: 'cancelled',
-          isVideoConsultation: false
-        },
-        {
-          id: '6',
-          doctor: { firstName: 'David', lastName: 'Lee', specialty: 'Pediatrician' },
-          appointmentDate: '2025-09-05',
-          appointmentTime: '3:00 PM',
-          location: 'Building A, Room 105',
-          status: 'cancelled',
-          isVideoConsultation: false
-        },
-         {
-          id: '7',
-          doctor: { firstName: 'David', lastName: 'Lee', specialty: 'Pediatrician' },
-          appointmentDate: '2025-09-05',
-          appointmentTime: '3:00 PM',
-          location: 'Building A, Room 105',
-          status: 'cancelled',
-          isVideoConsultation: false
-        },
-         {
-          id: '8',
-          doctor: { firstName: 'David', lastName: 'Lee', specialty: 'Pediatrician' },
-          appointmentDate: '2025-09-05',
-          appointmentTime: '3:00 PM',
-          location: 'Building A, Room 105',
-          status: 'cancelled',
-          isVideoConsultation: false
-        },
-         {
-          id: '9',
-          doctor: { firstName: 'David', lastName: 'Lee', specialty: 'Pediatrician' },
-          appointmentDate: '2025-09-05',
-          appointmentTime: '3:00 PM',
-          location: 'Building A, Room 105',
-          status: 'cancelled',
-          isVideoConsultation: false
-        }
 
-
-
-      ];
-
-      this.appointments.set(mockAppointments);
-      this.filteredAppointments.set(mockAppointments);
-      this.applyFilters();
-      this.isLoading.set(false);
-    }, 1000);
+    this.appointmentService.getMyAppointments().subscribe({
+      next: (apts) => {
+        this.appointments.set(apts as AppointmentModel[]);
+        this.applyFilters();
+        this.isLoading.set(false);
+      },
+      error: (err) => {
+        console.error('Failed to load appointments', err);
+        this.appointments.set([]);
+        this.filteredAppointments.set([]);
+        this.isLoading.set(false);
+      }
+    });
   }
 
   applyFilters(): void {
     let filtered = [...this.appointments()];
 
     if (this.selectedFilter() !== 'all') {
-      filtered = filtered.filter(apt => apt.status === this.selectedFilter());
+      filtered = filtered.filter((apt) => apt.status === this.selectedFilter());
     }
 
     if (this.searchQuery()) {
       const query = this.searchQuery().toLowerCase();
-      filtered = filtered.filter(apt =>
-        `${apt.doctor.firstName} ${apt.doctor.lastName}`.toLowerCase().includes(query) ||
-        apt.doctor.specialty.toLowerCase().includes(query) ||
-        apt.location?.toLowerCase().includes(query) ||
-        apt.notes?.toLowerCase().includes(query)
-      );
+      filtered = filtered.filter((apt) => {
+        const doctorName = `${apt.doctor?.firstName ?? ''} ${apt.doctor?.lastName ?? ''}`.toLowerCase();
+        const specialty = (apt.doctor?.specialty ?? '').toLowerCase();
+        return (
+          doctorName.includes(query) ||
+          specialty.includes(query) ||
+          (apt.location ?? '').toLowerCase().includes(query) ||
+          (apt.notes ?? '').toLowerCase().includes(query)
+        );
+      });
     }
 
     filtered = this.sortAppointments(filtered);
     this.filteredAppointments.set(filtered);
   }
 
-  sortAppointments(appointments: Appointment[]): Appointment[] {
+  sortAppointments(appointments: AppointmentModel[]): AppointmentModel[] {
     const sorted = [...appointments];
     const order = this.sortOrder() === 'asc' ? 1 : -1;
-
     sorted.sort((a, b) => {
       switch (this.sortBy()) {
         case 'date':
           return order * (new Date(a.appointmentDate).getTime() - new Date(b.appointmentDate).getTime());
-        case 'doctor':
-          return order * `${a.doctor.firstName} ${a.doctor.lastName}`.localeCompare(`${b.doctor.firstName} ${b.doctor.lastName}`);
+        case 'doctor': {
+          const nameA = `${a.doctor?.firstName ?? ''} ${a.doctor?.lastName ?? ''}`.trim();
+          const nameB = `${b.doctor?.firstName ?? ''} ${b.doctor?.lastName ?? ''}`.trim();
+          return order * nameA.localeCompare(nameB);
+        }
         case 'status':
-          return order * a.status.localeCompare(b.status);
+          return order * (a.status ?? '').localeCompare(b.status ?? '');
         case 'time':
-          return order * a.appointmentTime.localeCompare(b.appointmentTime);
+          return order * (a.appointmentTime ?? '').localeCompare(b.appointmentTime ?? '');
         default:
           return 0;
       }

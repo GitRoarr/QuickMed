@@ -53,6 +53,13 @@ export const routes: Routes = [
             (m) => m.DoctorsComponent
           ),
       },
+      {
+        path: "records",
+        loadComponent: () =>
+          import("./features/patient/records/medical-records.component").then(
+            (m) => m.MedicalRecordsComponent
+          ),
+      },
     ],
   },
   {
@@ -89,32 +96,31 @@ export const routes: Routes = [
           ),
       },
       {
-  path: "doctors",
-  children: [
-    {
-      path: "",
-      loadComponent: () =>
-        import("./features/admin/doctors/admin-doctors.component").then(
-          (m) => m.AdminDoctorsComponent
-        ),
-    },
-    {
-      path: "add-doctor",
-      loadComponent: () =>
-        import("./features/admin/doctors/add-doctor/admin-doctor-add.component").then(
-          (m) => m.AdminDoctorAddComponent
-        ),
-    },
-    {
-      path: "verify-doctor/:id",
-      loadComponent: () =>
-        import(
-          "./features/admin/doctors/verify-doctor/admin-doctor-verify.component"
-        ).then((m) => m.AdminDoctorVerifyComponent),
-    },
-  ],
-},
-
+        path: "doctors",
+        children: [
+          {
+            path: "",
+            loadComponent: () =>
+              import(
+                "./features/admin/doctors/admin-doctors.component"
+              ).then((m) => m.AdminDoctorsComponent),
+          },
+          {
+            path: "add-doctor",
+            loadComponent: () =>
+              import(
+                "./features/admin/doctors/add-doctor/admin-doctor-add.component"
+              ).then((m) => m.AdminDoctorAddComponent),
+          },
+          {
+            path: "verify-doctor/:id",
+            loadComponent: () =>
+              import(
+                "./features/admin/doctors/verify-doctor/admin-doctor-verify.component"
+              ).then((m) => m.AdminDoctorVerifyComponent),
+          },
+        ],
+      },
       {
         path: "appointments",
         loadComponent: () =>

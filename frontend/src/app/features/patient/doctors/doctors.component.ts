@@ -1,20 +1,10 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormsModule } from '@angular/forms';
+import { UserService } from '../../../core/services/user.service';
+import { AppointmentService } from '../../../core/services/appointment.service';
+import { Doctor } from '../../../core/models/user.model';
 import { Router, RouterModule } from '@angular/router';
-
-interface Doctor {
-  id: string;
-  firstName: string;
-  lastName: string;
-  specialty: string;
-  bio?: string;
-  phoneNumber?: string;
-  email?: string;
-  rating?: number;
-  experience?: number;
-  available?: boolean;
-}
 
 @Component({
   selector: 'app-patient-doctors',
@@ -51,7 +41,12 @@ export class DoctorsComponent implements OnInit {
     { value: 'pediatrics', label: 'Pediatrics' }
   ];
 
-  constructor(private fb: FormBuilder, private router: Router) {
+  constructor(
+    private fb: FormBuilder,
+    private router: Router,
+    private userService: UserService,
+    private appointmentService: AppointmentService
+  ) {
     this.appointmentForm = this.fb.group({
       appointmentDate: ['', Validators.required],
       appointmentTime: ['', Validators.required],
@@ -65,87 +60,21 @@ export class DoctorsComponent implements OnInit {
 
   loadDoctors(): void {
     this.isLoading.set(true);
-    
-    setTimeout(() => {
-      const mockDoctors: Doctor[] = [
-        {
-          id: '1',
-          firstName: 'Michael',
-          lastName: 'Chen',
-          specialty: 'Cardiology',
-          bio: 'Specialized in cardiovascular diseases with 15+ years of experience',
-          phoneNumber: '+1 (555) 123-4567',
-          email: 'michael.chen@quickmed.com',
-          rating: 4.8,
-          experience: 15,
-          available: true
-        },
-        {
-          id: '2',
-          firstName: 'Emily',
-          lastName: 'Rodriguez',
-          specialty: 'General Practice',
-          bio: 'Family physician focused on preventive care and wellness',
-          phoneNumber: '+1 (555) 234-5678',
-          email: 'emily.rodriguez@quickmed.com',
-          rating: 4.9,
-          experience: 10,
-          available: true
-        },
-        {
-          id: '3',
-          firstName: 'James',
-          lastName: 'Wilson',
-          specialty: 'Dermatology',
-          bio: 'Expert in skin conditions and cosmetic dermatology',
-          phoneNumber: '+1 (555) 345-6789',
-          email: 'james.wilson@quickmed.com',
-          rating: 4.7,
-          experience: 12,
-          available: false
-        },
-        {
-          id: '4',
-          firstName: 'Sarah',
-          lastName: 'Martinez',
-          specialty: 'Orthopedics',
-          bio: 'Specialized in sports medicine and joint replacement',
-          phoneNumber: '+1 (555) 456-7890',
-          email: 'sarah.martinez@quickmed.com',
-          rating: 4.9,
-          experience: 18,
-          available: true
-        },
-        {
-          id: '5',
-          firstName: 'David',
-          lastName: 'Lee',
-          specialty: 'Pediatrics',
-          bio: 'Caring for children from newborns to adolescents',
-          phoneNumber: '+1 (555) 567-8901',
-          email: 'david.lee@quickmed.com',
-          rating: 5.0,
-          experience: 8,
-          available: true
-        },
-        {
-          id: '6',
-          firstName: 'Lisa',
-          lastName: 'Thompson',
-          specialty: 'Cardiology',
-          bio: 'Heart health specialist with focus on prevention',
-          phoneNumber: '+1 (555) 678-9012',
-          email: 'lisa.thompson@quickmed.com',
-          rating: 4.8,
-          experience: 14,
-          available: true
-        }
-      ];
 
-      this.doctors.set(mockDoctors);
-      this.filteredDoctors.set(mockDoctors);
-      this.isLoading.set(false);
-    }, 1000);
+    this.userService.getDoctors().subscribe({
+      next: (docs) => {
+        // backend returns a subset of user fields; coerce to Doctor[]
+        this.doctors.set(docs as Doctor[]);
+        this.filteredDoctors.set(docs as Doctor[]);
+        this.isLoading.set(false);
+      },
+      error: (err) => {
+        console.error('Failed to load doctors', err);
+        this.doctors.set([]);
+        this.filteredDoctors.set([]);
+        this.isLoading.set(false);
+      }
+    });
   }
 
   filterDoctors(): void {
@@ -153,16 +82,16 @@ export class DoctorsComponent implements OnInit {
 
     if (this.selectedSpecialty() !== 'all') {
       filtered = filtered.filter(doc => 
-        doc.specialty.toLowerCase() === this.selectedSpecialty().toLowerCase()
+        (doc.specialty ?? '').toLowerCase() === this.selectedSpecialty().toLowerCase()
       );
     }
 
     if (this.searchQuery()) {
       const query = this.searchQuery().toLowerCase();
       filtered = filtered.filter(doc =>
-        `${doc.firstName} ${doc.lastName}`.toLowerCase().includes(query) ||
-        doc.specialty.toLowerCase().includes(query) ||
-        doc.bio?.toLowerCase().includes(query)
+        `${doc.firstName ?? ''} ${doc.lastName ?? ''}`.toLowerCase().includes(query) ||
+        (doc.specialty ?? '').toLowerCase().includes(query) ||
+        (doc.bio ?? '').toLowerCase().includes(query)
       );
     }
 
@@ -193,13 +122,24 @@ export class DoctorsComponent implements OnInit {
       return;
     }
 
-    console.log('Booking appointment:', {
-      ...this.appointmentForm.value,
-      doctorId: this.selectedDoctor()?.id
-    });
+    const payload = {
+      doctorId: this.selectedDoctor()!.id,
+      appointmentDate: this.appointmentForm.value.appointmentDate,
+      appointmentTime: this.appointmentForm.value.appointmentTime,
+      notes: this.appointmentForm.value.notes,
+    };
 
-    alert('Appointment booked successfully!');
-    this.closeBookingForm();
+    this.appointmentService.create(payload).subscribe({
+      next: (res) => {
+        // successfully created - inform user and close form
+        alert('Appointment booked successfully!');
+        this.closeBookingForm();
+      },
+      error: (err) => {
+        console.error('Failed to book appointment', err);
+        alert('Failed to book appointment. Please try again.');
+      }
+    });
   }
 
   toggleSidebar(): void {

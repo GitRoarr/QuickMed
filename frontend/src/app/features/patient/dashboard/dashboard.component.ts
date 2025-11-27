@@ -3,6 +3,10 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { ThemeService } from '../../../core/services/theme.service';
+import { AuthService } from '../../../core/services/auth.service';
+import { UserService } from '../../../core/services/user.service';
+import { AppointmentService } from '../../../core/services/appointment.service';
+import { Appointment as AppointmentModel } from '../../../core/models/appointment.model';
 import { DataContainerComponent } from '../../../shared/components/data-container/data-container.component';
 
 interface User {
@@ -47,53 +51,16 @@ export class DashboardComponent implements OnInit {
   sidebarCollapsed = signal(false);
   
   
-  user = signal<User>({
-    firstName: 'Sarah',
-    lastName: 'Johnson',
-    patientId: '#12345',
-    email: 'sarah.johnson@email.com',
-    phoneNumber: '+1 (555) 123-4567',
-    dateOfBirth: 'March 15, 1985',
-    bloodType: 'O+',
-    allergies: ['Penicillin', 'Peanuts']
-  });
+  user = signal<User | null>(null);
 
   stats = signal<Stats>({
-    upcomingAppointments: 3,
-    activeMeds: 2,
-    records: 12,
-    testResults: 3
+    upcomingAppointments: 0,
+    activeMeds: 0,
+    records: 0,
+    testResults: 0,
   });
 
-  appointments = signal<Appointment[]>([
-    {
-      id: '1',
-      doctor: { firstName: 'Michael', lastName: 'Chen', specialty: 'Cardiologist' },
-      appointmentDate: '2025-10-16',
-      appointmentTime: '10:00 AM',
-      location: 'Building A, Room 302',
-      status: 'confirmed',
-      isVideoConsultation: false
-    },
-    {
-      id: '2',
-      doctor: { firstName: 'Emily', lastName: 'Rodriguez', specialty: 'General Physician' },
-      appointmentDate: '2025-10-20',
-      appointmentTime: '2:30 PM',
-      location: 'Video Consultation',
-      status: 'confirmed',
-      isVideoConsultation: true
-    },
-    {
-      id: '3',
-      doctor: { firstName: 'James', lastName: 'Wilson', specialty: 'Dermatologist' },
-      appointmentDate: '2025-10-25',
-      appointmentTime: '11:15 AM',
-      location: 'Building B, Room 105',
-      status: 'pending',
-      isVideoConsultation: false
-    }
-  ]);
+  appointments = signal<AppointmentModel[]>([]);
 
   menuItems = [
     { icon: 'bi-house', label: 'Dashboard', route: '/patient/dashboard', active: true },
@@ -110,16 +77,62 @@ export class DashboardComponent implements OnInit {
     { icon: 'bi-telephone', label: 'Contact Support' }
   ];
 
-  constructor(public theme: ThemeService, private router: Router) {}
+  constructor(
+    public theme: ThemeService,
+    private router: Router,
+    private authService: AuthService,
+    private userService: UserService,
+    private appointmentService: AppointmentService
+  ) {}
 
   ngOnInit(): void {
     this.loadData();
   }
 
   loadData(): void {
-    setTimeout(() => {
-      this.isLoading.set(false);
-    }, 1000);
+    const current = this.authService.currentUser();
+
+    if (current && current.id) {
+      this.userService.getOne(current.id).subscribe({
+        next: (u) => {
+          this.user.set(u as any);
+          this.stats.update((s) => ({
+            ...s,
+            activeMeds: (u as any).activeMedicationsCount ?? s.activeMeds,
+            records: (u as any).medicalRecordsCount ?? s.records,
+            testResults: (u as any).testResultsCount ?? s.testResults,
+          }));
+        },
+        error: (err) => {
+          console.error('Failed to load user profile', err);
+        },
+      });
+
+      // fetch appointments for current user
+      this.appointmentService.getMyAppointments().subscribe({
+        next: (apts) => {
+          this.appointments.set(apts as AppointmentModel[]);
+          this.stats.update((s) => ({ ...s, upcomingAppointments: apts.length }));
+        },
+        error: (err) => console.error('Failed to load appointments', err),
+      });
+    } else {
+      // fallback: try to fetch current user from storage
+      const storedUser = this.authService.currentUser();
+      if (storedUser && storedUser.id) {
+        this.userService.getOne(storedUser.id).subscribe({ next: (u) => this.user.set(u) });
+      }
+
+      this.appointmentService.getMyAppointments().subscribe({
+        next: (apts) => {
+          this.appointments.set(apts as AppointmentModel[]);
+          this.stats.update((s) => ({ ...s, upcomingAppointments: apts.length }));
+        },
+        error: (err) => console.error('Failed to load appointments', err),
+      });
+    }
+
+    setTimeout(() => this.isLoading.set(false), 400);
   }
 
   toggleSidebar(): void {

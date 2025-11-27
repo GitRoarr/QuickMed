@@ -31,6 +31,11 @@ export class UsersController {
     return this.usersService.findPatients();
   }
 
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.usersService.findOne(id);
+  }
+
   @Patch(':id/avatar')
   @UseInterceptors(FileInterceptor('file'))
   async uploadAvatar(

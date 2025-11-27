@@ -1,20 +1,59 @@
-import { IsString, IsNotEmpty, IsDateString, IsOptional, IsUUID, isUUID } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsDateString,
+  IsOptional,
+  IsUUID,
+  IsEnum,
+  IsBoolean,
+  IsInt,
+  Min,
+} from "class-validator"
+import { AppointmentStatus, AppointmentType } from "../../common"
 
 export class CreateAppointmentDto {
   @IsUUID()
   @IsNotEmpty()
-  doctorId: string;
+  doctorId: string
+
+  @IsUUID()
+  @IsNotEmpty()
+  patientId: string
 
   @IsDateString()
   @IsNotEmpty()
-  appointmentDate: Date;
+  appointmentDate: Date
 
   @IsString()
   @IsNotEmpty()
-  appointmentTime: string;
+  appointmentTime: string
+
+  @IsEnum(AppointmentType)
+  @IsOptional()
+  appointmentType?: AppointmentType
+
+  @IsEnum(AppointmentStatus)
+  @IsOptional()
+  status?: AppointmentStatus
 
   @IsString()
   @IsOptional()
-  notes?: string;
-  
+  notes?: string
+
+  @IsString()
+  @IsOptional()
+  reason?: string
+
+  @IsString()
+  @IsOptional()
+  location?: string
+
+  @IsBoolean()
+  @IsOptional()
+  isVideoConsultation?: boolean
+
+  @IsInt()
+  @IsOptional()
+  @Min(15)
+  duration?: number
 }

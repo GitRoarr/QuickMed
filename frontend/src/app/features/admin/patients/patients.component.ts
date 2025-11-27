@@ -1,11 +1,12 @@
-import { Component, DestroyRef, OnInit, computed, inject, signal } from "@angular/core"
+import { Component, DestroyRef, type OnInit, computed, inject, signal } from "@angular/core"
 import { CommonModule } from "@angular/common"
+import { FormsModule } from "@angular/forms"
 import { Subject, debounceTime, distinctUntilChanged } from "rxjs"
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop"
 
 import { SidebarComponent } from "../shared/sidebar"
 import { HeaderComponent } from "../shared/header"
-import { AdminService, User } from "@app/core/services/admin.service"
+import { AdminService, type User } from "@app/core/services/admin.service"
 
 interface PatientRow {
   id: string
@@ -26,7 +27,7 @@ interface PatientRow {
 @Component({
   selector: "app-patients",
   standalone: true,
-  imports: [CommonModule, SidebarComponent, HeaderComponent],
+  imports: [CommonModule, SidebarComponent, HeaderComponent, FormsModule],
   templateUrl: "./patients.component.html",
   styleUrls: ["./patients.component.css"],
 })
@@ -37,6 +38,8 @@ export class PatientsComponent implements OnInit {
   patients = signal<PatientRow[]>([])
   isLoading = signal<boolean>(false)
   errorMessage = signal<string>("")
+  isSavingPatient = signal<boolean>(false)
+  patientFormMessage = signal<{ type: "success" | "error"; text: string } | null>(null)
 
   page = signal<number>(1)
   totalPages = signal<number>(1)
@@ -45,6 +48,7 @@ export class PatientsComponent implements OnInit {
   private readonly search$ = new Subject<string>()
   private searchTerm = ""
   statusFilter: "all" | "active" | "pending" = "all"
+  showAddPatientForm = signal<boolean>(false)
 
   highlightedPatient = signal<PatientRow | null>(null)
   totalPatients = signal<number>(0)
@@ -86,6 +90,16 @@ export class PatientsComponent implements OnInit {
     })
   })
 
+  newPatient = {
+    firstName: "",
+    lastName: "",
+    email: "",
+    phoneNumber: "",
+    dateOfBirth: "",
+    bloodType: "",
+    medicalHistory: "",
+  }
+
   ngOnInit(): void {
     this.search$
       .pipe(debounceTime(300), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
@@ -120,6 +134,53 @@ export class PatientsComponent implements OnInit {
 
   selectPatient(patient: PatientRow): void {
     this.highlightedPatient.set(patient)
+  }
+
+  toggleAddPatientForm(): void {
+    this.showAddPatientForm.update((value) => !value)
+    this.patientFormMessage.set(null)
+  }
+
+  createPatient(): void {
+    const payload = this.newPatient
+    if (!payload.firstName || !payload.lastName || !payload.email) {
+      this.patientFormMessage.set({ type: "error", text: "First name, last name, and email are required." })
+      return
+    }
+
+    this.isSavingPatient.set(true)
+    this.patientFormMessage.set(null)
+
+    const requestBody: Partial<User> & { password: string } = {
+      ...payload,
+      role: "patient",
+      password: this.generateTempPassword(),
+      patientId: this.generatePatientId(),
+      dateOfBirth: payload.dateOfBirth || undefined,
+      medicalHistory: payload.medicalHistory || undefined,
+      bloodType: payload.bloodType || undefined,
+      allergies: [],
+    }
+
+    this.adminService
+      .createPatient(requestBody)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.patientFormMessage.set({
+            type: "success",
+            text: `${payload.firstName} ${payload.lastName} has been added.`,
+          })
+          this.isSavingPatient.set(false)
+          this.resetPatientForm()
+          this.loadPatients()
+        },
+        error: (err) => {
+          console.error("Failed to create patient", err)
+          this.patientFormMessage.set({ type: "error", text: err.error?.message || "Failed to add patient." })
+          this.isSavingPatient.set(false)
+        },
+      })
   }
 
   private loadPatients(): void {
@@ -194,5 +255,26 @@ export class PatientsComponent implements OnInit {
     if (history.includes("female")) return "Female"
     if (history.includes("male")) return "Male"
     return "—"
+  }
+
+  resetPatientForm(): void {
+    this.newPatient = {
+      firstName: "",
+      lastName: "",
+      email: "",
+      phoneNumber: "",
+      dateOfBirth: "",
+      bloodType: "",
+      medicalHistory: "",
+    }
+  }
+
+  private generateTempPassword(): string {
+    return `Patient@${Math.floor(1000 + Math.random() * 9000)}`
+  }
+
+  private generatePatientId(): string {
+    const random = Math.floor(1000 + Math.random() * 9000)
+    return `PAT-${random}`
   }
 }

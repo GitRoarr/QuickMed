@@ -133,13 +133,13 @@
     <div class="appointments-list" *ngIf="!isLoading()">
       <div *ngFor="let apt of filteredAppointments()" class="appointment-card">
         <div class="doctor-avatar">
-          {{ apt.doctor.firstName[0] }}
+          {{ apt.doctor?.firstName?.charAt(0) || '?' }}
         </div>
         <div class="appointment-details">
           <div class="appointment-header">
             <div>
-              <h4>Dr. {{ apt.doctor.firstName }} {{ apt.doctor.lastName }}</h4>
-              <p class="specialty">{{ apt.doctor.specialty }}</p>
+              <h4>Dr. {{ apt.doctor?.firstName || '' }} {{ apt.doctor?.lastName || '' }}</h4>
+              <p class="specialty">{{ apt.doctor?.specialty || '' }}</p>
             </div>
             <span class="status-badge" [class]="'status-' + apt.status">
               {{ apt.status }}
