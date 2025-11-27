@@ -56,4 +56,9 @@ export class CreateAppointmentDto {
   @IsOptional()
   @Min(15)
   duration?: number
+
+  // optional receptionist id (normally set from auth token)
+  @IsOptional()
+  @IsString()
+  receptionistId?: string
 }

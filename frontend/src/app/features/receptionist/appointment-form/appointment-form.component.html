@@ -1,0 +1,16 @@
+<div class="appointment-form">
+  <div class="form-row">
+    <input [(ngModel)]="model().patientId" name="patientId" placeholder="Patient ID" />
+    <input [(ngModel)]="model().doctorId" name="doctorId" placeholder="Doctor ID" />
+  </div>
+  <div class="form-row">
+    <input [(ngModel)]="model().appointmentDate" name="appointmentDate" type="date" />
+    <input [(ngModel)]="model().appointmentTime" name="appointmentTime" type="time" />
+  </div>
+  <div class="form-row">
+    <textarea [(ngModel)]="model().notes" name="notes" placeholder="Notes"></textarea>
+  </div>
+  <div class="form-actions">
+    <button (click)="save()" [disabled]="isSaving()">Create Appointment</button>
+  </div>
+</div>

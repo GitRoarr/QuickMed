@@ -143,6 +143,30 @@ export const routes: Routes = [
     ],
   },
   {
+    path: 'receptionist',
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['receptionist'] },
+    children: [
+      {
+        path: 'dashboard',
+        loadComponent: () => import('./features/receptionist/dashboard/dashboard.component').then(m => m.DashboardComponent)
+      },
+      {
+        path: 'patients',
+        loadComponent: () => import('./features/receptionist/patient-form/patient-form.component').then(m => m.PatientFormComponent)
+      },
+      {
+        path: 'appointments',
+        loadComponent: () => import('./features/receptionist/appointment-form/appointment-form.component').then(m => m.AppointmentFormComponent)
+      },
+      {
+        path: '',
+        pathMatch: 'full',
+        redirectTo: 'dashboard'
+      }
+    ]
+  },
+  {
     path: "**",
     redirectTo: "",
   },

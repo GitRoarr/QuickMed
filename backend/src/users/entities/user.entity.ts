@@ -91,6 +91,9 @@ export class User extends BaseEntity {
   inviteExpiresAt: Date;
 
   @Column({ type: 'boolean', default: false })
+  mustChangePassword: boolean;
+
+  @Column({ type: 'boolean', default: false })
   licenseValidated: boolean;
 
   @Column({ type: 'boolean', default: false })

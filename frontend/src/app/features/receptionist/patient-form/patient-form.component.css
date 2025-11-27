@@ -1,0 +1,5 @@
+.patient-form { background:#fff; padding:16px; border-radius:8px; border:1px solid #e5e7eb; max-width:800px }
+.form-row { display:flex; gap:8px; margin-bottom:8px }
+.form-row input, .form-row textarea { flex:1; padding:8px; border:1px solid #e6eef6; border-radius:6px }
+.form-actions { margin-top:12px }
+.form-actions button { padding:8px 12px; border-radius:6px; background:#0ea5a4; color:#fff; border:none }

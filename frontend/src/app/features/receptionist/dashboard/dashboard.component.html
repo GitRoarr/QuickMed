@@ -1,0 +1,35 @@
+<div class="admin-layout">
+  <app-header></app-header>
+  <div class="layout-body">
+    <app-sidebar></app-sidebar>
+    <main class="content">
+      <h1 class="title">Receptionist Dashboard</h1>
+      <section class="cards">
+        <div class="card">
+          <h3>Today's Appointments</h3>
+          <ul>
+            <li *ngFor="let a of todayAppointments()">
+              {{ a.appointmentTime }} — {{ a.patient?.firstName }} {{ a.patient?.lastName }} (Dr. {{ a.doctor?.firstName }}) — {{ a.status }}
+            </li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>Pending Payments</h3>
+          <ul>
+            <li *ngFor="let p of pendingPayments()">
+              {{ p.appointmentDate }} {{ p.appointmentTime }} — {{ p.patient?.firstName }} {{ p.patient?.lastName }} — {{ p.paymentStatus }}
+            </li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>Waiting Patients</h3>
+          <ul>
+            <li *ngFor="let w of waiting()">
+              {{ w.appointmentTime }} — {{ w.patient?.firstName }} {{ w.patient?.lastName }}
+            </li>
+          </ul>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>

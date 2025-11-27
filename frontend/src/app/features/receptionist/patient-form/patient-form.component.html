@@ -1,0 +1,22 @@
+<div class="patient-form">
+  <app-alert-message *ngIf="message()" [type]="message()?.type" [message]="message()?.text"></app-alert-message>
+
+  <div class="form-row">
+    <input [(ngModel)]="model().firstName" name="firstName" placeholder="First name" />
+    <input [(ngModel)]="model().lastName" name="lastName" placeholder="Last name" />
+  </div>
+  <div class="form-row">
+    <input [(ngModel)]="model().email" name="email" placeholder="Email" />
+    <input [(ngModel)]="model().phoneNumber" name="phoneNumber" placeholder="Phone" />
+  </div>
+  <div class="form-row">
+    <input [(ngModel)]="model().dateOfBirth" name="dateOfBirth" placeholder="Date of birth" type="date" />
+  </div>
+  <div class="form-row">
+    <textarea [(ngModel)]="model().medicalHistory" name="medicalHistory" placeholder="Medical notes"></textarea>
+  </div>
+
+  <div class="form-actions">
+    <button (click)="save()" [disabled]="isSaving()">Create patient</button>
+  </div>
+</div>

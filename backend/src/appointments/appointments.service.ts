@@ -2,7 +2,7 @@ import { Injectable, NotFoundException, BadRequestException, ForbiddenException 
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { Appointment} from "./entities/appointment.entity";
-import {AppointmentStatus,UserRole} from '../common/index'
+import {AppointmentStatus,UserRole,PaymentStatus} from '../common/index'
 import { CreateAppointmentDto } from "./dto/create-appointment.dto";
 import { UpdateAppointmentDto } from "./dto/update-appointment.dto";
 import { UsersService } from "../users/users.service";
@@ -17,7 +17,7 @@ export class AppointmentsService {
   ) {}
 
   async create(createAppointmentDto: CreateAppointmentDto, patientId: string): Promise<Appointment> {
-    const { doctorId, appointmentDate, appointmentTime, notes } = createAppointmentDto;
+    const { doctorId, appointmentDate, appointmentTime, notes, receptionistId } = createAppointmentDto;
 
     const doctor = await this.usersService.findOne(doctorId);
     if (doctor.role !== UserRole.DOCTOR) {
@@ -44,6 +44,9 @@ export class AppointmentsService {
       appointmentTime,
       notes,
       status: AppointmentStatus.PENDING,
+      receptionistId: receptionistId ?? null,
+      arrived: false,
+      paymentStatus: PaymentStatus.NOT_PAID,
     });
 
     return this.appointmentsRepository.save(appointment);
@@ -51,7 +54,7 @@ export class AppointmentsService {
 
   async findAll(): Promise<Appointment[]> {
     return this.appointmentsRepository.find({
-      relations: ["patient", "doctor"],
+      relations: ["patient", "doctor", 'receptionist'],
       order: { appointmentDate: "DESC", appointmentTime: "DESC" },
     });
   }
@@ -59,7 +62,7 @@ export class AppointmentsService {
   async findByPatient(patientId: string): Promise<Appointment[]> {
     return this.appointmentsRepository.find({
       where: { patientId },
-      relations: ["doctor"],
+      relations: ["doctor", 'receptionist'],
       order: { appointmentDate: "DESC", appointmentTime: "DESC" },
     });
   }
@@ -67,7 +70,7 @@ export class AppointmentsService {
   async findByDoctor(doctorId: string): Promise<Appointment[]> {
     return this.appointmentsRepository.find({
       where: { doctorId },
-      relations: ["patient"],
+      relations: ["patient", 'receptionist'],
       order: { appointmentDate: "DESC", appointmentTime: "DESC" },
     });
   }
@@ -75,7 +78,7 @@ export class AppointmentsService {
   async findOne(id: string): Promise<Appointment> {
     const appointment = await this.appointmentsRepository.findOne({
       where: { id },
-      relations: ["patient", "doctor"],
+      relations: ["patient", "doctor", 'receptionist'],
     });
 
     if (!appointment) {
@@ -94,6 +97,11 @@ export class AppointmentsService {
 
     if (user.role === UserRole.DOCTOR && appointment.doctorId !== user.id) {
       throw new ForbiddenException("You can only update appointments assigned to you");
+    }
+
+    // Receptionists can update many appointment fields
+    if (user.role === UserRole.RECEPTIONIST) {
+      // allow receptionist updates — but we might restrict in future
     }
 
     if (updateAppointmentDto.appointmentDate || updateAppointmentDto.appointmentTime) {
@@ -127,6 +135,10 @@ export class AppointmentsService {
 
     if (user.role === UserRole.DOCTOR && appointment.doctorId !== user.id) {
       throw new ForbiddenException("You can only cancel appointments assigned to you");
+    }
+
+    if (user.role === UserRole.RECEPTIONIST) {
+      // Receptionist can cancel appointments
     }
 
     appointment.status = AppointmentStatus.CANCELLED;

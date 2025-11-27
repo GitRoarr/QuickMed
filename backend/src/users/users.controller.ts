@@ -6,7 +6,9 @@ import {
   UseGuards, 
   UseInterceptors, 
   Param,
-  ForbiddenException
+  ForbiddenException,
+  Body,
+  BadRequestException,
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { diskStorage } from 'multer'
@@ -64,5 +66,39 @@ export class UsersController {
       throw new ForbiddenException('You are not allowed to upload avatar for this user')
     }
     return this.usersService.uploadUserAvatar(id, file);
+  }
+
+  @Patch(':id/password')
+  async changePassword(
+    @Param('id') id: string,
+    @Body() body: { currentPassword?: string; newPassword: string },
+    @CurrentUser() user: User,
+  ) {
+    if (user.id !== id && user.role !== UserRole.ADMIN) {
+      throw new ForbiddenException('You are not allowed to change this user password');
+    }
+
+    const { currentPassword, newPassword } = body;
+    if (!newPassword || newPassword.length < 6) {
+      throw new BadRequestException('New password must be at least 6 characters');
+    }
+
+    return (async () => {
+      const target = await this.usersService.findByIdWithPassword(id);
+      // If user has a password, require currentPassword to match unless the caller is admin
+      if (target.password && user.role !== UserRole.ADMIN) {
+        if (!currentPassword) throw new BadRequestException('Current password is required');
+        const bcrypt = require('bcrypt');
+        const ok = await bcrypt.compare(currentPassword, target.password);
+        if (!ok) throw new BadRequestException('Current password is incorrect');
+      }
+
+      const bcrypt = require('bcrypt');
+      const hashed = await bcrypt.hash(newPassword, 10);
+      target.password = hashed;
+      target.mustChangePassword = false;
+      await this.usersService.update(id, target as any);
+      return { message: 'Password updated' };
+    })();
   }
 }

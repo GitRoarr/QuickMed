@@ -2,6 +2,7 @@ export enum UserRole {
   PATIENT = 'patient',
   DOCTOR = 'doctor',
   ADMIN = 'admin',
+  RECEPTIONIST = 'receptionist',
 }
 
 export enum AppointmentStatus {
@@ -38,4 +39,10 @@ export enum NotificationPriority {
   MEDIUM = 'medium',
   HIGH = 'high',
   URGENT = 'urgent',
+}
+
+export enum PaymentStatus {
+  PAID = 'paid',
+  NOT_PAID = 'not_paid',
+  PENDING = 'pending',
 }

@@ -41,6 +41,23 @@ export class Appointment extends BaseEntity {
   @Column({ type: 'boolean', default: false })
   isVideoConsultation: boolean;
 
+  @Column({ type: 'boolean', default: false })
+  arrived: boolean;
+
+  @Column({
+    type: 'enum',
+    enum: ['paid','not_paid','pending'],
+    default: 'not_paid',
+  })
+  paymentStatus: string;
+
+  @ManyToOne(() => User, (user) => user.patientAppointments)
+  @JoinColumn({ name: 'receptionistId' })
+  receptionist: User;
+
+  @Column({ nullable: true })
+  receptionistId: string;
+
   @ManyToOne(() => User, (user) => user.patientAppointments)
   @JoinColumn({ name: 'patientId' })
   patient: User;

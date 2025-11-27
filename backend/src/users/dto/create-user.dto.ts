@@ -9,6 +9,7 @@ import {
   IsArray,
   IsNotEmpty,
 } from 'class-validator';
+import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 import { UserRole } from '../../common/index';
 
@@ -61,6 +62,7 @@ export class CreateUserDto {
   @ApiProperty({ required: false })
   @IsOptional()
   @IsDate()
+  @Type(() => Date)
   dateOfBirth?: Date;
 
   @ApiProperty({ required: false })

@@ -13,24 +13,19 @@ import {
   standalone: true,
   imports: [CommonModule],
   templateUrl: './alert-message.component.html',
+  styleUrls: ['./alert-message.component.css'],
 })
 export class AlertMessageComponent implements OnInit, OnDestroy {
-  /** message text shown in the alert */
   @Input() message = '';
-  /** 'success' | 'error' determines colors and icon */
-  @Input() type: 'success' | 'error' = 'success';
-  /** automatically hide after `duration` ms */
+  @Input() type: 'success' | 'error' | 'info' = 'success';
   @Input() autoDismiss = true;
-  /** milliseconds to auto dismiss */
   @Input() duration = 4000;
-  /** show icon */
   @Input() showIcon = true;
-  /** control visibility from parent */
   @Input() visible = false;
 
   @Output() closed = new EventEmitter<void>();
 
-  // internal state for animation
+  // Internal state for animation & rendering
   isRendered = false;
   isVisible = false;
 
@@ -67,6 +62,11 @@ export class AlertMessageComponent implements OnInit, OnDestroy {
   toggle() {
     if (this.isVisible) this.hide();
     else this.show();
+  }
+
+  // Backwards-compatible alias for callers expecting `close()`
+  close() {
+    this.hide();
   }
 
   private clearTimer() {

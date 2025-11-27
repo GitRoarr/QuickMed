@@ -17,4 +17,15 @@ export class UpdateAppointmentDto {
   @IsString()
   @IsOptional()
   notes?: string
+
+  @IsOptional()
+  @IsString()
+  receptionistId?: string
+
+  @IsOptional()
+  arrived?: boolean
+
+  @IsOptional()
+  @IsString()
+  paymentStatus?: string
 }

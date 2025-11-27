@@ -54,22 +54,29 @@
         ></app-alert-message>
       </div>
 
-      <form class="grid grid-cols-1 md:grid-cols-2 gap-4" (ngSubmit)="createPatient()">
+      <form #patientForm="ngForm" class="grid grid-cols-1 md:grid-cols-2 gap-4" (ngSubmit)="createPatient()">
         <div>
           <label class="form-label">First Name</label>
-          <input type="text" class="form-control" [(ngModel)]="newPatient.firstName" name="firstName" required />
+          <input type="text" class="form-control" [(ngModel)]="newPatient.firstName" name="firstName" required #firstName="ngModel" />
+          <div class="text-sm text-red-600 mt-1" *ngIf="firstName.invalid && firstName.touched">First name is required.</div>
         </div>
         <div>
           <label class="form-label">Last Name</label>
-          <input type="text" class="form-control" [(ngModel)]="newPatient.lastName" name="lastName" required />
+          <input type="text" class="form-control" [(ngModel)]="newPatient.lastName" name="lastName" required #lastName="ngModel" />
+          <div class="text-sm text-red-600 mt-1" *ngIf="lastName.invalid && lastName.touched">Last name is required.</div>
         </div>
         <div>
           <label class="form-label">Email</label>
-          <input type="email" class="form-control" [(ngModel)]="newPatient.email" name="email" required />
+          <input type="email" class="form-control" [(ngModel)]="newPatient.email" name="email" required #emailModel="ngModel" />
+          <div class="text-sm text-red-600 mt-1" *ngIf="emailModel.invalid && emailModel.touched">
+            <span *ngIf="emailModel.errors?.['required']">Email is required.</span>
+            <span *ngIf="emailModel.errors?.['email']">Please enter a valid email.</span>
+          </div>
         </div>
         <div>
           <label class="form-label">Phone Number</label>
-          <input type="tel" class="form-control" [(ngModel)]="newPatient.phoneNumber" name="phoneNumber" required />
+          <input type="tel" class="form-control" [(ngModel)]="newPatient.phoneNumber" name="phoneNumber" required #phone="ngModel" />
+          <div class="text-sm text-red-600 mt-1" *ngIf="phone.invalid && phone.touched">Phone number is required.</div>
         </div>
         <div>
           <label class="form-label">Date of Birth</label>
@@ -85,7 +92,7 @@
         </div>
         <div class="md:col-span-2 flex justify-end gap-3 mt-2">
           <button class="ghost-btn" type="button" (click)="resetPatientForm()">Clear</button>
-          <button class="spotify-btn" type="submit" [disabled]="isSavingPatient()">
+          <button class="spotify-btn" type="submit" [disabled]="isSavingPatient() || patientForm.invalid">
             {{ isSavingPatient() ? "Saving..." : "Save Patient" }}
           </button>
         </div>

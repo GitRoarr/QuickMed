@@ -2,6 +2,9 @@ import { Injectable, NotFoundException, BadRequestException } from '@nestjs/comm
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Between } from 'typeorm';
 import { User } from '../users/entities/user.entity';
+import * as bcrypt from 'bcrypt';
+import { EmailService } from '../common/services/email.service';
+import { SmsService } from '../common/services/sms.service';
 import { Appointment } from '../appointments/entities/appointment.entity';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { UpdateUserDto } from '../users/dto/update-user.dto';
@@ -34,6 +37,9 @@ export class AdminService {
     private appointmentRepository: Repository<Appointment>,
     private readonly statsService: AdminStatsService,
     private readonly doctorsService: DoctorsService
+    ,
+    private readonly emailService?: EmailService,
+    private readonly smsService?: SmsService,
   ) {}
 
   // -------------------- Dashboard --------------------
@@ -136,16 +142,84 @@ export class AdminService {
       ...dto,
     });
 
-    // If admin did not provide a password, create an invite token instead of setting a password
-    if (!dto.password) {
-      user.password = null;
-      user.inviteToken = Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
-      const expires = new Date();
-      expires.setDate(expires.getDate() + 7); // invite valid 7 days
-      user.inviteExpiresAt = expires;
+    // If admin provided a password, hash it
+    if (dto.password) {
+      user.password = await bcrypt.hash(dto.password, 10);
+      user.mustChangePassword = false;
+    } else {
+      // No password provided by admin
+      if (user.role === UserRole.PATIENT) {
+        // For patients: generate a temporary password, hash it, and force password change on first login
+        const tempPassword = this.generateTempPassword();
+        user.password = await bcrypt.hash(tempPassword, 10);
+        user.mustChangePassword = true;
+
+        // Save user first to get id
+        const saved = await this.userRepository.save(user);
+
+        // Send email with temporary password
+        try {
+          const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:4200';
+          const loginLink = `${frontendUrl}/auth/login`;
+          const subject = 'Your QuickMed account — temporary password';
+          const html = `
+            <h3>Welcome to QuickMed</h3>
+            <p>An account has been created for you. Use the temporary password below to sign in, then change your password immediately.</p>
+            <p><strong>Temporary password:</strong> <code>${tempPassword}</code></p>
+            <p><a href="${loginLink}">Sign in to QuickMed</a></p>
+            <p>If you did not expect this, please contact support.</p>
+          `;
+          if (this.emailService) {
+            await this.emailService.sendMail(saved.email, subject, html);
+          } else {
+            console.log('[AdminService] EmailService not available; temp password:', tempPassword);
+          }
+        } catch (err) {
+          console.warn('[AdminService] Failed to send temp password email', err?.message || err);
+        }
+
+        // Send SMS if phone number provided
+        try {
+          if (saved.phoneNumber && this.smsService) {
+            const smsMessage = `Your QuickMed temporary password: ${tempPassword}. Please change it after first login.`;
+            await this.smsService.sendSms(saved.phoneNumber, smsMessage);
+          }
+        } catch (err) {
+          console.warn('[AdminService] Failed to send temp password SMS', err?.message || err);
+        }
+
+        // return user without password field
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { password: _, ...userWithoutPassword } = saved as any;
+        return userWithoutPassword;
+      } else {
+        // Non-patient (e.g., doctor): create an invite token workflow
+        user.password = null;
+        user.inviteToken = Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
+        const expires = new Date();
+        expires.setDate(expires.getDate() + 7); // invite valid 7 days
+        user.inviteExpiresAt = expires;
+      }
     }
 
-    return this.userRepository.save(user);
+    const finalSaved = await this.userRepository.save(user);
+    const { password: __, ...result } = finalSaved as any;
+    return result;
+  }
+
+  private generateTempPassword(): string {
+    // Randomly pick a style
+    const rand = Math.floor(Math.random() * 3);
+    const digits = () => Math.floor(1000 + Math.random() * 9000).toString();
+    const fiveDigits = () => Math.floor(10000 + Math.random() * 90000).toString();
+    switch (rand) {
+      case 0:
+        return `QM-${fiveDigits()}`;
+      case 1:
+        return `Patient@${new Date().getFullYear()}`;
+      default:
+        return `TempPass#${digits()}`;
+    }
   }
 
   async updateUser(id: string, dto: UpdateUserDto) {
