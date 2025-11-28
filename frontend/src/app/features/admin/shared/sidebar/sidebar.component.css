@@ -26,3 +26,9 @@
 .nav-link.active .bi {
   color: #1db954;
 }
+
+.icon-img {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}

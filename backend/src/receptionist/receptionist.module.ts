@@ -9,9 +9,10 @@ import { UsersService } from '../users/users.service';
 import { EmailModule } from '@/common/services/email.module';
 import { SmsModule } from '@/common/services/sms.module';
 import { AdminModule } from '../admin/admin.module';
+import { CloudinaryModule } from '@/profile/cloudinary.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Appointment, User]), EmailModule, SmsModule, AdminModule],
+  imports: [TypeOrmModule.forFeature([Appointment, User]), EmailModule, SmsModule, AdminModule, CloudinaryModule],
   controllers: [ReceptionistController],
   providers: [ReceptionistService, AppointmentsService, UsersService],
   exports: [ReceptionistService],

@@ -8,7 +8,7 @@ export interface User {
   firstName: string
   lastName: string
   email: string
-  role: "admin" | "doctor" | "patient"
+  role: "admin" | "doctor" | "patient" | "receptionist"
   phoneNumber?: string
   dateOfBirth?: string
   bloodType?: string

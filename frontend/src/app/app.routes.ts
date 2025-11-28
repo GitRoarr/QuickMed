@@ -136,6 +136,13 @@ export const routes: Routes = [
           ),
       },
       {
+        path: "users",
+        loadComponent: () =>
+          import("./features/admin/user-management/user-management.component").then(
+            (m) => m.UserManagementComponent
+          ),
+      },
+      {
         path: "",
         pathMatch: "full",
         redirectTo: "dashboard",

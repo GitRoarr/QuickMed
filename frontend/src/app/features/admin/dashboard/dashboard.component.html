@@ -146,7 +146,10 @@
           <h3 class="text-lg font-bold text-gray-900">Today's Appointments</h3>
           <p class="text-sm text-gray-600">5 appointments scheduled</p>
         </div>
-        <a href="#" class="text-sm font-medium text-gray-700 hover:text-gray-900">View Calendar</a>
+          <div class="flex items-center gap-3">
+            <a href="#" class="text-sm font-medium text-gray-700 hover:text-gray-900">View Calendar</a>
+            <button class="px-3 py-2 bg-green-600 text-white rounded-md" (click)="openNewAppointment()">New Appointment</button>
+          </div>
       </div>
 
       <div class="space-y-4">
@@ -238,6 +241,60 @@
             <div class="text-xs text-gray-600">Today</div>
           </div>
           <button class="ml-4 text-gray-400 hover:text-gray-600">⋮</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- New Appointment Modal -->
+    <div *ngIf="showNewAppointment()" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+      <div class="bg-white rounded-lg w-full max-w-2xl p-6">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-lg font-semibold">New Appointment</h3>
+          <button class="text-gray-500" (click)="closeNewAppointment()">✕</button>
+        </div>
+        <app-alert-message *ngIf="apptAlert()" [message]="apptAlert()!.text" [type]="apptAlert()!.type" [visible]="true" [autoDismiss]="true"></app-alert-message>
+
+        <div class="grid grid-cols-2 gap-3">
+          <label>
+            Patient
+            <select class="p-2 border rounded w-full" [ngModel]="apptPatientId()" (ngModelChange)="apptPatientId.set($event)">
+              <option value="">Select patient</option>
+              <option *ngFor="let p of patients()" [value]="p.id">{{p.firstName}} {{p.lastName}} — {{p.email}}</option>
+            </select>
+          </label>
+
+          <label>
+            Doctor
+            <select class="p-2 border rounded w-full" [ngModel]="apptDoctorId()" (ngModelChange)="apptDoctorId.set($event)">
+              <option value="">Select doctor</option>
+              <option *ngFor="let d of doctors()" [value]="d.id">{{d.firstName}} {{d.lastName}} — {{d.specialty || 'Doctor'}}</option>
+            </select>
+          </label>
+
+          <label>
+            Date
+            <input type="date" class="p-2 border rounded w-full" [ngModel]="apptDate()" (ngModelChange)="apptDate.set($event)" />
+          </label>
+
+          <label>
+            Time
+            <input type="time" class="p-2 border rounded w-full" [ngModel]="apptTime()" (ngModelChange)="apptTime.set($event)" />
+          </label>
+
+          <label class="col-span-2">
+            Video consultation
+            <input type="checkbox" class="ml-2" [ngModel]="apptIsVideo()" (ngModelChange)="apptIsVideo.set($event)" />
+          </label>
+
+          <label class="col-span-2">
+            Notes
+            <textarea class="p-2 border rounded w-full" rows="3" [ngModel]="apptNotes()" (ngModelChange)="apptNotes.set($event)"></textarea>
+          </label>
+        </div>
+
+        <div class="mt-4 flex justify-end gap-3">
+          <button class="px-4 py-2 border rounded" (click)="closeNewAppointment()">Cancel</button>
+          <button class="px-4 py-2 bg-green-600 text-white rounded" (click)="createAppointment()">Create Appointment</button>
         </div>
       </div>
     </div>

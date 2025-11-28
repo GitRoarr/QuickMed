@@ -4,7 +4,44 @@
   <app-header></app-header>
 
   <div class="p-8 max-w-7xl">
-    <h2 class="text-2xl font-bold text-gray-900 mb-6">User Management</h2>
+    <div class="flex items-center justify-between mb-6">
+      <h2 class="text-2xl font-bold text-gray-900">User Management</h2>
+    </div>
+
+    <!-- Create User Modal -->
+    <div *ngIf="showCreate()" class="modal-overlay">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3 class="font-semibold">Create User</h3>
+          <button class="text-gray-500" (click)="closeCreateModal()">✕</button>
+        </div>
+        <app-alert-message *ngIf="userMessage()" [type]="userMessage()!.type" [message]="userMessage()!.text"></app-alert-message>
+
+        <div class="grid grid-cols-2 gap-3 mt-3">
+          <input [ngModel]="userFirst()" (ngModelChange)="userFirst.set($event)" placeholder="First name" class="p-2 border rounded" />
+          <input [ngModel]="userLast()" (ngModelChange)="userLast.set($event)" placeholder="Last name" class="p-2 border rounded" />
+          <input [ngModel]="userEmail()" (ngModelChange)="userEmail.set($event)" placeholder="Email" class="p-2 border rounded" />
+          <input [ngModel]="userPhone()" (ngModelChange)="userPhone.set($event)" placeholder="Phone number" class="p-2 border rounded" />
+          <label class="col-span-2">
+            Role:
+            <select class="p-2 border rounded w-full mt-1" [ngModel]="userRole()" (ngModelChange)="userRole.set($event)">
+              <option value="receptionist">Receptionist</option>
+              <option value="doctor">Doctor</option>
+              <option value="patient">Patient</option>
+              <option value="admin">Admin</option>
+            </select>
+          </label>
+
+          <input *ngIf="userRole() === 'doctor'" [ngModel]="userSpecialty()" (ngModelChange)="userSpecialty.set($event)" placeholder="Specialty (doctor only)" class="p-2 border rounded" />
+          <input *ngIf="userRole() === 'doctor'" [ngModel]="userLicense()" (ngModelChange)="userLicense.set($event)" placeholder="License number (doctor only)" class="p-2 border rounded" />
+        </div>
+
+        <div class="mt-4 flex justify-end gap-3">
+          <button class="px-4 py-2 border rounded" (click)="closeCreateModal()">Cancel</button>
+          <button class="px-4 py-2 bg-green-600 text-white rounded" (click)="createUser()">Create</button>
+        </div>
+      </div>
+    </div>
 
     <!-- Stats Cards -->
     <div class="grid grid-cols-6 gap-4 mb-8">
@@ -35,20 +72,26 @@
     </div>
 
     <!-- Search and Filters -->
-    <div class="bg-white border border-gray-200 rounded-lg p-4 mb-6 flex gap-4">
-      <input type="text" placeholder="Search by name, email, or phone..." class="flex-1 px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg text-sm">
-      <select class="px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg text-sm text-gray-700">
-        <option>All Roles</option>
-        <option>Patient</option>
-        <option>Doctor</option>
-        <option>Admin</option>
-      </select>
-      <select class="px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg text-sm text-gray-700">
-        <option>All Status</option>
-        <option>Active</option>
-        <option>Pending</option>
-        <option>Inactive</option>
-      </select>
+    <div class="bg-white border border-gray-200 rounded-lg p-4 mb-6 flex items-center gap-4">
+      <input type="text" placeholder="Search by name, email, or phone..." class="flex-1 px-4 py-3 bg-white border border-gray-200 rounded-lg text-sm shadow-sm">
+      <div class="flex items-center gap-3">
+        <select class="px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-700">
+          <option>All Roles</option>
+          <option>Patient</option>
+          <option>Doctor</option>
+          <option>Admin</option>
+        </select>
+        <select class="px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-700">
+          <option>All Status</option>
+          <option>Active</option>
+          <option>Pending</option>
+          <option>Inactive</option>
+        </select>
+        <button class="add-user-btn" (click)="openCreateModal()">
+          <span class="plus">+</span>
+          <span class="label">Add New User</span>
+        </button>
+      </div>
     </div>
 
     <!-- Users List -->
@@ -62,7 +105,7 @@
             <span class="px-2 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-full">active</span>
             <span class="px-2 py-1 text-xs font-semibold text-green-600 bg-green-50 rounded-full">patient</span>
           </div>
-          <div class="text-sm text-gray-600">📧 sarah.j@email.com</div>
+          <div class="text-sm text-gray-600">📧 sarah.j&#64;email.com</div>
           <div class="text-sm text-gray-600">📱 +1 (555) 123-4567</div>
         </div>
         <div class="text-right text-sm">
@@ -83,7 +126,7 @@
           </div>
           <div class="text-sm text-gray-600">Specialization: <span class="font-medium">Cardiology</span></div>
           <div class="text-sm text-gray-600">License: <span class="font-medium">MD-789456</span></div>
-          <div class="text-sm text-gray-600">📧 michael.chen@quickmed.com</div>
+          <div class="text-sm text-gray-600">📧 michael.chen&#64;quickmed.com</div>
           <div class="text-sm text-gray-600">📱 +1 (555) 234-5678</div>
         </div>
         <div class="text-right text-sm">
@@ -102,7 +145,7 @@
             <span class="px-2 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-full">active</span>
             <span class="px-2 py-1 text-xs font-semibold text-green-600 bg-green-50 rounded-full">patient</span>
           </div>
-          <div class="text-sm text-gray-600">📧 emily.d@email.com</div>
+          <div class="text-sm text-gray-600">📧 emily.d&#64;email.com</div>
           <div class="text-sm text-gray-600">📱 +1 (555) 345-6789</div>
         </div>
         <div class="text-right text-sm">
@@ -123,7 +166,7 @@
           </div>
           <div class="text-sm text-gray-600">Specialization: <span class="font-medium">Neurology</span></div>
           <div class="text-sm text-gray-600">License: <span class="font-medium">MD-321654</span></div>
-          <div class="text-sm text-gray-600">📧 sarah.rodriguez@quickmed.com</div>
+          <div class="text-sm text-gray-600">📧 sarah.rodriguez&#64;quickmed.com</div>
           <div class="text-sm text-gray-600">📱 +1 (555) 456-7890</div>
         </div>
         <div class="text-right text-sm">
@@ -142,7 +185,7 @@
             <span class="px-2 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-full">active</span>
             <span class="px-2 py-1 text-xs font-semibold text-purple-600 bg-purple-50 rounded-full">admin</span>
           </div>
-          <div class="text-sm text-gray-600">📧 admin@quickmed.com</div>
+          <div class="text-sm text-gray-600">📧 admin&#64;quickmed.com</div>
           <div class="text-sm text-gray-600">📱 +1 (555) 000-0000</div>
         </div>
         <div class="text-right text-sm">
@@ -161,7 +204,7 @@
             <span class="px-2 py-1 text-xs font-semibold text-gray-600 bg-gray-100 rounded-full">inactive</span>
             <span class="px-2 py-1 text-xs font-semibold text-green-600 bg-green-50 rounded-full">patient</span>
           </div>
-          <div class="text-sm text-gray-600">📧 robert.w@email.com</div>
+          <div class="text-sm text-gray-600">📧 robert.w&#64;email.com</div>
           <div class="text-sm text-gray-600">📱 +1 (555) 567-8901</div>
         </div>
         <div class="text-right text-sm">

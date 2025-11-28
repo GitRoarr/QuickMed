@@ -1,3 +1,30 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* New Appointment modal styles */
+.modal-overlay {
+	position: fixed;
+	inset: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: rgba(0,0,0,0.45);
+	z-index: 60;
+}
+
+.modal-card {
+	background: white;
+	border-radius: 10px;
+	padding: 1.25rem;
+	width: 100%;
+	max-width: 900px;
+}
+
+.btn-new-appointment {
+	background: #16a34a;
+	color: white;
+	padding: 0.5rem 0.9rem;
+	border-radius: 6px;
+	font-weight: 600;
+}

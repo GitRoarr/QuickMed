@@ -8,6 +8,10 @@ export const roleGuard: CanActivateFn = (route) => {
 
   const requiredRoles = route.data["roles"] as string[]
 
+  // Diagnostic logging to help debug unexpected redirects
+  const user = authService.currentUser()
+  console.debug('[roleGuard] requiredRoles=', requiredRoles, 'currentUser=', user)
+
   if (authService.hasRole(requiredRoles)) {
     return true
   }
