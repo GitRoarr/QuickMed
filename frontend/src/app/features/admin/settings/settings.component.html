@@ -31,7 +31,7 @@
 
     <div class="settings-tabs">
       <button 
-        *ngFor="let tab of ['theme', 'general', 'security', 'notifications', 'logs']"
+        *ngFor="let tab of getTabs()"
         [class]="'tab-btn' + (activeTab() === tab ? ' active' : '')"
         (click)="setActiveTab(tab)">
         <i class="bi" [class]="getTabIcon(tab)"></i>
@@ -117,7 +117,7 @@
               class="theme-card"
               [class.active]="theme.isActive">
               <div class="theme-preview" [style.background]="theme.primaryColor || '#10b981'"></div>
-              <div class="theme-accent" [style.background]="theme.secondaryColor || '#059669'"></div>
+              <div class="theme-accent" [style.background]="theme.primaryHover || '#059669'"></div>
 
               <div class="theme-info">
                 <h4>{{ theme.name }}</h4>

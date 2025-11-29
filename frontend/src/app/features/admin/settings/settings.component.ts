@@ -3,7 +3,7 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { SidebarComponent } from '../shared/sidebar';
 import { HeaderComponent } from '../shared/header';
-import { AdminThemeService, Theme } from 'src/app/core/services/admin-theme.service';
+import { AdminThemeService, Theme } from '../../../core/services/admin-theme.service';
 import { AdminService } from '../../../core/services/admin.service';
 
 @Component({
@@ -64,7 +64,7 @@ export class SettingsComponent implements OnInit {
 
   ngOnInit(): void {
     const current = this.themeService.currentTheme();
-    if (current) this.themeService.applyTheme(this.normalizeTheme(current));
+    if (current) this.themeService.applyTheme(current);
     this.loadThemes();
     this.loadCurrentTheme();
     this.checkDarkMode();
@@ -86,8 +86,8 @@ export class SettingsComponent implements OnInit {
       document.documentElement.classList.remove('dark');
       localStorage.setItem('darkMode', 'false');
     }
-    if (this.themeService.currentTheme())
-      this.themeService.applyTheme(this.normalizeTheme(this.themeService.currentTheme()!));
+    const current = this.themeService.currentTheme();
+    if (current) this.themeService.applyTheme(current);
   }
 
   loadThemes() {
@@ -104,17 +104,16 @@ export class SettingsComponent implements OnInit {
   loadCurrentTheme() {
     const rawTheme = this.themeService.currentTheme();
     if (rawTheme) {
-      const theme = this.normalizeTheme(rawTheme);
-      this.currentTheme.set(theme);
+      this.currentTheme.set(rawTheme);
       this.themeForm.patchValue({
-        name: theme.name || '',
-        primaryColor: theme.primaryColor,
-        secondaryColor: theme.secondaryColor,
-        accentColor: theme.accentColor,
-        backgroundColor: theme.backgroundColor,
-        textColor: theme.textColor,
-        borderColor: theme.borderColor,
-        primaryHover: theme.primaryHover
+        name: rawTheme.name || '',
+        primaryColor: rawTheme.primaryColor,
+        secondaryColor: rawTheme.primaryHover, // Map to secondaryColor in form
+        accentColor: rawTheme.statusConfirmed, // Map to accentColor in form
+        backgroundColor: rawTheme.backgroundLight,
+        textColor: rawTheme.textDark,
+        borderColor: rawTheme.borderColor,
+        primaryHover: rawTheme.primaryHover
       });
     }
   }
@@ -126,10 +125,29 @@ export class SettingsComponent implements OnInit {
     }
 
     this.saving.set(true);
-    const themeData = this.themeForm.value;
+    const formValue = this.themeForm.value;
+    const themeData: Partial<Theme> = {
+      name: formValue.name,
+      mode: this.isDarkMode() ? 'dark' : 'light',
+      primaryColor: formValue.primaryColor,
+      primaryHover: formValue.primaryHover,
+      primaryLight: formValue.primaryColor + '20',
+      backgroundLight: formValue.backgroundColor,
+      sidebarBg: formValue.backgroundColor,
+      backgroundGray: formValue.backgroundColor,
+      textDark: formValue.textColor,
+      textGray: formValue.textColor,
+      textMuted: formValue.textColor + '80',
+      borderColor: formValue.borderColor,
+      cardShadow: '0 2px 5px rgba(0, 0, 0, 0.08)',
+      statusConfirmed: formValue.accentColor,
+      statusPending: '#f97316',
+      statusCompleted: '#3b82f6',
+      statusCancelled: '#ef4444'
+    };
 
     if (this.currentTheme()?.id) {
-      this.adminService.updateTheme(this.currentTheme()!.id!, themeData).subscribe({
+      this.adminService.updateTheme(this.currentTheme()!.id, themeData).subscribe({
         next: () => {
           this.message.set({ type: 'success', text: 'Theme updated successfully!' });
           this.loadThemes();
@@ -188,7 +206,31 @@ export class SettingsComponent implements OnInit {
   }
 
   previewTheme() {
-    this.themeService.applyTheme(this.normalizeTheme(this.themeForm.value));
+    const formValue = this.themeForm.value;
+    const previewTheme: Theme = {
+      id: this.currentTheme()?.id || '',
+      name: formValue.name,
+      mode: this.isDarkMode() ? 'dark' : 'light',
+      primaryColor: formValue.primaryColor,
+      primaryHover: formValue.primaryHover,
+      primaryLight: formValue.primaryColor + '20',
+      backgroundLight: formValue.backgroundColor,
+      sidebarBg: formValue.backgroundColor,
+      backgroundGray: formValue.backgroundColor,
+      textDark: formValue.textColor,
+      textGray: formValue.textColor,
+      textMuted: formValue.textColor + '80',
+      borderColor: formValue.borderColor,
+      cardShadow: '0 2px 5px rgba(0, 0, 0, 0.08)',
+      statusConfirmed: formValue.accentColor,
+      statusPending: '#f97316',
+      statusCompleted: '#3b82f6',
+      statusCancelled: '#ef4444',
+      isActive: this.currentTheme()?.isActive || false,
+      createdAt: this.currentTheme()?.createdAt || new Date(),
+      updatedAt: new Date()
+    };
+    this.themeService.applyTheme(previewTheme);
   }
 
   resetTheme() {
@@ -202,6 +244,10 @@ export class SettingsComponent implements OnInit {
       borderColor: '#e5e7eb',
       primaryHover: '#059669'
     });
+  }
+
+  getTabs(): ('theme' | 'general' | 'security' | 'notifications' | 'logs')[] {
+    return ['theme', 'general', 'security', 'notifications', 'logs'];
   }
 
   setActiveTab(tab: 'theme' | 'general' | 'security' | 'notifications' | 'logs') {
@@ -239,18 +285,4 @@ export class SettingsComponent implements OnInit {
     ];
   }
 
-  private normalizeTheme(t: any): Theme {
-    return {
-      id: t?.id ?? null,
-      name: t?.name ?? '',
-      primaryColor: t?.primaryColor ?? '#10b981',
-      secondaryColor: t?.secondaryColor ?? '#059669',
-      accentColor: t?.accentColor ?? '#3b82f6',
-      backgroundColor: t?.backgroundColor ?? '#ffffff',
-      textColor: t?.textColor ?? '#1f2937',
-      borderColor: t?.borderColor ?? '#e5e7eb',
-      primaryHover: t?.primaryHover ?? '#059669',
-      isActive: !!t?.isActive
-    } as Theme;
-  }
 }
