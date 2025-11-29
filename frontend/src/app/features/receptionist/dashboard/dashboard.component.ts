@@ -1,9 +1,8 @@
-import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReceptionistService } from '@app/core/services/receptionist.service';
 import { HeaderComponent } from '@app/features/admin/shared/header';
 import { SidebarComponent } from '@app/features/admin/shared/sidebar';
-import { AppointmentService } from '@app/core/services/appointment.service';
 
 @Component({
   selector: 'app-receptionist-dashboard',
@@ -14,11 +13,19 @@ import { AppointmentService } from '@app/core/services/appointment.service';
 })
 export class DashboardComponent implements OnInit {
   private readonly receptionistService = inject(ReceptionistService);
-  private readonly destroyRef = inject(DestroyRef);
 
   todayAppointments = signal<any[]>([]);
   pendingPayments = signal<any[]>([]);
   waiting = signal<any[]>([]);
+  stats = signal<{ totalToday: number; waitingRoom: number; paymentsDue: number; videoVisits: number }>({
+    totalToday: 0,
+    waitingRoom: 0,
+    paymentsDue: 0,
+    videoVisits: 0,
+  });
+  timeline = signal<any[]>([]);
+  recentPatients = signal<any[]>([]);
+  tasks = signal<{ id: string; title: string; status: string }[]>([]);
   isLoading = signal(false);
 
   ngOnInit(): void {
@@ -32,6 +39,10 @@ export class DashboardComponent implements OnInit {
         this.todayAppointments.set(res.todayAppointments || []);
         this.pendingPayments.set(res.pendingPayments || []);
         this.waiting.set(res.waiting || []);
+        if (res.stats) this.stats.set(res.stats);
+        this.timeline.set(res.timeline || []);
+        this.recentPatients.set(res.recentPatients || []);
+        this.tasks.set(res.tasks || []);
         this.isLoading.set(false);
       },
       error: (err) => {

@@ -65,11 +65,15 @@ export class SetPasswordComponent implements OnInit {
     this.loading = true;
     this.message = '';
 
-    this.http.post(`${environment.apiUrl}/doctors/set-password`, {
+    // Try doctor endpoint first, then receptionist
+    const payload = {
       uid: this.uid,
       token: this.token,
       password: this.form.value.password
-    }).subscribe({
+    };
+
+    // Try doctor endpoint first
+    this.http.post(`${environment.apiUrl}/doctors/set-password`, payload).subscribe({
       next: () => {
         this.type = 'success';
         this.message = 'Password set successfully! You can now log in.';
@@ -78,11 +82,24 @@ export class SetPasswordComponent implements OnInit {
           this.router.navigate(['/login']);
         }, 2000);
       },
-      error: (err) => {
-        this.type = 'error';
-        this.message = err.error?.message || 'Failed to set password. The link may have expired.';
-        this.loading = false;
-        console.error('Error setting password:', err);
+      error: (doctorErr) => {
+        // If doctor endpoint fails, try receptionist endpoint
+        this.http.post(`${environment.apiUrl}/receptionist/set-password`, payload).subscribe({
+          next: () => {
+            this.type = 'success';
+            this.message = 'Password set successfully! You can now log in.';
+            this.loading = false;
+            setTimeout(() => {
+              this.router.navigate(['/login']);
+            }, 2000);
+          },
+          error: (receptionistErr) => {
+            this.type = 'error';
+            this.message = receptionistErr.error?.message || doctorErr.error?.message || 'Failed to set password. The link may have expired.';
+            this.loading = false;
+            console.error('Error setting password:', receptionistErr);
+          }
+        });
       }
     });
   }

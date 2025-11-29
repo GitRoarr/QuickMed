@@ -5,6 +5,7 @@ import { Router, RouterModule } from '@angular/router';
 import { AppointmentService } from '../../../core/services/appointment.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { Appointment as AppointmentModel } from '../../../core/models/appointment.model';
+import { PayButtonComponent } from '../../../shared/components/pay-button/pay-button.component';
 
 interface Appointment {
   id: string;
@@ -20,7 +21,7 @@ interface Appointment {
 @Component({
   selector: 'app-patient-appointments',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, PayButtonComponent],
   templateUrl: './appointments.component.html',
   styleUrls: ['./appointments.component.css']
 })

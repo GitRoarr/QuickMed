@@ -1,0 +1,48 @@
+<div class="success-container">
+  <div class="success-card" *ngIf="!loading()">
+    <div class="success-icon" *ngIf="verified()">
+      <svg viewBox="0 0 100 100" class="checkmark">
+        <circle cx="50" cy="50" r="45" fill="none" stroke="#10b981" stroke-width="4"/>
+        <path d="M30 50 L45 65 L70 35" fill="none" stroke="#10b981" stroke-width="4" stroke-linecap="round"/>
+      </svg>
+    </div>
+
+    <div class="success-icon error" *ngIf="!verified()">
+      <i class="bi bi-x-circle"></i>
+    </div>
+
+    <h1 *ngIf="verified()">Payment Successful!</h1>
+    <h1 *ngIf="!verified()">Payment Verification Failed</h1>
+
+    <p class="message" *ngIf="verified()">
+      Your appointment payment has been processed successfully.
+    </p>
+    <p class="message error" *ngIf="!verified()">
+      We couldn't verify your payment. Please contact support if you were charged.
+    </p>
+
+    <div class="payment-details" *ngIf="verified() && payment()">
+      <div class="detail-item">
+        <span class="label">Transaction ID:</span>
+        <span class="value">{{ payment()?.transactionId }}</span>
+      </div>
+      <div class="detail-item">
+        <span class="label">Amount:</span>
+        <span class="value">ETB {{ payment()?.amount }}</span>
+      </div>
+      <div class="detail-item" *ngIf="payment()?.paidAt">
+        <span class="label">Paid At:</span>
+        <span class="value">{{ payment()?.paidAt | date:'medium' }}</span>
+      </div>
+    </div>
+
+    <button class="btn-primary" (click)="goToAppointments()">
+      View My Appointments
+    </button>
+  </div>
+
+  <div class="loading-state" *ngIf="loading()">
+    <div class="spinner"></div>
+    <p>Verifying payment...</p>
+  </div>
+</div>

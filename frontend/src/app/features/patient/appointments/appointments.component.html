@@ -164,6 +164,13 @@
             <span>{{ apt.notes }}</span>
           </div>
           <div class="appointment-actions">
+            <app-pay-button 
+              *ngIf="apt.paymentStatus !== 'paid'"
+              [appointmentId]="apt.id"
+              [paymentStatus]="apt.paymentStatus || 'not_paid'"
+              size="small"
+              variant="primary">
+            </app-pay-button>
             <button *ngIf="apt.isVideoConsultation && apt.status === 'confirmed'" 
                     class="btn-primary btn-sm" 
                     (click)="joinVideoCall(apt.id)">

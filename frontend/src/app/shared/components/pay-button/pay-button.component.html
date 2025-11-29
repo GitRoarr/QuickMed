@@ -1,0 +1,21 @@
+<div class="pay-button-wrapper">
+  <button
+    *ngIf="canPay"
+    [class]="'pay-btn pay-btn-' + variant + ' pay-btn-' + size"
+    (click)="handlePayment()"
+    [disabled]="processing()">
+    <i *ngIf="!processing()" class="bi bi-credit-card"></i>
+    <i *ngIf="processing()" class="bi bi-hourglass-split spinning"></i>
+    <span *ngIf="!processing()">Pay Now</span>
+    <span *ngIf="processing()">Processing...</span>
+  </button>
+
+  <div *ngIf="isPaid" class="paid-badge">
+    <i class="bi bi-check-circle-fill"></i>
+    <span>Paid</span>
+  </div>
+
+  <div *ngIf="error()" class="error-tooltip">
+    {{ error() }}
+  </div>
+</div>

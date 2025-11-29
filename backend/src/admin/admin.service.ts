@@ -234,12 +234,30 @@ export class AdminService {
   }
 
   // -------------------- Appointments --------------------
-  async getAllAppointments(page = 1, limit = 10, status?: string) {
+  async getAllAppointments(page = 1, limit = 10, status?: string, search?: string) {
     const query = this.appointmentRepository
       .createQueryBuilder('appointment')
       .leftJoinAndSelect('appointment.patient', 'patient')
       .leftJoinAndSelect('appointment.doctor', 'doctor');
-    if (status) query.where('appointment.status = :status', { status });
+    
+    const conditions: string[] = [];
+    const params: any = {};
+    
+    if (status) {
+      conditions.push('appointment.status = :status');
+      params.status = status;
+    }
+    
+    if (search) {
+      const likeTerm = `%${search.toLowerCase()}%`;
+      conditions.push('(LOWER(patient.firstName) LIKE :likeTerm OR LOWER(patient.lastName) LIKE :likeTerm OR LOWER(patient.email) LIKE :likeTerm OR LOWER(doctor.firstName) LIKE :likeTerm OR LOWER(doctor.lastName) LIKE :likeTerm OR LOWER(appointment.reason) LIKE :likeTerm OR LOWER(appointment.notes) LIKE :likeTerm)');
+      params.likeTerm = likeTerm;
+    }
+    
+    if (conditions.length > 0) {
+      query.where(conditions.join(' AND '), params);
+    }
+    
     const [appointments, total] = await query
       .orderBy('appointment.appointmentDate', 'DESC')
       .addOrderBy('appointment.appointmentTime', 'ASC')
@@ -265,13 +283,38 @@ export class AdminService {
     const patient = await this.userRepository.findOne({ where: { id: dto.patientId, role: UserRole.PATIENT } })
     if (!patient) throw new BadRequestException("Invalid patient ID")
 
+    // Check for conflicting appointments
+    const appointmentDate = typeof dto.appointmentDate === 'string' 
+      ? new Date(dto.appointmentDate) 
+      : dto.appointmentDate;
+    
+    const existingAppointment = await this.appointmentRepository.findOne({
+      where: {
+        doctorId: dto.doctorId,
+        appointmentDate: appointmentDate,
+        appointmentTime: dto.appointmentTime,
+        status: AppointmentStatus.CONFIRMED,
+      },
+    });
+
+    if (existingAppointment) {
+      throw new BadRequestException("Doctor already has an appointment at this time");
+    }
+
     const appointment = this.appointmentRepository.create({
       ...dto,
       status: dto.status ?? AppointmentStatus.PENDING,
       appointmentType: dto.appointmentType ?? AppointmentType.CONSULTATION,
+      duration: dto.duration ?? 30,
     })
 
-    return this.appointmentRepository.save(appointment)
+    const saved = await this.appointmentRepository.save(appointment);
+    
+    // Load relations for response
+    return this.appointmentRepository.findOne({
+      where: { id: saved.id },
+      relations: ['patient', 'doctor'],
+    });
   }
 
   async updateAppointment(id: string, dto: UpdateAppointmentDto) {
@@ -358,5 +401,172 @@ async getSystemHealth(): Promise<{
 
   async getAllDoctors() {
     return this.doctorsService.findAll();
+  }
+
+  async getDoctorsOverview(search?: string, status?: 'active' | 'pending', specialty?: string) {
+    const query = this.userRepository
+      .createQueryBuilder('doctor')
+      .leftJoinAndSelect('doctor.doctorAppointments', 'appointment')
+      .leftJoinAndSelect('appointment.patient', 'patient')
+      .where('doctor.role = :role', { role: UserRole.DOCTOR });
+
+    if (search) {
+      const likeTerm = `%${search.toLowerCase()}%`;
+      query.andWhere(
+        '(LOWER(doctor.firstName) LIKE :likeTerm OR LOWER(doctor.lastName) LIKE :likeTerm OR LOWER(doctor.email) LIKE :likeTerm OR LOWER(doctor.specialty) LIKE :likeTerm)',
+        { likeTerm },
+      );
+    }
+
+    if (specialty && specialty !== 'all') {
+      query.andWhere('LOWER(doctor.specialty) = :specialty', { specialty: specialty.toLowerCase() });
+    }
+
+    if (status === 'active') {
+      query.andWhere('doctor.isActive = :active', { active: true });
+    } else if (status === 'pending') {
+      query.andWhere('doctor.isActive = :active', { active: false });
+    }
+
+    const doctors = await query.orderBy('doctor.createdAt', 'DESC').getMany();
+
+    const cards = doctors.map((doctor) => {
+      const appointments = doctor.doctorAppointments || [];
+      const uniquePatients = new Set(
+        appointments
+          .map((appt) => appt?.patient?.id || appt.patientId)
+          .filter((id) => !!id),
+      );
+
+      const ratingBase = 4 + (appointments.length % 10) / 10;
+      const rating = Math.min(5, Number(ratingBase.toFixed(1)));
+
+      const statusLabel = doctor.isActive
+        ? 'active'
+        : doctor.licenseValidated && doctor.employmentConfirmed
+        ? 'ready'
+        : 'pending';
+
+      return {
+        id: doctor.id,
+        firstName: doctor.firstName,
+        lastName: doctor.lastName,
+        specialty: doctor.specialty,
+        licenseNumber: doctor.licenseNumber,
+        email: doctor.email,
+        avatar: doctor.avatar,
+        phoneNumber: doctor.phoneNumber,
+        availableDays: doctor.availableDays,
+        status: statusLabel,
+        rating,
+        stats: {
+          patients: uniquePatients.size,
+          appointments: appointments.length,
+          videoVisits: appointments.filter((a) => !!a?.isVideoConsultation).length,
+        },
+        verification: {
+          licenseValidated: doctor.licenseValidated,
+          employmentConfirmed: doctor.employmentConfirmed,
+        },
+      };
+    });
+
+    const stats = {
+      totalDoctors: cards.length,
+      activeDoctors: cards.filter((c) => c.status === 'active').length,
+      pendingDoctors: cards.filter((c) => c.status !== 'active').length,
+    };
+
+    const specialties = Array.from(
+      new Set(
+        doctors
+          .map((doctor) => doctor.specialty)
+          .filter((spec): spec is string => !!spec),
+      ),
+    ).sort();
+
+    return { doctors: cards, stats, specialties };
+  }
+
+  async getAnalyticsData(startDate?: Date, endDate?: Date) {
+    const start = startDate || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000); // default last 30 days
+    const end = endDate || new Date();
+
+    // Get appointment trends
+    const appointments = await this.appointmentRepository.find({
+      where: {
+        appointmentDate: Between(start, end),
+      },
+      relations: ['patient', 'doctor'],
+    });
+
+    // Group by date
+    const appointmentsByDate: { [key: string]: number } = {};
+    appointments.forEach(apt => {
+      const dateKey = new Date(apt.appointmentDate).toISOString().split('T')[0];
+      appointmentsByDate[dateKey] = (appointmentsByDate[dateKey] || 0) + 1;
+    });
+
+    // Status distribution
+    const statusDistribution = {
+      pending: appointments.filter(a => a.status === AppointmentStatus.PENDING).length,
+      confirmed: appointments.filter(a => a.status === AppointmentStatus.CONFIRMED).length,
+      completed: appointments.filter(a => a.status === AppointmentStatus.COMPLETED).length,
+      cancelled: appointments.filter(a => a.status === AppointmentStatus.CANCELLED).length,
+    };
+
+    // Doctor performance
+    const doctorStats = await this.appointmentRepository
+      .createQueryBuilder('appointment')
+      .select('doctor.id', 'doctorId')
+      .addSelect('doctor.firstName', 'firstName')
+      .addSelect('doctor.lastName', 'lastName')
+      .addSelect('COUNT(appointment.id)', 'totalAppointments')
+      .addSelect('COUNT(CASE WHEN appointment.status = :completed THEN 1 END)', 'completedCount')
+      .leftJoin('appointment.doctor', 'doctor')
+      .where('appointment.appointmentDate BETWEEN :start AND :end', { start, end })
+      .setParameter('completed', AppointmentStatus.COMPLETED)
+      .groupBy('doctor.id')
+      .addGroupBy('doctor.firstName')
+      .addGroupBy('doctor.lastName')
+      .orderBy('totalAppointments', 'DESC')
+      .limit(10)
+      .getRawMany();
+
+    // Patient growth
+    const patientsByDate = await this.userRepository
+      .createQueryBuilder('user')
+      .select('DATE(user.createdAt)', 'date')
+      .addSelect('COUNT(user.id)', 'count')
+      .where('user.role = :role', { role: UserRole.PATIENT })
+      .andWhere('user.createdAt BETWEEN :start AND :end', { start, end })
+      .groupBy('DATE(user.createdAt)')
+      .orderBy('date', 'ASC')
+      .getRawMany();
+
+    // Revenue trends
+    const revenueByDate: { [key: string]: number } = {};
+    appointments
+      .filter(a => a.status === AppointmentStatus.COMPLETED)
+      .forEach(apt => {
+        const dateKey = new Date(apt.appointmentDate).toISOString().split('T')[0];
+        revenueByDate[dateKey] = (revenueByDate[dateKey] || 0) + 150; // example price
+      });
+
+    return {
+      appointmentsByDate,
+      statusDistribution,
+      doctorStats: doctorStats.map(d => ({
+        doctorId: d.doctorId,
+        name: `${d.firstName} ${d.lastName}`,
+        totalAppointments: parseInt(d.totalAppointments),
+        completedCount: parseInt(d.completedCount),
+        completionRate: (parseInt(d.completedCount) / parseInt(d.totalAppointments) * 100).toFixed(1),
+      })),
+      patientsByDate,
+      revenueByDate,
+      totalRevenue: Object.values(revenueByDate).reduce((sum, val) => sum + val, 0),
+      period: { start, end },
+    };
   }
 }

@@ -1,33 +1,125 @@
 <app-sidebar title="QuickMed Admin Portal" [menuItems]="menuItems"></app-sidebar>
 
-<div class="ml-60 bg-gray-50 min-h-screen">
+<div class="ml-60 bg-dashboard min-h-screen">
   <app-header></app-header>
 
-  <div class="p-8 max-w-7xl">
-    <h2 class="text-3xl font-bold mb-6">Manage Doctors</h2>
-    <div class="bg-white border rounded-lg p-6">
-      <div class="flex justify-between items-center mb-6">
-        <h1 class="text-2xl font-semibold">Doctors</h1>
-        <button class="btn btn-primary animate-pulse" (click)="onAdd()">+ Add Doctor</button>
+  <div class="page-shell">
+    <section class="page-header">
+      <div>
+        <p class="eyebrow">Medical network</p>
+        <h1>Doctors Management</h1>
+        <p class="subtitle">Track credentials, performance, and onboarding progress for every physician.</p>
       </div>
+      <button class="primary-btn" (click)="onAdd()">
+        <span>+</span>
+        Add Doctor
+      </button>
+    </section>
 
-      <div *ngIf="loading" class="text-gray-500">Loading...</div>
-      <div *ngIf="!loading && doctors.length === 0" class="text-gray-500">No doctors yet</div>
-
-      <div *ngFor="let d of doctors" class="card p-4 mb-3 flex justify-between items-center border rounded">
-        <div>
-          <div class="font-semibold">{{ d.firstName }} {{ d.lastName }}</div>
-          <div class="text-sm text-gray-500">{{ d.specialty || 'No Specialty' }}</div>
-        </div>
-        <div class="flex items-center gap-3">
-          <span [ngClass]="{
-            'badge-warning': !d.isActive,
-            'badge-success': d.isActive
-          }">{{ d.isActive ? 'ACTIVE' : 'PENDING' }}</span>
-          <button class="btn" (click)="onVerify(d.id)">Verify</button>
-          <button class="btn btn-danger" (click)="onDelete(d.id)">Delete</button>
-        </div>
+    <section class="stats-grid" *ngIf="stats() as metric">
+      <div class="stat-card">
+        <p>Total doctors</p>
+        <h3>{{ metric.totalDoctors }}</h3>
       </div>
+      <div class="stat-card positive">
+        <p>Active</p>
+        <h3>{{ metric.activeDoctors }}</h3>
+      </div>
+      <div class="stat-card warning">
+        <p>Pending onboarding</p>
+        <h3>{{ metric.pendingDoctors }}</h3>
+      </div>
+    </section>
+
+    <section class="filters-card">
+      <form [formGroup]="filterForm">
+        <div class="search-field">
+          <i class="bi bi-search"></i>
+          <input formControlName="search" placeholder="Search doctors by name, specialty, or email" />
+        </div>
+        <select formControlName="specialty">
+          <option value="all">All specialties</option>
+          <option *ngFor="let spec of specialties()" [value]="spec">{{ spec }}</option>
+        </select>
+        <select formControlName="status">
+          <option value="all">All statuses</option>
+          <option value="active">Active</option>
+          <option value="pending">Pending</option>
+        </select>
+      </form>
+    </section>
+
+    <div class="alert" *ngIf="message() as alert" [class.error]="alert.type === 'error'">
+      {{ alert.text }}
     </div>
+
+    <section class="doctor-grid">
+      <div class="loader" *ngIf="loading()">Loading doctors...</div>
+      <div class="empty-state" *ngIf="!loading() && doctors().length === 0">
+        <h3>No doctors found</h3>
+        <p>Try adjusting your filters or invite a new doctor.</p>
+      </div>
+
+      <article class="doctor-card" *ngFor="let doctor of doctors(); trackBy: trackByDoctor">
+        <div class="card-head">
+          <div class="avatar">{{ getInitials(doctor) }}</div>
+          <div>
+            <div class="name">
+              Dr. {{ doctor.firstName }} {{ doctor.lastName }}
+              <span class="rating">
+                <i class="bi bi-star-fill"></i> {{ doctor.rating | number : "1.1-1" }}
+              </span>
+            </div>
+            <p class="meta">
+              {{ doctor.specialty || "General Medicine" }} • License {{ doctor.licenseNumber || "N/A" }}
+            </p>
+          </div>
+          <span class="status-pill" [ngClass]="doctor.status">{{ doctor.status }}</span>
+        </div>
+
+        <div class="card-body">
+          <div class="stat">
+            <p>Patients</p>
+            <strong>{{ doctor.stats.patients }}</strong>
+          </div>
+          <div class="stat">
+            <p>Appointments</p>
+            <strong>{{ doctor.stats.appointments }}</strong>
+          </div>
+          <div class="stat">
+            <p>Video visits</p>
+            <strong>{{ doctor.stats.videoVisits }}</strong>
+          </div>
+        </div>
+
+        <div class="verification">
+          <button
+            class="verify-btn"
+            [disabled]="doctor.verification.licenseValidated"
+            (click)="validateLicense(doctor.id)"
+          >
+            {{ doctor.verification.licenseValidated ? "License validated" : "Validate license" }}
+          </button>
+          <button
+            class="verify-btn"
+            [disabled]="doctor.verification.employmentConfirmed"
+            (click)="confirmEmployment(doctor.id)"
+          >
+            {{ doctor.verification.employmentConfirmed ? "Employment confirmed" : "Confirm employment" }}
+          </button>
+          <button
+            class="verify-btn"
+            [disabled]="doctor.status === 'active'"
+            (click)="activateDoctor(doctor.id)"
+          >
+            Activate
+          </button>
+          <button class="ghost-btn" (click)="onVerify(doctor.id)">Open profile</button>
+          <button class="ghost-btn danger" (click)="onDelete(doctor.id)">
+            <i class="bi bi-trash"></i>
+          </button>
+        </div>
+      </article>
+    </section>
   </div>
 </div>

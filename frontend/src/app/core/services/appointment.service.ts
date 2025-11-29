@@ -36,6 +36,10 @@ export class AppointmentService {
     return this.http.get<Appointment>(`${this.API_URL}/${id}`)
   }
 
+  getAppointmentById(id: string): Observable<Appointment> {
+    return this.getOne(id)
+  }
+
   update(id: string, data: UpdateAppointmentRequest): Observable<Appointment> {
     return this.http.patch<Appointment>(`${this.API_URL}/${id}`, data)
   }

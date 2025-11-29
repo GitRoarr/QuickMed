@@ -1,31 +1,88 @@
-<div class="admin-layout">
+<div class="receptionist-layout">
   <app-header></app-header>
-  <div class="layout-body">
+  <div class="body">
     <app-sidebar></app-sidebar>
-    <main class="content">
-      <h1 class="title">Receptionist Dashboard</h1>
-      <section class="cards">
-        <div class="card">
-          <h3>Today's Appointments</h3>
-          <ul>
-            <li *ngFor="let a of todayAppointments()">
-              {{ a.appointmentTime }} — {{ a.patient?.firstName }} {{ a.patient?.lastName }} (Dr. {{ a.doctor?.firstName }}) — {{ a.status }}
-            </li>
-          </ul>
+    <main class="panel">
+      <section class="dramatic-head">
+        <div>
+          <h1>Daily Command Center</h1>
+          <p>Monitor arrivals, payments, and frontline tasks all in one spotlight.</p>
         </div>
-        <div class="card">
-          <h3>Pending Payments</h3>
-          <ul>
-            <li *ngFor="let p of pendingPayments()">
-              {{ p.appointmentDate }} {{ p.appointmentTime }} — {{ p.patient?.firstName }} {{ p.patient?.lastName }} — {{ p.paymentStatus }}
-            </li>
-          </ul>
+        <button class="refresh" (click)="loadDashboard()" [disabled]="isLoading()">
+          <i class="bi bi-arrow-clockwise" *ngIf="!isLoading(); else loading"></i>
+          <ng-template #loading><span class="spinner"></span></ng-template>
+          Refresh
+        </button>
+      </section>
+
+      <section class="kpis" *ngIf="stats() as metric">
+        <div class="kpi-card">
+          <p>Appointments today</p>
+          <h2>{{ metric.totalToday }}</h2>
         </div>
+        <div class="kpi-card">
+          <p>Waiting room</p>
+          <h2>{{ metric.waitingRoom }}</h2>
+        </div>
+        <div class="kpi-card">
+          <p>Payments due</p>
+          <h2>{{ metric.paymentsDue }}</h2>
+        </div>
+        <div class="kpi-card">
+          <p>Virtual visits</p>
+          <h2>{{ metric.videoVisits }}</h2>
+        </div>
+      </section>
+
+      <section class="grid">
+        <div class="card wide">
+          <header>
+            <h3>Today’s timeline</h3>
+          </header>
+          <div class="timeline" *ngIf="timeline().length; else noTimeline">
+            <div class="slot" *ngFor="let item of timeline()">
+              <div class="time">{{ item.time }}</div>
+              <div>
+                <p>{{ item.patient }}</p>
+                <small>{{ item.doctor }}</small>
+              </div>
+              <span class="pill" [class.video]="item.type === 'Video'">{{ item.type }}</span>
+            </div>
+          </div>
+          <ng-template #noTimeline>
+            <p class="muted">No appointments scheduled.</p>
+          </ng-template>
+        </div>
+
         <div class="card">
-          <h3>Waiting Patients</h3>
+          <h3>Waiting room</h3>
           <ul>
             <li *ngFor="let w of waiting()">
-              {{ w.appointmentTime }} — {{ w.patient?.firstName }} {{ w.patient?.lastName }}
+              <strong>{{ w.patient?.firstName }} {{ w.patient?.lastName }}</strong>
+              <span>{{ w.appointmentTime }}</span>
+            </li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <h3>Pending payments</h3>
+          <ul>
+            <li *ngFor="let p of pendingPayments()">
+              <div>
+                <strong>{{ p.patient?.firstName }} {{ p.patient?.lastName }}</strong>
+                <span>{{ p.appointmentDate | date }}</span>
+              </div>
+              <span class="pill warning">{{ p.paymentStatus }}</span>
+            </li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <h3>Action list</h3>
+          <ul class="tasks">
+            <li *ngFor="let task of tasks()" [class.completed]="task.status === 'completed'">
+              <input type="checkbox" [checked]="task.status === 'completed'" />
+              <span>{{ task.title }}</span>
             </li>
           </ul>
         </div>

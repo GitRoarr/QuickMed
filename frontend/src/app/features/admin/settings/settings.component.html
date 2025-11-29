@@ -1,0 +1,263 @@
+<app-sidebar title="QuickMed Admin Portal" [menuItems]="menuItems"></app-sidebar>
+
+<div class="ml-60 settings-page">
+  <app-header></app-header>
+
+  <div class="settings-container">
+    <section class="page-header">
+      <div>
+        <p class="eyebrow">Configuration</p>
+        <h1>Settings</h1>
+        <p class="subtitle">Manage your system preferences, themes, and configurations.</p>
+      </div>
+      <div class="dark-mode-toggle">
+        <label class="toggle-switch">
+          <input type="checkbox" [checked]="isDarkMode()" (change)="toggleDarkMode()">
+          <span class="slider"></span>
+        </label>
+        <span class="toggle-label">
+          <i class="bi" [class.bi-moon-fill]="isDarkMode()" [class.bi-sun-fill]="!isDarkMode()"></i>
+          {{ isDarkMode() ? 'Dark Mode' : 'Light Mode' }}
+        </span>
+      </div>
+    </section>
+
+    <div class="message-alert" *ngIf="message()">
+      <div [class]="'alert alert-' + message()?.type">
+        <i class="bi" [class.bi-check-circle]="message()?.type === 'success'" [class.bi-exclamation-circle]="message()?.type === 'error'"></i>
+        <span>{{ message()?.text }}</span>
+      </div>
+    </div>
+
+    <div class="settings-tabs">
+      <button 
+        *ngFor="let tab of ['theme', 'general', 'security', 'notifications', 'logs']"
+        [class]="'tab-btn' + (activeTab() === tab ? ' active' : '')"
+        (click)="setActiveTab(tab)">
+        <i class="bi" [class]="getTabIcon(tab)"></i>
+        {{ getTabLabel(tab) }}
+      </button>
+    </div>
+
+    <!-- Theme Tab -->
+    <div class="settings-content" *ngIf="activeTab() === 'theme'">
+      <div class="settings-grid">
+        <div class="settings-card theme-editor">
+          <h3>Theme Editor</h3>
+          <form [formGroup]="themeForm" (ngSubmit)="saveTheme()">
+            <div class="form-group">
+              <label>Theme Name</label>
+              <input type="text" formControlName="name" placeholder="My Custom Theme">
+            </div>
+
+            <div class="color-grid">
+              <div class="color-input">
+                <label>Primary Color</label>
+                <div class="color-picker-wrapper">
+                  <input type="color" formControlName="primaryColor">
+                  <input type="text" formControlName="primaryColor" class="color-text">
+                </div>
+              </div>
+              <div class="color-input">
+                <label>Secondary Color</label>
+                <div class="color-picker-wrapper">
+                  <input type="color" formControlName="secondaryColor">
+                  <input type="text" formControlName="secondaryColor" class="color-text">
+                </div>
+              </div>
+              <div class="color-input">
+                <label>Accent Color</label>
+                <div class="color-picker-wrapper">
+                  <input type="color" formControlName="accentColor">
+                  <input type="text" formControlName="accentColor" class="color-text">
+                </div>
+              </div>
+              <div class="color-input">
+                <label>Background</label>
+                <div class="color-picker-wrapper">
+                  <input type="color" formControlName="backgroundColor">
+                  <input type="text" formControlName="backgroundColor" class="color-text">
+                </div>
+              </div>
+              <div class="color-input">
+                <label>Text Color</label>
+                <div class="color-picker-wrapper">
+                  <input type="color" formControlName="textColor">
+                  <input type="text" formControlName="textColor" class="color-text">
+                </div>
+              </div>
+              <div class="color-input">
+                <label>Border Color</label>
+                <div class="color-picker-wrapper">
+                  <input type="color" formControlName="borderColor">
+                  <input type="text" formControlName="borderColor" class="color-text">
+                </div>
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button type="button" class="btn-secondary" (click)="previewTheme()">
+                <i class="bi bi-eye"></i> Preview
+              </button>
+              <button type="button" class="btn-secondary" (click)="resetTheme()">
+                <i class="bi bi-arrow-counterclockwise"></i> Reset
+              </button>
+              <button type="submit" class="btn-primary" [disabled]="saving()">
+                <i class="bi bi-save"></i> {{ saving() ? 'Saving...' : 'Save Theme' }}
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <div class="settings-card themes-list">
+          <h3>Available Themes</h3>
+          <div class="themes-grid" *ngIf="!loading()">
+            <div 
+              *ngFor="let theme of themes()" 
+              class="theme-card"
+              [class.active]="theme.isActive">
+              <div class="theme-preview" [style.background]="theme.primaryColor || '#10b981'"></div>
+              <div class="theme-accent" [style.background]="theme.secondaryColor || '#059669'"></div>
+
+              <div class="theme-info">
+                <h4>{{ theme.name }}</h4>
+                <p *ngIf="theme.isActive" class="active-badge">Active</p>
+
+                <div class="theme-actions">
+                  <button *ngIf="!theme.isActive" (click)="activateTheme(theme)">Activate</button>
+                  <button *ngIf="!theme.isActive && theme.id" (click)="deleteTheme(theme.id)">Delete</button>
+                </div>
+              </div>
+            </div>
+            <div *ngIf="themes()?.length === 0" class="empty-state">
+              No themes
+            </div>
+          </div>
+          <div *ngIf="loading()" class="loading-state">
+            <p>Loading themes...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- General Tab -->
+    <div class="settings-content" *ngIf="activeTab() === 'general'">
+      <div class="settings-card">
+        <h3>General Settings</h3>
+        <form [formGroup]="generalForm">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Clinic Name</label>
+              <input type="text" formControlName="clinicName">
+            </div>
+            <div class="form-group">
+              <label>Clinic Email</label>
+              <input type="email" formControlName="clinicEmail">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Clinic Phone</label>
+              <input type="tel" formControlName="clinicPhone">
+            </div>
+            <div class="form-group">
+              <label>Timezone</label>
+              <select formControlName="timezone">
+                <option value="Africa/Addis_Ababa">Africa/Addis_Ababa (EAT)</option>
+                <option value="UTC">UTC</option>
+                <option value="America/New_York">America/New_York (EST)</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Date Format</label>
+              <select formControlName="dateFormat">
+                <option value="DD/MM/YYYY">DD/MM/YYYY</option>
+                <option value="MM/DD/YYYY">MM/DD/YYYY</option>
+                <option value="YYYY-MM-DD">YYYY-MM-DD</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Currency</label>
+              <select formControlName="currency">
+                <option value="ETB">ETB (Ethiopian Birr)</option>
+                <option value="USD">USD (US Dollar)</option>
+                <option value="EUR">EUR (Euro)</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button type="button" class="btn-primary">Save Changes</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Security Tab -->
+    <div class="settings-content" *ngIf="activeTab() === 'security'">
+      <div class="settings-card">
+        <h3>Security Settings</h3>
+        <div class="security-section">
+          <h4>Password Policy</h4>
+          <div class="info-item">
+            <span>Minimum Password Length</span>
+            <strong>8 characters</strong>
+          </div>
+          <div class="info-item">
+            <span>Require Special Characters</span>
+            <strong>Yes</strong>
+          </div>
+        </div>
+        <div class="security-section">
+          <h4>Session Management</h4>
+          <div class="info-item">
+            <span>Session Timeout</span>
+            <strong>30 minutes</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notifications Tab -->
+    <div class="settings-content" *ngIf="activeTab() === 'notifications'">
+      <div class="settings-card">
+        <h3>Notification Preferences</h3>
+        <div class="notification-item">
+          <div>
+            <h4>Email Notifications</h4>
+            <p>Receive email updates for important events</p>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div class="notification-item">
+          <div>
+            <h4>Appointment Reminders</h4>
+            <p>Get notified about upcoming appointments</p>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Logs Tab -->
+    <div class="settings-content" *ngIf="activeTab() === 'logs'">
+      <div class="settings-card">
+        <h3>System Logs</h3>
+        <div class="logs-container">
+          <div class="log-entry" *ngFor="let log of getLogs()">
+            <div class="log-time">{{ log.time | date:'short' }}</div>
+            <div class="log-level" [class]="'level-' + log.level">{{ log.level }}</div>
+            <div class="log-message">{{ log.message }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

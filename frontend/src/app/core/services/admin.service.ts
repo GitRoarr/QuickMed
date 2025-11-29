@@ -34,6 +34,8 @@ export interface Appointment {
   notes?: string
   isVideoConsultation: boolean
   location?: string
+  appointmentType?: string
+  reason?: string
   patient?: User
   doctor?: User
   createdAt: Date
@@ -52,6 +54,39 @@ export interface DoctorInvitationResponse {
   doctor: User
   emailSent: boolean
   inviteLink?: string
+}
+
+export interface DoctorOverviewCard {
+  id: string
+  firstName: string
+  lastName: string
+  specialty?: string
+  licenseNumber?: string
+  email: string
+  avatar?: string
+  phoneNumber?: string
+  availableDays?: string[]
+  status: "active" | "ready" | "pending"
+  rating: number
+  stats: {
+    patients: number
+    appointments: number
+    videoVisits: number
+  }
+  verification: {
+    licenseValidated: boolean
+    employmentConfirmed: boolean
+  }
+}
+
+export interface DoctorOverviewResponse {
+  doctors: DoctorOverviewCard[]
+  stats: {
+    totalDoctors: number
+    activeDoctors: number
+    pendingDoctors: number
+  }
+  specialties: string[]
 }
 
 export interface SystemHealthStatus {
@@ -154,9 +189,10 @@ export class AdminService {
     return this.http.delete<void>(`${this.apiUrl}/users/${id}`)
   }
 
-  getAllAppointments(page = 1, limit = 10, status?: string): Observable<PaginatedResponse<Appointment>> {
+  getAllAppointments(page = 1, limit = 10, status?: string, search?: string): Observable<PaginatedResponse<Appointment>> {
     let params = new HttpParams().set("page", page.toString()).set("limit", limit.toString())
     if (status && status !== "all") params = params.set("status", status)
+    if (search) params = params.set("search", search)
     return this.http.get<any>(`${this.apiUrl}/appointments`, { params }).pipe(
       map((res) => {
         const data = res.appointments ?? []
@@ -188,7 +224,7 @@ export class AdminService {
   }
 
   createDoctorInvitation(data: any): Observable<DoctorInvitationResponse> {
-    return this.http.post<DoctorInvitationResponse>(`${this.apiUrl}/doctors`, data)
+    return this.http.post<DoctorInvitationResponse>(`${this.apiUrl}/doctors/invite`, data)
   }
 
   createPatient(payload: Partial<User> & { password?: string }): Observable<User> {
@@ -219,6 +255,46 @@ export class AdminService {
 
   deleteDoctor(id: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/doctors/${id}`)
+  }
+
+  getDoctorOverview(filters: { search?: string; status?: string; specialty?: string } = {}): Observable<DoctorOverviewResponse> {
+    let params = new HttpParams()
+    if (filters.search) params = params.set("search", filters.search)
+    if (filters.status && filters.status !== "all") params = params.set("status", filters.status)
+    if (filters.specialty && filters.specialty !== "all") params = params.set("specialty", filters.specialty)
+
+    return this.http.get<DoctorOverviewResponse>(`${this.apiUrl}/doctors/overview`, { params })
+  }
+
+  inviteReceptionist(data: { firstName: string; lastName: string; email: string; phoneNumber?: string }): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/receptionists/invite`, data)
+  }
+
+  getAnalytics(startDate?: string, endDate?: string): Observable<any> {
+    let params = new HttpParams()
+    if (startDate) params = params.set('startDate', startDate)
+    if (endDate) params = params.set('endDate', endDate)
+    return this.http.get<any>(`${this.apiUrl}/analytics`, { params })
+  }
+
+  getAllThemes(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/themes`)
+  }
+
+  createTheme(data: any): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/themes`, data)
+  }
+
+  updateTheme(id: string, data: any): Observable<any> {
+    return this.http.put<any>(`${this.apiUrl}/themes/${id}`, data)
+  }
+
+  deleteTheme(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/themes/${id}`)
+  }
+
+  setActiveTheme(id: string): Observable<any> {
+    return this.http.patch<any>(`${this.apiUrl}/themes/${id}/activate`, {})
   }
 
   getDashboardData(): Observable<AdminDashboardResponse> {

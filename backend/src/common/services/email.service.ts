@@ -84,12 +84,35 @@ export class EmailService {
   }
 
   async sendDoctorInvite(to: string, inviteLink: string): Promise<EmailResult> {
-    const subject = 'Your Doctor Account Invitation';
+    const subject = 'Your Doctor Account Invitation - QuickMed';
     const html = `
-      <h3>Welcome!</h3>
-      <p>You have been invited as a doctor. Click the link below to set your password and activate your account:</p>
-      <a href="${inviteLink}">Set Your Password</a>
-      <p>The link expires in 7 days.</p>
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <h2 style="color: #16a34a;">Welcome to QuickMed!</h2>
+        <p>You have been invited to join QuickMed as a <strong>Doctor</strong>.</p>
+        <p>Click the button below to set your password and activate your account:</p>
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="${inviteLink}" style="background-color: #16a34a; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: bold;">Set Your Password</a>
+        </div>
+        <p style="color: #6b7280; font-size: 14px;">This invitation link will expire in 7 days.</p>
+        <p style="color: #6b7280; font-size: 14px;">If you did not expect this invitation, please ignore this email.</p>
+      </div>
+    `;
+    return this.sendMail(to, subject, html);
+  }
+
+  async sendReceptionistInvite(to: string, inviteLink: string): Promise<EmailResult> {
+    const subject = 'Your Receptionist Account Invitation - QuickMed';
+    const html = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <h2 style="color: #16a34a;">Welcome to QuickMed!</h2>
+        <p>You have been invited to join QuickMed as a <strong>Receptionist</strong>.</p>
+        <p>Click the button below to set your password and activate your account:</p>
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="${inviteLink}" style="background-color: #16a34a; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: bold;">Set Your Password</a>
+        </div>
+        <p style="color: #6b7280; font-size: 14px;">This invitation link will expire in 7 days.</p>
+        <p style="color: #6b7280; font-size: 14px;">If you did not expect this invitation, please ignore this email.</p>
+      </div>
     `;
     return this.sendMail(to, subject, html);
   }

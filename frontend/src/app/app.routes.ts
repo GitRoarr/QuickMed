@@ -28,6 +28,13 @@ export const routes: Routes = [
       ),
   },
   {
+    path: "payment/success",
+    loadComponent: () =>
+      import("./features/patient/payment-success/payment-success.component").then(
+        (m) => m.PaymentSuccessComponent
+      ),
+  },
+  {
     path: "patient",
     canActivate: [authGuard, roleGuard],
     data: { roles: ["patient"] },
@@ -58,6 +65,20 @@ export const routes: Routes = [
         loadComponent: () =>
           import("./features/patient/records/medical-records.component").then(
             (m) => m.MedicalRecordsComponent
+          ),
+      },
+      {
+        path: "payment",
+        loadComponent: () =>
+          import("./features/patient/payment/payment.component").then(
+            (m) => m.PaymentComponent
+          ),
+      },
+      {
+        path: "payment/success",
+        loadComponent: () =>
+          import("./features/patient/payment-success/payment-success.component").then(
+            (m) => m.PaymentSuccessComponent
           ),
       },
     ],
@@ -94,6 +115,11 @@ export const routes: Routes = [
           import("./features/admin/overview/overview.component").then(
             (m) => m.OverviewComponent
           ),
+      },
+      {
+        path: "overview",
+        redirectTo: "dashboard",
+        pathMatch: "full",
       },
       {
         path: "doctors",
@@ -136,10 +162,31 @@ export const routes: Routes = [
           ),
       },
       {
+        path: "receptionists",
+        loadComponent: () =>
+          import("./features/admin/receptionists/admin-receptionists.component").then(
+            (m) => m.AdminReceptionistsComponent
+          ),
+      },
+      {
         path: "users",
         loadComponent: () =>
           import("./features/admin/user-management/user-management.component").then(
             (m) => m.UserManagementComponent
+          ),
+      },
+      {
+        path: "analytics",
+        loadComponent: () =>
+          import("./features/admin/analytics/analytics.component").then(
+            (m) => m.AnalyticsComponent
+          ),
+      },
+      {
+        path: "settings",
+        loadComponent: () =>
+          import("./features/admin/settings/settings.component").then(
+            (m) => m.SettingsComponent
           ),
       },
       {

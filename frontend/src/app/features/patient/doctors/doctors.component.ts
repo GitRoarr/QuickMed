@@ -131,9 +131,11 @@ export class DoctorsComponent implements OnInit {
 
     this.appointmentService.create(payload).subscribe({
       next: (res) => {
-        // successfully created - inform user and close form
-        alert('Appointment booked successfully!');
+        // successfully created - redirect to payment
         this.closeBookingForm();
+        this.router.navigate(['/patient/payment'], {
+          queryParams: { appointmentId: res.id }
+        });
       },
       error: (err) => {
         console.error('Failed to book appointment', err);

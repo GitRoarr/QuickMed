@@ -1,0 +1,86 @@
+<div class="payment-container">
+  <div class="payment-card" *ngIf="!loading() && appointment()">
+    <div class="payment-header">
+      <h1>Complete Payment</h1>
+      <p class="subtitle">Secure payment for your appointment</p>
+    </div>
+
+    <div class="appointment-summary" *ngIf="appointment()">
+      <div class="summary-header">
+        <i class="bi bi-calendar-check"></i>
+        <h3>Appointment Details</h3>
+      </div>
+      
+      <div class="summary-content">
+        <div class="summary-item">
+          <span class="label">Date:</span>
+          <span class="value">{{ appointment()?.appointmentDate | date:'fullDate' }}</span>
+        </div>
+        <div class="summary-item">
+          <span class="label">Time:</span>
+          <span class="value">{{ appointment()?.appointmentTime }}</span>
+        </div>
+        <div class="summary-item" *ngIf="appointment()?.doctor">
+          <span class="label">Doctor:</span>
+          <span class="value">{{ appointment()?.doctor?.firstName }} {{ appointment()?.doctor?.lastName }}</span>
+        </div>
+        <div class="summary-item" *ngIf="appointment()?.appointmentType">
+          <span class="label">Type:</span>
+          <span class="value">{{ appointment()?.appointmentType }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="payment-amount">
+      <div class="amount-display">
+        <span class="currency">ETB</span>
+        <span class="amount">500</span>
+      </div>
+      <p class="amount-label">Appointment Fee</p>
+    </div>
+
+    <div class="payment-methods">
+      <div class="method-card active">
+        <i class="bi bi-credit-card"></i>
+        <div>
+          <h4>Chapa Payment</h4>
+          <p>Secure online payment via Chapa</p>
+        </div>
+        <i class="bi bi-check-circle-fill"></i>
+      </div>
+    </div>
+
+    <div class="error-message" *ngIf="error()">
+      <i class="bi bi-exclamation-circle"></i>
+      <span>{{ error() }}</span>
+    </div>
+
+    <div class="payment-actions">
+      <button 
+        class="btn-cancel" 
+        (click)="cancel()"
+        [disabled]="processing()">
+        Cancel
+      </button>
+      <button 
+        class="btn-pay" 
+        (click)="proceedToPayment()"
+        [disabled]="processing() || appointment()?.paymentStatus === 'paid'">
+        <span *ngIf="!processing()">Pay Now</span>
+        <span *ngIf="processing()">
+          <i class="bi bi-hourglass-split"></i> Processing...
+        </span>
+      </button>
+    </div>
+
+    <div class="security-note">
+      <i class="bi bi-shield-check"></i>
+      <p>Your payment is secured by Chapa. We never store your card details.</p>
+    </div>
+  </div>
+
+  <div class="loading-state" *ngIf="loading()">
+    <div class="spinner"></div>
+    <p>Loading appointment details...</p>
+  </div>
+</div>

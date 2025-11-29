@@ -10,13 +10,20 @@ import { UpdateAppointmentDto } from '../appointments/dto/update-appointment.dto
 import { UserRole } from '../common/index';
 import { DoctorsService } from '@/doctors/doctors.service';
 import { CreateDoctorDto } from '@/doctors/dto/create-doctor.dto';
+import { ThemeService } from './theme.service';
+import { CreateThemeDto } from './dto/create-theme.dto';
+import { UpdateThemeDto } from './dto/update-theme.dto';
+import { ReceptionistService } from '../receptionist/receptionist.service';
+import { CreateReceptionistInviteDto } from '../receptionist/dto/create-receptionist-invite.dto';
 
 @Controller('admin')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class AdminController {
   constructor(
     private readonly adminService: AdminService,
-    private readonly doctorsService: DoctorsService
+    private readonly doctorsService: DoctorsService,
+    private readonly themeService: ThemeService,
+    private readonly receptionistService: ReceptionistService
   ) {}
 
   @Get('dashboard')
@@ -81,9 +88,10 @@ export class AdminController {
   async getAllAppointments(
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 10,
-    @Query('status') status?: string
+    @Query('status') status?: string,
+    @Query('search') search?: string
   ) {
-    return await this.adminService.getAllAppointments(page, limit, status);
+    return await this.adminService.getAllAppointments(page, limit, status, search);
   }
 
   @Get('appointments/:id')
@@ -135,6 +143,13 @@ export class AdminController {
   }
 
   // ---------------- Doctor Management ----------------
+  @Post('doctors/invite')
+  @Roles(UserRole.ADMIN)
+  @HttpCode(HttpStatus.CREATED)
+  async inviteDoctor(@Body() createDoctorDto: CreateDoctorDto) {
+    return this.doctorsService.createDoctorInvite(createDoctorDto);
+  }
+
   @Post('doctors')
   @Roles(UserRole.ADMIN)
   @HttpCode(HttpStatus.CREATED)
@@ -164,5 +179,80 @@ export class AdminController {
   @Roles(UserRole.ADMIN)
   async getAllDoctors() {
     return this.doctorsService.findAll();
+  }
+
+  @Get('doctors/overview')
+  @Roles(UserRole.ADMIN)
+  async getDoctorsOverview(
+    @Query('search') search?: string,
+    @Query('status') status?: 'active' | 'pending',
+    @Query('specialty') specialty?: string,
+  ) {
+    return this.adminService.getDoctorsOverview(search, status as any, specialty);
+  }
+
+  // ---------------- Receptionist Management ----------------
+  @Post('receptionists/invite')
+  @Roles(UserRole.ADMIN)
+  @HttpCode(HttpStatus.CREATED)
+  async inviteReceptionist(@Body() dto: CreateReceptionistInviteDto) {
+    return this.receptionistService.createReceptionistInvite(dto);
+  }
+
+  // ---------------- Analytics ----------------
+  @Get('analytics')
+  @Roles(UserRole.ADMIN)
+  async getAnalytics(
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+  ) {
+    const start = startDate ? new Date(startDate) : undefined;
+    const end = endDate ? new Date(endDate) : undefined;
+    return this.adminService.getAnalyticsData(start, end);
+  }
+
+  // ---------------- Theme Management ----------------
+  @Get('theme')
+  @Roles(UserRole.ADMIN)
+  async getActiveTheme() {
+    return this.themeService.getActiveTheme();
+  }
+
+  @Get('themes')
+  @Roles(UserRole.ADMIN)
+  async getAllThemes() {
+    return this.themeService.getAllThemes();
+  }
+
+  @Get('themes/:id')
+  @Roles(UserRole.ADMIN)
+  async getThemeById(@Param('id') id: string) {
+    return this.themeService.getThemeById(id);
+  }
+
+  @Post('themes')
+  @HttpCode(HttpStatus.CREATED)
+  @Roles(UserRole.ADMIN)
+  async createTheme(@Body() createThemeDto: CreateThemeDto) {
+    return this.themeService.createTheme(createThemeDto);
+  }
+
+  @Put('themes/:id')
+  @Roles(UserRole.ADMIN)
+  async updateTheme(@Param('id') id: string, @Body() updateThemeDto: UpdateThemeDto) {
+    return this.themeService.updateTheme(id, updateThemeDto);
+  }
+
+  @Patch('themes/:id/activate')
+  @Roles(UserRole.ADMIN)
+  async setActiveTheme(@Param('id') id: string) {
+    return this.themeService.setActiveTheme(id);
+  }
+
+  @Delete('themes/:id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Roles(UserRole.ADMIN)
+  async deleteTheme(@Param('id') id: string) {
+    await this.themeService.deleteTheme(id);
   }
 }

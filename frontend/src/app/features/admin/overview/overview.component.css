@@ -172,3 +172,33 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Dark mode styles */
+.dark .stat-card,
+.dark .chart-section,
+.dark .schedule-section {
+  background: #2d2d2d;
+  border-color: #404040;
+}
+
+.dark .stat-label,
+.dark .section-header p,
+.dark .doctor-specialty,
+.dark .doctor-schedule {
+  color: #9ca3af;
+}
+
+.dark .stat-value,
+.dark .section-header h3,
+.dark .doctor-name,
+.dark .patient-count {
+  color: #ffffff;
+}
+
+.dark .doctor-item {
+  background: #1a1a1a;
+}
+
+.dark .overview-container {
+  background: #1a1a1a;
+}

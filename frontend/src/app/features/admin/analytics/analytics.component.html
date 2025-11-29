@@ -1,0 +1,143 @@
+<app-sidebar title="QuickMed Admin Portal" [menuItems]="menuItems"></app-sidebar>
+
+<div class="ml-60 analytics-page">
+  <app-header></app-header>
+
+  <div class="analytics-container">
+    <section class="page-header">
+      <div>
+        <p class="eyebrow">Data insights</p>
+        <h1>Analytics Dashboard</h1>
+        <p class="subtitle">Track performance, trends, and key metrics across your healthcare system.</p>
+      </div>
+      <div class="date-range">
+        <input type="date" [ngModel]="startDate()" (ngModelChange)="startDate.set($event); onDateRangeChange()" />
+        <span>to</span>
+        <input type="date" [ngModel]="endDate()" (ngModelChange)="endDate.set($event); onDateRangeChange()" />
+      </div>
+    </section>
+
+    <div *ngIf="isLoading()" class="loading-state">
+      <p>Loading analytics data...</p>
+    </div>
+
+    <div *ngIf="!isLoading() && analytics()" class="analytics-grid">
+      <!-- Revenue Card -->
+      <div class="metric-card revenue">
+        <div class="metric-header">
+          <h3>Total Revenue</h3>
+          <i class="bi bi-currency-dollar"></i>
+        </div>
+        <div class="metric-value">${{ analytics()?.totalRevenue?.toLocaleString() || '0' }}</div>
+        <p class="metric-label">From completed appointments</p>
+      </div>
+
+      <!-- Status Distribution -->
+      <div class="metric-card">
+        <h3>Appointment Status</h3>
+        <div class="status-grid" *ngIf="analytics()?.statusDistribution">
+          <div class="status-item">
+            <span class="status-dot pending"></span>
+            <div>
+              <strong>{{ analytics()?.statusDistribution?.pending || 0 }}</strong>
+              <p>Pending</p>
+            </div>
+          </div>
+          <div class="status-item">
+            <span class="status-dot confirmed"></span>
+            <div>
+              <strong>{{ analytics()?.statusDistribution?.confirmed || 0 }}</strong>
+              <p>Confirmed</p>
+            </div>
+          </div>
+          <div class="status-item">
+            <span class="status-dot completed"></span>
+            <div>
+              <strong>{{ analytics()?.statusDistribution?.completed || 0 }}</strong>
+              <p>Completed</p>
+            </div>
+          </div>
+          <div class="status-item">
+            <span class="status-dot cancelled"></span>
+            <div>
+              <strong>{{ analytics()?.statusDistribution?.cancelled || 0 }}</strong>
+              <p>Cancelled</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Appointments Trend Chart -->
+      <div class="chart-card">
+        <h3>Appointments Trend</h3>
+        <div class="chart-container">
+          <div class="chart-bars" *ngIf="getChartData() as chart">
+            <div class="bar-wrapper" *ngFor="let value of chart.values; let i = index">
+              <div class="bar" [style.height.%]="getBarHeight(value, getMaxValue(chart.values))">
+                <span class="bar-value">{{ value }}</span>
+              </div>
+              <span class="bar-label">{{ chart.labels[i] }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Revenue Trend -->
+      <div class="chart-card">
+        <h3>Revenue Trend</h3>
+        <div class="chart-container">
+          <div class="chart-bars revenue-bars" *ngIf="getRevenueChartData() as chart">
+            <div class="bar-wrapper" *ngFor="let value of chart.values; let i = index">
+              <div class="bar revenue-bar" [style.height.%]="getBarHeight(value, getMaxValue(chart.values))">
+                <span class="bar-value">${{ value }}</span>
+              </div>
+              <span class="bar-label">{{ chart.labels[i] }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Top Doctors -->
+      <div class="table-card">
+        <h3>Top Performing Doctors</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Doctor</th>
+              <th>Appointments</th>
+              <th>Completed</th>
+              <th>Completion Rate</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let doctor of analytics()?.doctorStats || []">
+              <td><strong>{{ doctor.name }}</strong></td>
+              <td>{{ doctor.totalAppointments }}</td>
+              <td>{{ doctor.completedCount }}</td>
+              <td>
+                <span class="rate-badge">{{ doctor.completionRate }}%</span>
+              </td>
+            </tr>
+            <tr *ngIf="!analytics()?.doctorStats?.length">
+              <td colspan="4" class="empty">No data available</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Patient Growth -->
+      <div class="chart-card">
+        <h3>Patient Growth</h3>
+        <div class="growth-list" *ngIf="analytics()?.patientsByDate">
+          <div class="growth-item" *ngFor="let item of analytics()?.patientsByDate">
+            <span class="date">{{ item.date | date:'shortDate' }}</span>
+            <div class="growth-bar">
+              <div class="growth-fill" [style.width.%]="getPatientGrowthWidth(item.count)"></div>
+            </div>
+            <span class="count">+{{ item.count }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

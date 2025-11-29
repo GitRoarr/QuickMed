@@ -1,4 +1,4 @@
-import { Controller, UseGuards, Post, Body, Get, Param, Patch, Query } from '@nestjs/common';
+import { Controller, UseGuards, Post, Body, Get, Param, Patch, Query, HttpCode, HttpStatus } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -12,6 +12,8 @@ import { UsersService } from '../users/users.service';
 import { UpdateUserDto } from '../users/dto/update-user.dto';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { User } from '../users/entities/user.entity';
+import { CreateReceptionistInviteDto } from './dto/create-receptionist-invite.dto';
+import { SetReceptionistPasswordDto } from './dto/set-receptionist-password.dto';
 
 @Controller('receptionist')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -74,9 +76,21 @@ export class ReceptionistController {
   @Get('dashboard')
   @Roles(UserRole.RECEPTIONIST, UserRole.ADMIN)
   async dashboard(@Query('doctorId') doctorId?: string, @Query('status') status?: string) {
-    const todayAppointments = await this.receptionistService.getTodayAppointments({ doctorId, status });
-    const pendingPayments = await this.receptionistService.getPendingPayments();
-    const waiting = await this.receptionistService.getWaitingPatients();
-    return { todayAppointments, pendingPayments, waiting };
+    return this.receptionistService.getDashboardInsights({ doctorId, status });
+  }
+
+  // Invitation endpoints (public - no auth required for setting password)
+  @Post('invite')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  @HttpCode(HttpStatus.CREATED)
+  async createReceptionistInvite(@Body() dto: CreateReceptionistInviteDto) {
+    return this.receptionistService.createReceptionistInvite(dto);
+  }
+
+  @Post('set-password')
+  @HttpCode(HttpStatus.OK)
+  async setReceptionistPassword(@Body() dto: SetReceptionistPasswordDto) {
+    return this.receptionistService.setReceptionistPassword(dto.uid, dto.token, dto.password);
   }
 }

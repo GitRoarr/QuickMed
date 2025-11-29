@@ -3,7 +3,7 @@
   align-items: center;
   gap: 0.75rem;
   padding: 0.65rem 1.5rem;
-  color: #4b5563;
+  color: var(--text-gray, #4b5563);
   text-decoration: none;
   font-size: 0.925rem;
   font-weight: 500;
@@ -12,19 +12,19 @@
 }
 
 .nav-link:hover {
-  background: #f3f4f6;
-  color: #0f172a;
+  background: var(--background-gray, #f3f4f6);
+  color: var(--text-dark, #0f172a);
 }
 
 .nav-link.active {
-  background: #e9f9ee;
-  color: #0f172a;
-  border-left-color: #1db954;
+  background: var(--primary-light, #e9f9ee);
+  color: var(--text-dark, #0f172a);
+  border-left-color: var(--primary-color, #10b981);
   font-weight: 600;
 }
 
 .nav-link.active .bi {
-  color: #1db954;
+  color: var(--primary-color, #10b981);
 }
 
 .icon-img {
