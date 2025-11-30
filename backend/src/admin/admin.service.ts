@@ -513,16 +513,17 @@ async getSystemHealth(): Promise<{
   }
 
   async getAnalyticsData(startDate?: Date, endDate?: Date) {
-    const start = startDate || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000); // default last 30 days
-    const end = endDate || new Date();
+    try {
+      const start = startDate || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000); // default last 30 days
+      const end = endDate || new Date();
 
-    // Get appointment trends
-    const appointments = await this.appointmentRepository.find({
-      where: {
-        appointmentDate: Between(start, end),
-      },
-      relations: ['patient', 'doctor'],
-    });
+      // Get appointment trends
+      const appointments = await this.appointmentRepository.find({
+        where: {
+          appointmentDate: Between(start, end),
+        },
+        relations: ['patient', 'doctor'],
+      });
 
     // Group by date
     const appointmentsByDate: { [key: string]: number } = {};
@@ -577,20 +578,35 @@ async getSystemHealth(): Promise<{
         revenueByDate[dateKey] = (revenueByDate[dateKey] || 0) + 150; // example price
       });
 
-    return {
-      appointmentsByDate,
-      statusDistribution,
-      doctorStats: doctorStats.map(d => ({
-        doctorId: d.doctorId,
-        name: `${d.firstName} ${d.lastName}`,
-        totalAppointments: parseInt(d.totalAppointments),
-        completedCount: parseInt(d.completedCount),
-        completionRate: (parseInt(d.completedCount) / parseInt(d.totalAppointments) * 100).toFixed(1),
-      })),
-      patientsByDate,
-      revenueByDate,
-      totalRevenue: Object.values(revenueByDate).reduce((sum, val) => sum + val, 0),
-      period: { start, end },
-    };
+      return {
+        appointmentsByDate,
+        statusDistribution,
+        doctorStats: doctorStats.map(d => ({
+          doctorId: d.doctorId,
+          name: `${d.firstName || ''} ${d.lastName || ''}`.trim(),
+          totalAppointments: parseInt(d.totalAppointments || '0'),
+          completedCount: parseInt(d.completedCount || '0'),
+          completionRate: d.totalAppointments && parseInt(d.totalAppointments) > 0
+            ? (parseInt(d.completedCount || '0') / parseInt(d.totalAppointments) * 100).toFixed(1)
+            : '0.0',
+        })),
+        patientsByDate: patientsByDate || [],
+        revenueByDate,
+        totalRevenue: Object.values(revenueByDate).reduce((sum, val) => sum + val, 0),
+        period: { start, end },
+      };
+    } catch (error) {
+      console.error('[AdminService] Analytics error:', error);
+      return {
+        appointmentsByDate: {},
+        statusDistribution: { pending: 0, confirmed: 0, completed: 0, cancelled: 0 },
+        doctorStats: [],
+        patientsByDate: [],
+        revenueByDate: {},
+        totalRevenue: 0,
+        period: { start: startDate || new Date(), end: endDate || new Date() },
+        error: 'Failed to generate analytics data',
+      };
+    }
   }
 }

@@ -91,35 +91,92 @@ export class ReceptionistService {
     emailSent: boolean;
     inviteLink?: string;
   }> {
+    // Use transaction to ensure data integrity
+    const queryRunner = this.userRepo.manager.connection.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
     try {
       console.log('[ReceptionistService] Creating receptionist invite for', dto.email);
-      const existingUser = await this.userRepo.findOne({ where: { email: dto.email } });
+      
+      // Normalize and validate email
+      const normalizedEmail = dto.email.toLowerCase().trim();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
+        await queryRunner.rollbackTransaction();
+        throw new BadRequestException('Invalid email format');
+      }
+
+      // Check if email already exists (with transaction isolation)
+      const existingUser = await queryRunner.manager.findOne(User, { 
+        where: { email: normalizedEmail } 
+      });
       if (existingUser) {
         console.log('[ReceptionistService] Email already exists:', dto.email);
+        await queryRunner.rollbackTransaction();
         throw new BadRequestException('Email already exists');
       }
 
-      const inviteToken = uuidv4();
+      // Validate required fields
+      if (!dto.firstName || !dto.lastName || !dto.email) {
+        await queryRunner.rollbackTransaction();
+        throw new BadRequestException('First name, last name, and email are required');
+      }
+
+      // Generate unique invite token (ensure uniqueness)
+      let inviteToken: string;
+      let tokenExists = true;
+      let attempts = 0;
+      while (tokenExists && attempts < 10) {
+        inviteToken = uuidv4();
+        const existingToken = await queryRunner.manager.findOne(User, {
+          where: { inviteToken },
+        });
+        tokenExists = !!existingToken;
+        attempts++;
+      }
+      if (tokenExists) {
+        await queryRunner.rollbackTransaction();
+        throw new BadRequestException('Failed to generate unique invite token. Please try again.');
+      }
+
       const inviteExpiresAt = new Date();
       inviteExpiresAt.setDate(inviteExpiresAt.getDate() + 7); // 7 days expiry
 
-      const receptionist = this.userRepo.create({
-        firstName: dto.firstName,
-        lastName: dto.lastName,
-        email: dto.email,
-        phoneNumber: dto.phoneNumber,
+      // Create receptionist user with invitation data
+      const receptionist = queryRunner.manager.create(User, {
+        firstName: dto.firstName.trim(),
+        lastName: dto.lastName.trim(),
+        email: normalizedEmail,
+        phoneNumber: dto.phoneNumber?.trim() || null,
         role: UserRole.RECEPTIONIST,
-        isActive: false,
+        isActive: false, // Inactive until password is set
         inviteToken,
         inviteExpiresAt,
-        password: null, // No password until they accept invitation
+        password: null, // No password until invitation is accepted
       });
 
-      const savedReceptionist = await this.userRepo.save(receptionist);
-      const inviteLink = `${process.env.FRONTEND_URL || 'http://localhost:4200'}/set-password?token=${inviteToken}&uid=${savedReceptionist.id}`;
-      const emailResult = await this.emailService.sendReceptionistInvite(savedReceptionist.email, inviteLink);
+      const savedReceptionist = await queryRunner.manager.save(receptionist);
+      
+      // Commit transaction before sending email (non-critical operation)
+      await queryRunner.commitTransaction();
 
-      console.log('[ReceptionistService] Receptionist invite created', { id: savedReceptionist.id, emailSent: emailResult.sent });
+      // Generate invite link
+      const inviteLink = `${process.env.FRONTEND_URL || 'http://localhost:4200'}/set-password?token=${inviteToken}&uid=${savedReceptionist.id}`;
+      
+      // Send invitation email (non-blocking)
+      let emailResult = { sent: false, fallbackLink: inviteLink };
+      try {
+        emailResult = await this.emailService.sendReceptionistInvite(savedReceptionist.email, inviteLink);
+      } catch (emailError) {
+        console.error('[ReceptionistService] Failed to send email, but invitation created:', emailError);
+        // Don't fail the whole operation if email fails
+      }
+
+      console.log('[ReceptionistService] Receptionist invite created', { 
+        id: savedReceptionist.id, 
+        email: savedReceptionist.email,
+        emailSent: emailResult.sent 
+      });
 
       // Return without sensitive data
       const { password, inviteToken: _, inviteExpiresAt: __, ...safeReceptionist } = savedReceptionist;
@@ -130,25 +187,81 @@ export class ReceptionistService {
         inviteLink: emailResult.sent ? undefined : emailResult.fallbackLink || inviteLink,
       };
     } catch (error) {
+      await queryRunner.rollbackTransaction();
       console.error('[ReceptionistService] Failed to create receptionist invite:', error);
       throw error;
+    } finally {
+      await queryRunner.release();
     }
   }
 
   async setReceptionistPassword(uid: string, token: string, password: string): Promise<User> {
-    const receptionist = await this.userRepo.findOne({ where: { id: uid, role: UserRole.RECEPTIONIST } });
-    if (!receptionist) throw new NotFoundException('Receptionist not found');
-    if (receptionist.isActive) throw new BadRequestException('Receptionist already active');
-    if (receptionist.inviteToken !== token) throw new BadRequestException('Invalid invite token');
-    if (!receptionist.inviteExpiresAt || new Date() > receptionist.inviteExpiresAt) {
-      throw new BadRequestException('Invite token expired');
+    // Validate password strength
+    if (!password || password.length < 6) {
+      throw new BadRequestException('Password must be at least 6 characters long');
     }
 
-    receptionist.password = await bcrypt.hash(password, 10);
-    receptionist.isActive = true;
-    receptionist.inviteToken = null;
-    receptionist.inviteExpiresAt = null;
+    // Use transaction for data integrity
+    const queryRunner = this.userRepo.manager.connection.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
 
-    return this.userRepo.save(receptionist);
+    try {
+      // Find receptionist with proper locking to prevent race conditions
+      const receptionist = await queryRunner.manager.findOne(User, { 
+        where: { id: uid, role: UserRole.RECEPTIONIST },
+        lock: { mode: 'pessimistic_write' }
+      });
+
+      if (!receptionist) {
+        await queryRunner.rollbackTransaction();
+        throw new NotFoundException('Receptionist not found');
+      }
+
+      if (receptionist.isActive && receptionist.password) {
+        await queryRunner.rollbackTransaction();
+        throw new BadRequestException('Receptionist already has a password set. Please use password reset instead.');
+      }
+
+      if (!receptionist.inviteToken) {
+        await queryRunner.rollbackTransaction();
+        throw new BadRequestException('No active invitation found for this receptionist');
+      }
+
+      if (receptionist.inviteToken !== token) {
+        await queryRunner.rollbackTransaction();
+        throw new BadRequestException('Invalid invite token');
+      }
+
+      if (!receptionist.inviteExpiresAt || new Date() > receptionist.inviteExpiresAt) {
+        await queryRunner.rollbackTransaction();
+        throw new BadRequestException('Invite token has expired. Please request a new invitation.');
+      }
+
+      // Hash password with bcrypt
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      // Update receptionist: set password, activate, and clear invitation
+      receptionist.password = hashedPassword;
+      receptionist.isActive = true;
+      receptionist.inviteToken = null;
+      receptionist.inviteExpiresAt = null;
+      receptionist.mustChangePassword = false;
+
+      const savedReceptionist = await queryRunner.manager.save(receptionist);
+      await queryRunner.commitTransaction();
+
+      console.log(`[ReceptionistService] Password set successfully for receptionist: ${receptionist.email}`);
+      
+      // Return without sensitive data
+      const { password: _, inviteToken: __, inviteExpiresAt: ___, ...safeReceptionist } = savedReceptionist;
+      return safeReceptionist as User;
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      console.error('[ReceptionistService] Failed to set receptionist password:', error);
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
   }
 }

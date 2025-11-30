@@ -12,7 +12,7 @@ export class User extends BaseEntity {
   lastName: string;
 
   @Column({ unique: true })
-  email: string;
+  email: string; // Database-level unique constraint ensures integrity
 
   @Column({ nullable: true })
   password: string;
@@ -85,7 +85,7 @@ export class User extends BaseEntity {
   isActive: boolean;
 
   @Column({ nullable: true })
-  inviteToken: string;
+  inviteToken: string; // Unique per active invitation (enforced in application logic)
 
   @Column({ type: 'timestamp', nullable: true })
   inviteExpiresAt: Date;

@@ -11,6 +11,8 @@ import {
   BadRequestException,
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { diskStorage } from 'multer'
 import * as os from 'os'
 import { UsersService } from "./users.service";
@@ -22,7 +24,11 @@ import { UserRole } from "../common/index";
 @Controller("users")
 @UseGuards(JwtAuthGuard)
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    @InjectRepository(User)
+    private readonly usersRepository: Repository<User>,
+  ) {}
 
   @Get()
   findAll() {
@@ -79,26 +85,52 @@ export class UsersController {
     }
 
     const { currentPassword, newPassword } = body;
+    
+    // Validate new password
     if (!newPassword || newPassword.length < 6) {
       throw new BadRequestException('New password must be at least 6 characters');
     }
 
-    return (async () => {
+    // Use transaction for data integrity
+    const queryRunner = this.usersRepository.manager.connection.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
       const target = await this.usersService.findByIdWithPassword(id);
+      
       // If user has a password, require currentPassword to match unless the caller is admin
       if (target.password && user.role !== UserRole.ADMIN) {
-        if (!currentPassword) throw new BadRequestException('Current password is required');
+        if (!currentPassword) {
+          await queryRunner.rollbackTransaction();
+          throw new BadRequestException('Current password is required');
+        }
+        
         const bcrypt = require('bcrypt');
-        const ok = await bcrypt.compare(currentPassword, target.password);
-        if (!ok) throw new BadRequestException('Current password is incorrect');
+        const isValidPassword = await bcrypt.compare(currentPassword, target.password);
+        if (!isValidPassword) {
+          await queryRunner.rollbackTransaction();
+          throw new BadRequestException('Current password is incorrect');
+        }
       }
 
+      // Hash new password
       const bcrypt = require('bcrypt');
       const hashed = await bcrypt.hash(newPassword, 10);
-      target.password = hashed;
-      target.mustChangePassword = false;
-      await this.usersService.update(id, target as any);
-      return { message: 'Password updated' };
-    })();
+      
+      // Update password with transaction
+      await queryRunner.manager.update(User, { id }, {
+        password: hashed,
+        mustChangePassword: false,
+      });
+      
+      await queryRunner.commitTransaction();
+      return { message: 'Password updated successfully' };
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
   }
 }

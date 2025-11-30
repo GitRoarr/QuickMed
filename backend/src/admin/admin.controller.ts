@@ -27,17 +27,13 @@ export class AdminController {
   ) {}
 
   @Get('dashboard')
-  @Roles(UserRole.ADMIN)
-  async getDashboardData() {
-    return await this.adminService.getDashboardData();
-  }
-
   @Get('stats')
   @Roles(UserRole.ADMIN)
-  async getAdminStats() {
-    return await this.adminService.getAdminStats();
+  async getAdminData(@Query('type') type?: string) {
+    return type === 'stats' ? this.adminService.getAdminStats() : this.adminService.getDashboardData();
   }
 
+  // ---------------- User Management ----------------
   @Get('users')
   @Roles(UserRole.ADMIN)
   async getAllUsers(
@@ -46,28 +42,37 @@ export class AdminController {
     @Query('role') role?: string,
     @Query('search') search?: string,
   ) {
-    const safePage = Math.max(1, Number(page) || 1);
-    const safeLimit = Math.max(1, Math.min(50, Number(limit) || 10));
-    return await this.adminService.getAllUsers(safePage, safeLimit, role, search);
+    return this.adminService.getAllUsers(
+      Math.max(1, Number(page) || 1),
+      Math.max(1, Math.min(50, Number(limit) || 10)),
+      role,
+      search
+    );
   }
 
   @Get('users/:id')
   @Roles(UserRole.ADMIN)
   async getUserById(@Param('id') id: string) {
-    return await this.adminService.getUserById(id);
+    return this.adminService.getUserById(id);
+  }
+
+  @Get('users/:id/export')
+  @Roles(UserRole.ADMIN)
+  async exportUserData(@Param('id') id: string) {
+    return this.adminService.exportUserData(id);
   }
 
   @Post('users')
   @HttpCode(HttpStatus.CREATED)
   @Roles(UserRole.ADMIN)
-  async createUser(@Body() createUserDto: CreateUserDto) {
-    return await this.adminService.createUser(createUserDto);
+  async createUser(@Body() dto: CreateUserDto) {
+    return this.adminService.createUser(dto);
   }
 
   @Put('users/:id')
   @Roles(UserRole.ADMIN)
-  async updateUser(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return await this.adminService.updateUser(id, updateUserDto);
+  async updateUser(@Param('id') id: string, @Body() dto: UpdateUserDto) {
+    return this.adminService.updateUser(id, dto);
   }
 
   @Delete('users/:id')
@@ -77,12 +82,7 @@ export class AdminController {
     await this.adminService.deleteUser(id);
   }
 
-  @Get('users/:id/export')
-  @Roles(UserRole.ADMIN)
-  async exportUserData(@Param('id') id: string) {
-    return await this.adminService.exportUserData(id);
-  }
-
+  // ---------------- Appointment Management ----------------
   @Get('appointments')
   @Roles(UserRole.ADMIN)
   async getAllAppointments(
@@ -91,26 +91,26 @@ export class AdminController {
     @Query('status') status?: string,
     @Query('search') search?: string
   ) {
-    return await this.adminService.getAllAppointments(page, limit, status, search);
+    return this.adminService.getAllAppointments(page, limit, status, search);
   }
 
   @Get('appointments/:id')
   @Roles(UserRole.ADMIN)
   async getAppointmentById(@Param('id') id: string) {
-    return await this.adminService.getAppointmentById(id);
+    return this.adminService.getAppointmentById(id);
   }
 
   @Post('appointments')
   @HttpCode(HttpStatus.CREATED)
   @Roles(UserRole.ADMIN)
-  async createAppointment(@Body() createAppointmentDto: CreateAppointmentDto) {
-    return await this.adminService.createAppointment(createAppointmentDto);
+  async createAppointment(@Body() dto: CreateAppointmentDto) {
+    return this.adminService.createAppointment(dto);
   }
 
   @Put('appointments/:id')
   @Roles(UserRole.ADMIN)
-  async updateAppointment(@Param('id') id: string, @Body() updateAppointmentDto: UpdateAppointmentDto) {
-    return await this.adminService.updateAppointment(id, updateAppointmentDto);
+  async updateAppointment(@Param('id') id: string, @Body() dto: UpdateAppointmentDto) {
+    return this.adminService.updateAppointment(id, dto);
   }
 
   @Delete('appointments/:id')
@@ -120,40 +120,35 @@ export class AdminController {
     await this.adminService.deleteAppointment(id);
   }
 
-  // ---------------- System Health & Notifications ----------------
+  // ---------------- System & Reports ----------------
   @Get('system/health')
   @Roles(UserRole.ADMIN)
   async getSystemHealth() {
-    return await this.adminService.getSystemHealth();
+    return this.adminService.getSystemHealth();
   }
 
   @Get('notifications')
   @Roles(UserRole.ADMIN)
   async getSystemNotifications() {
-    return await this.adminService.getSystemNotifications();
+    return this.adminService.getSystemNotifications();
   }
 
-  // ---------------- Reports ----------------
   @Post('reports')
   @Roles(UserRole.ADMIN)
-  async generateReport(@Body() reportRequest: { type: 'users' | 'appointments' | 'revenue'; startDate?: string; endDate?: string }) {
-    const startDate = reportRequest.startDate ? new Date(reportRequest.startDate) : undefined;
-    const endDate = reportRequest.endDate ? new Date(reportRequest.endDate) : undefined;
-    return await this.adminService.generateReport(reportRequest.type, startDate, endDate);
+  async generateReport(@Body() req: { type: 'users' | 'appointments' | 'revenue'; startDate?: string; endDate?: string }) {
+    return this.adminService.generateReport(
+      req.type,
+      req.startDate ? new Date(req.startDate) : undefined,
+      req.endDate ? new Date(req.endDate) : undefined
+    );
   }
 
   // ---------------- Doctor Management ----------------
   @Post('doctors/invite')
-  @Roles(UserRole.ADMIN)
-  @HttpCode(HttpStatus.CREATED)
-  async inviteDoctor(@Body() createDoctorDto: CreateDoctorDto) {
-    return this.doctorsService.createDoctorInvite(createDoctorDto);
-  }
-
   @Post('doctors')
   @Roles(UserRole.ADMIN)
   @HttpCode(HttpStatus.CREATED)
-  async addDoctor(@Body() createDoctorDto: CreateDoctorDto) {
+  async inviteDoctor(@Body() createDoctorDto: CreateDoctorDto) {
     return this.doctorsService.createDoctorInvite(createDoctorDto);
   }
 
@@ -202,13 +197,11 @@ export class AdminController {
   // ---------------- Analytics ----------------
   @Get('analytics')
   @Roles(UserRole.ADMIN)
-  async getAnalytics(
-    @Query('startDate') startDate?: string,
-    @Query('endDate') endDate?: string,
-  ) {
-    const start = startDate ? new Date(startDate) : undefined;
-    const end = endDate ? new Date(endDate) : undefined;
-    return this.adminService.getAnalyticsData(start, end);
+  async getAnalytics(@Query('startDate') startDate?: string, @Query('endDate') endDate?: string) {
+    return this.adminService.getAnalyticsData(
+      startDate ? new Date(startDate) : undefined,
+      endDate ? new Date(endDate) : undefined
+    );
   }
 
   // ---------------- Theme Management ----------------
@@ -233,14 +226,14 @@ export class AdminController {
   @Post('themes')
   @HttpCode(HttpStatus.CREATED)
   @Roles(UserRole.ADMIN)
-  async createTheme(@Body() createThemeDto: CreateThemeDto) {
-    return this.themeService.createTheme(createThemeDto);
+  async createTheme(@Body() dto: CreateThemeDto) {
+    return this.themeService.createTheme(dto);
   }
 
   @Put('themes/:id')
   @Roles(UserRole.ADMIN)
-  async updateTheme(@Param('id') id: string, @Body() updateThemeDto: UpdateThemeDto) {
-    return this.themeService.updateTheme(id, updateThemeDto);
+  async updateTheme(@Param('id') id: string, @Body() dto: UpdateThemeDto) {
+    return this.themeService.updateTheme(id, dto);
   }
 
   @Patch('themes/:id/activate')

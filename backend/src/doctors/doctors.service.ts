@@ -27,33 +27,97 @@ export class DoctorsService {
     emailSent: boolean;
     inviteLink?: string;
   }> {
+    // Use transaction to ensure data integrity
+    const queryRunner = this.usersRepository.manager.connection.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
     try {
       console.log("[DoctorsService] Creating doctor invite for", createDoctorDto.email);
-      const existingUser = await this.usersRepository.findOne({ where: { email: createDoctorDto.email } });
+      
+      // Normalize and validate email
+      const normalizedEmail = createDoctorDto.email.toLowerCase().trim();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
+        await queryRunner.rollbackTransaction();
+        throw new BadRequestException('Invalid email format');
+      }
+
+      // Check if email already exists (with transaction isolation)
+      const existingUser = await queryRunner.manager.findOne(User, { 
+        where: { email: normalizedEmail } 
+      });
       if (existingUser) {
         console.log("[DoctorsService] Email already exists:", createDoctorDto.email);
+        await queryRunner.rollbackTransaction();
         throw new BadRequestException("Email already exists");
       }
 
-      const inviteToken = uuidv4();
-      const inviteExpiresAt = new Date();
-      inviteExpiresAt.setDate(inviteExpiresAt.getDate() + 7);
+      // Validate required fields
+      if (!createDoctorDto.firstName || !createDoctorDto.lastName || !createDoctorDto.email) {
+        await queryRunner.rollbackTransaction();
+        throw new BadRequestException("First name, last name, and email are required");
+      }
 
-      const doctor = this.usersRepository.create({
-        ...createDoctorDto,
+      // Generate unique invite token (ensure uniqueness)
+      let inviteToken: string;
+      let tokenExists = true;
+      let attempts = 0;
+      while (tokenExists && attempts < 10) {
+        inviteToken = uuidv4();
+        const existingToken = await queryRunner.manager.findOne(User, {
+          where: { inviteToken },
+        });
+        tokenExists = !!existingToken;
+        attempts++;
+      }
+      if (tokenExists) {
+        await queryRunner.rollbackTransaction();
+        throw new BadRequestException('Failed to generate unique invite token. Please try again.');
+      }
+
+      const inviteExpiresAt = new Date();
+      inviteExpiresAt.setDate(inviteExpiresAt.getDate() + 7); // 7 days expiry
+
+      // Create doctor user with invitation data
+      const doctor = queryRunner.manager.create(User, {
+        firstName: createDoctorDto.firstName.trim(),
+        lastName: createDoctorDto.lastName.trim(),
+        email: normalizedEmail,
+        phoneNumber: createDoctorDto.phoneNumber,
+        specialty: createDoctorDto.specialty,
+        licenseNumber: createDoctorDto.licenseNumber,
+        bio: createDoctorDto.bio,
         role: UserRole.DOCTOR,
-        isActive: false,
+        isActive: false, // Inactive until password is set
         inviteToken,
         inviteExpiresAt,
         licenseValidated: false,
         employmentConfirmed: false,
+        password: null, // No password until invitation is accepted
       });
 
-      const savedDoctor = await this.usersRepository.save(doctor);
-      const inviteLink = `${process.env.FRONTEND_URL || "http://localhost:4200"}/set-password?token=${inviteToken}&uid=${savedDoctor.id}`;
-      const emailResult = await this.emailService.sendDoctorInvite(savedDoctor.email, inviteLink);
+      const savedDoctor = await queryRunner.manager.save(doctor);
+      
+      // Commit transaction before sending email (non-critical operation)
+      await queryRunner.commitTransaction();
 
-      console.log("[DoctorsService] Doctor invite created", { id: savedDoctor.id, emailSent: emailResult.sent });
+      // Generate invite link
+      const inviteLink = `${process.env.FRONTEND_URL || "http://localhost:4200"}/set-password?token=${inviteToken}&uid=${savedDoctor.id}`;
+      
+      // Send invitation email (non-blocking)
+      let emailResult = { sent: false, fallbackLink: inviteLink };
+      try {
+        emailResult = await this.emailService.sendDoctorInvite(savedDoctor.email, inviteLink);
+      } catch (emailError) {
+        console.error("[DoctorsService] Failed to send email, but invitation created:", emailError);
+        // Don't fail the whole operation if email fails
+      }
+
+      console.log("[DoctorsService] Doctor invite created", { 
+        id: savedDoctor.id, 
+        email: savedDoctor.email,
+        emailSent: emailResult.sent 
+      });
 
       return {
         doctor: this.sanitizeDoctor(savedDoctor),
@@ -61,24 +125,79 @@ export class DoctorsService {
         inviteLink: emailResult.sent ? undefined : emailResult.fallbackLink || inviteLink,
       };
     } catch (error) {
+      await queryRunner.rollbackTransaction();
       console.error("[DoctorsService] Failed to create doctor invite:", error);
       throw error;
+    } finally {
+      await queryRunner.release();
     }
   }
 
   async setDoctorPassword(uid: string, token: string, password: string): Promise<User> {
-    const doctor = await this.usersRepository.findOne({ where: { id: uid, role: UserRole.DOCTOR } });
-    if (!doctor) throw new NotFoundException('Doctor not found');
-    if (doctor.isActive) throw new BadRequestException('Doctor already active');
-    if (doctor.inviteToken !== token) throw new BadRequestException('Invalid invite token');
-    if (new Date() > doctor.inviteExpiresAt) throw new BadRequestException('Invite token expired');
+    // Validate password strength
+    if (!password || password.length < 6) {
+      throw new BadRequestException('Password must be at least 6 characters long');
+    }
 
-    doctor.password = await bcrypt.hash(password, 10);
-    doctor.isActive = true;
-    doctor.inviteToken = null;
-    doctor.inviteExpiresAt = null;
+    // Use transaction for data integrity
+    const queryRunner = this.usersRepository.manager.connection.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
 
-    return this.usersRepository.save(doctor);
+    try {
+      // Find doctor with proper locking to prevent race conditions
+      const doctor = await queryRunner.manager.findOne(User, { 
+        where: { id: uid, role: UserRole.DOCTOR },
+        lock: { mode: 'pessimistic_write' }
+      });
+
+      if (!doctor) {
+        await queryRunner.rollbackTransaction();
+        throw new NotFoundException('Doctor not found');
+      }
+
+      if (doctor.isActive && doctor.password) {
+        await queryRunner.rollbackTransaction();
+        throw new BadRequestException('Doctor already has a password set. Please use password reset instead.');
+      }
+
+      if (!doctor.inviteToken) {
+        await queryRunner.rollbackTransaction();
+        throw new BadRequestException('No active invitation found for this doctor');
+      }
+
+      if (doctor.inviteToken !== token) {
+        await queryRunner.rollbackTransaction();
+        throw new BadRequestException('Invalid invite token');
+      }
+
+      if (!doctor.inviteExpiresAt || new Date() > doctor.inviteExpiresAt) {
+        await queryRunner.rollbackTransaction();
+        throw new BadRequestException('Invite token has expired. Please request a new invitation.');
+      }
+
+      // Hash password with bcrypt
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      // Update doctor: set password, activate, and clear invitation
+      doctor.password = hashedPassword;
+      doctor.isActive = true;
+      doctor.inviteToken = null;
+      doctor.inviteExpiresAt = null;
+      doctor.mustChangePassword = false;
+
+      const savedDoctor = await queryRunner.manager.save(doctor);
+      await queryRunner.commitTransaction();
+
+      console.log(`[DoctorsService] Password set successfully for doctor: ${doctor.email}`);
+      return this.sanitizeDoctor(savedDoctor) as User;
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      console.error('[DoctorsService] Failed to set doctor password:', error);
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
   }
 
   async validateLicense(doctorId: string): Promise<User> {
