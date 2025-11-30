@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsEnum, IsDateString } from "class-validator";
+import { IsString, IsOptional, IsEnum, IsDateString, IsNumber } from "class-validator";
 import { MedicalRecordType } from "../entities/medical-record.entity";
 
 export class CreateMedicalRecordDto {
@@ -27,4 +27,16 @@ export class CreateMedicalRecordDto {
   @IsString()
   @IsOptional()
   notes?: string;
+
+  @IsString()
+  @IsOptional()
+  description?: string;
+
+  @IsNumber()
+  @IsOptional()
+  fileSize?: number;
+
+  @IsString()
+  @IsOptional()
+  status?: string;
 }

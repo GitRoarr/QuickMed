@@ -2,7 +2,7 @@ import { Component, OnInit, signal, inject } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '@core/services/auth.service';
-import { PrescriptionService, Prescription } from '@core/services/prescription.service';
+import { DoctorService, DoctorAnalytics } from '@core/services/doctor.service';
 
 interface MenuItem {
   label: string;
@@ -11,23 +11,21 @@ interface MenuItem {
   badge?: number;
 }
 
-
 @Component({
-  selector: 'app-doctor-prescriptions',
+  selector: 'app-doctor-analytics',
   standalone: true,
   imports: [CommonModule, RouterModule, DatePipe],
-  templateUrl: './prescriptions.component.html',
-  styleUrls: ['./prescriptions.component.css']
+  templateUrl: './analytics.component.html',
+  styleUrls: ['./analytics.component.css']
 })
-export class PrescriptionsComponent implements OnInit {
+export class AnalyticsComponent implements OnInit {
   private authService = inject(AuthService);
   private router = inject(Router);
-  private prescriptionService = inject(PrescriptionService);
+  private doctorService = inject(DoctorService);
 
-  prescriptions = signal<Prescription[]>([]);
-  filteredPrescriptions = signal<Prescription[]>([]);
+  analytics = signal<DoctorAnalytics | null>(null);
   isLoading = signal(true);
-  searchQuery = signal('');
+  selectedPeriod = signal('6months');
   currentUser = signal<any>(null);
 
   menuItems: MenuItem[] = [
@@ -42,9 +40,16 @@ export class PrescriptionsComponent implements OnInit {
     { label: 'Settings', icon: 'bi-gear', route: '/doctor/settings' },
   ];
 
+  periodOptions = [
+    { value: '7days', label: '7 Days' },
+    { value: '30days', label: '30 Days' },
+    { value: '6months', label: '6 Months' },
+    { value: '1year', label: '1 Year' },
+  ];
+
   ngOnInit(): void {
     this.loadUserData();
-    this.loadPrescriptions();
+    this.loadAnalytics();
   }
 
   loadUserData(): void {
@@ -52,19 +57,23 @@ export class PrescriptionsComponent implements OnInit {
     this.currentUser.set(user);
   }
 
-  loadPrescriptions(): void {
+  loadAnalytics(): void {
     this.isLoading.set(true);
-    this.prescriptionService.getAll(this.searchQuery() || undefined).subscribe({
+    this.doctorService.getAnalytics(this.selectedPeriod()).subscribe({
       next: (data) => {
-        this.prescriptions.set(data);
-        this.filteredPrescriptions.set(data);
+        this.analytics.set(data);
         this.isLoading.set(false);
       },
       error: (error) => {
-        console.error('Error loading prescriptions:', error);
+        console.error('Error loading analytics:', error);
         this.isLoading.set(false);
       }
     });
+  }
+
+  onPeriodChange(period: string): void {
+    this.selectedPeriod.set(period);
+    this.loadAnalytics();
   }
 
   getDoctorName(): string {
@@ -90,30 +99,44 @@ export class PrescriptionsComponent implements OnInit {
     return name.substring(0, 2).toUpperCase();
   }
 
-  onSearchChange(): void {
-    this.loadPrescriptions();
+  getAppointmentTrendData() {
+    const data = this.analytics();
+    if (!data) return { months: [], completed: [], cancelled: [], noShow: [] };
+
+    const months = Object.keys(data.appointmentTrends).sort();
+    return {
+      months: months.map(m => {
+        const date = new Date(m + '-01');
+        return date.toLocaleDateString('en-US', { month: 'short' });
+      }),
+      completed: months.map(m => data.appointmentTrends[m]?.completed || 0),
+      cancelled: months.map(m => data.appointmentTrends[m]?.cancelled || 0),
+      noShow: months.map(m => data.appointmentTrends[m]?.noShow || 0),
+    };
   }
 
-  viewPrescription(prescription: Prescription): void {
-    console.log('View prescription:', prescription);
-    // Navigate to prescription details
+  getMaxChartValue(): number {
+    const trendData = this.getAppointmentTrendData();
+    const allValues = [...trendData.completed, ...trendData.cancelled, ...trendData.noShow];
+    if (!allValues || allValues.length === 0) return 1;
+    return Math.max(...allValues, 1);
   }
 
-  downloadPrescription(prescription: Prescription): void {
-    console.log('Download prescription:', prescription);
-    // Implement download logic - could generate PDF
+  getCompletedValue(index: number): number {
+    return this.getAppointmentTrendData().completed[index] || 0;
   }
 
-  getPatientName(prescription: Prescription): string {
-    if (prescription.patient) {
-      return `${prescription.patient.firstName} ${prescription.patient.lastName}`;
-    }
-    return 'Unknown Patient';
+  getCancelledValue(index: number): number {
+    return this.getAppointmentTrendData().cancelled[index] || 0;
   }
 
-  createNewPrescription(): void {
-    console.log('Create new prescription');
-    // Navigate to create prescription form
+  getNoShowValue(index: number): number {
+    return this.getAppointmentTrendData().noShow[index] || 0;
+  }
+
+  getBarHeight(value: number, maxValue: number): number {
+    if (!maxValue || maxValue === 0) return 0;
+    return (value / maxValue) * 100;
   }
 
   logout(): void {

@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn, UpdateDateColumn } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn, UpdateDateColumn } from "typeorm";
 import { User } from "../../users/entities/user.entity";
 
 export enum MedicalRecordType {
@@ -23,11 +23,19 @@ export class MedicalRecord {
   @Column({ type: 'timestamptz', nullable: true })
   recordDate: Date;
 
-  @ManyToOne(() => User, (user) => user.id, { nullable: false })
+  @ManyToOne(() => User, { nullable: false })
+  @JoinColumn({ name: 'patientId' })
   patient: User;
 
-  @ManyToOne(() => User, (user) => user.id, { nullable: true })
+  @Column()
+  patientId: string;
+
+  @ManyToOne(() => User, { nullable: true })
+  @JoinColumn({ name: 'doctorId' })
   doctor?: User;
+
+  @Column({ nullable: true })
+  doctorId?: string;
 
   @Column({ nullable: true })
   fileUrl?: string;

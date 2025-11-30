@@ -52,12 +52,12 @@ export class MedicalRecordsComponent implements OnInit {
     }
 
     this.recordsService.getByPatient(user.id).subscribe({
-      next: (r) => {
+      next: (r: MedicalRecord[]) => {
         this.records.set(r);
         this.updateCounts(r || []);
         this.isLoading.set(false);
       },
-      error: (err) => {
+      error: (err: any) => {
         console.error('Failed to load medical records', err);
         this.records.set([]);
         this.isLoading.set(false);

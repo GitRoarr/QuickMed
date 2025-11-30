@@ -141,13 +141,14 @@ export class MessagesService {
       .getMany();
   }
 
-  async getUnreadCount(doctorId: string): Promise<number> {
-    return this.messagesRepository.count({
+  async getUnreadCount(doctorId: string): Promise<{ count: number }> {
+    const count = await this.messagesRepository.count({
       where: {
         receiverId: doctorId,
         isRead: false,
         senderType: MessageSenderType.PATIENT,
       },
     });
+    return { count };
   }
 }

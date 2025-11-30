@@ -26,9 +26,14 @@ export class MedicalRecordsService {
       type: createDto.type ?? MedicalRecordType.OTHER,
       recordDate: createDto.recordDate ? new Date(createDto.recordDate) : undefined,
       patient,
+      patientId: createDto.patientId,
       doctor,
+      doctorId: createDto.doctorId,
       fileUrl: createDto.fileUrl,
       notes: createDto.notes,
+      description: createDto.description,
+      fileSize: createDto.fileSize,
+      status: createDto.status || 'pending',
     });
 
     const saved = await this.recordsRepository.save(record);
@@ -52,7 +57,7 @@ export class MedicalRecordsService {
       .createQueryBuilder('record')
       .leftJoinAndSelect('record.patient', 'patient')
       .leftJoinAndSelect('record.doctor', 'doctor')
-      .where('record.doctor.id = :doctorId', { doctorId })
+      .where('record.doctorId = :doctorId', { doctorId })
       .orderBy('record.recordDate', 'DESC');
 
     if (search) {
@@ -73,7 +78,7 @@ export class MedicalRecordsService {
 
   async delete(id: string, doctorId: string) {
     const rec = await this.findOne(id);
-    if (rec.doctor?.id !== doctorId) {
+    if (rec.doctorId !== doctorId) {
       throw new NotFoundException('Record not found or access denied');
     }
     await this.recordsRepository.remove(rec);

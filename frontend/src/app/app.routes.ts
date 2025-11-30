@@ -131,6 +131,34 @@ export const routes: Routes = [
           ),
       },
       {
+        path: "messages",
+        loadComponent: () =>
+          import("./features/doctor/messages/messages.component").then(
+            (m) => m.MessagesComponent
+          ),
+      },
+      {
+        path: "records",
+        loadComponent: () =>
+          import("./features/doctor/records/records.component").then(
+            (m) => m.RecordsComponent
+          ),
+      },
+      {
+        path: "analytics",
+        loadComponent: () =>
+          import("./features/doctor/analytics/analytics.component").then(
+            (m) => m.AnalyticsComponent
+          ),
+      },
+      {
+        path: "settings",
+        loadComponent: () =>
+          import("./features/doctor/settings/settings.component").then(
+            (m) => m.SettingsComponent
+          ),
+      },
+      {
         path: "",
         pathMatch: "full",
         redirectTo: "dashboard",

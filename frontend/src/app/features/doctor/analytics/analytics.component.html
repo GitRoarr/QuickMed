@@ -1,0 +1,192 @@
+<div class="doctor-analytics">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="logo">
+        <div class="logo-icon">QM</div>
+        <div class="logo-text">
+          <h3>QuickMed</h3>
+          <p>Doctor Portal</p>
+        </div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a
+        *ngFor="let item of menuItems"
+        [routerLink]="item.route"
+        routerLinkActive="active"
+        class="nav-item"
+      >
+        <i [class]="'bi ' + item.icon"></i>
+        <span>{{ item.label }}</span>
+        <span *ngIf="item.badge" class="badge">{{ item.badge }}</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="user-avatar">
+          {{ getDoctorInitials() }}
+        </div>
+        <div class="user-details">
+          <p class="user-name">Dr. {{ getDoctorName() }}</p>
+          <p class="user-role">{{ getDoctorSpecialty() }}</p>
+        </div>
+      </div>
+      <button class="logout-btn" (click)="logout()">
+        <i class="bi bi-box-arrow-right"></i>
+        Logout
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <header class="content-header">
+      <div>
+        <h1 class="page-title">Analytics & Performance</h1>
+        <p class="page-subtitle">Your practice performance metrics and insights</p>
+      </div>
+      <div class="period-filters">
+        <button
+          *ngFor="let period of periodOptions"
+          class="period-btn"
+          [class.active]="selectedPeriod() === period.value"
+          (click)="onPeriodChange(period.value)"
+        >
+          {{ period.label }}
+        </button>
+      </div>
+    </header>
+
+    <!-- Loading State -->
+    <div *ngIf="isLoading()" class="loading-container">
+      <div class="spinner"></div>
+      <p>Loading analytics...</p>
+    </div>
+
+    <!-- Analytics Content -->
+    <div *ngIf="!isLoading() && analytics()" class="analytics-content">
+      <!-- KPI Cards -->
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-header">
+            <h3>Total Appointments</h3>
+            <i class="bi bi-calendar-check kpi-icon"></i>
+          </div>
+          <div class="kpi-value">{{ analytics()!.kpis.totalAppointments }}</div>
+          <div class="kpi-footer">
+            <span class="kpi-trend positive">
+              <i class="bi bi-arrow-up"></i>
+              +{{ analytics()!.trends.appointmentsChange }}% from last month
+            </span>
+          </div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-header">
+            <h3>Completion Rate</h3>
+            <i class="bi bi-check-circle kpi-icon"></i>
+          </div>
+          <div class="kpi-value">{{ analytics()!.kpis.completionRate }}%</div>
+          <div class="kpi-footer">
+            <span class="kpi-trend positive">
+              <i class="bi bi-arrow-up"></i>
+              +{{ analytics()!.trends.completionChange }}% improvement
+            </span>
+          </div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-header">
+            <h3>Patient Satisfaction</h3>
+            <i class="bi bi-star kpi-icon"></i>
+          </div>
+          <div class="kpi-value">{{ analytics()!.kpis.patientSatisfaction }}/5</div>
+          <div class="kpi-footer">
+            <span class="kpi-trend positive">
+              <i class="bi bi-arrow-up"></i>
+              +{{ analytics()!.trends.satisfactionChange }} points
+            </span>
+          </div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-header">
+            <h3>New Patients</h3>
+            <i class="bi bi-people kpi-icon"></i>
+          </div>
+          <div class="kpi-value">{{ analytics()!.kpis.newPatients }}</div>
+          <div class="kpi-footer">
+            <span class="kpi-trend positive">
+              <i class="bi bi-arrow-up"></i>
+              +{{ analytics()!.trends.newPatientsChange }} vs last month
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Charts -->
+      <div class="charts-grid">
+        <!-- Appointment Trends Chart -->
+        <div class="chart-card">
+          <h3 class="chart-title">Appointment Trends</h3>
+          <p class="chart-subtitle">Completed, cancelled, and no-show appointments</p>
+          <div class="chart-container">
+            <div class="chart-bars">
+              <div *ngFor="let month of getAppointmentTrendData().months; let i = index" class="bar-wrapper">
+                <div class="bars-group">
+                  <div
+                    class="bar completed"
+                    [style.height.%]="getBarHeight(getCompletedValue(i), getMaxChartValue())"
+                    [title]="'Completed: ' + getCompletedValue(i)"
+                  ></div>
+                  <div
+                    class="bar cancelled"
+                    [style.height.%]="getBarHeight(getCancelledValue(i), getMaxChartValue())"
+                    [title]="'Cancelled: ' + getCancelledValue(i)"
+                  ></div>
+                  <div
+                    class="bar noShow"
+                    [style.height.%]="getBarHeight(getNoShowValue(i), getMaxChartValue())"
+                    [title]="'No Show: ' + getNoShowValue(i)"
+                  ></div>
+                </div>
+                <div class="bar-label">{{ month }}</div>
+              </div>
+            </div>
+            <div class="chart-legend">
+              <div class="legend-item">
+                <div class="legend-color completed"></div>
+                <span>completed</span>
+              </div>
+              <div class="legend-item">
+                <div class="legend-color cancelled"></div>
+                <span>cancelled</span>
+              </div>
+              <div class="legend-item">
+                <div class="legend-color noShow"></div>
+                <span>noShow</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Satisfaction Trend Chart -->
+        <div class="chart-card">
+          <h3 class="chart-title">Patient Satisfaction Trend</h3>
+          <p class="chart-subtitle">Average satisfaction rating over time</p>
+          <div class="chart-container">
+            <div class="satisfaction-chart">
+              <div class="chart-placeholder">
+                <p>Satisfaction trend visualization</p>
+                <small>Jan - Jun 2025</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>

@@ -2,7 +2,7 @@ import { Component, OnInit, signal, inject } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '@core/services/auth.service';
-import { PrescriptionService, Prescription } from '@core/services/prescription.service';
+import { MedicalRecordService, MedicalRecord } from '@core/services/medical-record.service';
 
 interface MenuItem {
   label: string;
@@ -11,21 +11,19 @@ interface MenuItem {
   badge?: number;
 }
 
-
 @Component({
-  selector: 'app-doctor-prescriptions',
+  selector: 'app-doctor-records',
   standalone: true,
   imports: [CommonModule, RouterModule, DatePipe],
-  templateUrl: './prescriptions.component.html',
-  styleUrls: ['./prescriptions.component.css']
+  templateUrl: './records.component.html',
+  styleUrls: ['./records.component.css']
 })
-export class PrescriptionsComponent implements OnInit {
+export class RecordsComponent implements OnInit {
   private authService = inject(AuthService);
   private router = inject(Router);
-  private prescriptionService = inject(PrescriptionService);
+  private medicalRecordService = inject(MedicalRecordService);
 
-  prescriptions = signal<Prescription[]>([]);
-  filteredPrescriptions = signal<Prescription[]>([]);
+  records = signal<MedicalRecord[]>([]);
   isLoading = signal(true);
   searchQuery = signal('');
   currentUser = signal<any>(null);
@@ -44,7 +42,7 @@ export class PrescriptionsComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadUserData();
-    this.loadPrescriptions();
+    this.loadRecords();
   }
 
   loadUserData(): void {
@@ -52,19 +50,84 @@ export class PrescriptionsComponent implements OnInit {
     this.currentUser.set(user);
   }
 
-  loadPrescriptions(): void {
+  loadRecords(): void {
     this.isLoading.set(true);
-    this.prescriptionService.getAll(this.searchQuery() || undefined).subscribe({
+    this.medicalRecordService.getMyRecords(this.searchQuery() || undefined).subscribe({
       next: (data) => {
-        this.prescriptions.set(data);
-        this.filteredPrescriptions.set(data);
+        this.records.set(data);
         this.isLoading.set(false);
       },
       error: (error) => {
-        console.error('Error loading prescriptions:', error);
+        console.error('Error loading records:', error);
         this.isLoading.set(false);
       }
     });
+  }
+
+  onSearchChange(): void {
+    this.loadRecords();
+  }
+
+  viewRecord(record: MedicalRecord): void {
+    if (record.fileUrl) {
+      window.open(record.fileUrl, '_blank');
+    }
+  }
+
+  downloadRecord(record: MedicalRecord): void {
+    this.medicalRecordService.download(record.id).subscribe({
+      next: (data) => {
+        if (data.url) {
+          window.open(data.url, '_blank');
+        }
+      },
+      error: () => {
+        alert('Failed to download record');
+      }
+    });
+  }
+
+  deleteRecord(record: MedicalRecord): void {
+    if (confirm('Are you sure you want to delete this record?')) {
+      this.medicalRecordService.delete(record.id).subscribe({
+        next: () => {
+          this.loadRecords();
+        },
+        error: () => {
+          alert('Failed to delete record');
+        }
+      });
+    }
+  }
+
+  uploadRecord(): void {
+    // Navigate to upload form or open modal
+    console.log('Upload record');
+  }
+
+  getPatientName(record: MedicalRecord): string {
+    if (record.patient) {
+      return `${record.patient.firstName} ${record.patient.lastName}`;
+    }
+    return 'Unknown Patient';
+  }
+
+  getRecordTypeLabel(type: string): string {
+    const labels: { [key: string]: string } = {
+      'lab': 'Lab Report',
+      'prescription': 'Prescription',
+      'imaging': 'X-Ray',
+      'diagnosis': 'Diagnosis',
+      'other': 'Other',
+    };
+    return labels[type] || type;
+  }
+
+  formatFileSize(bytes: number | undefined): string {
+    if (!bytes) return 'N/A';
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
   }
 
   getDoctorName(): string {
@@ -88,32 +151,6 @@ export class PrescriptionsComponent implements OnInit {
       return (parts[0][0] + parts[1][0]).toUpperCase();
     }
     return name.substring(0, 2).toUpperCase();
-  }
-
-  onSearchChange(): void {
-    this.loadPrescriptions();
-  }
-
-  viewPrescription(prescription: Prescription): void {
-    console.log('View prescription:', prescription);
-    // Navigate to prescription details
-  }
-
-  downloadPrescription(prescription: Prescription): void {
-    console.log('Download prescription:', prescription);
-    // Implement download logic - could generate PDF
-  }
-
-  getPatientName(prescription: Prescription): string {
-    if (prescription.patient) {
-      return `${prescription.patient.firstName} ${prescription.patient.lastName}`;
-    }
-    return 'Unknown Patient';
-  }
-
-  createNewPrescription(): void {
-    console.log('Create new prescription');
-    // Navigate to create prescription form
   }
 
   logout(): void {

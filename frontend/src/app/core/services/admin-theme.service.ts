@@ -90,11 +90,11 @@ export class AdminThemeService {
   deleteTheme(id: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/themes/${id}`);
   }
+  // good work
 
   applyTheme(theme: Theme): void {
     const root = document.documentElement;
     
-    // Set CSS custom properties
     root.style.setProperty('--primary-color', theme.primaryColor);
     root.style.setProperty('--primary-hover', theme.primaryHover);
     root.style.setProperty('--primary-light', theme.primaryLight);

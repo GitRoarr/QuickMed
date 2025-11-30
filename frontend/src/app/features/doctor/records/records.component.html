@@ -1,4 +1,4 @@
-<div class="doctor-prescriptions">
+<div class="doctor-records">
   <!-- Sidebar -->
   <aside class="sidebar">
     <div class="sidebar-header">
@@ -45,13 +45,19 @@
   <main class="main-content">
     <header class="content-header">
       <div>
-        <h1 class="page-title">Prescriptions</h1>
-        <p class="page-subtitle">Create and manage patient prescriptions</p>
+        <h1 class="page-title">Medical Records</h1>
+        <p class="page-subtitle">View and manage patient medical records and documents</p>
       </div>
-      <button class="btn-primary" (click)="createNewPrescription()">
-        <i class="bi bi-plus-circle"></i>
-        New Prescription
-      </button>
+      <div class="header-actions">
+        <button class="btn-secondary">
+          <i class="bi bi-funnel"></i>
+          Filter
+        </button>
+        <button class="btn-primary" (click)="uploadRecord()">
+          <i class="bi bi-plus-circle"></i>
+          Upload Record
+        </button>
+      </div>
     </header>
 
     <!-- Search Bar -->
@@ -60,7 +66,7 @@
         <i class="bi bi-search search-icon"></i>
         <input
           type="text"
-          placeholder="Search by patient name or medication..."
+          placeholder="Search by patient name or record type..."
           [value]="searchQuery()"
           (input)="searchQuery.set($any($event.target).value); onSearchChange()"
           class="search-input"
@@ -71,62 +77,61 @@
     <!-- Loading State -->
     <div *ngIf="isLoading()" class="loading-container">
       <div class="spinner"></div>
-      <p>Loading prescriptions...</p>
+      <p>Loading records...</p>
     </div>
 
-    <!-- Prescriptions List -->
-    <div *ngIf="!isLoading()" class="prescriptions-list">
+    <!-- Records List -->
+    <div *ngIf="!isLoading()" class="records-list">
       <div
-        *ngFor="let prescription of filteredPrescriptions()"
-        class="prescription-card"
+        *ngFor="let record of records()"
+        class="record-card"
       >
-        <div class="prescription-header">
-          <div class="medication-info">
-            <div class="medication-icon">
-              <i class="bi bi-capsule"></i>
-            </div>
-            <div>
-              <h3 class="medication-name">{{ prescription.medication }} - {{ prescription.dosage }}</h3>
-              <p class="patient-name">Patient: {{ getPatientName(prescription) }}</p>
-            </div>
+        <div class="record-header">
+          <div class="record-icon">
+            <i class="bi bi-file-earmark-medical"></i>
           </div>
-          <div class="prescription-status">
-            <span [class]="'status-badge ' + prescription.status">
-              {{ prescription.status | titlecase }}
+          <div class="record-info">
+            <h3 class="record-type">{{ getRecordTypeLabel(record.type) }}</h3>
+            <p class="record-description">{{ record.description || record.title }}</p>
+            <p class="record-patient">Patient: {{ getPatientName(record) }}</p>
+          </div>
+          <div class="record-status">
+            <span [class]="'status-badge ' + (record.status || 'pending')">
+              {{ (record.status || 'pending') | titlecase }}
             </span>
           </div>
         </div>
 
-        <div class="prescription-details">
-          <div class="detail-item">
-            <i class="bi bi-clock"></i>
-            <span><strong>Frequency:</strong> {{ prescription.frequency }}</span>
-          </div>
-          <div class="detail-item">
-            <i class="bi bi-calendar"></i>
-            <span><strong>Duration:</strong> {{ prescription.duration }}</span>
-          </div>
+        <div class="record-details">
           <div class="detail-item">
             <i class="bi bi-calendar-date"></i>
-            <span><strong>Date:</strong> {{ prescription.prescriptionDate | date:'yyyy-MM-dd' }}</span>
+            <span>Date: {{ record.recordDate | date:'yyyy-MM-dd' }}</span>
+          </div>
+          <div class="detail-item" *ngIf="record.fileSize">
+            <i class="bi bi-file-earmark"></i>
+            <span>Size: {{ formatFileSize(record.fileSize) }}</span>
           </div>
         </div>
 
-        <div class="prescription-actions">
-          <button class="action-btn view" (click)="viewPrescription(prescription)">
+        <div class="record-actions">
+          <button class="action-btn view" (click)="viewRecord(record)">
             <i class="bi bi-eye"></i>
-            View
+            View Record
           </button>
-          <button class="action-btn download" (click)="downloadPrescription(prescription)">
+          <button class="action-btn download" (click)="downloadRecord(record)">
             <i class="bi bi-download"></i>
             Download
+          </button>
+          <button class="action-btn delete" (click)="deleteRecord(record)">
+            <i class="bi bi-trash"></i>
+            Delete
           </button>
         </div>
       </div>
 
-      <div *ngIf="filteredPrescriptions().length === 0" class="empty-state">
-        <i class="bi bi-prescription2"></i>
-        <p>No prescriptions found</p>
+      <div *ngIf="records().length === 0" class="empty-state">
+        <i class="bi bi-file-earmark-medical"></i>
+        <p>No medical records found</p>
       </div>
     </div>
   </main>

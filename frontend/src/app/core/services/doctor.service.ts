@@ -46,6 +46,23 @@ export interface DoctorStats {
   cancelled: number;
 }
 
+export interface DoctorAnalytics {
+  kpis: {
+    totalAppointments: number;
+    completionRate: number;
+    patientSatisfaction: number;
+    newPatients: number;
+  };
+  trends: {
+    appointmentsChange: number;
+    completionChange: number;
+    satisfactionChange: number;
+    newPatientsChange: number;
+  };
+  appointmentTrends: { [key: string]: { completed: number; cancelled: number; noShow: number } };
+  satisfactionTrend: number[];
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -60,5 +77,9 @@ export class DoctorService {
 
   getStats(): Observable<DoctorStats> {
     return this.http.get<DoctorStats>(`${this.API_URL}/stats`);
+  }
+
+  getAnalytics(period: string = '6months'): Observable<DoctorAnalytics> {
+    return this.http.get<DoctorAnalytics>(`${this.API_URL}/analytics`, { params: { period } });
   }
 }

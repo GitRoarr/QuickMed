@@ -1,28 +1,80 @@
-import { Injectable } from "@angular/core";
-import { HttpClient } from "@angular/common/http";
-import { environment } from "@environments/environment";
-import { Observable } from "rxjs";
-import { MedicalRecord } from "../models/medical-record.model";
+import { Injectable } from '@angular/core';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { environment } from '@environments/environment';
 
-@Injectable({ providedIn: 'root' })
+export interface MedicalRecord {
+  id: string;
+  title: string;
+  type: 'lab' | 'prescription' | 'imaging' | 'diagnosis' | 'other';
+  recordDate?: string;
+  patientId: string;
+  patient?: {
+    id: string;
+    firstName: string;
+    lastName: string;
+  };
+  doctorId?: string;
+  doctor?: {
+    id: string;
+    firstName: string;
+    lastName: string;
+  };
+  fileUrl?: string;
+  notes?: string;
+  description?: string;
+  fileSize?: number;
+  status?: 'verified' | 'pending' | 'rejected';
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateMedicalRecordDto {
+  title: string;
+  type?: 'lab' | 'prescription' | 'imaging' | 'diagnosis' | 'other';
+  recordDate?: string;
+  patientId: string;
+  doctorId?: string;
+  fileUrl?: string;
+  notes?: string;
+  description?: string;
+  fileSize?: number;
+  status?: 'verified' | 'pending' | 'rejected';
+}
+
+@Injectable({
+  providedIn: 'root',
+})
 export class MedicalRecordService {
-  private readonly API = `${environment.apiUrl}/medical-records`;
+  private readonly API_URL = `${environment.apiUrl}/medical-records`;
 
   constructor(private http: HttpClient) {}
 
+  create(data: CreateMedicalRecordDto): Observable<MedicalRecord> {
+    return this.http.post<MedicalRecord>(this.API_URL, data);
+  }
+
+  getMyRecords(search?: string): Observable<MedicalRecord[]> {
+    let params = new HttpParams();
+    if (search) {
+      params = params.set('search', search);
+    }
+    return this.http.get<MedicalRecord[]>(`${this.API_URL}/my`, { params });
+  }
+
   getByPatient(patientId: string): Observable<MedicalRecord[]> {
-    return this.http.get<MedicalRecord[]>(`${this.API}/patient/${patientId}`);
+    return this.http.get<MedicalRecord[]>(`${this.API_URL}/patient/${patientId}`);
   }
 
   getOne(id: string): Observable<MedicalRecord> {
-    return this.http.get<MedicalRecord>(`${this.API}/${id}`);
+    return this.http.get<MedicalRecord>(`${this.API_URL}/${id}`);
   }
 
-  download(id: string) {
-    return this.http.get<{url?: string}>(`${this.API}/${id}/download`);
+  download(id: string): Observable<{ url: string }> {
+    return this.http.get<{ url: string }>(`${this.API_URL}/${id}/download`);
   }
 
-  create(payload: Partial<MedicalRecord>) {
-    return this.http.post<MedicalRecord>(this.API, payload);
+  delete(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.API_URL}/${id}`);
   }
 }

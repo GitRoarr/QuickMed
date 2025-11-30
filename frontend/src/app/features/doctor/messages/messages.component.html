@@ -1,0 +1,158 @@
+<div class="doctor-messages">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="logo">
+        <div class="logo-icon">QM</div>
+        <div class="logo-text">
+          <h3>QuickMed</h3>
+          <p>Doctor Portal</p>
+        </div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a
+        *ngFor="let item of menuItems"
+        [routerLink]="item.route"
+        routerLinkActive="active"
+        class="nav-item"
+      >
+        <i [class]="'bi ' + item.icon"></i>
+        <span>{{ item.label }}</span>
+        <span *ngIf="item.badge" class="badge">{{ item.badge }}</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="user-avatar">
+          {{ getDoctorInitials() }}
+        </div>
+        <div class="user-details">
+          <p class="user-name">Dr. {{ getDoctorName() }}</p>
+          <p class="user-role">{{ getDoctorSpecialty() }}</p>
+        </div>
+      </div>
+      <button class="logout-btn" (click)="logout()">
+        <i class="bi bi-box-arrow-right"></i>
+        Logout
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <div class="messages-container">
+      <!-- Conversations List -->
+      <div class="conversations-panel">
+        <div class="conversations-header">
+          <h2>Messages</h2>
+          <p class="unread-count">{{ unreadCount() }} unread messages from patients</p>
+          <button class="btn-primary" (click)="navigate('/doctor/patients')">
+            <i class="bi bi-plus-circle"></i>
+            New Message
+          </button>
+        </div>
+
+        <div class="search-bar">
+          <i class="bi bi-search"></i>
+          <input
+            type="text"
+            placeholder="Search conversations..."
+            [value]="searchQuery()"
+            (input)="searchQuery.set($any($event.target).value); onSearchChange()"
+          />
+        </div>
+
+        <div class="conversations-list">
+          <div
+            *ngFor="let conversation of conversations()"
+            class="conversation-item"
+            [class.active]="selectedConversation()?.id === conversation.id"
+            (click)="selectConversation(conversation)"
+          >
+            <div class="conversation-avatar">
+              {{ getPatientInitials(conversation) }}
+            </div>
+            <div class="conversation-details">
+              <div class="conversation-header">
+                <h3>{{ getPatientName(conversation) }}</h3>
+                <span class="conversation-time">{{ getTimeAgo(conversation.lastMessageAt) }}</span>
+              </div>
+              <p class="conversation-preview">{{ conversation.lastMessageContent || 'No messages yet' }}</p>
+            </div>
+            <span *ngIf="conversation.unreadCount > 0" class="unread-badge">
+              {{ conversation.unreadCount }}
+            </span>
+          </div>
+
+          <div *ngIf="conversations().length === 0 && !isLoading()" class="empty-state">
+            <i class="bi bi-chat-dots"></i>
+            <p>No conversations yet</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chat Panel -->
+      <div class="chat-panel">
+        <div *ngIf="!selectedConversation()" class="no-selection">
+          <i class="bi bi-chat-left-text"></i>
+          <p>Select a conversation to start messaging</p>
+        </div>
+
+        <div *ngIf="selectedConversation()" class="chat-window">
+          <div class="chat-header">
+            <div class="chat-user-info">
+              <div class="chat-avatar">
+                {{ getPatientInitials(selectedConversation()!) }}
+              </div>
+              <div>
+                <h3>{{ getPatientName(selectedConversation()!) }}</h3>
+                <p class="user-status">Online now</p>
+              </div>
+            </div>
+            <div class="chat-actions">
+              <button class="icon-btn">
+                <i class="bi bi-telephone"></i>
+              </button>
+              <button class="icon-btn">
+                <i class="bi bi-camera-video"></i>
+              </button>
+              <button class="icon-btn">
+                <i class="bi bi-three-dots-vertical"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="messages-area">
+            <div
+              *ngFor="let message of messages()"
+              class="message"
+              [class.sent]="isMyMessage(message)"
+              [class.received]="!isMyMessage(message)"
+            >
+              <div class="message-content">
+                <p>{{ message.content }}</p>
+                <span class="message-time">{{ message.createdAt | date:'short' }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="message-input-area">
+            <input
+              type="text"
+              placeholder="Type your message...."
+              [value]="messageContent()"
+              (input)="messageContent.set($any($event.target).value)"
+              (keyup.enter)="sendMessage()"
+            />
+            <button class="send-btn" (click)="sendMessage()" [disabled]="!messageContent().trim()">
+              <i class="bi bi-send"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
