@@ -105,12 +105,14 @@ export class DoctorsService {
       const inviteLink = `${process.env.FRONTEND_URL || "http://localhost:4200"}/set-password?token=${inviteToken}&uid=${savedDoctor.id}`;
       
       // Send invitation email (non-blocking)
-      let emailResult = { sent: false, fallbackLink: inviteLink };
+      let emailResult: { sent: boolean; fallbackLink?: string } = { sent: false, fallbackLink: inviteLink };
       try {
-        emailResult = await this.emailService.sendDoctorInvite(savedDoctor.email, inviteLink);
+        const result = await this.emailService.sendDoctorInvite(savedDoctor.email, inviteLink);
+        emailResult = { sent: result.sent, fallbackLink: result.fallbackLink || inviteLink };
       } catch (emailError) {
         console.error("[DoctorsService] Failed to send email, but invitation created:", emailError);
         // Don't fail the whole operation if email fails
+        emailResult = { sent: false, fallbackLink: inviteLink };
       }
 
       console.log("[DoctorsService] Doctor invite created", { 
