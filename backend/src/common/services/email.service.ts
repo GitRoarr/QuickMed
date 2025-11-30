@@ -15,16 +15,47 @@ export class EmailService {
     (async () => {
       // If SMTP is configured, use it
       if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
-        this.transporter = nodemailer.createTransport({
-          host: process.env.SMTP_HOST,
-          port: +(process.env.SMTP_PORT || 587),
-          secure: process.env.SMTP_PORT === '465',
-          auth: {
-            user: process.env.SMTP_USER,
-            pass: process.env.SMTP_PASS,
-          },
-        });
-        return;
+        try {
+          console.log('[EmailService] Initializing SMTP connection...');
+          console.log('[EmailService] SMTP_HOST:', process.env.SMTP_HOST);
+          console.log('[EmailService] SMTP_PORT:', process.env.SMTP_PORT || 587);
+          console.log('[EmailService] SMTP_USER:', process.env.SMTP_USER);
+          
+          this.transporter = nodemailer.createTransport({
+            host: process.env.SMTP_HOST,
+            port: +(process.env.SMTP_PORT || 587),
+            secure: process.env.SMTP_PORT === '465',
+            auth: {
+              user: process.env.SMTP_USER,
+              pass: process.env.SMTP_PASS,
+            },
+            // Add connection timeout and retry options
+            connectionTimeout: 10000,
+            greetingTimeout: 10000,
+            socketTimeout: 10000,
+            // Gmail specific settings
+            tls: {
+              rejectUnauthorized: false, // For development only
+            },
+          });
+          
+          // Verify connection
+          console.log('[EmailService] Verifying SMTP connection...');
+          await this.transporter.verify();
+          console.info('[EmailService] ✅ SMTP connection verified successfully');
+          return;
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : String(error);
+          console.error('[EmailService] ❌ Failed to initialize SMTP:', errorMessage);
+          console.error('[EmailService] Error details:', error);
+          console.warn('[EmailService] ⚠️  Email sending will be disabled. Check SMTP credentials.');
+          console.warn('[EmailService] 💡 For Gmail: Use App Password, not regular password');
+          console.warn('[EmailService] 💡 Generate App Password: https://myaccount.google.com/apppasswords');
+          this.transporter = null;
+        }
+      } else {
+        console.warn('[EmailService] ⚠️  SMTP not configured in .env file');
+        console.warn('[EmailService] Required: SMTP_HOST, SMTP_USER, SMTP_PASS');
       }
 
       // In non-production, create a test account (Ethereal) to preview emails
@@ -57,29 +88,60 @@ export class EmailService {
     const extractLink = () => html.match(/href="([^"]+)"/)?.[1];
 
     if (!this.transporter) {
-      console.log(`[EmailService] Email would be sent to ${to}: ${subject}`);
-      return { sent: false, fallbackLink: extractLink() };
+      console.warn(`[EmailService] ⚠️  No transporter available. Email would be sent to ${to}: ${subject}`);
+      const fallback = extractLink();
+      console.log(`[EmailService] 📋 Fallback invite link: ${fallback || 'N/A'}`);
+      return { sent: false, fallbackLink: fallback };
     }
 
     try {
+      console.log(`[EmailService] 📧 Attempting to send email to: ${to}`);
       const info = await this.transporter.sendMail({
-        from: `"Clinic Admin" <${process.env.SMTP_USER || 'no-reply@example.com'}>` ,
+        from: `"QuickMed Admin" <${process.env.SMTP_USER || 'no-reply@example.com'}>` ,
         to,
         subject,
         html,
       });
 
       const previewUrl = nodemailer.getTestMessageUrl(info) || undefined;
-      console.log(`[EmailService] Email sent successfully to ${to}` + (previewUrl ? ` (preview: ${previewUrl})` : ''));
+      if (previewUrl) {
+        console.log(`[EmailService] ✅ Email sent successfully to ${to}`);
+        console.log(`[EmailService] 👀 Preview URL: ${previewUrl}`);
+      } else {
+        console.log(`[EmailService] ✅ Email sent successfully to ${to} (Message ID: ${info.messageId})`);
+      }
       return { sent: true, previewUrl };
     } catch (err) {
-      console.error('Email sending error:', err);
-      if (process.env.NODE_ENV !== 'production') {
-        const fallback = extractLink();
-        console.log(`[EmailService] Development mode - Invite link: ${fallback || 'N/A'}`);
-        return { sent: false, fallbackLink: fallback };
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      const errorStack = err instanceof Error ? err.stack : undefined;
+      
+      console.error('[EmailService] ❌ Email sending failed!');
+      console.error('[EmailService] Error message:', errorMessage);
+      if (errorStack) {
+        console.error('[EmailService] Error stack:', errorStack);
       }
-      throw new InternalServerErrorException('Failed to send email');
+      
+      // Check for common Gmail errors
+      if (errorMessage.includes('Invalid login') || errorMessage.includes('535')) {
+        console.error('[EmailService] 🔐 Authentication failed!');
+        console.error('[EmailService] 💡 For Gmail: You must use an App Password, not your regular password');
+        console.error('[EmailService] 💡 Steps:');
+        console.error('[EmailService]    1. Go to: https://myaccount.google.com/apppasswords');
+        console.error('[EmailService]    2. Generate a new App Password for "Mail"');
+        console.error('[EmailService]    3. Replace SMTP_PASS in .env with the 16-character App Password');
+      } else if (errorMessage.includes('ECONNECTION') || errorMessage.includes('ETIMEDOUT')) {
+        console.error('[EmailService] 🌐 Connection error!');
+        console.error('[EmailService] 💡 Check your internet connection and SMTP_HOST');
+      } else if (errorMessage.includes('EAUTH')) {
+        console.error('[EmailService] 🔐 Authentication error!');
+        console.error('[EmailService] 💡 Verify SMTP_USER and SMTP_PASS are correct');
+      }
+      
+      // Extract link for fallback
+      const fallback = extractLink();
+      
+      console.warn(`[EmailService] 📋 Returning fallback invite link: ${fallback || 'N/A'}`);
+      return { sent: false, fallbackLink: fallback };
     }
   }
 
