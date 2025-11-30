@@ -74,4 +74,17 @@ export class PaymentService {
   getAppointmentPayments(appointmentId: string): Observable<PaymentDetails[]> {
     return this.http.get<PaymentDetails[]>(`${this.apiUrl}/appointment/${appointmentId}`);
   }
+
+  // Stripe Payment Methods
+  createStripePaymentIntent(data: { appointmentId: string; email?: string; amount?: number }): Observable<{ clientSecret: string; paymentIntentId: string }> {
+    return this.http.post<{ clientSecret: string; paymentIntentId: string }>(`${this.apiUrl}/stripe/create-intent`, data);
+  }
+
+  confirmStripePayment(paymentIntentId: string): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/stripe/confirm`, { paymentIntentId });
+  }
+
+  getStripePayment(paymentIntentId: string): Observable<PaymentDetails> {
+    return this.http.get<PaymentDetails>(`${this.apiUrl}/stripe/payment/${paymentIntentId}`);
+  }
 }

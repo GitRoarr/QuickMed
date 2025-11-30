@@ -207,6 +207,30 @@ export class AdminService {
     return result;
   }
 
+  async resetUserPassword(userId: string, newPassword: string): Promise<void> {
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPassword;
+    user.mustChangePassword = false;
+    await this.userRepository.save(user);
+  }
+
+  async resetUserPasswordByEmail(email: string, newPassword: string): Promise<void> {
+    const user = await this.userRepository.findOne({ where: { email } });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPassword;
+    user.mustChangePassword = false;
+    await this.userRepository.save(user);
+  }
+
   private generateTempPassword(): string {
     // Randomly pick a style
     const rand = Math.floor(Math.random() * 3);

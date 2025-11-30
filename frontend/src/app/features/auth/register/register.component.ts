@@ -16,6 +16,7 @@ export class RegisterComponent {
   registerForm: FormGroup
   errorMessage = ""
   isLoading = false
+  showPassword = false
   @ViewChild('alert') alertRef?: AlertMessageComponent;
 
   constructor(
@@ -69,5 +70,9 @@ export class RegisterComponent {
         }, 0);
       },
     })
+  }
+
+  togglePasswordVisibility(): void {
+    this.showPassword = !this.showPassword;
   }
 }

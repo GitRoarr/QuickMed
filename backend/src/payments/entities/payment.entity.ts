@@ -12,6 +12,7 @@ export enum PaymentStatus {
 
 export enum PaymentMethod {
   CHAPA = 'chapa',
+  STRIPE = 'stripe',
   CASH = 'cash',
   CARD = 'card',
 }
@@ -23,6 +24,9 @@ export class Payment extends BaseEntity {
 
   @Column({ type: 'varchar', length: 255, nullable: true })
   chapaReference: string; // Chapa's tx_ref
+
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  stripePaymentIntentId: string; // Stripe Payment Intent ID
 
   @ManyToOne(() => Appointment)
   @JoinColumn({ name: 'appointmentId' })
@@ -56,13 +60,16 @@ export class Payment extends BaseEntity {
   method: PaymentMethod;
 
   @Column({ type: 'varchar', length: 255, nullable: true })
-  currency: string; // ETB
+  currency: string; // ETB or USD
 
   @Column({ type: 'text', nullable: true })
   description: string;
 
   @Column({ type: 'json', nullable: true })
   chapaResponse: any; // Store Chapa's full response
+
+  @Column({ type: 'json', nullable: true })
+  stripeResponse: any; // Store Stripe's full response
 
   @Column({ type: 'varchar', length: 255, nullable: true })
   callbackUrl: string;

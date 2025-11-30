@@ -1,0 +1,74 @@
+<div class="payment-container">
+  <div class="payment-card">
+    <div class="payment-header">
+      <h2>Complete Payment</h2>
+      <p class="subtitle">Pay for your appointment using Stripe</p>
+    </div>
+
+    <div *ngIf="loading() && !appointment()" class="loading-state">
+      <div class="spinner"></div>
+      <p>Loading appointment details...</p>
+    </div>
+
+    <div *ngIf="error()" class="error-alert">
+      <app-alert-message [message]="error()" type="error" [autoDismiss]="false"></app-alert-message>
+    </div>
+
+    <div *ngIf="success()" class="success-alert">
+      <app-alert-message message="Payment successful! Redirecting..." type="success" [autoDismiss]="false"></app-alert-message>
+    </div>
+
+    <div *ngIf="appointment() && !success()" class="payment-content">
+      <div class="appointment-summary">
+        <h3>Appointment Summary</h3>
+        <div class="summary-item">
+          <span>Doctor:</span>
+          <strong>{{ appointment()?.doctor?.firstName }} {{ appointment()?.doctor?.lastName }}</strong>
+        </div>
+        <div class="summary-item">
+          <span>Date:</span>
+          <strong>{{ appointment()?.appointmentDate | date:'medium' }}</strong>
+        </div>
+        <div class="summary-item" *ngIf="appointment()">
+          <span>Amount:</span>
+          <strong class="amount">Will be calculated</strong>
+        </div>
+      </div>
+
+      <form [formGroup]="paymentForm" (ngSubmit)="handleSubmit()">
+        <div class="form-group">
+          <label for="name">Cardholder Name</label>
+          <input
+            type="text"
+            id="name"
+            formControlName="name"
+            class="form-control"
+            placeholder="John Doe"
+            [class.is-invalid]="paymentForm.get('name')?.invalid && paymentForm.get('name')?.touched"
+          />
+          <div class="invalid-feedback" *ngIf="paymentForm.get('name')?.invalid && paymentForm.get('name')?.touched">
+            Cardholder name is required
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="card-element">Card Details</label>
+          <div id="card-element" class="card-element-container">
+            <!-- Stripe Elements will mount here -->
+          </div>
+          <div id="card-errors" class="card-errors" role="alert"></div>
+        </div>
+
+        <div class="payment-actions">
+          <button type="button" class="btn btn-secondary" (click)="cancel()" [disabled]="processing()">
+            Cancel
+          </button>
+          <button type="submit" class="btn btn-primary" [disabled]="processing() || paymentForm.invalid || !clientSecret()">
+            <span *ngIf="processing()" class="spinner-border spinner-border-sm me-2"></span>
+            {{ processing() ? 'Processing...' : 'Pay Now' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

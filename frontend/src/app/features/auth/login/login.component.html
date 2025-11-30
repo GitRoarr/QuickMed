@@ -45,14 +45,24 @@
           <label for="password" class="form-label">
             <i class="bi bi-lock me-2"></i>Password
           </label>
-          <input
-            type="password"
-            class="form-control"
-            id="password"
-            formControlName="password"
-            placeholder="••••••••"
-            [class.is-invalid]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched"
-          />
+          <div class="password-input-wrapper">
+            <input
+              [type]="showPassword ? 'text' : 'password'"
+              class="form-control"
+              id="password"
+              formControlName="password"
+              placeholder="••••••••"
+              [class.is-invalid]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched"
+            />
+            <button
+              type="button"
+              class="password-toggle-btn"
+              (click)="togglePasswordVisibility()"
+              tabindex="-1"
+            >
+              <i [class]="showPassword ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
+            </button>
+          </div>
           <div class="invalid-feedback" *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched">
             Password must be at least 6 characters
           </div>
@@ -62,7 +72,7 @@
           <a routerLink="/" class="back-link">
             <i class="bi bi-arrow-left me-2"></i> Back
           </a>
-          <a href="#" class="forgot-link">Forgot password?</a>
+          <a routerLink="/forgot-password" class="forgot-link">Forgot password?</a>
         </div>
 
         <button type="submit" class="btn btn-primary btn-submit" [disabled]="isLoading">

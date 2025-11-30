@@ -18,4 +18,15 @@ export class AuthController {
   async login(@Body() loginDto: LoginDto) {
     return this.authService.login(loginDto);
   }
+
+  // Emergency password reset endpoint (DEVELOPMENT ONLY - Remove in production!)
+  @Post("emergency-reset-password")
+  @HttpCode(HttpStatus.OK)
+  async emergencyResetPassword(@Body() body: { email: string; newPassword: string }) {
+    // Only allow in development
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('This endpoint is disabled in production');
+    }
+    return this.authService.emergencyResetPassword(body.email, body.newPassword);
+  }
 }

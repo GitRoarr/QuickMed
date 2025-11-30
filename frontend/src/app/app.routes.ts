@@ -28,6 +28,13 @@ export const routes: Routes = [
       ),
   },
   {
+    path: "forgot-password",
+    loadComponent: () =>
+      import("./features/auth/forgot-password/forgot-password.component").then(
+        (m) => m.ForgotPasswordComponent
+      ),
+  },
+  {
     path: "payment/success",
     loadComponent: () =>
       import("./features/patient/payment-success/payment-success.component").then(
@@ -72,6 +79,13 @@ export const routes: Routes = [
         loadComponent: () =>
           import("./features/patient/payment/payment.component").then(
             (m) => m.PaymentComponent
+          ),
+      },
+      {
+        path: "stripe-payment",
+        loadComponent: () =>
+          import("./features/patient/stripe-payment/stripe-payment.component").then(
+            (m) => m.StripePaymentComponent
           ),
       },
       {

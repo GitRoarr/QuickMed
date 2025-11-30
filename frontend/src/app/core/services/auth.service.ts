@@ -36,6 +36,10 @@ export class AuthService {
     this.router.navigate(["/login"]);
   }
 
+  forgotPassword(email: string): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${this.API_URL}/forgot-password`, { email });
+  }
+
   /** Replace stored user (and keep token untouched). Useful after profile updates. */
   setUser(user: User): void {
     if (!user) return;

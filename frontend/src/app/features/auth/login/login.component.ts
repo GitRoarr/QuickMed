@@ -16,6 +16,7 @@ export class LoginComponent implements OnInit {
   loginForm: FormGroup;
   errorMessage = "";
   isLoading = false;
+  showPassword = false;
   @ViewChild('alert') alertRef?: AlertMessageComponent;
 
   constructor(
@@ -74,5 +75,9 @@ export class LoginComponent implements OnInit {
   resetForm(): void {
     this.loginForm.reset();
     this.errorMessage = "";
+  }
+
+  togglePasswordVisibility(): void {
+    this.showPassword = !this.showPassword;
   }
 }

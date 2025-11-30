@@ -255,4 +255,24 @@ export class AdminController {
   async deleteTheme(@Param('id') id: string) {
     await this.themeService.deleteTheme(id);
   }
+
+  // ---------------- Password Reset (Admin Only) ----------------
+  @Patch('users/:id/reset-password')
+  @Roles(UserRole.ADMIN)
+  async resetUserPassword(
+    @Param('id') id: string,
+    @Body() body: { newPassword: string },
+  ) {
+    await this.adminService.resetUserPassword(id, body.newPassword);
+    return { message: 'Password reset successfully' };
+  }
+
+  @Patch('users/reset-password-by-email')
+  @Roles(UserRole.ADMIN)
+  async resetUserPasswordByEmail(
+    @Body() body: { email: string; newPassword: string },
+  ) {
+    await this.adminService.resetUserPasswordByEmail(body.email, body.newPassword);
+    return { message: 'Password reset successfully' };
+  }
 }

@@ -18,12 +18,17 @@ import { UserRole,} from '../common/index';
 import { User } from '@/users/entities/user.entity';
 
 import { ChapaService } from './chapa.service';
+import { StripeService } from './stripe.service';
 import { InitializePaymentDto } from './dto/initialize-payment.dto';
 import { VerifyPaymentDto } from './dto/verify-payment.dto';
+import { CreateStripePaymentDto, ConfirmStripePaymentDto } from './dto/create-stripe-payment.dto';
 
 @Controller('payments')
 export class PaymentsController {
-  constructor(private readonly chapaService: ChapaService) {}
+  constructor(
+    private readonly chapaService: ChapaService,
+    private readonly stripeService: StripeService,
+  ) {}
 
   @Post('initialize')
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -73,5 +78,45 @@ export class PaymentsController {
   @Roles(UserRole.PATIENT, UserRole.ADMIN, UserRole.RECEPTIONIST, UserRole.DOCTOR)
   async getAppointmentPayments(@Param('appointmentId') appointmentId: string) {
     return this.chapaService.getPaymentsByAppointment(appointmentId);
+  }
+
+  // Stripe Payment Endpoints
+  @Post('stripe/create-intent')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.PATIENT, UserRole.ADMIN, UserRole.RECEPTIONIST)
+  @HttpCode(HttpStatus.OK)
+  async createStripePaymentIntent(
+    @Body() dto: CreateStripePaymentDto,
+    @CurrentUser() user: User,
+  ) {
+    return this.stripeService.createPaymentIntent(
+      dto.appointmentId,
+      user.id,
+      dto.email || user.email,
+      dto.amount,
+    );
+  }
+
+  @Post('stripe/confirm')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.PATIENT, UserRole.ADMIN, UserRole.RECEPTIONIST)
+  @HttpCode(HttpStatus.OK)
+  async confirmStripePayment(@Body() dto: ConfirmStripePaymentDto) {
+    return this.stripeService.confirmPayment(dto.paymentIntentId);
+  }
+
+  @Post('stripe/webhook')
+  @HttpCode(HttpStatus.OK)
+  async handleStripeWebhook(@Req() req: any) {
+    const signature = req.headers['stripe-signature'];
+    // For webhooks, we need raw body. In production, use body-parser with verify option
+    const payload = req.body;
+    return this.stripeService.handleWebhook(signature, payload);
+  }
+
+  @Get('stripe/payment/:paymentIntentId')
+  @UseGuards(JwtAuthGuard)
+  async getStripePayment(@Param('paymentIntentId') paymentIntentId: string) {
+    return this.stripeService.getPaymentByIntentId(paymentIntentId);
   }
 }

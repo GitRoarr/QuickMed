@@ -131,6 +131,44 @@
   color: var(--text-muted);
 }
 
+.password-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-input-wrapper .form-control {
+  padding-right: 3rem;
+}
+
+.password-toggle-btn {
+  position: absolute;
+  right: 0.75rem;
+  background: none;
+  border: none;
+  color: var(--text-gray);
+  cursor: pointer;
+  padding: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s ease;
+  z-index: 1;
+}
+
+.password-toggle-btn:hover {
+  color: var(--primary-color);
+}
+
+.password-toggle-btn:focus {
+  outline: none;
+  color: var(--primary-color);
+}
+
+.password-toggle-btn i {
+  font-size: 1.1rem;
+}
+
 .form-footer {
   display: flex;
   justify-content: space-between;
