@@ -558,16 +558,33 @@ async getSystemHealth(): Promise<{
       .limit(10)
       .getRawMany();
 
-    // Patient growth
-    const patientsByDate = await this.userRepository
-      .createQueryBuilder('user')
-      .select('DATE(user.createdAt)', 'date')
-      .addSelect('COUNT(user.id)', 'count')
-      .where('user.role = :role', { role: UserRole.PATIENT })
-      .andWhere('user.createdAt BETWEEN :start AND :end', { start, end })
-      .groupBy('DATE(user.createdAt)')
-      .orderBy('date', 'ASC')
-      .getRawMany();
+    // Patient growth - use safer date extraction
+    let patientsByDate: Array<{ date: string; count: number }> = [];
+    try {
+      const patients = await this.userRepository.find({
+        where: {
+          role: UserRole.PATIENT,
+          createdAt: Between(start, end),
+        },
+        select: ['createdAt'],
+      });
+      
+      // Group by date manually
+      const patientsByDateMap: { [key: string]: number } = {};
+      patients.forEach(patient => {
+        if (patient.createdAt) {
+          const dateKey = new Date(patient.createdAt).toISOString().split('T')[0];
+          patientsByDateMap[dateKey] = (patientsByDateMap[dateKey] || 0) + 1;
+        }
+      });
+      
+      patientsByDate = Object.entries(patientsByDateMap)
+        .map(([date, count]) => ({ date, count }))
+        .sort((a, b) => a.date.localeCompare(b.date));
+    } catch (error) {
+      console.error('[AdminService] Error fetching patient growth:', error);
+      patientsByDate = [];
+    }
 
     // Revenue trends
     const revenueByDate: { [key: string]: number } = {};
@@ -604,7 +621,10 @@ async getSystemHealth(): Promise<{
         patientsByDate: [],
         revenueByDate: {},
         totalRevenue: 0,
-        period: { start: startDate || new Date(), end: endDate || new Date() },
+        period: { 
+          start: (startDate || new Date()).toISOString().split('T')[0], 
+          end: (endDate || new Date()).toISOString().split('T')[0] 
+        },
         error: 'Failed to generate analytics data',
       };
     }

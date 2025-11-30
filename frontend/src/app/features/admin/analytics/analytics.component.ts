@@ -66,11 +66,36 @@ export class AnalyticsComponent implements OnInit {
     
     this.adminService.getAnalytics(start, end).subscribe({
       next: (data) => {
-        this.analytics.set(data);
+        // Handle error response from backend
+        if (data?.error) {
+          console.warn('Analytics warning:', data.error);
+          // Set empty data structure
+          this.analytics.set({
+            appointmentsByDate: {},
+            statusDistribution: { pending: 0, confirmed: 0, completed: 0, cancelled: 0 },
+            doctorStats: [],
+            patientsByDate: [],
+            revenueByDate: {},
+            totalRevenue: 0,
+            period: { start, end },
+          });
+        } else {
+          this.analytics.set(data);
+        }
         this.isLoading.set(false);
       },
       error: (error) => {
         console.error('Error loading analytics:', error);
+        // Set empty data on error
+        this.analytics.set({
+          appointmentsByDate: {},
+          statusDistribution: { pending: 0, confirmed: 0, completed: 0, cancelled: 0 },
+          doctorStats: [],
+          patientsByDate: [],
+          revenueByDate: {},
+          totalRevenue: 0,
+          period: { start, end },
+        });
         this.isLoading.set(false);
       }
     });
