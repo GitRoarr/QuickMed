@@ -1,11 +1,10 @@
-import { Component, OnInit, signal } from "@angular/core";
-import { CommonModule } from "@angular/common";
+import { Component, OnInit, signal, inject } from "@angular/core";
+import { CommonModule, DatePipe } from "@angular/common";
 import { FormsModule } from "@angular/forms";
-import { Router } from "@angular/router";
-import { SidebarComponent } from "../../admin/shared/sidebar/sidebar.component";
-import { NotificationCenterComponent } from "../../../shared/components/notification-center/notification-center.component";
+import { Router, RouterModule } from "@angular/router";
 import { AppointmentService } from "@core/services/appointment.service";
 import { Appointment, AppointmentStatus } from "@core/models/appointment.model";
+import { AuthService } from "@core/services/auth.service";
 
 interface AppointmentFilter {
   status: string;
@@ -16,7 +15,7 @@ interface AppointmentFilter {
 @Component({
   selector: "app-doctor-appointments",
   standalone: true,
-  imports: [CommonModule, SidebarComponent, FormsModule, NotificationCenterComponent],
+  imports: [CommonModule, FormsModule, RouterModule, DatePipe],
   templateUrl: "./appointments.component.html",
   styleUrls: ["./appointments.component.css"],
 })
@@ -36,12 +35,20 @@ export class AppointmentsComponent implements OnInit {
 
   appointmentsBySlot: { [key: string]: Appointment[] } = {};
 
+  private authService = inject(AuthService);
+  private router = inject(Router);
+  currentUser = signal<any>(null);
+
   menuItems = [
-    { label: "Dashboard", icon: "bi-house", route: "/doctor/dashboard" },
-    { label: "Appointments", icon: "bi-calendar-check", route: "/doctor/appointments" },
-    { label: "Patients", icon: "bi-people", route: "/doctor/patients" },
+    { label: "Dashboard", icon: "bi-house-door", route: "/doctor/dashboard" },
+    { label: "Appointments", icon: "bi-calendar-check", route: "/doctor/appointments", badge: 5 },
     { label: "Schedule", icon: "bi-calendar3", route: "/doctor/schedule" },
-    { label: "Reports", icon: "bi-graph-up", route: "/doctor/reports" },
+    { label: "My Patients", icon: "bi-people", route: "/doctor/patients" },
+    { label: "Medical Records", icon: "bi-file-earmark-medical", route: "/doctor/records" },
+    { label: "Prescriptions", icon: "bi-prescription2", route: "/doctor/prescriptions" },
+    { label: "Messages", icon: "bi-chat-dots", route: "/doctor/messages", badge: 3 },
+    { label: "Analytics", icon: "bi-graph-up", route: "/doctor/analytics" },
+    { label: "Settings", icon: "bi-gear", route: "/doctor/settings" },
   ];
 
   filterOptions = [
@@ -83,10 +90,48 @@ export class AppointmentsComponent implements OnInit {
     "18:00",
   ];
 
-  constructor(private appointmentService: AppointmentService, private router: Router) {}
+  constructor(private appointmentService: AppointmentService) {}
 
   ngOnInit(): void {
+    this.loadUserData();
     this.loadAppointments();
+  }
+
+  loadUserData(): void {
+    const user = this.authService.currentUser();
+    this.currentUser.set(user);
+  }
+
+  getDoctorName(): string {
+    const user = this.currentUser();
+    if (user) {
+      return `${user.firstName} ${user.lastName}`;
+    }
+    return 'Doctor';
+  }
+
+  getDoctorSpecialty(): string {
+    const user = this.currentUser();
+    return user?.specialty || 'General Practitioner';
+  }
+
+  getDoctorInitials(): string {
+    const name = this.getDoctorName();
+    if (!name) return 'DR';
+    const parts = name.split(' ');
+    if (parts.length >= 2) {
+      return (parts[0][0] + parts[1][0]).toUpperCase();
+    }
+    return name.substring(0, 2).toUpperCase();
+  }
+
+  logout(): void {
+    this.authService.logout();
+    this.router.navigate(['/login']);
+  }
+
+  navigate(route: string): void {
+    this.router.navigate([route]);
   }
 
   loadAppointments(): void {

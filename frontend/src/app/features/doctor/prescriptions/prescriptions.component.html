@@ -1,0 +1,133 @@
+<div class="doctor-prescriptions">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="logo">
+        <div class="logo-icon">QM</div>
+        <div class="logo-text">
+          <h3>QuickMed</h3>
+          <p>Doctor Portal</p>
+        </div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a
+        *ngFor="let item of menuItems"
+        [routerLink]="item.route"
+        routerLinkActive="active"
+        class="nav-item"
+      >
+        <i [class]="'bi ' + item.icon"></i>
+        <span>{{ item.label }}</span>
+        <span *ngIf="item.badge" class="badge">{{ item.badge }}</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="user-avatar">
+          {{ getDoctorInitials() }}
+        </div>
+        <div class="user-details">
+          <p class="user-name">Dr. {{ getDoctorName() }}</p>
+          <p class="user-role">{{ getDoctorSpecialty() }}</p>
+        </div>
+      </div>
+      <button class="logout-btn" (click)="logout()">
+        <i class="bi bi-box-arrow-right"></i>
+        Logout
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <header class="content-header">
+      <div>
+        <h1 class="page-title">Prescriptions</h1>
+        <p class="page-subtitle">Create and manage patient prescriptions</p>
+      </div>
+      <button class="btn-primary" (click)="createNewPrescription()">
+        <i class="bi bi-plus-circle"></i>
+        New Prescription
+      </button>
+    </header>
+
+    <!-- Search Bar -->
+    <div class="search-section">
+      <div class="search-input-wrapper">
+        <i class="bi bi-search search-icon"></i>
+        <input
+          type="text"
+          placeholder="Search by patient name or medication..."
+          [value]="searchQuery()"
+          (input)="searchQuery.set($any($event.target).value); onSearchChange()"
+          class="search-input"
+        />
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="isLoading()" class="loading-container">
+      <div class="spinner"></div>
+      <p>Loading prescriptions...</p>
+    </div>
+
+    <!-- Prescriptions List -->
+    <div *ngIf="!isLoading()" class="prescriptions-list">
+      <div
+        *ngFor="let prescription of filteredPrescriptions()"
+        class="prescription-card"
+      >
+        <div class="prescription-header">
+          <div class="medication-info">
+            <div class="medication-icon">
+              <i class="bi bi-capsule"></i>
+            </div>
+            <div>
+              <h3 class="medication-name">{{ prescription.medication }} - {{ prescription.dosage }}</h3>
+              <p class="patient-name">Patient: {{ prescription.patientName }}</p>
+            </div>
+          </div>
+          <div class="prescription-status">
+            <span [class]="'status-badge ' + prescription.status">
+              {{ prescription.status | titlecase }}
+            </span>
+          </div>
+        </div>
+
+        <div class="prescription-details">
+          <div class="detail-item">
+            <i class="bi bi-clock"></i>
+            <span><strong>Frequency:</strong> {{ prescription.frequency }}</span>
+          </div>
+          <div class="detail-item">
+            <i class="bi bi-calendar"></i>
+            <span><strong>Duration:</strong> {{ prescription.duration }}</span>
+          </div>
+          <div class="detail-item">
+            <i class="bi bi-calendar-date"></i>
+            <span><strong>Date:</strong> {{ prescription.date }}</span>
+          </div>
+        </div>
+
+        <div class="prescription-actions">
+          <button class="action-btn view" (click)="viewPrescription(prescription)">
+            <i class="bi bi-eye"></i>
+            View
+          </button>
+          <button class="action-btn download" (click)="downloadPrescription(prescription)">
+            <i class="bi bi-download"></i>
+            Download
+          </button>
+        </div>
+      </div>
+
+      <div *ngIf="filteredPrescriptions().length === 0" class="empty-state">
+        <i class="bi bi-prescription2"></i>
+        <p>No prescriptions found</p>
+      </div>
+    </div>
+  </main>
+</div>

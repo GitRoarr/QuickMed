@@ -1,162 +1,128 @@
-import { Component, OnInit } from "@angular/core"
-import { CommonModule } from "@angular/common"
-import { AppointmentService } from "@core/services/appointment.service"
-import { Appointment } from "@core/models/appointment.model"
-import  { ThemeService } from "@core/services/theme.service"
+import { Component, OnInit, signal, inject } from '@angular/core';
+import { CommonModule, DatePipe } from '@angular/common';
+import { Router } from '@angular/router';
+import { DoctorService, DoctorDashboardData } from '@core/services/doctor.service';
+import { AuthService } from '@core/services/auth.service';
 
-interface AppointmentData {
-  id: number
-  time: string
-  patient: string
-  age: number
-  type: string
-  status: string
-  reason: string
-  duration: string
+interface MenuItem {
+  label: string;
+  icon: string;
+  route: string;
+  badge?: number;
 }
 
 @Component({
-  selector: "app-doctor-dashboard",
+  selector: 'app-doctor-dashboard',
   standalone: true,
-  imports: [CommonModule],
-  templateUrl: "./dashboard.component.html",
-  styleUrls: ["./dashboard.component.css"],
+  imports: [CommonModule, DatePipe, RouterModule],
+  templateUrl: './dashboard.component.html',
+  styleUrls: ['./dashboard.component.css']
 })
 export class DashboardComponent implements OnInit {
-  appointments: Appointment[] = []
-  isLoading = true
-  activeTab = "schedule"
-  currentDate = new Date()
-  isDarkMode = false
+  private doctorService = inject(DoctorService);
+  private authService = inject(AuthService);
+  private router = inject(Router);
 
-  // Doctor info (would come from auth service in real app)
-  doctorName = "Michael Chen"
-  doctorSpecialty = "Cardiologist"
-  doctorDepartment = "Cardiology Department"
-  doctorLicense = "MD-12345"
+  dashboardData = signal<DoctorDashboardData | null>(null);
+  isLoading = signal(true);
+  currentUser = signal<any>(null);
 
-  todayAppointments: AppointmentData[] = [
-    {
-      id: 1,
-      time: "09:00 AM",
-      patient: "Sarah Johnson",
-      age: 38,
-      type: "Follow-up",
-      status: "completed",
-      reason: "Hypertension checkup",
-      duration: "30 min",
-    },
-  ]
-
-  todayStats = {
-    totalAppointments: 12,
-    completed: 7,
-    pending: 3,
-    patients: 12,
-    cancelled: 2,
-  }
-
-  weekStats = {
-    totalPatients: 48,
-    consultations: 52,
-    reportsPending: 8,
-  }
-
-  constructor(
-    private appointmentService: AppointmentService,
-    private themeService: ThemeService,
-  ) {}
+  menuItems: MenuItem[] = [
+    { label: 'Dashboard', icon: 'bi-house-door', route: '/doctor/dashboard' },
+    { label: 'Appointments', icon: 'bi-calendar-check', route: '/doctor/appointments', badge: 5 },
+    { label: 'Schedule', icon: 'bi-calendar3', route: '/doctor/schedule' },
+    { label: 'My Patients', icon: 'bi-people', route: '/doctor/patients' },
+    { label: 'Medical Records', icon: 'bi-file-earmark-medical', route: '/doctor/records' },
+    { label: 'Prescriptions', icon: 'bi-prescription2', route: '/doctor/prescriptions' },
+    { label: 'Messages', icon: 'bi-chat-dots', route: '/doctor/messages', badge: 3 },
+    { label: 'Analytics', icon: 'bi-graph-up', route: '/doctor/analytics' },
+    { label: 'Settings', icon: 'bi-gear', route: '/doctor/settings' },
+  ];
 
   ngOnInit(): void {
-    this.loadAppointments()
-    this.isDarkMode = this.themeService.isDarkMode()
+    this.loadUserData();
+    this.loadDashboardData();
   }
 
-  loadAppointments(): void {
-    this.appointmentService.getMyAppointments().subscribe({
+  loadUserData(): void {
+    const user = this.authService.currentUser();
+    this.currentUser.set(user);
+  }
+
+  loadDashboardData(): void {
+    this.isLoading.set(true);
+    this.doctorService.getDashboardData().subscribe({
       next: (data) => {
-        this.appointments = data
-        this.isLoading = false
+        this.dashboardData.set(data);
+        this.isLoading.set(false);
       },
-      error: () => {
-        this.isLoading = false
-      },
-    })
+      error: (error) => {
+        console.error('Error loading dashboard:', error);
+        this.isLoading.set(false);
+      }
+    });
   }
 
-  toggleTheme(): void {
-    this.themeService.toggleTheme()
-    this.isDarkMode = this.themeService.isDarkMode()
-  }
-
-  getTodayTotal(): number {
-    return this.todayStats.totalAppointments
-  }
-
-  getCompletedCount(): number {
-    return this.todayStats.completed
-  }
-
-  getPendingCount(): number {
-    return this.todayStats.pending
-  }
-
-  getPatientCount(): number {
-    return this.todayStats.patients
-  }
-
-  getCancelledCount(): number {
-    return this.todayStats.cancelled
-  }
-
-  getInitials(name: string): string {
-    if (!name) return "??"
-    return name
-      .split(" ")
-      .map((n) => n.charAt(0))
-      .join("")
-      .toUpperCase()
-  }
-
-  getStatusClass(status: string): string {
-    const statusMap: { [key: string]: string } = {
-      completed: "status-completed",
-      waiting: "status-waiting",
-      scheduled: "status-scheduled",
-      "in-progress": "status-in-progress",
-      cancelled: "status-cancelled",
-      pending: "status-pending",
+  getDoctorName(): string {
+    const user = this.currentUser();
+    if (user) {
+      return `${user.firstName} ${user.lastName}`;
     }
-    return statusMap[status] || "status-pending"
+    return 'Doctor';
   }
 
-  getStatusIcon(status: string): string {
-    const iconMap: { [key: string]: string } = {
-      completed: "bi bi-check-circle",
-      waiting: "bi bi-clock",
-      scheduled: "bi bi-calendar-check",
-      "in-progress": "bi bi-activity",
-      cancelled: "bi bi-x-circle",
-      pending: "bi bi-hourglass",
+  getDoctorSpecialty(): string {
+    const user = this.currentUser();
+    return user?.specialty || 'General Practitioner';
+  }
+
+  getChartData() {
+    const data = this.dashboardData();
+    if (!data) return { labels: [], completed: [], pending: [] };
+
+    const timeSlots = ['09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00'];
+    return {
+      labels: timeSlots.map(t => {
+        const [hours, minutes] = t.split(':');
+        const date = new Date();
+        date.setHours(parseInt(hours), parseInt(minutes));
+        return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+      }),
+      completed: timeSlots.map(slot => data.appointmentsByTime[slot]?.completed || 0),
+      pending: timeSlots.map(slot => data.appointmentsByTime[slot]?.pending || 0),
+    };
+  }
+
+  getMaxValue(values: number[]): number {
+    if (!values || values.length === 0) return 1;
+    return Math.max(...values, 1);
+  }
+
+  getBarHeight(value: number, maxValue: number): number {
+    if (!maxValue || maxValue === 0) return 0;
+    return (value / maxValue) * 100;
+  }
+
+  abs(value: number): number {
+    return Math.abs(value);
+  }
+
+  getDoctorInitials(): string {
+    const name = this.getDoctorName();
+    if (!name) return 'DR';
+    const parts = name.split(' ');
+    if (parts.length >= 2) {
+      return (parts[0][0] + parts[1][0]).toUpperCase();
     }
-    return iconMap[status] || "bi bi-hourglass"
+    return name.substring(0, 2).toUpperCase();
   }
 
-  startConsultation(appointment: Appointment): void {
-    console.log("[v0] Starting consultation for:", appointment)
-    // Implementation for starting consultation
+  logout(): void {
+    this.authService.logout();
+    this.router.navigate(['/login']);
   }
 
-  joinVideoCall(appointment: Appointment): void {
-    console.log("[v0] Joining video call for:", appointment)
-    // Implementation for video call
-  }
-
-  viewRecords(appointment: Appointment): void {
-    console.log("[v0] Viewing records for:", appointment)
-  }
-
-  addNotes(appointment: Appointment): void {
-    console.log("[v0] Adding notes for:", appointment)
+  navigate(route: string): void {
+    this.router.navigate([route]);
   }
 }

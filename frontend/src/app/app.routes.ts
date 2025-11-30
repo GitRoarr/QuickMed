@@ -116,6 +116,25 @@ export const routes: Routes = [
             (m) => m.AppointmentsComponent
           ),
       },
+      {
+        path: "schedule",
+        loadComponent: () =>
+          import("./features/doctor/schedule/schedule.component").then(
+            (m) => m.ScheduleComponent
+          ),
+      },
+      {
+        path: "prescriptions",
+        loadComponent: () =>
+          import("./features/doctor/prescriptions/prescriptions.component").then(
+            (m) => m.PrescriptionsComponent
+          ),
+      },
+      {
+        path: "",
+        pathMatch: "full",
+        redirectTo: "dashboard",
+      },
     ],
   },
   {
