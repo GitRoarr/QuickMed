@@ -1,6 +1,6 @@
 import { Component, OnInit, signal, inject } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { DoctorService, DoctorDashboardData } from '@core/services/doctor.service';
 import { AuthService } from '@core/services/auth.service';
 
@@ -93,14 +93,26 @@ export class DashboardComponent implements OnInit {
     };
   }
 
-  getMaxValue(values: number[]): number {
-    if (!values || values.length === 0) return 1;
-    return Math.max(...values, 1);
+  getMaxChartValue(): number {
+    const chartData = this.getChartData();
+    const allValues = [...chartData.completed, ...chartData.pending];
+    if (!allValues || allValues.length === 0) return 1;
+    return Math.max(...allValues, 1);
   }
 
   getBarHeight(value: number, maxValue: number): number {
     if (!maxValue || maxValue === 0) return 0;
     return (value / maxValue) * 100;
+  }
+
+  getCompletedValue(index: number): number {
+    const chartData = this.getChartData();
+    return chartData.completed[index] || 0;
+  }
+
+  getPendingValue(index: number): number {
+    const chartData = this.getChartData();
+    return chartData.pending[index] || 0;
   }
 
   abs(value: number): number {

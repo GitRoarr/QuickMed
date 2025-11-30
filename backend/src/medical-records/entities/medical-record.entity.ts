@@ -35,6 +35,15 @@ export class MedicalRecord {
   @Column({ type: 'text', nullable: true })
   notes?: string;
 
+  @Column({ nullable: true })
+  description?: string;
+
+  @Column({ type: 'bigint', nullable: true })
+  fileSize?: number; // in bytes
+
+  @Column({ nullable: true })
+  status?: string; // 'verified', 'pending', 'rejected'
+
   @CreateDateColumn()
   createdAt: Date;
 

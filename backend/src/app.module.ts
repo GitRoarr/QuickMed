@@ -11,6 +11,9 @@ import { AdminModule } from "./admin/admin.module";
 import { MedicalRecordsModule } from "./medical-records/medical-records.module";
 import { ReceptionistModule } from './receptionist/receptionist.module';
 import { PaymentsModule } from './payments/payments.module';
+import { PrescriptionsModule } from './prescriptions/prescriptions.module';
+import { MessagesModule } from './messages/messages.module';
+import { SettingsModule } from './settings/settings.module';
 
 @Module({
   imports: [
@@ -42,6 +45,9 @@ import { PaymentsModule } from './payments/payments.module';
     AdminModule,
     ReceptionistModule,
     PaymentsModule,
+    PrescriptionsModule,
+    MessagesModule,
+    SettingsModule,
   ],
 })
 export class AppModule {}

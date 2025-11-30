@@ -47,9 +47,35 @@ export class MedicalRecordsService {
     return this.recordsRepository.find({ where: { patient: { id: patientId } }, relations: ['doctor', 'patient'] });
   }
 
+  async findByDoctor(doctorId: string, search?: string) {
+    const queryBuilder = this.recordsRepository
+      .createQueryBuilder('record')
+      .leftJoinAndSelect('record.patient', 'patient')
+      .leftJoinAndSelect('record.doctor', 'doctor')
+      .where('record.doctor.id = :doctorId', { doctorId })
+      .orderBy('record.recordDate', 'DESC');
+
+    if (search) {
+      queryBuilder.andWhere(
+        '(LOWER(record.title) LIKE LOWER(:search) OR LOWER(record.type) LIKE LOWER(:search) OR LOWER(patient.firstName) LIKE LOWER(:search) OR LOWER(patient.lastName) LIKE LOWER(:search))',
+        { search: `%${search}%` },
+      );
+    }
+
+    return queryBuilder.getMany();
+  }
+
   async findOne(id: string) {
     const rec = await this.recordsRepository.findOne({ where: { id }, relations: ['doctor', 'patient'] });
     if (!rec) throw new NotFoundException(`Record ${id} not found`);
     return rec;
+  }
+
+  async delete(id: string, doctorId: string) {
+    const rec = await this.findOne(id);
+    if (rec.doctor?.id !== doctorId) {
+      throw new NotFoundException('Record not found or access denied');
+    }
+    await this.recordsRepository.remove(rec);
   }
 }

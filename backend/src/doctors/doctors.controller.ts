@@ -38,6 +38,12 @@ export class DoctorsController {
     return this.doctorsService.getStats(user.id);
   }
 
+  @Get('analytics')
+  @UseGuards(JwtAuthGuard)
+  getAnalytics(@CurrentUser() user: User, @Query('period') period: string = '6months') {
+    return this.doctorsService.getAnalytics(user.id, period);
+  }
+
   @Patch(':id/validate-license')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)

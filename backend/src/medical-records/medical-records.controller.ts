@@ -1,8 +1,10 @@
-import { Controller, Post, Body, UseGuards, Get, Param, UseInterceptors, UploadedFile } from "@nestjs/common";
+import { Controller, Post, Body, UseGuards, Get, Param, Delete, Query } from "@nestjs/common";
 import { MedicalRecordsService } from "./medical-records.service";
 import { CreateMedicalRecordDto } from "./dto/create-medical-record.dto";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
-import { FileInterceptor } from "@nestjs/platform-express";
+import { CurrentUser } from "../auth/decorators/current-user.decorator";
+import { User } from "../users/entities/user.entity";
+import { UserRole } from "../common/index";
 
 @Controller('medical-records')
 @UseGuards(JwtAuthGuard)
@@ -10,17 +12,20 @@ export class MedicalRecordsController {
   constructor(private readonly recordsService: MedicalRecordsService) {}
 
   @Post()
-  create(@Body() dto: CreateMedicalRecordDto) {
+  create(@Body() dto: CreateMedicalRecordDto, @CurrentUser() user: User) {
+    if (!dto.doctorId) {
+      dto.doctorId = user.id;
+    }
     return this.recordsService.create(dto);
   }
 
   @Get('my')
-  getMyRecords(@Param() params: any, @Body() body: any) {
-    // JwtAuthGuard provides user via request; the decorator is not used here for brevity
-    // The guard will attach user in request, but controller method can access using @Req if needed.
-    // For simplicity frontend will call /medical-records/my and the service can be extended to read current user.
-    // Here we assume frontend will pass patientId in query or that other controllers handle it.
-    return { message: 'Please use GET /medical-records/patient/:patientId to fetch records for a patient' };
+  getMyRecords(@CurrentUser() user: User, @Query('search') search?: string) {
+    if (user.role === UserRole.DOCTOR) {
+      return this.recordsService.findByDoctor(user.id, search);
+    } else {
+      return this.recordsService.findByPatient(user.id);
+    }
   }
 
   @Get('patient/:patientId')
@@ -37,5 +42,10 @@ export class MedicalRecordsController {
   async download(@Param('id') id: string) {
     const rec = await this.recordsService.findOne(id);
     return { url: rec.fileUrl };
+  }
+
+  @Delete(':id')
+  delete(@Param('id') id: string, @CurrentUser() user: User) {
+    return this.recordsService.delete(id, user.id);
   }
 }

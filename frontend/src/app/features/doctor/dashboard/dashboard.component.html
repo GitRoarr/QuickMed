@@ -138,13 +138,13 @@
                 <div class="bars-group">
                   <div
                     class="bar completed"
-                    [style.height.%]="getBarHeight(getChartData().completed[i], getMaxValue([...getChartData().completed, ...getChartData().pending]))"
-                    [title]="'Completed: ' + getChartData().completed[i]"
+                    [style.height.%]="getBarHeight(getCompletedValue(i), getMaxChartValue())"
+                    [title]="'Completed: ' + getCompletedValue(i)"
                   ></div>
                   <div
                     class="bar pending"
-                    [style.height.%]="getBarHeight(getChartData().pending[i], getMaxValue([...getChartData().completed, ...getChartData().pending]))"
-                    [title]="'Pending: ' + getChartData().pending[i]"
+                    [style.height.%]="getBarHeight(getPendingValue(i), getMaxChartValue())"
+                    [title]="'Pending: ' + getPendingValue(i)"
                   ></div>
                 </div>
                 <div class="bar-label">{{ label }}</div>

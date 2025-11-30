@@ -380,4 +380,89 @@ export class DoctorsService {
       cancelled: allAppointments.filter(a => a.status === AppointmentStatus.CANCELLED).length,
     };
   }
+
+  async getAnalytics(doctorId: string, period: string = '6months') {
+    const now = new Date();
+    let startDate = new Date();
+
+    switch (period) {
+      case '7days':
+        startDate.setDate(now.getDate() - 7);
+        break;
+      case '30days':
+        startDate.setDate(now.getDate() - 30);
+        break;
+      case '6months':
+        startDate.setMonth(now.getMonth() - 6);
+        break;
+      case '1year':
+        startDate.setFullYear(now.getFullYear() - 1);
+        break;
+      default:
+        startDate.setMonth(now.getMonth() - 6);
+    }
+
+    const allAppointments = await this.appointmentsRepository.find({
+      where: {
+        doctorId,
+        appointmentDate: Between(startDate, now),
+      },
+      relations: ['patient'],
+    });
+
+    const completed = allAppointments.filter(a => a.status === AppointmentStatus.COMPLETED).length;
+    const cancelled = allAppointments.filter(a => a.status === AppointmentStatus.CANCELLED).length;
+    const total = allAppointments.length;
+    const completionRate = total > 0 ? (completed / total) * 100 : 0;
+
+    // Get unique patients
+    const uniquePatients = new Set(allAppointments.map(a => a.patientId));
+    
+    // Calculate new patients (patients who had their first appointment in this period)
+    const firstAppointments = await this.appointmentsRepository
+      .createQueryBuilder('appointment')
+      .select('MIN(appointment.appointmentDate)', 'firstDate')
+      .addSelect('appointment.patientId', 'patientId')
+      .where('appointment.doctorId = :doctorId', { doctorId })
+      .groupBy('appointment.patientId')
+      .getRawMany();
+
+    const newPatients = firstAppointments.filter(
+      (fa: any) => new Date(fa.firstDate) >= startDate
+    ).length;
+
+    // Group appointments by month for trends
+    const monthlyData: { [key: string]: { completed: number; cancelled: number; noShow: number } } = {};
+    allAppointments.forEach(apt => {
+      const monthKey = new Date(apt.appointmentDate).toISOString().substring(0, 7); // YYYY-MM
+      if (!monthlyData[monthKey]) {
+        monthlyData[monthKey] = { completed: 0, cancelled: 0, noShow: 0 };
+      }
+      if (apt.status === AppointmentStatus.COMPLETED) {
+        monthlyData[monthKey].completed++;
+      } else if (apt.status === AppointmentStatus.CANCELLED) {
+        monthlyData[monthKey].cancelled++;
+      }
+    });
+
+    // Satisfaction trend (mock for now - can be calculated from reviews if available)
+    const satisfactionTrend = [4.0, 4.2, 4.4, 4.5, 4.6, 4.7];
+
+    return {
+      kpis: {
+        totalAppointments: total,
+        completionRate: parseFloat(completionRate.toFixed(1)),
+        patientSatisfaction: 4.7, // Mock - can be from reviews
+        newPatients: newPatients,
+      },
+      trends: {
+        appointmentsChange: 12, // Mock - calculate from previous period
+        completionChange: 2.1,
+        satisfactionChange: 0.2,
+        newPatientsChange: 7,
+      },
+      appointmentTrends: monthlyData,
+      satisfactionTrend: satisfactionTrend,
+    };
+  }
 }
