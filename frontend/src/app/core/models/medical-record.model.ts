@@ -6,10 +6,22 @@ export interface MedicalRecord {
   type: MedicalRecordType;
   recordDate?: string;
   patientId: string;
+  patient?: {
+    id: string;
+    firstName: string;
+    lastName: string;
+  };
   doctorId?: string;
-  doctor?: any;
+  doctor?: {
+    id: string;
+    firstName: string;
+    lastName: string;
+  };
   fileUrl?: string;
   notes?: string;
-  createdAt?: Date;
-  updatedAt?: Date;
+  description?: string;
+  fileSize?: number;
+  status?: 'verified' | 'pending' | 'rejected';
+  createdAt: string;
+  updatedAt: string;
 }

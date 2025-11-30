@@ -1,9 +1,8 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
-import { MedicalRecordService } from '../../../core/services/medical-record.service';
+import { MedicalRecordService, MedicalRecord } from '../../../core/services/medical-record.service';
 import { AuthService } from '../../../core/services/auth.service';
-import { MedicalRecord } from '../../../core/models/medical-record.model';
 @Component({
   selector: 'app-patient-records',
   standalone: true,
