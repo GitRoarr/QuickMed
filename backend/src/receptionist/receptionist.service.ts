@@ -198,9 +198,9 @@ export class ReceptionistService {
   }
 
   async setReceptionistPassword(uid: string, token: string, password: string): Promise<User> {
-    // Validate password strength
-    if (!password || password.length < 6) {
-      throw new BadRequestException('Password must be at least 6 characters long');
+    // Validate password strength (must match DTO validation: MinLength(8))
+    if (!password || password.length < 8) {
+      throw new BadRequestException('Password must be at least 8 characters long');
     }
 
     // Use transaction for data integrity

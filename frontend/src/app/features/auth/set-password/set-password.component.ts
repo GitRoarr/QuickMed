@@ -27,7 +27,7 @@ export class SetPasswordComponent implements OnInit {
     private http: HttpClient
   ) {
     this.form = this.fb.group({
-      password: ['', [Validators.required, Validators.minLength(6)]],
+      password: ['', [Validators.required, Validators.minLength(8)]],
       confirmPassword: ['', [Validators.required]]
     }, { validators: this.passwordMatchValidator });
   }
@@ -65,14 +65,13 @@ export class SetPasswordComponent implements OnInit {
     this.loading = true;
     this.message = '';
 
-    // Try doctor endpoint first, then receptionist
     const payload = {
       uid: this.uid,
       token: this.token,
       password: this.form.value.password
     };
 
-    // Try doctor endpoint first
+    // Try doctor endpoint first (most common case)
     this.http.post(`${environment.apiUrl}/doctors/set-password`, payload).subscribe({
       next: () => {
         this.type = 'success';
@@ -83,23 +82,40 @@ export class SetPasswordComponent implements OnInit {
         }, 2000);
       },
       error: (doctorErr) => {
-        // If doctor endpoint fails, try receptionist endpoint
-        this.http.post(`${environment.apiUrl}/receptionist/set-password`, payload).subscribe({
-          next: () => {
-            this.type = 'success';
-            this.message = 'Password set successfully! You can now log in.';
-            this.loading = false;
-            setTimeout(() => {
-              this.router.navigate(['/login']);
-            }, 2000);
-          },
-          error: (receptionistErr) => {
-            this.type = 'error';
-            this.message = receptionistErr.error?.message || doctorErr.error?.message || 'Failed to set password. The link may have expired.';
-            this.loading = false;
-            console.error('Error setting password:', receptionistErr);
-          }
-        });
+        // Check if it's a 400/404 error (user not found or invalid) vs network error
+        // If it's a clear "not found" error, try receptionist endpoint
+        if (doctorErr.status === 404 || (doctorErr.status === 400 && doctorErr.error?.message?.includes('Doctor not found'))) {
+          console.log('[SetPassword] Doctor endpoint failed, trying receptionist endpoint...');
+          // Try receptionist endpoint
+          this.http.post(`${environment.apiUrl}/receptionist/set-password`, payload).subscribe({
+            next: () => {
+              this.type = 'success';
+              this.message = 'Password set successfully! You can now log in.';
+              this.loading = false;
+              setTimeout(() => {
+                this.router.navigate(['/login']);
+              }, 2000);
+            },
+            error: (receptionistErr) => {
+              this.type = 'error';
+              // Show the most specific error message
+              const errorMsg = receptionistErr.error?.message || doctorErr.error?.message;
+              this.message = errorMsg || 'Failed to set password. The link may have expired or is invalid.';
+              this.loading = false;
+              console.error('Error setting password (both endpoints failed):', {
+                doctor: doctorErr.error,
+                receptionist: receptionistErr.error
+              });
+            }
+          });
+        } else {
+          // For other errors (validation, expired token, etc.), show the error
+          this.type = 'error';
+          const errorMsg = doctorErr.error?.message || 'Failed to set password. Please check your password meets the requirements.';
+          this.message = errorMsg;
+          this.loading = false;
+          console.error('Error setting password:', doctorErr);
+        }
       }
     });
   }

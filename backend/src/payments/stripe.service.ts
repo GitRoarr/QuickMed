@@ -17,8 +17,13 @@ export class StripeService {
     private appointmentsRepository: Repository<Appointment>,
     private appointmentsService: AppointmentsService,
   ) {
-    // Initialize Stripe with secret key from environment
-    this.stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+    // Initialize Stripe with secret key from environment. Do NOT hard-code secrets here.
+    const stripeKey = process.env.STRIPE_SECRET_KEY;
+    if (!stripeKey) {
+      throw new Error('Missing environment variable STRIPE_SECRET_KEY. Add it to backend/.env and do not commit secrets to git.');
+    }
+
+    this.stripe = new Stripe(stripeKey, {
       apiVersion: '2025-11-17.clover',
     });
   }
