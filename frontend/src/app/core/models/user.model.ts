@@ -31,9 +31,10 @@ export interface User {
 }
 
 export interface Doctor extends User {
-  available: boolean;
-  rating: number;
-  experience: number;
+  available?: boolean;
+  rating?: number;
+  ratingCount?: number;
+  experience?: number;
 }
 
 export interface AuthResponse {

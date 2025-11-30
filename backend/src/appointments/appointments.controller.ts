@@ -39,6 +39,14 @@ export class AppointmentsController {
     return this.appointmentsService.findAll();
   }
 
+  @Get('pending-count')
+  getPendingCount(@CurrentUser() user: User) {
+    if (user.role === UserRole.DOCTOR) {
+      return this.appointmentsService.getPendingCount(user.id);
+    }
+    return { count: 0 };
+  }
+
   @Get('patient/:patientId')
   @UseGuards(RolesGuard)
   findByPatient(@Param('patientId') patientId: string) {

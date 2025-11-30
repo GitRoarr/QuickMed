@@ -3,6 +3,8 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '@core/services/auth.service';
 import { MedicalRecordService, MedicalRecord } from '@core/services/medical-record.service';
+import { AppointmentService } from '@core/services/appointment.service';
+import { MessageService } from '@core/services/message.service';
 
 interface MenuItem {
   label: string;
@@ -22,27 +24,52 @@ export class RecordsComponent implements OnInit {
   private authService = inject(AuthService);
   private router = inject(Router);
   private medicalRecordService = inject(MedicalRecordService);
+  private appointmentService = inject(AppointmentService);
+  private messageService = inject(MessageService);
 
   records = signal<MedicalRecord[]>([]);
   isLoading = signal(true);
   searchQuery = signal('');
   currentUser = signal<any>(null);
 
-  menuItems: MenuItem[] = [
-    { label: 'Dashboard', icon: 'bi-house-door', route: '/doctor/dashboard' },
-    { label: 'Appointments', icon: 'bi-calendar-check', route: '/doctor/appointments', badge: 5 },
-    { label: 'Schedule', icon: 'bi-calendar3', route: '/doctor/schedule' },
-    { label: 'My Patients', icon: 'bi-people', route: '/doctor/patients' },
-    { label: 'Medical Records', icon: 'bi-file-earmark-medical', route: '/doctor/records' },
-    { label: 'Prescriptions', icon: 'bi-prescription2', route: '/doctor/prescriptions' },
-    { label: 'Messages', icon: 'bi-chat-dots', route: '/doctor/messages', badge: 3 },
-    { label: 'Analytics', icon: 'bi-graph-up', route: '/doctor/analytics' },
-    { label: 'Settings', icon: 'bi-gear', route: '/doctor/settings' },
-  ];
+  menuItems = signal<MenuItem[]>([]);
 
   ngOnInit(): void {
     this.loadUserData();
     this.loadRecords();
+    this.loadBadgeCounts();
+  }
+
+  loadBadgeCounts(): void {
+    this.appointmentService.getPendingCount().subscribe({
+      next: (data) => {
+        this.updateMenuItems(data.count || 0, 0);
+      }
+    });
+
+    this.messageService.getUnreadCount().subscribe({
+      next: (data) => {
+        this.appointmentService.getPendingCount().subscribe({
+          next: (aptData) => {
+            this.updateMenuItems(aptData.count || 0, data.count || 0);
+          }
+        });
+      }
+    });
+  }
+
+  updateMenuItems(appointmentCount: number, messageCount: number): void {
+    this.menuItems.set([
+      { label: 'Dashboard', icon: 'bi-house-door', route: '/doctor/dashboard' },
+      { label: 'Appointments', icon: 'bi-calendar-check', route: '/doctor/appointments', badge: appointmentCount > 0 ? appointmentCount : undefined },
+      { label: 'Schedule', icon: 'bi-calendar3', route: '/doctor/schedule' },
+      { label: 'My Patients', icon: 'bi-people', route: '/doctor/patients' },
+      { label: 'Medical Records', icon: 'bi-file-earmark-medical', route: '/doctor/records' },
+      { label: 'Prescriptions', icon: 'bi-prescription2', route: '/doctor/prescriptions' },
+      { label: 'Messages', icon: 'bi-chat-dots', route: '/doctor/messages', badge: messageCount > 0 ? messageCount : undefined },
+      { label: 'Analytics', icon: 'bi-graph-up', route: '/doctor/analytics' },
+      { label: 'Settings', icon: 'bi-gear', route: '/doctor/settings' },
+    ]);
   }
 
   loadUserData(): void {

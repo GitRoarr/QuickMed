@@ -13,7 +13,8 @@ export class AppointmentsService {
   constructor(
     @InjectRepository(Appointment)
     private readonly appointmentsRepository: Repository<Appointment>,
-    private readonly usersService: UsersService
+    private readonly usersService: UsersService,
+    private readonly settingsService: SettingsService,
   ) {}
 
   async create(createAppointmentDto: CreateAppointmentDto, patientId: string): Promise<Appointment> {
@@ -24,6 +25,36 @@ export class AppointmentsService {
       throw new BadRequestException("Selected user is not a doctor");
     }
 
+    if (!doctor.isActive) {
+      throw new BadRequestException("Doctor is not active");
+    }
+
+    // Check doctor availability
+    const settings = await this.settingsService.getSettings(doctorId).catch(() => null);
+    const availableDays = settings?.availableDays || doctor.availableDays || [];
+    const appointmentDateObj = new Date(appointmentDate);
+    const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const appointmentDay = dayNames[appointmentDateObj.getDay()];
+
+    if (!availableDays.includes(appointmentDay)) {
+      throw new BadRequestException(`Doctor is not available on ${appointmentDay}`);
+    }
+
+    // Check time slot availability
+    if (settings?.startTime && settings?.endTime) {
+      const [startHour, startMin] = settings.startTime.split(':').map(Number);
+      const [endHour, endMin] = settings.endTime.split(':').map(Number);
+      const [apptHour, apptMin] = appointmentTime.split(':').map(Number);
+      const startMinutes = startHour * 60 + startMin;
+      const endMinutes = endHour * 60 + endMin;
+      const apptMinutes = apptHour * 60 + apptMin;
+
+      if (apptMinutes < startMinutes || apptMinutes >= endMinutes) {
+        throw new BadRequestException(`Doctor is only available between ${settings.startTime} and ${settings.endTime}`);
+      }
+    }
+
+    // Check for existing appointment at same time
     const existingAppointment = await this.appointmentsRepository.findOne({
       where: {
         doctorId,
@@ -35,6 +66,20 @@ export class AppointmentsService {
 
     if (existingAppointment) {
       throw new BadRequestException("This time slot is already booked. Please choose another time.");
+    }
+
+    // Check for pending appointment at same time
+    const pendingAppointment = await this.appointmentsRepository.findOne({
+      where: {
+        doctorId,
+        appointmentDate,
+        appointmentTime,
+        status: AppointmentStatus.PENDING,
+      },
+    });
+
+    if (pendingAppointment) {
+      throw new BadRequestException("This time slot has a pending appointment. Please choose another time.");
     }
 
     const appointment = this.appointmentsRepository.create({
@@ -73,6 +118,16 @@ export class AppointmentsService {
       relations: ["patient", 'receptionist'],
       order: { appointmentDate: "DESC", appointmentTime: "DESC" },
     });
+  }
+
+  async getPendingCount(doctorId: string): Promise<{ count: number }> {
+    const count = await this.appointmentsRepository.count({
+      where: {
+        doctorId,
+        status: AppointmentStatus.PENDING,
+      },
+    });
+    return { count };
   }
 
   async findOne(id: string): Promise<Appointment> {

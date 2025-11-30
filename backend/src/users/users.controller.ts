@@ -36,8 +36,8 @@ export class UsersController {
   }
 
   @Get("doctors")
-  findDoctors() {
-    return this.usersService.findDoctors();
+  async findDoctors() {
+    return this.usersService.findDoctorsWithAvailability();
   }
 
   @Get("patients")

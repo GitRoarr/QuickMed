@@ -1,9 +1,11 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, inject } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { AppointmentService } from '@core/services/appointment.service';
 import { Appointment } from '@core/models/appointment.model';
 import { AuthService } from '@core/services/auth.service';
+import { BadgeService } from '@core/services/badge.service';
+import { MessageService } from '@core/services/message.service';
 
 interface MenuItem {
   label: string;
@@ -26,17 +28,10 @@ export class ScheduleComponent implements OnInit {
   currentMonth = signal(new Date());
   currentUser = signal<any>(null);
 
-  menuItems: MenuItem[] = [
-    { label: 'Dashboard', icon: 'bi-house-door', route: '/doctor/dashboard' },
-    { label: 'Appointments', icon: 'bi-calendar-check', route: '/doctor/appointments', badge: 5 },
-    { label: 'Schedule', icon: 'bi-calendar3', route: '/doctor/schedule' },
-    { label: 'My Patients', icon: 'bi-people', route: '/doctor/patients' },
-    { label: 'Medical Records', icon: 'bi-file-earmark-medical', route: '/doctor/records' },
-    { label: 'Prescriptions', icon: 'bi-prescription2', route: '/doctor/prescriptions' },
-    { label: 'Messages', icon: 'bi-chat-dots', route: '/doctor/messages', badge: 3 },
-    { label: 'Analytics', icon: 'bi-graph-up', route: '/doctor/analytics' },
-    { label: 'Settings', icon: 'bi-gear', route: '/doctor/settings' },
-  ];
+  menuItems = signal<MenuItem[]>([]);
+  private badgeService = inject(BadgeService);
+  private appointmentService = inject(AppointmentService);
+  private messageService = inject(MessageService);
 
   timeSlots = [
     '08:00', '09:00', '10:00', '11:00', '12:00',
@@ -52,6 +47,35 @@ export class ScheduleComponent implements OnInit {
   ngOnInit(): void {
     this.loadUserData();
     this.loadAppointments();
+    this.loadBadgeCounts();
+  }
+
+  loadBadgeCounts(): void {
+    this.appointmentService.getPendingCount().subscribe({
+      next: (data) => {
+        this.updateMenuItems(data.count || 0, this.badgeService.messageCount());
+      }
+    });
+
+    this.messageService.getUnreadCount().subscribe({
+      next: (data) => {
+        this.updateMenuItems(this.badgeService.appointmentCount(), data.count || 0);
+      }
+    });
+  }
+
+  updateMenuItems(appointmentCount: number, messageCount: number): void {
+    this.menuItems.set([
+      { label: 'Dashboard', icon: 'bi-house-door', route: '/doctor/dashboard' },
+      { label: 'Appointments', icon: 'bi-calendar-check', route: '/doctor/appointments', badge: appointmentCount > 0 ? appointmentCount : undefined },
+      { label: 'Schedule', icon: 'bi-calendar3', route: '/doctor/schedule' },
+      { label: 'My Patients', icon: 'bi-people', route: '/doctor/patients' },
+      { label: 'Medical Records', icon: 'bi-file-earmark-medical', route: '/doctor/records' },
+      { label: 'Prescriptions', icon: 'bi-prescription2', route: '/doctor/prescriptions' },
+      { label: 'Messages', icon: 'bi-chat-dots', route: '/doctor/messages', badge: messageCount > 0 ? messageCount : undefined },
+      { label: 'Analytics', icon: 'bi-graph-up', route: '/doctor/analytics' },
+      { label: 'Settings', icon: 'bi-gear', route: '/doctor/settings' },
+    ]);
   }
 
   loadUserData(): void {

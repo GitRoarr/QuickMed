@@ -51,4 +51,8 @@ export class AppointmentService {
   delete(id: string): Observable<void> {
     return this.http.delete<void>(`${this.API_URL}/${id}`)
   }
+
+  getPendingCount(): Observable<{ count: number }> {
+    return this.http.get<{ count: number }>(`${this.API_URL}/pending-count`)
+  }
 }

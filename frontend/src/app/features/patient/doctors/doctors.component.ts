@@ -62,10 +62,16 @@ export class DoctorsComponent implements OnInit {
     this.isLoading.set(true);
 
     this.userService.getDoctors().subscribe({
-      next: (docs) => {
-        // backend returns a subset of user fields; coerce to Doctor[]
-        this.doctors.set(docs as Doctor[]);
-        this.filteredDoctors.set(docs as Doctor[]);
+      next: (docs: any[]) => {
+        // Backend now returns doctors with availability, rating, and experience
+        const doctorsWithData = docs.map(doc => ({
+          ...doc,
+          available: doc.available !== undefined ? doc.available : false,
+          rating: doc.rating || 0,
+          experience: doc.experience || 0,
+        }));
+        this.doctors.set(doctorsWithData as Doctor[]);
+        this.filteredDoctors.set(doctorsWithData as Doctor[]);
         this.isLoading.set(false);
       },
       error: (err) => {
@@ -149,7 +155,12 @@ export class DoctorsComponent implements OnInit {
   }
 
   getStarArray(rating: number): number[] {
-    return Array(5).fill(0).map((_, i) => i < Math.floor(rating) ? 1 : 0);
+    const roundedRating = Math.round(rating * 2) / 2; // Round to nearest 0.5
+    return Array(5).fill(0).map((_, i) => {
+      if (i < Math.floor(roundedRating)) return 1;
+      if (i === Math.floor(roundedRating) && roundedRating % 1 === 0.5) return 0.5; // Half star
+      return 0;
+    });
   }
 
   getSelectedDoctorInitial(): string {

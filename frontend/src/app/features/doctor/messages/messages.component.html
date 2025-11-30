@@ -11,18 +11,18 @@
       </div>
     </div>
 
-    <nav class="sidebar-nav">
-      <a
-        *ngFor="let item of menuItems"
-        [routerLink]="item.route"
-        routerLinkActive="active"
-        class="nav-item"
-      >
-        <i [class]="'bi ' + item.icon"></i>
-        <span>{{ item.label }}</span>
-        <span *ngIf="item.badge" class="badge">{{ item.badge }}</span>
-      </a>
-    </nav>
+            <nav class="sidebar-nav">
+              <a
+                *ngFor="let item of menuItems()"
+                [routerLink]="item.route"
+                routerLinkActive="active"
+                class="nav-item"
+              >
+                <i [class]="'bi ' + item.icon"></i>
+                <span>{{ item.label }}</span>
+                <span *ngIf="item.badge && item.badge > 0" class="badge">{{ item.badge }}</span>
+              </a>
+            </nav>
 
     <div class="sidebar-footer">
       <div class="user-info">

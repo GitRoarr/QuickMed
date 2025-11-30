@@ -5,13 +5,17 @@ import { User } from "./entities/user.entity";
 import { UserRole } from "../common/index";
 import { CloudinaryService } from "@/profile/cloudinary.service";
 import * as fs from 'fs/promises'
+import { ReviewsService } from "../reviews/reviews.service";
+import { SettingsService } from "../settings/settings.service";
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
-    private readonly cloudinaryService: CloudinaryService
+    private readonly cloudinaryService: CloudinaryService,
+    private readonly reviewsService: ReviewsService,
+    private readonly settingsService: SettingsService,
   ) { }
 
   async findOne(id: string): Promise<User> {
@@ -48,9 +52,79 @@ export class UsersService {
 
   async findDoctors(): Promise<User[]> {
     return this.usersRepository.find({
-      where: { role: UserRole.DOCTOR },
-      select: ["id", "firstName", "lastName", "email", "specialty", "bio", "availableDays", "startTime", "endTime"],
+      where: { role: UserRole.DOCTOR, isActive: true },
+      select: ["id", "firstName", "lastName", "email", "specialty", "bio", "availableDays", "startTime", "endTime", "phoneNumber", "avatar", "licenseNumber"],
     });
+  }
+
+  async findDoctorsWithAvailability(): Promise<any[]> {
+    const doctors = await this.findDoctors();
+    const allRatings = await this.reviewsService.getAllDoctorRatings();
+    
+    const result = await Promise.all(
+      doctors.map(async (doctor) => {
+        const rating = allRatings[doctor.id] || { average: 0, count: 0 };
+        const settings = await this.settingsService.getSettings(doctor.id).catch(() => null);
+        
+        // Calculate availability based on settings or user fields
+        const availableDays = settings?.availableDays || doctor.availableDays || [];
+        const startTime = settings?.startTime || doctor.startTime;
+        const endTime = settings?.endTime || doctor.endTime;
+        
+        // Check if doctor is available (has availability configured)
+        // For patient view, we show available if they have availability settings, not just "right now"
+        const isAvailable = availableDays.length > 0 && startTime && endTime;
+        
+        // Calculate experience (years since account creation or default to 5)
+        let accountAge = 5;
+        if (doctor.createdAt) {
+          const createdDate = typeof doctor.createdAt === 'string' 
+            ? new Date(doctor.createdAt) 
+            : doctor.createdAt;
+          accountAge = Math.max(1, Math.floor((new Date().getTime() - createdDate.getTime()) / (1000 * 60 * 60 * 24 * 365)));
+        }
+        
+        return {
+          ...doctor,
+          available: isAvailable,
+          rating: rating.average || 0,
+          ratingCount: rating.count || 0,
+          experience: accountAge,
+        };
+      })
+    );
+    
+    return result;
+  }
+
+  private checkDoctorAvailability(availableDays: string[], startTime?: string, endTime?: string): boolean {
+    if (!availableDays || availableDays.length === 0) {
+      return false; // No availability set
+    }
+
+    const now = new Date();
+    const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const currentDay = dayNames[now.getDay()];
+    
+    // Check if today is in available days
+    if (!availableDays.includes(currentDay)) {
+      return false;
+    }
+
+    // Check time if startTime and endTime are set
+    if (startTime && endTime) {
+      const currentTime = now.getHours() * 60 + now.getMinutes(); // minutes since midnight
+      const [startHour, startMin] = startTime.split(':').map(Number);
+      const [endHour, endMin] = endTime.split(':').map(Number);
+      const startMinutes = startHour * 60 + startMin;
+      const endMinutes = endHour * 60 + endMin;
+      
+      if (currentTime < startMinutes || currentTime >= endMinutes) {
+        return false;
+      }
+    }
+
+    return true;
   }
 
   async findPatients(): Promise<User[]> {

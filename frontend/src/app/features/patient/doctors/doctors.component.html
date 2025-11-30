@@ -70,10 +70,11 @@
           <h3>Dr. {{ doctor.firstName }} {{ doctor.lastName }}</h3>
           <p class="specialty">{{ doctor.specialty }}</p>
           <div class="rating">
-            <span *ngFor="let star of getStarArray(doctor.rating || 0)" class="star">
-              <i class="bi bi-star-fill"></i>
+            <span *ngFor="let star of getStarArray(doctor.rating || 0)" class="star" [class.filled]="star === 1">
+              <i class="bi" [class.bi-star-fill]="star === 1" [class.bi-star]="star === 0"></i>
             </span>
-            <span class="rating-text">{{ doctor.rating }} ({{ doctor.experience }}+ years)</span>
+            <span class="rating-text">{{ doctor.rating || 0 }} ({{ doctor.experience || 0 }}+ years)</span>
+            <span *ngIf="doctor.ratingCount && doctor.ratingCount > 0" class="rating-count">({{ doctor.ratingCount }} reviews)</span>
           </div>
           <p class="bio">{{ doctor.bio }}</p>
           <div class="contact-info">
