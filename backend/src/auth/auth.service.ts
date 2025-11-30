@@ -1,17 +1,21 @@
 import { Injectable, UnauthorizedException, ConflictException, NotFoundException } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import * as bcrypt from "bcrypt";
+import { v4 as uuidv4 } from "uuid";
 import { UsersService } from "../users/users.service";
 import { RegisterDto } from "./dto/register.dto";
 import { LoginDto } from "./dto/login.dto";
+import { ForgotPasswordDto } from "./dto/forgot-password.dto";
 import { User } from "../users/entities/user.entity";
 import { UserRole } from "@/common";
+import { EmailService } from "../common/services/email.service";
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly usersService: UsersService, 
-    private readonly jwtService: JwtService
+    private readonly jwtService: JwtService,
+    private readonly emailService: EmailService
   ) {}
 
   async register(registerDto: RegisterDto): Promise<{ user: Partial<User>; token: string }> {
@@ -87,6 +91,41 @@ export class AuthService {
     const user = await this.usersService.findOne(userId);
     if (!user) throw new UnauthorizedException("User not found");
     return user;
+  }
+
+  async forgotPassword(forgotPasswordDto: ForgotPasswordDto): Promise<{ message: string }> {
+    const { email } = forgotPasswordDto;
+    
+    const user = await this.usersService.findByEmail(email);
+    if (!user) {
+      // Don't reveal if user exists or not for security
+      return { message: 'If an account with that email exists, a password reset link has been sent.' };
+    }
+
+    // Generate reset token
+    const resetToken = uuidv4();
+    const resetTokenExpiry = new Date();
+    resetTokenExpiry.setHours(resetTokenExpiry.getHours() + 1); // Token valid for 1 hour
+
+    // Store reset token in user entity (we'll use inviteToken field or add a new field)
+    await this.usersService.update(user.id, {
+      inviteToken: resetToken,
+      inviteExpiresAt: resetTokenExpiry,
+    } as any);
+
+    // Generate reset link
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:4200';
+    const resetLink = `${frontendUrl}/reset-password?token=${resetToken}&email=${encodeURIComponent(email)}`;
+
+    // Send email
+    try {
+      await this.emailService.sendPasswordResetEmail(user.email, resetLink, user.firstName);
+    } catch (error) {
+      console.error('Failed to send password reset email:', error);
+      // Still return success to not reveal if email exists
+    }
+
+    return { message: 'If an account with that email exists, a password reset link has been sent.' };
   }
 
   async emergencyResetPassword(email: string, newPassword: string): Promise<{ message: string }> {

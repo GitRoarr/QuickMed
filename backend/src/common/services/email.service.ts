@@ -178,4 +178,23 @@ export class EmailService {
     `;
     return this.sendMail(to, subject, html);
   }
+
+  async sendPasswordResetEmail(to: string, resetLink: string, firstName?: string): Promise<EmailResult> {
+    const subject = 'Reset Your Password - QuickMed';
+    const html = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <h2 style="color: #16a34a;">Password Reset Request</h2>
+        <p>Hello ${firstName || 'there'},</p>
+        <p>We received a request to reset your password for your QuickMed account.</p>
+        <p>Click the button below to reset your password:</p>
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="${resetLink}" style="background-color: #16a34a; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: bold;">Reset Password</a>
+        </div>
+        <p style="color: #6b7280; font-size: 14px;">This link will expire in 1 hour.</p>
+        <p style="color: #6b7280; font-size: 14px;">If you did not request a password reset, please ignore this email. Your password will remain unchanged.</p>
+        <p style="color: #6b7280; font-size: 14px;">For security reasons, if you continue to receive these emails, please contact support.</p>
+      </div>
+    `;
+    return this.sendMail(to, subject, html);
+  }
 }
