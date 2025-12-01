@@ -1,257 +1,146 @@
-<div class="dashboard-container">
-  <aside class="sidebar" [class.collapsed]="sidebarCollapsed()">
-    <div class="sidebar-header">
-     <div class="logo" *ngIf="!sidebarCollapsed()" (click)="goHome()" style="cursor:pointer">
-          <div class="logo-icon">
-            <img src="assets/images/QuickMed-Logo.png" alt="QuickMed Logo" class="h-8 mb-2" />
-          </div>
-          <div class="logo-text">
-            <h3>QuickMed</h3>
-            <p>Patient Portal</p>
-          </div>
-        </div>
-
-      <button class="toggle-btn" (click)="toggleSidebar()">
-        <i class="bi" [class.bi-chevron-right]="sidebarCollapsed()" [class.bi-chevron-left]="!sidebarCollapsed()"></i>
-      </button>
-    </div>
-
-    <nav class="sidebar-nav">
-      <a *ngFor="let item of menuItems" 
-         [routerLink]="item.route" 
-         class="nav-item"
-         [class.active]="item.active">
-        <img *ngIf="item.iconUrl" [src]="item.iconUrl" alt="" class="menu-icon" />
-        <span *ngIf="!sidebarCollapsed()">{{ item.label }}</span>
+<app-patient-shell active="dashboard">
+  <div class="patient-dashboard" *ngIf="!isLoading(); else loadingState">
+    <div class="dashboard-header" *ngIf="dashboard() as data">
+      <div>
+        <p class="eyebrow">Good day</p>
+        <h1>Welcome back, {{ data.patient.name }}</h1>
+        <p class="muted">Here's a snapshot of your health today.</p>
+      </div>
+      <a class="primary-btn" routerLink="/patient/appointments">
+        <i class="bi bi-plus-circle"></i>
+        Book Appointment
       </a>
-    </nav>
-
-    <div class="sidebar-footer">
-      <button class="logout-btn" (click)="logout()">
-        <i class="bi bi-box-arrow-right"></i>
-        <span *ngIf="!sidebarCollapsed()">Logout</span>
-      </button>
     </div>
-  </aside>
 
-  <main class="main-content">
-    <header class="top-header">
-      <div class="header-left"></div>
-
-      <div class="header-right">
-        <button class="theme-toggle" [class.active]="theme.isDarkMode()" (click)="toggleTheme()">
-          <i class="bi" [class.bi-sun]="!theme.isDarkMode()" [class.bi-moon]="theme.isDarkMode()"></i>
-        </button>
-
-        <button class="emergency-btn" (click)="callEmergency()">
-          <i class="bi bi-telephone-fill"></i>
-          <span>Emergency</span>
-        </button>
-
-        <div class="notification-icon">
-          <i class="bi bi-bell"></i>
-          <span class="badge">2</span>
+    <div class="vitals-grid" *ngIf="dashboard()">
+      <div class="vital-card" *ngFor="let vit of getVitalsCards()">
+        <div class="vital-icon">
+          <i class="bi" [ngClass]="vit.icon"></i>
         </div>
-
-        <div class="user-avatar">
-          <app-avatar-uploader [userId]="user()?.id" [avatarUrl]="user()?.avatar"></app-avatar-uploader>
+        <div>
+          <p class="vital-label">{{ vit.label }}</p>
+          <p class="vital-value">{{ vit.value }}</p>
+          <p class="vital-status">{{ vit.status }}</p>
         </div>
       </div>
-    </header>
+    </div>
 
-    <div class="content-wrapper">
-      <div class="page-header">
-        <h2>Welcome back, {{ user()?.firstName || 'Patient' }} {{ user()?.lastName || '' }}</h2>
-        <p>Manage your appointments and health records</p>
-      </div>
-
-      <div class="stats-grid">
-        <div class="stat-card stat-primary">
-            <div class="stat-icon">
-            <img src="https://img.icons8.com/ios-filled/20/000000/calendar.png" alt="" />
-          </div>
-          <div class="stat-content">
-            <p class="stat-label">Upcoming</p>
-            <p class="stat-value">{{ stats().upcomingAppointments }}</p>
-          </div>
-        </div>
-
-        <div class="stat-card stat-success">
-          <div class="stat-icon">
-            <img src="https://img.icons8.com/ios-filled/20/000000/pills.png" alt="" />
-          </div>
-          <div class="stat-content">
-            <p class="stat-label">Active Meds</p>
-            <p class="stat-value">{{ stats().activeMeds }}</p>
-          </div>
-        </div>
-
-        <div class="stat-card stat-info">
-          <div class="stat-icon">
-            <img src="https://img.icons8.com/ios-filled/20/000000/medical-records.png" alt="" />
-          </div>
-          <div class="stat-content">
-            <p class="stat-label">Records</p>
-            <p class="stat-value">{{ stats().records }}</p>
-          </div>
-        </div>
-
-        <div class="stat-card stat-warning">
-          <div class="stat-icon">
-            <img src="https://img.icons8.com/ios-filled/20/000000/activity-history.png" alt="" />
-          </div>
-          <div class="stat-content">
-            <p class="stat-label">Test Results</p>
-            <p class="stat-value">{{ stats().testResults }}</p>
-          </div>
+    <div class="stats-grid" *ngIf="dashboard()">
+      <div class="stat-pill" *ngFor="let stat of getStatsCards()">
+        <i class="bi" [ngClass]="stat.icon"></i>
+        <div>
+          <p class="pill-label">{{ stat.label }}</p>
+          <p class="pill-value">{{ stat.value }}</p>
         </div>
       </div>
+    </div>
 
-      <app-data-container
-        title="Recent Activities"
-        [items]="[
-          { title: 'Appointment booked', meta: '—' },
-          { title: 'Prescription updated', meta: '—' }
-        ]"
-        (refresh)="loadData()">
-      </app-data-container>
-
-      <div class="content-grid">
-        <div class="main-section">
-          <div class="tabs">
-            <button class="tab-btn" [class.active]="activeTab() === 'appointments'" (click)="setActiveTab('appointments')">
-              Appointments
-            </button>
-            <button class="tab-btn" [class.active]="activeTab() === 'history'" (click)="setActiveTab('history')">
-              Medical History
-            </button>
-            <button class="tab-btn" [class.active]="activeTab() === 'prescriptions'" (click)="setActiveTab('prescriptions')">
-              Prescriptions
-            </button>
-            <button class="tab-btn" [class.active]="activeTab() === 'tests'" (click)="setActiveTab('tests')">
-              Test Results
-            </button>
+    <div class="content-grid" *ngIf="dashboard()">
+      <section class="panel">
+        <div class="panel-header">
+          <div>
+            <h2>Upcoming Appointments</h2>
+            <p class="muted">Stay prepared for your next visit.</p>
           </div>
-
-          <div class="section-header">
-            <h3>Upcoming Appointments</h3>
-            <button class="btn-primary" (click)="bookAppointment()">
-              <i class="bi bi-plus-circle"></i>
-              Book Appointment
-            </button>
-          </div>
-
-          <div class="appointments-list">
-            <div *ngFor="let apt of appointments()" class="appointment-card">
-              <div class="doctor-avatar">
-                {{ apt.doctor?.firstName?.[0] || '?' }}
-              </div>
-              <div class="appointment-details">
-                <div class="appointment-header">
-                  <div>
-                    <h4>Dr. {{ apt.doctor?.firstName || '' }} {{ apt.doctor?.lastName || '' }}</h4>
-                    <p class="specialty">{{ apt.doctor?.specialty || '' }}</p>
-                  </div>
-                  <span class="status-badge" [class]="'status-' + apt.status">
-                    {{ apt.status }}
-                  </span>
-                </div>
-                <div class="appointment-info">
-                  <div class="info-item">
-                      <img src="https://img.icons8.com/ios-filled/16/000000/calendar.png" alt="" />
-                      <span>{{ apt.appointmentDate }}</span>
-                    </div>
-                    <div class="info-item">
-                      <img src="https://img.icons8.com/ios-filled/16/000000/clock.png" alt="" />
-                      <span>{{ apt.appointmentTime }}</span>
-                    </div>
-                  <div class="info-item">
-                    <img *ngIf="apt.isVideoConsultation" src="https://img.icons8.com/ios-filled/16/000000/video-call.png" alt="" />
-                    <img *ngIf="!apt.isVideoConsultation" src="https://img.icons8.com/ios-filled/16/000000/marker.png" alt="" />
-                    <span>{{ apt.location }}</span>
-                  </div>
-                </div>
-                <div class="appointment-actions">
-                  <button *ngIf="apt.isVideoConsultation && apt.status === 'confirmed'" 
-                          class="btn-primary btn-sm" 
-                          (click)="joinVideoCall(apt.id)">
-                    <img src="https://img.icons8.com/ios-filled/14/ffffff/video-call.png" alt="" />
-                    Join Call
-                  </button>
-                  <button class="btn-outline btn-sm" (click)="rescheduleAppointment(apt.id)">
-                    Reschedule
-                  </button>
-                  <button class="btn-outline btn-sm" (click)="cancelAppointment(apt.id)">
-                    Cancel
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <div *ngIf="appointments().length === 0 && !isLoading()" class="empty-state">
-              <h3>No upcoming appointments</h3>
-              <p>Book a new appointment to get started</p>
-              <button class="btn-primary" (click)="bookAppointment()">Book Appointment</button>
-            </div>
-          </div>
+          <a class="text-link" routerLink="/patient/appointments">View all</a>
         </div>
 
-        <div class="sidebar-section">
-          <div class="profile-card">
-            <h3>Profile Information</h3>
-            <div class="profile-header">
-              <div class="profile-avatar">
-                  <app-avatar-uploader [userId]="user()?.id" [avatarUrl]="user()?.avatar"></app-avatar-uploader>
-                </div>
+        <div *ngIf="getUpcomingAppointments().length === 0" class="empty-state">
+          <p>No upcoming appointments. Book your next visit.</p>
+        </div>
+
+        <div class="appointment-card" *ngFor="let apt of getUpcomingAppointments()">
+          <div class="appointment-icon" [class.video]="apt.isVideoConsultation">
+            <i class="bi" [ngClass]="apt.isVideoConsultation ? 'bi-camera-video' : 'bi-geo-alt'"></i>
+          </div>
+          <div class="appointment-content">
+            <div class="appointment-meta">
               <div>
-                <h4>{{ user()?.firstName || '—' }} {{ user()?.lastName || '' }}</h4>
-                <p>Patient ID: {{ user()?.patientId || '—' }}</p>
+                <p class="appointment-doctor">{{ apt.doctor }}</p>
+                <p class="muted">{{ apt.specialty || 'General Care' }}</p>
+              </div>
+              <span class="badge" [class.badge-video]="apt.isVideoConsultation">
+                {{ apt.isVideoConsultation ? 'Video visit' : 'In-person' }}
+              </span>
+            </div>
+            <div class="appointment-details">
+              <div>
+                <i class="bi bi-calendar-event"></i>
+                <span>{{ apt.appointmentDate | date:'MMM d, y' }}</span>
+              </div>
+              <div>
+                <i class="bi bi-clock"></i>
+                <span>{{ apt.appointmentTime }}</span>
+              </div>
+              <div>
+                <i class="bi" [ngClass]="apt.isVideoConsultation ? 'bi-link-45deg' : 'bi-pin-map'"></i>
+                <span>{{ apt.location || (apt.isVideoConsultation ? 'Virtual room' : 'Clinic visit') }}</span>
               </div>
             </div>
-            <div class="profile-details">
-              <div class="detail-item">
-                <span>📧</span>
-                <span>{{ user()?.email || '—' }}</span>
-              </div>
-              <div class="detail-item">
-                <span>📱</span>
-                <span>{{ user()?.phoneNumber || '—' }}</span>
-              </div>
-              <div class="detail-item">
-                <span>🎂</span>
-                <span>DOB: {{ user()?.dateOfBirth || '—' }}</span>
-              </div>
-              <div class="detail-item">
-                <span>🩸</span>
-                <span>Blood Type: {{ user()?.bloodType || '—' }}</span>
-              </div>
-            </div>
-            <div class="allergies-section">
-              <h5>Allergies</h5>
-              <div class="allergies-tags">
-                <span *ngFor="let allergy of (user()?.allergies || [])" class="allergy-tag">
-                  {{ allergy }}
-                </span>
-              </div>
-            </div>
-            <button class="btn-primary btn-full" (click)="editProfile()">
-              Edit Profile
-            </button>
-          </div>
-
-          <div class="quick-actions-card">
-            <h3>Quick Actions</h3>
-            <div class="actions-list">
-                  <button *ngFor="let action of quickActions" 
-                    class="action-btn" 
-                    (click)="quickAction(action.label)">
-                  <img *ngIf="action.iconUrl" [src]="action.iconUrl" alt="" class="action-icon" />
-                  <span>{{ action.label }}</span>
-                </button>
+            <div class="appointment-actions">
+              <button class="text-link">Reschedule</button>
+              <button class="text-link">Cancel</button>
+              <button class="primary-btn subtle" *ngIf="apt.isVideoConsultation">Join</button>
             </div>
           </div>
         </div>
-      </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-header">
+          <div>
+            <h2>Current Prescriptions</h2>
+            <p class="muted">Medications you're actively taking.</p>
+          </div>
+          <a class="text-link">Request refill</a>
+        </div>
+
+        <div class="prescription-card" *ngFor="let rx of getPrescriptions()">
+          <div>
+            <p class="prescription-name">{{ rx.medication }}</p>
+            <p class="muted">{{ rx.dosage }} • {{ rx.frequency }}</p>
+          </div>
+          <div>
+            <p class="muted">Prescribed by {{ rx.doctor }}</p>
+            <p class="pill-label">{{ rx.duration }}</p>
+          </div>
+        </div>
+
+        <div *ngIf="getPrescriptions().length === 0" class="empty-state">
+          <p>No active prescriptions.</p>
+        </div>
+      </section>
     </div>
-  </main>
-</div>
+
+    <section class="panel" *ngIf="dashboard()">
+      <div class="panel-header">
+        <div>
+          <h2>Recent Lab Results</h2>
+          <p class="muted">Latest test reports and imaging.</p>
+        </div>
+      </div>
+
+      <div class="lab-results">
+        <div class="lab-item" *ngFor="let lab of getLabResults()">
+          <div>
+            <p class="lab-title">{{ lab.title }}</p>
+            <p class="muted">{{ lab.recordDate ? (lab.recordDate | date:'MMM d, y') : 'Awaiting date' }}</p>
+          </div>
+          <span class="badge" [class.badge-success]="lab.status === 'available'">{{ lab.status || 'pending' }}</span>
+        </div>
+        <div *ngIf="getLabResults().length === 0" class="empty-state">
+          <p>No lab results yet.</p>
+        </div>
+      </div>
+    </section>
+  </div>
+</app-patient-shell>
+
+<ng-template #loadingState>
+  <app-patient-shell active="dashboard">
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <p>Loading your dashboard...</p>
+    </div>
+  </app-patient-shell>
+</ng-template>

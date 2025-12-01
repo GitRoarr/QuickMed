@@ -54,6 +54,21 @@ export class User extends BaseEntity {
   @Column({ type: 'int', default: 0 })
   testResultsCount: number;
 
+  @Column({ type: 'int', nullable: true })
+  bloodPressureSystolic: number;
+
+  @Column({ type: 'int', nullable: true })
+  bloodPressureDiastolic: number;
+
+  @Column({ type: 'int', nullable: true })
+  heartRate: number;
+
+  @Column({ type: 'float', nullable: true })
+  bmi: number;
+
+  @Column({ type: 'date', nullable: true })
+  lastCheckupDate: Date;
+
   @Column({ nullable: true })
   specialty: string;
 

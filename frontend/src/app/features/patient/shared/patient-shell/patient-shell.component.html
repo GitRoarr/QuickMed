@@ -1,0 +1,46 @@
+<div class="patient-shell">
+  <aside class="patient-shell__sidebar">
+    <div class="patient-shell__brand" (click)="navigate('/patient/dashboard')">
+      <div class="brand-icon">QM</div>
+      <div>
+        <p class="brand-title">QuickMed</p>
+        <p class="brand-subtitle">Patient Portal</p>
+      </div>
+    </div>
+
+    <nav class="patient-shell__nav">
+      <a
+        *ngFor="let item of menuItems"
+        class="patient-shell__nav-item"
+        [routerLink]="item.route"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: item.exact !== false }">
+        <i class="bi" [ngClass]="item.icon"></i>
+        <span>{{ item.label }}</span>
+      </a>
+    </nav>
+
+    <div class="patient-shell__profile" *ngIf="user as current">
+      <div class="avatar">
+        <img *ngIf="current.avatar; else initials" [src]="current.avatar" alt="{{ current.firstName }}" />
+        <ng-template #initials>
+          {{ (current.firstName.charAt(0) || 'A') + (current.lastName.charAt(0) || 'J') }}
+        </ng-template>
+      </div>
+      <div>
+        <p class="profile-name">{{ current.firstName }} {{ current.lastName }}</p>
+        <p class="profile-id">{{ current.patientId || current.id }}</p>
+      </div>
+    </div>
+
+    <button class="patient-shell__logout" type="button" (click)="logout()">
+      <i class="bi bi-box-arrow-right"></i>
+      Logout
+    </button>
+  </aside>
+
+  <main class="patient-shell__content">
+    <ng-content></ng-content>
+  </main>
+</div>
+

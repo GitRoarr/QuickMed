@@ -1,85 +1,59 @@
-<div class="dashboard-container">
-  <aside class="sidebar" [class.collapsed]="sidebarCollapsed()">
-    <div class="sidebar-header">
-      <div class="logo" *ngIf="!sidebarCollapsed()" (click)="goHome()" style="cursor:pointer">
-        <div class="logo-icon">
-          <img src="assets/images/QuickMed-Logo.png" alt="QuickMed Logo" class="h-8 mb-2" />
-        </div>
-        <div class="logo-text">
-          <h3>QuickMed</h3>
-          <p>Patient Portal</p>
-        </div>
-      </div>
-
-      <button class="toggle-btn" (click)="toggleSidebar()">
-        <i class="bi" [class.bi-chevron-right]="sidebarCollapsed()" [class.bi-chevron-left]="!sidebarCollapsed()"></i>
-      </button>
-    </div>
-
-    <nav class="sidebar-nav">
-      <a *ngFor="let item of menuItems" 
-         [routerLink]="item.route" 
-         class="nav-item"
-         [class.active]="item.active">
-        <i class="bi" [class]="'bi ' + item.icon"></i>
-        <span *ngIf="!sidebarCollapsed()">{{ item.label }}</span>
-      </a>
-    </nav>
-  </aside>
-
-  <main class="main-content records-page">
+<app-patient-shell active="records">
+  <div class="records-page">
     <div class="page-header">
-      <h1>Medical Records</h1>
-      <p>View and manage patient medical records</p>
+      <div>
+        <p class="eyebrow">Medical Records</p>
+        <h1>View and manage your medical history</h1>
+      </div>
     </div>
 
     <div class="stats-row" *ngIf="!isLoading()">
       <div class="stat-card">
-        <div class="stat-label">Total Records</div>
-        <div class="stat-value">{{ totalRecords() }}</div>
+        <p>Total Records</p>
+        <h2>{{ totalRecords() }}</h2>
       </div>
       <div class="stat-card">
-        <div class="stat-label">Lab Results</div>
-        <div class="stat-value">{{ labCount() }}</div>
+        <p>Lab Results</p>
+        <h2>{{ labCount() }}</h2>
       </div>
       <div class="stat-card">
-        <div class="stat-label">Prescriptions</div>
-        <div class="stat-value">{{ prescriptionCount() }}</div>
+        <p>Prescriptions</p>
+        <h2>{{ prescriptionCount() }}</h2>
       </div>
       <div class="stat-card">
-        <div class="stat-label">Imaging</div>
-        <div class="stat-value">{{ imagingCount() }}</div>
+        <p>Imaging</p>
+        <h2>{{ imagingCount() }}</h2>
       </div>
       <div class="stat-card">
-        <div class="stat-label">Diagnoses</div>
-        <div class="stat-value">{{ diagnosisCount() }}</div>
+        <p>Diagnoses</p>
+        <h2>{{ diagnosisCount() }}</h2>
       </div>
     </div>
 
-    <div class="records-list" *ngIf="!isLoading()">
-      <div *ngFor="let r of records()" class="record-item">
-        <div class="record-left">
-          <div class="record-icon">
-            <i class="bi bi-file-earmark-text"></i>
-          </div>
-          <div class="record-meta">
-            <h3>{{ r.title }}</h3>
-            <p class="meta-sub">{{ r.patientId }} • {{ r.recordDate | date }}</p>
-          </div>
+    <div class="records-list" *ngIf="!isLoading(); else loadingState">
+      <div class="record-card" *ngFor="let record of records()">
+        <div>
+          <p class="record-title">{{ record.title }}</p>
+          <p class="muted">{{ record.recordDate | date:'MMM d, y' }}</p>
+          <span class="tag">{{ record.type }}</span>
         </div>
-        <div class="record-right">
-          <span class="tag">{{ r.type }}</span>
-          <div class="actions">
-            <button class="btn-spotify" (click)="viewRecord(r)">View</button>
-            <button class="btn-outline" (click)="downloadRecord(r)">Download</button>
-          </div>
+        <div class="record-actions">
+          <button class="text-btn" (click)="viewRecord(record)">View</button>
+          <button class="primary-btn subtle" (click)="downloadRecord(record)">Download</button>
         </div>
       </div>
-    </div>
 
-    <div *ngIf="isLoading()" class="loading-state">
-      <div class="spinner"></div>
-      <p>Loading records...</p>
+      <div class="empty-state" *ngIf="records().length === 0">
+        <p>No records yet.</p>
+      </div>
     </div>
-  </main>
-</div>
+  </div>
+</app-patient-shell>
+
+<ng-template #loadingState>
+  <div class="empty-state">
+    <div class="spinner"></div>
+    Loading records...
+  </div>
+</ng-template>
+

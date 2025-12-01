@@ -15,6 +15,7 @@ import { PrescriptionsModule } from './prescriptions/prescriptions.module';
 import { MessagesModule } from './messages/messages.module';
 import { SettingsModule } from './settings/settings.module';
 import { ReviewsModule } from './reviews/reviews.module';
+import { PatientPortalModule } from './patient-portal/patient-portal.module';
 
 @Module({
   imports: [
@@ -50,6 +51,7 @@ import { ReviewsModule } from './reviews/reviews.module';
     MessagesModule,
     SettingsModule,
     ReviewsModule,
+    PatientPortalModule,
   ],
 })
 export class AppModule {}

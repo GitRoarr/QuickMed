@@ -1,0 +1,35 @@
+<app-patient-shell active="profile">
+  <div class="profile-page" *ngIf="user() as profile">
+    <div class="hero">
+      <div class="avatar">
+        <img *ngIf="profile.avatar; else initials" [src]="profile.avatar" alt="{{ profile.firstName }}" />
+        <ng-template #initials>
+          {{ ((profile.firstName || '').charAt(0) || 'A') + ((profile.lastName || '').charAt(0) || 'J') }}
+        </ng-template>
+      </div>
+      <div>
+        <h1>{{ profile.firstName }} {{ profile.lastName }}</h1>
+        <p class="muted">Patient ID: {{ profile.patientId || profile.id }}</p>
+      </div>
+    </div>
+
+    <div class="info-grid">
+      <div class="info-card">
+        <h3>Contact</h3>
+        <p>Email: {{ profile.email }}</p>
+        <p>Phone: {{ profile.phoneNumber || '—' }}</p>
+      </div>
+      <div class="info-card">
+        <h3>Health</h3>
+        <p>Blood Type: {{ profile.bloodType || '—' }}</p>
+        <p>Allergies: {{ profile.allergies?.join(', ') || 'None listed' }}</p>
+      </div>
+      <div class="info-card">
+        <h3>Account</h3>
+        <p>Member since {{ profile.createdAt | date:'MMMM y' }}</p>
+        <p>Last update {{ profile.updatedAt | date:'mediumDate' }}</p>
+      </div>
+    </div>
+  </div>
+</app-patient-shell>
+

@@ -3,6 +3,7 @@ import { MessagesService } from './messages.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { User } from '../users/entities/user.entity';
+import { SendMessageDto } from './dto/send-message.dto';
 
 @Controller('messages')
 @UseGuards(JwtAuthGuard)
@@ -11,28 +12,21 @@ export class MessagesController {
 
   @Get('conversations')
   getConversations(@CurrentUser() user: User, @Query('search') search?: string) {
-    if (search) {
-      return this.messagesService.searchConversations(user.id, search);
-    }
-    return this.messagesService.getConversations(user.id);
+    return this.messagesService.getConversationsForUser(user, search);
   }
 
   @Get('conversations/:conversationId')
   getMessages(@Param('conversationId') conversationId: string, @CurrentUser() user: User) {
-    return this.messagesService.getMessages(conversationId, user.id);
+    return this.messagesService.getMessages(conversationId, user);
   }
 
   @Post('send')
-  sendMessage(
-    @Body('patientId') patientId: string,
-    @Body('content') content: string,
-    @CurrentUser() user: User,
-  ) {
-    return this.messagesService.sendMessage(user.id, patientId, content);
+  sendMessage(@Body() body: SendMessageDto, @CurrentUser() user: User) {
+    return this.messagesService.sendMessageFromUser(user, body);
   }
 
   @Get('unread-count')
   getUnreadCount(@CurrentUser() user: User) {
-    return this.messagesService.getUnreadCount(user.id);
+    return this.messagesService.getUnreadCount(user);
   }
 }

@@ -41,5 +41,9 @@ export class UserService {
     return this.http.patch<User>(`${this.API_URL}/${userId}/avatar`, formData);
   }
 
+  changePassword(id: string, payload: { currentPassword?: string; newPassword: string }): Observable<any> {
+    return this.http.patch(`${this.API_URL}/${id}/password`, payload);
+  }
+
   
 }

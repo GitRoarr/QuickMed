@@ -1,10 +1,11 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, SelectQueryBuilder } from 'typeorm';
 import { Message, MessageSenderType } from './entities/message.entity';
 import { Conversation } from './entities/conversation.entity';
 import { User } from '../users/entities/user.entity';
 import { UserRole } from '../common/index';
+import { SendMessageDto } from './dto/send-message.dto';
 
 @Injectable()
 export class MessagesService {
@@ -33,19 +34,44 @@ export class MessagesService {
     return conversation;
   }
 
-  async getConversations(doctorId: string): Promise<Conversation[]> {
-    const conversations = await this.conversationsRepository.find({
-      where: { doctorId },
-      relations: ['patient', 'doctor'],
-      order: { lastMessageAt: 'DESC' },
-    });
+  private conversationBaseQuery(): SelectQueryBuilder<Conversation> {
+    return this.conversationsRepository
+      .createQueryBuilder('conversation')
+      .leftJoinAndSelect('conversation.patient', 'patient')
+      .leftJoinAndSelect('conversation.doctor', 'doctor')
+      .orderBy('conversation.lastMessageAt', 'DESC');
+  }
 
-    // Calculate unread count for each conversation
+  async getConversationsForUser(user: Pick<User, 'id' | 'role'>, search?: string): Promise<Conversation[]> {
+    let query = this.conversationBaseQuery();
+
+    if (user.role === UserRole.DOCTOR) {
+      query = query.where('conversation.doctorId = :userId', { userId: user.id });
+      if (search) {
+        query = query.andWhere(
+          '(LOWER(patient.firstName) LIKE LOWER(:query) OR LOWER(patient.lastName) LIKE LOWER(:query))',
+          { query: `%${search}%` },
+        );
+      }
+    } else if (user.role === UserRole.PATIENT) {
+      query = query.where('conversation.patientId = :userId', { userId: user.id });
+      if (search) {
+        query = query.andWhere(
+          '(LOWER(doctor.firstName) LIKE LOWER(:query) OR LOWER(doctor.lastName) LIKE LOWER(:query))',
+          { query: `%${search}%` },
+        );
+      }
+    } else {
+      return [];
+    }
+
+    const conversations = await query.getMany();
+
     for (const conv of conversations) {
       const unread = await this.messagesRepository.count({
         where: {
           conversationId: conv.id,
-          receiverId: doctorId,
+          receiverId: user.id,
           isRead: false,
         },
       });
@@ -55,7 +81,7 @@ export class MessagesService {
     return conversations;
   }
 
-  async getMessages(conversationId: string, doctorId: string): Promise<Message[]> {
+  async getMessages(conversationId: string, user: Pick<User, 'id' | 'role'>): Promise<Message[]> {
     const conversation = await this.conversationsRepository.findOne({
       where: { id: conversationId },
     });
@@ -64,7 +90,7 @@ export class MessagesService {
       throw new NotFoundException('Conversation not found');
     }
 
-    if (conversation.doctorId !== doctorId) {
+    if (conversation.doctorId !== user.id && conversation.patientId !== user.id) {
       throw new ForbiddenException('You can only access your own conversations');
     }
 
@@ -78,7 +104,7 @@ export class MessagesService {
     await this.messagesRepository.update(
       {
         conversationId,
-        receiverId: doctorId,
+        receiverId: user.id,
         isRead: false,
       },
       {
@@ -88,65 +114,63 @@ export class MessagesService {
     );
 
     // Update conversation unread count
-    conversation.unreadCount = 0;
-    await this.conversationsRepository.save(conversation);
+    if (conversation.doctorId === user.id || conversation.patientId === user.id) {
+      conversation.unreadCount = 0;
+      await this.conversationsRepository.save(conversation);
+    }
 
     return messages;
   }
 
-  async sendMessage(
-    doctorId: string,
-    patientId: string,
-    content: string,
+  async sendMessageFromUser(
+    sender: Pick<User, 'id' | 'role'>,
+    payload: SendMessageDto,
   ): Promise<Message> {
+    let doctorId: string | undefined;
+    let patientId: string | undefined;
+
+    if (sender.role === UserRole.DOCTOR) {
+      doctorId = sender.id;
+      patientId = payload.patientId;
+    } else if (sender.role === UserRole.PATIENT) {
+      patientId = sender.id;
+      doctorId = payload.doctorId;
+    } else {
+      throw new ForbiddenException('Only doctors and patients can send messages');
+    }
+
+    if (!doctorId || !patientId) {
+      throw new BadRequestException('Missing recipient information');
+    }
+
     const conversation = await this.getOrCreateConversation(doctorId, patientId);
 
     const message = this.messagesRepository.create({
       conversationId: conversation.id,
-      senderId: doctorId,
-      receiverId: patientId,
-      content,
-      senderType: MessageSenderType.DOCTOR,
+      senderId: sender.id,
+      receiverId: sender.role === UserRole.DOCTOR ? patientId : doctorId,
+      content: payload.content,
+      senderType: sender.role === UserRole.DOCTOR ? MessageSenderType.DOCTOR : MessageSenderType.PATIENT,
       isRead: false,
     });
 
     const savedMessage = await this.messagesRepository.save(message);
 
-    // Update conversation
     conversation.lastMessageAt = new Date();
-    conversation.lastMessageContent = content;
-    conversation.unreadCount = await this.messagesRepository.count({
-      where: {
-        conversationId: conversation.id,
-        receiverId: patientId,
-        isRead: false,
-      },
-    });
+    conversation.lastMessageContent = payload.content;
     await this.conversationsRepository.save(conversation);
 
-    return savedMessage;
+    return this.messagesRepository.findOne({
+      where: { id: savedMessage.id },
+      relations: ['sender', 'receiver'],
+    });
   }
 
-  async searchConversations(doctorId: string, query: string): Promise<Conversation[]> {
-    return this.conversationsRepository
-      .createQueryBuilder('conversation')
-      .leftJoinAndSelect('conversation.patient', 'patient')
-      .leftJoinAndSelect('conversation.doctor', 'doctor')
-      .where('conversation.doctorId = :doctorId', { doctorId })
-      .andWhere(
-        '(LOWER(patient.firstName) LIKE LOWER(:query) OR LOWER(patient.lastName) LIKE LOWER(:query))',
-        { query: `%${query}%` },
-      )
-      .orderBy('conversation.lastMessageAt', 'DESC')
-      .getMany();
-  }
-
-  async getUnreadCount(doctorId: string): Promise<{ count: number }> {
+  async getUnreadCount(user: Pick<User, 'id' | 'role'>): Promise<{ count: number }> {
     const count = await this.messagesRepository.count({
       where: {
-        receiverId: doctorId,
+        receiverId: user.id,
         isRead: false,
-        senderType: MessageSenderType.PATIENT,
       },
     });
     return { count };

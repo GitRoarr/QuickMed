@@ -1,50 +1,24 @@
-<div class="doctors-container">
-  <aside class="sidebar" [class.collapsed]="sidebarCollapsed()">
-    <div class="sidebar-header">
-      <div class="logo" *ngIf="!sidebarCollapsed()" (click)="goHome()" style="cursor:pointer">
-        <div class="logo-icon">
-          <img src="assets/images/QuickMed-Logo.png" alt="QuickMed Logo" class="h-8 mb-2" />
-        </div>
-        <div class="logo-text">
-          <h3>QuickMed</h3>
-          <p>Patient Portal</p>
-        </div>
-      </div>
-      <button class="toggle-btn" (click)="toggleSidebar()">
-        <i class="bi" [class.bi-chevron-right]="sidebarCollapsed()" [class.bi-chevron-left]="!sidebarCollapsed()"></i>
-      </button>
-    </div>
-    <nav class="sidebar-nav">
-      <a *ngFor="let item of menuItems" 
-         [routerLink]="item.route" 
-         class="nav-item"
-         [class.active]="item.active">
-        <i class="bi" [class]="'bi ' + item.icon"></i>
-        <span *ngIf="!sidebarCollapsed()">{{ item.label }}</span>
-      </a>
-    </nav>
-  </aside>
-
-  <main class="main-content">
+<app-patient-shell active="doctors">
+  <div class="doctors-page">
     <div class="page-header">
-      <h1 class="page-title">Find Doctors</h1>
-      <p class="page-subtitle">Browse and book appointments with our healthcare professionals</p>
+      <div>
+        <p class="eyebrow">Find Doctors</p>
+        <h1>Browse and book appointments with our healthcare professionals</h1>
+      </div>
     </div>
 
-    <div class="search-section">
-      <div class="search-bar">
-        <i class="bi bi-search search-icon"></i>
-        <input 
-          type="text" 
-          placeholder="Search by name, specialty, or expertise..." 
+    <div class="search-controls">
+      <div class="search-input">
+        <i class="bi bi-search"></i>
+        <input
+          type="text"
+          placeholder="Search by name, specialty, or expertise..."
           [(ngModel)]="searchQuery"
-          (ngModelChange)="onSearchChange()"
-          class="search-input"
-        />
+          (ngModelChange)="onSearchChange()" />
       </div>
-      <div class="specialty-filter">
-        <label>Specialty:</label>
-        <select [(ngModel)]="selectedSpecialty" (ngModelChange)="onSpecialtyChange()" class="specialty-select">
+      <div class="filter-select">
+        <label>Specialty</label>
+        <select [(ngModel)]="selectedSpecialty" (ngModelChange)="onSpecialtyChange()">
           <option *ngFor="let specialty of specialties" [value]="specialty.value">
             {{ specialty.label }}
           </option>
@@ -52,123 +26,87 @@
       </div>
     </div>
 
-    <div class="results-info" *ngIf="!isLoading()">
-      <p>Found {{ filteredDoctors().length }} doctors</p>
+    <div class="results-note" *ngIf="!isLoading()">
+      Found {{ filteredDoctors().length }} doctors
     </div>
 
-    <div class="doctors-grid" *ngIf="!isLoading()">
-      <div *ngFor="let doctor of filteredDoctors()" class="doctor-card">
-        <div class="doctor-header">
-          <div class="doctor-avatar">
-            <i class="bi bi-person-circle"></i>
+    <div class="doctors-grid" *ngIf="!isLoading(); else loadingState">
+      <div class="doctor-card" *ngFor="let doctor of filteredDoctors()">
+        <div class="card-head">
+          <div class="avatar">
+            <i class="bi bi-person"></i>
           </div>
-          <div class="doctor-status" [class.available]="doctor.available">
+          <span class="availability" [class.available]="doctor.available">
             {{ doctor.available ? 'Available' : 'Unavailable' }}
-          </div>
+          </span>
         </div>
-        <div class="doctor-info">
+
+        <div class="card-body">
           <h3>Dr. {{ doctor.firstName }} {{ doctor.lastName }}</h3>
-          <p class="specialty">{{ doctor.specialty }}</p>
+          <p class="muted">{{ doctor.specialty }}</p>
+
           <div class="rating">
             <span *ngFor="let star of getStarArray(doctor.rating || 0)" class="star" [class.filled]="star === 1">
               <i class="bi" [class.bi-star-fill]="star === 1" [class.bi-star]="star === 0"></i>
             </span>
-            <span class="rating-text">{{ doctor.rating || 0 }} ({{ doctor.experience || 0 }}+ years)</span>
-            <span *ngIf="doctor.ratingCount && doctor.ratingCount > 0" class="rating-count">({{ doctor.ratingCount }} reviews)</span>
+            <span class="rating-text">
+              {{ doctor.rating || 0 }} · {{ doctor.experience || 0 }}+ years
+            </span>
           </div>
+
           <p class="bio">{{ doctor.bio }}</p>
-          <div class="contact-info">
-            <div class="contact-item">
-              <i class="bi bi-telephone"></i>
-              <span>{{ doctor.phoneNumber }}</span>
-            </div>
-            <div class="contact-item">
-              <i class="bi bi-envelope"></i>
-              <span>{{ doctor.email }}</span>
-            </div>
+
+          <div class="contact-row">
+            <span><i class="bi bi-telephone"></i>{{ doctor.phoneNumber || '—' }}</span>
+            <span><i class="bi bi-envelope"></i>{{ doctor.email }}</span>
           </div>
         </div>
-        <button 
-          class="book-btn" 
-          (click)="selectDoctor(doctor)"
-          [disabled]="!doctor.available">
+
+        <button class="primary-btn subtle" (click)="selectDoctor(doctor)" [disabled]="!doctor.available">
           <i class="bi bi-calendar-plus"></i>
           {{ doctor.available ? 'Book Appointment' : 'Unavailable' }}
         </button>
       </div>
 
-      <div *ngIf="filteredDoctors().length === 0" class="empty-state">
+      <div class="empty-state" *ngIf="filteredDoctors().length === 0">
         <i class="bi bi-search"></i>
-        <h3>No doctors found</h3>
-        <p>Try adjusting your search or filters</p>
+        <p>No doctors match your filters.</p>
       </div>
     </div>
-
-    <div *ngIf="isLoading()" class="loading-state">
-      <div class="spinner"></div>
-      <p>Loading doctors...</p>
-    </div>
-  </main>
+  </div>
 
   <div class="modal-overlay" *ngIf="showBookingForm()" (click)="closeBookingForm()">
     <div class="modal-content" (click)="$event.stopPropagation()">
       <div class="modal-header">
         <h2>Book Appointment</h2>
-        <button class="close-btn" (click)="closeBookingForm()">
-          <i class="bi bi-x-lg"></i>
-        </button>
+        <button class="icon-btn" (click)="closeBookingForm()"><i class="bi bi-x-lg"></i></button>
       </div>
       <div class="modal-body" *ngIf="selectedDoctor()">
         <div class="doctor-summary">
-          <div class="doctor-avatar-small">
-            {{ getSelectedDoctorInitial() }}
-          </div>
+          <div class="avatar small">{{ getSelectedDoctorInitial() }}</div>
           <div>
-            <h4>Dr. {{ selectedDoctor()?.firstName }} {{ selectedDoctor()?.lastName }}</h4>
-            <p>{{ selectedDoctor()?.specialty }}</p>
+            <p class="doctor-name">Dr. {{ selectedDoctor()?.firstName }} {{ selectedDoctor()?.lastName }}</p>
+            <p class="muted">{{ selectedDoctor()?.specialty }}</p>
           </div>
         </div>
+
         <form [formGroup]="appointmentForm" (ngSubmit)="bookAppointment()">
-          <div class="form-group">
-            <label for="appointmentDate">Appointment Date</label>
-            <input 
-              type="date" 
-              id="appointmentDate" 
-              class="form-control"
-              formControlName="appointmentDate"
-              [min]="getCurrentDate()"
-            />
-            <div class="error-message" *ngIf="appointmentForm.get('appointmentDate')?.invalid && appointmentForm.get('appointmentDate')?.touched">
-              Please select a date
-            </div>
-          </div>
-          <div class="form-group">
-            <label for="appointmentTime">Appointment Time</label>
-            <input 
-              type="time" 
-              id="appointmentTime" 
-              class="form-control"
-              formControlName="appointmentTime"
-            />
-            <div class="error-message" *ngIf="appointmentForm.get('appointmentTime')?.invalid && appointmentForm.get('appointmentTime')?.touched">
-              Please select a time
-            </div>
-          </div>
-          <div class="form-group">
-            <label for="notes">Notes (Optional)</label>
-            <textarea 
-              id="notes" 
-              class="form-control"
-              formControlName="notes"
-              rows="4"
-              placeholder="Add any notes or special requests..."
-            ></textarea>
-          </div>
+          <label>
+            <span>Appointment Date</span>
+            <input type="date" formControlName="appointmentDate" [min]="getCurrentDate()" />
+          </label>
+          <label>
+            <span>Appointment Time</span>
+            <input type="time" formControlName="appointmentTime" />
+          </label>
+          <label>
+            <span>Notes (optional)</span>
+            <textarea rows="3" formControlName="notes" placeholder="Add special requests..."></textarea>
+          </label>
+
           <div class="modal-actions">
-            <button type="button" class="btn-outline" (click)="closeBookingForm()">
-              Cancel
-            </button>
-            <button type="submit" class="btn-primary" [disabled]="appointmentForm.invalid">
+            <button type="button" class="text-btn" (click)="closeBookingForm()">Cancel</button>
+            <button type="submit" class="primary-btn" [disabled]="appointmentForm.invalid">
               <i class="bi bi-check-circle"></i>
               Confirm Booking
             </button>
@@ -177,4 +115,11 @@
       </div>
     </div>
   </div>
-</div>
+</app-patient-shell>
+
+<ng-template #loadingState>
+  <div class="empty-state">
+    <div class="spinner"></div>
+    Loading doctors...
+  </div>
+</ng-template>

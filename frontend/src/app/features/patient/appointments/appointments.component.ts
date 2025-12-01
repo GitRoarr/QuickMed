@@ -1,11 +1,12 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterModule } from '@angular/router';
+import { Router } from '@angular/router';
 import { AppointmentService } from '../../../core/services/appointment.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { Appointment as AppointmentModel } from '../../../core/models/appointment.model';
 import { PayButtonComponent } from '../../../shared/components/pay-button/pay-button.component';
+import { PatientShellComponent } from '../shared/patient-shell/patient-shell.component';
 
 interface Appointment {
   id: string;
@@ -21,45 +22,40 @@ interface Appointment {
 @Component({
   selector: 'app-patient-appointments',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, PayButtonComponent],
+  imports: [CommonModule, FormsModule, PayButtonComponent, PatientShellComponent],
   templateUrl: './appointments.component.html',
-  styleUrls: ['./appointments.component.css']
+  styleUrls: ['./appointments.component.css'],
 })
 export class AppointmentsComponent implements OnInit {
+  private readonly router = inject(Router);
+  private readonly appointmentService = inject(AppointmentService);
+  private readonly authService = inject(AuthService);
+
   appointments = signal<AppointmentModel[]>([]);
-  filteredAppointments = signal<AppointmentModel[]>([]);
   isLoading = signal(true);
   searchQuery = signal('');
-  selectedFilter = signal('all');
-  showFilters = signal(false);
-  sortBy = signal('date');
-  sortOrder = signal('desc');
-  sidebarCollapsed = signal(false);
+  activeSegment = signal<'upcoming' | 'completed'>('upcoming');
 
-  menuItems = [
-    { label: 'Dashboard', icon: 'bi-house', route: '/patient/dashboard', active: false },
-    { label: 'My Appointments', icon: 'bi-calendar-check', route: '/patient/appointments', active: true },
-    { label: 'Find Doctors', icon: 'bi-people', route: '/patient/doctors', active: false },
-    { label: 'Medical Records', icon: 'bi-file-medical', route: '/patient/records', active: false },
-    { label: 'Prescriptions', icon: 'bi-prescription', route: '/patient/prescriptions', active: false }
-  ];
-
-  filterOptions = [
-    { value: 'all', label: 'All Appointments', icon: 'bi-list' },
-    { value: 'pending', label: 'Pending', icon: 'bi-clock' },
-    { value: 'confirmed', label: 'Confirmed', icon: 'bi-check-circle' },
-    { value: 'completed', label: 'Completed', icon: 'bi-check2-all' },
-    { value: 'cancelled', label: 'Cancelled', icon: 'bi-x-circle' }
-  ];
-
-  sortOptions = [
-    { value: 'date', label: 'Date' },
-    { value: 'doctor', label: 'Doctor' },
-    { value: 'status', label: 'Status' },
-    { value: 'time', label: 'Time' }
-  ];
-
-  constructor(private router: Router, private appointmentService: AppointmentService, private authService: AuthService) {}
+  visibleAppointments = computed(() => {
+    let list = [...this.appointments()];
+    const query = this.searchQuery().toLowerCase().trim();
+    if (query) {
+      list = list.filter((apt) => {
+        const doctorName = `${apt.doctor?.firstName ?? ''} ${apt.doctor?.lastName ?? ''}`.toLowerCase();
+        return (
+          doctorName.includes(query) ||
+          (apt.doctor?.specialty ?? '').toLowerCase().includes(query) ||
+          (apt.location ?? '').toLowerCase().includes(query)
+        );
+      });
+    }
+    if (this.activeSegment() === 'upcoming') {
+      list = list.filter((apt) => apt.status !== 'completed' && apt.status !== 'cancelled');
+    } else {
+      list = list.filter((apt) => apt.status === 'completed');
+    }
+    return list.sort((a, b) => new Date(a.appointmentDate).getTime() - new Date(b.appointmentDate).getTime());
+  });
 
   ngOnInit(): void {
     this.loadAppointments();
@@ -67,92 +63,25 @@ export class AppointmentsComponent implements OnInit {
 
   loadAppointments(): void {
     this.isLoading.set(true);
-
     this.appointmentService.getMyAppointments().subscribe({
       next: (apts) => {
         this.appointments.set(apts as AppointmentModel[]);
-        this.applyFilters();
         this.isLoading.set(false);
       },
       error: (err) => {
         console.error('Failed to load appointments', err);
         this.appointments.set([]);
-        this.filteredAppointments.set([]);
         this.isLoading.set(false);
-      }
+      },
     });
-  }
-
-  applyFilters(): void {
-    let filtered = [...this.appointments()];
-
-    if (this.selectedFilter() !== 'all') {
-      filtered = filtered.filter((apt) => apt.status === this.selectedFilter());
-    }
-
-    if (this.searchQuery()) {
-      const query = this.searchQuery().toLowerCase();
-      filtered = filtered.filter((apt) => {
-        const doctorName = `${apt.doctor?.firstName ?? ''} ${apt.doctor?.lastName ?? ''}`.toLowerCase();
-        const specialty = (apt.doctor?.specialty ?? '').toLowerCase();
-        return (
-          doctorName.includes(query) ||
-          specialty.includes(query) ||
-          (apt.location ?? '').toLowerCase().includes(query) ||
-          (apt.notes ?? '').toLowerCase().includes(query)
-        );
-      });
-    }
-
-    filtered = this.sortAppointments(filtered);
-    this.filteredAppointments.set(filtered);
-  }
-
-  sortAppointments(appointments: AppointmentModel[]): AppointmentModel[] {
-    const sorted = [...appointments];
-    const order = this.sortOrder() === 'asc' ? 1 : -1;
-    sorted.sort((a, b) => {
-      switch (this.sortBy()) {
-        case 'date':
-          return order * (new Date(a.appointmentDate).getTime() - new Date(b.appointmentDate).getTime());
-        case 'doctor': {
-          const nameA = `${a.doctor?.firstName ?? ''} ${a.doctor?.lastName ?? ''}`.trim();
-          const nameB = `${b.doctor?.firstName ?? ''} ${b.doctor?.lastName ?? ''}`.trim();
-          return order * nameA.localeCompare(nameB);
-        }
-        case 'status':
-          return order * (a.status ?? '').localeCompare(b.status ?? '');
-        case 'time':
-          return order * (a.appointmentTime ?? '').localeCompare(b.appointmentTime ?? '');
-        default:
-          return 0;
-      }
-    });
-
-    return sorted;
   }
 
   onSearchChange(): void {
-    this.applyFilters();
+    // computed signal automatically reacts
   }
 
-  setFilter(filter: string): void {
-    this.selectedFilter.set(filter);
-    this.applyFilters();
-  }
-
-  toggleFilters(): void {
-    this.showFilters.set(!this.showFilters());
-  }
-
-  setSortBy(sortBy: string): void {
-    if (this.sortBy() === sortBy) {
-      this.sortOrder.set(this.sortOrder() === 'asc' ? 'desc' : 'asc');
-    } else {
-      this.sortBy.set(sortBy);
-      this.sortOrder.set('desc');
-    }
-    this.applyFilters();
+  setSegment(segment: 'upcoming' | 'completed'): void {
+    this.activeSegment.set(segment);
   }
 
   getAppointmentStats() {
@@ -185,10 +114,7 @@ export class AppointmentsComponent implements OnInit {
     console.log('View details:', appointmentId);
   }
 
-  toggleSidebar(): void {
-    this.sidebarCollapsed.set(!this.sidebarCollapsed());
-  }
-  goHome(){
+  goHome() {
     this.router.navigate(['/']);
   }
 }

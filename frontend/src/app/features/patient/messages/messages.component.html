@@ -1,0 +1,98 @@
+<app-patient-shell active="messages">
+  <div class="patient-messages">
+    <section class="messages-panel">
+      <div class="panel-header">
+        <div>
+          <p class="eyebrow">Messages</p>
+          <h1>Stay in touch with your care team</h1>
+        </div>
+        <div class="header-actions">
+          <button class="icon-btn"><i class="bi bi-telephone"></i></button>
+          <button class="icon-btn"><i class="bi bi-camera-video"></i></button>
+        </div>
+      </div>
+
+      <div class="messages-layout">
+        <aside class="conversations">
+          <div class="search-field">
+            <i class="bi bi-search"></i>
+            <input
+              type="text"
+              placeholder="Search conversations..."
+              [(ngModel)]="searchQuery"
+              (ngModelChange)="loadConversations()" />
+          </div>
+
+          <div class="conversation-list" *ngIf="!isLoadingConversations(); else loadingConversations">
+            <button
+              type="button"
+              class="conversation-item"
+              *ngFor="let conversation of conversations()"
+              [class.active]="selectedConversation()?.id === conversation.id"
+              (click)="selectConversation(conversation)">
+              <div class="avatar">
+                {{ conversation.doctor?.firstName?.charAt(0) || 'D' }}
+              </div>
+              <div class="conversation-meta">
+                <div class="meta-row">
+                  <p>{{ getRecipientName(conversation) }}</p>
+                  <span>{{ conversation.lastMessageAt | date:'shortTime' }}</span>
+                </div>
+                <p class="preview">{{ conversation.lastMessageContent || 'New conversation' }}</p>
+              </div>
+              <span class="pill" *ngIf="conversation.unreadCount">{{ conversation.unreadCount }}</span>
+            </button>
+          </div>
+        </aside>
+
+        <section class="chat-view" *ngIf="selectedConversation(); else emptyState">
+          <header class="chat-header">
+            <div>
+              <p class="chat-title">{{ getRecipientName(selectedConversation()!) }}</p>
+              <p class="status">Online now</p>
+            </div>
+            <div class="header-actions">
+              <button class="icon-btn"><i class="bi bi-telephone"></i></button>
+              <button class="icon-btn"><i class="bi bi-camera-video"></i></button>
+              <button class="icon-btn"><i class="bi bi-three-dots"></i></button>
+            </div>
+          </header>
+
+          <div class="chat-body">
+            <div
+              *ngFor="let message of messages()"
+              class="message-row"
+              [class.mine]="isOwnMessage(message)">
+              <div class="message-bubble">
+                <p>{{ message.content }}</p>
+                <span>{{ message.createdAt | date:'shortTime' }}</span>
+              </div>
+            </div>
+          </div>
+
+          <footer class="chat-input">
+            <textarea
+              rows="2"
+              placeholder="Type your message..."
+              [(ngModel)]="messageContent"
+              (keyup.enter)="sendMessage()"></textarea>
+            <button class="primary-btn" (click)="sendMessage()" [disabled]="!messageContent().trim()">
+              Send
+            </button>
+          </footer>
+        </section>
+      </div>
+    </section>
+  </div>
+</app-patient-shell>
+
+<ng-template #loadingConversations>
+  <div class="empty-state">Loading conversations...</div>
+</ng-template>
+
+<ng-template #emptyState>
+  <div class="chat-empty">
+    <p>Select a conversation to get started</p>
+  </div>
+</ng-template>
+

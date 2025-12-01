@@ -1,209 +1,76 @@
-<div class="appointments-container">
-  <aside class="sidebar" [class.collapsed]="sidebarCollapsed()">
-    <div class="sidebar-header">
-      <div class="logo" *ngIf="!sidebarCollapsed()" (click)="goHome()" style="cursor:pointer">
-        <div class="logo-icon">
-          <img src="assets/images/QuickMed-Logo.png" alt="QuickMed Logo" class="h-8 mb-2" />
-        </div>
-        <div class="logo-text">
-          <h3>QuickMed</h3>
-          <p>Patient Portal</p>
-        </div>
+<app-patient-shell active="appointments">
+  <div class="appointments-page">
+    <div class="page-header">
+      <div>
+        <p class="eyebrow">My Appointments</p>
+        <h1>Manage your medical appointments</h1>
       </div>
-      <button class="toggle-btn" (click)="toggleSidebar()">
-        <i class="bi" [class.bi-chevron-right]="sidebarCollapsed()" [class.bi-chevron-left]="!sidebarCollapsed()"></i>
+      <button class="primary-btn" (click)="bookNewAppointment()">
+        <i class="bi bi-plus"></i>
+        Book Appointment
       </button>
     </div>
-    <nav class="sidebar-nav">
-      <a *ngFor="let item of menuItems" 
-         [routerLink]="item.route" 
-         class="nav-item"
-         [class.active]="item.active">
-        <i class="bi" [class]="'bi ' + item.icon"></i>
-        <span *ngIf="!sidebarCollapsed()">{{ item.label }}</span>
-      </a>
-    </nav>
-  </aside>
 
-  <main class="main-content">
-    <div class="page-header">
-      <div class="header-content">
-        <div class="header-info">
-          <h1 class="page-title">My Appointments</h1>
-          <p class="page-subtitle">Manage your medical appointments</p>
-        </div>
-        <div class="header-actions">
-          <button class="btn btn-primary" (click)="bookNewAppointment()">
-            <i class="bi bi-plus-circle"></i>
-            Book Appointment
-          </button>
-        </div>
+    <div class="segment-tabs">
+      <button type="button" [class.active]="activeSegment() === 'upcoming'" (click)="setSegment('upcoming')">Upcoming</button>
+      <button type="button" [class.active]="activeSegment() === 'completed'" (click)="setSegment('completed')">Completed</button>
+    </div>
+
+    <div class="appointments-toolbar">
+      <div class="search-field">
+        <i class="bi bi-search"></i>
+        <input
+          type="text"
+          placeholder="Search doctors, specialties, locations..."
+          [(ngModel)]="searchQuery"
+          (ngModelChange)="onSearchChange()" />
+      </div>
+      <div class="stats">
+        <span>Total: {{ getAppointmentStats().total }}</span>
+        <span>Confirmed: {{ getAppointmentStats().confirmed }}</span>
       </div>
     </div>
 
-    <div class="stats-grid" *ngIf="!isLoading()">
-      <div class="stat-card stat-total">
-        <div class="stat-icon">
-          <i class="bi bi-calendar3"></i>
-        </div>
-        <div class="stat-content">
-          <div class="stat-number">{{ getAppointmentStats().total }}</div>
-          <div class="stat-label">Total</div>
-        </div>
-      </div>
-      <div class="stat-card stat-pending">
-        <div class="stat-icon">
-          <i class="bi bi-clock"></i>
-        </div>
-        <div class="stat-content">
-          <div class="stat-number">{{ getAppointmentStats().pending }}</div>
-          <div class="stat-label">Pending</div>
-        </div>
-      </div>
-      <div class="stat-card stat-confirmed">
-        <div class="stat-icon">
-          <i class="bi bi-check-circle"></i>
-        </div>
-        <div class="stat-content">
-          <div class="stat-number">{{ getAppointmentStats().confirmed }}</div>
-          <div class="stat-label">Confirmed</div>
-        </div>
-      </div>
-      <div class="stat-card stat-completed">
-        <div class="stat-icon">
-          <i class="bi bi-check2-all"></i>
-        </div>
-        <div class="stat-content">
-          <div class="stat-number">{{ getAppointmentStats().completed }}</div>
-          <div class="stat-label">Completed</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="search-filter-section">
-      <div class="search-bar">
-        <div class="search-input-wrapper">
-          <i class="bi bi-search search-icon"></i>
-          <input 
-            type="text" 
-            placeholder="Search appointments, doctors, or notes..." 
-            [(ngModel)]="searchQuery"
-            (ngModelChange)="onSearchChange()"
-            class="search-input"
-          />
-        </div>
-        <button class="filter-toggle-btn" (click)="toggleFilters()">
-          <i class="bi bi-funnel"></i>
-          Filters
-        </button>
-      </div>
-
-      <div class="filters-panel" *ngIf="showFilters()">
-        <div class="filter-group">
-          <label>Status</label>
-          <div class="filter-options">
-            <button *ngFor="let option of filterOptions"
-                    class="filter-option"
-                    [class.active]="selectedFilter() === option.value"
-                    (click)="setFilter(option.value)">
-              <i class="bi" [class]="'bi ' + option.icon"></i>
-              {{ option.label }}
-            </button>
-          </div>
-        </div>
-
-        <div class="filter-group">
-          <label>Sort By</label>
-          <div class="sort-options">
-            <button *ngFor="let option of sortOptions"
-                    class="sort-option"
-                    [class.active]="sortBy() === option.value"
-                    (click)="setSortBy(option.value)">
-              {{ option.label }}
-              <i *ngIf="sortBy() === option.value" 
-                 class="bi"
-                 [class.bi-arrow-up]="sortOrder() === 'asc'"
-                 [class.bi-arrow-down]="sortOrder() === 'desc'"></i>
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="appointments-list" *ngIf="!isLoading()">
-      <div *ngFor="let apt of filteredAppointments()" class="appointment-card">
-        <div class="doctor-avatar">
-          {{ apt.doctor?.firstName?.charAt(0) || '?' }}
+    <ng-container *ngIf="!isLoading(); else loadingState">
+      <div class="appointment-card" *ngFor="let apt of visibleAppointments()">
+        <div class="appointment-icon" [class.video]="apt.isVideoConsultation">
+          <i class="bi" [ngClass]="apt.isVideoConsultation ? 'bi-camera-video' : 'bi-geo-alt'"></i>
         </div>
         <div class="appointment-details">
-          <div class="appointment-header">
+          <div class="details-header">
             <div>
-              <h4>Dr. {{ apt.doctor?.firstName || '' }} {{ apt.doctor?.lastName || '' }}</h4>
-              <p class="specialty">{{ apt.doctor?.specialty || '' }}</p>
+              <p class="doctor">Dr. {{ apt.doctor?.firstName }} {{ apt.doctor?.lastName }}</p>
+              <p class="muted">{{ apt.doctor?.specialty }}</p>
             </div>
-            <span class="status-badge" [class]="'status-' + apt.status">
-              {{ apt.status }}
-            </span>
+            <span class="badge" [ngClass]="apt.status">{{ apt.status }}</span>
           </div>
-          <div class="appointment-info">
-            <div class="info-item">
-              <i class="bi bi-calendar"></i>
-              <span>{{ apt.appointmentDate }}</span>
-            </div>
-            <div class="info-item">
-              <i class="bi bi-clock"></i>
-              <span>{{ apt.appointmentTime }}</span>
-            </div>
-            <div class="info-item">
-              <i class="bi" [class.bi-camera-video]="apt.isVideoConsultation" [class.bi-geo-alt]="!apt.isVideoConsultation"></i>
-              <span>{{ apt.location }}</span>
-            </div>
+          <div class="details-grid">
+            <div><i class="bi bi-calendar-event"></i>{{ apt.appointmentDate | date:'MMM d, y' }}</div>
+            <div><i class="bi bi-clock"></i>{{ apt.appointmentTime }}</div>
+            <div><i class="bi bi-geo-alt"></i>{{ apt.location || (apt.isVideoConsultation ? 'Virtual visit' : 'Clinic') }}</div>
           </div>
-          <div class="appointment-notes" *ngIf="apt.notes">
-            <i class="bi bi-chat-left-text"></i>
-            <span>{{ apt.notes }}</span>
-          </div>
-          <div class="appointment-actions">
-            <app-pay-button 
-              *ngIf="apt.paymentStatus !== 'paid'"
-              [appointmentId]="apt.id"
-              [paymentStatus]="apt.paymentStatus || 'not_paid'"
-              size="small"
-              variant="primary">
-            </app-pay-button>
-            <button *ngIf="apt.isVideoConsultation && apt.status === 'confirmed'" 
-                    class="btn-primary btn-sm" 
-                    (click)="joinVideoCall(apt.id)">
-              <i class="bi bi-camera-video"></i>
-              Join Call
-            </button>
-            <button class="btn-outline btn-sm" (click)="viewDetails(apt.id)">
-              View Details
-            </button>
-            <button class="btn-outline btn-sm" (click)="rescheduleAppointment(apt.id)">
-              Reschedule
-            </button>
-            <button class="btn-outline btn-sm btn-danger" (click)="cancelAppointment(apt.id)">
-              Cancel
+          <div class="actions">
+            <button class="text-btn" (click)="rescheduleAppointment(apt.id)">Reschedule</button>
+            <button class="text-btn" (click)="cancelAppointment(apt.id)">Cancel</button>
+            <button class="primary-btn subtle" *ngIf="apt.isVideoConsultation && apt.status === 'confirmed'" (click)="joinVideoCall(apt.id)">
+              Join
             </button>
           </div>
         </div>
       </div>
 
-      <div *ngIf="filteredAppointments().length === 0" class="empty-state">
-        <i class="bi bi-calendar-x"></i>
-        <h3>No appointments found</h3>
-        <p>Try adjusting your filters or book a new appointment</p>
-        <button class="btn-primary" (click)="bookNewAppointment()">
-          <i class="bi bi-plus-circle"></i>
-          Book Appointment
-        </button>
+      <div class="empty-state" *ngIf="visibleAppointments().length === 0">
+        <p>No appointments found.</p>
+        <button class="primary-btn" (click)="bookNewAppointment()">Book your next visit</button>
       </div>
-    </div>
+    </ng-container>
+  </div>
+</app-patient-shell>
 
-    <div *ngIf="isLoading()" class="loading-state">
-      <div class="spinner"></div>
-      <p>Loading appointments...</p>
-    </div>
-  </main>
-</div>
+<ng-template #loadingState>
+  <div class="empty-state">
+    <div class="spinner"></div>
+    Loading appointments...
+  </div>
+</ng-template>
+

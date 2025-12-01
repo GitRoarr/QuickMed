@@ -64,8 +64,8 @@ export class MessageService {
     return this.http.get<Message[]>(`${this.API_URL}/conversations/${conversationId}`);
   }
 
-  sendMessage(patientId: string, content: string): Observable<Message> {
-    return this.http.post<Message>(`${this.API_URL}/send`, { patientId, content });
+  sendMessage(payload: { patientId?: string; doctorId?: string; content: string }): Observable<Message> {
+    return this.http.post<Message>(`${this.API_URL}/send`, payload);
   }
 
   getUnreadCount(): Observable<{ count: number }> {

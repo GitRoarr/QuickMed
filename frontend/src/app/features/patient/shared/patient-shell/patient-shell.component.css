@@ -1,0 +1,141 @@
+.patient-shell {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  min-height: 100vh;
+  background: #f6f8fb;
+  color: #0f172a;
+}
+
+.patient-shell__sidebar {
+  background: #ffffff;
+  border-right: 1px solid #e2e8f0;
+  padding: 2rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.patient-shell__brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+}
+
+.brand-icon {
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  background: #0f9d58;
+  color: #fff;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+}
+
+.brand-title {
+  font-weight: 700;
+  margin: 0;
+}
+
+.brand-subtitle {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.85rem;
+}
+
+.patient-shell__nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.patient-shell__nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  border-radius: 12px;
+  border: none;
+  background: transparent;
+  font-weight: 500;
+  color: #475569;
+  transition: background 0.2s, color 0.2s;
+  cursor: pointer;
+}
+
+.patient-shell__nav-item.active,
+.patient-shell__nav-item:hover {
+  background: #e8f5ee;
+  color: #0f9d58;
+}
+
+.patient-shell__profile {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  border-radius: 14px;
+  background: #f1f5f9;
+}
+
+.avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #d1fae5;
+  color: #0f9d58;
+  font-weight: 600;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+
+.avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profile-name {
+  margin: 0;
+  font-weight: 600;
+}
+
+.profile-id {
+  margin: 0;
+  color: #94a3b8;
+  font-size: 0.85rem;
+}
+
+.patient-shell__logout {
+  margin-top: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border: none;
+  border-radius: 10px;
+  background: #fee2e2;
+  color: #b91c1c;
+  cursor: pointer;
+}
+
+.patient-shell__content {
+  padding: 2rem 2.5rem;
+}
+
+@media (max-width: 1024px) {
+  .patient-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .patient-shell__sidebar {
+    flex-direction: row;
+    flex-wrap: wrap;
+    border-right: none;
+    border-bottom: 1px solid #e2e8f0;
+  }
+}
+

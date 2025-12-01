@@ -4,12 +4,13 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormsModule } 
 import { UserService } from '../../../core/services/user.service';
 import { AppointmentService } from '../../../core/services/appointment.service';
 import { Doctor } from '../../../core/models/user.model';
-import { Router, RouterModule } from '@angular/router';
+import { Router } from '@angular/router';
+import { PatientShellComponent } from '../shared/patient-shell/patient-shell.component';
 
 @Component({
   selector: 'app-patient-doctors',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule, RouterModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, PatientShellComponent],
   templateUrl: './doctors.component.html',
   styleUrls: ['./doctors.component.css']
 })
@@ -21,16 +22,8 @@ export class DoctorsComponent implements OnInit {
   showBookingForm = signal(false);
   searchQuery = signal('');
   selectedSpecialty = signal('all');
-  sidebarCollapsed = signal(false);
   
   appointmentForm: FormGroup;
-
-  menuItems = [
-    { label: 'Dashboard', icon: 'bi-house', route: '/patient/dashboard', active: false },
-    { label: 'My Appointments', icon: 'bi-calendar-check', route: '/patient/appointments', active: false },
-    { label: 'Find Doctors', icon: 'bi-people', route: '/patient/doctors', active: true },
-    { label: 'Medical Records', icon: 'bi-file-medical', route: '/patient/records', active: false }
-  ];
 
   specialties = [
     { value: 'all', label: 'All Specialties' },
@@ -151,7 +144,6 @@ export class DoctorsComponent implements OnInit {
   }
 
   toggleSidebar(): void {
-    this.sidebarCollapsed.set(!this.sidebarCollapsed());
   }
 
   getStarArray(rating: number): number[] {
@@ -166,9 +158,6 @@ export class DoctorsComponent implements OnInit {
   getSelectedDoctorInitial(): string {
     const d = this.selectedDoctor();
     return d?.firstName?.charAt(0) ?? '';
-  }
-  goHome(){
-    this.router.navigate(['/']);
   }
 
   getCurrentDate(): string {

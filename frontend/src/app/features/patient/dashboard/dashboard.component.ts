@@ -1,192 +1,127 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { Router, RouterModule } from '@angular/router';
-import { ThemeService } from '../../../core/services/theme.service';
-import { AuthService } from '../../../core/services/auth.service';
-import { UserService } from '../../../core/services/user.service';
-import { AppointmentService } from '../../../core/services/appointment.service';
-import { Appointment as AppointmentModel } from '../../../core/models/appointment.model';
-import { DataContainerComponent } from '../../../shared/components/data-container/data-container.component';
-import { AvatarUploaderComponent } from '../../../shared/components/avatar-uploader/avatar-uploader.component';
-
-interface User {
-  firstName: string;
-  lastName: string;
-  email: string;
-  phoneNumber?: string;
-  dateOfBirth?: string;
-  bloodType?: string;
-  patientId?: string;
-  allergies?: string[];
-  id?: string;
-  avatar?: string;
-}
-
-interface Appointment {
-  id: string;
-  doctor: { firstName: string; lastName: string; specialty: string };
-  appointmentDate: string;
-  appointmentTime: string;
-  location?: string;
-  status: 'confirmed' | 'pending' | 'completed' | 'cancelled';
-  isVideoConsultation?: boolean;
-}
-
-interface Stats {
-  upcomingAppointments: number;
-  activeMeds: number;
-  records: number;
-  testResults: number;
-}
+import { RouterModule } from '@angular/router';
+import {
+  PatientDashboardAppointment,
+  PatientDashboardData,
+  PatientPortalService,
+} from '@core/services/patient-portal.service';
+import { PatientShellComponent } from '../shared/patient-shell/patient-shell.component';
 
 @Component({
   selector: 'app-patient-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, DataContainerComponent, AvatarUploaderComponent],
+  imports: [CommonModule, RouterModule, PatientShellComponent],
   templateUrl: './dashboard.component.html',
-  styleUrls: ['./dashboard.component.css']
+  styleUrls: ['./dashboard.component.css'],
 })
 export class DashboardComponent implements OnInit {
+  private readonly patientPortalService = inject(PatientPortalService);
+
   isLoading = signal(true);
-  activeTab = signal<'appointments' | 'history' | 'prescriptions' | 'tests'>('appointments');
-  searchQuery = signal('');
-  sidebarCollapsed = signal(false);
-  
-  
-  user = signal<User | null>(null);
-
-  stats = signal<Stats>({
-    upcomingAppointments: 0,
-    activeMeds: 0,
-    records: 0,
-    testResults: 0,
-  });
-
-  appointments = signal<AppointmentModel[]>([]);
-
-  menuItems = [
-    { iconUrl: 'https://img.icons8.com/ios-filled/24/000000/home.png', label: 'Dashboard', route: '/patient/dashboard', active: true },
-    { iconUrl: 'https://img.icons8.com/ios-filled/24/000000/calendar.png', label: 'Appointments', route: '/patient/appointments', active: false },
-    { iconUrl: 'https://img.icons8.com/ios-filled/24/000000/doctor-male.png', label: 'Find Doctors', route: '/patient/doctors', active: false },
-    { iconUrl: 'https://img.icons8.com/ios-filled/24/000000/medical-records.png', label: 'Medical Records', route: '/patient/records', active: false },
-    { iconUrl: 'https://img.icons8.com/ios-filled/24/000000/settings.png', label: 'Settings', route: '/patient/settings', active: false }
-  ];
-
-  quickActions = [
-    { iconUrl: 'https://img.icons8.com/ios-filled/20/000000/add-calendar.png', label: 'Book Appointment' },
-    { iconUrl: 'https://img.icons8.com/ios-filled/20/000000/download.png', label: 'Download Records' },
-    { iconUrl: 'https://img.icons8.com/ios-filled/20/000000/pills.png', label: 'Request Prescription' },
-    { iconUrl: 'https://img.icons8.com/ios-filled/20/000000/phone.png', label: 'Contact Support' }
-  ];
-
-  constructor(
-    public theme: ThemeService,
-    private router: Router,
-    private authService: AuthService,
-    private userService: UserService,
-    private appointmentService: AppointmentService
-  ) {}
+  dashboard = signal<PatientDashboardData | null>(null);
 
   ngOnInit(): void {
-    this.loadData();
+    this.loadDashboard();
   }
 
-  loadData(): void {
-    const current = this.authService.currentUser();
+  loadDashboard(): void {
+    this.isLoading.set(true);
+    this.patientPortalService.getDashboard().subscribe({
+      next: (data) => {
+        this.dashboard.set(data);
+        this.isLoading.set(false);
+      },
+      error: (error) => {
+        console.error('Failed to load dashboard', error);
+        this.isLoading.set(false);
+      },
+    });
+  }
 
-    if (current && current.id) {
-      this.userService.getOne(current.id).subscribe({
-        next: (u) => {
-          this.user.set(u as any);
-          this.stats.update((s) => ({
-            ...s,
-            activeMeds: (u as any).activeMedicationsCount ?? s.activeMeds,
-            records: (u as any).medicalRecordsCount ?? s.records,
-            testResults: (u as any).testResultsCount ?? s.testResults,
-          }));
-        },
-        error: (err) => {
-          console.error('Failed to load user profile', err);
-        },
-      });
-
-      // fetch appointments for current user
-      this.appointmentService.getMyAppointments().subscribe({
-        next: (apts) => {
-          this.appointments.set(apts as AppointmentModel[]);
-          this.stats.update((s) => ({ ...s, upcomingAppointments: apts.length }));
-        },
-        error: (err) => console.error('Failed to load appointments', err),
-      });
-    } else {
-      // fallback: try to fetch current user from storage
-      const storedUser = this.authService.currentUser();
-      if (storedUser && storedUser.id) {
-        this.userService.getOne(storedUser.id).subscribe({ next: (u) => this.user.set(u) });
-      }
-
-      this.appointmentService.getMyAppointments().subscribe({
-        next: (apts) => {
-          this.appointments.set(apts as AppointmentModel[]);
-          this.stats.update((s) => ({ ...s, upcomingAppointments: apts.length }));
-        },
-        error: (err) => console.error('Failed to load appointments', err),
-      });
+  getVitalsCards() {
+    const vitals = this.dashboard()?.vitals;
+    if (!vitals) {
+      return [];
     }
-
-    setTimeout(() => this.isLoading.set(false), 400);
+    return [
+      {
+        label: 'Blood Pressure',
+        value: `${vitals.bloodPressure.systolic}/${vitals.bloodPressure.diastolic}`,
+        status: 'Normal',
+        icon: 'bi-activity',
+      },
+      {
+        label: 'Heart Rate',
+        value: `${vitals.heartRate} BPM`,
+        status: vitals.heartRate < 60 || vitals.heartRate > 100 ? 'Needs attention' : 'Healthy',
+        icon: 'bi-heart-pulse',
+      },
+      {
+        label: 'BMI',
+        value: vitals.bmi.toFixed(1),
+        status: vitals.bmi >= 18.5 && vitals.bmi <= 24.9 ? 'Normal Weight' : 'Review',
+        icon: 'bi-person',
+      },
+      {
+        label: 'Last Checkup',
+        value: vitals.lastCheckupDate ? new Date(vitals.lastCheckupDate).toLocaleDateString() : '—',
+        status: vitals.lastCheckupDate ? this.getCheckupStatus(vitals.lastCheckupDate) : 'Schedule soon',
+        icon: 'bi-calendar-check',
+      },
+    ];
   }
 
-  toggleSidebar(): void {
-    this.sidebarCollapsed.set(!this.sidebarCollapsed());
-  }
-  goHome(){
-    this.router.navigate(['/']);
-  }
-
-  toggleTheme(): void {
-    this.theme.toggleTheme();
+  private getCheckupStatus(dateString: string): string {
+    const days = this.daysSince(dateString);
+    if (days < 30) return 'Up to date';
+    if (days < 90) return 'Due soon';
+    return 'Schedule visit';
   }
 
-  setActiveTab(tab: 'appointments' | 'history' | 'prescriptions' | 'tests'): void {
-    this.activeTab.set(tab);
+  private daysSince(dateString: string): number {
+    const date = new Date(dateString);
+    const today = new Date();
+    const diff = today.getTime() - date.getTime();
+    return Math.floor(diff / (1000 * 60 * 60 * 24));
   }
 
-  getInitials(firstName?: string, lastName?: string): string {
-    if (!firstName || !lastName) return 'SJ';
-    return `${firstName[0]}${lastName[0]}`;
+  getUpcomingAppointments(): PatientDashboardAppointment[] {
+    return this.dashboard()?.upcomingAppointments ?? [];
   }
 
-  callEmergency(): void {
-    window.location.href = 'tel:911';
+  getPrescriptions() {
+    return this.dashboard()?.prescriptions ?? [];
   }
 
-  bookAppointment(): void {
-    console.log('Book appointment clicked');
+  getLabResults() {
+    return this.dashboard()?.labResults ?? [];
   }
 
-  rescheduleAppointment(appointmentId: string): void {
-    console.log('Reschedule appointment:', appointmentId);
-  }
-
-  cancelAppointment(appointmentId: string): void {
-    console.log('Cancel appointment:', appointmentId);
-  }
-
-  joinVideoCall(appointmentId: string): void {
-    console.log('Join video call:', appointmentId);
-  }
-
-  editProfile(): void {
-    console.log('Edit profile clicked');
-  }
-
-  quickAction(action: string): void {
-    console.log('Quick action:', action);
-  }
-
-  logout(): void {
-    console.log('Logout clicked');
+  getStatsCards() {
+    const stats = this.dashboard()?.stats;
+    if (!stats) return [];
+    return [
+      {
+        label: 'Total Appointments',
+        value: stats.totalAppointments,
+        icon: 'bi-calendar4-week',
+      },
+      {
+        label: 'Confirmed Visits',
+        value: stats.confirmed,
+        icon: 'bi-check2-circle',
+      },
+      {
+        label: 'Video Visits',
+        value: stats.videoVisits,
+        icon: 'bi-camera-video',
+      },
+      {
+        label: 'In-person Visits',
+        value: stats.inPersonVisits,
+        icon: 'bi-geo-alt',
+      },
+    ];
   }
 }

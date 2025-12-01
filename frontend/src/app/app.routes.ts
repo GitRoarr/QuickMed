@@ -75,6 +75,27 @@ export const routes: Routes = [
           ),
       },
       {
+        path: "profile",
+        loadComponent: () =>
+          import("./features/patient/profile/profile.component").then(
+            (m) => m.ProfileComponent
+          ),
+      },
+      {
+        path: "messages",
+        loadComponent: () =>
+          import("./features/patient/messages/messages.component").then(
+            (m) => m.PatientMessagesComponent
+          ),
+      },
+      {
+        path: "settings",
+        loadComponent: () =>
+          import("./features/patient/settings/settings.component").then(
+            (m) => m.SettingsComponent
+          ),
+      },
+      {
         path: "payment",
         loadComponent: () =>
           import("./features/patient/payment/payment.component").then(

@@ -1,0 +1,102 @@
+<app-patient-shell active="settings">
+  <div class="settings-wrapper">
+    <section class="settings-panel">
+      <div class="panel-header">
+        <div>
+          <p class="eyebrow">Settings</p>
+          <h1>Manage your account and preferences</h1>
+        </div>
+      </div>
+
+      <div class="settings-layout">
+        <nav class="settings-tabs">
+          <button type="button" [class.active]="activeTab() === 'profile'" (click)="activeTab.set('profile')">Profile</button>
+          <button type="button" [class.active]="activeTab() === 'notifications'" (click)="activeTab.set('notifications')">
+            Notifications
+          </button>
+          <button type="button" [class.active]="activeTab() === 'security'" (click)="activeTab.set('security')">Security</button>
+          <button type="button" [class.active]="activeTab() === 'privacy'" (click)="activeTab.set('privacy')">Privacy</button>
+        </nav>
+
+        <div class="tab-body" [ngSwitch]="activeTab()">
+          <form *ngSwitchCase="'profile'" [formGroup]="profileForm" (ngSubmit)="saveProfile()" class="form-grid">
+            <label>
+              <span>Full Name</span>
+              <input formControlName="fullName" type="text" placeholder="Alex Johnson" />
+            </label>
+            <label>
+              <span>Email</span>
+              <input formControlName="email" type="email" placeholder="alex@email.com" />
+            </label>
+            <label>
+              <span>Phone</span>
+              <input formControlName="phoneNumber" type="tel" placeholder="+1 (555) 123-4567" />
+            </label>
+            <button class="primary-btn" type="submit" [disabled]="profileForm.invalid">Save Changes</button>
+          </form>
+
+          <form
+            *ngSwitchCase="'notifications'"
+            [formGroup]="notificationsForm"
+            (ngSubmit)="saveNotifications()"
+            class="preferences">
+            <label class="toggle">
+              <input type="checkbox" formControlName="email" />
+              <span>Email notifications</span>
+            </label>
+            <label class="toggle">
+              <input type="checkbox" formControlName="sms" />
+              <span>SMS alerts</span>
+            </label>
+            <label class="toggle">
+              <input type="checkbox" formControlName="push" />
+              <span>Push notifications</span>
+            </label>
+            <label class="toggle">
+              <input type="checkbox" formControlName="marketing" />
+              <span>Marketing emails</span>
+            </label>
+            <button class="primary-btn" type="submit">Update Preferences</button>
+          </form>
+
+          <form
+            *ngSwitchCase="'security'"
+            [formGroup]="passwordForm"
+            (ngSubmit)="changePassword()"
+            class="form-grid">
+            <label>
+              <span>Current Password</span>
+              <input formControlName="currentPassword" type="password" placeholder="••••••••" />
+            </label>
+            <label>
+              <span>New Password</span>
+              <input formControlName="newPassword" type="password" placeholder="At least 6 characters" />
+            </label>
+            <button class="primary-btn" type="submit" [disabled]="passwordForm.invalid">Update Password</button>
+          </form>
+
+          <div *ngSwitchCase="'privacy'" class="preferences">
+            <label class="toggle">
+              <input type="checkbox" [checked]="privacyPreferences().shareActivity" (change)="setPrivacyPreference('shareActivity', $any($event.target).checked ?? false)" />
+              <span>Share anonymized activity data</span>
+            </label>
+            <label class="toggle">
+              <input type="checkbox" [checked]="privacyPreferences().shareAnalytics" (change)="setPrivacyPreference('shareAnalytics', $any($event.target).checked ?? false)" />
+              <span>Participate in analytics programs</span>
+            </label>
+            <label class="toggle">
+              <input type="checkbox" [checked]="privacyPreferences().personalizedTips" (change)="setPrivacyPreference('personalizedTips', $any($event.target).checked ?? false)" />
+              <span>Receive personalized tips</span>
+            </label>
+            <button class="primary-btn subtle" type="button">Export Data</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="status-banner" *ngIf="statusMessage() as message" [class.error]="statusTone() === 'error'">
+        {{ message }}
+      </div>
+    </section>
+  </div>
+</app-patient-shell>
+

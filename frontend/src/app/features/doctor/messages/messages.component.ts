@@ -122,7 +122,7 @@ export class MessagesComponent implements OnInit {
     const content = this.messageContent().trim();
     if (!content || !this.selectedConversation()) return;
 
-    this.messageService.sendMessage(this.selectedConversation()!.patientId, content).subscribe({
+    this.messageService.sendMessage({ patientId: this.selectedConversation()!.patientId, content }).subscribe({
       next: (message) => {
         this.messageContent.set('');
         this.loadMessages(this.selectedConversation()!.id);
