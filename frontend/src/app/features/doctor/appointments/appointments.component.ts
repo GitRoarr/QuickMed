@@ -5,11 +5,20 @@ import { Router, RouterModule } from "@angular/router";
 import { AppointmentService } from "@core/services/appointment.service";
 import { Appointment, AppointmentStatus } from "@core/models/appointment.model";
 import { AuthService } from "@core/services/auth.service";
+import { BadgeService } from "@core/services/badge.service";
+import { MessageService } from "@core/services/message.service";
 
 interface AppointmentFilter {
   status: string;
   dateRange: string;
   patient: string;
+
+}
+interface MenuItem {
+  label: string;
+  icon: string;
+  route: string;
+  badge?: number;
 }
 
 @Component({
@@ -40,8 +49,10 @@ export class AppointmentsComponent implements OnInit {
   private badgeService = inject(BadgeService);
   private messageService = inject(MessageService);
   currentUser = signal<any>(null);
+  
+  
 
-  menuItems = signal([
+   menuItems = signal<MenuItem[]>([
     { label: "Dashboard", icon: "bi-house-door", route: "/doctor/dashboard" },
     { label: "Appointments", icon: "bi-calendar-check", route: "/doctor/appointments" },
     { label: "Schedule", icon: "bi-calendar3", route: "/doctor/schedule" },
@@ -114,19 +125,16 @@ export class AppointmentsComponent implements OnInit {
     });
   }
 
-  updateMenuItems(appointmentCount: number, messageCount: number): void {
-    this.menuItems.set([
-      { label: "Dashboard", icon: "bi-house-door", route: "/doctor/dashboard" },
-      { label: "Appointments", icon: "bi-calendar-check", route: "/doctor/appointments", badge: appointmentCount > 0 ? appointmentCount : undefined },
-      { label: "Schedule", icon: "bi-calendar3", route: "/doctor/schedule" },
-      { label: "My Patients", icon: "bi-people", route: "/doctor/patients" },
-      { label: "Medical Records", icon: "bi-file-earmark-medical", route: "/doctor/records" },
-      { label: "Prescriptions", icon: "bi-prescription2", route: "/doctor/prescriptions" },
-      { label: "Messages", icon: "bi-chat-dots", route: "/doctor/messages", badge: messageCount > 0 ? messageCount : undefined },
-      { label: "Analytics", icon: "bi-graph-up", route: "/doctor/analytics" },
-      { label: "Settings", icon: "bi-gear", route: "/doctor/settings" },
-    ]);
-  }
+updateMenuItems(appointmentCount: number, messageCount: number) {
+  this.menuItems.update(items =>
+    items.map(item => {
+      if (item.label === "Appointments") return { ...item, badge: appointmentCount || undefined };
+      if (item.label === "Messages") return { ...item, badge: messageCount || undefined };
+      return item;
+    })
+  );
+}
+
 
   loadUserData(): void {
     const user = this.authService.currentUser();
