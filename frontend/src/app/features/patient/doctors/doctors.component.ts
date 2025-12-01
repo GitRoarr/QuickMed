@@ -6,6 +6,7 @@ import { AppointmentService } from '../../../core/services/appointment.service';
 import { Doctor } from '../../../core/models/user.model';
 import { Router } from '@angular/router';
 import { PatientShellComponent } from '../shared/patient-shell/patient-shell.component';
+import { ReviewService, CreateReviewDto } from '../../../core/services/review.service';
 
 @Component({
   selector: 'app-patient-doctors',
@@ -19,6 +20,9 @@ export class DoctorsComponent implements OnInit {
   filteredDoctors = signal<Doctor[]>([]);
   isLoading = signal(true);
   selectedDoctor = signal<Doctor | null>(null);
+  ratingDoctor = signal<Doctor | null>(null);
+  ratingValue = signal<number>(0);
+  ratingSubmitting = signal(false);
   showBookingForm = signal(false);
   searchQuery = signal('');
   selectedSpecialty = signal('all');
@@ -38,7 +42,8 @@ export class DoctorsComponent implements OnInit {
     private fb: FormBuilder,
     private router: Router,
     private userService: UserService,
-    private appointmentService: AppointmentService
+    private appointmentService: AppointmentService,
+    private reviewService: ReviewService
   ) {
     this.appointmentForm = this.fb.group({
       appointmentDate: ['', Validators.required],
@@ -57,12 +62,19 @@ export class DoctorsComponent implements OnInit {
     this.userService.getDoctors().subscribe({
       next: (docs: any[]) => {
         // Backend now returns doctors with availability, rating, and experience
-        const doctorsWithData = docs.map(doc => ({
-          ...doc,
-          available: doc.available !== undefined ? doc.available : false,
-          rating: doc.rating || 0,
-          experience: doc.experience || 0,
-        }));
+        const doctorsWithData = docs.map(doc => {
+          const experience =
+            doc.experienceYears ??
+            doc.experience ??
+            0;
+          return {
+            ...doc,
+            available: doc.available !== undefined ? doc.available : false,
+            rating: doc.rating || 0,
+            ratingCount: doc.ratingCount || 0,
+            experience,
+          };
+        });
         this.doctors.set(doctorsWithData as Doctor[]);
         this.filteredDoctors.set(doctorsWithData as Doctor[]);
         this.isLoading.set(false);
@@ -166,5 +178,43 @@ export class DoctorsComponent implements OnInit {
     const mm = String(today.getMonth() + 1).padStart(2, '0');
     const dd = String(today.getDate()).padStart(2, '0');
     return `${yyyy}-${mm}-${dd}`;
+  }
+
+  openRating(doctor: Doctor): void {
+    this.ratingDoctor.set(doctor);
+    this.ratingValue.set(0);
+  }
+
+  setRating(value: number): void {
+    this.ratingValue.set(value);
+  }
+
+  submitRating(): void {
+    const doctor = this.ratingDoctor();
+    if (!doctor || this.ratingValue() <= 0) {
+      return;
+    }
+    const payload: CreateReviewDto = {
+      doctorId: doctor.id,
+      rating: this.ratingValue(),
+    };
+    this.ratingSubmitting.set(true);
+    this.reviewService.create(payload).subscribe({
+      next: () => {
+        // Reload doctors to update average rating
+        this.loadDoctors();
+        this.ratingSubmitting.set(false);
+        this.ratingDoctor.set(null);
+      },
+      error: (err) => {
+        console.error('Failed to submit rating', err);
+        this.ratingSubmitting.set(false);
+        alert(err?.error?.message || 'Failed to submit rating');
+      },
+    });
+  }
+
+  closeRating(): void {
+    this.ratingDoctor.set(null);
   }
 }

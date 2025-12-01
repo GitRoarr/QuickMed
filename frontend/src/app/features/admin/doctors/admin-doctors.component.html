@@ -109,7 +109,7 @@
           </button>
           <button
             class="verify-btn"
-            [disabled]="doctor.status === 'active'"
+            [disabled]="doctor.status === 'active' || !doctor.verification.licenseValidated || !doctor.verification.employmentConfirmed"
             (click)="activateDoctor(doctor.id)"
           >
             Activate

@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { SidebarComponent } from '../shared/sidebar';
 import { HeaderComponent } from '../shared/header';
 import { AdminService } from '@app/core/services/admin.service';
+import { AppointmentService } from '@app/core/services/appointment.service';
 import { AlertMessageComponent } from '@app/shared/components/alert-message/alert-message.component';
 
 @Component({
@@ -29,6 +30,7 @@ export class DashboardComponent implements OnInit {
   }
 
   private adminService = inject(AdminService)
+  private appointmentService = inject(AppointmentService)
 
   showNewAppointment = signal(false)
   patients = signal<Array<any>>([])
@@ -79,10 +81,11 @@ export class DashboardComponent implements OnInit {
       notes: this.apptNotes(),
     }
 
-    this.adminService.createAppointment(payload).subscribe({
+    this.appointmentService.create(payload).subscribe({
       next: (res) => {
         this.apptAlert.set({ type: 'success', text: 'Appointment created successfully.' })
-        setTimeout(() => this.closeNewAppointment(), 800)
+        // keep the success alert visible briefly then close
+        setTimeout(() => this.closeNewAppointment(), 900)
       },
       error: (err) => {
         console.error('Create appointment failed', err)

@@ -50,7 +50,8 @@
               <i class="bi" [class.bi-star-fill]="star === 1" [class.bi-star]="star === 0"></i>
             </span>
             <span class="rating-text">
-              {{ doctor.rating || 0 }} · {{ doctor.experience || 0 }}+ years
+              {{ doctor.rating || 0 }} ({{ doctor.ratingCount || 0 }})
+              · {{ doctor.experience || 0 }}+ years
             </span>
           </div>
 
@@ -62,10 +63,16 @@
           </div>
         </div>
 
-        <button class="primary-btn subtle" (click)="selectDoctor(doctor)" [disabled]="!doctor.available">
-          <i class="bi bi-calendar-plus"></i>
-          {{ doctor.available ? 'Book Appointment' : 'Unavailable' }}
-        </button>
+        <div class="card-actions">
+          <button class="primary-btn subtle" (click)="selectDoctor(doctor)" [disabled]="!doctor.available">
+            <i class="bi bi-calendar-plus"></i>
+            {{ doctor.available ? 'Book Appointment' : 'Unavailable' }}
+          </button>
+          <button class="ghost-btn" type="button" (click)="openRating(doctor)">
+            <i class="bi bi-star"></i>
+            Rate doctor
+          </button>
+        </div>
       </div>
 
       <div class="empty-state" *ngIf="filteredDoctors().length === 0">
@@ -112,6 +119,41 @@
             </button>
           </div>
         </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Rating modal -->
+  <div class="modal-overlay" *ngIf="ratingDoctor()" (click)="closeRating()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Rate Doctor</h2>
+        <button class="icon-btn" (click)="closeRating()">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+      <div class="modal-body" *ngIf="ratingDoctor() as rd">
+        <p class="mb-3">How was your experience with Dr. {{ rd.firstName }} {{ rd.lastName }}?</p>
+        <div class="rating-input">
+          <button
+            type="button"
+            *ngFor="let star of [1,2,3,4,5]"
+            class="star-btn"
+            [class.active]="star <= ratingValue()"
+            (click)="setRating(star)">
+            <i class="bi" [ngClass]="star <= ratingValue() ? 'bi-star-fill' : 'bi-star'"></i>
+          </button>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="text-btn" (click)="closeRating()">Cancel</button>
+          <button
+            type="button"
+            class="primary-btn"
+            [disabled]="ratingValue() === 0 || ratingSubmitting()"
+            (click)="submitRating()">
+            Submit rating
+          </button>
+        </div>
       </div>
     </div>
   </div>

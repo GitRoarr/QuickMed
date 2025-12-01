@@ -34,23 +34,23 @@ export class AdminDoctorVerifyComponent implements OnInit {
   }
 
   validateLicense() {
-    this.adminService.updateUser(this.id, {}).subscribe({
+    this.adminService.validateDoctorLicense(this.id).subscribe({
       next: () => this.showMsg('License validated'),
-      error: () => this.showMsg('License validation failed', 'error'),
+      error: (err) => this.showMsg(err.error?.message || 'License validation failed', 'error'),
     });
   }
 
   confirmEmployment() {
-    this.adminService.updateUser(this.id, {}).subscribe({
+    this.adminService.confirmDoctorEmployment(this.id).subscribe({
       next: () => this.showMsg('Employment confirmed'),
-      error: () => this.showMsg('Confirmation failed', 'error'),
+      error: (err) => this.showMsg(err.error?.message || 'Confirmation failed', 'error'),
     });
   }
 
   activateDoctor() {
     this.adminService.activateDoctor(this.id).subscribe({
       next: () => this.showMsg('Doctor activated'),
-      error: () => this.showMsg('Activation failed', 'error'),
+      error: (err) => this.showMsg(err.error?.message || 'Activation failed', 'error'),
     });
   }
 

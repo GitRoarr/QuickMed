@@ -6,15 +6,30 @@
     <app-alert-message [message]="message" [type]="type || 'success'" [visible]="true" [autoDismiss]="true" [duration]="4000"></app-alert-message>
   </div>
 
-  <div *ngIf="doctor" class="card p-4 mb-4">
-    <div class="font-semibold">{{ doctor!.firstName }} {{ doctor!.lastName }}</div>
-    <div class="text-sm">{{ doctor!.specialty }}</div>
-    <div class="mt-2">License: {{ doctor!.licenseNumber }}</div>
+  <div *ngIf="doctor as d" class="card p-4 mb-4 space-y-3">
+    <div>
+      <div class="font-semibold text-lg">Dr. {{ d.firstName }} {{ d.lastName }}</div>
+      <div class="text-sm text-gray-500">{{ d.specialty || 'General Medicine' }}</div>
+      <div class="text-sm text-gray-500">License: {{ d.licenseNumber || '—' }}</div>
+      <div class="text-sm text-gray-500">Status: {{ d.isActive ? 'Active' : 'Pending' }}</div>
+    </div>
 
-    <div class="flex gap-3 mt-3">
-      <button class="btn animate-pulse" (click)="validateLicense()">Validate License</button>
-      <button class="btn animate-pulse" (click)="confirmEmployment()">Confirm Employment</button>
-      <button class="btn btn-primary animate-bounce" (click)="activateDoctor()">Activate Doctor</button>
+    <div class="flex flex-wrap gap-3 mt-3">
+      <button class="btn animate-pulse"
+              [disabled]="d.licenseValidated"
+              (click)="validateLicense()">
+        {{ d.licenseValidated ? 'License validated' : 'Validate License' }}
+      </button>
+      <button class="btn animate-pulse"
+              [disabled]="d.employmentConfirmed"
+              (click)="confirmEmployment()">
+        {{ d.employmentConfirmed ? 'Employment confirmed' : 'Confirm Employment' }}
+      </button>
+      <button class="btn btn-primary animate-bounce"
+              [disabled]="d.isActive || !d.licenseValidated || !d.employmentConfirmed"
+              (click)="activateDoctor()">
+        {{ d.isActive ? 'Doctor Active' : 'Activate Doctor' }}
+      </button>
     </div>
   </div>
 </div>

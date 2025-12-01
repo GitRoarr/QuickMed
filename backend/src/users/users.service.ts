@@ -53,7 +53,22 @@ export class UsersService {
   async findDoctors(): Promise<User[]> {
     return this.usersRepository.find({
       where: { role: UserRole.DOCTOR, isActive: true },
-      select: ["id", "firstName", "lastName", "email", "specialty", "bio", "availableDays", "startTime", "endTime", "phoneNumber", "avatar", "licenseNumber"],
+      select: [
+        "id",
+        "firstName",
+        "lastName",
+        "email",
+        "specialty",
+        "bio",
+        "availableDays",
+        "startTime",
+        "endTime",
+        "phoneNumber",
+        "avatar",
+        "licenseNumber",
+        "createdAt",
+        "experienceYears",
+      ],
     });
   }
 
@@ -75,13 +90,23 @@ export class UsersService {
         // For patient view, we show available if they have availability settings, not just "right now"
         const isAvailable = availableDays.length > 0 && startTime && endTime;
         
-        // Calculate experience (years since account creation or default to 5)
-        let accountAge = 5;
-        if (doctor.createdAt) {
-          const createdDate = typeof doctor.createdAt === 'string' 
-            ? new Date(doctor.createdAt) 
-            : doctor.createdAt;
-          accountAge = Math.max(1, Math.floor((new Date().getTime() - createdDate.getTime()) / (1000 * 60 * 60 * 24 * 365)));
+        // Experience: prefer explicit value if set, otherwise derive from account age
+        let experienceYears = doctor.experienceYears ?? null;
+        if (!experienceYears) {
+          let accountAge = 1;
+          if (doctor.createdAt) {
+            const createdDate = typeof doctor.createdAt === 'string'
+              ? new Date(doctor.createdAt)
+              : doctor.createdAt;
+            accountAge = Math.max(
+              1,
+              Math.floor(
+                (new Date().getTime() - createdDate.getTime()) /
+                  (1000 * 60 * 60 * 24 * 365),
+              ),
+            );
+          }
+          experienceYears = accountAge;
         }
         
         return {
@@ -89,7 +114,7 @@ export class UsersService {
           available: isAvailable,
           rating: rating.average || 0,
           ratingCount: rating.count || 0,
-          experience: accountAge,
+          experience: experienceYears,
         };
       })
     );

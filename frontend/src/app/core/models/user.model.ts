@@ -35,6 +35,7 @@ export interface Doctor extends User {
   rating?: number;
   ratingCount?: number;
   experience?: number;
+  experienceYears?: number;
 }
 
 export interface AuthResponse {

@@ -93,4 +93,39 @@ export class ReviewsService {
 
     return result;
   }
+
+  /**
+   * Aggregate rating for the whole QuickMed platform.
+   * Used on the public landing page stats (e.g. 4.9/5, 50,000+ happy patients).
+   */
+  async getPlatformSummary(): Promise<{
+    average: number;
+    count: number;
+    happyPatients: number;
+  }> {
+    const reviews = await this.reviewsRepository.find({
+      select: ['doctorId', 'patientId', 'rating'],
+    });
+
+    if (reviews.length === 0) {
+      return { average: 0, count: 0, happyPatients: 0 };
+    }
+
+    const sum = reviews.reduce((acc, review) => acc + review.rating, 0);
+    const average = parseFloat((sum / reviews.length).toFixed(1));
+
+    // Count distinct patients who left at least one review
+    const uniquePatients = new Set<string>();
+    reviews.forEach((r) => {
+      if (r.patientId) {
+        uniquePatients.add(r.patientId);
+      }
+    });
+
+    return {
+      average,
+      count: reviews.length,
+      happyPatients: uniquePatients.size,
+    };
+  }
 }

@@ -96,7 +96,7 @@ export class AdminDoctorsComponent implements OnInit {
   onDelete(id: string) {
     if (!confirm("Delete this doctor? This action cannot be undone.")) return
     this.loading.set(true)
-    this.adminService.deleteUser(id).subscribe({
+    this.adminService.deleteDoctor(id).subscribe({
       next: () => {
         this.message.set({ type: "success", text: "Doctor removed successfully." })
         this.loadDoctors()

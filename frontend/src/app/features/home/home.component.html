@@ -98,7 +98,13 @@
                                 <i class="bi bi-people-fill"></i>
                             </div>
                             <div>
-                                <div class="stat-number">50,000+</div>
+                                <div class="stat-number">
+                                  {{
+                                    happyPatients() !== null
+                                      ? (happyPatients()! | number:'1.0-0') + '+'
+                                      : '—'
+                                  }}
+                                </div>
                                 <div class="stat-label">Happy Patients</div>
                             </div>
                         </div>
@@ -108,7 +114,13 @@
                                 <i class="bi bi-star-fill"></i>
                             </div>
                             <div>
-                                <div class="stat-number">4.9/5</div>
+                                <div class="stat-number">
+                                  {{
+                                    platformRating() !== null
+                                      ? (platformRating()! | number:'1.1-1') + '/5'
+                                      : '—'
+                                  }}
+                                </div>
                                 <div class="stat-label">Rating</div>
                             </div>
                         </div>

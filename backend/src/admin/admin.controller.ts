@@ -10,6 +10,7 @@ import { UpdateAppointmentDto } from '../appointments/dto/update-appointment.dto
 import { UserRole } from '../common/index';
 import { DoctorsService } from '@/doctors/doctors.service';
 import { CreateDoctorDto } from '@/doctors/dto/create-doctor.dto';
+import { UpdateDoctorDto } from '@/doctors/dto/update-doctor.dto';
 import { ThemeService } from './theme.service';
 import { CreateThemeDto } from './dto/create-theme.dto';
 import { UpdateThemeDto } from './dto/update-theme.dto';
@@ -168,6 +169,19 @@ export class AdminController {
   @Roles(UserRole.ADMIN)
   async activateDoctor(@Param('id') doctorId: string) {
     return this.doctorsService.activateDoctor(doctorId);
+  }
+
+  @Patch('doctors/:id')
+  @Roles(UserRole.ADMIN)
+  async updateDoctor(@Param('id') doctorId: string, @Body() updateDoctorDto: UpdateDoctorDto) {
+    return this.doctorsService.update(doctorId, updateDoctorDto);
+  }
+
+  @Delete('doctors/:id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Roles(UserRole.ADMIN)
+  async removeDoctor(@Param('id') doctorId: string) {
+    await this.doctorsService.remove(doctorId);
   }
 
   @Get('doctors')

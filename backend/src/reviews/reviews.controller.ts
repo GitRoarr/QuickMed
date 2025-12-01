@@ -24,4 +24,10 @@ export class ReviewsController {
   getDoctorRating(@Param('doctorId') doctorId: string) {
     return this.reviewsService.getDoctorRating(doctorId);
   }
+
+  // Public aggregate rating for landing page (no auth needed)
+  @Get('summary')
+  getPlatformSummary() {
+    return this.reviewsService.getPlatformSummary();
+  }
 }

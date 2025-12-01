@@ -19,6 +19,8 @@ export interface User {
   licenseNumber?: string
   avatar?: string
   isActive: boolean
+  licenseValidated?: boolean
+  employmentConfirmed?: boolean
   createdAt: Date
   updatedAt: Date
   password?: string

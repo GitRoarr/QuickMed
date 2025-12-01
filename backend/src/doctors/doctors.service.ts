@@ -248,6 +248,8 @@ export class DoctorsService {
 
   async remove(id: string): Promise<void> {
     const doctor = await this.findOne(id);
+    // Clean up appointments referencing this doctor to avoid FK violations
+    await this.appointmentsRepository.delete({ doctorId: id });
     await this.usersRepository.remove(doctor);
   }
 

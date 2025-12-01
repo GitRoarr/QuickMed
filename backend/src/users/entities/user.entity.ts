@@ -12,7 +12,7 @@ export class User extends BaseEntity {
   lastName: string;
 
   @Column({ unique: true })
-  email: string; // Database-level unique constraint ensures integrity
+  email: string;
 
   @Column({ nullable: true })
   password: string;
@@ -113,4 +113,7 @@ export class User extends BaseEntity {
 
   @Column({ type: 'boolean', default: false })
   employmentConfirmed: boolean;
+
+  @Column({ type: 'int', nullable: true })
+  experienceYears: number;
 }

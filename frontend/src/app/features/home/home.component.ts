@@ -3,6 +3,8 @@ import { CommonModule } from "@angular/common"
 import { Router, RouterLink } from "@angular/router"
 import { AuthService } from "@core/services/auth.service"
 import { ThemeService } from "@core/services/theme.service"
+import { LandingMetricsService, PlatformSummary } from "@core/services/landing-metrics.service"
+import { OnInit, signal } from "@angular/core"
 
 @Component({
   selector: "app-home",
@@ -11,15 +13,30 @@ import { ThemeService } from "@core/services/theme.service"
   templateUrl: "./home.component.html",
   styleUrls: ["./home.component.css"],
 })
-export class HomeComponent {
+export class HomeComponent implements OnInit {
   currentUser = this.authService.currentUser
   isDarkMode = this.themeService.isDarkMode
+  happyPatients = signal<number | null>(null)
+  platformRating = signal<number | null>(null)
 
   constructor(
     private authService: AuthService,
     private router: Router,
     private themeService: ThemeService,
+    private landingMetrics: LandingMetricsService,
   ) {}
+
+  ngOnInit(): void {
+    this.landingMetrics.getSummary().subscribe({
+      next: (summary: PlatformSummary) => {
+        this.happyPatients.set(summary.happyPatients);
+        this.platformRating.set(summary.average);
+      },
+      error: (err) => {
+        console.error('Failed to load platform summary', err);
+      },
+    });
+  }
 
   isHomePage(): boolean {
     try {
