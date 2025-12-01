@@ -316,3 +316,79 @@
   }
 }
 
+@media (max-width: 768px) {
+  .patient-dashboard {
+    gap: 1rem;
+  }
+
+  .vital-card {
+    align-items: flex-start;
+  }
+
+  .vital-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 1.1rem;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  }
+
+  .appointment-card {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+
+  .appointment-meta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .appointment-actions {
+    justify-content: flex-start;
+  }
+
+  .prescription-card {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .panel {
+    padding: 1rem;
+  }
+
+  .patient-dashboard .dashboard-header .primary-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .patient-shell__content {
+    padding: 1rem;
+  }
+
+  .dashboard-header h1 {
+    font-size: 1.25rem;
+  }
+
+  .vitals-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .appointment-details {
+    font-size: 0.85rem;
+  }
+
+  .primary-btn {
+    padding: 0.5rem 0.75rem;
+  }
+}
+
