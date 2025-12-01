@@ -1,16 +1,25 @@
-<div class="patient-shell">
+<div class="patient-shell" [class.sidebar-open]="sidebarOpen">
   <aside class="patient-shell__sidebar">
     <div class="patient-shell__brand" (click)="navigate('/patient/dashboard')">
-      <div class="brand-icon">
-        <img src="assets/images/QuickMed-Logo.png" alt="QuickMed Logo" class="h-8 w-8 rounded" />
+      <div style="display:flex;align-items:center;gap:.5rem;">
+        <div class="brand-icon">
+          <img src="assets/images/QuickMed-Logo.png" alt="QuickMed Logo" class="h-8 w-8 rounded" />
+        </div>
+        <div>
+          <p class="brand-title">QuickMed</p>
+          <p class="brand-subtitle">Patient Portal</p>
+        </div>
       </div>
-      <div>
-        <p class="brand-title">QuickMed</p>
-        <p class="brand-subtitle">Patient Portal</p>
-      </div>
+
+      <!-- Hamburger (mobile) -->
+      <button class="hamburger" aria-label="Toggle menu" (click)="toggleSidebar()" type="button">
+        <span class="hamburger-box">
+          <span class="hamburger-inner"></span>
+        </span>
+      </button>
     </div>
 
-    <nav class="patient-shell__nav">
+    <nav class="patient-shell__nav" [attr.aria-hidden]="!sidebarOpen && mobile">
       <a
         *ngFor="let item of menuItems"
         class="patient-shell__nav-item"
@@ -18,7 +27,7 @@
         routerLinkActive="active"
         [routerLinkActiveOptions]="{ exact: item.exact !== false }">
         <i class="bi" [ngClass]="item.icon"></i>
-        <span>{{ item.label }}</span>
+        <span (click)="closeSidebar()">{{ item.label }}</span>
       </a>
     </nav>
 
@@ -35,7 +44,7 @@
       </div>
     </div>
 
-    <button class="patient-shell__logout" type="button" (click)="logout()">
+    <button class="patient-shell__logout" type="button" (click)="logout(); closeSidebar()">
       <i class="bi bi-box-arrow-right"></i>
       Logout
     </button>

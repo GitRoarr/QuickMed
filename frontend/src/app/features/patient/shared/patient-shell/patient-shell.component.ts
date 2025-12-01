@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, HostListener, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { AuthService } from '@core/services/auth.service';
@@ -17,7 +17,9 @@ interface PatientNavItem {
   templateUrl: './patient-shell.component.html',
   styleUrls: ['./patient-shell.component.css'],
 })
-export class PatientShellComponent {
+export class PatientShellComponent implements OnInit {
+  sidebarOpen = false;
+  mobile = false;
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
 
@@ -37,6 +39,23 @@ export class PatientShellComponent {
 
   navigate(route: string): void {
     this.router.navigate([route]);
+  }
+
+  toggleSidebar(): void {
+    this.sidebarOpen = !this.sidebarOpen;
+  }
+
+  closeSidebar(): void {
+    this.sidebarOpen = false;
+  }
+
+  ngOnInit(): void {
+    this.mobile = typeof window !== 'undefined' && window.innerWidth <= 1024;
+  }
+
+  @HostListener('window:resize', ['$event'])
+  onResize(): void {
+    this.mobile = typeof window !== 'undefined' && window.innerWidth <= 1024;
   }
 
   logout(): void {
