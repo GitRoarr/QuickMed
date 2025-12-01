@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
+import { Injectable, BadRequestException, NotFoundException, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import Stripe from 'stripe';
@@ -8,7 +8,8 @@ import { Appointment } from '../appointments/entities/appointment.entity';
 
 @Injectable()
 export class StripeService {
-  private stripe: Stripe;
+  private readonly logger = new Logger(StripeService.name);
+  private stripe: Stripe | null = null;
 
   constructor(
     @InjectRepository(Payment)
@@ -20,7 +21,10 @@ export class StripeService {
     // Initialize Stripe with secret key from environment. Do NOT hard-code secrets here.
     const stripeKey = process.env.STRIPE_SECRET_KEY;
     if (!stripeKey) {
-      throw new Error('Missing environment variable STRIPE_SECRET_KEY. Add it to backend/.env and do not commit secrets to git.');
+      this.logger.warn(
+        'STRIPE_SECRET_KEY is not set. Stripe card payments will be disabled until this is configured.',
+      );
+      return;
     }
 
     this.stripe = new Stripe(stripeKey, {
@@ -34,6 +38,9 @@ export class StripeService {
     email: string,
     amount?: number,
   ): Promise<{ clientSecret: string; paymentIntentId: string }> {
+    if (!this.stripe) {
+      throw new BadRequestException('Stripe is not configured on the server.');
+    }
     // Get appointment to determine amount if not provided
     const appointment = await this.appointmentsService.findOne(appointmentId);
     if (!appointment) {
@@ -86,6 +93,9 @@ export class StripeService {
   }
 
   async confirmPayment(paymentIntentId: string): Promise<Payment> {
+    if (!this.stripe) {
+      throw new BadRequestException('Stripe is not configured on the server.');
+    }
     // Retrieve payment intent from Stripe
     const paymentIntent = await this.stripe.paymentIntents.retrieve(paymentIntentId);
 
@@ -123,6 +133,9 @@ export class StripeService {
   }
 
   async handleWebhook(signature: string, payload: string | Buffer): Promise<void> {
+    if (!this.stripe) {
+      throw new BadRequestException('Stripe is not configured on the server.');
+    }
     const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
     let event: Stripe.Event;

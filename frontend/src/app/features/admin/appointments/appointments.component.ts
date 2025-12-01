@@ -53,6 +53,8 @@ export class AppointmentsComponent implements OnInit {
   
   // Search debounce
   private searchSubject = new Subject<string>();
+  private patientSearchSubject = new Subject<string>();
+  private doctorSearchSubject = new Subject<string>();
   
   // New appointment form
   showNewAppointmentModal = signal(false);
@@ -73,6 +75,15 @@ export class AppointmentsComponent implements OnInit {
   patients = signal<User[]>([]);
   doctors = signal<User[]>([]);
   appointmentTypes = ['Consultation', 'Follow-up', 'New Patient', 'Video Call', 'Checkup'];
+  patientResults = signal<User[]>([]);
+  doctorResults = signal<User[]>([]);
+  patientSearchTerm = signal('');
+  doctorSearchTerm = signal('');
+  patientDropdownOpen = signal(false);
+  doctorDropdownOpen = signal(false);
+  patientSearchLoading = signal(false);
+  doctorSearchLoading = signal(false);
+  timeSlots = signal<string[]>([]);
   
   // Map frontend types to backend enum values
   getAppointmentTypeEnum(type: string): string {
@@ -101,8 +112,24 @@ export class AppointmentsComponent implements OnInit {
       distinctUntilChanged()
     ).subscribe(searchTerm => {
       this.searchQuery.set(searchTerm);
-      this.applyFilters();
+      this.fetchAppointments();
     });
+
+    this.patientSearchSubject.pipe(
+      debounceTime(250),
+      distinctUntilChanged()
+    ).subscribe((term) => {
+      this.performUserSearch('patient', term);
+    });
+
+    this.doctorSearchSubject.pipe(
+      debounceTime(250),
+      distinctUntilChanged()
+    ).subscribe((term) => {
+      this.performUserSearch('doctor', term);
+    });
+
+    this.timeSlots.set(this.generateTimeSlots());
   }
 
   ngOnInit() {
@@ -119,6 +146,8 @@ export class AppointmentsComponent implements OnInit {
 
   ngOnDestroy() {
     this.searchSubject.complete();
+    this.patientSearchSubject.complete();
+    this.doctorSearchSubject.complete();
   }
 
   fetchAppointments() {
@@ -202,6 +231,9 @@ export class AppointmentsComponent implements OnInit {
     this.adminService.getPatients(1, 200).subscribe({
       next: (response) => {
         this.patients.set(response.data);
+        if (!this.patientResults().length) {
+          this.patientResults.set(response.data.slice(0, 10));
+        }
       },
       error: (error) => {
         console.error('Error loading patients:', error);
@@ -212,6 +244,9 @@ export class AppointmentsComponent implements OnInit {
     this.adminService.getAllUsers(1, 200, 'doctor').subscribe({
       next: (response) => {
         this.doctors.set(response.data);
+        if (!this.doctorResults().length) {
+          this.doctorResults.set(response.data.slice(0, 10));
+        }
       },
       error: (error) => {
         console.error('Error loading doctors:', error);
@@ -308,6 +343,12 @@ export class AppointmentsComponent implements OnInit {
     if (!target.closest('.notification-dropdown') && !target.closest('.notification-icon')) {
       this.showNotificationDropdown.set(false);
     }
+    if (!target.closest('.patient-search')) {
+      this.patientDropdownOpen.set(false);
+    }
+    if (!target.closest('.doctor-search')) {
+      this.doctorDropdownOpen.set(false);
+    }
   }
 
   markAsRead(notificationId: string) {
@@ -391,6 +432,10 @@ export class AppointmentsComponent implements OnInit {
       notes: '',
       status: 'pending' as AppointmentStatus
     });
+    this.patientSearchTerm.set('');
+    this.doctorSearchTerm.set('');
+    this.patientDropdownOpen.set(false);
+    this.doctorDropdownOpen.set(false);
     this.alertMessage.set(null);
   }
 
@@ -514,5 +559,159 @@ export class AppointmentsComponent implements OnInit {
     }
     
     return days;
+  }
+
+  onPatientSearchChange(term: string) {
+    this.patientSearchTerm.set(term);
+    this.patientDropdownOpen.set(true);
+    this.patientSearchSubject.next(term);
+  }
+
+  onDoctorSearchChange(term: string) {
+    this.doctorSearchTerm.set(term);
+    this.doctorDropdownOpen.set(true);
+    this.doctorSearchSubject.next(term);
+  }
+
+  openPatientDropdown() {
+    this.patientDropdownOpen.set(true);
+    if (!this.patientSearchTerm()) {
+      this.patientResults.set(this.patients().slice(0, 10));
+    }
+  }
+
+  openDoctorDropdown() {
+    this.doctorDropdownOpen.set(true);
+    if (!this.doctorSearchTerm()) {
+      this.doctorResults.set(this.doctors().slice(0, 10));
+    }
+  }
+
+  selectPatient(patient: User) {
+    this.newAppointment.update((current) => ({
+      ...current,
+      patientId: patient.id,
+    }));
+    this.patientSearchTerm.set(`${patient.firstName} ${patient.lastName} — ${patient.email ?? ''}`.trim());
+    this.patientDropdownOpen.set(false);
+  }
+
+  selectDoctor(doctor: User) {
+    this.newAppointment.update((current) => ({
+      ...current,
+      doctorId: doctor.id,
+    }));
+    this.doctorSearchTerm.set(`Dr. ${doctor.firstName} ${doctor.lastName} — ${doctor.specialty || 'General Practice'}`);
+    this.doctorDropdownOpen.set(false);
+  }
+
+  clearSelectedPatient(event?: Event) {
+    event?.stopPropagation();
+    this.newAppointment.update((current) => ({
+      ...current,
+      patientId: '',
+    }));
+    this.patientSearchTerm.set('');
+  }
+
+  clearSelectedDoctor(event?: Event) {
+    event?.stopPropagation();
+    this.newAppointment.update((current) => ({
+      ...current,
+      doctorId: '',
+    }));
+    this.doctorSearchTerm.set('');
+  }
+
+  getInitials(user?: User | null, fallback = '??'): string {
+    if (!user) return fallback;
+    const first = user.firstName?.charAt(0) ?? '';
+    const last = user.lastName?.charAt(0) ?? '';
+    return `${first}${last}`.toUpperCase() || fallback;
+  }
+
+  private performUserSearch(role: 'patient' | 'doctor', term: string) {
+    const trimmed = term.trim();
+    if (!trimmed) {
+      if (role === 'patient') {
+        this.patientResults.set(this.patients().slice(0, 10));
+      } else {
+        this.doctorResults.set(this.doctors().slice(0, 10));
+      }
+      return;
+    }
+
+    if (role === 'patient') {
+      this.patientSearchLoading.set(true);
+      this.adminService.getPatients(1, 10, trimmed).subscribe({
+        next: (response) => {
+          this.patientResults.set(response.data);
+          this.patientSearchLoading.set(false);
+        },
+        error: () => {
+          this.patientSearchLoading.set(false);
+          this.patientResults.set([]);
+        },
+      });
+    } else {
+      this.doctorSearchLoading.set(true);
+      this.adminService.getAllUsers(1, 10, 'doctor', trimmed).subscribe({
+        next: (response) => {
+          this.doctorResults.set(response.data);
+          this.doctorSearchLoading.set(false);
+        },
+        error: () => {
+          this.doctorSearchLoading.set(false);
+          this.doctorResults.set([]);
+        },
+      });
+    }
+  }
+
+  handleVideoToggle(checked: boolean) {
+    this.newAppointment.update((current) => ({
+      ...current,
+      isVideoConsultation: checked,
+      location: checked ? 'Virtual Visit' : current.location,
+    }));
+  }
+
+  isVideoConsultation(): boolean {
+    return !!this.newAppointment().isVideoConsultation;
+  }
+
+  generateTimeSlots(): string[] {
+    const slots: string[] = [];
+    for (let hour = 8; hour <= 18; hour++) {
+      ['00', '30'].forEach((minute) => {
+        if (hour === 18 && minute === '30') return;
+        const formattedHour = hour.toString().padStart(2, '0');
+        slots.push(`${formattedHour}:${minute}`);
+      });
+    }
+    return slots;
+  }
+
+  onTimeSlotClick(slot: string) {
+    this.newAppointment.update((current) => ({
+      ...current,
+      appointmentTime: slot,
+    }));
+  }
+
+  isSlotSelected(slot: string): boolean {
+    return this.newAppointment().appointmentTime === slot;
+  }
+
+  getSelectedPatient(): User | undefined {
+    const id = this.newAppointment().patientId;
+    if (!id) return undefined;
+    return this.patients().find((patient) => patient.id === id);
+  }
+
+  getSelectedDoctor(): User | undefined {
+    const id = this.newAppointment().doctorId;
+    if (!id) return undefined;
+    return this.doctors().find((doctor) => doctor.id === id);
   }
 }

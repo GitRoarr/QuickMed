@@ -7,6 +7,7 @@ import { CreateAppointmentDto } from "./dto/create-appointment.dto";
 import { UpdateAppointmentDto } from "./dto/update-appointment.dto";
 import { UsersService } from "../users/users.service";
 import { User} from "../users/entities/user.entity";
+import { SettingsService } from "../settings/settings.service";
 
 @Injectable()
 export class AppointmentsService {

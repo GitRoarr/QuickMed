@@ -17,6 +17,7 @@ export interface User {
   patientId?: string
   specialty?: string
   licenseNumber?: string
+  avatar?: string
   isActive: boolean
   createdAt: Date
   updatedAt: Date
