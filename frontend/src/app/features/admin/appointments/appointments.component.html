@@ -335,7 +335,7 @@
                 type="text"
                 autocomplete="off"
                 [value]="patientSearchTerm()"
-                (input)="onPatientSearchChange($event.target.value)"
+                (input)="onPatientSearchChange($any($event.target).value)"
                 (focus)="openPatientDropdown()"
                 placeholder="Search by name, email, or patient ID"
                 class="flex-1 focus:outline-none border-none text-sm text-gray-900 placeholder-gray-500">
@@ -408,7 +408,7 @@
                 type="text"
                 autocomplete="off"
                 [value]="doctorSearchTerm()"
-                (input)="onDoctorSearchChange($event.target.value)"
+                (input)="onDoctorSearchChange($any($event.target).value)"
                 (focus)="openDoctorDropdown()"
                 placeholder="Search doctors by name, specialty, email..."
                 class="flex-1 focus:outline-none border-none text-sm text-gray-900 placeholder-gray-500">
@@ -552,7 +552,7 @@
               type="checkbox" 
               name="isVideoConsultation"
               [checked]="isVideoConsultation()"
-              (change)="handleVideoToggle($event.target.checked)"
+              (change)="handleVideoToggle($any($event.target).checked)"
               class="rounded border-gray-300 text-green-600 focus:ring-green-500">
             <span class="text-sm font-medium text-gray-700">Video Consultation (no room needed)</span>
           </label>
