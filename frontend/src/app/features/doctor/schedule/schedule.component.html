@@ -91,7 +91,7 @@
         </div>
 
         <div class="schedule-list">
-          <div *ngFor="let slot of timeSlots" class="schedule-item">
+          <div *ngFor="let slot of getTimeSlots()" class="schedule-item">
             <div class="time-label">{{ slot }} {{ slot < '12:00' ? 'AM' : 'PM' }}</div>
 
             <div class="slot-content" [ngClass]="getSlotStatus(slot)">

@@ -39,10 +39,12 @@ export class ScheduleComponent implements OnInit {
   private authService = inject(AuthService);
   private router = inject(Router);
 
-  timeSlots = [
-    '08:00', '09:00', '10:00', '11:00', '12:00',
-    '13:00', '14:00', '15:00', '16:00', '17:00', '18:00'
-  ];
+  getTimeSlots(): string[] {
+    return (this.slots() || [])
+      .map((s: any) => s.time)
+      .filter((t: string) => !!t)
+      .sort();
+  }
 
   ngOnInit(): void {
     this.loadUserData();
@@ -52,7 +54,7 @@ export class ScheduleComponent implements OnInit {
   }
 
   loadSlots(): void {
-    const dateStr = this.selectedDate().toISOString().split('T')[0]; // YYYY-MM-DD
+    const dateStr = this.selectedDate().toISOString().split('T')[0];
     this.scheduleService.getDaySchedule(dateStr).subscribe({
       next: (res: any[]) => this.slots.set(res),
       error: () => this.slots.set([])
@@ -81,7 +83,6 @@ export class ScheduleComponent implements OnInit {
     ) || null;
   }
 
-  // ==================== BADGES & MENU ====================
   loadBadgeCounts(): void {
     forkJoin({
       appointments: this.appointmentService.getPendingCount(),
@@ -105,7 +106,6 @@ export class ScheduleComponent implements OnInit {
     ]);
   }
 
-  // ==================== USER ====================
   loadUserData(): void {
     this.currentUser.set(this.authService.currentUser());
   }
