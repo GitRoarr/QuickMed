@@ -38,14 +38,12 @@ export class DoctorsService {
     try {
       console.log("[DoctorsService] Creating doctor invite for", createDoctorDto.email);
       
-      // Normalize and validate email
       const normalizedEmail = createDoctorDto.email.toLowerCase().trim();
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
         await queryRunner.rollbackTransaction();
         throw new BadRequestException('Invalid email format');
       }
 
-      // Check if email already exists (with transaction isolation)
       const existingUser = await queryRunner.manager.findOne(User, { 
         where: { email: normalizedEmail } 
       });
@@ -55,13 +53,11 @@ export class DoctorsService {
         throw new BadRequestException("Email already exists");
       }
 
-      // Validate required fields
       if (!createDoctorDto.firstName || !createDoctorDto.lastName || !createDoctorDto.email) {
         await queryRunner.rollbackTransaction();
         throw new BadRequestException("First name, last name, and email are required");
       }
 
-      // Generate unique invite token (ensure uniqueness)
       let inviteToken: string;
       let tokenExists = true;
       let attempts = 0;
@@ -81,7 +77,6 @@ export class DoctorsService {
       const inviteExpiresAt = new Date();
       inviteExpiresAt.setDate(inviteExpiresAt.getDate() + 7); // 7 days expiry
 
-      // Create doctor user with invitation data
       const doctor = queryRunner.manager.create(User, {
         firstName: createDoctorDto.firstName.trim(),
         lastName: createDoctorDto.lastName.trim(),
@@ -184,7 +179,6 @@ export class DoctorsService {
       // Hash password with bcrypt
       const hashedPassword = await bcrypt.hash(password, 10);
 
-      // Update doctor: set password, activate, and clear invitation
       doctor.password = hashedPassword;
       doctor.isActive = true;
       doctor.inviteToken = null;
@@ -248,7 +242,6 @@ export class DoctorsService {
 
   async remove(id: string): Promise<void> {
     const doctor = await this.findOne(id);
-    // Clean up appointments referencing this doctor to avoid FK violations
     await this.appointmentsRepository.delete({ doctorId: id });
     await this.usersRepository.remove(doctor);
   }
@@ -259,7 +252,6 @@ export class DoctorsService {
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
 
-    // Get today's appointments
     const todayAppointments = await this.appointmentsRepository.find({
       where: {
         doctorId,
@@ -269,19 +261,16 @@ export class DoctorsService {
       order: { appointmentTime: 'ASC' },
     });
 
-    // Get all appointments for stats
     const allAppointments = await this.appointmentsRepository.find({
       where: { doctorId },
       relations: ['patient'],
     });
 
-    // Calculate stats
     const totalToday = todayAppointments.length;
     const pendingToday = todayAppointments.filter(a => a.status === AppointmentStatus.PENDING).length;
     const completedToday = todayAppointments.filter(a => a.status === AppointmentStatus.COMPLETED).length;
     const confirmedToday = todayAppointments.filter(a => a.status === AppointmentStatus.CONFIRMED).length;
 
-    // Get unique patients count
     const uniquePatients = new Set(allAppointments.map(a => a.patientId));
     const totalPatients = uniquePatients.size;
 

@@ -8,7 +8,6 @@ async function bootstrap() {
   app.enableCors({
     origin: true,
     credentials: true,
-    // Ensure the browser can send the Authorization header in CORS requests
     allowedHeaders: ['Authorization', 'Content-Type', 'Accept'],
     methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
     exposedHeaders: ['Authorization'],

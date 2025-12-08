@@ -8,6 +8,7 @@ import { UpdateAppointmentDto } from "./dto/update-appointment.dto";
 import { UsersService } from "../users/users.service";
 import { User} from "../users/entities/user.entity";
 import { SettingsService } from "../settings/settings.service";
+import { SchedulesService } from '../schedules/schedules.service';
 
 @Injectable()
 export class AppointmentsService {
@@ -16,6 +17,7 @@ export class AppointmentsService {
     private readonly appointmentsRepository: Repository<Appointment>,
     private readonly usersService: UsersService,
     private readonly settingsService: SettingsService,
+    private readonly schedulesService: SchedulesService, // add injection (ensure provider wired in module)
   ) {}
 
   async create(createAppointmentDto: CreateAppointmentDto, patientId: string): Promise<Appointment> {
@@ -41,7 +43,6 @@ export class AppointmentsService {
       throw new BadRequestException(`Doctor is not available on ${appointmentDay}`);
     }
 
-    // Check time slot availability
     if (settings?.startTime && settings?.endTime) {
       const [startHour, startMin] = settings.startTime.split(':').map(Number);
       const [endHour, endMin] = settings.endTime.split(':').map(Number);
@@ -69,7 +70,6 @@ export class AppointmentsService {
       throw new BadRequestException("This time slot is already booked. Please choose another time.");
     }
 
-    // Check for pending appointment at same time
     const pendingAppointment = await this.appointmentsRepository.findOne({
       where: {
         doctorId,
@@ -95,7 +95,22 @@ export class AppointmentsService {
       paymentStatus: PaymentStatus.NOT_PAID,
     });
 
-    return this.appointmentsRepository.save(appointment);
+    const savedAppointment = await this.appointmentsRepository.save(appointment);
+
+    try {
+      const dateStr = this.toDateString(savedAppointment.appointmentDate);
+      const timeStr = this.toTimeString(savedAppointment.appointmentTime);
+      await this.schedulesService.setSlotStatus(
+        String(savedAppointment.doctorId),
+        dateStr,
+        timeStr,
+        'booked'
+      );
+    } catch (e) {
+      console.error('Failed to mark schedule slot booked', e);
+    }
+
+    return savedAppointment;
   }
 
   async findAll(): Promise<Appointment[]> {
@@ -198,7 +213,22 @@ export class AppointmentsService {
     }
 
     appointment.status = AppointmentStatus.CANCELLED;
-    return this.appointmentsRepository.save(appointment);
+
+    const canceledAppointment = await this.appointmentsRepository.save(appointment);
+
+    const apt = await this.appointmentsRepository.findOne({ where: { id } });
+    if (apt) {
+      const cancelDate = this.toDateString(apt.appointmentDate);
+      const cancelTime = this.toTimeString(apt.appointmentTime);
+      await this.schedulesService.setSlotStatus(
+        String(apt.doctorId),
+        cancelDate,
+        cancelTime,
+        'available'
+      );
+    }
+
+    return canceledAppointment;
   }
 
   async remove(id: string): Promise<void> {
@@ -206,5 +236,24 @@ export class AppointmentsService {
     if (result.affected === 0) {
       throw new NotFoundException(`Appointment with ID ${id} not found`);
     }
+  }
+
+  async getPendingCountForDoctor(doctorId: string): Promise<number> {
+    if (!doctorId) return 0;
+    return this.appointmentsRepository.count({
+      where: { doctorId: doctorId, status: 'pending' as any }
+    });
+  }
+
+  // helper inside the class (add near other private helpers)
+  private toDateString(d: any): string {
+    if (!d) return '';
+    return d instanceof Date ? d.toISOString().split('T')[0] : String(d);
+  }
+
+  private toTimeString(t: any): string {
+    if (!t) return '';
+    if (t instanceof Date) return t.toTimeString().slice(0, 5);
+    return String(t).slice(0, 5);
   }
 }

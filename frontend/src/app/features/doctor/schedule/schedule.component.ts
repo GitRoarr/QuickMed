@@ -7,6 +7,7 @@ import { AuthService } from '@core/services/auth.service';
 import { BadgeService } from '@core/services/badge.service';
 import { MessageService } from '@core/services/message.service';
 import { forkJoin } from 'rxjs';
+import { SchedulingService, DoctorSlot } from '../../../core/services/schedule.service';
 
 interface MenuItem {
   label: string;
@@ -24,14 +25,15 @@ interface MenuItem {
 })
 export class ScheduleComponent implements OnInit {
   appointments = signal<Appointment[]>([]);
+  slots = signal<any[]>([]);
   isLoading = signal(true);
   selectedDate = signal(new Date());
   currentMonth = signal(new Date());
   currentUser = signal<any>(null);
-
   menuItems = signal<MenuItem[]>([]);
 
   private badgeService = inject(BadgeService);
+  private scheduleService = inject(SchedulingService);
   private appointmentService = inject(AppointmentService);
   private messageService = inject(MessageService);
   private authService = inject(AuthService);
@@ -46,8 +48,40 @@ export class ScheduleComponent implements OnInit {
     this.loadUserData();
     this.loadAppointments();
     this.loadBadgeCounts();
+    this.loadSlots();
   }
 
+  loadSlots(): void {
+    const dateStr = this.selectedDate().toISOString().split('T')[0]; // YYYY-MM-DD
+    this.scheduleService.getDaySchedule(dateStr).subscribe({
+      next: (res: any[]) => this.slots.set(res),
+      error: () => this.slots.set([])
+    });
+  }
+
+  setAvailable(time: string): void {
+    const dateStr = this.selectedDate().toISOString().split('T')[0];
+    this.scheduleService.setAvailable(dateStr, time).subscribe(() => this.loadSlots());
+  }
+
+  blockSlot(time: string): void {
+    const dateStr = this.selectedDate().toISOString().split('T')[0];
+    this.scheduleService.blockSlot(dateStr, time).subscribe(() => this.loadSlots());
+  }
+
+  getSlotStatus(time: string): string {
+    const found = this.slots().find(s => s.time === time);
+    return found ? found.status : 'available';
+  }
+
+  getAppointmentForSlot(slot: string): Appointment | null {
+    const dateStr = this.selectedDate().toISOString().split('T')[0];
+    return this.appointments().find(
+      apt => apt.appointmentDate === dateStr && apt.appointmentTime.startsWith(slot)
+    ) || null;
+  }
+
+  // ==================== BADGES & MENU ====================
   loadBadgeCounts(): void {
     forkJoin({
       appointments: this.appointmentService.getPendingCount(),
@@ -71,20 +105,9 @@ export class ScheduleComponent implements OnInit {
     ]);
   }
 
+  // ==================== USER ====================
   loadUserData(): void {
-    const user = this.authService.currentUser();
-    this.currentUser.set(user);
-  }
-
-  loadAppointments(): void {
-    this.isLoading.set(true);
-    this.appointmentService.getMyAppointments().subscribe({
-      next: (data) => {
-        this.appointments.set(data);
-        this.isLoading.set(false);
-      },
-      error: () => this.isLoading.set(false)
-    });
+    this.currentUser.set(this.authService.currentUser());
   }
 
   getDoctorName(): string {
@@ -105,19 +128,25 @@ export class ScheduleComponent implements OnInit {
       : name.substring(0, 2).toUpperCase();
   }
 
+  // ==================== APPOINTMENTS ====================
+  loadAppointments(): void {
+    this.isLoading.set(true);
+    this.appointmentService.getMyAppointments().subscribe({
+      next: (data) => {
+        this.appointments.set(data);
+        this.isLoading.set(false);
+      },
+      error: () => this.isLoading.set(false)
+    });
+  }
+
   getSelectedDateAppointments(): Appointment[] {
     const selected = this.selectedDate();
     const dateStr = selected.toISOString().split('T')[0];
     return this.appointments().filter(apt => apt.appointmentDate === dateStr);
   }
 
-  getAppointmentForSlot(slot: string): Appointment | null {
-    const dateStr = this.selectedDate().toISOString().split('T')[0];
-    return this.appointments().find(
-      apt => apt.appointmentDate === dateStr && apt.appointmentTime.startsWith(slot)
-    ) || null;
-  }
-
+  // ==================== CALENDAR ====================
   getCalendarDays(): Date[] {
     const month = this.currentMonth();
     const year = month.getFullYear();
@@ -161,6 +190,7 @@ export class ScheduleComponent implements OnInit {
 
   selectDate(date: Date): void {
     this.selectedDate.set(date);
+    this.loadSlots();
   }
 
   previousMonth(): void {

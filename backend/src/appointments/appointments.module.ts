@@ -5,12 +5,14 @@ import { AppointmentsService } from "./appointments.service";
 import { Appointment } from "./entities/appointment.entity";
 import { UsersModule } from "../users/users.module";
 import { SettingsModule } from "../settings/settings.module";
+import { SchedulesModule } from "../schedules/schedules.module";
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Appointment]),
     UsersModule,
     SettingsModule,
+    SchedulesModule,
   ],
   controllers: [AppointmentsController],
   providers: [AppointmentsService],

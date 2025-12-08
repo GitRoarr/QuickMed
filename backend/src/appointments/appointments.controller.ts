@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from "@nestjs/common"
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req } from "@nestjs/common"
 import  { AppointmentsService } from "./appointments.service"
 import  { CreateAppointmentDto } from "./dto/create-appointment.dto"
 import  { UpdateAppointmentDto } from "./dto/update-appointment.dto"
@@ -40,11 +40,10 @@ export class AppointmentsController {
   }
 
   @Get('pending-count')
-  getPendingCount(@CurrentUser() user: User) {
-    if (user.role === UserRole.DOCTOR) {
-      return this.appointmentsService.getPendingCount(user.id);
-    }
-    return { count: 0 };
+  async getPendingCount(@Req() req: any) {
+    const doctorId = req.user?.id ?? req.user?.sub;
+    const count = await this.appointmentsService.getPendingCountForDoctor(doctorId);
+    return { count };
   }
 
   @Get('patient/:patientId')

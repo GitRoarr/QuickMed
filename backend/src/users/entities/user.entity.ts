@@ -90,6 +90,9 @@ export class User extends BaseEntity {
   @Column({ nullable: true })
   department: string;
 
+  @Column({ type: 'jsonb', nullable: true, default: () => "'[]'" })
+  workingDays: number[];
+
   @OneToMany(() => Appointment, (appointment) => appointment.patient)
   patientAppointments: Appointment[];
 
