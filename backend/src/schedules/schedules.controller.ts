@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Body, Param, Query, Req, UseGuards } from '@nestjs/common';
 import { SchedulesService } from './schedules.service';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'; // adjust path if different
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { UpdateSlotDto } from './dto/update-slot.dto';
 
 @UseGuards(JwtAuthGuard)
@@ -15,31 +15,52 @@ export class SchedulesController {
   }
 
   @Post('available')
-  setAvailable(@Req() req: any, @Body() body: UpdateSlotDto) {
+  async setAvailable(@Req() req: any, @Body() body: UpdateSlotDto) {
     const doctorId = req.user?.id ?? req.user?.sub ?? req.headers['x-doctor-id'];
-    return this.svc.setSlotStatus(doctorId, body.date, body.time, 'available');
+    const start = body.startTime ?? body.time;
+    const end = body.endTime ?? start;
+
+    if (start === end) {
+      return this.svc.setSingleSlotStatus(doctorId, body.date, start!, 'available');
+    } else {
+      return this.svc.setRangeSlotStatus(doctorId, body.date, start!, end!, 'available');
+    }
   }
 
   @Post('block')
-  blockSlot(@Req() req: any, @Body() body: UpdateSlotDto) {
+  async blockSlot(@Req() req: any, @Body() body: UpdateSlotDto) {
     const doctorId = req.user?.id ?? req.user?.sub ?? req.headers['x-doctor-id'];
-    return this.svc.setSlotStatus(doctorId, body.date, body.time, 'blocked', body.reason);
+    const start = body.startTime ?? body.time;
+    const end = body.endTime ?? start;
+
+    if (start === end) {
+      return this.svc.setSingleSlotStatus(doctorId, body.date, start!, 'blocked', body.reason);
+    } else {
+      return this.svc.setRangeSlotStatus(doctorId, body.date, start!, end!, 'blocked', body.reason);
+    }
   }
 
   @Post('unblock')
-  unblockSlot(@Req() req: any, @Body() body: UpdateSlotDto) {
+  async unblockSlot(@Req() req: any, @Body() body: UpdateSlotDto) {
     const doctorId = req.user?.id ?? req.user?.sub ?? req.headers['x-doctor-id'];
-    return this.svc.setSlotStatus(doctorId, body.date, body.time, 'available');
+    const start = body.startTime ?? body.time;
+    const end = body.endTime ?? start;
+
+    if (start === end) {
+      return this.svc.setSingleSlotStatus(doctorId, body.date, start!, 'available');
+    } else {
+      return this.svc.setRangeSlotStatus(doctorId, body.date, start!, end!, 'available');
+    }
   }
 
   @Get('overview')
-  getOverview(@Req() req: any, @Query('year') year: string, @Query('month') month: string) {
+  async getOverview(@Req() req: any, @Query('year') year: string, @Query('month') month: string) {
     const doctorId = req.user?.id ?? req.user?.sub ?? req.headers['x-doctor-id'];
     return this.svc.getMonthlyOverview(doctorId, Number(year), Number(month));
   }
 
   @Get('blocked-days')
-  getBlockedDays(@Req() req: any, @Query('year') year: string, @Query('month') month: string) {
+  async getBlockedDays(@Req() req: any, @Query('year') year: string, @Query('month') month: string) {
     const doctorId = req.user?.id ?? req.user?.sub ?? req.headers['x-doctor-id'];
     return this.svc.getBlockedDays(doctorId, Number(year), Number(month));
   }

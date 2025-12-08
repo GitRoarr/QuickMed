@@ -4,7 +4,9 @@ import { Observable, map } from 'rxjs';
 import { environment } from '@environments/environment';
 
 export interface DoctorSlot {
-  time: string;
+  startTime?: string;
+  endTime?: string;
+  time?: string; // legacy fallback
   status: 'available' | 'booked' | 'blocked';
   appointmentId?: string;
 }
@@ -34,25 +36,25 @@ export class SchedulingService {
       .pipe(map(res => res.slots));
   }
 
-  setAvailable(date: Date | string, time: string): Observable<any> {
-    return this.http.post(`${this.API_URL}/available`, {
-      date: this.normalizeDate(date),
-      time
-    });
+  setAvailable(date: Date | string, startTime: string, endTime?: string): Observable<any> {
+    const payload = endTime
+      ? { date: this.normalizeDate(date), startTime, endTime }
+      : { date: this.normalizeDate(date), time: startTime };
+    return this.http.post(`${this.API_URL}/available`, payload);
   }
 
-  blockSlot(date: Date | string, time: string): Observable<any> {
-    return this.http.post(`${this.API_URL}/block`, {
-      date: this.normalizeDate(date),
-      time
-    });
+  blockSlot(date: Date | string, startTime: string, endTime?: string): Observable<any> {
+    const payload = endTime
+      ? { date: this.normalizeDate(date), startTime, endTime }
+      : { date: this.normalizeDate(date), time: startTime };
+    return this.http.post(`${this.API_URL}/block`, payload);
   }
 
-  unblockSlot(date: Date | string, time: string): Observable<any> {
-    return this.http.post(`${this.API_URL}/unblock`, {
-      date: this.normalizeDate(date),
-      time
-    });
+  unblockSlot(date: Date | string, startTime: string, endTime?: string): Observable<any> {
+    const payload = endTime
+      ? { date: this.normalizeDate(date), startTime, endTime }
+      : { date: this.normalizeDate(date), time: startTime };
+    return this.http.post(`${this.API_URL}/unblock`, payload);
   }
 
   getMonthlyOverview(year: number, month: number): Observable<any> {

@@ -41,7 +41,10 @@ export class ScheduleComponent implements OnInit {
 
   getTimeSlots(): string[] {
     return (this.slots() || [])
-      .map((s: any) => s.time)
+      .map((s: any) => {
+        if (s.startTime && s.endTime) return `${s.startTime} - ${s.endTime}`;
+        return s.time ? `${s.time}` : '';
+      })
       .filter((t: string) => !!t)
       .sort();
   }
@@ -61,18 +64,21 @@ export class ScheduleComponent implements OnInit {
     });
   }
 
-  setAvailable(time: string): void {
+  setAvailable(timeRange: string): void {
     const dateStr = this.selectedDate().toISOString().split('T')[0];
-    this.scheduleService.setAvailable(dateStr, time).subscribe(() => this.loadSlots());
+    const [startTime, endTime] = timeRange.split(' - ');
+    this.scheduleService.setAvailable(dateStr, startTime, endTime).subscribe(() => this.loadSlots());
   }
 
-  blockSlot(time: string): void {
+  blockSlot(timeRange: string): void {
     const dateStr = this.selectedDate().toISOString().split('T')[0];
-    this.scheduleService.blockSlot(dateStr, time).subscribe(() => this.loadSlots());
+    const [startTime, endTime] = timeRange.split(' - ');
+    this.scheduleService.blockSlot(dateStr, startTime, endTime).subscribe(() => this.loadSlots());
   }
 
-  getSlotStatus(time: string): string {
-    const found = this.slots().find(s => s.time === time);
+  getSlotStatus(timeRange: string): string {
+    const [startTime, endTime] = timeRange.split(' - ');
+    const found = this.slots().find(s => (s.startTime === startTime && s.endTime === endTime) || s.time === startTime);
     return found ? found.status : 'available';
   }
 

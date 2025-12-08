@@ -2,7 +2,9 @@ import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, Index } from 'typeor
 import { User } from '../users/entities/user.entity';
 
 export type Slot = {
-  time: string; // "08:00"
+  startTime?: string;
+  endTime?: string;
+  time?: string; // legacy single time support
   status: 'available' | 'booked' | 'blocked';
   appointmentId?: string | null;
   blockedReason?: string | null;
@@ -20,7 +22,6 @@ export class DoctorSchedule {
   @ManyToOne(() => User, { nullable: false })
   doctor: User;
 
-  // use Date type for TypeORM `date` column
   @Column({ type: 'date' })
   date: Date;
 
