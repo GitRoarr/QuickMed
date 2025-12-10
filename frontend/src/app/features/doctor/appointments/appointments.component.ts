@@ -7,6 +7,7 @@ import { Appointment, AppointmentStatus } from "@core/models/appointment.model";
 import { AuthService } from "@core/services/auth.service";
 import { BadgeService } from "@core/services/badge.service";
 import { MessageService } from "@core/services/message.service";
+import { SchedulingService } from '@core/services/schedule.service';
 
 interface AppointmentFilter {
   status: string;
@@ -79,29 +80,9 @@ export class AppointmentsComponent implements OnInit {
     { value: "time", label: "Time" },
   ];
 
-  timeSlots = [
-    "08:00",
-    "08:30",
-    "09:00",
-    "09:30",
-    "10:00",
-    "10:30",
-    "11:00",
-    "11:30",
-    "12:00",
-    "12:30",
-    "13:00",
-    "13:30",
-    "14:00",
-    "14:30",
-    "15:00",
-    "15:30",
-    "16:00",
-    "16:30",
-    "17:00",
-    "17:30",
-    "18:00",
-  ];
+  timeSlots: string[] = [];
+
+  private schedulingService = inject(SchedulingService);
 
   constructor(private appointmentService: AppointmentService) {}
 
@@ -109,6 +90,7 @@ export class AppointmentsComponent implements OnInit {
     this.loadUserData();
     this.loadAppointments();
     this.loadBadgeCounts();
+    this.loadTimeSlotsForSelectedDate();
   }
 
   loadBadgeCounts(): void {
@@ -181,6 +163,8 @@ updateMenuItems(appointmentCount: number, messageCount: number) {
         this.filteredAppointments = [...data];
         this.applyFilters();
         this.isLoading.set(false);
+          // refresh time slots after appointments load
+          this.loadTimeSlotsForSelectedDate();
       },
       error: () => {
         this.isLoading.set(false);
@@ -239,6 +223,8 @@ updateMenuItems(appointmentCount: number, messageCount: number) {
 
     // Update appointmentsBySlot mapping after filtering
     this.updateAppointmentsBySlot();
+    // ensure time slots reflect selected date's schedule
+    this.loadTimeSlotsForSelectedDate();
   }
 
   // Updated helper function to ensure all timeSlots have entries
@@ -256,6 +242,27 @@ updateMenuItems(appointmentCount: number, messageCount: number) {
       }
     });
     this.appointmentsBySlot = map;
+  }
+
+  loadTimeSlotsForSelectedDate(): void {
+    const date = this.selectedDate();
+    if (!date) return;
+    // scheduling service returns slots from backend; map them to display strings
+    this.schedulingService.getDaySchedule(date).subscribe({
+      next: (slots) => {
+        const derived = (slots || [])
+          .map((s: any) => (s.startTime && s.endTime ? `${s.startTime}` : s.time || ''))
+          .filter((t: string) => !!t)
+          .sort();
+        this.timeSlots = derived;
+        // rebuild appointments mapping
+        this.updateAppointmentsBySlot();
+      },
+      error: () => {
+        this.timeSlots = [];
+        this.updateAppointmentsBySlot();
+      }
+    });
   }
 
   onSearchChange(): void {

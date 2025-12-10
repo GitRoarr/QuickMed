@@ -90,34 +90,64 @@
           <p class="appointment-count">{{ getSelectedDateAppointments().length }} appointments scheduled</p>
         </div>
 
-        <div class="schedule-list">
-          <div *ngFor="let slot of getTimeSlots()" class="schedule-item">
-            <div class="time-label">{{ slot }} {{ slot < '12:00' ? 'AM' : 'PM' }}</div>
+        <ng-container *ngIf="(slots() || []).length > 0; else noSlots">
+          <div class="schedule-list">
+            <div *ngFor="let slot of getTimeSlots()" class="schedule-item">
+              <div class="time-label">{{ slot }} {{ slot < '12:00' ? 'AM' : 'PM' }}</div>
 
-            <div class="slot-content" [ngClass]="getSlotStatus(slot)">
-              <ng-container *ngIf="getAppointmentForSlot(slot); else availableSlot">
-                <div class="appointment-details">
-                  <div class="patient-name">
-                    {{ getAppointmentForSlot(slot)?.patient?.firstName }}
-                    {{ getAppointmentForSlot(slot)?.patient?.lastName }}
+              <div class="slot-content" [ngClass]="getSlotStatus(slot)">
+                <ng-container *ngIf="getAppointmentForSlot(slot); else availableSlot">
+                  <div class="appointment-details">
+                    <div class="patient-name">
+                      {{ getAppointmentForSlot(slot)?.patient?.firstName }}
+                      {{ getAppointmentForSlot(slot)?.patient?.lastName }}
+                    </div>
+                    <div class="appointment-type">{{ getAppointmentForSlot(slot)?.appointmentType || 'Consultation' }}</div>
                   </div>
-                  <div class="appointment-type">{{ getAppointmentForSlot(slot)?.appointmentType || 'Consultation' }}</div>
-                </div>
-              </ng-container>
+                </ng-container>
 
-              <ng-template #availableSlot>
-                <div class="available-slot">
-                  <span>{{ getSlotStatus(slot) === 'blocked' ? 'Blocked' : 'Available' }}</span>
-                  <button *ngIf="getSlotStatus(slot) !== 'booked'" 
-                          (click)="getSlotStatus(slot) === 'available' ? blockSlot(slot) : setAvailable(slot)"
-                          class="block-btn">
-                    {{ getSlotStatus(slot) === 'available' ? 'Block' : 'Set Available' }}
-                  </button>
-                </div>
-              </ng-template>
+                <ng-template #availableSlot>
+                  <div class="available-slot">
+                    <span>{{ getSlotStatus(slot) === 'blocked' ? 'Blocked' : 'Available' }}</span>
+                    <button *ngIf="getSlotStatus(slot) !== 'booked'" 
+                            (click)="getSlotStatus(slot) === 'available' ? blockSlot(slot) : setAvailable(slot)"
+                            class="block-btn">
+                      {{ getSlotStatus(slot) === 'available' ? 'Block' : 'Set Available' }}
+                    </button>
+                  </div>
+                </ng-template>
+              </div>
             </div>
           </div>
-        </div>
+        </ng-container>
+
+        <ng-template #noSlots>
+          <div class="no-slots">
+            <p>No availability has been set for this date.</p>
+            <div class="availability-card">
+              <label>
+                <input type="radio" name="mode" value="single" [checked]="availabilityMode() === 'single'" (change)="availabilityMode.set('single')" />
+                Single time
+              </label>
+              <label style="margin-left:1rem;">
+                <input type="radio" name="mode" value="range" [checked]="availabilityMode() === 'range'" (change)="availabilityMode.set('range')" />
+                Range
+              </label>
+
+              <div class="availability-inputs" style="margin-top: .75rem; display:flex; gap: .5rem; align-items:center;">
+                <div *ngIf="availabilityMode() === 'single'">
+                  <input type="time" [ngModel]="singleTime()" (ngModelChange)="singleTime.set($event)" [ngModelOptions]="{standalone: true}" />
+                </div>
+                <div *ngIf="availabilityMode() === 'range'" style="display:flex; gap:.5rem;">
+                  <input type="time" [ngModel]="rangeStart()" (ngModelChange)="rangeStart.set($event)" [ngModelOptions]="{standalone: true}" />
+                  <span>to</span>
+                  <input type="time" [ngModel]="rangeEnd()" (ngModelChange)="rangeEnd.set($event)" [ngModelOptions]="{standalone: true}" />
+                </div>
+                <button class="btn btn-primary" (click)="setAvailability()">Set Available</button>
+              </div>
+            </div>
+          </div>
+        </ng-template>
       </div>
     </div>
   </main>

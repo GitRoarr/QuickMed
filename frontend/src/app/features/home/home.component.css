@@ -8,6 +8,77 @@
     z-index: 1200;
 }
 
+/* Ensure consistent header ordering across light/dark themes */
+.navbar .container {
+    display: flex !important;
+    align-items: center !important;
+    gap: 1rem !important;
+}
+
+.navbar .navbar-brand {
+    order: 1 !important;
+    flex: 0 0 auto !important;
+}
+
+.navbar .navbar-collapse {
+    order: 2 !important;
+    display: flex !important;
+    align-items: center !important;
+    flex: 1 1 auto !important;
+}
+
+.navbar .navbar-collapse > .navbar-nav {
+    order: 1 !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+
+.navbar .navbar-collapse > .d-flex {
+    order: 2 !important;
+    flex: 0 0 auto !important;
+}
+
+/* Same rules when dark mode is applied via body/class or Bootstrap dark utilities */
+.dark .navbar .container,
+.navbar.bg-dark .container,
+.navbar.navbar-dark .container {
+    display: flex !important;
+    align-items: center !important;
+    gap: 1rem !important;
+}
+
+.dark .navbar .navbar-brand,
+.navbar.bg-dark .navbar-brand,
+.navbar.navbar-dark .navbar-brand {
+    order: 1 !important;
+    flex: 0 0 auto !important;
+}
+
+.dark .navbar .navbar-collapse,
+.navbar.bg-dark .navbar-collapse,
+.navbar.navbar-dark .navbar-collapse {
+    order: 2 !important;
+    display: flex !important;
+    align-items: center !important;
+    flex: 1 1 auto !important;
+}
+
+.dark .navbar .navbar-collapse > .navbar-nav,
+.navbar.bg-dark .navbar-collapse > .navbar-nav,
+.navbar.navbar-dark .navbar-collapse > .navbar-nav {
+    order: 1 !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+
+.dark .navbar .navbar-collapse > .d-flex,
+.navbar.bg-dark .navbar-collapse > .d-flex,
+.navbar.navbar-dark .navbar-collapse > .d-flex {
+    order: 2 !important;
+    flex: 0 0 auto !important;
+}
+
+
 .navbar-expand-lg .navbar-collapse {
     display: flex !important;
     justify-content: flex-end;

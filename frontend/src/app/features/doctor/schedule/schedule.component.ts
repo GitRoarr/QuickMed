@@ -1,6 +1,7 @@
 import { Component, OnInit, signal, inject } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { AppointmentService } from '@core/services/appointment.service';
 import { Appointment } from '@core/models/appointment.model';
 import { AuthService } from '@core/services/auth.service';
@@ -19,7 +20,7 @@ interface MenuItem {
 @Component({
   selector: 'app-doctor-schedule',
   standalone: true,
-  imports: [CommonModule, DatePipe, RouterModule],
+  imports: [CommonModule, DatePipe, RouterModule, FormsModule],
   templateUrl: './schedule.component.html',
   styleUrls: ['./schedule.component.css']
 })
@@ -39,6 +40,12 @@ export class ScheduleComponent implements OnInit {
   private authService = inject(AuthService);
   private router = inject(Router);
 
+  // Availability form state
+  availabilityMode = signal<'single' | 'range'>('single');
+  singleTime = signal('08:00');
+  rangeStart = signal('08:00');
+  rangeEnd = signal('09:00');
+
   getTimeSlots(): string[] {
     return (this.slots() || [])
       .map((s: any) => {
@@ -54,6 +61,24 @@ export class ScheduleComponent implements OnInit {
     this.loadAppointments();
     this.loadBadgeCounts();
     this.loadSlots();
+  }
+
+  setAvailability(): void {
+    const dateStr = this.selectedDate().toISOString().split('T')[0];
+    if (this.availabilityMode() === 'single') {
+      const time = this.singleTime();
+      this.scheduleService.setAvailable(dateStr, time).subscribe({
+        next: () => this.loadSlots(),
+        error: () => this.loadSlots(),
+      });
+    } else {
+      const start = this.rangeStart();
+      const end = this.rangeEnd();
+      this.scheduleService.setAvailable(dateStr, start, end).subscribe({
+        next: () => this.loadSlots(),
+        error: () => this.loadSlots(),
+      });
+    }
   }
 
   loadSlots(): void {
