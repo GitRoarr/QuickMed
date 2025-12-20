@@ -211,6 +211,27 @@ export class HomeComponent implements OnInit {
         },
       })
   }
+  navigateToProfile(): void {
+    const user = this.currentUser()
+    if (!user) {
+      this.router.navigate(['/login'])
+      return
+    }
+    switch (user.role) {
+      case 'patient':
+        this.router.navigate(['/patient/profile'])
+        break
+      case 'doctor':
+        this.router.navigate(['/doctor/settings'])
+        break
+      case 'admin':
+        this.router.navigate(['/admin/dashboard'])
+        break
+      default:
+        this.router.navigate(['/'])
+        break
+    }
+  }
  getUserAvatar(): string {
   const user = this.currentUser()
   return user?.avatar || 'assets/images/profile-placeholder.png'

@@ -37,9 +37,9 @@
           <a routerLink="/register" class="btn btn-success px-4">Get Started</a>
         </ng-container>
 
-        <ng-template #loggedIn>
-          <div class="d-flex align-items-center gap-3">
-            <div class="user-avatar-wrapper d-flex align-items-center gap-2" style="cursor: pointer;" (click)="navigateToDashboard()">
+                <ng-template #loggedIn>
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="user-avatar-wrapper d-flex align-items-center gap-2" style="cursor: pointer;" (click)="navigateToDashboard()">
               <img 
                 *ngIf="currentUser()?.avatar; else initialsAvatar"
                 [src]="currentUser()?.avatar!" 
@@ -53,12 +53,13 @@
                 </div>
               </ng-template>
               <span class="fw-medium">{{ currentUser()?.firstName }}</span>
-            </div>
 
-            <button (click)="logout()" class="btn px-4" 
-                    [ngClass]="isDarkMode() ? 'btn-outline-light' : 'btn-outline-danger'">
-              Logout
-            </button>
+                            <!-- Hover dropdown -->
+                            <div class="profile-menu">
+                                <button type="button" class="dropdown-item" (click)="navigateToProfile()">Edit Profile</button>
+                                <button type="button" class="dropdown-item text-danger" (click)="logout()">Logout</button>
+                            </div>
+            </div>
           </div>
         </ng-template>
       </div>
@@ -331,13 +332,13 @@
                     <label class="review-label">Your Rating</label>
                     <div class="rating-stars"
                              (mouseleave)="setReviewHover(reviewRating())">
-                        <button type="button"
+                            <button type="button"
                                         class="star-button"
                                         *ngFor="let star of [1,2,3,4,5]"
                                         (mouseenter)="setReviewHover(star)"
                                         (click)="setReviewRating(star)"
                                         [ngClass]="{ filled: reviewHover() >= star || reviewRating() >= star }"
-                                        aria-label="Rate {{ star }} star">
+                                [attr.aria-label]="'Rate ' + star + ' star'">
                             <i class="bi" [ngClass]="(reviewHover() >= star || reviewRating() >= star) ? 'bi-star-fill' : 'bi-star'"></i>
                         </button>
                     </div>
