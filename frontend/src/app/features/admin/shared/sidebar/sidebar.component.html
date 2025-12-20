@@ -2,7 +2,7 @@
        [style.background-color]="themeService.currentTheme()?.sidebarBg || '#ffffff'"
        [style.border-right-color]="themeService.currentTheme()?.borderColor || '#e5e5e5'"
        style="border-right: 1px solid;">
-  <div class="px-6 py-4 border-b border-gray-200 cursor-pointer" (click)="goHome()">
+  <div class="px-6 py-4 border-b border-gray-200 cursor-pointer" (click)="goHome()" title="Back to Home">
     <img src="assets/images/QuickMed-Logo.png" alt="QuickMed Logo" class="h-8 mb-2" />
     <h2 class="text-lg font-bold text-gray-900">{{ title }}</h2>
   </div>

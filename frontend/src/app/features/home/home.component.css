@@ -93,6 +93,124 @@
         justify-content: flex-end !important;
     }
 
+.review-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.9rem 1.6rem;
+    border-radius: 999px;
+    font-weight: 700;
+}
+
+.review-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    padding: 1rem;
+}
+
+.review-modal {
+    position: relative;
+    max-width: 680px;
+    width: 100%;
+    background: #fff;
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.12);
+}
+
+.review-modal .btn-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+}
+
+.review-title {
+    text-align: center;
+    font-weight: 800;
+    margin-bottom: 0.25rem;
+}
+
+.review-subtitle {
+    text-align: center;
+    color: #4b5563;
+    margin-bottom: 1.5rem;
+}
+
+.review-group {
+    margin-bottom: 1.25rem;
+}
+
+.review-label {
+    display: block;
+    font-weight: 700;
+    margin-bottom: 0.6rem;
+}
+
+.rating-stars {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.star-button {
+    width: 42px;
+    height: 42px;
+    border: none;
+    background: transparent;
+    font-size: 1.6rem;
+    color: #9ca3af;
+    transition: transform 0.15s ease, color 0.15s ease;
+}
+
+.star-button.filled {
+    color: #f59e0b;
+}
+
+.star-button:hover {
+    transform: translateY(-2px) scale(1.05);
+}
+
+.review-textarea {
+    resize: vertical;
+    min-height: 140px;
+    font-size: 1rem;
+}
+
+.review-meta {
+    display: flex;
+    justify-content: space-between;
+    color: #6b7280;
+    margin-top: 0.25rem;
+}
+
+.review-error {
+    background: #fef2f2;
+    color: #b91c1c;
+    border: 1px solid #fecdd3;
+    padding: 0.75rem 1rem;
+    border-radius: 12px;
+    margin-bottom: 1rem;
+}
+
+@media (max-width: 576px) {
+    .review-modal {
+        padding: 1.5rem;
+    }
+    .rating-stars {
+        gap: 0.4rem;
+    }
+    .star-button {
+        width: 36px;
+        height: 36px;
+        font-size: 1.4rem;
+    }
+}
+
     .navbar .navbar-nav {
         display: flex !important;
         flex-direction: row !important;

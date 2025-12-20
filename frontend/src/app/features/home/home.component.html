@@ -312,7 +312,64 @@
         <ng-template #testimonialsFallback>
           <div class="text-center text-muted">Testimonials are loading. Check back shortly.</div>
         </ng-template>
+
+                <div class="text-center mt-4">
+                    <button class="btn btn-primary btn-lg review-cta" type="button" (click)="openReviewModal()">
+                        <i class="bi bi-pen me-2"></i>
+                        Write a Review
+                    </button>
+                </div>
     </div>
+
+        <div class="review-overlay" *ngIf="reviewModalOpen()">
+            <div class="review-modal">
+                <button class="btn-close" aria-label="Close" (click)="closeReviewModal()"></button>
+                <h3 class="review-title">Share Your Experience</h3>
+                <p class="review-subtitle">Help others by sharing your feedback about QuickMed</p>
+
+                <div class="review-group">
+                    <label class="review-label">Your Rating</label>
+                    <div class="rating-stars"
+                             (mouseleave)="setReviewHover(reviewRating())">
+                        <button type="button"
+                                        class="star-button"
+                                        *ngFor="let star of [1,2,3,4,5]"
+                                        (mouseenter)="setReviewHover(star)"
+                                        (click)="setReviewRating(star)"
+                                        [ngClass]="{ filled: reviewHover() >= star || reviewRating() >= star }"
+                                        aria-label="Rate {{ star }} star">
+                            <i class="bi" [ngClass]="(reviewHover() >= star || reviewRating() >= star) ? 'bi-star-fill' : 'bi-star'"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="review-group">
+                    <label class="review-label">Your Review</label>
+                    <textarea
+                        class="form-control review-textarea"
+                        rows="5"
+                        placeholder="Tell us about your experience with QuickMed..."
+                        [ngModel]="reviewText()"
+                        (ngModelChange)="reviewText.set($event)"
+                        [maxLength]="reviewCharLimit"
+                    ></textarea>
+                    <div class="review-meta">
+                        <small>Minimum 10 characters</small>
+                        <small>{{ reviewCharCount }}/{{ reviewCharLimit }}</small>
+                    </div>
+                </div>
+
+                <div class="review-error" *ngIf="reviewError()">
+                    {{ reviewError() }}
+                </div>
+
+                <div class="d-grid">
+                    <button class="btn btn-success btn-lg" type="button" [disabled]="!canSubmitReview()" (click)="submitReview()">
+                        {{ reviewSubmitting() ? 'Submitting...' : 'Submit Review' }}
+                    </button>
+                </div>
+            </div>
+        </div>
 </section>
 
 <!-- CTA Section -->
