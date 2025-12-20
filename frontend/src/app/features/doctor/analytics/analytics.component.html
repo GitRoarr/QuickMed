@@ -29,7 +29,8 @@
     <div class="sidebar-footer">
       <div class="user-info">
         <div class="user-avatar">
-          {{ getDoctorInitials() }}
+          <img *ngIf="currentUser()?.avatar; else docInitials" [src]="currentUser()?.avatar" alt="Doctor avatar" />
+          <ng-template #docInitials>{{ getDoctorInitials() }}</ng-template>
         </div>
         <div class="user-details">
           <p class="user-name">Dr. {{ getDoctorName() }}</p>

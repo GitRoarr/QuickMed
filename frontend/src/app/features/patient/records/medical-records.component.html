@@ -30,8 +30,30 @@
       </div>
     </div>
 
+    <div class="filter-bar" *ngIf="!isLoading()">
+      <div class="filter-label">
+        <img
+          class="filter-icon"
+          src="https://img.icons8.com/?size=100&id=3720&format=png&color=000000"
+          alt="Filter records"
+        />
+        <span>Filter records</span>
+      </div>
+      <div class="filter-chips">
+        <button
+          type="button"
+          class="filter-chip"
+          *ngFor="let option of filterOptions"
+          [class.active]="filterType() === option.value"
+          (click)="setFilter(option.value)"
+        >
+          {{ option.label }}
+        </button>
+      </div>
+    </div>
+
     <div class="records-list" *ngIf="!isLoading(); else loadingState">
-      <div class="record-card" *ngFor="let record of records()">
+      <div class="record-card" *ngFor="let record of filteredRecords()">
         <div>
           <p class="record-title">{{ record.title }}</p>
           <p class="muted">{{ record.recordDate | date:'MMM d, y' }}</p>
@@ -43,8 +65,8 @@
         </div>
       </div>
 
-      <div class="empty-state" *ngIf="records().length === 0">
-        <p>No records yet.</p>
+      <div class="empty-state" *ngIf="filteredRecords().length === 0">
+        <p>No records match this filter.</p>
       </div>
     </div>
   </div>

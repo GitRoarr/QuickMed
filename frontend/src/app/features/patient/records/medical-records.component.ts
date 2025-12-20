@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MedicalRecordService, MedicalRecord } from '../../../core/services/medical-record.service';
 import { AuthService } from '../../../core/services/auth.service';
@@ -18,6 +18,20 @@ export class MedicalRecordsComponent implements OnInit {
   prescriptionCount = signal(0);
   imagingCount = signal(0);
   diagnosisCount = signal(0);
+  filterType = signal<MedicalRecord['type'] | 'all'>('all');
+  filterOptions: { label: string; value: MedicalRecord['type'] | 'all' }[] = [
+    { label: 'All', value: 'all' },
+    { label: 'Lab', value: 'lab' },
+    { label: 'Prescriptions', value: 'prescription' },
+    { label: 'Imaging', value: 'imaging' },
+    { label: 'Diagnoses', value: 'diagnosis' },
+    { label: 'Other', value: 'other' }
+  ];
+  filteredRecords = computed(() => {
+    const type = this.filterType();
+    const data = this.records();
+    return type === 'all' ? data : data.filter((record) => record.type === type);
+  });
 
   constructor(private recordsService: MedicalRecordService, private auth: AuthService) {}
 
@@ -79,5 +93,9 @@ export class MedicalRecordsComponent implements OnInit {
         console.error('Failed to download', err);
       }
     })
+  }
+
+  setFilter(type: MedicalRecord['type'] | 'all') {
+    this.filterType.set(type);
   }
 }

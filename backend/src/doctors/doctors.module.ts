@@ -5,9 +5,10 @@ import { DoctorsService } from "./doctors.service"
 import { User } from "../users/entities/user.entity"
 import { Appointment } from "../appointments/entities/appointment.entity"
 import { EmailModule } from "../common/services/email.module"
+import { ReviewsModule } from "../reviews/reviews.module"
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, Appointment]), EmailModule],
+  imports: [TypeOrmModule.forFeature([User, Appointment]), EmailModule, ReviewsModule],
   controllers: [DoctorsController],
   providers: [DoctorsService],
   exports: [DoctorsService],

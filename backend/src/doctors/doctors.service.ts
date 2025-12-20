@@ -9,6 +9,7 @@ import * as bcrypt from "bcrypt";
 import { v4 as uuidv4 } from "uuid";
 import { UserRole, AppointmentStatus } from "../common/index";
 import { EmailService } from "../common/services/email.service";
+import { ReviewsService } from "../reviews/reviews.service";
 
 @Injectable()
 export class DoctorsService {
@@ -17,7 +18,8 @@ export class DoctorsService {
     private readonly usersRepository: Repository<User>,
     @InjectRepository(Appointment)
     private readonly appointmentsRepository: Repository<Appointment>,
-    private readonly emailService: EmailService
+    private readonly emailService: EmailService,
+    private readonly reviewsService: ReviewsService
   ) {}
 
   private sanitizeDoctor(doctor: User) {
@@ -314,8 +316,8 @@ export class DoctorsService {
     // Calculate average consultation time (mock for now - can be calculated from actual data)
     const avgConsultationTime = 32; // minutes
 
-    // Calculate satisfaction rate (mock for now)
-    const satisfactionRate = 4.7;
+    // Calculate satisfaction rate from reviews
+    const { average: satisfactionRate, count: satisfactionCount } = await this.reviewsService.getDoctorRating(doctorId);
 
     // Get appointments by time slot for today
     const appointmentsByTime: { [key: string]: { completed: number; pending: number } } = {};
@@ -386,7 +388,7 @@ export class DoctorsService {
         appointmentsChange: totalToday - yesterdayAppointments,
         patientsChange: 8, // Mock: +8% from last month
         consultationChange: -2, // Mock: -2 min improvement
-        satisfactionChange: 0.2, // Mock: +0.2 points
+        satisfactionChange: satisfactionCount > 1 ? 0.2 : 0, // placeholder change until historical calc added
       },
     };
   }
@@ -473,20 +475,20 @@ export class DoctorsService {
       }
     });
 
-    // Satisfaction trend (mock for now - can be calculated from reviews if available)
-    const satisfactionTrend = [4.0, 4.2, 4.4, 4.5, 4.6, 4.7];
+    const { average: patientSatisfaction, count: satisfactionCount } = await this.reviewsService.getDoctorRating(doctorId);
+    const satisfactionTrend = [patientSatisfaction || 0];
 
     return {
       kpis: {
         totalAppointments: total,
         completionRate: parseFloat(completionRate.toFixed(1)),
-        patientSatisfaction: 4.7, // Mock - can be from reviews
+        patientSatisfaction: patientSatisfaction,
         newPatients: newPatients,
       },
       trends: {
         appointmentsChange: 12, // Mock - calculate from previous period
         completionChange: 2.1,
-        satisfactionChange: 0.2,
+        satisfactionChange: satisfactionCount > 1 ? 0.2 : 0,
         newPatientsChange: 7,
       },
       appointmentTrends: monthlyData,
