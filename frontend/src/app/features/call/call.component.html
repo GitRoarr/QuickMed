@@ -1,0 +1,11 @@
+<div class="call-container">
+  <div class="videos">
+    <video #remoteVideo autoplay playsinline class="remote"></video>
+    <video #localVideo autoplay playsinline muted class="local"></video>
+  </div>
+  <div class="controls">
+    <button (click)="toggleMic()">{{ micOn ? 'Mute' : 'Unmute' }}</button>
+    <button (click)="toggleCam()">{{ camOn ? 'Camera Off' : 'Camera On' }}</button>
+    <button class="hangup" (click)="hangup()">Hang Up</button>
+  </div>
+</div>

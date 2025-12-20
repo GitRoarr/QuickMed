@@ -17,6 +17,8 @@ import { SettingsModule } from './settings/settings.module';
 import { ReviewsModule } from './reviews/reviews.module';
 import { PatientPortalModule } from './patient-portal/patient-portal.module';
 import { SchedulesModule } from './schedules/schedules.module';
+import { ConsultationsModule } from './consultations/consultations.module';
+import { WebRtcModule } from './webrtc/webrtc.module';
 
 @Module({
   imports: [
@@ -28,15 +30,40 @@ import { SchedulesModule } from './schedules/schedules.module';
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        type: "postgres",
-        url: configService.get("DATABASE_URL"),
-        autoLoadEntities: true,
-        synchronize: configService.get("NODE_ENV") !== "production",
-        logging: configService.get("NODE_ENV") === "development",
-        ssl: { rejectUnauthorized: false },
-        extra: { family: 4 },
-      }),
+      useFactory: (configService: ConfigService) => {
+        const databaseUrl = configService.get<string>("DATABASE_URL");
+        const sslEnabled = configService.get<string>("DB_SSL", "false") === "true";
+
+        const sslConfig = sslEnabled ? { rejectUnauthorized: false } : false;
+
+        const commonOptions = {
+          autoLoadEntities: true,
+          synchronize: configService.get("NODE_ENV") !== "production",
+          logging: configService.get("NODE_ENV") === "development",
+        };
+
+        if (databaseUrl) {
+          return {
+            type: "postgres",
+            url: databaseUrl,
+            ssl: sslConfig,
+            extra: { family: 4 },
+            ...commonOptions,
+          };
+        }
+
+        return {
+          type: "postgres",
+          host: configService.get<string>("DB_HOST", "localhost"),
+          port: Number(configService.get<string>("DB_PORT", "5432")),
+          username: configService.get<string>("DB_USER", "postgres"),
+          password: configService.get<string>("DB_PASS", "postgres"),
+          database: configService.get<string>("DB_NAME", "postgres"),
+          ssl: sslConfig,
+          extra: { family: 4 },
+          ...commonOptions,
+        };
+      },
     }),
 
     AuthModule,
@@ -54,6 +81,8 @@ import { SchedulesModule } from './schedules/schedules.module';
     ReviewsModule,
     PatientPortalModule,
     SchedulesModule,
+    ConsultationsModule,
+    WebRtcModule,
   ],
 })
 export class AppModule {}

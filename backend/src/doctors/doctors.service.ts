@@ -246,6 +246,43 @@ export class DoctorsService {
     await this.usersRepository.remove(doctor);
   }
 
+  async getMyPatients(doctorId: string) {
+    const appointments = await this.appointmentsRepository.find({
+      where: { doctorId },
+      relations: ['patient'],
+      order: {
+        appointmentDate: 'DESC',
+        appointmentTime: 'DESC',
+      },
+    });
+
+    const map = new Map<string, any>();
+
+    for (const appt of appointments) {
+      if (!appt.patient) continue;
+      const key = appt.patientId;
+      if (!map.has(key)) {
+        map.set(key, {
+          patientId: appt.patientId,
+          firstName: appt.patient.firstName,
+          lastName: appt.patient.lastName,
+          email: appt.patient.email,
+          phoneNumber: appt.patient.phoneNumber,
+          lastAppointmentDate: appt.appointmentDate,
+          lastAppointmentTime: appt.appointmentTime,
+          lastStatus: appt.status,
+          totalAppointments: 1,
+          isActive: appt.patient.isActive,
+        });
+      } else {
+        const current = map.get(key);
+        current.totalAppointments += 1;
+      }
+    }
+
+    return Array.from(map.values());
+  }
+
   async getDashboardData(doctorId: string) {
     const today = new Date();
     today.setHours(0, 0, 0, 0);

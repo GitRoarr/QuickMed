@@ -9,6 +9,10 @@ export const routes: Routes = [
       import("./features/home/home.component").then((m) => m.HomeComponent),
   },
   {
+    path: 'call/:roomId',
+    loadComponent: () => import('./features/call/call.component').then(m => m.CallComponent),
+  },
+  {
     path: "login",
     loadComponent: () =>
       import("./features/auth/login/login.component").then((m) => m.LoginComponent),
@@ -135,6 +139,13 @@ export const routes: Routes = [
         loadComponent: () =>
           import("./features/doctor/appointments/appointments.component").then(
             (m) => m.AppointmentsComponent
+          ),
+      },
+      {
+        path: "patients",
+        loadComponent: () =>
+          import("./features/doctor/patients/patients.component").then(
+            (m) => m.PatientsComponent
           ),
       },
       {

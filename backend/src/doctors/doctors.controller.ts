@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Param, Delete, Body, UseGuards, Query } from '@nestjs/common';
+  import { Controller, Get, Post, Patch, Param, Delete, Body, UseGuards, Query } from '@nestjs/common';
 import { DoctorsService } from './doctors.service';
 import { CreateDoctorDto } from './dto/create-doctor.dto';
 import { UpdateDoctorDto } from './dto/update-doctor.dto';
@@ -42,6 +42,13 @@ export class DoctorsController {
   @UseGuards(JwtAuthGuard)
   getAnalytics(@CurrentUser() user: User, @Query('period') period: string = '6months') {
     return this.doctorsService.getAnalytics(user.id, period);
+  }
+
+  @Get('patients')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.DOCTOR)
+  getMyPatients(@CurrentUser() user: User) {
+    return this.doctorsService.getMyPatients(user.id);
   }
 
   @Patch(':id/validate-license')

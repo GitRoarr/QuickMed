@@ -63,6 +63,19 @@ export interface DoctorAnalytics {
   satisfactionTrend: number[];
 }
 
+export interface DoctorPatientSummary {
+  patientId: string;
+  firstName: string;
+  lastName: string;
+  email?: string;
+  phoneNumber?: string;
+  lastAppointmentDate?: string;
+  lastAppointmentTime?: string;
+  lastStatus?: string;
+  totalAppointments: number;
+  isActive?: boolean;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -81,5 +94,9 @@ export class DoctorService {
 
   getAnalytics(period: string = '6months'): Observable<DoctorAnalytics> {
     return this.http.get<DoctorAnalytics>(`${this.API_URL}/analytics`, { params: { period } });
+  }
+
+  getMyPatients(): Observable<DoctorPatientSummary[]> {
+    return this.http.get<DoctorPatientSummary[]>(`${this.API_URL}/patients`);
   }
 }

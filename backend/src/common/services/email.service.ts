@@ -13,6 +13,14 @@ export class EmailService {
 
   constructor() {
     (async () => {
+      const emailMode = (process.env.EMAIL_MODE || 'auto').toLowerCase();
+
+      if (['log', 'disable', 'off'].includes(emailMode)) {
+        console.info('[EmailService] Email mode set to log-only; skipping SMTP setup.');
+        this.transporter = null;
+        return;
+      }
+
       // If SMTP is configured, use it
       if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
         try {
@@ -59,7 +67,7 @@ export class EmailService {
       }
 
       // In non-production, create a test account (Ethereal) to preview emails
-      if (process.env.NODE_ENV !== 'production') {
+      if (process.env.NODE_ENV !== 'production' && emailMode === 'auto') {
         try {
           const testAccount = await nodemailer.createTestAccount();
           this.transporter = nodemailer.createTransport({

@@ -1,0 +1,63 @@
+<div class="page">
+  <aside class="sidebar">
+    <div class="logo">QuickMed</div>
+    <nav>
+      <a *ngFor="let item of menuItems" [routerLink]="item.route" routerLinkActive="active">
+        <i class="bi" [ngClass]="item.icon"></i>
+        <span>{{ item.label }}</span>
+      </a>
+    </nav>
+  </aside>
+
+  <main class="content">
+    <header class="page-header">
+      <div>
+        <p class="eyebrow">Care continuity</p>
+        <h1>My Patients</h1>
+        <p class="subtitle">Review your patient list and jump into charts, messages, or calls.</p>
+      </div>
+    </header>
+
+    <div *ngIf="isLoading()" class="skeleton">Loading patients...</div>
+
+    <div *ngIf="!isLoading() && patients().length === 0" class="empty">
+      <i class="bi bi-people"></i>
+      <p>No patients yet. Once appointments are completed, patients will appear here.</p>
+    </div>
+
+    <div class="card-grid" *ngIf="!isLoading() && patients().length > 0">
+      <div class="patient-card" *ngFor="let p of patients()">
+        <div class="header">
+          <div class="avatar">{{ (p.firstName?.[0] || 'P') + (p.lastName?.[0] || '') }}</div>
+          <div>
+            <h3>{{ getFullName(p) }}</h3>
+            <p class="muted">{{ p.email || 'No email' }}</p>
+            <p class="muted">{{ p.phoneNumber || 'No phone' }}</p>
+          </div>
+          <span class="chip" [class.active]="p.isActive">{{ p.isActive ? 'Active' : 'Inactive' }}</span>
+        </div>
+
+        <div class="meta">
+          <div>
+            <p class="label">Last appointment</p>
+            <p class="value">{{ p.lastAppointmentDate | date:'mediumDate' }} {{ p.lastAppointmentTime }}</p>
+          </div>
+          <div>
+            <p class="label">Status</p>
+            <p class="value">{{ p.lastStatus || '—' }}</p>
+          </div>
+          <div>
+            <p class="label">Visits</p>
+            <p class="value">{{ p.totalAppointments }}</p>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="ghost" [routerLink]="['/doctor/records']" [queryParams]="{ patientId: p.patientId }">Records</button>
+          <button class="ghost" [routerLink]="['/doctor/messages']" [queryParams]="{ patientId: p.patientId }">Message</button>
+          <button class="primary" [routerLink]="['/call', p.patientId]">Start Call</button>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>

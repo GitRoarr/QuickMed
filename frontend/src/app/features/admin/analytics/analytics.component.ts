@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { SidebarComponent } from '../shared/sidebar';
 import { HeaderComponent } from '../shared/header';
 import { AdminService } from '../../../core/services/admin.service';
+import { ConsultationsService, ConsultationStats } from '../../../core/services/consultations.service';
 import { AdminThemeService } from '../../../core/services/admin-theme.service';
 
 interface AnalyticsData {
@@ -48,12 +49,13 @@ export class AnalyticsComponent implements OnInit {
 
   analytics = signal<AnalyticsData | null>(null);
   isLoading = signal(false);
+  consultationStats = signal<ConsultationStats | null>(null);
   startDate = signal(new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]);
   endDate = signal(new Date().toISOString().split('T')[0]);
 
   themeService = inject(AdminThemeService);
 
-  constructor(private adminService: AdminService) {}
+  constructor(private adminService: AdminService, private consultationsService: ConsultationsService) {}
 
   ngOnInit() {
     this.loadAnalytics();
@@ -99,6 +101,21 @@ export class AnalyticsComponent implements OnInit {
         this.isLoading.set(false);
       }
     });
+
+    // Load consultation stats in parallel
+    this.consultationsService.getStats(start, end).subscribe({
+      next: (stats) => this.consultationStats.set(stats),
+      error: (err) => {
+        console.warn('Consultation stats unavailable', err);
+        this.consultationStats.set({
+          averageConsultationMinutes: 0,
+          satisfactionRate: 0,
+          reviewsCount: 0,
+          sampleSize: 0,
+          period: { start, end },
+        });
+      }
+    })
   }
 
   onDateRangeChange() {
