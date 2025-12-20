@@ -161,13 +161,6 @@
                 <h3>Video Consultations</h3>
                 <p>Meet doctors online</p>
             </div>
-            <div class="feature-card">
-                <div class="feature-icon">
-                    <i class="bi bi-shield-check"></i>
-                </div>
-                <h3>100% Secure</h3>
-                <p>HIPAA compliant</p>
-            </div>
         </div>
     </div>
 </section>
@@ -292,71 +285,33 @@
             <h2 class="section-title">Loved by patients and doctors</h2>
             <p class="section-subtitle">Don't just take our word for it</p>
         </div>
-        <div class="row g-4">
-            <div class="col-md-4">
+        <div class="row g-4" *ngIf="testimonials().length; else testimonialsFallback">
+            <div class="col-md-4" *ngFor="let testimonial of testimonials(); trackBy: trackTestimonial">
                 <div class="testimonial-card">
                     <div class="stars">
-                        <i class="bi bi-star-fill"></i>
-                        <i class="bi bi-star-fill"></i>
-                        <i class="bi bi-star-fill"></i>
-                        <i class="bi bi-star-fill"></i>
-                        <i class="bi bi-star-fill"></i>
+                        <i
+                          class="bi"
+                          *ngFor="let star of getStarArray(testimonial.rating); let i = index"
+                          [ngClass]="star ? 'bi-star-fill text-warning' : 'bi-star'"
+                          aria-hidden="true"
+                        ></i>
                     </div>
-                    <p class="testimonial-text">"Finally, a healthcare app that doesn't make me want to pull my hair out. I've never booked an appointment this fast in my life!"</p>
+                    <p class="testimonial-text">"{{ testimonial.comment || 'Patients love how easy it is to book and consult with QuickMed.' }}"</p>
                     <div class="testimonial-author">
                         <div class="author-avatar">
                             <i class="bi bi-person-circle"></i>
                         </div>
                         <div>
-                            <div class="author-name">Sarah Johnson</div>
-                            <div class="author-role">Patient</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="testimonial-card">
-                    <div class="stars">
-                        <i class="bi bi-star-fill"></i>
-                        <i class="bi bi-star-fill"></i>
-                        <i class="bi bi-star-fill"></i>
-                        <i class="bi bi-star-fill"></i>
-                        <i class="bi bi-star-fill"></i>
-                    </div>
-                    <p class="testimonial-text">"My patients love it and so do I. The interface is clean, and everything just works. It's changed my practice."</p>
-                    <div class="testimonial-author">
-                        <div class="author-avatar">
-                            <i class="bi bi-person-circle"></i>
-                        </div>
-                        <div>
-                            <div class="author-name">Dr. Michael Chen</div>
-                            <div class="author-role">Cardiologist</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="testimonial-card">
-                    <div class="stars">
-                        <i class="bi bi-star-fill"></i>
-                        <i class="bi bi-star-fill"></i>
-                        <i class="bi bi-star-fill"></i>
-                        <i class="bi bi-star-fill"></i>
-                        <i class="bi bi-star-fill"></i>
-                    </div>
-                    <p class="testimonial-text">"I booked a video consultation at 2 AM when I was sick. Had a prescription within 15 minutes. Life-changing!"</p>
-                    <div class="testimonial-author">
-                        <div class="author-avatar">
-                            <i class="bi bi-person-circle"></i>
-                        </div>
-                        <div>
-                            <div class="author-name">Emily Rodriguez</div>
-                            <div class="author-role">Patient</div>
+                            <div class="author-name">{{ testimonial.patientName || 'Patient' }}</div>
+                            <div class="author-role">{{ testimonial.patientRole || 'Patient' }}</div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+        <ng-template #testimonialsFallback>
+          <div class="text-center text-muted">Testimonials are loading. Check back shortly.</div>
+        </ng-template>
     </div>
 </section>
 

@@ -1,5 +1,5 @@
 import { Controller, Get, Post, Body, Param, UseGuards } from '@nestjs/common';
-import { ReviewsService } from './reviews.service';
+import { FeaturedTestimonial, ReviewsService } from './reviews.service';
 import { CreateReviewDto } from './dto/create-review.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
@@ -29,5 +29,13 @@ export class ReviewsController {
   @Get('summary')
   getPlatformSummary() {
     return this.reviewsService.getPlatformSummary();
+  }
+  
+  @Get('featured')
+  @HttpCode(HttpStatus.OK)
+  async getFeaturedTestimonials(@Query('limit') limit?: string): Promise<FeaturedTestimonial[]> {
+    const parsed = limit ? Number(limit) : undefined;
+    const take = parsed && !Number.isNaN(parsed) ? parsed : undefined;
+    return this.reviewsService.getFeaturedTestimonials(take);
   }
 }

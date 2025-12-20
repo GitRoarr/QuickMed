@@ -6,6 +6,15 @@ import { CreateReviewDto } from './dto/create-review.dto';
 import { User } from '../users/entities/user.entity';
 import { UserRole } from '../common/index';
 
+export interface FeaturedTestimonial {
+  id: string;
+  rating: number;
+  comment: string | null;
+  patientName: string;
+  patientRole: string;
+  createdAt: Date;
+}
+
 @Injectable()
 export class ReviewsService {
   constructor(
@@ -127,5 +136,24 @@ export class ReviewsService {
       count: reviews.length,
       happyPatients: uniquePatients.size,
     };
+  }
+
+  /** Latest testimonials for landing (sanitized) */
+  async getFeaturedTestimonials(limit = 3): Promise<FeaturedTestimonial[]> {
+    const take = limit && limit > 0 ? limit : 3;
+    const reviews = await this.reviewsRepository.find({
+      order: { createdAt: 'DESC' },
+      relations: ['patient'],
+      take,
+    });
+
+    return reviews.map((r) => ({
+      id: r.id,
+      rating: r.rating,
+      comment: r.comment || '',
+      patientName: r.patient ? `${r.patient.firstName} ${r.patient.lastName}`.trim() : 'Patient',
+      patientRole: r.patient?.role ? r.patient.role.toLowerCase() : 'patient',
+      createdAt: r.createdAt,
+    }));
   }
 }

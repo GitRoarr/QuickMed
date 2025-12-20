@@ -3,7 +3,7 @@ import { CommonModule } from "@angular/common"
 import { Router, RouterLink } from "@angular/router"
 import { AuthService } from "@core/services/auth.service"
 import { ThemeService } from "@core/services/theme.service"
-import { LandingMetricsService, PlatformSummary } from "@core/services/landing-metrics.service"
+import { FeaturedTestimonial, LandingMetricsService, PlatformSummary } from "@core/services/landing-metrics.service"
 import { OnInit, signal } from "@angular/core"
 
 @Component({
@@ -18,6 +18,7 @@ export class HomeComponent implements OnInit {
   isDarkMode = this.themeService.isDarkMode
   happyPatients = signal<number | null>(null)
   platformRating = signal<number | null>(null)
+  testimonials = signal<FeaturedTestimonial[]>([])
 
   constructor(
     private authService: AuthService,
@@ -34,6 +35,15 @@ export class HomeComponent implements OnInit {
       },
       error: (err) => {
         console.error('Failed to load platform summary', err);
+      },
+    });
+
+    this.landingMetrics.getFeaturedTestimonials(3).subscribe({
+      next: (testimonials: FeaturedTestimonial[]) => {
+        this.testimonials.set(testimonials || []);
+      },
+      error: (err) => {
+        console.error('Failed to load testimonials', err);
       },
     });
   }
@@ -93,6 +103,14 @@ navbarClasses() {
       "text-dark": !this.isDarkMode(),
       "text-white": this.isDarkMode(),
     };
+  }
+
+  getStarArray(rating: number): number[] {
+    return Array.from({ length: 5 }, (_, idx) => idx < rating ? 1 : 0);
+  }
+
+  trackTestimonial(_index: number, testimonial: FeaturedTestimonial): string {
+    return testimonial.id;
   }
 
 

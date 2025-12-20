@@ -9,16 +9,31 @@ export interface PlatformSummary {
   happyPatients: number;
 }
 
+export interface FeaturedTestimonial {
+  id: string;
+  rating: number;
+  comment: string;
+  patientName: string;
+  patientRole: string;
+  createdAt: string;
+}
+
 @Injectable({
   providedIn: 'root',
 })
 export class LandingMetricsService {
-  private readonly API_URL = `${environment.apiUrl}/reviews/summary`;
+  private readonly baseUrl = `${environment.apiUrl}/reviews`;
 
   constructor(private http: HttpClient) {}
 
   getSummary(): Observable<PlatformSummary> {
-    return this.http.get<PlatformSummary>(this.API_URL);
+    return this.http.get<PlatformSummary>(`${this.baseUrl}/summary`);
+  }
+
+  getFeaturedTestimonials(limit = 3): Observable<FeaturedTestimonial[]> {
+    return this.http.get<FeaturedTestimonial[]>(`${this.baseUrl}/featured`, {
+      params: { limit: limit.toString() },
+    });
   }
 }
 
