@@ -12,6 +12,7 @@ export interface FeaturedTestimonial {
   comment: string | null;
   patientName: string;
   patientRole: string;
+  patientAvatar?: string | null;
   createdAt: Date;
 }
 
@@ -153,6 +154,7 @@ export class ReviewsService {
       comment: r.comment || '',
       patientName: r.patient ? `${r.patient.firstName} ${r.patient.lastName}`.trim() : 'Patient',
       patientRole: r.patient?.role ? r.patient.role.toLowerCase() : 'patient',
+      patientAvatar: r.patient?.avatar || null,
       createdAt: r.createdAt,
     }));
   }

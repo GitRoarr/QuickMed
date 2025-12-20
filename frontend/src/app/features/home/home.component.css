@@ -122,7 +122,33 @@
     border-radius: 20px;
     padding: 2rem;
     box-shadow: 0 24px 60px rgba(0,0,0,0.12);
+    max-height: 90vh;
+    overflow-y: auto;
 }
+
+/* Dark theme styling for review/profile modals */
+/* Force modal to stay light regardless of theme */
+.review-modal { background: #ffffff !important; color: #0f172a !important; }
+.review-modal .review-title { color: #0f172a !important; }
+.review-modal .review-subtitle { color: #4b5563 !important; }
+.review-modal .review-label { color: #0f172a !important; }
+.review-modal .form-control,
+.review-modal textarea,
+.review-modal input[type="text"],
+.review-modal input[type="email"],
+.review-modal input[type="tel"] { background: #ffffff !important; border: 1px solid #e5e7eb !important; color: #0f172a !important; }
+.review-modal .form-control::placeholder,
+.review-modal textarea::placeholder,
+.review-modal input::placeholder { color: #9ca3af !important; }
+.review-modal .form-control:focus,
+.review-modal textarea:focus,
+.review-modal input[type="text"]:focus,
+.review-modal input[type="email"]:focus,
+.review-modal input[type="tel"]:focus { border-color: #10b981 !important; box-shadow: 0 0 0 3px rgba(16,185,129,0.25) !important; }
+.review-modal .profile-avatar-preview { background: #f3f4f6 !important; }
+.review-modal .profile-avatar-preview .initials { color: #0f172a !important; }
+.review-modal .review-error { background: #fef2f2 !important; border-color: #fecdd3 !important; color: #b91c1c !important; }
+.review-modal .btn-close { filter: none !important; }
 
 .profile-modal .review-title { margin-bottom: 0.5rem; }
 .profile-avatar-row { display: flex; align-items: center; gap: 1rem; }
@@ -671,6 +697,7 @@
     font-size: 24px;
     margin-bottom: 1.5rem;
 }
+.benefit-icon img { width: 28px; height: 28px; display: block; object-fit: contain; }
 
 .benefit-card h4 {
     font-size: 1.125rem;
@@ -791,6 +818,13 @@
     justify-content: center;
     color: var(--primary-color);
     font-size: 32px;
+}
+.author-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+    display: block;
 }
 
 .author-name {

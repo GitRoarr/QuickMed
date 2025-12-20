@@ -15,6 +15,7 @@ export interface FeaturedTestimonial {
   comment: string;
   patientName: string;
   patientRole: string;
+  patientAvatar?: string | null;
   createdAt: string;
 }
 
