@@ -29,9 +29,21 @@ export class HomeComponent implements OnInit {
   reviewSubmitting = signal(false)
   reviewError = signal<string | null>(null)
   reviewSuccess = signal(false)
+  reviewSubmitted = signal(false)
   reviewCharLimit = 500
   doctorOptions = signal<{ id: string; name: string }[]>([])
   selectedDoctorId = signal<string | null>(null)
+  editProfileOpen = signal(false)
+  profileSubmitting = signal(false)
+  profileError = signal<string | null>(null)
+  avatarPreview = signal<string | null>(null)
+  profileFirstName = signal('')
+  profileLastName = signal('')
+  profileEmail = signal('')
+  profilePhone = signal('')
+  profileSpecialty = signal('')
+  profileBio = signal('')
+  private selectedAvatarFile: File | null = null
 
   constructor(
     private authService: AuthService,
@@ -46,6 +58,7 @@ export class HomeComponent implements OnInit {
     this.loadSummary()
     this.loadTestimonials()
     this.preloadDoctors()
+    this.syncReviewSubmissionState()
   }
 
   private loadSummary(): void {
@@ -139,6 +152,9 @@ export class HomeComponent implements OnInit {
       this.router.navigate(['/login'], { queryParams: { redirect: '/' } })
       return
     }
+    if (this.reviewSubmitted()) {
+      return
+    }
     this.reviewError.set(null)
     this.reviewSuccess.set(false)
     this.reviewRating.set(0)
@@ -198,6 +214,7 @@ export class HomeComponent implements OnInit {
       })
       .subscribe({
         next: () => {
+          this.markReviewSubmitted()
           this.reviewSubmitting.set(false)
           this.reviewSuccess.set(true)
           this.reviewModalOpen.set(false)
@@ -210,6 +227,118 @@ export class HomeComponent implements OnInit {
           this.reviewSubmitting.set(false)
         },
       })
+  }
+
+  private syncReviewSubmissionState(): void {
+    const user = this.currentUser()
+    if (!user) {
+      this.reviewSubmitted.set(false)
+      return
+    }
+    const stored = localStorage.getItem(`review_submitted_${user.id}`)
+    this.reviewSubmitted.set(stored === 'true')
+  }
+
+  private markReviewSubmitted(): void {
+    const user = this.currentUser()
+    if (!user) return
+    localStorage.setItem(`review_submitted_${user.id}`, 'true')
+    this.reviewSubmitted.set(true)
+  }
+  // Edit profile modal logic
+  openEditProfile(): void {
+    const user = this.currentUser()
+    if (!user) {
+      this.router.navigate(['/login'], { queryParams: { redirect: '/' } })
+      return
+    }
+    this.profileError.set(null)
+    this.profileSubmitting.set(false)
+    this.avatarPreview.set(user.avatar || null)
+    this.selectedAvatarFile = null
+    this.profileFirstName.set(user.firstName || '')
+    this.profileLastName.set(user.lastName || '')
+    this.profileEmail.set(user.email || '')
+    this.profilePhone.set(user.phoneNumber || '')
+    this.profileSpecialty.set(user.specialty || '')
+    this.profileBio.set(user.bio || '')
+    this.editProfileOpen.set(true)
+  }
+
+  closeEditProfile(): void {
+    this.editProfileOpen.set(false)
+  }
+
+  onAvatarSelected(event: Event): void {
+    const input = event.target as HTMLInputElement
+    const file = input.files?.[0] || null
+    this.selectedAvatarFile = file
+    if (file) {
+      const url = URL.createObjectURL(file)
+      this.avatarPreview.set(url)
+    }
+  }
+
+  canSubmitProfile(): boolean {
+    return !this.profileSubmitting()
+      && this.profileFirstName().trim().length > 0
+      && this.profileLastName().trim().length > 0
+  }
+
+  submitProfile(): void {
+    const user = this.currentUser()
+    if (!user) {
+      this.router.navigate(['/login'])
+      return
+    }
+    if (!this.canSubmitProfile()) {
+      this.profileError.set('Please fill in required fields (first and last name).')
+      return
+    }
+    this.profileSubmitting.set(true)
+    this.profileError.set(null)
+
+    const updatePayload: any = {
+      firstName: this.profileFirstName().trim(),
+      lastName: this.profileLastName().trim(),
+      email: this.profileEmail().trim() || undefined,
+      phoneNumber: this.profilePhone().trim() || undefined,
+    }
+    // role-based fields
+    if (user.role === 'doctor') {
+      updatePayload.specialty = this.profileSpecialty().trim() || undefined
+      updatePayload.bio = this.profileBio().trim() || undefined
+    }
+
+    this.userService.update(user.id, updatePayload).subscribe({
+      next: (updatedUser) => {
+        if (this.selectedAvatarFile) {
+          this.userService.updateAvatar(user.id, this.selectedAvatarFile).subscribe({
+            next: (avatarUser) => {
+              this.authService.setUser(avatarUser)
+              this.profileSubmitting.set(false)
+              this.editProfileOpen.set(false)
+            },
+            error: (err) => {
+              console.error('Failed to update avatar', err)
+              const msg = err?.error?.message || 'Failed to upload avatar.'
+              this.profileError.set(msg)
+              this.profileSubmitting.set(false)
+            },
+          })
+        } else {
+          this.authService.setUser(updatedUser)
+          this.profileSubmitting.set(false)
+          this.editProfileOpen.set(false)
+        }
+      },
+      error: (err) => {
+        console.error('Failed to update profile', err)
+        const msg = err?.error?.message || 'Failed to update profile.'
+        this.profileError.set(msg)
+        this.profileSubmitting.set(false)
+      },
+    })
   }
   navigateToProfile(): void {
     const user = this.currentUser()

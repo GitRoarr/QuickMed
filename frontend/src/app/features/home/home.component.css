@@ -124,6 +124,12 @@
     box-shadow: 0 24px 60px rgba(0,0,0,0.12);
 }
 
+.profile-modal .review-title { margin-bottom: 0.5rem; }
+.profile-avatar-row { display: flex; align-items: center; gap: 1rem; }
+.profile-avatar-preview { width: 64px; height: 64px; background: #f3f4f6; display: grid; place-items: center; overflow: hidden; }
+.profile-avatar-preview img { width: 100%; height: 100%; object-fit: cover; }
+.profile-avatar-preview .initials { font-weight: 700; color: #0f172a; }
+
 .review-modal .btn-close {
     position: absolute;
     top: 1rem;

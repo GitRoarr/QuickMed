@@ -55,9 +55,9 @@
               <span class="fw-medium">{{ currentUser()?.firstName }}</span>
 
                             <!-- Hover dropdown -->
-                            <div class="profile-menu">
-                                <button type="button" class="dropdown-item" (click)="navigateToProfile()">Edit Profile</button>
-                                <button type="button" class="dropdown-item text-danger" (click)="logout()">Logout</button>
+                            <div class="profile-menu" (click)="$event.stopPropagation()">
+                                <button type="button" class="dropdown-item" (click)="$event.stopPropagation(); openEditProfile()">Edit Profile</button>
+                                <button type="button" class="dropdown-item text-danger" (click)="$event.stopPropagation(); logout()">Logout</button>
                             </div>
             </div>
           </div>
@@ -314,7 +314,7 @@
           <div class="text-center text-muted">Testimonials are loading. Check back shortly.</div>
         </ng-template>
 
-                <div class="text-center mt-4">
+                <div class="text-center mt-4" *ngIf="!reviewSubmitted()">
                     <button class="btn btn-primary btn-lg review-cta" type="button" (click)="openReviewModal()">
                         <i class="bi bi-pen me-2"></i>
                         Write a Review
@@ -384,6 +384,71 @@
                 <img class="inline-icon ms-2" src="https://img.icons8.com/?size=100&id=26138&format=png&color=ffffff" alt="Next" />
             </button>
             <p class="cta-note">No credit card required. Free forever.</p>
+        </div>
+    </div>
+</section>
+
+<!-- Edit Profile Modal -->
+<section>
+    <div class="review-overlay" *ngIf="editProfileOpen()">
+        <div class="review-modal profile-modal">
+            <button class="btn-close" aria-label="Close" (click)="closeEditProfile()"></button>
+            <h3 class="review-title">Edit Profile</h3>
+            <p class="review-subtitle">Update your information and profile picture</p>
+
+            <div class="review-group">
+                <label class="review-label">Profile Picture</label>
+                <div class="profile-avatar-row">
+                    <div class="profile-avatar-preview rounded-circle">
+                        <img *ngIf="avatarPreview(); else avatarInitials" [src]="avatarPreview()!" alt="Avatar preview" />
+                        <ng-template #avatarInitials>
+                            <div class="initials">{{ getInitials(profileFirstName(), profileLastName()) }}</div>
+                        </ng-template>
+                    </div>
+                    <div>
+                        <input type="file" accept="image/*" (change)="onAvatarSelected($event)" />
+                        <small class="text-muted d-block mt-1">PNG/JPG up to ~2MB</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="review-group">
+                <label class="review-label">First Name</label>
+                <input class="form-control" type="text" [ngModel]="profileFirstName()" (ngModelChange)="profileFirstName.set($event)" />
+            </div>
+
+            <div class="review-group">
+                <label class="review-label">Last Name</label>
+                <input class="form-control" type="text" [ngModel]="profileLastName()" (ngModelChange)="profileLastName.set($event)" />
+            </div>
+
+            <div class="review-group">
+                <label class="review-label">Email</label>
+                <input class="form-control" type="email" [ngModel]="profileEmail()" (ngModelChange)="profileEmail.set($event)" />
+            </div>
+
+            <div class="review-group">
+                <label class="review-label">Phone</label>
+                <input class="form-control" type="tel" [ngModel]="profilePhone()" (ngModelChange)="profilePhone.set($event)" />
+            </div>
+
+            <!-- Doctor-only fields -->
+            <div class="review-group" *ngIf="currentUser()?.role === 'doctor'">
+                <label class="review-label">Specialty</label>
+                <input class="form-control" type="text" [ngModel]="profileSpecialty()" (ngModelChange)="profileSpecialty.set($event)" />
+            </div>
+            <div class="review-group" *ngIf="currentUser()?.role === 'doctor'">
+                <label class="review-label">Bio</label>
+                <textarea class="form-control" rows="4" [ngModel]="profileBio()" (ngModelChange)="profileBio.set($event)"></textarea>
+            </div>
+
+            <div class="review-error" *ngIf="profileError()">{{ profileError() }}</div>
+
+            <div class="d-grid">
+                <button class="btn btn-primary btn-lg" type="button" [disabled]="!canSubmitProfile()" (click)="submitProfile()">
+                    {{ profileSubmitting() ? 'Saving...' : 'Save Changes' }}
+                </button>
+            </div>
         </div>
     </div>
 </section>

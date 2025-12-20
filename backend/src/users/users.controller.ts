@@ -74,6 +74,20 @@ export class UsersController {
     return this.usersService.uploadUserAvatar(id, file);
   }
 
+  @Patch(':id')
+  async updateUser(
+    @Param('id') id: string,
+    @Body() body: Partial<User>,
+    @CurrentUser() user: User,
+  ) {
+    // Only the owner or an admin can update a user
+    if (user.id !== id && user.role !== UserRole.ADMIN) {
+      throw new ForbiddenException('You are not allowed to update this user');
+    }
+
+    return this.usersService.update(id, body);
+  }
+
   @Patch(':id/password')
   async changePassword(
     @Param('id') id: string,
