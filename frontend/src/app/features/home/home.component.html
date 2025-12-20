@@ -13,6 +13,15 @@
 
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav mx-auto">
+                <li class="nav-item back-home-item">
+                    <button type="button" class="btn back-home-btn" (click)="navigateToDashboard()">
+                        <img
+                            class="back-home-icon"
+                            [src]="isDarkMode() ? 'https://img.icons8.com/?size=48&id=23107&format=png&color=ffffff' : 'https://img.icons8.com/?size=48&id=23107&format=png&color=000000'"
+                            alt="Back to home" />
+                        <span>Dashboard</span>
+                    </button>
+                </li>
         <li class="nav-item"><a class="nav-link fw-medium" routerLink="/">Features</a></li>
         <li class="nav-item"><a class="nav-link fw-medium" href="#how-it-works">How It Works</a></li>
         <li class="nav-item"><a class="nav-link fw-medium" href="#testimonials">Testimonials</a></li>
@@ -47,8 +56,8 @@
                 class="rounded-circle" 
                 width="40" height="40" />
               <ng-template #initialsAvatar>
-                <div class="placeholder-avatar rounded-circle text-white fw-bold d-flex align-items-center justify-content-center"
-                     style="width: 40px; height: 40px; background-color: #16a34a; font-size: 16px;">
+                 <div class="placeholder-avatar rounded-circle text-white fw-bold d-flex align-items-center justify-content-center"
+                     style="width: 40px; height: 40px; background-color: var(--primary-color); font-size: 16px;">
                   {{ getInitials(currentUser()?.firstName, currentUser()?.lastName) }}
                 </div>
               </ng-template>
@@ -83,11 +92,11 @@
                         Book appointments in seconds, connect with top doctors instantly, and manage your health journey with a smile. Because healthcare should feel good.
                     </p>
                     <div class="hero-actions">
-                        <button class="btn btn-primary btn-lg px-5" (click)="navigateToDashboard()">
-              Book Your First Appointment
-              <i class="bi bi-arrow-right ms-2"></i>
-            </button>
-                        <a href="#how-it-works" class="btn btn-link text-light">
+                                                <button class="btn btn-primary btn-lg px-5" (click)="navigateToDashboard()">
+                            Book Your First Appointment
+                            <img class="inline-icon ms-2" [src]="isDarkMode() ? 'https://img.icons8.com/?size=100&id=26138&format=png&color=ffffff' : 'https://img.icons8.com/?size=100&id=26138&format=png&color=000000'" alt="Next" />
+                        </button>
+                                                <a href="#how-it-works" class="btn btn-link text-light" *ngIf="!isDarkMode()">
               Watch Demo
               <i class="bi bi-play-circle ms-2"></i>
             </a>
@@ -277,10 +286,10 @@
             </div>
         </div>
         <div class="text-center mt-5">
-            <button class="btn btn-primary btn-lg px-5" (click)="navigateToDashboard()">
-        Start Your Journey
-        <i class="bi bi-arrow-right ms-2"></i>
-      </button>
+                        <button class="btn btn-primary btn-lg px-5" (click)="navigateToDashboard()">
+                Start Your Journey
+                <img class="inline-icon ms-2" [src]="isDarkMode() ? 'https://img.icons8.com/?size=100&id=26138&format=png&color=ffffff' : 'https://img.icons8.com/?size=100&id=26138&format=png&color=000000'" alt="Next" />
+            </button>
         </div>
     </div>
 </section>
@@ -366,10 +375,10 @@
         <div class="cta-content text-center">
             <h2 class="cta-title">Ready to feel better?</h2>
             <p class="cta-subtitle">Join thousands of happy patients who've discovered a better way to manage their health</p>
-            <button class="btn btn-primary btn-lg px-5" (click)="navigateToDashboard()">
-        Get Started for Free
-        <i class="bi bi-arrow-right ms-2"></i>
-      </button>
+                        <button class="btn btn-primary btn-lg px-5" (click)="navigateToDashboard()">
+                Get Started for Free
+                <img class="inline-icon ms-2" [src]="isDarkMode() ? 'https://img.icons8.com/?size=100&id=26138&format=png&color=ffffff' : 'https://img.icons8.com/?size=100&id=26138&format=png&color=000000'" alt="Next" />
+            </button>
             <p class="cta-note">No credit card required. Free forever.</p>
         </div>
     </div>

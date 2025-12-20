@@ -28,7 +28,7 @@
     <div class="card-grid" *ngIf="!isLoading() && patients().length > 0">
       <div class="patient-card" *ngFor="let p of patients()">
         <div class="header">
-          <div class="avatar">{{ (p.firstName?.[0] || 'P') + (p.lastName?.[0] || '') }}</div>
+          <div class="avatar">{{ (p.firstName[0] || 'P') + (p.lastName[0] || '') }}</div>
           <div>
             <h3>{{ getFullName(p) }}</h3>
             <p class="muted">{{ p.email || 'No email' }}</p>

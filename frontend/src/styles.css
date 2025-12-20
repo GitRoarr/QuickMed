@@ -5,21 +5,31 @@
 
 /* Custom design tokens and overrides - These can be overridden by backend theme */
 :root {
-    --primary-color: #10b981;
-    --primary-hover: #059669;
-    --primary-light: #d1fae5;
+    --primary-color: #0FA958;
+    --primary-hover: #0C8A49;
+    --primary-light: #E6F7EF;
     --background-light: #ffffff;
-    --sidebar-bg: #f5f5f5;
-    --background-gray: #f0f0f0;
-    --text-dark: #000000;
-    --text-gray: #4b5563;
+    --sidebar-bg: #f5f7f9;
+    --background-gray: #f3f4f6;
+    --text-dark: #0f172a;
+    --text-gray: #374151;
     --text-muted: #6b7280;
-    --border-color: #e5e5e5;
-    --card-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
-    --status-confirmed: #10b981;
+    --border-color: #e5e7eb;
+    --card-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+    --status-confirmed: #0FA958;
     --status-pending: #f97316;
     --status-completed: #3b82f6;
     --status-cancelled: #ef4444;
+
+    /* surface + accent tokens to keep light/dark palettes aligned */
+    --surface: var(--background-light);
+    --surface-alt: var(--background-gray);
+    --surface-muted: var(--sidebar-bg);
+    --accent-soft: #E6F7EF;
+    --accent-border: #a7f3d0;
+    --heading-color: var(--text-dark);
+    --primary-shadow: 0 10px 30px rgba(22, 163, 74, 0.18);
+    --primary-strong-shadow: 0 20px 60px rgba(22, 163, 74, 0.15);
 }
 
 /* Semantic tokens used across components (HSL triplets for components that call hsl(var(--...))) */
@@ -29,7 +39,7 @@
     --card: 0 0% 100%;                 /* card background */
     --border: 220 12% 93%;             /* light border */
     --muted-foreground: 215 15% 60%;   /* muted text */
-    --primary: 146 71% 41%;            /* green */
+    --primary: 148 84% 36%;            /* Telebirr green */
     --primary-foreground: 0 0% 100%;   /* white for primary text */
     --medical-green: 162 50% 35%;
     --medical-orange: 24 90% 56%;
@@ -38,17 +48,26 @@
 }
 
 .dark-theme {
-    --primary-color: #1db954;
-    --primary-hover: #169c43;
+    --primary-color: #0FA958;
+    --primary-hover: #0C8A49;
     --primary-light: #0f291c;
-    --background-light: #000000;
-    --sidebar-bg: #0a0a0a;
-    --background-gray: #111111;
-    --text-dark: #ffffff;
-    --text-gray: #d1d5db;
-    --text-muted: #9ca3af;
-    --border-color: #333333;
-    --card-shadow: 0 2px 5px rgba(29, 185, 84, 0.2);
+    --background-light: #0b0f12;
+    --sidebar-bg: #0f1319;
+    --background-gray: #111821;
+    --text-dark: #e6f6ec;
+    --text-gray: #cbd5e1;
+    --text-muted: #94a3b8;
+    --border-color: #1f2937;
+    --card-shadow: 0 10px 30px rgba(22, 163, 74, 0.2);
+
+    --surface: #0c0f15;
+    --surface-alt: #0f131b;
+    --surface-muted: #111821;
+    --accent-soft: #0f291c;
+    --accent-border: rgba(22, 163, 74, 0.28);
+    --heading-color: #e6f6ec;
+    --primary-shadow: 0 10px 30px rgba(22, 163, 74, 0.32);
+    --primary-strong-shadow: 0 20px 60px rgba(22, 163, 74, 0.35);
 }
 
 /* Dark semantic tokens (used when body.dark or .dark-theme is set) */
@@ -58,7 +77,7 @@ body.dark, .dark-theme {
     --card: 220 14% 10%;               /* card surface */
     --border: 220 14% 12%;             /* dark border */
     --muted-foreground: 210 10% 60%;
-    --primary: 146 71% 41%;
+    --primary: 148 84% 36%;
     --primary-foreground: 0 0% 100%;
     --medical-green: 162 50% 35%;
     --medical-orange: 24 90% 56%;
@@ -74,7 +93,7 @@ body.dark, .dark-theme {
 
 body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    background-color: var(--background-light);
+    background-color: var(--surface);
     color: var(--text-dark);
 }
 
@@ -191,7 +210,7 @@ body.dark,
     --qm-surface: rgba(10,11,12,0.7);
     --qm-text: #e6f6ec;
     --qm-muted: #98bfa8;
-    --qm-accent: #16a34a;
+    --qm-accent: #0FA958;
 }
 
 body.dark {
@@ -203,7 +222,7 @@ body.dark {
 .bg-dark.navbar,
 body.dark .navbar {
     background: #060606 !important;
-    border-bottom: 1px solid rgba(22,163,74,0.06) !important;
+    border-bottom: 1px solid rgba(15,169,88,0.06) !important;
 }
 
 body.dark .navbar-brand .brand-name,
@@ -224,7 +243,7 @@ body.dark .nav-link:hover,
 /* Theme toggle / avatar */
 body.dark .theme-toggle {
     background: rgba(255,255,255,0.03) !important;
-    box-shadow: 0 0 0 4px rgba(22,163,74,0.06) inset;
+    box-shadow: 0 0 0 4px rgba(15,169,88,0.06) inset;
 }
 
 /* Hero */
@@ -343,6 +362,7 @@ body.dark .navbar .container,
 body.dark .navbar-brand,
 .bg-dark .navbar-brand {
     order: 0;
+    flex: 0 0 auto !important;
 }
 
 /* keep nav centered */
@@ -353,6 +373,7 @@ body.dark .navbar-collapse,
     justify-content: center !important;
     align-items: center !important;
     flex: 1 1 auto !important;
+    min-width: 0 !important;
 }
 
 body.dark .navbar-nav,
@@ -371,6 +392,44 @@ body.dark .navbar .d-flex.align-items-center,
     display: flex !important;
     align-items: center !important;
     gap: 1rem !important;
+}
+
+/* Light + Dark: enforce identical header positioning globally */
+.navbar .container {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 1rem !important;
+}
+
+.navbar .navbar-brand {
+    order: 0;
+    flex: 0 0 auto !important;
+}
+
+.navbar .navbar-collapse {
+    order: 1;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+}
+
+.navbar .navbar-nav {
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 1.25rem !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+
+.navbar .d-flex.align-items-center {
+    order: 2;
+    display: flex !important;
+    align-items: center !important;
+    gap: 1rem !important;
+    flex: 0 0 auto !important;
 }
 
 /* ensure toggler and buttons keep their size & position */

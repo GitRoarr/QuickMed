@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { MessageService, Conversation, Message } from '@core/services/message.service';
 import { MessagesSocketService } from '@core/services/messages-socket.service';
 import { AuthService } from '@core/services/auth.service';
+import { ToastService } from '@core/services/toast.service';
 import { PatientShellComponent } from '../shared/patient-shell/patient-shell.component';
 
 @Component({
@@ -17,6 +18,7 @@ export class PatientMessagesComponent implements OnInit, OnDestroy {
   private readonly messageService = inject(MessageService);
   private readonly socketService = inject(MessagesSocketService);
   private readonly authService = inject(AuthService);
+  private readonly toast = inject(ToastService);
 
   conversations = signal<Conversation[]>([]);
   messages = signal<Message[]>([]);
@@ -61,6 +63,7 @@ export class PatientMessagesComponent implements OnInit, OnDestroy {
       },
       error: () => {
         this.isLoadingConversations.set(false);
+        this.toast.error('Could not load conversations', { title: 'Messages' });
       },
     });
   }
@@ -75,6 +78,9 @@ export class PatientMessagesComponent implements OnInit, OnDestroy {
     this.messageService.getMessages(conversationId).subscribe({
       next: (data) => {
         this.messages.set(data);
+      },
+      error: () => {
+        this.toast.error('Could not load messages', { title: 'Messages' });
       },
     });
   }
@@ -98,6 +104,10 @@ export class PatientMessagesComponent implements OnInit, OnDestroy {
             content,
           });
           this.loadConversations(false);
+          this.toast.success('Message sent', { position: 'bottom-right' });
+        },
+        error: () => {
+          this.toast.error('Delivery failed', { title: 'Try again', duration: 0, position: 'bottom-right' });
         },
       });
   }

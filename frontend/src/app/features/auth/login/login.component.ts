@@ -1,14 +1,14 @@
-import { Component, OnInit, ViewChild } from "@angular/core";
+import { Component, OnInit } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from "@angular/forms";
 import { Router, RouterLink } from "@angular/router";
 import { AuthService } from "@core/services/auth.service";
-import { AlertMessageComponent } from '@app/shared/components/alert-message/alert-message.component';
+import { ToastService } from "@core/services/toast.service";
 
 @Component({
   selector: "app-login",
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, AlertMessageComponent],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink],
   templateUrl: "./login.component.html",
   styleUrls: ["./login.component.css"],
 })
@@ -17,12 +17,12 @@ export class LoginComponent implements OnInit {
   errorMessage = "";
   isLoading = false;
   showPassword = false;
-  @ViewChild('alert') alertRef?: AlertMessageComponent;
 
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private toast: ToastService,
   ) {
     this.loginForm = this.fb.group({
       email: ["", [Validators.required, Validators.email]],
@@ -43,6 +43,10 @@ export class LoginComponent implements OnInit {
         this.isLoading = false;
         const user = response.user;
 
+        this.toast.success(`Welcome back, ${user.firstName || 'there'}!`, {
+          title: 'Signed in',
+        });
+
         switch (user.role) {
           case "patient":
             this.router.navigate(["/patient/dashboard"]);
@@ -61,13 +65,7 @@ export class LoginComponent implements OnInit {
         this.isLoading = false;
         const msg = error.error?.message || "Invalid email or password";
         this.errorMessage = msg;
-        setTimeout(() => {
-          if (this.alertRef) {
-            this.alertRef.message = msg;
-            this.alertRef.type = 'error';
-            this.alertRef.show();
-          }
-        }, 0);
+        this.toast.error(msg, { title: 'Login failed' });
       },
     });
   }

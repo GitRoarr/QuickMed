@@ -22,7 +22,6 @@
             </div>
 
             <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
-                <app-alert-message #alert [message]="errorMessage" type="error" [autoDismiss]="true" [duration]="5000" *ngIf="errorMessage"></app-alert-message>
 
                 <div class="row">
                     <div class="col-md-6">

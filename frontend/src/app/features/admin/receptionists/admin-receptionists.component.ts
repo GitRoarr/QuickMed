@@ -119,6 +119,6 @@ export class AdminReceptionistsComponent implements OnInit {
   }
 
   getInitials(user: User) {
-    return `${user.firstName?.[0] ?? ""}${user.lastName?.[0] ?? ""}`.toUpperCase()
+    return `${(user.firstName[0] || "")}${(user.lastName[0] || "")}`.toUpperCase()
   }
 }

@@ -9,6 +9,6 @@
 .alert .alert-icon { font-size: 1.25rem }
 .alert .alert-text { flex:1; color:#0f172a }
 .alert .alert-close { background:transparent; border:none; cursor:pointer; color:#334155 }
-.success { background: #ecfdf5; border: 1px solid #bbf7d0 }
+.success { background: var(--primary-light); border: 1px solid var(--accent-border) }
 .error { background: #fff1f2; border: 1px solid #fecaca }
 .info { background: #eff6ff; border: 1px solid #bfdbfe }

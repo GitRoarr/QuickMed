@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { AuthService } from '@core/services/auth.service';
 import { MessageService, Conversation, Message } from '@core/services/message.service';
 import { AppointmentService } from '@core/services/appointment.service';
+import { ToastService } from '@core/services/toast.service';
 
 interface MenuItem {
   label: string;
@@ -25,6 +26,7 @@ export class MessagesComponent implements OnInit {
   private router = inject(Router);
   private messageService = inject(MessageService);
   private appointmentService = inject(AppointmentService);
+  private toast = inject(ToastService);
 
   conversations = signal<Conversation[]>([]);
   selectedConversation = signal<Conversation | null>(null);
@@ -83,6 +85,7 @@ export class MessagesComponent implements OnInit {
       },
       error: () => {
         this.isLoading.set(false);
+        this.toast.error('Could not load conversations', { title: 'Messages' });
       }
     });
   }
@@ -113,7 +116,7 @@ export class MessagesComponent implements OnInit {
         this.loadConversations();
       },
       error: () => {
-        // Handle error
+        this.toast.error('Could not load messages', { title: 'Messages' });
       }
     });
   }
@@ -127,9 +130,10 @@ export class MessagesComponent implements OnInit {
         this.messageContent.set('');
         this.loadMessages(this.selectedConversation()!.id);
         this.loadConversations();
+        this.toast.success('Message sent', { position: 'bottom-right' });
       },
       error: () => {
-        alert('Failed to send message');
+        this.toast.error('Delivery failed', { title: 'Try again', duration: 0, position: 'bottom-right' });
       }
     });
   }

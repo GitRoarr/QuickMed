@@ -162,6 +162,6 @@ export class AdminDoctorsComponent implements OnInit {
   }
 
   getInitials(doc: DoctorOverviewCard) {
-    return `${doc.firstName?.[0] ?? ""}${doc.lastName?.[0] ?? ""}`.toUpperCase()
+    return `${(doc.firstName[0] || "")}${(doc.lastName[0] || "")}`.toUpperCase()
   }
 }
