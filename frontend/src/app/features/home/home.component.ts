@@ -40,7 +40,14 @@ export class HomeComponent implements OnInit {
 
     this.landingMetrics.getFeaturedTestimonials(3).subscribe({
       next: (testimonials: FeaturedTestimonial[]) => {
-        this.testimonials.set(testimonials || []);
+        const normalized = (testimonials || [])
+          .map((t) => ({
+            ...t,
+            comment: (t.comment || '').trim(),
+          }))
+          .filter((t) => t.comment.length > 0);
+
+        this.testimonials.set(normalized);
       },
       error: (err) => {
         console.error('Failed to load testimonials', err);
