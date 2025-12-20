@@ -85,6 +85,62 @@ body.dark, .dark-theme {
     --destructive-foreground: 0 0% 100%;
 }
 
+/* Map Bootstrap "success" palette to our primary color for consistency */
+:root {
+    --bs-success: var(--primary-color);
+    --bs-success-rgb: 15, 169, 88; /* match #0FA958 */
+    --bs-success-bg-subtle: var(--primary-light);
+    --bs-success-border-subtle: var(--accent-border);
+    --bs-success-text-emphasis: var(--primary-hover);
+}
+
+.dark-theme, body.dark {
+    --bs-success: var(--primary-color);
+    --bs-success-rgb: 15, 169, 88;
+    --bs-success-bg-subtle: var(--accent-soft);
+    --bs-success-border-subtle: var(--accent-border);
+    --bs-success-text-emphasis: #d6ffe8;
+}
+
+/* Ensure buttons, text, and backgrounds use primary color when success is referenced */
+.btn-success {
+    background-color: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+    color: #ffffff !important;
+}
+
+.btn-success:hover,
+.btn-success:focus {
+    background-color: var(--primary-hover) !important;
+    border-color: var(--primary-hover) !important;
+    color: #ffffff !important;
+}
+
+.btn-outline-success {
+    border-color: var(--primary-color) !important;
+    color: var(--primary-color) !important;
+}
+
+.btn-outline-success:hover,
+.btn-outline-success:focus {
+    background-color: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+    color: #ffffff !important;
+}
+
+.text-success,
+.link-success {
+    color: var(--primary-color) !important;
+}
+
+.bg-success {
+    background-color: var(--primary-color) !important;
+}
+
+.border-success {
+    border-color: var(--primary-color) !important;
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -338,10 +394,13 @@ body.dark .navbar .theme-toggle {
     z-index: 1500 !important;
 }
 
-/* small tweak for boxed layouts */
+/* small tweak for boxed layouts (keep both themes aligned) */
 @media (min-width: 992px) {
-    body.dark .navbar .container {
+    body.dark .navbar .container,
+    .navbar .container {
         max-width: 1200px;
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
     }
 }
 
