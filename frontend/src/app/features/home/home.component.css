@@ -152,9 +152,10 @@
 
 .profile-modal .review-title { margin-bottom: 0.5rem; }
 .profile-avatar-row { display: flex; align-items: center; gap: 1rem; }
-.profile-avatar-preview { width: 64px; height: 64px; background: #f3f4f6; display: grid; place-items: center; overflow: hidden; }
-.profile-avatar-preview img { width: 100%; height: 100%; object-fit: cover; }
+.profile-avatar-preview { width: 64px; height: 64px; background: #f3f4f6; display: grid; place-items: center; overflow: visible; cursor: pointer; position: relative; border-radius: 50%; }
+.profile-avatar-preview img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
 .profile-avatar-preview .initials { font-weight: 700; color: #0f172a; }
+.avatar-add-badge { position: absolute; bottom: -4px; right: -4px; width: 24px; height: 24px; border-radius: 50%; background: var(--primary-color); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 14px; border: 2px solid #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.15); z-index: 1; }
 
 .review-modal .btn-close {
     position: absolute;
@@ -432,6 +433,7 @@
     font-size: 24px;
     color: var(--primary-color);
 }
+.logo-icon img { width: 36px; height: 36px; display: block; border-radius: 8px; }
 
 .brand-name {
     font-size: 1.5rem;
@@ -534,6 +536,13 @@
     justify-content: center;
     color: var(--primary-color);
     font-size: 24px;
+}
+
+.stat-icon img {
+    width: 24px;
+    height: 24px;
+    display: block;
+    object-fit: contain;
 }
 
 .stat-number {

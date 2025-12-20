@@ -112,7 +112,7 @@
                         <div class="stat-divider"></div>
                         <div class="stat-item">
                             <div class="stat-icon">
-                                <i class="bi bi-star-fill"></i>
+                                                                <img src="https://img.icons8.com/?size=100&id=8ggStxqyboK5&format=png&color=0FA958" alt="Rating icon" />
                             </div>
                             <div>
                                 <div class="stat-number">
@@ -351,15 +351,15 @@
             <div class="review-group">
                 <label class="review-label">Profile Picture</label>
                 <div class="profile-avatar-row">
-                    <div class="profile-avatar-preview rounded-circle">
+                    <div class="profile-avatar-preview rounded-circle" role="button" aria-label="Upload profile picture" (click)="avatarInput.click()">
                         <img *ngIf="avatarPreview(); else avatarInitials" [src]="avatarPreview()!" alt="Avatar preview" />
                         <ng-template #avatarInitials>
                             <div class="initials">{{ getInitials(profileFirstName(), profileLastName()) }}</div>
                         </ng-template>
+                        <span class="avatar-add-badge" aria-hidden="true"><i class="bi bi-plus-lg"></i></span>
                     </div>
                     <div>
-                        <input type="file" accept="image/*" (change)="onAvatarSelected($event)" />
-                        <small class="text-muted d-block mt-1">PNG/JPG up to ~2MB</small>
+                        <input #avatarInput class="visually-hidden" type="file" accept="image/*" (change)="onAvatarSelected($event)" />
                     </div>
                 </div>
             </div>
@@ -413,7 +413,7 @@
                 <div class="footer-brand">
                     <div class="d-flex align-items-center mb-3">
                         <div class="logo-icon me-2">
-                            <i class="bi bi-plus-circle-fill"></i>
+                            <img src="assets/images/QuickMed-Logo.png" alt="QuickMed logo" />
                         </div>
                         <span class="brand-name">QuickMed</span>
                     </div>
@@ -466,11 +466,11 @@
                 <ul class="footer-contact">
                     <li>
                         <i class="bi bi-envelope me-2"></i>
-                        <a href="mailto:hello@quickmed.com">hello&#64;quickmed.com</a>
+                        <a href="mailto:girmaenkuchille@example.com">girmaenkuchille@gmail.com</a>
                     </li>
                     <li>
                         <i class="bi bi-telephone me-2"></i>
-                        <span>1-800-QUICKMED</span>
+                        <span>+251920189715</span>
                     </li>
                 </ul>
             </div>
