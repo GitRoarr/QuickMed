@@ -31,12 +31,10 @@ export class PaymentService {
 
   constructor(private http: HttpClient) {}
 
-  // Stripe Checkout
   createStripeCheckout(data: { appointmentId: string; email?: string; amount?: number }): Observable<InitializePaymentResponse> {
     return this.http.post<InitializePaymentResponse>(`${this.apiUrl}/stripe/checkout`, data);
   }
 
-  // Stripe Payment Intent (optional future flow)
   createStripePaymentIntent(data: { appointmentId: string; email?: string; amount?: number }): Observable<{ clientSecret: string; paymentIntentId: string }> {
     return this.http.post<{ clientSecret: string; paymentIntentId: string }>(`${this.apiUrl}/stripe/create-intent`, data);
   }
@@ -51,5 +49,10 @@ export class PaymentService {
 
   getStripeTransaction(transactionId: string): Observable<PaymentDetails | null> {
     return this.http.get<PaymentDetails | null>(`${this.apiUrl}/stripe/transaction/${transactionId}`);
+  }
+
+  // Cash Payment
+  createCashPayment(data: { appointmentId: string; amount?: number; currency?: string; note?: string }): Observable<PaymentDetails> {
+    return this.http.post<PaymentDetails>(`${this.apiUrl}/cash`, data);
   }
 }

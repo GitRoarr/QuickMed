@@ -4,9 +4,9 @@
     [class]="'pay-btn pay-btn-' + variant + ' pay-btn-' + size"
     (click)="handlePayment()"
     [disabled]="processing()">
-    <i *ngIf="!processing()" class="bi bi-credit-card"></i>
+    <i *ngIf="!processing()" class="bi" [ngClass]="method === 'cash' ? 'bi-cash' : 'bi-credit-card'"></i>
     <i *ngIf="processing()" class="bi bi-hourglass-split spinning"></i>
-    <span *ngIf="!processing()">Pay Now</span>
+    <span *ngIf="!processing()">{{ method === 'cash' ? 'Mark Cash Paid' : 'Pay Now' }}</span>
     <span *ngIf="processing()">Processing...</span>
   </button>
 

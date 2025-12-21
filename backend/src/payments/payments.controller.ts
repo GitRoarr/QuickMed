@@ -19,11 +19,14 @@ import { User } from '@/users/entities/user.entity';
 
 import { StripeService } from './stripe.service';
 import { CreateStripePaymentDto, ConfirmStripePaymentDto } from './dto/create-stripe-payment.dto';
+import { CashPaymentDto } from './dto/cash-payment.dto';
+import { CashService } from './cash.service';
 
 @Controller('payments')
 export class PaymentsController {
   constructor(
     private readonly stripeService: StripeService,
+    private readonly cashService: CashService,
   ) {}
 
   // Stripe Payment Endpoints
@@ -86,5 +89,23 @@ export class PaymentsController {
   @UseGuards(JwtAuthGuard)
   async getStripeTransaction(@Param('transactionId') transactionId: string) {
     return this.stripeService.getPaymentByTransactionId(transactionId);
+  }
+
+  // Cash Payment Endpoint
+  @Post('cash')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.RECEPTIONIST, UserRole.ADMIN, UserRole.PATIENT)
+  @HttpCode(HttpStatus.OK)
+  async recordCashPayment(
+    @Body() dto: CashPaymentDto,
+    @CurrentUser() user: User,
+  ) {
+    return this.cashService.recordCashPayment(
+      dto.appointmentId,
+      user.id,
+      dto.amount,
+      dto.currency,
+      dto.note,
+    );
   }
 }

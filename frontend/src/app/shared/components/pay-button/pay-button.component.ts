@@ -16,6 +16,7 @@ export class PayButtonComponent {
   @Input() paymentStatus: string = '';
   @Input() size: 'small' | 'medium' | 'large' = 'medium';
   @Input() variant: 'primary' | 'outline' = 'primary';
+  @Input() method: 'stripe' | 'cash' = 'stripe';
 
   private paymentService = inject(PaymentService);
   private authService = inject(AuthService);
@@ -39,25 +40,43 @@ export class PayButtonComponent {
     this.error.set('');
 
     const user = this.authService.currentUser();
-    const paymentData = {
-      appointmentId: this.appointmentId,
-      email: user?.email,
-    };
-
-    this.paymentService.createStripeCheckout(paymentData).subscribe({
-      next: (response) => {
-        if (response.checkoutUrl) {
-          window.location.href = response.checkoutUrl;
-        } else {
-          this.error.set('Failed to get Stripe checkout URL');
+    if (this.method === 'cash') {
+      const cashData = {
+        appointmentId: this.appointmentId,
+        amount: 50,
+        currency: 'USD',
+        note: 'Cash payment recorded via receptionist UI'
+      };
+      this.paymentService.createCashPayment(cashData).subscribe({
+        next: () => {
+          this.paymentStatus = 'paid';
+          this.processing.set(false);
+        },
+        error: (err) => {
+          this.error.set(err.error?.message || 'Failed to record cash payment');
           this.processing.set(false);
         }
-      },
-      error: (err) => {
-        this.error.set(err.error?.message || 'Failed to start payment');
-        this.processing.set(false);
-      }
-    });
+      });
+    } else {
+      const paymentData = {
+        appointmentId: this.appointmentId,
+        email: user?.email,
+      };
+      this.paymentService.createStripeCheckout(paymentData).subscribe({
+        next: (response) => {
+          if (response.checkoutUrl) {
+            window.location.href = response.checkoutUrl;
+          } else {
+            this.error.set('Failed to get Stripe checkout URL');
+            this.processing.set(false);
+          }
+        },
+        error: (err) => {
+          this.error.set(err.error?.message || 'Failed to start payment');
+          this.processing.set(false);
+        }
+      });
+    }
   }
 
   goToPayment() {
