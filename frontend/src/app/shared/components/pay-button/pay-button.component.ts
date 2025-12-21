@@ -42,22 +42,19 @@ export class PayButtonComponent {
     const paymentData = {
       appointmentId: this.appointmentId,
       email: user?.email,
-      phoneNumber: user?.phoneNumber,
-      firstName: user?.firstName,
-      lastName: user?.lastName,
     };
 
-    this.paymentService.initializePayment(paymentData).subscribe({
+    this.paymentService.createStripeCheckout(paymentData).subscribe({
       next: (response) => {
         if (response.checkoutUrl) {
           window.location.href = response.checkoutUrl;
         } else {
-          this.error.set('Failed to get payment URL');
+          this.error.set('Failed to get Stripe checkout URL');
           this.processing.set(false);
         }
       },
       error: (err) => {
-        this.error.set(err.error?.message || 'Failed to initialize payment');
+        this.error.set(err.error?.message || 'Failed to start payment');
         this.processing.set(false);
       }
     });

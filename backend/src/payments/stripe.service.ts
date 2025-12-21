@@ -18,7 +18,6 @@ export class StripeService {
     private appointmentsRepository: Repository<Appointment>,
     private appointmentsService: AppointmentsService,
   ) {
-    // Initialize Stripe with secret key from environment. Do NOT hard-code secrets here.
     const stripeKey = process.env.STRIPE_SECRET_KEY;
     if (!stripeKey) {
       this.logger.warn(
@@ -41,26 +40,21 @@ export class StripeService {
     if (!this.stripe) {
       throw new BadRequestException('Stripe is not configured on the server.');
     }
-    // Get appointment to determine amount if not provided
     const appointment = await this.appointmentsService.findOne(appointmentId);
     if (!appointment) {
       throw new NotFoundException('Appointment not found');
     }
 
-    // Use provided amount or default to 50 USD if not provided
-    // In production, you might want to get this from appointment type or doctor's fee
     const paymentAmount = amount || 50;
     if (paymentAmount <= 0) {
       throw new BadRequestException('Invalid payment amount');
     }
 
-    // Convert to cents (Stripe uses smallest currency unit)
     const amountInCents = Math.round(paymentAmount * 100);
 
-    // Create Payment Intent
     const paymentIntent = await this.stripe.paymentIntents.create({
       amount: amountInCents,
-      currency: 'usd', // Change to 'etb' if Stripe supports ETB, otherwise use USD
+      currency: 'usd', 
       metadata: {
         appointmentId,
         patientId,
@@ -71,7 +65,6 @@ export class StripeService {
       },
     });
 
-    // Create payment record in database
     const payment = this.paymentRepository.create({
       transactionId: paymentIntent.id,
       appointmentId,
@@ -96,10 +89,8 @@ export class StripeService {
     if (!this.stripe) {
       throw new BadRequestException('Stripe is not configured on the server.');
     }
-    // Retrieve payment intent from Stripe
     const paymentIntent = await this.stripe.paymentIntents.retrieve(paymentIntentId);
 
-    // Find payment in database
     const payment = await this.paymentRepository.findOne({
       where: { stripePaymentIntentId: paymentIntentId },
     });
@@ -108,13 +99,11 @@ export class StripeService {
       throw new NotFoundException('Payment not found');
     }
 
-    // Update payment status based on Stripe status
     if (paymentIntent.status === 'succeeded') {
       payment.status = PaymentStatus.SUCCESS;
       payment.paidAt = new Date();
       payment.stripeResponse = paymentIntent as any;
 
-      // Update appointment payment status directly via repository
       await this.appointmentsRepository.update(payment.appointmentId, {
         paymentStatus: 'paid',
       });
@@ -186,5 +175,12 @@ export class StripeService {
     }
 
     return payment;
+  }
+
+  async getPaymentByTransactionId(txId: string): Promise<Payment | null> {
+    return this.paymentRepository.findOne({
+      where: [{ transactionId: txId }, { stripePaymentIntentId: txId }],
+      relations: ['appointment', 'patient'],
+    });
   }
 }

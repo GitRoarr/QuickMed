@@ -22,29 +22,25 @@ export class PaymentSuccessComponent implements OnInit {
 
   ngOnInit() {
     this.route.queryParams.subscribe(params => {
-      const txRef = params['tx_ref'];
-      if (txRef) {
-        this.transactionId.set(txRef);
-        this.verifyPayment(txRef);
+      const sessionId = params['session_id'] || params['transactionId'];
+      if (sessionId) {
+        this.transactionId.set(sessionId);
+        this.loadPayment(sessionId);
       } else {
         this.loading.set(false);
       }
     });
   }
 
-  verifyPayment(transactionId: string) {
-    this.paymentService.verifyPaymentGet(transactionId).subscribe({
-      next: (response) => {
-        if (response.success) {
-          this.payment.set(response.payment);
-          this.verified.set(true);
-        } else {
-          this.verified.set(false);
-        }
+  loadPayment(transactionId: string) {
+    this.paymentService.getStripeTransaction(transactionId).subscribe({
+      next: (payment) => {
+        this.payment.set(payment);
+        this.verified.set(!!payment && payment.status === 'success');
         this.loading.set(false);
       },
       error: (err) => {
-        console.error('Payment verification error:', err);
+        console.error('Payment lookup error:', err);
         this.loading.set(false);
       }
     });

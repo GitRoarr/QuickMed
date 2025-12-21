@@ -11,7 +11,6 @@ export enum PaymentStatus {
 }
 
 export enum PaymentMethod {
-  CHAPA = 'chapa',
   STRIPE = 'stripe',
   CASH = 'cash',
   CARD = 'card',
@@ -20,10 +19,7 @@ export enum PaymentMethod {
 @Entity('payments')
 export class Payment extends BaseEntity {
   @Column({ type: 'varchar', length: 255, unique: true })
-  transactionId: string; // Chapa transaction reference
-
-  @Column({ type: 'varchar', length: 255, nullable: true })
-  chapaReference: string; // Chapa's tx_ref
+  transactionId: string; // Payment reference (intent or checkout session)
 
   @Column({ type: 'varchar', length: 255, nullable: true })
   stripePaymentIntentId: string; // Stripe Payment Intent ID
@@ -55,7 +51,7 @@ export class Payment extends BaseEntity {
   @Column({
     type: 'enum',
     enum: PaymentMethod,
-    default: PaymentMethod.CHAPA,
+    default: PaymentMethod.STRIPE,
   })
   method: PaymentMethod;
 
@@ -64,9 +60,6 @@ export class Payment extends BaseEntity {
 
   @Column({ type: 'text', nullable: true })
   description: string;
-
-  @Column({ type: 'json', nullable: true })
-  chapaResponse: any; // Store Chapa's full response
 
   @Column({ type: 'json', nullable: true })
   stripeResponse: any; // Store Stripe's full response

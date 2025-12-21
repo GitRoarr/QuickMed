@@ -26,7 +26,7 @@ interface MenuItem {
 })
 export class ScheduleComponent implements OnInit {
   appointments = signal<Appointment[]>([]);
-  slots = signal<any[]>([]);
+  slots = signal<DoctorSlot[]>([]);
   isLoading = signal(true);
   selectedDate = signal(new Date());
   currentMonth = signal(new Date());
@@ -46,14 +46,14 @@ export class ScheduleComponent implements OnInit {
   rangeStart = signal('08:00');
   rangeEnd = signal('09:00');
 
-  getTimeSlots(): string[] {
-    return (this.slots() || [])
-      .map((s: any) => {
-        if (s.startTime && s.endTime) return `${s.startTime} - ${s.endTime}`;
-        return s.time ? `${s.time}` : '';
-      })
-      .filter((t: string) => !!t)
-      .sort();
+  getSlots(): DoctorSlot[] {
+    return [...(this.slots() || [])]
+      .map((s) => ({
+        ...s,
+        startTime: s.startTime || s.time || '',
+        endTime: s.endTime || s.startTime || s.time || '',
+      }))
+      .sort((a, b) => (a.startTime || '').localeCompare(b.startTime || ''));
   }
 
   ngOnInit(): void {
@@ -84,33 +84,34 @@ export class ScheduleComponent implements OnInit {
   loadSlots(): void {
     const dateStr = this.selectedDate().toISOString().split('T')[0];
     this.scheduleService.getDaySchedule(dateStr).subscribe({
-      next: (res: any[]) => this.slots.set(res),
+      next: (res: DoctorSlot[]) => this.slots.set(res || []),
       error: () => this.slots.set([])
     });
   }
 
-  setAvailable(timeRange: string): void {
+  setAvailableSlot(slot: DoctorSlot): void {
     const dateStr = this.selectedDate().toISOString().split('T')[0];
-    const [startTime, endTime] = timeRange.split(' - ');
+    const startTime = slot.startTime || slot.time!;
+    const endTime = slot.endTime || startTime;
     this.scheduleService.setAvailable(dateStr, startTime, endTime).subscribe(() => this.loadSlots());
   }
 
-  blockSlot(timeRange: string): void {
+  blockSlot(slot: DoctorSlot): void {
     const dateStr = this.selectedDate().toISOString().split('T')[0];
-    const [startTime, endTime] = timeRange.split(' - ');
+    const startTime = slot.startTime || slot.time!;
+    const endTime = slot.endTime || startTime;
     this.scheduleService.blockSlot(dateStr, startTime, endTime).subscribe(() => this.loadSlots());
   }
 
-  getSlotStatus(timeRange: string): string {
-    const [startTime, endTime] = timeRange.split(' - ');
-    const found = this.slots().find(s => (s.startTime === startTime && s.endTime === endTime) || s.time === startTime);
-    return found ? found.status : 'available';
+  getSlotStatus(slot: DoctorSlot): string {
+    return slot?.status || 'available';
   }
 
-  getAppointmentForSlot(slot: string): Appointment | null {
+  getAppointmentForSlot(slot: DoctorSlot): Appointment | null {
     const dateStr = this.selectedDate().toISOString().split('T')[0];
+    const startTime = slot.startTime || slot.time || '';
     return this.appointments().find(
-      apt => apt.appointmentDate === dateStr && apt.appointmentTime.startsWith(slot)
+      apt => apt.appointmentDate === dateStr && apt.appointmentTime.startsWith(startTime)
     ) || null;
   }
 

@@ -1,7 +1,7 @@
 import { Component, OnInit, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { PaymentService, InitializePaymentRequest } from '@app/core/services/payment.service';
+import { PaymentService } from '@app/core/services/payment.service';
 import { AppointmentService } from '@app/core/services/appointment.service';
 import { AuthService } from '@app/core/services/auth.service';
 
@@ -71,26 +71,23 @@ export class PaymentComponent implements OnInit {
     this.error.set('');
 
     const user = this.authService.currentUser();
-    const paymentData: InitializePaymentRequest = {
+    const paymentData = {
       appointmentId: this.appointmentId(),
       email: user?.email,
-      phoneNumber: user?.phoneNumber,
-      firstName: user?.firstName,
-      lastName: user?.lastName,
+      amount: 50,
     };
 
-    this.paymentService.initializePayment(paymentData).subscribe({
+    this.paymentService.createStripeCheckout(paymentData).subscribe({
       next: (response) => {
         if (response.checkoutUrl) {
-          // Redirect to Chapa checkout
           window.location.href = response.checkoutUrl;
         } else {
-          this.error.set('Failed to get payment URL');
+          this.error.set('Failed to get Stripe checkout URL');
           this.processing.set(false);
         }
       },
       error: (err) => {
-        this.error.set(err.error?.message || 'Failed to initialize payment');
+        this.error.set(err.error?.message || 'Failed to start Stripe checkout');
         this.processing.set(false);
       }
     });

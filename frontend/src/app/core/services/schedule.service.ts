@@ -9,6 +9,7 @@ export interface DoctorSlot {
   time?: string; // legacy fallback
   status: 'available' | 'booked' | 'blocked';
   appointmentId?: string;
+  blockedReason?: string | null;
 }
 
 export interface DayScheduleResponse {
