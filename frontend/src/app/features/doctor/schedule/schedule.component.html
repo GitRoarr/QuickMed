@@ -237,7 +237,10 @@
 
       <ng-template #emptyState>
         <div class="empty">
-          <p>No slots yet for this day. Adjust working hours or click Save to generate slots.</p>
+          <p *ngIf="noVisibleButHasSlots(); else noSlots">All slots for this day are either blocked or in the past. Adjust hours or generate new slots.</p>
+          <ng-template #noSlots>
+            <p>No slots yet for this day. Adjust working hours or click Save to generate slots.</p>
+          </ng-template>
           <button class="primary" (click)="saveAvailability()">Generate slots</button>
         </div>
       </ng-template>

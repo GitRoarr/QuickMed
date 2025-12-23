@@ -78,7 +78,10 @@ export class ScheduleComponent implements OnInit {
 
   daySlots = computed(() => this.buildDaySlots(this.selectedDate()));
   hasBlockedSlots = computed(() => (this.daySlots() || []).some(s => (s.status || 'available') === 'blocked'));
-  visibleDaySlots = computed(() => (this.daySlots() || []).filter(s => (s.status || 'available') !== 'blocked'));
+  visibleDaySlots = computed(() => (this.daySlots() || [])
+    .filter((s) => (s.status || 'available') !== 'blocked')
+    .filter((s) => !this.isPastSlot(s)));
+  noVisibleButHasSlots = computed(() => !this.visibleDaySlots().length && !!(this.daySlots() || []).length);
   nextAppointment = computed(() => this.getNextAppointment());
 
   getSlots(): DoctorSlot[] {
