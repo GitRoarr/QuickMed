@@ -4,6 +4,11 @@
   background: #f7f9fb;
 }
 
+.doctor-schedule.dark {
+  background: #0b1423;
+  color: #e2e8f0;
+}
+
 /* Sidebar - Same as dashboard */
 .sidebar {
   width: 260px;
@@ -15,6 +20,27 @@
   height: 100vh;
   overflow-y: auto;
 }
+
+.doctor-schedule.dark .sidebar {
+  background: #0f1c2f;
+  border-color: #1f2937;
+  color: #e2e8f0;
+}
+.doctor-schedule.dark .sidebar-header,
+.doctor-schedule.dark .sidebar-footer {
+  border-color: #1f2937;
+}
+.doctor-schedule.dark .logo-text h3 { color: #e2e8f0; }
+.doctor-schedule.dark .logo-text p { color: #9fb1c9; }
+.doctor-schedule.dark .nav-item { color: #9fb1c9; }
+.doctor-schedule.dark .nav-item:hover { background: #0f172a; color: #fff; }
+.doctor-schedule.dark .nav-item.active { background: rgba(16,185,129,0.14); color: #6ef3b0; }
+.doctor-schedule.dark .nav-item.active::before { background: #6ef3b0; }
+.doctor-schedule.dark .nav-item .badge { background: #ef4444; }
+.doctor-schedule.dark .user-name { color: #e2e8f0; }
+.doctor-schedule.dark .user-role { color: #94a3b8; }
+.doctor-schedule.dark .logout-btn { background: #ef4444; }
+.doctor-schedule.dark .logout-btn:hover { background: #dc2626; }
 
 .sidebar-header {
   padding: 1.5rem;
@@ -182,12 +208,170 @@
   padding: 2rem;
 }
 
+.doctor-schedule.dark .main-content {
+  background: #0b1423;
+  color: #e2e8f0;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.search-box {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.85rem 1rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+}
+
+.doctor-schedule.dark .search-box {
+  background: #0f1c2f;
+  border-color: #1f2937;
+}
+.doctor-schedule.dark .search-box input { color: #e2e8f0; }
+.doctor-schedule.dark .search-box i { color: #9fb1c9; }
+
+.search-box input {
+  border: none;
+  background: transparent;
+  width: 100%;
+  outline: none;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.search-box i {
+  color: #94a3b8;
+}
+
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.topbar-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.8rem 1.1rem;
+  border-radius: 12px;
+}
+
+.icon-btn {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.doctor-schedule.dark .icon-btn {
+  background: #0f1c2f;
+  border-color: #1f2937;
+  color: #e2e8f0;
+}
+.doctor-schedule.dark .icon-btn:hover { border-color: #10b981; box-shadow: 0 8px 20px rgba(16,185,129,0.18); }
+
+.icon-btn:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 8px 20px rgba(15, 157, 88, 0.12);
+}
+
+.badge-dot {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: #ef4444;
+  color: #fff;
+  font-size: 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+}
+
+.divider {
+  width: 1px;
+  height: 32px;
+  background: #e5e7eb;
+}
+
+.pill-toggle {
+  width: 44px;
+  height: 44px;
+  border: none;
+  border-radius: 12px;
+  background: #f8fafc;
+  display: grid;
+  place-items: center;
+  color: #0f172a;
+  cursor: pointer;
+}
+
+.pill-toggle.active {
+  background: #ecfdf5;
+  color: #0f172a;
+  box-shadow: 0 6px 16px rgba(16,185,129,0.2);
+}
+
+.doctor-schedule.dark .pill-toggle {
+  background: #0f1c2f;
+  color: #e2e8f0;
+  border: 1px solid #1f2937;
+}
+.doctor-schedule.dark .pill-toggle.active {
+  background: #10b981;
+  color: #0b1423;
+  border-color: #10b981;
+}
+
+.avatar-sm {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #d1fae5;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  color: #0f172a;
+  border: 1px solid #e5e7eb;
+}
+
+.avatar-sm img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 .content-header {
   margin-bottom: 1.5rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
+
+.doctor-schedule.dark .page-title { color: #e2e8f0; }
+.doctor-schedule.dark .page-subtitle { color: #9fb1c9; }
+
 
 .page-title {
   font-size: 2rem;
@@ -215,6 +399,10 @@
   gap: 4px;
 }
 
+.doctor-schedule.dark .view-toggle { background: #0f1c2f; }
+.doctor-schedule.dark .view-toggle button { color: #cbd5e1; }
+.doctor-schedule.dark .view-toggle button.active { background: #10b981; color: #0b1423; }
+
 .view-toggle button {
   border: none;
   background: transparent;
@@ -240,6 +428,13 @@
   border-radius: 10px;
   font-weight: 600;
 }
+
+.doctor-schedule.dark .slot-config {
+  background: #0f1c2f;
+  border-color: #1f2937;
+  color: #e2e8f0;
+}
+.doctor-schedule.dark .slot-config select { color: #e2e8f0; }
 
 .slot-config select {
   border: none;
@@ -274,6 +469,20 @@
   height: fit-content;
   animation: cardAppear 220ms ease-out;
 }
+
+.doctor-schedule.dark .calendar-card {
+  background: #0f1c2f;
+  border-color: #1f2937;
+}
+.doctor-schedule.dark .nav-btn { background: #0b1423; border-color: #1f2937; color: #e2e8f0; }
+.doctor-schedule.dark .nav-btn:hover { background: #10b981; color: #0b1423; border-color: #10b981; }
+.doctor-schedule.dark .month-year { color: #6ef3b0; }
+.doctor-schedule.dark .calendar-day { background: #0b1423; border-color: #1f2937; color: #e2e8f0; }
+.doctor-schedule.dark .calendar-day:hover { background: #0f1c2f; }
+.doctor-schedule.dark .calendar-day.today { background: rgba(16,185,129,0.15); border-color: #10b981; color: #6ef3b0; }
+.doctor-schedule.dark .calendar-day.selected { background: #10b981; color: #0b1423; }
+.doctor-schedule.dark .weekday { color: #9fb1c9; }
+.doctor-schedule.dark .calendar-day.other-month { color: #475569; background: #0b1423; }
 
 .calendar-header {
   display: flex;
@@ -408,6 +617,35 @@
   max-height: 65vh;
   overflow: hidden;
 }
+
+.doctor-schedule.dark .schedule-board {
+  background: #0f1c2f;
+  border-color: #1f2937;
+  color: #e2e8f0;
+}
+.doctor-schedule.dark .chip { background: #0b1423; color: #cbd5e1; }
+.doctor-schedule.dark .chip.muted { color: #94a3b8; }
+.doctor-schedule.dark .slot-card { background: #0b1423; border-color: #1f2937; }
+.doctor-schedule.dark .slot-card.available { background: #0b1423; }
+.doctor-schedule.dark .slot-card.pending { background: rgba(245, 158, 11, 0.12); border-color: #f59e0b; }
+.doctor-schedule.dark .slot-card.booked { background: rgba(16,185,129,0.16); border-color: #10b981; }
+.doctor-schedule.dark .slot-card.cancelled { background: rgba(239,68,68,0.12); border-color: #ef4444; }
+.doctor-schedule.dark .slot-card.completed { background: rgba(99,102,241,0.12); border-color: #6366f1; }
+.doctor-schedule.dark .slot-time { color: #cbd5e1; }
+.doctor-schedule.dark .type { color: #cbd5e1; }
+.doctor-schedule.dark .actions button { background: #0f1c2f; border-color: #1f2937; color: #e2e8f0; }
+.doctor-schedule.dark .actions button.primary { background: #10b981; border-color: #10b981; color: #0b1423; }
+.doctor-schedule.dark .empty { background: #0b1423; border-color: #1f2937; color: #cbd5e1; }
+.doctor-schedule.dark .today-card { background: #0f1c2f; border-color: #1f2937; color: #e2e8f0; }
+.doctor-schedule.dark .today-head .eyebrow { color: #9fb1c9; }
+.doctor-schedule.dark .next .time { color: #cbd5e1; }
+.doctor-schedule.dark .next-actions .ghost { background: #0b1423; border-color: #1f2937; color: #e2e8f0; }
+.doctor-schedule.dark .week-day { background: #0b1423; border-color: #1f2937; color: #e2e8f0; }
+.doctor-schedule.dark .week-count { color: #cbd5e1; }
+.doctor-schedule.dark .availability-toggle label { color: #e2e8f0; }
+.doctor-schedule.dark .hours-row input { background: #0f1c2f; border-color: #1f2937; color: #e2e8f0; }
+.doctor-schedule.dark .day-buttons button { background: #0b1423; border-color: #1f2937; color: #e2e8f0; }
+.doctor-schedule.dark .day-buttons button.active { background: #10b981; color: #0b1423; border-color: #10b981; }
 
 .board-head {
   display: flex;

@@ -2,6 +2,7 @@
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+  transition: color 0.25s ease, background 0.25s ease;
 }
 
 .dashboard-header {
@@ -56,6 +57,9 @@
   box-shadow: none;
 }
 
+.patient-shell.dark .primary-btn { background: #10b981; color: #0b1423; box-shadow: 0 18px 35px -20px rgba(16,185,129,0.6); }
+.patient-shell.dark .primary-btn.subtle { background: rgba(16,185,129,0.16); color: #6ef3b0; }
+
 .vitals-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -71,6 +75,15 @@
   align-items: center;
   box-shadow: 0 20px 45px -35px rgba(15, 15, 15, 0.6);
 }
+
+.patient-shell.dark .vital-card {
+  background: #0f1c2f;
+  box-shadow: 0 20px 45px -35px rgba(0, 0, 0, 0.6);
+}
+.patient-shell.dark .vital-value { color: #e2e8f0; }
+.patient-shell.dark .vital-label { color: #9fb1c9; }
+.patient-shell.dark .vital-status { color: #6ef3b0; }
+.patient-shell.dark .vital-icon { background: rgba(16,185,129,0.18); color: #6ef3b0; }
 
 .vital-icon {
   width: 48px;
@@ -119,6 +132,11 @@
   box-shadow: 0 15px 40px -30px rgba(15, 15, 15, 0.5);
 }
 
+.patient-shell.dark .stat-pill { background: #0f1c2f; box-shadow: 0 15px 40px -30px rgba(0,0,0,0.55); }
+.patient-shell.dark .pill-label { color: #9fb1c9; }
+.patient-shell.dark .pill-value { color: #e2e8f0; }
+.patient-shell.dark .stat-pill i { color: #6ef3b0; }
+
 .stat-pill i {
   font-size: 1.35rem;
   color: #0f9d58;
@@ -148,6 +166,27 @@
   padding: 1.5rem;
   box-shadow: 0 40px 70px -55px rgba(15, 15, 15, 0.55);
 }
+
+.patient-shell.dark .panel {
+  background: #0f1c2f;
+  color: #e2e8f0;
+  box-shadow: 0 40px 70px -55px rgba(0, 0, 0, 0.6);
+  border: 1px solid #1f2937;
+}
+.patient-shell.dark .panel-header h2 { color: #e2e8f0; }
+.patient-shell.dark .text-link { color: #6ef3b0; }
+.patient-shell.dark .appointment-card { border-color: #1f2937; }
+.patient-shell.dark .appointment-doctor { color: #e2e8f0; }
+.patient-shell.dark .appointment-details { color: #cbd5e1; }
+.patient-shell.dark .appointment-details i { color: #6ef3b0; }
+.patient-shell.dark .badge { background: #0b1423; color: #e2e8f0; border: 1px solid #1f2937; }
+.patient-shell.dark .badge-video { background: rgba(16,185,129,0.16); color: #6ef3b0; }
+.patient-shell.dark .prescription-card { border-color: #1f2937; }
+.patient-shell.dark .prescription-name { color: #e2e8f0; }
+.patient-shell.dark .lab-item { border-color: #1f2937; }
+.patient-shell.dark .lab-title { color: #e2e8f0; }
+.patient-shell.dark .lab-results .badge { background: rgba(16,185,129,0.16); color: #6ef3b0; border-color: transparent; }
+.patient-shell.dark .empty-state { background: #0b1423; color: #9fb1c9; border: 1px solid #1f2937; }
 
 .panel-header {
   display: flex;
@@ -288,6 +327,8 @@
   padding: 4rem 0;
   gap: 1rem;
 }
+
+.patient-shell.dark .spinner { border-color: #1f2937; border-top-color: #6ef3b0; }
 
 .spinner {
   width: 48px;

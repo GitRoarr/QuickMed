@@ -7,6 +7,7 @@ import { Appointment, AppointmentStatus } from '@core/models/appointment.model';
 import { AuthService } from '@core/services/auth.service';
 import { BadgeService } from '@core/services/badge.service';
 import { MessageService } from '@core/services/message.service';
+import { NotificationService } from '@core/services/notification.service';
 import { forkJoin } from 'rxjs';
 import { SchedulingService, DoctorSlot } from '../../../core/services/schedule.service';
 
@@ -32,6 +33,8 @@ export class ScheduleComponent implements OnInit {
   currentMonth = signal(new Date());
   currentUser = signal<any>(null);
   menuItems = signal<MenuItem[]>([]);
+  unreadMessages = signal(0);
+  unreadNotifications = signal(0);
 
   viewMode = signal<'day' | 'week' | 'month'>('day');
   slotDurationMinutes = signal(30);
@@ -42,6 +45,7 @@ export class ScheduleComponent implements OnInit {
   workingDays = signal<number[]>([1, 2, 3, 4, 5]); // Mon-Fri
   showAvailabilityEditor = signal(false);
   showLegend = signal(true);
+  themeMode = signal<'light' | 'dark'>('light');
 
   today = new Date();
 
@@ -49,6 +53,7 @@ export class ScheduleComponent implements OnInit {
   private scheduleService = inject(SchedulingService);
   private appointmentService = inject(AppointmentService);
   private messageService = inject(MessageService);
+  private notificationService = inject(NotificationService);
   private authService = inject(AuthService);
   private router = inject(Router);
 
@@ -85,6 +90,7 @@ export class ScheduleComponent implements OnInit {
     this.loadAppointments();
     this.loadBadgeCounts();
     this.loadSlots();
+    this.loadHeaderCounts();
   }
 
   // ==================== Availability ====================
@@ -221,7 +227,16 @@ export class ScheduleComponent implements OnInit {
       appointments: this.appointmentService.getPendingCount(),
       messages: this.messageService.getUnreadCount()
     }).subscribe(({ appointments, messages }) => {
-      this.updateMenuItems(appointments.count || 0, messages.count || 0);
+      const msgCount = messages.count || 0;
+      this.unreadMessages.set(msgCount);
+      this.updateMenuItems(appointments.count || 0, msgCount);
+    });
+  }
+
+  loadHeaderCounts(): void {
+    this.notificationService.getUnreadCount().subscribe({
+      next: (count) => this.unreadNotifications.set(count || 0),
+      error: () => this.unreadNotifications.set(0),
     });
   }
 
@@ -241,6 +256,10 @@ export class ScheduleComponent implements OnInit {
 
   loadUserData(): void {
     this.currentUser.set(this.authService.currentUser());
+  }
+
+  setTheme(mode: 'light' | 'dark'): void {
+    this.themeMode.set(mode);
   }
 
   getDoctorName(): string {

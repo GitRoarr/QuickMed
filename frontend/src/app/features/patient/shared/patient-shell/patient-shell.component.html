@@ -1,4 +1,4 @@
-<div class="patient-shell" [class.sidebar-open]="sidebarOpen">
+<div class="patient-shell" [class.sidebar-open]="sidebarOpen" [class.dark]="themeMode()==='dark'">
   <aside class="patient-shell__sidebar">
     <div class="patient-shell__brand" (click)="navigate('/')" title="Back to Home">
       <div style="display:flex;align-items:center;gap:.5rem;">
@@ -11,7 +11,6 @@
         </div>
       </div>
 
-      <!-- Hamburger (mobile) -->
       <button class="hamburger" aria-label="Toggle menu" (click)="toggleSidebar()" type="button">
         <span class="hamburger-box">
           <span class="hamburger-inner"></span>
@@ -51,6 +50,24 @@
   </aside>
 
   <main class="patient-shell__content">
+    <div class="patient-shell__topbar">
+      <div class="theme-switch">
+        <button class="theme-btn" type="button" [class.active]="themeMode()==='light'" (click)="setTheme('light')" title="Light mode">
+          <i class="bi bi-brightness-high"></i>
+        </button>
+        <button class="theme-btn" type="button" [class.active]="themeMode()==='dark'" (click)="setTheme('dark')" title="Dark mode">
+          <i class="bi bi-moon"></i>
+        </button>
+      </div>
+      <button class="patient-shell__icon-btn" type="button" [routerLink]="'/patient/messages'" title="Messages">
+        <i class="bi bi-chat-dots"></i>
+        <span class="patient-shell__badge" *ngIf="unreadMessages() > 0">{{ unreadMessages() }}</span>
+      </button>
+      <button class="patient-shell__icon-btn" type="button" [routerLink]="'/patient/settings'" title="Notifications">
+        <i class="bi bi-bell"></i>
+        <span class="patient-shell__badge" *ngIf="unreadNotifications() > 0">{{ unreadNotifications() }}</span>
+      </button>
+    </div>
     <ng-content></ng-content>
   </main>
 </div>

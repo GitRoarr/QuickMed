@@ -86,7 +86,8 @@ export class PatientsComponent implements OnInit {
     { label: 'Settings', icon: 'bi-gear', route: '/doctor/settings' },
   ];
 
-  currentUser = this.authService.currentUser();
+  currentUser = this.authService.currentUser;
+  Math = Math;
 
   ngOnInit(): void {
     this.loadPatients();
