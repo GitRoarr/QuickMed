@@ -12,10 +12,17 @@ import { Theme } from './entities/theme.entity';
 import { ThemeService } from './theme.service';
 import { ReceptionistModule } from '../receptionist/receptionist.module';
 import { forwardRef } from '@nestjs/common';
+import { ReviewsModule } from '../reviews/reviews.module';
 
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, Appointment, Theme]), EmailModule, SmsModule, forwardRef(() => ReceptionistModule)],
+  imports: [
+    TypeOrmModule.forFeature([User, Appointment, Theme]),
+    EmailModule,
+    SmsModule,
+    ReviewsModule,
+    forwardRef(() => ReceptionistModule),
+  ],
   controllers: [AdminController],
   providers: [AdminService, AdminStatsService, DoctorsService, ThemeService],
   exports: [AdminService, ThemeService],
