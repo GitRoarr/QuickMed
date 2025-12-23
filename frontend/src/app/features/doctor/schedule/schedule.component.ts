@@ -40,9 +40,11 @@ export class ScheduleComponent implements OnInit {
   slotDurationMinutes = signal(30);
   workingStart = signal('09:00');
   workingEnd = signal('17:00');
+  // Make break optional via toggle
+  hasBreak = signal(true);
   breakStart = signal('12:00');
   breakEnd = signal('13:00');
-  workingDays = signal<number[]>([1, 2, 3, 4, 5]); // Mon-Fri
+  workingDays = signal<number[]>([1, 2, 3, 4, 5]);
   showAvailabilityEditor = signal(false);
   showLegend = signal(true);
   themeMode = signal<'light' | 'dark'>('light');
@@ -144,13 +146,14 @@ export class ScheduleComponent implements OnInit {
     const slots: DoctorSlot[] = [];
     const start = this.toMinutes(this.workingStart());
     const end = this.toMinutes(this.workingEnd());
-    const breakStart = this.toMinutes(this.breakStart());
-    const breakEnd = this.toMinutes(this.breakEnd());
+    const useBreak = this.hasBreak() && !!this.breakStart() && !!this.breakEnd();
+    const breakStart = useBreak ? this.toMinutes(this.breakStart()) : -1;
+    const breakEnd = useBreak ? this.toMinutes(this.breakEnd()) : -1;
     const step = this.slotDurationMinutes();
 
     for (let t = start; t < end; t += step) {
       const slotEnd = Math.min(t + step, end);
-      const inBreak = t < breakEnd && slotEnd > breakStart;
+      const inBreak = useBreak && t < breakEnd && slotEnd > breakStart;
       if (inBreak) continue;
       slots.push({
         startTime: this.toTimeString(t),

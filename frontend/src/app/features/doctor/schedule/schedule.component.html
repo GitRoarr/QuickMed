@@ -139,10 +139,16 @@
             <input type="time" [ngModel]="workingEnd()" (ngModelChange)="workingEnd.set($event)" [ngModelOptions]="{standalone:true}">
           </div>
           <div class="hours-row">
-            <label>Break</label>
-            <input type="time" [ngModel]="breakStart()" (ngModelChange)="breakStart.set($event)" [ngModelOptions]="{standalone:true}">
+            <label>
+              Break
+              <span class="muted" style="margin-left:8px; font-size:12px;">
+                <input type="checkbox" [ngModel]="hasBreak()" (ngModelChange)="hasBreak.set($event)" [ngModelOptions]="{standalone:true}">
+                Enable (optional)
+              </span>
+            </label>
+            <input type="time" [disabled]="!hasBreak()" [ngModel]="breakStart()" (ngModelChange)="breakStart.set($event)" [ngModelOptions]="{standalone:true}">
             <span>–</span>
-            <input type="time" [ngModel]="breakEnd()" (ngModelChange)="breakEnd.set($event)" [ngModelOptions]="{standalone:true}">
+            <input type="time" [disabled]="!hasBreak()" [ngModel]="breakEnd()" (ngModelChange)="breakEnd.set($event)" [ngModelOptions]="{standalone:true}">
             <button class="primary ghost" (click)="saveAvailability()">Save</button>
           </div>
         </div>

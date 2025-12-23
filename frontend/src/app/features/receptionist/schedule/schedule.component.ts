@@ -25,6 +25,7 @@ export class ReceptionistScheduleComponent implements OnInit {
   endTime = signal('17:00');
   isLoading = signal(false);
   statusMessage = signal('');
+  toasts = signal<{ id: number; text: string; type: 'success' | 'error' | 'info' }[]>([]);
 
   menuItems = [
     { label: 'Dashboard', icon: 'grid', route: '/receptionist/dashboard' },
@@ -75,9 +76,13 @@ export class ReceptionistScheduleComponent implements OnInit {
       .subscribe({
         next: () => {
           this.statusMessage.set('Slot saved as available');
+          this.showToast('Slot saved as available', 'success');
           this.loadSlots();
         },
-        error: () => this.statusMessage.set('Failed to save availability'),
+        error: () => {
+          this.statusMessage.set('Failed to save availability');
+          this.showToast('Failed to save availability', 'error');
+        },
       });
   }
 
@@ -90,9 +95,13 @@ export class ReceptionistScheduleComponent implements OnInit {
       .subscribe({
         next: () => {
           this.statusMessage.set('Slot blocked');
+          this.showToast('Slot blocked', 'success');
           this.loadSlots();
         },
-        error: () => this.statusMessage.set('Failed to block slot'),
+        error: () => {
+          this.statusMessage.set('Failed to block slot');
+          this.showToast('Failed to block slot', 'error');
+        },
       });
   }
 
@@ -102,8 +111,14 @@ export class ReceptionistScheduleComponent implements OnInit {
     const start = slot.startTime || slot.time || '';
     const end = slot.endTime || start;
     this.schedulingService.unblockSlot(this.selectedDate(), start, end, doctorId).subscribe({
-      next: () => this.loadSlots(),
-      error: () => this.statusMessage.set('Failed to unblock slot'),
+      next: () => {
+        this.showToast('Slot unblocked', 'success');
+        this.loadSlots();
+      },
+      error: () => {
+        this.statusMessage.set('Failed to unblock slot');
+        this.showToast('Failed to unblock slot', 'error');
+      },
     });
   }
 
@@ -113,8 +128,14 @@ export class ReceptionistScheduleComponent implements OnInit {
     const start = slot.startTime || slot.time || '';
     const end = slot.endTime || start;
     this.schedulingService.setAvailable(this.selectedDate(), start, end, doctorId).subscribe({
-      next: () => this.loadSlots(),
-      error: () => this.statusMessage.set('Failed to mark available'),
+      next: () => {
+        this.showToast('Marked as available', 'success');
+        this.loadSlots();
+      },
+      error: () => {
+        this.statusMessage.set('Failed to mark available');
+        this.showToast('Failed to mark available', 'error');
+      },
     });
   }
 
@@ -124,12 +145,28 @@ export class ReceptionistScheduleComponent implements OnInit {
     const start = slot.startTime || slot.time || '';
     const end = slot.endTime || start;
     this.schedulingService.blockSlot(this.selectedDate(), start, end, doctorId).subscribe({
-      next: () => this.loadSlots(),
-      error: () => this.statusMessage.set('Failed to block slot'),
+      next: () => {
+        this.showToast('Blocked this time', 'success');
+        this.loadSlots();
+      },
+      error: () => {
+        this.statusMessage.set('Failed to block slot');
+        this.showToast('Failed to block slot', 'error');
+      },
     });
   }
 
   onDoctorChange(): void {
     this.loadSlots();
+  }
+
+  private showToast(text: string, type: 'success' | 'error' | 'info' = 'info') {
+    const id = Date.now() + Math.random();
+    const list = [...this.toasts()];
+    list.push({ id, text, type });
+    this.toasts.set(list);
+    setTimeout(() => {
+      this.toasts.set(this.toasts().filter((t) => t.id !== id));
+    }, 3000);
   }
 }

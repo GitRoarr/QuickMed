@@ -1,6 +1,11 @@
 .receptionist-layout { display: flex; min-height: 100vh; background: #f8fafc; }
 .body { display: flex; width: 100%; }
 .panel { margin-left: 15rem; padding: 1.5rem; width: 100%; }
+.toast-container { position: fixed; top: 1rem; right: 1rem; display: flex; flex-direction: column; gap: 0.5rem; z-index: 1000; }
+.toast { display: flex; align-items: center; gap: 0.5rem; background: #ffffff; border: 1px solid #e5e7eb; color: #111827; padding: 0.65rem 0.85rem; border-radius: 12px; box-shadow: 0 10px 24px rgba(15,23,42,0.08); }
+.toast.success { border-color: #bbf7d0; color: #166534; }
+.toast.error { border-color: #fecaca; color: #991b1b; }
+.toast i { font-size: 1rem; }
 .head { background: #fff; border: 1px solid #e5e7eb; border-radius: 16px; padding: 1.25rem; margin-bottom: 1rem; }
 .eyebrow { text-transform: uppercase; letter-spacing: 0.08em; font-size: 0.75rem; color: #6b7280; margin: 0; }
 .head h1 { margin: 0.25rem 0; }

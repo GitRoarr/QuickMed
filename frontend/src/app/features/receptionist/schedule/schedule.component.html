@@ -3,6 +3,13 @@
   <div class="body">
     <app-sidebar [title]="'Receptionist'" [menuItems]="menuItems"></app-sidebar>
     <main class="panel">
+      <!-- Toast overlay -->
+      <div class="toast-container" *ngIf="toasts().length">
+        <div class="toast" *ngFor="let t of toasts()" [class.success]="t.type==='success'" [class.error]="t.type==='error'">
+          <i class="bi" [ngClass]="t.type==='success' ? 'bi-check-circle' : 'bi-exclamation-triangle'"></i>
+          <span>{{ t.text }}</span>
+        </div>
+      </div>
       <section class="head">
         <div>
           <p class="eyebrow">Schedule</p>

@@ -649,6 +649,7 @@
 .doctor-schedule.dark .week-count { color: #cbd5e1; }
 .doctor-schedule.dark .availability-toggle label { color: #e2e8f0; }
 .doctor-schedule.dark .hours-row input { background: #0f1c2f; border-color: #1f2937; color: #e2e8f0; }
+.doctor-schedule.dark .hours-row input[type="checkbox"] { accent-color: var(--primary-color); }
 .doctor-schedule.dark .day-buttons button { background: #0b1423; border-color: #1f2937; color: #e2e8f0; }
 .doctor-schedule.dark .day-buttons button.active { background: #10b981; color: #0b1423; border-color: #10b981; }
 
@@ -831,6 +832,7 @@
 }
 .hours-row label { font-weight: 700; color: #111827; }
 .hours-row input { border: 1px solid #e5e7eb; border-radius: 8px; padding: 0.4rem 0.5rem; }
+.hours-row input[type="checkbox"] { accent-color: var(--primary-color); }
 .hours-row .primary { padding: 0.4rem 0.75rem; }
 
 .today-card {
