@@ -279,6 +279,11 @@ export class ScheduleComponent implements OnInit {
     return this.appointments().filter(apt => apt.appointmentDate === dateStr);
   }
 
+  countAppointmentsForDate(date: Date): number {
+    const dateStr = this.toDateOnly(date);
+    return this.appointments().filter((apt) => apt.appointmentDate === dateStr).length;
+  }
+
   // ==================== Quick actions ====================
   acceptAppointment(appt: Appointment): void {
     this.updateAppointmentStatus(appt, AppointmentStatus.CONFIRMED);
@@ -384,6 +389,13 @@ export class ScheduleComponent implements OnInit {
 
   setViewMode(mode: 'day' | 'week' | 'month'): void {
     this.viewMode.set(mode);
+  }
+
+  openNextAppointmentDay(): void {
+    const next = this.nextAppointment();
+    if (!next) return;
+    this.setViewMode('day');
+    this.selectDate(new Date(next.appointmentDate));
   }
 
   private toMinutes(time: string): number {

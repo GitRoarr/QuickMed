@@ -7,7 +7,7 @@ export interface DoctorSlot {
   startTime?: string;
   endTime?: string;
   time?: string; // legacy fallback
-  status: 'available' | 'booked' | 'blocked';
+  status: 'available' | 'booked' | 'blocked' | 'pending' | 'cancelled' | 'completed';
   appointmentId?: string;
   blockedReason?: string | null;
 }

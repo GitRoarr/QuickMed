@@ -142,7 +142,7 @@
           <p class="time">{{ nextAppointment()?.appointmentTime }} • {{ nextAppointment()?.isVideoConsultation ? 'Online' : 'In-person' }}</p>
           <div class="next-actions">
             <button class="primary" *ngIf="nextAppointment()?.isVideoConsultation" (click)="joinCall(nextAppointment()!)">Join call</button>
-            <button class="ghost" (click)="setViewMode('day'); selectDate(new Date(nextAppointment()!.appointmentDate))">Open day</button>
+            <button class="ghost" (click)="openNextAppointmentDay()">Open day</button>
           </div>
         </div>
         <ng-template #noNext>
@@ -205,7 +205,7 @@
               <strong>{{ d | date:'EEE' }}</strong>
               <span>{{ d | date:'MMM d' }}</span>
             </div>
-            <div class="week-count">{{ appointments().filter(a => a.appointmentDate === (d.toISOString().split('T')[0])).length }} appts</div>
+            <div class="week-count">{{ countAppointmentsForDate(d) }} appts</div>
           </div>
         </div>
 

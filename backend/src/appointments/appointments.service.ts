@@ -56,7 +56,6 @@ export class AppointmentsService {
       }
     }
 
-    // Check for existing appointment at same time
     const existingAppointment = await this.appointmentsRepository.findOne({
       where: {
         doctorId,
