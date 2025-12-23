@@ -130,7 +130,7 @@ export class ScheduleComponent implements OnInit {
   }
 
   setAvailability(): void {
-    const dateStr = this.selectedDate().toISOString().split('T')[0];
+    const dateStr = this.toDateOnly(this.selectedDate());
     if (this.availabilityMode() === 'single') {
       const time = this.singleTime();
       this.scheduleService.setAvailable(dateStr, time).subscribe({
@@ -160,7 +160,7 @@ export class ScheduleComponent implements OnInit {
   }
 
   loadSlots(): void {
-    const dateStr = this.selectedDate().toISOString().split('T')[0];
+    const dateStr = this.toDateOnly(this.selectedDate());
     this.scheduleService.getDaySchedule(dateStr).subscribe({
       next: (res: DoctorSlot[]) => this.slots.set(res || []),
       error: () => this.slots.set([])
@@ -213,7 +213,7 @@ export class ScheduleComponent implements OnInit {
   }
 
   setAvailableSlot(slot: DoctorSlot): void {
-    const dateStr = this.selectedDate().toISOString().split('T')[0];
+    const dateStr = this.toDateOnly(this.selectedDate());
     const startTime = slot.startTime || slot.time!;
     const endTime = slot.endTime || startTime;
     this.scheduleService.setAvailable(dateStr, startTime, endTime).subscribe({
@@ -226,7 +226,7 @@ export class ScheduleComponent implements OnInit {
   }
 
   blockSlot(slot: DoctorSlot): void {
-    const dateStr = this.selectedDate().toISOString().split('T')[0];
+    const dateStr = this.toDateOnly(this.selectedDate());
     const startTime = slot.startTime || slot.time!;
     const endTime = slot.endTime || startTime;
     this.scheduleService.blockSlot(dateStr, startTime, endTime).subscribe({
@@ -364,7 +364,7 @@ export class ScheduleComponent implements OnInit {
 
   getSelectedDateAppointments(): Appointment[] {
     const selected = this.selectedDate();
-    const dateStr = selected.toISOString().split('T')[0];
+    const dateStr = this.toDateOnly(selected);
     return this.appointments().filter(apt => apt.appointmentDate === dateStr);
   }
 
@@ -517,7 +517,10 @@ export class ScheduleComponent implements OnInit {
   }
 
   private toDateOnly(date: Date): string {
-    return date.toISOString().split('T')[0];
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
   }
 
   private getWeekStart(date: Date): Date {
