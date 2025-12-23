@@ -1,18 +1,21 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
+import { Repository, MoreThanOrEqual } from "typeorm";
 import { User } from "./entities/user.entity";
 import { UserRole } from "../common/index";
 import { CloudinaryService } from "@/profile/cloudinary.service";
 import * as fs from 'fs/promises'
 import { ReviewsService } from "../reviews/reviews.service";
 import { SettingsService } from "../settings/settings.service";
+import { DoctorSchedule } from "@/schedules/schedule.entity";
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
+    @InjectRepository(DoctorSchedule)
+    private readonly schedulesRepository: Repository<DoctorSchedule>,
     private readonly cloudinaryService: CloudinaryService,
     private readonly reviewsService: ReviewsService,
     private readonly settingsService: SettingsService,
@@ -75,11 +78,18 @@ export class UsersService {
   async findDoctorsWithAvailability(): Promise<any[]> {
     const doctors = await this.findDoctors();
     const allRatings = await this.reviewsService.getAllDoctorRatings();
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
     
     const result = await Promise.all(
       doctors.map(async (doctor) => {
         const rating = allRatings[doctor.id] || { average: 0, count: 0 };
         const settings = await this.settingsService.getSettings(doctor.id).catch(() => null);
+        // Check schedule-based availability: any future slot marked 'available'
+        const futureSchedules = await this.schedulesRepository.find({
+          where: { doctorId: doctor.id, date: MoreThanOrEqual(today) },
+        });
+        const scheduleHasAvailable = futureSchedules.some(s => Array.isArray(s.slots) && s.slots.some(slot => slot.status === 'available'));
         
         // Calculate availability based on settings or user fields
         const availableDays = settings?.availableDays || doctor.availableDays || [];
@@ -87,8 +97,8 @@ export class UsersService {
         const endTime = settings?.endTime || doctor.endTime;
         
         // Check if doctor is available (has availability configured)
-        // For patient view, we show available if they have availability settings, not just "right now"
-        const isAvailable = availableDays.length > 0 && startTime && endTime;
+        // Available if settings configured OR at least one upcoming available slot exists
+        const isAvailable = (availableDays.length > 0 && !!startTime && !!endTime) || scheduleHasAvailable;
         
         // Experience: prefer explicit value if set, otherwise derive from account age
         let experienceYears = doctor.experienceYears ?? null;

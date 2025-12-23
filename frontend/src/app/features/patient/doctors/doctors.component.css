@@ -10,8 +10,8 @@
 }
 
 .page-header {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
+  background: var(--surface);
+  border: 1px solid var(--border-color);
   box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
   border-radius: 16px;
   padding: 1rem 1.25rem;
@@ -50,8 +50,8 @@
   border: none;
   border-radius: 14px;
   padding: 0.65rem 0.75rem 0.65rem 2.5rem;
-  background: #f8fafc;
-  box-shadow: inset 0 0 0 1px #e2e8f0;
+  background: var(--surface-alt);
+  box-shadow: inset 0 0 0 1px var(--border-color);
 }
 
 .filter-select {
@@ -64,7 +64,7 @@
   border: none;
   border-radius: 12px;
   padding: 0.65rem 1rem;
-  background: #f1f5f9;
+  background: var(--surface-alt);
   font-weight: 600;
 }
 
@@ -80,7 +80,8 @@
 }
 
 .doctor-card {
-  background: #fff;
+  background: var(--surface);
+  border: 1px solid var(--border-color);
   border-radius: 18px;
   padding: 1.25rem;
   box-shadow: 0 25px 45px -45px rgba(15, 15, 15, 0.65);
@@ -202,7 +203,7 @@
   grid-column: 1 / -1;
   padding: 2rem;
   text-align: center;
-  background: #f8fafc;
+  background: var(--surface-alt);
   border-radius: 16px;
   color: #94a3b8;
 }
@@ -226,7 +227,7 @@
 }
 
 .modal-content {
-  background: #fff;
+  background: var(--surface);
   border-radius: 20px;
   padding: 1.5rem;
   width: min(520px, 100%);
@@ -265,8 +266,8 @@
   border: none;
   border-radius: 12px;
   padding: 0.65rem 0.85rem;
-  background: #f8fafc;
-  box-shadow: inset 0 0 0 1px #e2e8f0;
+  background: var(--surface-alt);
+  box-shadow: inset 0 0 0 1px var(--border-color);
 }
 
 .modal-actions {

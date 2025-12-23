@@ -51,11 +51,6 @@
 
   <main class="patient-shell__content">
     <div class="patient-shell__topbar">
-      <div class="theme-switch">
-        <button class="theme-btn" type="button" (click)="toggleTheme()" title="Toggle theme">
-          <i class="bi" [ngClass]="themeMode()==='dark' ? 'bi-moon' : 'bi-brightness-high'"></i>
-        </button>
-      </div>
       <button class="patient-shell__icon-btn" type="button" [routerLink]="'/patient/messages'" title="Messages">
         <i class="bi bi-chat-dots"></i>
         <span class="patient-shell__badge" *ngIf="unreadMessages() > 0">{{ unreadMessages() }}</span>
@@ -63,6 +58,9 @@
       <button class="patient-shell__icon-btn" type="button" [routerLink]="'/patient/settings'" title="Notifications">
         <i class="bi bi-bell"></i>
         <span class="patient-shell__badge" *ngIf="unreadNotifications() > 0">{{ unreadNotifications() }}</span>
+      </button>
+      <button class="patient-shell__icon-btn" type="button" (click)="toggleTheme()" title="Toggle theme">
+        <i class="bi" [ngClass]="themeMode()==='dark' ? 'bi-moon' : 'bi-brightness-high'"></i>
       </button>
     </div>
     <ng-content></ng-content>
