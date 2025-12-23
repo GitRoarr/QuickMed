@@ -62,6 +62,22 @@ export class DoctorsComponent implements OnInit {
     this.userService.getDoctors().subscribe({
       next: (docs: any[]) => {
         // Backend now returns doctors with availability, rating, and experience
+        const dayNames = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+        const todayName = dayNames[new Date().getDay()];
+        const normalize = (s: string) => (s || '').toLowerCase();
+        const isAvailableToday = (d: any) => {
+          const days: string[] = d.availableDays || [];
+          const hasDays = Array.isArray(days) && days.length > 0;
+          if (!hasDays) return false;
+          const normalizedDays = days.map(normalize);
+          // Support both full and short day names
+          const shortNames: Record<string,string> = {
+            sunday:'sun', monday:'mon', tuesday:'tue', wednesday:'wed', thursday:'thu', friday:'fri', saturday:'sat'
+          };
+          const tn = normalize(todayName);
+          return normalizedDays.includes(tn) || normalizedDays.includes(shortNames[tn]);
+        };
+
         const doctorsWithData = docs.map(doc => {
           const experience =
             doc.experienceYears ??
@@ -69,7 +85,7 @@ export class DoctorsComponent implements OnInit {
             0;
           return {
             ...doc,
-            available: doc.available !== undefined ? doc.available : false,
+            available: doc.available !== undefined ? doc.available : isAvailableToday(doc),
             rating: doc.rating || 0,
             ratingCount: doc.ratingCount || 0,
             experience,

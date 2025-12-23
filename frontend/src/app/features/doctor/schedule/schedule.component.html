@@ -159,7 +159,7 @@
         <div class="next" *ngIf="nextAppointment(); else noNext">
           <p class="label">Next patient</p>
           <h4>{{ nextAppointment()?.patient?.firstName }} {{ nextAppointment()?.patient?.lastName }}</h4>
-          <p class="time">{{ nextAppointment()?.appointmentTime }} • {{ nextAppointment()?.isVideoConsultation ? 'Online' : 'In-person' }}</p>
+          <p class="time">{{ formatTime12(nextAppointment()?.appointmentTime) }} • {{ nextAppointment()?.isVideoConsultation ? 'Online' : 'In-person' }}</p>
           <div class="next-actions">
             <button class="primary" *ngIf="nextAppointment()?.isVideoConsultation" (click)="joinCall(nextAppointment()!)">Join call</button>
             <button class="ghost" (click)="openNextAppointmentDay()">Open day</button>
@@ -188,7 +188,7 @@
         <div *ngSwitchCase="'day'">
           <div *ngIf="visibleDaySlots().length; else emptyState" class="timeline">
             <div class="slot-row" *ngFor="let slot of visibleDaySlots()">
-              <div class="slot-time">{{ slot.startTime }} - {{ slot.endTime }}</div>
+              <div class="slot-time">{{ formatRange12(slot.startTime, slot.endTime) }}</div>
               <div class="slot-card" [ngClass]="[slot.status, getAppointmentForSlot(slot)?.isVideoConsultation ? 'online' : '']">
                 <ng-container *ngIf="getAppointmentForSlot(slot) as appt; else available">
                   <div class="slot-meta">

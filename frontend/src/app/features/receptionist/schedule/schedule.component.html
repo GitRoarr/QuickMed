@@ -3,7 +3,6 @@
   <div class="body">
     <app-sidebar [title]="'Receptionist'" [menuItems]="menuItems"></app-sidebar>
     <main class="panel">
-      <!-- Toasts handled globally by app-toast-container -->
       <section class="head">
         <div>
           <p class="eyebrow">Schedule</p>
@@ -53,7 +52,7 @@
         <div class="slots" *ngIf="slots().length">
           <div class="slot" *ngFor="let slot of slots()">
             <div>
-              <p class="time">{{ slot.startTime }} – {{ slot.endTime }}</p>
+              <p class="time">{{ formatRange12(slot.startTime, slot.endTime) }}</p>
               <p class="muted">Status: {{ slot.status }}<span *ngIf="isPastSlot(slot)"> • Past</span></p>
             </div>
             <div class="slot-actions">

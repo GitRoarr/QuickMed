@@ -256,6 +256,24 @@ export class ScheduleComponent implements OnInit {
     return target.getTime() < now.getTime();
   }
 
+  // ===== Time formatting (12-hour) =====
+  formatTime12(time: string | null | undefined): string {
+    const t = (time || '').slice(0,5);
+    const [hStr, mStr] = t.split(':');
+    const h = Number(hStr || 0);
+    const m = Number(mStr || 0);
+    if (Number.isNaN(h) || Number.isNaN(m)) return t || '';
+    const period = h >= 12 ? 'PM' : 'AM';
+    const hr = h % 12 || 12;
+    return `${hr}:${String(m).padStart(2,'0')} ${period}`;
+  }
+
+  formatRange12(start?: string | null, end?: string | null): string {
+    const s = this.formatTime12(start || '');
+    const e = this.formatTime12(end || start || '');
+    return `${s} - ${e}`;
+  }
+
   mapStatus(status: AppointmentStatus | string): 'available' | 'booked' | 'blocked' | 'pending' | 'cancelled' | 'completed' {
     switch (status) {
       case AppointmentStatus.CONFIRMED:
