@@ -48,6 +48,7 @@ export class PatientShellComponent implements OnInit {
 
   setTheme(mode: 'light' | 'dark'): void {
     this.themeMode.set(mode);
+    this.applyTheme(mode);
     if (typeof window !== 'undefined') {
       try {
         localStorage.setItem(this.THEME_KEY, mode);
@@ -82,6 +83,7 @@ export class PatientShellComponent implements OnInit {
       const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
       this.themeMode.set(prefersDark ? 'dark' : 'light');
     }
+    this.applyTheme(this.themeMode());
   }
 
   private loadCounts(): void {
@@ -104,8 +106,17 @@ export class PatientShellComponent implements OnInit {
   @HostListener('window:storage', ['$event'])
   onStorage(e: StorageEvent): void {
     if (e && e.key === this.THEME_KEY && (e.newValue === 'dark' || e.newValue === 'light')) {
-      this.themeMode.set(e.newValue as 'light' | 'dark');
+      const mode = e.newValue as 'light' | 'dark';
+      this.themeMode.set(mode);
+      this.applyTheme(mode);
     }
+  }
+
+  private applyTheme(mode: 'light' | 'dark'): void {
+    if (typeof document === 'undefined') return;
+    const body = document.body;
+    body.classList.toggle('dark', mode === 'dark');
+    body.classList.toggle('dark-theme', mode === 'dark');
   }
 
   logout(): void {

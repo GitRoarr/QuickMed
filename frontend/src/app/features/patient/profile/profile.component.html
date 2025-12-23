@@ -13,23 +13,76 @@
       </div>
     </div>
 
-    <div class="info-grid">
-      <div class="info-card">
-        <h3>Contact</h3>
-        <p>Email: {{ profile.email }}</p>
-        <p>Phone: {{ profile.phoneNumber || '—' }}</p>
+    <form class="edit-grid" [formGroup]="profileForm" (ngSubmit)="saveProfile()">
+      <div class="info-card span-2">
+        <h3>Personal</h3>
+        <div class="two-col">
+          <label>
+            <span>First Name</span>
+            <input formControlName="firstName" type="text" />
+          </label>
+          <label>
+            <span>Last Name</span>
+            <input formControlName="lastName" type="text" />
+          </label>
+          <label>
+            <span>Email</span>
+            <input type="email" [value]="profile.email" disabled />
+          </label>
+          <label>
+            <span>Phone</span>
+            <input formControlName="phoneNumber" type="text" />
+          </label>
+        </div>
       </div>
-      <div class="info-card">
+
+      <div class="info-card span-2">
         <h3>Health</h3>
-        <p>Blood Type: {{ profile.bloodType || '—' }}</p>
-        <p>Allergies: {{ profile.allergies?.join(', ') || 'None listed' }}</p>
+        <div class="two-col">
+          <label>
+            <span>Blood Type</span>
+            <input formControlName="bloodType" type="text" />
+          </label>
+          <label>
+            <span>Allergies (comma separated)</span>
+            <input formControlName="allergies" type="text" />
+          </label>
+          <label>
+            <span>Blood Pressure Systolic</span>
+            <input formControlName="bloodPressureSystolic" type="number" min="0" />
+          </label>
+          <label>
+            <span>Blood Pressure Diastolic</span>
+            <input formControlName="bloodPressureDiastolic" type="number" min="0" />
+          </label>
+          <label>
+            <span>Heart Rate (BPM)</span>
+            <input formControlName="heartRate" type="number" min="0" />
+          </label>
+          <label>
+            <span>BMI</span>
+            <input formControlName="bmi" type="number" min="0" step="0.1" />
+          </label>
+          <label>
+            <span>Last Checkup</span>
+            <input formControlName="lastCheckupDate" type="date" />
+          </label>
+        </div>
       </div>
+
       <div class="info-card">
         <h3>Account</h3>
         <p>Member since {{ profile.createdAt | date:'MMMM y' }}</p>
         <p>Last update {{ profile.updatedAt | date:'mediumDate' }}</p>
+        <p class="muted">Patient ID: {{ profile.patientId || profile.id }}</p>
       </div>
-    </div>
+
+      <div class="actions">
+        <button class="primary" type="submit" [disabled]="profileForm.invalid || saving()">
+          {{ saving() ? 'Saving...' : 'Save changes' }}
+        </button>
+      </div>
+    </form>
   </div>
 </app-patient-shell>
 

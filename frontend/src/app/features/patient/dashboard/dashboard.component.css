@@ -16,6 +16,15 @@
   box-shadow: 0 30px 80px -60px rgba(15, 23, 42, 0.55);
 }
 
+.patient-shell.dark .dashboard-header {
+  background: #0f1c2f;
+  border-color: #1f2937;
+  box-shadow: 0 30px 80px -60px rgba(0, 0, 0, 0.7);
+}
+.patient-shell.dark .dashboard-header h1 { color: #e2e8f0; }
+.patient-shell.dark .eyebrow { color: #9fb1c9; }
+.patient-shell.dark .muted { color: #9fb1c9; }
+
 .dashboard-header h1 {
   margin: 0;
   font-size: 1.85rem;
@@ -79,7 +88,8 @@
 
 .patient-shell.dark .vital-card {
   background: #0f1c2f;
-  box-shadow: 0 20px 45px -35px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 20px 45px -35px rgba(0, 0, 0, 0.7);
+  border: 1px solid #1f2937;
 }
 .patient-shell.dark .vital-value { color: #e2e8f0; }
 .patient-shell.dark .vital-label { color: #9fb1c9; }
@@ -192,7 +202,7 @@
 .patient-shell.dark .panel {
   background: #0f1c2f;
   color: #e2e8f0;
-  box-shadow: 0 40px 70px -55px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 40px 70px -55px rgba(0, 0, 0, 0.7);
   border: 1px solid #1f2937;
 }
 .patient-shell.dark .panel-header h2 { color: #e2e8f0; }
