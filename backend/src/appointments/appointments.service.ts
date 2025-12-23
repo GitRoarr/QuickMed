@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, BadRequestException, ForbiddenException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
+import { In, Repository } from "typeorm";
 import { Appointment} from "./entities/appointment.entity";
 import {AppointmentStatus,UserRole,PaymentStatus} from '../common/index'
 import { CreateAppointmentDto } from "./dto/create-appointment.dto";
@@ -25,7 +25,17 @@ export class AppointmentsService {
   async create(createAppointmentDto: CreateAppointmentDto, patientId: string): Promise<Appointment> {
     const { doctorId, appointmentDate, appointmentTime, notes, receptionistId } = createAppointmentDto;
 
-    const doctor = await this.usersService.findOne(doctorId);
+    // Auto-assign a free doctor if none was provided
+    let assignedDoctorId = doctorId;
+    if (!assignedDoctorId) {
+      const autoDoctor = await this.pickAvailableDoctor(appointmentDate, appointmentTime);
+      if (!autoDoctor) {
+        throw new BadRequestException('No available doctors for the requested date/time');
+      }
+      assignedDoctorId = autoDoctor.id;
+    }
+
+    const doctor = await this.usersService.findOne(assignedDoctorId);
     if (doctor.role !== UserRole.DOCTOR) {
       throw new BadRequestException("Selected user is not a doctor");
     }
@@ -33,7 +43,7 @@ export class AppointmentsService {
     if (!doctor.isActive) {
       throw new BadRequestException("Doctor is not active");
     }
-    const settings = await this.settingsService.getSettings(doctorId).catch(() => null);
+    const settings = await this.settingsService.getSettings(assignedDoctorId).catch(() => null);
     const availableDays = settings?.availableDays || doctor.availableDays || [];
     const appointmentDateObj = new Date(appointmentDate);
     const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -58,7 +68,7 @@ export class AppointmentsService {
 
     const existingAppointment = await this.appointmentsRepository.findOne({
       where: {
-        doctorId,
+        doctorId: assignedDoctorId,
         appointmentDate,
         appointmentTime,
         status: AppointmentStatus.CONFIRMED,
@@ -71,7 +81,7 @@ export class AppointmentsService {
 
     const pendingAppointment = await this.appointmentsRepository.findOne({
       where: {
-        doctorId,
+        doctorId: assignedDoctorId,
         appointmentDate,
         appointmentTime,
         status: AppointmentStatus.PENDING,
@@ -84,7 +94,7 @@ export class AppointmentsService {
 
     const appointment = this.appointmentsRepository.create({
       patientId,
-      doctorId,
+      doctorId: assignedDoctorId,
       appointmentDate,
       appointmentTime,
       notes,
@@ -203,13 +213,28 @@ export class AppointmentsService {
       }
     }
 
+    // Detect reschedule before we mutate
+    const newDateStr = this.toDateString(updateAppointmentDto.appointmentDate || appointment.appointmentDate);
+    const newTimeStr = this.toTimeString(updateAppointmentDto.appointmentTime || appointment.appointmentTime);
+    const oldDateStr = this.toDateString(originalDate);
+    const oldTimeStr = this.toTimeString(originalTime);
+
     Object.assign(appointment, updateAppointmentDto);
     const updatedAppointment = await this.appointmentsRepository.save(appointment);
 
-    const dateChanged = !!updateAppointmentDto.appointmentDate && this.toDateString(updateAppointmentDto.appointmentDate) !== this.toDateString(originalDate);
-    const timeChanged = !!updateAppointmentDto.appointmentTime && this.toTimeString(updateAppointmentDto.appointmentTime) !== this.toTimeString(originalTime);
+    const dateChanged = newDateStr !== oldDateStr;
+    const timeChanged = newTimeStr !== oldTimeStr;
 
     if (dateChanged || timeChanged) {
+      // Free old slot and book new slot
+      try {
+        await this.schedulesService.setSlotStatus(String(updatedAppointment.doctorId), oldDateStr, oldTimeStr, 'available');
+        await this.schedulesService.setSlotStatus(String(updatedAppointment.doctorId), newDateStr, newTimeStr, 'booked');
+      } catch (e) {
+        // non-fatal
+        console.error('Failed to update schedule during reschedule', e);
+      }
+
       await this.notificationIntegrationService.createAppointmentNotification(
         updatedAppointment,
         'rescheduled',
@@ -286,5 +311,64 @@ export class AppointmentsService {
     if (!t) return '';
     if (t instanceof Date) return t.toTimeString().slice(0, 5);
     return String(t).slice(0, 5);
+  }
+
+  // Auto-select an available doctor for the given date/time
+  private async pickAvailableDoctor(date: string | Date, time: string): Promise<User | null> {
+    const dateStr = this.toDateString(date);
+    const timeStr = this.toTimeString(time);
+
+    const doctors = await this.usersService.findDoctors();
+    if (!doctors || doctors.length === 0) return null;
+
+    // Simple strategy: first doctor with an available slot and no pending/confirmed appointment at that time
+    for (const doc of doctors) {
+      if (!doc.isActive) continue;
+
+      const settings = await this.settingsService.getSettings(doc.id).catch(() => null);
+      const availableDays = settings?.availableDays || doc.availableDays || [];
+      const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+      const appointmentDay = dayNames[new Date(dateStr).getDay()];
+      if (!availableDays.includes(appointmentDay)) continue;
+
+      // Check working hours window if known
+      const startTime = settings?.startTime || doc.startTime;
+      const endTime = settings?.endTime || doc.endTime;
+      if (startTime && endTime) {
+        const [sh, sm] = String(startTime).slice(0,5).split(':').map(Number);
+        const [eh, em] = String(endTime).slice(0,5).split(':').map(Number);
+        const [ah, am] = String(timeStr).slice(0,5).split(':').map(Number);
+        const sMin = (sh||0)*60 + (sm||0);
+        const eMin = (eh||0)*60 + (em||0);
+        const aMin = (ah||0)*60 + (am||0);
+        if (aMin < sMin || aMin >= eMin) continue;
+      }
+
+      // Check for existing pending/confirmed appointment
+      const conflict = await this.appointmentsRepository.findOne({
+        where: {
+          doctorId: doc.id,
+          appointmentDate: dateStr,
+          appointmentTime: timeStr,
+          status: In([AppointmentStatus.CONFIRMED, AppointmentStatus.PENDING]) as any,
+        } as any,
+      });
+      if (conflict) continue;
+
+      // Check schedule slot status is available (not blocked/booked)
+      try {
+        const day = await this.schedulesService.getDaySchedule(doc.id, dateStr);
+        const slot = (day?.slots || []).find((s: any) => (s.startTime || s.time) === timeStr);
+        if (slot && slot.status === 'blocked') {
+          continue;
+        }
+      } catch (_) {
+        // If schedule fails, still allow based on appointments + working hours
+      }
+
+      return doc as any;
+    }
+
+    return null;
   }
 }

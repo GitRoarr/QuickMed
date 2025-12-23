@@ -312,4 +312,41 @@ export class SchedulesService {
     const overview = await this.getMonthlyOverview(doctorId, year, month);
     return overview.blockedDays;
   }
+
+  // ===== Working days (availability) =====
+  private numberToDayName(n: number): string | null {
+    const names = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    return n >= 0 && n < 7 ? names[n] : null;
+  }
+
+  private dayNameToNumber(name: string): number | null {
+    const map: Record<string, number> = {
+      Sunday: 0,
+      Monday: 1,
+      Tuesday: 2,
+      Wednesday: 3,
+      Thursday: 4,
+      Friday: 5,
+      Saturday: 6,
+    };
+    return name in map ? map[name] : null;
+  }
+
+  async getDoctorWorkingDays(doctorId: string): Promise<number[]> {
+    const settings = await this.settingsService.getSettings(doctorId).catch(() => null);
+    const names = settings?.availableDays || [];
+    return names
+      .map((n) => this.dayNameToNumber(n))
+      .filter((v): v is number => typeof v === 'number')
+      .sort((a, b) => a - b);
+  }
+
+  async updateDoctorWorkingDays(doctorId: string, days: number[]): Promise<{ success: boolean; days: number[] }>{
+    const names = (days || [])
+      .map((d) => this.numberToDayName(d))
+      .filter((n): n is string => !!n);
+
+    await this.settingsService.updateSettings(doctorId, { availableDays: names });
+    return { success: true, days: days.sort((a, b) => a - b) };
+  }
 }

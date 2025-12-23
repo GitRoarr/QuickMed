@@ -1,54 +1,111 @@
-<div class="page">
+<div class="patients-shell">
   <aside class="sidebar">
-    <div class="logo">QuickMed</div>
+    <div class="logo">
+      <div class="mark">QM</div>
+      <div>
+        <p class="eyebrow">QuickMed</p>
+        <strong>Doctor Portal</strong>
+      </div>
+    </div>
+
     <nav>
       <a *ngFor="let item of menuItems" [routerLink]="item.route" routerLinkActive="active">
         <i class="bi" [ngClass]="item.icon"></i>
         <span>{{ item.label }}</span>
       </a>
     </nav>
+
+    <div class="sidebar-user" *ngIf="currentUser() as user">
+      <div class="avatar">{{ (user.firstName?.[0] || 'D') + (user.lastName?.[0] || '') }}</div>
+      <div>
+        <p class="name">Dr. {{ user.firstName }} {{ user.lastName }}</p>
+        <p class="role">{{ user.specialty || 'Provider' }}</p>
+      </div>
+    </div>
   </aside>
 
   <main class="content">
-    <header class="page-header">
-      <div>
+    <header class="hero">
+      <div class="hero-copy">
         <p class="eyebrow">Care continuity</p>
         <h1>My Patients</h1>
-        <p class="subtitle">Review your patient list and jump into charts, messages, or calls.</p>
+        <p class="subtitle">Spot high-touch patients, follow up quickly, and jump into charts or messaging without friction.</p>
+        <div class="hero-actions">
+          <div class="search">
+            <i class="bi bi-search"></i>
+            <input type="text" placeholder="Search by name, email, or phone" [ngModel]="searchTerm()" (ngModelChange)="searchTerm.set($event)" />
+          </div>
+          <div class="pills">
+            <button [class.active]="statusFilter()==='all'" (click)="statusFilter.set('all')">All</button>
+            <button [class.active]="statusFilter()==='active'" (click)="statusFilter.set('active')">Active</button>
+            <button [class.active]="statusFilter()==='inactive'" (click)="statusFilter.set('inactive')">Inactive</button>
+          </div>
+          <div class="sort">
+            <label>Sort</label>
+            <select [ngModel]="sortBy()" (ngModelChange)="sortBy.set($event)">
+              <option value="recent">Recently seen</option>
+              <option value="visits">Most visits</option>
+              <option value="alpha">A → Z</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="hero-stats">
+        <div class="stat-card">
+          <p class="label">Total patients</p>
+          <div class="value">{{ totalPatients() }}</div>
+          <p class="hint">{{ recentlySeen() }} seen in last 30 days</p>
+        </div>
+        <div class="stat-card">
+          <p class="label">Active</p>
+          <div class="value success">{{ activePatients() }}</div>
+          <p class="hint">{{ inactivePatients() }} inactive</p>
+        </div>
+        <div class="stat-card">
+          <p class="label">Avg visits</p>
+          <div class="value">{{ avgVisits() }}</div>
+          <p class="hint">per patient</p>
+        </div>
       </div>
     </header>
 
     <div *ngIf="isLoading()" class="skeleton">Loading patients...</div>
 
-    <div *ngIf="!isLoading() && patients().length === 0" class="empty">
+    <div *ngIf="!isLoading() && filteredPatients().length === 0" class="empty">
       <i class="bi bi-people"></i>
-      <p>No patients yet. Once appointments are completed, patients will appear here.</p>
+      <p>No patients match these filters. Clear search or adjust filters to see more.</p>
     </div>
 
-    <div class="card-grid" *ngIf="!isLoading() && patients().length > 0">
-      <div class="patient-card" *ngFor="let p of patients()">
-        <div class="header">
-          <div class="avatar">{{ (p.firstName[0] || 'P') + (p.lastName[0] || '') }}</div>
-          <div>
-            <h3>{{ getFullName(p) }}</h3>
-            <p class="muted">{{ p.email || 'No email' }}</p>
-            <p class="muted">{{ p.phoneNumber || 'No phone' }}</p>
+    <div class="card-grid" *ngIf="!isLoading() && filteredPatients().length > 0">
+      <div class="patient-card" *ngFor="let p of filteredPatients()">
+        <div class="card-top">
+          <div class="avatar">{{ getInitials(p) }}</div>
+          <div class="identity">
+            <div class="name-row">
+              <h3>{{ getFullName(p) || 'Unnamed patient' }}</h3>
+              <span class="pill" [class.success]="p.isActive !== false" [class.muted]="p.isActive === false">{{ p.isActive === false ? 'Inactive' : 'Active' }}</span>
+              <span class="pill ghost">{{ getSegment(p) }}</span>
+            </div>
+            <p class="contact">{{ p.email || p.phoneNumber || 'No contact info' }}</p>
+            <p class="meta">Last seen {{ formatLastSeen(p) }}</p>
           </div>
-          <span class="chip" [class.active]="p.isActive">{{ p.isActive ? 'Active' : 'Inactive' }}</span>
         </div>
 
-        <div class="meta">
+        <div class="insights">
           <div>
             <p class="label">Last appointment</p>
-            <p class="value">{{ p.lastAppointmentDate | date:'mediumDate' }} {{ p.lastAppointmentTime }}</p>
+            <p class="value">{{ p.lastAppointmentDate ? (p.lastAppointmentDate | date:'mediumDate') : '—' }}<span *ngIf="p.lastAppointmentTime"> • {{ p.lastAppointmentTime }}</span></p>
           </div>
           <div>
             <p class="label">Status</p>
-            <p class="value">{{ p.lastStatus || '—' }}</p>
+            <p class="value" [class]="'tone-' + getStatusTone(p)">{{ p.lastStatus || '—' }}</p>
           </div>
           <div>
             <p class="label">Visits</p>
             <p class="value">{{ p.totalAppointments }}</p>
+            <div class="bar">
+              <span [style.width.%]="Math.min((p.totalAppointments || 0) * 12.5, 100)"></span>
+            </div>
           </div>
         </div>
 

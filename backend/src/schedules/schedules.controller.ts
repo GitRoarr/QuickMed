@@ -64,4 +64,17 @@ export class SchedulesController {
     const doctorId = req.user?.id ?? req.user?.sub ?? req.headers['x-doctor-id'];
     return this.svc.getBlockedDays(doctorId, Number(year), Number(month));
   }
+
+  // Working days management
+  @Get('working-days')
+  async getWorkingDays(@Req() req: any) {
+    const doctorId = req.user?.id ?? req.user?.sub ?? req.headers['x-doctor-id'];
+    return this.svc.getDoctorWorkingDays(doctorId);
+  }
+
+  @Post('working-days')
+  async updateWorkingDays(@Req() req: any, @Body() body: { days: number[] }) {
+    const doctorId = req.user?.id ?? req.user?.sub ?? req.headers['x-doctor-id'];
+    return this.svc.updateDoctorWorkingDays(doctorId, body.days || []);
+  }
 }

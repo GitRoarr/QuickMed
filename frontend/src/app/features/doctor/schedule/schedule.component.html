@@ -155,6 +155,7 @@
         </div>
       </header>
 
+      <div class="board-scroll">
       <ng-container [ngSwitch]="viewMode()">
         <div *ngSwitchCase="'day'">
           <div *ngIf="daySlots().length; else emptyState" class="timeline">
@@ -212,6 +213,7 @@
           <button class="primary" (click)="saveAvailability()">Generate slots</button>
         </div>
       </ng-template>
+      </div>
     </section>
   </main>
 </div>
