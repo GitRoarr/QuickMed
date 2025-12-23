@@ -76,6 +76,13 @@ export interface DoctorPatientSummary {
   isActive?: boolean;
 }
 
+export interface DoctorListItem {
+  id: string;
+  firstName: string;
+  lastName: string;
+  specialty?: string;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -98,5 +105,9 @@ export class DoctorService {
 
   getMyPatients(): Observable<DoctorPatientSummary[]> {
     return this.http.get<DoctorPatientSummary[]>(`${this.API_URL}/patients`);
+  }
+
+  listDoctors(): Observable<DoctorListItem[]> {
+    return this.http.get<DoctorListItem[]>(`${this.API_URL}`);
   }
 }

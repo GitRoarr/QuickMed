@@ -30,32 +30,36 @@ export class SchedulingService {
     return date.toISOString().split('T')[0];
   }
 
-  getDaySchedule(date: Date | string): Observable<DoctorSlot[]> {
+  private withDoctorHeader(doctorId?: string) {
+    return doctorId ? { headers: { 'x-doctor-id': doctorId } } : {};
+  }
+
+  getDaySchedule(date: Date | string, doctorId?: string): Observable<DoctorSlot[]> {
     const formatted = this.normalizeDate(date);
     return this.http
-      .get<DayScheduleResponse>(`${this.API_URL}/${formatted}`)
+      .get<DayScheduleResponse>(`${this.API_URL}/${formatted}`, this.withDoctorHeader(doctorId))
       .pipe(map(res => res.slots));
   }
 
-  setAvailable(date: Date | string, startTime: string, endTime?: string): Observable<any> {
+  setAvailable(date: Date | string, startTime: string, endTime?: string, doctorId?: string): Observable<any> {
     const payload = endTime
       ? { date: this.normalizeDate(date), startTime, endTime }
       : { date: this.normalizeDate(date), time: startTime };
-    return this.http.post(`${this.API_URL}/available`, payload);
+    return this.http.post(`${this.API_URL}/available`, payload, this.withDoctorHeader(doctorId));
   }
 
-  blockSlot(date: Date | string, startTime: string, endTime?: string): Observable<any> {
+  blockSlot(date: Date | string, startTime: string, endTime?: string, doctorId?: string): Observable<any> {
     const payload = endTime
       ? { date: this.normalizeDate(date), startTime, endTime }
       : { date: this.normalizeDate(date), time: startTime };
-    return this.http.post(`${this.API_URL}/block`, payload);
+    return this.http.post(`${this.API_URL}/block`, payload, this.withDoctorHeader(doctorId));
   }
 
-  unblockSlot(date: Date | string, startTime: string, endTime?: string): Observable<any> {
+  unblockSlot(date: Date | string, startTime: string, endTime?: string, doctorId?: string): Observable<any> {
     const payload = endTime
       ? { date: this.normalizeDate(date), startTime, endTime }
       : { date: this.normalizeDate(date), time: startTime };
-    return this.http.post(`${this.API_URL}/unblock`, payload);
+    return this.http.post(`${this.API_URL}/unblock`, payload, this.withDoctorHeader(doctorId));
   }
 
   getMonthlyOverview(year: number, month: number): Observable<any> {

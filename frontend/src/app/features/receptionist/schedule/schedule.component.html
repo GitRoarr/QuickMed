@@ -1,0 +1,68 @@
+<div class="receptionist-layout">
+  <app-header></app-header>
+  <div class="body">
+    <app-sidebar [title]="'Receptionist'" [menuItems]="menuItems"></app-sidebar>
+    <main class="panel">
+      <section class="head">
+        <div>
+          <p class="eyebrow">Schedule</p>
+          <h1>Manage doctor slots</h1>
+          <p class="muted">Choose a doctor, pick a date, and open or block slots for them.</p>
+        </div>
+        <div class="filters">
+          <label class="field">
+            <span>Doctor</span>
+            <select [ngModel]="selectedDoctorId()" (ngModelChange)="selectedDoctorId.set($event); onDoctorChange()" [ngModelOptions]="{standalone:true}">
+              <option value="" disabled>Select doctor</option>
+              <option *ngFor="let doc of doctors()" [value]="doc.id">{{ doc.firstName }} {{ doc.lastName }} {{ doc.specialty ? '(' + doc.specialty + ')' : '' }}</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>Date</span>
+            <input type="date" [ngModel]="selectedDate()" (ngModelChange)="selectedDate.set($event); loadSlots()" [ngModelOptions]="{standalone:true}" />
+          </label>
+          <label class="field narrow">
+            <span>Start</span>
+            <input type="time" [ngModel]="startTime()" (ngModelChange)="startTime.set($event)" [ngModelOptions]="{standalone:true}" />
+          </label>
+          <label class="field narrow">
+            <span>End</span>
+            <input type="time" [ngModel]="endTime()" (ngModelChange)="endTime.set($event)" [ngModelOptions]="{standalone:true}" />
+          </label>
+          <div class="actions">
+            <button class="primary" (click)="setAvailable()" [disabled]="!selectedDoctorId()">Set available</button>
+            <button class="ghost danger" (click)="blockSlot()" [disabled]="!selectedDoctorId()">Block</button>
+          </div>
+        </div>
+        <p class="status" *ngIf="statusMessage()">{{ statusMessage() }}</p>
+      </section>
+
+      <section class="card">
+        <header class="card-head">
+          <div>
+            <h3>Slots for {{ selectedDate() }}</h3>
+            <p class="muted">Live view of this doctor's day. Toggle availability or unblock as needed.</p>
+          </div>
+          <button class="ghost" (click)="loadSlots()" [disabled]="isLoading()">Refresh</button>
+        </header>
+
+        <div *ngIf="isLoading()" class="loading">Loading slots…</div>
+        <div *ngIf="!isLoading() && !slots().length" class="empty">No slots yet. Set availability to generate one.</div>
+
+        <div class="slots" *ngIf="slots().length">
+          <div class="slot" *ngFor="let slot of slots()">
+            <div>
+              <p class="time">{{ slot.startTime }} – {{ slot.endTime }}</p>
+              <p class="muted">Status: {{ slot.status }}</p>
+            </div>
+            <div class="slot-actions">
+              <button class="ghost" *ngIf="slot.status === 'blocked'" (click)="unblock(slot)">Unblock</button>
+              <button class="ghost" *ngIf="slot.status !== 'blocked'" (click)="blockSlotFromSlot(slot)">Block this time</button>
+              <button class="primary" (click)="setAvailableFromSlot(slot)">Set available</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>

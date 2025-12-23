@@ -307,6 +307,10 @@ export const routes: Routes = [
         loadComponent: () => import('./features/receptionist/appointment-form/appointment-form.component').then(m => m.AppointmentFormComponent)
       },
       {
+        path: 'schedule',
+        loadComponent: () => import('./features/receptionist/schedule/schedule.component').then(m => m.ReceptionistScheduleComponent)
+      },
+      {
         path: '',
         pathMatch: 'full',
         redirectTo: 'dashboard'

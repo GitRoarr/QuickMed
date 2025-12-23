@@ -67,7 +67,6 @@
             <option [ngValue]="60">60m</option>
           </select>
         </div>
-        <button class="ghost" (click)="showLegend.set(!showLegend())">Legend</button>
       </div>
     </header>
 
@@ -119,13 +118,6 @@
           </div>
         </div>
 
-        <div class="legend" *ngIf="showLegend()">
-          <div class="legend-item"><span class="dot green"></span>Confirmed</div>
-          <div class="legend-item"><span class="dot yellow"></span>Pending</div>
-          <div class="legend-item"><span class="dot red"></span>Cancelled</div>
-          <div class="legend-item"><span class="dot blue"></span>Online</div>
-          <div class="legend-item"><span class="dot gray"></span>Available</div>
-        </div>
       </div>
 
       <div class="today-card">
