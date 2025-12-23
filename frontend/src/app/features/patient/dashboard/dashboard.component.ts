@@ -44,23 +44,29 @@ export class DashboardComponent implements OnInit {
     if (!vitals) {
       return [];
     }
+    const bpValue = vitals.bloodPressure.systolic && vitals.bloodPressure.diastolic
+      ? `${vitals.bloodPressure.systolic}/${vitals.bloodPressure.diastolic}`
+      : '—';
+    const heart = vitals.heartRate ?? null;
+    const bmi = vitals.bmi ?? null;
+
     return [
       {
         label: 'Blood Pressure',
-        value: `${vitals.bloodPressure.systolic}/${vitals.bloodPressure.diastolic}`,
-        status: 'Normal',
+        value: bpValue,
+        status: bpValue !== '—' ? 'Normal' : 'Not recorded',
         icon: 'bi-activity',
       },
       {
         label: 'Heart Rate',
-        value: `${vitals.heartRate} BPM`,
-        status: vitals.heartRate < 60 || vitals.heartRate > 100 ? 'Needs attention' : 'Healthy',
+        value: heart !== null ? `${heart} BPM` : '—',
+        status: heart !== null && (heart < 60 || heart > 100) ? 'Needs attention' : heart !== null ? 'Healthy' : 'Not recorded',
         icon: 'bi-heart-pulse',
       },
       {
         label: 'BMI',
-        value: vitals.bmi.toFixed(1),
-        status: vitals.bmi >= 18.5 && vitals.bmi <= 24.9 ? 'Normal Weight' : 'Review',
+        value: bmi !== null ? bmi.toFixed(1) : '—',
+        status: bmi !== null ? (bmi >= 18.5 && bmi <= 24.9 ? 'Normal Weight' : 'Review') : 'Not recorded',
         icon: 'bi-person',
       },
       {
@@ -100,28 +106,23 @@ export class DashboardComponent implements OnInit {
 
   getStatsCards() {
     const stats = this.dashboard()?.stats;
+    const quick = this.dashboard()?.quickStats;
     if (!stats) return [];
+
+    if (quick) {
+      return [
+        { label: 'Upcoming', value: quick.upcoming, icon: 'bi-calendar-event' },
+        { label: 'Active Meds', value: quick.activeMeds, icon: 'bi-capsule-pill' },
+        { label: 'Records', value: quick.records, icon: 'bi-file-medical' },
+        { label: 'Test Results', value: quick.testResults, icon: 'bi-activity' },
+      ];
+    }
+
     return [
-      {
-        label: 'Total Appointments',
-        value: stats.totalAppointments,
-        icon: 'bi-calendar4-week',
-      },
-      {
-        label: 'Confirmed Visits',
-        value: stats.confirmed,
-        icon: 'bi-check2-circle',
-      },
-      {
-        label: 'Video Visits',
-        value: stats.videoVisits,
-        icon: 'bi-camera-video',
-      },
-      {
-        label: 'In-person Visits',
-        value: stats.inPersonVisits,
-        icon: 'bi-geo-alt',
-      },
+      { label: 'Total Appointments', value: stats.totalAppointments, icon: 'bi-calendar4-week' },
+      { label: 'Confirmed Visits', value: stats.confirmed, icon: 'bi-check2-circle' },
+      { label: 'Video Visits', value: stats.videoVisits, icon: 'bi-camera-video' },
+      { label: 'In-person Visits', value: stats.inPersonVisits, icon: 'bi-geo-alt' },
     ];
   }
 }

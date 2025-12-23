@@ -5,11 +5,11 @@ import { environment } from '@environments/environment';
 
 export interface PatientDashboardVitals {
   bloodPressure: {
-    systolic: number;
-    diastolic: number;
+    systolic: number | null;
+    diastolic: number | null;
   };
-  heartRate: number;
-  bmi: number;
+  heartRate: number | null;
+  bmi: number | null;
   lastCheckupDate: string | null;
 }
 
@@ -52,6 +52,13 @@ export interface PatientDashboardStats {
   inPersonVisits: number;
 }
 
+export interface PatientDashboardQuickStats {
+  upcoming: number;
+  activeMeds: number;
+  records: number;
+  testResults: number;
+}
+
 export interface PatientDashboardData {
   patient: {
     id: string;
@@ -61,6 +68,7 @@ export interface PatientDashboardData {
   };
   vitals: PatientDashboardVitals;
   stats: PatientDashboardStats;
+  quickStats?: PatientDashboardQuickStats;
   upcomingAppointments: PatientDashboardAppointment[];
   prescriptions: PatientDashboardPrescription[];
   labResults: PatientDashboardLabResult[];

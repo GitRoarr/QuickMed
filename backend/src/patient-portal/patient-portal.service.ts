@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, MoreThanOrEqual } from 'typeorm';
 import { Appointment } from '../appointments/entities/appointment.entity';
 import { MedicalRecord, MedicalRecordType } from '../medical-records/entities/medical-record.entity';
 import { Prescription, PrescriptionStatus } from '../prescriptions/entities/prescription.entity';
@@ -44,10 +44,28 @@ export class PatientPortalService {
       take: 5,
     });
 
+    const activeMedsCount = await this.prescriptionsRepository.count({
+      where: { patientId, status: PrescriptionStatus.ACTIVE },
+    });
+
     const recentLabResults = await this.medicalRecordsRepository.find({
       where: { patientId },
       order: { recordDate: 'DESC' },
       take: 5,
+    });
+
+    const totalRecordsCount = await this.medicalRecordsRepository.count({ where: { patientId } });
+    const labResultsCount = await this.medicalRecordsRepository.count({
+      where: { patientId, type: MedicalRecordType.LAB },
+    });
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const upcomingCount = await this.appointmentsRepository.count({
+      where: {
+        patientId,
+        appointmentDate: MoreThanOrEqual(today),
+      },
     });
 
     const stats = {
@@ -66,14 +84,20 @@ export class PatientPortalService {
       },
       vitals: {
         bloodPressure: {
-          systolic: user.bloodPressureSystolic ?? 120,
-          diastolic: user.bloodPressureDiastolic ?? 80,
+          systolic: user.bloodPressureSystolic ?? null,
+          diastolic: user.bloodPressureDiastolic ?? null,
         },
-        heartRate: user.heartRate ?? 72,
-        bmi: user.bmi ?? 23.5,
+        heartRate: user.heartRate ?? null,
+        bmi: user.bmi ?? null,
         lastCheckupDate: user.lastCheckupDate ?? null,
       },
       stats,
+      quickStats: {
+        upcoming: upcomingCount,
+        activeMeds: activeMedsCount,
+        records: totalRecordsCount,
+        testResults: labResultsCount,
+      },
       upcomingAppointments,
       prescriptions: prescriptions.map((prescription) => ({
         id: prescription.id,
