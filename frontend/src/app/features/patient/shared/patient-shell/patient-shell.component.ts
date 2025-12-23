@@ -23,6 +23,7 @@ export class PatientShellComponent implements OnInit {
   sidebarOpen = false;
   mobile = false;
   themeMode = signal<'light' | 'dark'>('light');
+  private readonly THEME_KEY = 'patient_theme_mode';
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
   private readonly messageService = inject(MessageService);
@@ -47,6 +48,16 @@ export class PatientShellComponent implements OnInit {
 
   setTheme(mode: 'light' | 'dark'): void {
     this.themeMode.set(mode);
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem(this.THEME_KEY, mode);
+      } catch {}
+    }
+  }
+
+  toggleTheme(): void {
+    const next = this.themeMode() === 'dark' ? 'light' : 'dark';
+    this.setTheme(next);
   }
 
   navigate(route: string): void {
@@ -64,6 +75,13 @@ export class PatientShellComponent implements OnInit {
   ngOnInit(): void {
     this.mobile = typeof window !== 'undefined' && window.innerWidth <= 1024;
     this.loadCounts();
+    const stored = typeof window !== 'undefined' ? localStorage.getItem(this.THEME_KEY) : null;
+    if (stored === 'dark' || stored === 'light') {
+      this.themeMode.set(stored as 'light' | 'dark');
+    } else if (typeof window !== 'undefined' && window.matchMedia) {
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      this.themeMode.set(prefersDark ? 'dark' : 'light');
+    }
   }
 
   private loadCounts(): void {
@@ -81,6 +99,13 @@ export class PatientShellComponent implements OnInit {
   @HostListener('window:resize', ['$event'])
   onResize(): void {
     this.mobile = typeof window !== 'undefined' && window.innerWidth <= 1024;
+  }
+
+  @HostListener('window:storage', ['$event'])
+  onStorage(e: StorageEvent): void {
+    if (e && e.key === this.THEME_KEY && (e.newValue === 'dark' || e.newValue === 'light')) {
+      this.themeMode.set(e.newValue as 'light' | 'dark');
+    }
   }
 
   logout(): void {

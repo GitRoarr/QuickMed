@@ -92,6 +92,28 @@ export class AppointmentsService {
       throw new BadRequestException("This time slot has a pending appointment. Please choose another time.");
     }
 
+    // Respect the doctor's schedule: block booking if the slot is blocked or not available
+    const dateStr = this.toDateString(appointmentDate);
+    const timeStr = this.toTimeString(appointmentTime);
+    try {
+      const day = await this.schedulesService.getDaySchedule(assignedDoctorId, dateStr);
+      const slot = (day?.slots || []).find((s: any) => {
+        const start = this.toTimeString(s.startTime || s.time);
+        const end = this.toTimeString(s.endTime) || start;
+        return this.timeWithinSlot(timeStr, start, end);
+      });
+
+      if (slot && (slot.status === 'blocked' || slot.status === 'booked')) {
+        throw new BadRequestException('Selected slot is not available. Please pick another time.');
+      }
+    } catch (err) {
+      if (err instanceof BadRequestException) {
+        throw err;
+      }
+      // If schedule lookup fails, continue with appointment creation to avoid hard failures.
+      console.warn('Schedule lookup failed during appointment creation', err);
+    }
+
     const appointment = this.appointmentsRepository.create({
       patientId,
       doctorId: assignedDoctorId,
@@ -311,6 +333,19 @@ export class AppointmentsService {
     if (!t) return '';
     if (t instanceof Date) return t.toTimeString().slice(0, 5);
     return String(t).slice(0, 5);
+  }
+
+  private timeWithinSlot(time: string, start: string, end: string): boolean {
+    if (!time || !start) return false;
+    const toMinutes = (val: string) => {
+      const [h, m] = val.split(':').map(Number);
+      return (h || 0) * 60 + (m || 0);
+    };
+    const t = toMinutes(time);
+    const s = toMinutes(start);
+    const e = end ? toMinutes(end) : s;
+    if (e === s) return t === s;
+    return t >= s && t < e;
   }
 
   // Auto-select an available doctor for the given date/time

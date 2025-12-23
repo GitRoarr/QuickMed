@@ -34,7 +34,12 @@
       <div class="doctor-card" *ngFor="let doctor of filteredDoctors()">
         <div class="card-head">
           <div class="avatar">
-            <i class="bi bi-person"></i>
+            <ng-container *ngIf="doctor.avatar; else doctorInitial">
+              <img [src]="doctor.avatar" alt="Dr. {{ doctor.firstName }} {{ doctor.lastName }}" />
+            </ng-container>
+            <ng-template #doctorInitial>
+              {{ (doctor.firstName?.charAt(0) || 'D') + (doctor.lastName?.charAt(0) || '') }}
+            </ng-template>
           </div>
           <span class="availability" [class.available]="doctor.available">
             {{ doctor.available ? 'Available' : 'Unavailable' }}
@@ -90,7 +95,12 @@
       </div>
       <div class="modal-body" *ngIf="selectedDoctor()">
         <div class="doctor-summary">
-          <div class="avatar small">{{ getSelectedDoctorInitial() }}</div>
+          <div class="avatar small">
+            <ng-container *ngIf="selectedDoctor()?.avatar; else selectedInitial">
+              <img [src]="selectedDoctor()?.avatar!" alt="Dr. {{ selectedDoctor()?.firstName }} {{ selectedDoctor()?.lastName }}" />
+            </ng-container>
+            <ng-template #selectedInitial>{{ getSelectedDoctorInitial() }}</ng-template>
+          </div>
           <div>
             <p class="doctor-name">Dr. {{ selectedDoctor()?.firstName }} {{ selectedDoctor()?.lastName }}</p>
             <p class="muted">{{ selectedDoctor()?.specialty }}</p>

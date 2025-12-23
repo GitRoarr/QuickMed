@@ -52,11 +52,8 @@
   <main class="patient-shell__content">
     <div class="patient-shell__topbar">
       <div class="theme-switch">
-        <button class="theme-btn" type="button" [class.active]="themeMode()==='light'" (click)="setTheme('light')" title="Light mode">
-          <i class="bi bi-brightness-high"></i>
-        </button>
-        <button class="theme-btn" type="button" [class.active]="themeMode()==='dark'" (click)="setTheme('dark')" title="Dark mode">
-          <i class="bi bi-moon"></i>
+        <button class="theme-btn" type="button" (click)="toggleTheme()" title="Toggle theme">
+          <i class="bi" [ngClass]="themeMode()==='dark' ? 'bi-moon' : 'bi-brightness-high'"></i>
         </button>
       </div>
       <button class="patient-shell__icon-btn" type="button" [routerLink]="'/patient/messages'" title="Messages">

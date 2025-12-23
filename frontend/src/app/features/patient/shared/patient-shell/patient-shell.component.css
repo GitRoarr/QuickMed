@@ -159,6 +159,11 @@
   align-items: center;
   gap: 1rem;
   margin-bottom: 1.25rem;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 0.5rem 0.75rem;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
 }
 
 .theme-switch {
