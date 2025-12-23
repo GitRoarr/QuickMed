@@ -9,6 +9,7 @@ import { BadgeService } from '@core/services/badge.service';
 import { MessageService } from '@core/services/message.service';
 import { NotificationService } from '@core/services/notification.service';
 import { forkJoin } from 'rxjs';
+import { ToastService } from '@core/services/toast.service';
 import { SchedulingService, DoctorSlot } from '../../../core/services/schedule.service';
 
 interface MenuItem {
@@ -58,6 +59,7 @@ export class ScheduleComponent implements OnInit {
   private notificationService = inject(NotificationService);
   private authService = inject(AuthService);
   private router = inject(Router);
+  private toast = inject(ToastService);
 
   // Availability form state
   availabilityMode = signal<'single' | 'range'>('single');
@@ -75,6 +77,8 @@ export class ScheduleComponent implements OnInit {
   });
 
   daySlots = computed(() => this.buildDaySlots(this.selectedDate()));
+  hasBlockedSlots = computed(() => (this.daySlots() || []).some(s => (s.status || 'available') === 'blocked'));
+  visibleDaySlots = computed(() => (this.daySlots() || []).filter(s => (s.status || 'available') !== 'blocked'));
   nextAppointment = computed(() => this.getNextAppointment());
 
   getSlots(): DoctorSlot[] {
@@ -101,15 +105,24 @@ export class ScheduleComponent implements OnInit {
     set.has(day) ? set.delete(day) : set.add(day);
     const updated = Array.from(set).sort();
     this.workingDays.set(updated);
-    this.scheduleService.updateWorkingDays(updated).subscribe();
+    this.scheduleService.updateWorkingDays(updated).subscribe({
+      next: () => this.toast.success('Working days updated', { title: 'Schedule' }),
+      error: () => this.toast.error('Failed to update working days', { title: 'Schedule' }),
+    });
   }
 
   saveAvailability(): void {
     // Persist current day's availability to backend
     const dateStr = this.toDateOnly(this.selectedDate());
     this.scheduleService.setAvailable(dateStr, this.workingStart(), this.workingEnd()).subscribe({
-      next: () => this.loadSlots(),
-      error: () => this.loadSlots(),
+      next: () => {
+        this.toast.success('Availability saved', { title: 'Schedule' });
+        this.loadSlots();
+      },
+      error: () => {
+        this.toast.error('Failed to save availability', { title: 'Schedule' });
+        this.loadSlots();
+      },
     });
   }
 
@@ -118,15 +131,27 @@ export class ScheduleComponent implements OnInit {
     if (this.availabilityMode() === 'single') {
       const time = this.singleTime();
       this.scheduleService.setAvailable(dateStr, time).subscribe({
-        next: () => this.loadSlots(),
-        error: () => this.loadSlots(),
+        next: () => {
+          this.toast.success('Marked as available', { title: 'Schedule' });
+          this.loadSlots();
+        },
+        error: () => {
+          this.toast.error('Failed to mark available', { title: 'Schedule' });
+          this.loadSlots();
+        },
       });
     } else {
       const start = this.rangeStart();
       const end = this.rangeEnd();
       this.scheduleService.setAvailable(dateStr, start, end).subscribe({
-        next: () => this.loadSlots(),
-        error: () => this.loadSlots(),
+        next: () => {
+          this.toast.success('Marked as available', { title: 'Schedule' });
+          this.loadSlots();
+        },
+        error: () => {
+          this.toast.error('Failed to mark available', { title: 'Schedule' });
+          this.loadSlots();
+        },
       });
     }
   }
@@ -188,14 +213,26 @@ export class ScheduleComponent implements OnInit {
     const dateStr = this.selectedDate().toISOString().split('T')[0];
     const startTime = slot.startTime || slot.time!;
     const endTime = slot.endTime || startTime;
-    this.scheduleService.setAvailable(dateStr, startTime, endTime).subscribe(() => this.loadSlots());
+    this.scheduleService.setAvailable(dateStr, startTime, endTime).subscribe({
+      next: () => {
+        this.toast.success('Marked as available', { title: 'Schedule' });
+        this.loadSlots();
+      },
+      error: () => this.toast.error('Failed to mark available', { title: 'Schedule' }),
+    });
   }
 
   blockSlot(slot: DoctorSlot): void {
     const dateStr = this.selectedDate().toISOString().split('T')[0];
     const startTime = slot.startTime || slot.time!;
     const endTime = slot.endTime || startTime;
-    this.scheduleService.blockSlot(dateStr, startTime, endTime).subscribe(() => this.loadSlots());
+    this.scheduleService.blockSlot(dateStr, startTime, endTime).subscribe({
+      next: () => {
+        this.toast.success('Slot blocked', { title: 'Schedule' });
+        this.loadSlots();
+      },
+      error: () => this.toast.error('Failed to block slot', { title: 'Schedule' }),
+    });
   }
 
   getSlotStatus(slot: DoctorSlot): string {
@@ -208,6 +245,15 @@ export class ScheduleComponent implements OnInit {
     return this.appointments().find(
       apt => apt.appointmentDate === dayStr && apt.appointmentTime.startsWith(startTime)
     ) || null;
+  }
+
+  isPastSlot(slot: DoctorSlot): boolean {
+    const dateStr = this.toDateOnly(this.selectedDate());
+    const end = (slot.endTime || slot.startTime || slot.time || '').trim();
+    if (!dateStr || !end) return false;
+    const now = new Date();
+    const target = new Date(`${dateStr}T${end}:00`);
+    return target.getTime() < now.getTime();
   }
 
   mapStatus(status: AppointmentStatus | string): 'available' | 'booked' | 'blocked' | 'pending' | 'cancelled' | 'completed' {
@@ -308,25 +354,43 @@ export class ScheduleComponent implements OnInit {
 
   // ==================== Quick actions ====================
   acceptAppointment(appt: Appointment): void {
-    this.updateAppointmentStatus(appt, AppointmentStatus.CONFIRMED);
+    this.updateAppointmentStatus(appt, AppointmentStatus.CONFIRMED, 'Appointment accepted');
   }
 
   rejectAppointment(appt: Appointment): void {
-    this.appointmentService.cancel(appt.id).subscribe(() => this.loadAppointments());
+    this.appointmentService.cancel(appt.id).subscribe({
+      next: () => {
+        this.toast.success('Appointment cancelled', { title: 'Appointments' });
+        this.loadAppointments();
+      },
+      error: () => this.toast.error('Failed to cancel appointment', { title: 'Appointments' }),
+    });
   }
 
   completeAppointment(appt: Appointment): void {
-    this.updateAppointmentStatus(appt, AppointmentStatus.COMPLETED);
+    this.updateAppointmentStatus(appt, AppointmentStatus.COMPLETED, 'Appointment completed');
   }
 
   rescheduleAppointment(appt: Appointment): void {
     const newTime = prompt('Enter new time (HH:mm)', appt.appointmentTime.slice(0,5));
     if (!newTime) return;
-    this.appointmentService.update(appt.id, { appointmentTime: newTime }).subscribe(() => this.loadAppointments());
+    this.appointmentService.update(appt.id, { appointmentTime: newTime }).subscribe({
+      next: () => {
+        this.toast.success('Appointment rescheduled', { title: 'Appointments' });
+        this.loadAppointments();
+      },
+      error: () => this.toast.error('Failed to reschedule appointment', { title: 'Appointments' }),
+    });
   }
 
-  private updateAppointmentStatus(appt: Appointment, status: AppointmentStatus): void {
-    this.appointmentService.update(appt.id, { status }).subscribe(() => this.loadAppointments());
+  private updateAppointmentStatus(appt: Appointment, status: AppointmentStatus, successMsg?: string): void {
+    this.appointmentService.update(appt.id, { status }).subscribe({
+      next: () => {
+        if (successMsg) this.toast.success(successMsg, { title: 'Appointments' });
+        this.loadAppointments();
+      },
+      error: () => this.toast.error('Failed to update appointment', { title: 'Appointments' }),
+    });
   }
 
   joinCall(appt: Appointment): void {

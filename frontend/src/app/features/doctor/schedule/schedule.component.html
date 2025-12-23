@@ -44,18 +44,11 @@
     </div>
   </aside>
 
-  <!-- Main Content -->
   <main class="main-content">
     <div class="topbar">
-      <div class="search-box">
-        <i class="bi bi-search"></i>
-        <input type="text" placeholder="Search or type a command" />
-      </div>
+     
       <div class="topbar-actions">
-        <button class="primary topbar-btn" [routerLink]="'/doctor/appointments'">
-          <i class="bi bi-plus-lg"></i>
-          Book Appointment
-        </button>
+        
         <div class="divider"></div>
         <button class="icon-btn" [routerLink]="'/doctor/messages'" title="Messages">
           <i class="bi bi-chat-dots"></i>
@@ -182,7 +175,7 @@
       <header class="board-head">
         <div>
           <h3>{{ selectedDate() | date:'MMMM d, yyyy' }}</h3>
-          <p class="muted">Slots generated automatically from your availability. Accept, reject, or reschedule quickly.</p>
+          <p class="muted" *ngIf="!hasBlockedSlots()">Slots generated automatically from your availability. Accept, reject, or reschedule quickly.</p>
         </div>
         <div class="quick-filters">
           <span class="chip">Day view</span>
@@ -193,8 +186,8 @@
       <div class="board-scroll">
       <ng-container [ngSwitch]="viewMode()">
         <div *ngSwitchCase="'day'">
-          <div *ngIf="daySlots().length; else emptyState" class="timeline">
-            <div class="slot-row" *ngFor="let slot of daySlots()">
+          <div *ngIf="visibleDaySlots().length; else emptyState" class="timeline">
+            <div class="slot-row" *ngFor="let slot of visibleDaySlots()">
               <div class="slot-time">{{ slot.startTime }} - {{ slot.endTime }}</div>
               <div class="slot-card" [ngClass]="[slot.status, getAppointmentForSlot(slot)?.isVideoConsultation ? 'online' : '']">
                 <ng-container *ngIf="getAppointmentForSlot(slot) as appt; else available">
@@ -214,11 +207,11 @@
                   <div class="slot-meta available-row">
                     <div>
                       <div class="patient">Available</div>
-                      <div class="type">{{ slot.status === 'blocked' ? 'Blocked' : 'Open for booking' }}</div>
+                      <div class="type">{{ isPastSlot(slot) ? 'Past time' : (slot.status === 'blocked' ? 'Blocked' : 'Open for booking') }}</div>
                     </div>
                     <div class="actions">
-                      <button class="ghost" *ngIf="slot.status === 'blocked'" (click)="setAvailableSlot(slot)">Set available</button>
-                      <button class="ghost danger" *ngIf="slot.status !== 'blocked'" (click)="blockSlot(slot)">Block</button>
+                      <button class="ghost" *ngIf="slot.status === 'blocked'" (click)="setAvailableSlot(slot)" [disabled]="isPastSlot(slot)">Set available</button>
+                      <button class="ghost danger" *ngIf="slot.status !== 'blocked'" (click)="blockSlot(slot)" [disabled]="isPastSlot(slot)">Block</button>
                     </div>
                   </div>
                 </ng-template>

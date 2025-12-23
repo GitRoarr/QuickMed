@@ -3,13 +3,7 @@
   <div class="body">
     <app-sidebar [title]="'Receptionist'" [menuItems]="menuItems"></app-sidebar>
     <main class="panel">
-      <!-- Toast overlay -->
-      <div class="toast-container" *ngIf="toasts().length">
-        <div class="toast" *ngFor="let t of toasts()" [class.success]="t.type==='success'" [class.error]="t.type==='error'">
-          <i class="bi" [ngClass]="t.type==='success' ? 'bi-check-circle' : 'bi-exclamation-triangle'"></i>
-          <span>{{ t.text }}</span>
-        </div>
-      </div>
+      <!-- Toasts handled globally by app-toast-container -->
       <section class="head">
         <div>
           <p class="eyebrow">Schedule</p>
@@ -60,12 +54,12 @@
           <div class="slot" *ngFor="let slot of slots()">
             <div>
               <p class="time">{{ slot.startTime }} – {{ slot.endTime }}</p>
-              <p class="muted">Status: {{ slot.status }}</p>
+              <p class="muted">Status: {{ slot.status }}<span *ngIf="isPastSlot(slot)"> • Past</span></p>
             </div>
             <div class="slot-actions">
-              <button class="ghost" *ngIf="slot.status === 'blocked'" (click)="unblock(slot)">Unblock</button>
-              <button class="ghost" *ngIf="slot.status !== 'blocked'" (click)="blockSlotFromSlot(slot)">Block this time</button>
-              <button class="primary" (click)="setAvailableFromSlot(slot)">Set available</button>
+              <button class="ghost" *ngIf="slot.status === 'blocked'" (click)="unblock(slot)" [disabled]="isPastSlot(slot)">Unblock</button>
+              <button class="ghost" *ngIf="slot.status !== 'blocked'" (click)="blockSlotFromSlot(slot)" [disabled]="isPastSlot(slot)">Block this time</button>
+              <button class="primary" (click)="setAvailableFromSlot(slot)" [disabled]="isPastSlot(slot)">Set available</button>
             </div>
           </div>
         </div>

@@ -5,6 +5,7 @@ import { SchedulingService, DoctorSlot } from '@core/services/schedule.service';
 import { DoctorService, DoctorListItem } from '@core/services/doctor.service';
 import { HeaderComponent } from '@app/features/admin/shared/header';
 import { SidebarComponent } from '@app/features/admin/shared/sidebar';
+import { ToastService } from '@core/services/toast.service';
 
 @Component({
   selector: 'app-receptionist-schedule',
@@ -16,6 +17,7 @@ import { SidebarComponent } from '@app/features/admin/shared/sidebar';
 export class ReceptionistScheduleComponent implements OnInit {
   private readonly schedulingService = inject(SchedulingService);
   private readonly doctorService = inject(DoctorService);
+  private readonly toast = inject(ToastService);
 
   doctors = signal<DoctorListItem[]>([]);
   slots = signal<DoctorSlot[]>([]);
@@ -25,7 +27,6 @@ export class ReceptionistScheduleComponent implements OnInit {
   endTime = signal('17:00');
   isLoading = signal(false);
   statusMessage = signal('');
-  toasts = signal<{ id: number; text: string; type: 'success' | 'error' | 'info' }[]>([]);
 
   menuItems = [
     { label: 'Dashboard', icon: 'grid', route: '/receptionist/dashboard' },
@@ -36,6 +37,22 @@ export class ReceptionistScheduleComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadDoctors();
+  }
+
+  private isPastDateTime(dateStr: string, timeStr: string): boolean {
+    if (!dateStr || !timeStr) return false;
+    const now = new Date();
+    const target = new Date(`${dateStr}T${timeStr}:00`);
+    return target.getTime() < now.getTime();
+  }
+
+  isPastSlot(slot: DoctorSlot): boolean {
+    const date = this.selectedDate();
+    const end = (slot.endTime || slot.startTime || slot.time || '').trim();
+    if (!date || !end) return false;
+    const now = new Date();
+    const target = new Date(`${date}T${end}:00`);
+    return target.getTime() < now.getTime();
   }
 
   loadDoctors(): void {
@@ -71,17 +88,22 @@ export class ReceptionistScheduleComponent implements OnInit {
     const doctorId = this.selectedDoctorId();
     if (!doctorId) return;
     this.statusMessage.set('');
+    // Prevent setting availability in the past
+    if (this.isPastDateTime(this.selectedDate(), this.endTime())) {
+      this.toast.error('Cannot modify past time', { title: 'Schedule' });
+      return;
+    }
     this.schedulingService
       .setAvailable(this.selectedDate(), this.startTime(), this.endTime(), doctorId)
       .subscribe({
         next: () => {
-          this.statusMessage.set('Slot saved as available');
-          this.showToast('Slot saved as available', 'success');
+          this.statusMessage.set('');
+          this.toast.success('Slot saved as available', { title: 'Schedule' });
           this.loadSlots();
         },
         error: () => {
-          this.statusMessage.set('Failed to save availability');
-          this.showToast('Failed to save availability', 'error');
+          this.statusMessage.set('');
+          this.toast.error('Failed to save availability', { title: 'Schedule' });
         },
       });
   }
@@ -90,17 +112,22 @@ export class ReceptionistScheduleComponent implements OnInit {
     const doctorId = this.selectedDoctorId();
     if (!doctorId) return;
     this.statusMessage.set('');
+    // Prevent blocking a past time
+    if (this.isPastDateTime(this.selectedDate(), this.endTime())) {
+      this.toast.error('Cannot modify past time', { title: 'Schedule' });
+      return;
+    }
     this.schedulingService
       .blockSlot(this.selectedDate(), this.startTime(), this.endTime(), doctorId)
       .subscribe({
         next: () => {
-          this.statusMessage.set('Slot blocked');
-          this.showToast('Slot blocked', 'success');
+          this.statusMessage.set('');
+          this.toast.success('Slot blocked', { title: 'Schedule' });
           this.loadSlots();
         },
         error: () => {
-          this.statusMessage.set('Failed to block slot');
-          this.showToast('Failed to block slot', 'error');
+          this.statusMessage.set('');
+          this.toast.error('Failed to block slot', { title: 'Schedule' });
         },
       });
   }
@@ -112,12 +139,11 @@ export class ReceptionistScheduleComponent implements OnInit {
     const end = slot.endTime || start;
     this.schedulingService.unblockSlot(this.selectedDate(), start, end, doctorId).subscribe({
       next: () => {
-        this.showToast('Slot unblocked', 'success');
+        this.toast.success('Slot unblocked', { title: 'Schedule' });
         this.loadSlots();
       },
       error: () => {
-        this.statusMessage.set('Failed to unblock slot');
-        this.showToast('Failed to unblock slot', 'error');
+        this.toast.error('Failed to unblock slot', { title: 'Schedule' });
       },
     });
   }
@@ -127,14 +153,17 @@ export class ReceptionistScheduleComponent implements OnInit {
     if (!doctorId) return;
     const start = slot.startTime || slot.time || '';
     const end = slot.endTime || start;
+    if (this.isPastDateTime(this.selectedDate(), end)) {
+      this.toast.error('Cannot modify past time', { title: 'Schedule' });
+      return;
+    }
     this.schedulingService.setAvailable(this.selectedDate(), start, end, doctorId).subscribe({
       next: () => {
-        this.showToast('Marked as available', 'success');
+        this.toast.success('Marked as available', { title: 'Schedule' });
         this.loadSlots();
       },
       error: () => {
-        this.statusMessage.set('Failed to mark available');
-        this.showToast('Failed to mark available', 'error');
+        this.toast.error('Failed to mark available', { title: 'Schedule' });
       },
     });
   }
@@ -144,14 +173,17 @@ export class ReceptionistScheduleComponent implements OnInit {
     if (!doctorId) return;
     const start = slot.startTime || slot.time || '';
     const end = slot.endTime || start;
+    if (this.isPastDateTime(this.selectedDate(), end)) {
+      this.toast.error('Cannot modify past time', { title: 'Schedule' });
+      return;
+    }
     this.schedulingService.blockSlot(this.selectedDate(), start, end, doctorId).subscribe({
       next: () => {
-        this.showToast('Blocked this time', 'success');
+        this.toast.success('Blocked this time', { title: 'Schedule' });
         this.loadSlots();
       },
       error: () => {
-        this.statusMessage.set('Failed to block slot');
-        this.showToast('Failed to block slot', 'error');
+        this.toast.error('Failed to block slot', { title: 'Schedule' });
       },
     });
   }
@@ -160,13 +192,5 @@ export class ReceptionistScheduleComponent implements OnInit {
     this.loadSlots();
   }
 
-  private showToast(text: string, type: 'success' | 'error' | 'info' = 'info') {
-    const id = Date.now() + Math.random();
-    const list = [...this.toasts()];
-    list.push({ id, text, type });
-    this.toasts.set(list);
-    setTimeout(() => {
-      this.toasts.set(this.toasts().filter((t) => t.id !== id));
-    }, 3000);
-  }
+  
 }

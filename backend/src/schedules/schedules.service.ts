@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { In, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DoctorSchedule, Slot } from './schedule.entity';
@@ -58,7 +58,30 @@ export class SchedulesService {
     const appointmentSlots = await this.getBookedSlots(doctorId, dateObj);
     const mergedSlots = this.mergeSlots(baseSlots, storedSlots, appointmentSlots);
 
-    return { date: dateStr, slots: mergedSlots };
+    // Auto-block past-time available slots
+    const today = this.normalizeToDate(new Date());
+    const isPastDay = dateObj.getTime() < today.getTime();
+
+    const toDateTime = (d: Date, time: string) => {
+      const [h, m] = (time || '').slice(0,5).split(':').map(Number);
+      const dt = new Date(d);
+      dt.setHours(h || 0, m || 0, 0, 0);
+      return dt;
+    };
+
+    const now = new Date();
+    const finalSlots = mergedSlots.map((s) => {
+      if (s.status !== 'available') return s;
+      if (isPastDay) return { ...s, status: 'blocked' };
+      const end = s.endTime || s.startTime || s.time || '';
+      const endDt = toDateTime(dateObj, end);
+      if (endDt.getTime() < now.getTime()) {
+        return { ...s, status: 'blocked' };
+      }
+      return s;
+    });
+
+    return { date: dateStr, slots: finalSlots };
   }
   async setSingleSlotStatus(
     doctorId: string,
@@ -147,6 +170,14 @@ export class SchedulesService {
       endTime,
     );
     const dateObj = this.normalizeToDate(date);
+
+    // Prevent modifying past time slots
+    const localEnd = new Date(dateObj);
+    const [eh, em] = safeEnd.split(':').map(Number);
+    localEnd.setHours((eh || 0), (em || 0), 0, 0);
+    if (localEnd.getTime() < Date.now()) {
+      throw new BadRequestException('Cannot modify past time slot');
+    }
 
     let sched = await this.repo.findOne({
       where: { doctorId, date: dateObj },
