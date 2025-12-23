@@ -10,6 +10,7 @@ import { CreateNotificationTemplateDto } from './dto/create-notification-templat
 import { UpdateNotificationTemplateDto } from './dto/update-notification-template.dto';
 import { NotificationPreferencesDto } from './dto/notification-preferences.dto';
 import { NotificationType, NotificationPriority, AppointmentStatus, UserRole } from '../common/index'; // Updated import path
+import { AppointmentType } from '../common/index'; // Import AppointmentType
 import { LessThan, Between } from 'typeorm';
 import { User } from '../users/entities/user.entity';
 import { Appointment } from '../appointments/entities/appointment.entity';
@@ -39,6 +40,17 @@ export class NotificationsService {
     @InjectRepository(Appointment)
     private appointmentRepository: Repository<Appointment>,
   ) {}
+
+  private combineDateAndTime(dateVal: Date, timeVal: string): Date {
+    const date = new Date(dateVal);
+    const [hours, minutes] = (timeVal || '00:00').split(':').map(Number);
+    date.setHours(hours || 0, minutes || 0, 0, 0);
+    return date;
+  }
+
+  private isVideoAppointment(appointment: Appointment): boolean {
+    return appointment.isVideoConsultation || appointment.appointmentType === AppointmentType.VIDEO_CALL;
+  }
 
   async create(createNotificationDto: CreateNotificationDto): Promise<Notification> {
     const notification = this.notificationRepository.create(createNotificationDto);
@@ -456,6 +468,26 @@ export class NotificationsService {
       byPriority,
       readRate: total > 0 ? (read / total) * 100 : 0,
     };
+  }
+
+  async getAppointmentsInWindow(start: Date, end: Date): Promise<Appointment[]> {
+    const startDateOnly = new Date(start);
+    startDateOnly.setHours(0, 0, 0, 0);
+    const endDateOnly = new Date(end);
+    endDateOnly.setHours(23, 59, 59, 999);
+
+    const candidates = await this.appointmentRepository.find({
+      where: {
+        appointmentDate: Between(startDateOnly, endDateOnly),
+        status: AppointmentStatus.CONFIRMED,
+      },
+      relations: ['patient', 'doctor'],
+    });
+
+    return candidates.filter((appointment) => {
+      const apptDateTime = this.combineDateAndTime(appointment.appointmentDate, appointment.appointmentTime);
+      return apptDateTime >= start && apptDateTime <= end;
+    });
   }
 
   async getTomorrowAppointments(date: Date): Promise<Appointment[]> {

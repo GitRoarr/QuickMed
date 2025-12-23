@@ -13,18 +13,18 @@
       </div>
     </div>
 
-            <nav class="sidebar-nav">
-              <a
-                *ngFor="let item of menuItems()"
-                [routerLink]="item.route"
-                routerLinkActive="active"
-                class="nav-item"
-              >
-                <i [class]="'bi ' + item.icon"></i>
-                <span>{{ item.label }}</span>
-                <span *ngIf="item.badge && item.badge > 0" class="badge">{{ item.badge }}</span>
-              </a>
-            </nav>
+    <nav class="sidebar-nav">
+      <a
+        *ngFor="let item of menuItems()"
+        [routerLink]="item.route"
+        routerLinkActive="active"
+        class="nav-item"
+      >
+        <i [class]="'bi ' + item.icon"></i>
+        <span>{{ item.label }}</span>
+        <span *ngIf="item.badge && item.badge > 0" class="badge">{{ item.badge }}</span>
+      </a>
+    </nav>
 
     <div class="sidebar-footer">
       <div class="user-info">
@@ -44,30 +44,43 @@
     </div>
   </aside>
 
- 
   <!-- Main Content -->
   <main class="main-content">
     <header class="content-header">
       <div>
-        <h1 class="page-title">My Schedule</h1>
-        <p class="page-subtitle">View and manage your appointment schedule</p>
+        <h1 class="page-title">Schedule</h1>
+        <p class="page-subtitle">Manage availability, view appointments, and act quickly.</p>
+      </div>
+      <div class="header-actions">
+        <div class="view-toggle">
+          <button [class.active]="viewMode()==='day'" (click)="setViewMode('day')">Day</button>
+          <button [class.active]="viewMode()==='week'" (click)="setViewMode('week')">Week</button>
+          <button [class.active]="viewMode()==='month'" (click)="setViewMode('month')">Month</button>
+        </div>
+        <div class="slot-config">
+          <label>Slot</label>
+          <select [ngModel]="slotDurationMinutes()" (ngModelChange)="slotDurationMinutes.set(+($event))" [ngModelOptions]="{standalone:true}">
+            <option [ngValue]="15">15m</option>
+            <option [ngValue]="20">20m</option>
+            <option [ngValue]="30">30m</option>
+            <option [ngValue]="45">45m</option>
+            <option [ngValue]="60">60m</option>
+          </select>
+        </div>
+        <button class="ghost" (click)="showLegend.set(!showLegend())">Legend</button>
       </div>
     </header>
 
-    <div class="schedule-container">
-      <!-- Calendar View -->
-      <div class="calendar-section">
+    <div class="top-panels">
+      <div class="calendar-card">
         <div class="calendar-header">
           <button class="nav-btn" (click)="previousMonth()"><i class="bi bi-chevron-left"></i></button>
           <h2 class="month-year">{{ getMonthYear() }}</h2>
           <button class="nav-btn" (click)="nextMonth()"><i class="bi bi-chevron-right"></i></button>
         </div>
-
         <div class="calendar-grid">
           <div class="calendar-weekdays">
-            <div class="weekday" *ngFor="let day of ['Sun','Mon','Tue','Wed','Thu','Fri','Sat']">
-              {{ day }}
-            </div>
+            <div class="weekday" *ngFor="let day of ['Sun','Mon','Tue','Wed','Thu','Fri','Sat']">{{ day }}</div>
           </div>
           <div class="calendar-days">
             <button
@@ -82,74 +95,131 @@
             </button>
           </div>
         </div>
-      </div>
 
-      <!-- Daily Schedule -->
-      <div class="schedule-section">
-        <div class="schedule-header">
-          <h3>Schedule for {{ selectedDate() | date:'MMMM d, yyyy' }}</h3>
-          <p class="appointment-count">{{ getSelectedDateAppointments().length }} appointments scheduled</p>
+        <div class="availability-toggle">
+          <div class="day-buttons">
+            <button *ngFor="let d of [0,1,2,3,4,5,6]"
+              [class.active]="workingDays().includes(d)"
+              (click)="toggleWorkingDay(d)">
+              {{ ['S','M','T','W','T','F','S'][d] }}
+            </button>
+          </div>
+          <div class="hours-row">
+            <label>Hours</label>
+            <input type="time" [ngModel]="workingStart()" (ngModelChange)="workingStart.set($event)" [ngModelOptions]="{standalone:true}">
+            <span>–</span>
+            <input type="time" [ngModel]="workingEnd()" (ngModelChange)="workingEnd.set($event)" [ngModelOptions]="{standalone:true}">
+          </div>
+          <div class="hours-row">
+            <label>Break</label>
+            <input type="time" [ngModel]="breakStart()" (ngModelChange)="breakStart.set($event)" [ngModelOptions]="{standalone:true}">
+            <span>–</span>
+            <input type="time" [ngModel]="breakEnd()" (ngModelChange)="breakEnd.set($event)" [ngModelOptions]="{standalone:true}">
+            <button class="primary ghost" (click)="saveAvailability()">Save</button>
+          </div>
         </div>
 
-        <ng-container *ngIf="(slots() || []).length > 0; else noSlots">
-          <div class="schedule-list">
-            <div *ngFor="let slot of getSlots()" class="schedule-item">
-              <div class="time-label">{{ slot.startTime }} - {{ slot.endTime }} {{ (slot.startTime || '') < '12:00' ? 'AM' : 'PM' }}</div>
+        <div class="legend" *ngIf="showLegend()">
+          <div class="legend-item"><span class="dot green"></span>Confirmed</div>
+          <div class="legend-item"><span class="dot yellow"></span>Pending</div>
+          <div class="legend-item"><span class="dot red"></span>Cancelled</div>
+          <div class="legend-item"><span class="dot blue"></span>Online</div>
+          <div class="legend-item"><span class="dot gray"></span>Available</div>
+        </div>
+      </div>
 
-              <div class="slot-content" [ngClass]="getSlotStatus(slot)">
-                <ng-container *ngIf="getAppointmentForSlot(slot); else availableSlot">
-                  <div class="appointment-details">
-                    <div class="patient-name">
-                      {{ getAppointmentForSlot(slot)?.patient?.firstName }}
-                      {{ getAppointmentForSlot(slot)?.patient?.lastName }}
-                    </div>
-                    <div class="appointment-type">{{ getAppointmentForSlot(slot)?.appointmentType || 'Consultation' }}</div>
+      <div class="today-card">
+        <div class="today-head">
+          <div>
+            <p class="eyebrow">Today</p>
+            <h3>{{ today | date:'EEEE, MMM d' }}</h3>
+          </div>
+          <span class="chip">{{ getSelectedDateAppointments().length }} appts</span>
+        </div>
+        <div class="next" *ngIf="nextAppointment(); else noNext">
+          <p class="label">Next patient</p>
+          <h4>{{ nextAppointment()?.patient?.firstName }} {{ nextAppointment()?.patient?.lastName }}</h4>
+          <p class="time">{{ nextAppointment()?.appointmentTime }} • {{ nextAppointment()?.isVideoConsultation ? 'Online' : 'In-person' }}</p>
+          <div class="next-actions">
+            <button class="primary" *ngIf="nextAppointment()?.isVideoConsultation" (click)="joinCall(nextAppointment()!)">Join call</button>
+            <button class="ghost" (click)="setViewMode('day'); selectDate(new Date(nextAppointment()!.appointmentDate))">Open day</button>
+          </div>
+        </div>
+        <ng-template #noNext>
+          <p class="muted">No upcoming appointments today.</p>
+        </ng-template>
+      </div>
+    </div>
+
+    <section class="schedule-board">
+      <header class="board-head">
+        <div>
+          <h3>{{ selectedDate() | date:'MMMM d, yyyy' }}</h3>
+          <p class="muted">Slots generated automatically from your availability. Accept, reject, or reschedule quickly.</p>
+        </div>
+        <div class="quick-filters">
+          <span class="chip">Day view</span>
+          <span class="chip muted">{{ slotDurationMinutes() }}m slots</span>
+        </div>
+      </header>
+
+      <ng-container [ngSwitch]="viewMode()">
+        <div *ngSwitchCase="'day'">
+          <div *ngIf="daySlots().length; else emptyState" class="timeline">
+            <div class="slot-row" *ngFor="let slot of daySlots()">
+              <div class="slot-time">{{ slot.startTime }} - {{ slot.endTime }}</div>
+              <div class="slot-card" [ngClass]="[slot.status, getAppointmentForSlot(slot)?.isVideoConsultation ? 'online' : '']">
+                <ng-container *ngIf="getAppointmentForSlot(slot) as appt; else available">
+                  <div class="slot-meta">
+                    <div class="patient">{{ appt.patient?.firstName }} {{ appt.patient?.lastName }}</div>
+                    <div class="type">{{ appt.isVideoConsultation ? 'Online' : 'In-person' }} • {{ appt.appointmentType || 'Consultation' }}</div>
+                  </div>
+                  <div class="actions">
+                    <button class="ghost" (click)="rescheduleAppointment(appt)"><i class="bi bi-arrow-repeat"></i> Reschedule</button>
+                    <button class="ghost" (click)="acceptAppointment(appt)" *ngIf="appt.status === 'pending'"><i class="bi bi-check2"></i> Accept</button>
+                    <button class="ghost danger" (click)="rejectAppointment(appt)"><i class="bi bi-x"></i> Cancel</button>
+                    <button class="ghost" (click)="completeAppointment(appt)"><i class="bi bi-flag"></i> Mark done</button>
+                    <button class="primary" *ngIf="appt.isVideoConsultation" (click)="joinCall(appt)"><i class="bi bi-camera-video"></i> Join</button>
                   </div>
                 </ng-container>
-
-                <ng-template #availableSlot>
-                  <div class="available-slot">
-                    <span>{{ getSlotStatus(slot) === 'blocked' ? 'Blocked' : 'Available' }}</span>
-                    <button *ngIf="getSlotStatus(slot) !== 'booked'" 
-                            (click)="getSlotStatus(slot) === 'available' ? blockSlot(slot) : setAvailableSlot(slot)"
-                            class="block-btn">
-                      {{ getSlotStatus(slot) === 'available' ? 'Block' : 'Set Available' }}
-                    </button>
+                <ng-template #available>
+                  <div class="slot-meta available-row">
+                    <div>
+                      <div class="patient">Available</div>
+                      <div class="type">{{ slot.status === 'blocked' ? 'Blocked' : 'Open for booking' }}</div>
+                    </div>
+                    <div class="actions">
+                      <button class="ghost" *ngIf="slot.status === 'blocked'" (click)="setAvailableSlot(slot)">Set available</button>
+                      <button class="ghost danger" *ngIf="slot.status !== 'blocked'" (click)="blockSlot(slot)">Block</button>
+                    </div>
                   </div>
                 </ng-template>
               </div>
             </div>
           </div>
-        </ng-container>
+        </div>
 
-        <ng-template #noSlots>
-          <div class="no-slots">
-            <p>No availability has been set for this date.</p>
-            <div class="availability-card">
-              <label>
-                <input type="radio" name="mode" value="single" [checked]="availabilityMode() === 'single'" (change)="availabilityMode.set('single')" />
-                Single time
-              </label>
-              <label style="margin-left:1rem;">
-                <input type="radio" name="mode" value="range" [checked]="availabilityMode() === 'range'" (change)="availabilityMode.set('range')" />
-                Range
-              </label>
-
-              <div class="availability-inputs" style="margin-top: .75rem; display:flex; gap: .5rem; align-items:center;">
-                <div *ngIf="availabilityMode() === 'single'">
-                  <input type="time" [ngModel]="singleTime()" (ngModelChange)="singleTime.set($event)" [ngModelOptions]="{standalone: true}" />
-                </div>
-                <div *ngIf="availabilityMode() === 'range'" style="display:flex; gap:.5rem;">
-                  <input type="time" [ngModel]="rangeStart()" (ngModelChange)="rangeStart.set($event)" [ngModelOptions]="{standalone: true}" />
-                  <span>to</span>
-                  <input type="time" [ngModel]="rangeEnd()" (ngModelChange)="rangeEnd.set($event)" [ngModelOptions]="{standalone: true}" />
-                </div>
-                <button class="btn btn-primary" (click)="setAvailability()">Set Available</button>
-              </div>
+        <div *ngSwitchCase="'week'" class="week-grid">
+          <div class="week-day" *ngFor="let d of weekDays()">
+            <div class="week-day-head">
+              <strong>{{ d | date:'EEE' }}</strong>
+              <span>{{ d | date:'MMM d' }}</span>
             </div>
+            <div class="week-count">{{ appointments().filter(a => a.appointmentDate === (d.toISOString().split('T')[0])).length }} appts</div>
           </div>
-        </ng-template>
-      </div>
-    </div>
+        </div>
+
+        <div *ngSwitchCase="'month'" class="empty">
+          <p>Use the calendar to navigate the month. Select any day to drill into slots.</p>
+        </div>
+      </ng-container>
+
+      <ng-template #emptyState>
+        <div class="empty">
+          <p>No slots yet for this day. Adjust working hours or click Save to generate slots.</p>
+          <button class="primary" (click)="saveAvailability()">Generate slots</button>
+        </div>
+      </ng-template>
+    </section>
   </main>
 </div>

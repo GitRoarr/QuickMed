@@ -9,6 +9,7 @@ import { UsersService } from "../users/users.service";
 import { User} from "../users/entities/user.entity";
 import { SettingsService } from "../settings/settings.service";
 import { SchedulesService } from '../schedules/schedules.service';
+import { NotificationIntegrationService } from '../notifications/notification-integration.service';
 
 @Injectable()
 export class AppointmentsService {
@@ -17,7 +18,8 @@ export class AppointmentsService {
     private readonly appointmentsRepository: Repository<Appointment>,
     private readonly usersService: UsersService,
     private readonly settingsService: SettingsService,
-    private readonly schedulesService: SchedulesService, // add injection (ensure provider wired in module)
+    private readonly schedulesService: SchedulesService,
+    private readonly notificationIntegrationService: NotificationIntegrationService,
   ) {}
 
   async create(createAppointmentDto: CreateAppointmentDto, patientId: string): Promise<Appointment> {
@@ -31,8 +33,6 @@ export class AppointmentsService {
     if (!doctor.isActive) {
       throw new BadRequestException("Doctor is not active");
     }
-
-    // Check doctor availability
     const settings = await this.settingsService.getSettings(doctorId).catch(() => null);
     const availableDays = settings?.availableDays || doctor.availableDays || [];
     const appointmentDateObj = new Date(appointmentDate);
@@ -110,6 +110,14 @@ export class AppointmentsService {
       console.error('Failed to mark schedule slot booked', e);
     }
 
+    const patient = await this.usersService.findOne(patientId);
+    await this.notificationIntegrationService.createAppointmentNotification(
+      { ...savedAppointment, patient, doctor } as Appointment,
+      'created',
+      patient,
+      doctor,
+    );
+
     return savedAppointment;
   }
 
@@ -175,6 +183,9 @@ export class AppointmentsService {
       // allow receptionist updates — but we might restrict in future
     }
 
+    const originalDate = appointment.appointmentDate;
+    const originalTime = appointment.appointmentTime;
+
     if (updateAppointmentDto.appointmentDate || updateAppointmentDto.appointmentTime) {
       const newDate = updateAppointmentDto.appointmentDate || appointment.appointmentDate;
       const newTime = updateAppointmentDto.appointmentTime || appointment.appointmentTime;
@@ -194,7 +205,21 @@ export class AppointmentsService {
     }
 
     Object.assign(appointment, updateAppointmentDto);
-    return this.appointmentsRepository.save(appointment);
+    const updatedAppointment = await this.appointmentsRepository.save(appointment);
+
+    const dateChanged = !!updateAppointmentDto.appointmentDate && this.toDateString(updateAppointmentDto.appointmentDate) !== this.toDateString(originalDate);
+    const timeChanged = !!updateAppointmentDto.appointmentTime && this.toTimeString(updateAppointmentDto.appointmentTime) !== this.toTimeString(originalTime);
+
+    if (dateChanged || timeChanged) {
+      await this.notificationIntegrationService.createAppointmentNotification(
+        updatedAppointment,
+        'rescheduled',
+        appointment.patient,
+        appointment.doctor,
+      );
+    }
+
+    return updatedAppointment;
   }
 
   async cancel(id: string, user: User): Promise<Appointment> {
@@ -215,6 +240,13 @@ export class AppointmentsService {
     appointment.status = AppointmentStatus.CANCELLED;
 
     const canceledAppointment = await this.appointmentsRepository.save(appointment);
+
+    await this.notificationIntegrationService.createAppointmentNotification(
+      canceledAppointment,
+      'cancelled',
+      appointment.patient,
+      appointment.doctor,
+    );
 
     const apt = await this.appointmentsRepository.findOne({ where: { id } });
     if (apt) {

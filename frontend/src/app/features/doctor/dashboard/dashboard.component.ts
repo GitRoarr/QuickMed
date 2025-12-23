@@ -1,10 +1,12 @@
-import { Component, OnInit, signal, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, signal, inject, HostListener } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { DoctorService, DoctorDashboardData } from '@core/services/doctor.service';
 import { AuthService } from '@core/services/auth.service';
 import { AppointmentService } from '@core/services/appointment.service';
 import { MessageService } from '@core/services/message.service';
+import { NotificationService } from '@core/services/notification.service';
+import { Notification } from '@core/models/notification.model';
 
 interface MenuItem {
   label: string;
@@ -20,12 +22,13 @@ interface MenuItem {
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css']
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit, OnDestroy {
   private doctorService = inject(DoctorService);
   private authService = inject(AuthService);
   private router = inject(Router);
   private appointmentService = inject(AppointmentService);
   private messageService = inject(MessageService);
+  notificationService = inject(NotificationService);
 
   dashboardData = signal<DoctorDashboardData | null>(null);
   isLoading = signal(true);
@@ -35,11 +38,25 @@ export class DashboardComponent implements OnInit {
   appointmentBadgeCount = signal(0);
   messageBadgeCount = signal(0);
 
+  notifications = signal<Notification[]>([]);
+  unreadNotificationCount = signal(0);
+  showNotificationDropdown = signal(false);
+  isLoadingNotifications = signal(false);
+  private notificationIntervalId: any;
+
   ngOnInit(): void {
     this.loadUserData();
     this.loadDashboardData();
     this.loadBadgeCounts();
     this.updateMenuItems();
+    this.loadUnreadNotifications();
+    this.startNotificationPolling();
+  }
+
+  ngOnDestroy(): void {
+    if (this.notificationIntervalId) {
+      clearInterval(this.notificationIntervalId);
+    }
   }
 
   loadBadgeCounts(): void {
@@ -56,6 +73,69 @@ export class DashboardComponent implements OnInit {
         this.updateMenuItems();
       }
     });
+  }
+
+  loadUnreadNotifications(): void {
+    this.notificationService.getUnreadCount().subscribe({
+      next: (count) => this.unreadNotificationCount.set(count || 0),
+      error: (error) => console.error('Error loading unread notifications:', error)
+    });
+  }
+
+  loadNotifications(): void {
+    this.isLoadingNotifications.set(true);
+    this.notificationService.getNotifications(1, 10).subscribe({
+      next: (response) => {
+        this.notifications.set(response.notifications.slice(0, 10));
+        this.isLoadingNotifications.set(false);
+      },
+      error: (error) => {
+        console.error('Error loading notifications:', error);
+        this.isLoadingNotifications.set(false);
+      }
+    });
+  }
+
+  toggleNotificationDropdown(): void {
+    this.showNotificationDropdown.update((open) => !open);
+    if (this.showNotificationDropdown()) {
+      this.loadNotifications();
+      this.loadUnreadNotifications();
+    }
+  }
+
+  markNotificationAsRead(notificationId: string): void {
+    this.notificationService.markAsRead(notificationId).subscribe({
+      next: () => {
+        this.loadNotifications();
+        this.loadUnreadNotifications();
+      },
+      error: (error) => console.error('Error marking notification as read:', error)
+    });
+  }
+
+  markAllNotificationsAsRead(): void {
+    this.notificationService.markAllAsRead().subscribe({
+      next: () => {
+        this.loadNotifications();
+        this.loadUnreadNotifications();
+      },
+      error: (error) => console.error('Error marking all notifications as read:', error)
+    });
+  }
+
+  private startNotificationPolling(): void {
+    this.notificationIntervalId = setInterval(() => {
+      this.loadUnreadNotifications();
+    }, 30000);
+  }
+
+  @HostListener('document:click', ['$event'])
+  handleDocumentClick(event: MouseEvent): void {
+    const target = event.target as HTMLElement;
+    if (!target.closest('.notification-toggle') && !target.closest('.notification-dropdown')) {
+      this.showNotificationDropdown.set(false);
+    }
   }
 
   updateMenuItems(): void {

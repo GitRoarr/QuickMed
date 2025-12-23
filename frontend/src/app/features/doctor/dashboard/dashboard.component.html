@@ -52,10 +52,57 @@
         <h1 class="welcome-title">Welcome, Dr. {{ getDoctorName().split(' ')[0] }}</h1>
         <p class="welcome-subtitle">Here's your patient and appointment overview</p>
       </div>
-      <button class="btn-primary" (click)="navigate('/doctor/appointments')">
-        <i class="bi bi-plus-circle"></i>
-        New Appointment
-      </button>
+      <div class="header-actions">
+        <div class="notification-wrapper">
+          <button class="icon-button notification-toggle" (click)="toggleNotificationDropdown()" aria-label="Notifications">
+            <i class="bi bi-bell"></i>
+            <span *ngIf="unreadNotificationCount() > 0" class="notification-badge">
+              {{ unreadNotificationCount() > 9 ? '9+' : unreadNotificationCount() }}
+            </span>
+          </button>
+
+          <div *ngIf="showNotificationDropdown()" class="notification-dropdown">
+            <div class="dropdown-header">
+              <div>
+                <p class="dropdown-title">Notifications</p>
+                <p class="dropdown-subtitle">{{ unreadNotificationCount() }} unread</p>
+              </div>
+              <div class="dropdown-actions">
+                <button *ngIf="unreadNotificationCount() > 0" class="link-button" (click)="markAllNotificationsAsRead()">Mark all as read</button>
+                <button class="icon-button ghost" (click)="showNotificationDropdown.set(false)" aria-label="Close notifications">
+                  <i class="bi bi-x-lg"></i>
+                </button>
+              </div>
+            </div>
+
+            <div class="dropdown-body" *ngIf="isLoadingNotifications()">
+              <p>Loading notifications...</p>
+            </div>
+            <div class="dropdown-body" *ngIf="!isLoadingNotifications() && notifications().length === 0">
+              <p>No notifications</p>
+            </div>
+            <div class="dropdown-list" *ngIf="!isLoadingNotifications() && notifications().length > 0">
+              <div
+                class="notification-item"
+                *ngFor="let notification of notifications()"
+                [class.unread]="!notification.read"
+                (click)="markNotificationAsRead(notification.id)">
+                <div class="notification-icon" [class.unread]="!notification.read">
+                  <i [class]="'bi ' + notificationService.getNotificationIcon(notification.type)"></i>
+                </div>
+                <div class="notification-content">
+                  <p class="notification-title">{{ notification.title }}</p>
+                  <p class="notification-message">{{ notification.message }}</p>
+                  <div class="notification-meta">
+                    <span>{{ notification.createdAt | date:'short' }}</span>
+                    <span *ngIf="!notification.read" class="status-dot" aria-hidden="true"></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </header>
 
     <!-- Loading State -->

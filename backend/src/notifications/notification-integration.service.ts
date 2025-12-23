@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { NotificationsService } from './notifications.service';
 import { Appointment } from '../appointments/entities/appointment.entity';
 import { User } from '../users/entities/user.entity';
-import { NotificationType, NotificationPriority, UserRole } from '../common/index';
+import { NotificationType, NotificationPriority, UserRole, AppointmentType } from '../common/index';
 import { Notification } from './entities/notification.entity';
 
 @Injectable()
@@ -11,7 +11,7 @@ export class NotificationIntegrationService {
 
   async createAppointmentNotification(
     appointment: Appointment,
-    type: 'created' | 'confirmed' | 'cancelled' | 'rescheduled' | 'reminder',
+    type: 'created' | 'confirmed' | 'cancelled' | 'rescheduled' | 'reminder_24h' | 'reminder_1h',
     patient?: User,
     doctor?: User,
   ): Promise<void> {
@@ -24,10 +24,17 @@ export class NotificationIntegrationService {
         appointmentId: appointment.id,
         appointmentDate: appointment.appointmentDate,
         appointmentTime: appointment.appointmentTime,
+        reminderOffsetMinutes: type === 'reminder_24h' ? 1440 : type === 'reminder_1h' ? 60 : undefined,
+        channel: appointment.isVideoConsultation || appointment.appointmentType === AppointmentType.VIDEO_CALL ? 'video' : 'in_person',
+        chatEnabled: appointment.isVideoConsultation || appointment.appointmentType === AppointmentType.VIDEO_CALL,
         doctorName: doctor ? `${doctor.firstName} ${doctor.lastName}` : 'Unknown Doctor',
         patientName: patient ? `${patient.firstName} ${patient.lastName}` : 'Unknown Patient',
       },
     };
+
+    const isVideo = appointment.isVideoConsultation || appointment.appointmentType === AppointmentType.VIDEO_CALL;
+    const channelLabel = isVideo ? 'video call' : 'in-person visit';
+    const chatNote = notificationData.metadata?.chatEnabled ? ' Chat is open if you have questions.' : '';
 
     switch (type) {
       case 'created':
@@ -50,9 +57,14 @@ export class NotificationIntegrationService {
         notificationData.message = `Your appointment has been rescheduled to ${appointment.appointmentDate} at ${appointment.appointmentTime}`;
         notificationData.priority = NotificationPriority.MEDIUM;
         break;
-      case 'reminder':
-        notificationData.title = 'Appointment Reminder';
-        notificationData.message = `You have an appointment with Dr. ${doctor?.firstName} ${doctor?.lastName} tomorrow at ${appointment.appointmentTime}`;
+      case 'reminder_24h':
+        notificationData.title = 'Appointment in 24 hours';
+        notificationData.message = `Reminder: ${channelLabel} tomorrow at ${appointment.appointmentTime}.${chatNote}`;
+        notificationData.priority = NotificationPriority.HIGH;
+        break;
+      case 'reminder_1h':
+        notificationData.title = 'Appointment in 1 hour';
+        notificationData.message = `Reminder: Your ${channelLabel} starts at ${appointment.appointmentTime}.${chatNote}`;
         notificationData.priority = NotificationPriority.HIGH;
         break;
     }
@@ -190,13 +202,25 @@ export class NotificationIntegrationService {
   }
 
   async sendAppointmentReminders(): Promise<void> {
-    const tomorrow = new Date('2025-10-28T00:11:00Z'); // 12:11 AM EAT, October 28, 2025
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    tomorrow.setHours(0, 0, 0, 0);
+    const now = new Date();
+    const windows = [
+      { type: 'reminder_24h' as const, startOffset: 1440 - 10, endOffset: 1440 + 10 },
+      { type: 'reminder_1h' as const, startOffset: 60 - 10, endOffset: 60 + 10 },
+    ];
 
-    const appointments = await this.notificationsService.getTomorrowAppointments(tomorrow);
-    for (const appointment of appointments) {
-      await this.createAppointmentNotification(appointment, 'reminder', appointment.patient, appointment.doctor);
+    for (const window of windows) {
+      const start = new Date(now.getTime() + window.startOffset * 60 * 1000);
+      const end = new Date(now.getTime() + window.endOffset * 60 * 1000);
+      const appointments = await this.notificationsService.getAppointmentsInWindow(start, end);
+
+      for (const appointment of appointments) {
+        await this.createAppointmentNotification(
+          appointment,
+          window.type,
+          appointment.patient,
+          appointment.doctor,
+        );
+      }
     }
   }
 

@@ -1,9 +1,9 @@
-import { Component, OnInit, signal, inject } from '@angular/core';
+import { Component, OnInit, signal, inject, computed } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AppointmentService } from '@core/services/appointment.service';
-import { Appointment } from '@core/models/appointment.model';
+import { Appointment, AppointmentStatus } from '@core/models/appointment.model';
 import { AuthService } from '@core/services/auth.service';
 import { BadgeService } from '@core/services/badge.service';
 import { MessageService } from '@core/services/message.service';
@@ -33,6 +33,18 @@ export class ScheduleComponent implements OnInit {
   currentUser = signal<any>(null);
   menuItems = signal<MenuItem[]>([]);
 
+  viewMode = signal<'day' | 'week' | 'month'>('day');
+  slotDurationMinutes = signal(30);
+  workingStart = signal('09:00');
+  workingEnd = signal('17:00');
+  breakStart = signal('12:00');
+  breakEnd = signal('13:00');
+  workingDays = signal<number[]>([1, 2, 3, 4, 5]); // Mon-Fri
+  showAvailabilityEditor = signal(false);
+  showLegend = signal(true);
+
+  today = new Date();
+
   private badgeService = inject(BadgeService);
   private scheduleService = inject(SchedulingService);
   private appointmentService = inject(AppointmentService);
@@ -45,6 +57,18 @@ export class ScheduleComponent implements OnInit {
   singleTime = signal('08:00');
   rangeStart = signal('08:00');
   rangeEnd = signal('09:00');
+
+  weekDays = computed(() => {
+    const start = this.getWeekStart(this.selectedDate());
+    return Array.from({ length: 7 }, (_, i) => {
+      const d = new Date(start);
+      d.setDate(d.getDate() + i);
+      return d;
+    });
+  });
+
+  daySlots = computed(() => this.buildDaySlots(this.selectedDate()));
+  nextAppointment = computed(() => this.getNextAppointment());
 
   getSlots(): DoctorSlot[] {
     return [...(this.slots() || [])]
@@ -61,6 +85,24 @@ export class ScheduleComponent implements OnInit {
     this.loadAppointments();
     this.loadBadgeCounts();
     this.loadSlots();
+  }
+
+  // ==================== Availability ====================
+  toggleWorkingDay(day: number): void {
+    const set = new Set(this.workingDays());
+    set.has(day) ? set.delete(day) : set.add(day);
+    const updated = Array.from(set).sort();
+    this.workingDays.set(updated);
+    this.scheduleService.updateWorkingDays(updated).subscribe();
+  }
+
+  saveAvailability(): void {
+    // Persist current day's availability to backend
+    const dateStr = this.toDateOnly(this.selectedDate());
+    this.scheduleService.setAvailable(dateStr, this.workingStart(), this.workingEnd()).subscribe({
+      next: () => this.loadSlots(),
+      error: () => this.loadSlots(),
+    });
   }
 
   setAvailability(): void {
@@ -89,6 +131,50 @@ export class ScheduleComponent implements OnInit {
     });
   }
 
+  private generateSlotsFromAvailability(date: Date): DoctorSlot[] {
+    const dayIndex = date.getDay();
+    if (!this.workingDays().includes(dayIndex)) return [];
+
+    const slots: DoctorSlot[] = [];
+    const start = this.toMinutes(this.workingStart());
+    const end = this.toMinutes(this.workingEnd());
+    const breakStart = this.toMinutes(this.breakStart());
+    const breakEnd = this.toMinutes(this.breakEnd());
+    const step = this.slotDurationMinutes();
+
+    for (let t = start; t < end; t += step) {
+      const slotEnd = Math.min(t + step, end);
+      const inBreak = t < breakEnd && slotEnd > breakStart;
+      if (inBreak) continue;
+      slots.push({
+        startTime: this.toTimeString(t),
+        endTime: this.toTimeString(slotEnd),
+        status: 'available',
+      });
+    }
+    return slots;
+  }
+
+  private mergeAppointmentsIntoSlots(date: Date, baseSlots: DoctorSlot[]): DoctorSlot[] {
+    const dateStr = this.toDateOnly(date);
+    return baseSlots.map((slot) => {
+      const appt = this.getAppointmentForSlot(slot, dateStr);
+      if (!appt) return slot;
+      return {
+        ...slot,
+        status: this.mapStatus(appt.status),
+        appointmentId: appt.id,
+        blockedReason: appt.reason,
+      };
+    });
+  }
+
+  private buildDaySlots(date: Date): DoctorSlot[] {
+    const serverSlots = this.getSlots();
+    const baseSlots = serverSlots.length ? serverSlots : this.generateSlotsFromAvailability(date);
+    return this.mergeAppointmentsIntoSlots(date, baseSlots).sort((a, b) => (a.startTime || '').localeCompare(b.startTime || ''));
+  }
+
   setAvailableSlot(slot: DoctorSlot): void {
     const dateStr = this.selectedDate().toISOString().split('T')[0];
     const startTime = slot.startTime || slot.time!;
@@ -107,12 +193,27 @@ export class ScheduleComponent implements OnInit {
     return slot?.status || 'available';
   }
 
-  getAppointmentForSlot(slot: DoctorSlot): Appointment | null {
-    const dateStr = this.selectedDate().toISOString().split('T')[0];
+  getAppointmentForSlot(slot: DoctorSlot, dateStr?: string): Appointment | null {
+    const dayStr = dateStr || this.toDateOnly(this.selectedDate());
     const startTime = slot.startTime || slot.time || '';
     return this.appointments().find(
-      apt => apt.appointmentDate === dateStr && apt.appointmentTime.startsWith(startTime)
+      apt => apt.appointmentDate === dayStr && apt.appointmentTime.startsWith(startTime)
     ) || null;
+  }
+
+  mapStatus(status: AppointmentStatus | string): 'available' | 'booked' | 'blocked' | 'pending' | 'cancelled' | 'completed' {
+    switch (status) {
+      case AppointmentStatus.CONFIRMED:
+        return 'booked';
+      case AppointmentStatus.PENDING:
+        return 'pending';
+      case AppointmentStatus.CANCELLED:
+        return 'cancelled';
+      case AppointmentStatus.COMPLETED:
+        return 'completed';
+      default:
+        return 'booked';
+    }
   }
 
   loadBadgeCounts(): void {
@@ -176,6 +277,34 @@ export class ScheduleComponent implements OnInit {
     const selected = this.selectedDate();
     const dateStr = selected.toISOString().split('T')[0];
     return this.appointments().filter(apt => apt.appointmentDate === dateStr);
+  }
+
+  // ==================== Quick actions ====================
+  acceptAppointment(appt: Appointment): void {
+    this.updateAppointmentStatus(appt, AppointmentStatus.CONFIRMED);
+  }
+
+  rejectAppointment(appt: Appointment): void {
+    this.appointmentService.cancel(appt.id).subscribe(() => this.loadAppointments());
+  }
+
+  completeAppointment(appt: Appointment): void {
+    this.updateAppointmentStatus(appt, AppointmentStatus.COMPLETED);
+  }
+
+  rescheduleAppointment(appt: Appointment): void {
+    const newTime = prompt('Enter new time (HH:mm)', appt.appointmentTime.slice(0,5));
+    if (!newTime) return;
+    this.appointmentService.update(appt.id, { appointmentTime: newTime }).subscribe(() => this.loadAppointments());
+  }
+
+  private updateAppointmentStatus(appt: Appointment, status: AppointmentStatus): void {
+    this.appointmentService.update(appt.id, { status }).subscribe(() => this.loadAppointments());
+  }
+
+  joinCall(appt: Appointment): void {
+    if (!appt.isVideoConsultation) return;
+    this.router.navigate(['/call', appt.id]);
   }
 
   // ==================== CALENDAR ====================
@@ -251,5 +380,44 @@ export class ScheduleComponent implements OnInit {
 
   navigate(route: string): void {
     this.router.navigate([route]);
+  }
+
+  setViewMode(mode: 'day' | 'week' | 'month'): void {
+    this.viewMode.set(mode);
+  }
+
+  private toMinutes(time: string): number {
+    const [h, m] = time.split(':').map(Number);
+    return (h || 0) * 60 + (m || 0);
+  }
+
+  private toTimeString(totalMinutes: number): string {
+    const h = Math.floor(totalMinutes / 60).toString().padStart(2, '0');
+    const m = (totalMinutes % 60).toString().padStart(2, '0');
+    return `${h}:${m}`;
+  }
+
+  private toDateOnly(date: Date): string {
+    return date.toISOString().split('T')[0];
+  }
+
+  private getWeekStart(date: Date): Date {
+    const d = new Date(date);
+    const day = d.getDay();
+    const diff = d.getDate() - day + (day === 0 ? -6 : 1); // Monday as start
+    return new Date(d.setDate(diff));
+  }
+
+  private getNextAppointment(): Appointment | null {
+    const now = new Date();
+    const upcoming = this.appointments()
+      .filter((apt) => apt.status !== AppointmentStatus.CANCELLED)
+      .map((apt) => {
+        const dt = new Date(`${apt.appointmentDate}T${apt.appointmentTime}`);
+        return { apt, dt };
+      })
+      .filter(({ dt }) => dt >= now)
+      .sort((a, b) => a.dt.getTime() - b.dt.getTime());
+    return upcoming.length ? upcoming[0].apt : null;
   }
 }
