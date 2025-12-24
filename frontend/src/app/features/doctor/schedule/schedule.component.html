@@ -45,22 +45,16 @@
   </aside>
 
   <main class="main-content">
-    <div class="topbar">
-     
-      <div class="topbar-actions">
-        
-        <div class="divider"></div>
+    <div class="doctor-topbar">
+      <div class="doctor-topbar-actions">
         <button class="icon-btn" [routerLink]="'/doctor/messages'" title="Messages">
           <i class="bi bi-chat-dots"></i>
-          <span class="badge-dot" *ngIf="unreadMessages() > 0">{{ unreadMessages() > 99 ? '99+' : unreadMessages() }}</span>
         </button>
         <button class="icon-btn" [routerLink]="'/doctor/notifications'" title="Notifications">
           <i class="bi bi-bell"></i>
-          <span class="badge-dot" *ngIf="unreadNotifications() > 0">{{ unreadNotifications() > 99 ? '99+' : unreadNotifications() }}</span>
         </button>
-        <div class="divider"></div>
-        <button class="pill-toggle" type="button" title="Light mode" [class.active]="themeMode()==='light'" (click)="setTheme('light')"><i class="bi bi-brightness-high"></i></button>
-        <button class="pill-toggle" type="button" title="Dark mode" [class.active]="themeMode()==='dark'" (click)="setTheme('dark')"><i class="bi bi-moon"></i></button>
+        <button class="icon-btn" (click)="setTheme('light')"><i class="bi bi-brightness-high"></i></button>
+        <button class="icon-btn" (click)="setTheme('dark')"><i class="bi bi-moon"></i></button>
         <div class="avatar-sm">
           <img *ngIf="currentUser()?.avatar; else docSmall" [src]="currentUser()?.avatar" alt="Doctor" />
           <ng-template #docSmall>{{ getDoctorInitials() }}</ng-template>

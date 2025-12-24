@@ -11,11 +11,6 @@
         </div>
       </div>
 
-      <button class="hamburger" aria-label="Toggle menu" (click)="toggleSidebar()" type="button">
-        <span class="hamburger-box">
-          <span class="hamburger-inner"></span>
-        </span>
-      </button>
     </div>
 
     <nav class="patient-shell__nav" [attr.aria-hidden]="!sidebarOpen && mobile">
@@ -61,6 +56,11 @@
       </button>
       <button class="patient-shell__icon-btn" type="button" (click)="toggleTheme()" title="Toggle theme">
         <i class="bi" [ngClass]="themeMode()==='dark' ? 'bi-moon' : 'bi-brightness-high'"></i>
+      </button>
+      <button class="hamburger" type="button" aria-label="Toggle menu" (click)="toggleSidebar()" *ngIf="mobile">
+        <span class="hamburger-box">
+          <span class="hamburger-inner"></span>
+        </span>
       </button>
     </div>
     <ng-content></ng-content>

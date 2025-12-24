@@ -187,7 +187,7 @@ export class DoctorsComponent implements OnInit {
     if (!doctor) return;
     const date = dateStr || this.appointmentForm.value.appointmentDate;
     if (!date) return;
-    this.schedulingService.getDaySchedule(date, doctor.id).subscribe({
+    this.schedulingService.getDaySchedulePublic(doctor.id, date).subscribe({
       next: (slots) => {
         const available = (slots || []).filter(s => s.status === 'available');
         // Normalize time values to HH:mm

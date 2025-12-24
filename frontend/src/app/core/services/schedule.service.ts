@@ -41,6 +41,14 @@ export class SchedulingService {
       .pipe(map(res => res.slots));
   }
 
+  // Public read for patients without needing x-doctor-id header
+  getDaySchedulePublic(doctorId: string, date: Date | string): Observable<DoctorSlot[]> {
+    const formatted = this.normalizeDate(date);
+    return this.http
+      .get<DayScheduleResponse>(`${this.API_URL}/public/${doctorId}/${formatted}`)
+      .pipe(map(res => res.slots));
+  }
+
   setAvailable(date: Date | string, startTime: string, endTime?: string, doctorId?: string): Observable<any> {
     const payload = endTime
       ? { date: this.normalizeDate(date), startTime, endTime }
