@@ -399,4 +399,10 @@ updateMenuItems(appointmentCount: number, messageCount: number) {
   showErrorNotification(message: string): void {
     console.log("Error:", message);
   }
+
+  setTheme(theme: 'light' | 'dark') {
+    document.body.classList.remove('light', 'dark');
+    document.body.classList.add(theme);
+    localStorage.setItem('theme', theme);
+  }
 }

@@ -245,4 +245,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
   navigate(route: string): void {
     this.router.navigate([route]);
   }
+
+  setTheme(theme: 'light' | 'dark') {
+    document.body.classList.remove('light', 'dark');
+    document.body.classList.add(theme);
+    localStorage.setItem('theme', theme);
+  }
 }
