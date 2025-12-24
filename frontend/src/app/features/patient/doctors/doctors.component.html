@@ -38,7 +38,7 @@
               <img [src]="doctor.avatar" alt="Dr. {{ doctor.firstName }} {{ doctor.lastName }}" />
             </ng-container>
             <ng-template #doctorInitial>
-              {{ (doctor.firstName?.charAt(0) || 'D') + (doctor.lastName?.charAt(0) || '') }}
+              {{ ((doctor.firstName || '').charAt(0) || 'D') + (doctor.lastName || '').charAt(0) }}
             </ng-template>
           </div>
           <span class="availability" [class.available]="doctor.available">

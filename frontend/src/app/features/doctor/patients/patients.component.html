@@ -16,7 +16,7 @@
     </nav>
 
     <div class="sidebar-user" *ngIf="currentUser() as user">
-      <div class="avatar">{{ (user.firstName?.[0] || 'D') + (user.lastName?.[0] || '') }}</div>
+      <div class="avatar">{{ ((user.firstName || '').charAt(0) || 'D') + (user.lastName || '').charAt(0) }}</div>
       <div>
         <p class="name">Dr. {{ user.firstName }} {{ user.lastName }}</p>
         <p class="role">{{ user.specialty || 'Provider' }}</p>
@@ -110,6 +110,7 @@
         </div>
 
         <div class="actions">
+          <button class="ghost" [routerLink]="['/doctor/patients', p.patientId]">Details</button>
           <button class="ghost" [routerLink]="['/doctor/records']" [queryParams]="{ patientId: p.patientId }">Records</button>
           <button class="ghost" [routerLink]="['/doctor/messages']" [queryParams]="{ patientId: p.patientId }">Message</button>
           <button class="primary" [routerLink]="['/call', p.patientId]">Start Call</button>
