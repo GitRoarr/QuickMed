@@ -7,6 +7,7 @@ import { Doctor } from '../../../core/models/user.model';
 import { Router } from '@angular/router';
 import { PatientShellComponent } from '../shared/patient-shell/patient-shell.component';
 import { ReviewService, CreateReviewDto } from '../../../core/services/review.service';
+import { SchedulingService, DoctorSlot } from '../../../core/services/schedule.service';
 
 @Component({
   selector: 'app-patient-doctors',
@@ -26,6 +27,7 @@ export class DoctorsComponent implements OnInit {
   showBookingForm = signal(false);
   searchQuery = signal('');
   selectedSpecialty = signal('all');
+  availableSlots = signal<DoctorSlot[]>([]);
   
   appointmentForm: FormGroup;
 
@@ -43,7 +45,8 @@ export class DoctorsComponent implements OnInit {
     private router: Router,
     private userService: UserService,
     private appointmentService: AppointmentService,
-    private reviewService: ReviewService
+    private reviewService: ReviewService,
+    private schedulingService: SchedulingService
   ) {
     this.appointmentForm = this.fb.group({
       appointmentDate: ['', Validators.required],
@@ -136,12 +139,17 @@ export class DoctorsComponent implements OnInit {
   selectDoctor(doctor: Doctor): void {
     this.selectedDoctor.set(doctor);
     this.showBookingForm.set(true);
+    // Default date = today or next available date; start by loading today's slots
+    const date = this.getCurrentDate();
+    this.appointmentForm.patchValue({ appointmentDate: date, appointmentTime: '' });
+    this.loadAvailableSlots(date);
   }
 
   closeBookingForm(): void {
     this.showBookingForm.set(false);
     this.selectedDoctor.set(null);
     this.appointmentForm.reset();
+    this.availableSlots.set([]);
   }
 
   bookAppointment(): void {
@@ -166,9 +174,42 @@ export class DoctorsComponent implements OnInit {
       },
       error: (err) => {
         console.error('Failed to book appointment', err);
-        alert('Failed to book appointment. Please try again.');
+        const serverMsg = err?.error?.message || err?.message || 'Failed to book appointment. Please try again.';
+        // If message is array (class-validator), join it
+        const msg = Array.isArray(serverMsg) ? serverMsg.join('\n') : serverMsg;
+        alert(msg);
       }
     });
+  }
+
+  loadAvailableSlots(dateStr?: string): void {
+    const doctor = this.selectedDoctor();
+    if (!doctor) return;
+    const date = dateStr || this.appointmentForm.value.appointmentDate;
+    if (!date) return;
+    this.schedulingService.getDaySchedule(date, doctor.id).subscribe({
+      next: (slots) => {
+        const available = (slots || []).filter(s => s.status === 'available');
+        // Normalize time values to HH:mm
+        const normalize = (s: DoctorSlot) => (s.startTime || s.time || '').slice(0,5);
+        // Keep unique times and sort
+        const times = Array.from(new Set(available.map(normalize))).sort();
+        this.availableSlots.set(times.map(t => ({ startTime: t, status: 'available' } as DoctorSlot)));
+        // If current selected time not in list, clear it
+        const current = this.appointmentForm.value.appointmentTime;
+        if (!times.includes(current)) {
+          this.appointmentForm.patchValue({ appointmentTime: '' });
+        }
+      },
+      error: () => {
+        this.availableSlots.set([]);
+      }
+    });
+  }
+
+  onDateChange(): void {
+    const date = this.appointmentForm.value.appointmentDate;
+    this.loadAvailableSlots(date);
   }
 
   toggleSidebar(): void {

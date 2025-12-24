@@ -14,6 +14,12 @@ export class SchedulesController {
     return this.svc.getDaySchedule(doctorId, date);
   }
 
+  // Public variant for patients to request a specific doctor's schedule without relying on auth user
+  @Get('public/:doctorId/:date')
+  async getDayPublic(@Param('doctorId') doctorId: string, @Param('date') date: string) {
+    return this.svc.getDaySchedule(doctorId, date);
+  }
+
   @Post('available')
   async setAvailable(@Req() req: any, @Body() body: UpdateSlotDto) {
     const doctorId = req.user?.id ?? req.user?.sub ?? req.headers['x-doctor-id'];

@@ -48,8 +48,16 @@ export class AppointmentsService {
     const appointmentDateObj = new Date(appointmentDate);
     const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
     const appointmentDay = dayNames[appointmentDateObj.getDay()];
+    // Normalize to accept both full and short day names, case-insensitive
+    const toLower = (v: any) => String(v ?? '').toLowerCase();
+    const normalized = (availableDays || []).map(toLower);
+    const shortMap: Record<string, string> = {
+      sunday: 'sun', monday: 'mon', tuesday: 'tue', wednesday: 'wed', thursday: 'thu', friday: 'fri', saturday: 'sat'
+    };
+    const dayLower = toLower(appointmentDay);
+    const isAllowed = normalized.includes(dayLower) || normalized.includes(shortMap[dayLower]);
 
-    if (!availableDays.includes(appointmentDay)) {
+    if (!isAllowed) {
       throw new BadRequestException(`Doctor is not available on ${appointmentDay}`);
     }
 

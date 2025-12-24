@@ -16,7 +16,7 @@ import {
   providedIn: "root",
 })
 export class NotificationService {
-  private apiUrl = environment.apiUrl
+  private apiUrl = `${environment.apiUrl}/notifications`
   private notificationsSubject = new BehaviorSubject<Notification[]>([])
   private unreadCountSubject = new BehaviorSubject<number>(0)
   private refreshInterval = interval(30000)

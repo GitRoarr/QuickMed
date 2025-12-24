@@ -110,11 +110,14 @@
         <form [formGroup]="appointmentForm" (ngSubmit)="bookAppointment()">
           <label>
             <span>Appointment Date</span>
-            <input type="date" formControlName="appointmentDate" [min]="getCurrentDate()" />
+            <input type="date" formControlName="appointmentDate" [min]="getCurrentDate()" (change)="onDateChange()" />
           </label>
           <label>
             <span>Appointment Time</span>
-            <input type="time" formControlName="appointmentTime" />
+            <select formControlName="appointmentTime">
+              <option value="" disabled>Select a time</option>
+              <option *ngFor="let s of availableSlots()" [value]="s.startTime">{{ s.startTime }}</option>
+            </select>
           </label>
           <label>
             <span>Notes (optional)</span>

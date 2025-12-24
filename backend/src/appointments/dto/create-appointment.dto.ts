@@ -9,6 +9,7 @@ import {
   IsInt,
   Min,
 } from "class-validator"
+import { Transform } from "class-transformer"
 import { AppointmentStatus, AppointmentType } from "../../common"
 
 export class CreateAppointmentDto {
@@ -16,9 +17,12 @@ export class CreateAppointmentDto {
   @IsNotEmpty()
   doctorId: string
 
+  // Patient id is inferred from auth token on the server
+  // If client sends an empty string, normalize it to undefined so @IsOptional skips validation
+  @Transform(({ value }) => (value === '' ? undefined : value))
   @IsUUID()
-  @IsNotEmpty()
-  patientId: string
+  @IsOptional()
+  patientId?: string
 
   @IsDateString()
   @IsNotEmpty()
