@@ -3,7 +3,6 @@ import { inject } from "@angular/core"
 import { AuthService } from "../services/auth.service"
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
-  // Skip auth for public endpoints (set-password, login, register, etc.)
   const publicEndpoints = ['/set-password', '/login', '/register', '/forgot-password', '/emergency-reset-password']
   const isPublicEndpoint = publicEndpoints.some(endpoint => req.url.includes(endpoint))
   
@@ -12,6 +11,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   }
 
   const authService = inject(AuthService)
+  
   let token = authService.getToken()
 
   if (token) {
