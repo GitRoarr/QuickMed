@@ -1,21 +1,17 @@
 
 import { Component, OnInit } from "@angular/core";
+import { CommonModule } from '@angular/common';
 import { RouterOutlet } from "@angular/router";
 import { ToastContainerComponent } from "@shared/components/toast/toast-container.component";
 
 @Component({
   selector: "app-root",
   standalone: true,
-  imports: [RouterOutlet, ToastContainerComponent],
+  imports: [RouterOutlet, ToastContainerComponent, CommonModule],
   template: `
-    <button class="theme-toggle-btn" (click)="toggleTheme()" [attr.aria-label]="isDark ? 'Switch to light theme' : 'Switch to dark theme'">
-      <span *ngIf="!isDark">🌙</span>
-      <span *ngIf="isDark">☀️</span>
-    </button>
     <router-outlet></router-outlet>
     <app-toast-container></app-toast-container>
-  `,
-  styleUrls: ['./app.component.css']
+  `
 })
 export class AppComponent implements OnInit {
   isDark = false;
