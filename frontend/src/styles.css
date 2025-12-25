@@ -1,12 +1,35 @@
-/* Tailwind directives: must be at the top so utilities are available */
+/* Light theme variables */
+body.light, .light-theme {
+    --background-light: #f8fafc;
+    --sidebar-bg: #f5f7fa;
+    --background-gray: #e5e7eb;
+    --text-dark: #1e293b;
+    --text-gray: #475569;
+    --text-muted: #64748b;
+    --border-color: #d1d5db;
+    --card-shadow: 0 4px 24px 0 rgba(20, 30, 40, 0.10);
+    --primary-color: #19c37d;
+    --primary-hover: #15a76a;
+    --primary-light: #e6f7ef;
+    --status-confirmed: #19c37d;
+    --status-pending: #3ba3c7;
+    --status-completed: #2e8bba;
+    --status-cancelled: #e05a5a;
+    --surface: #ffffff;
+    --surface-alt: #f3f4f6;
+    --surface-muted: #f5f7fa;
+    --accent-soft: #e6f7ef;
+    --accent-border: #2e8bba;
+    --heading-color: #1e293b;
+    --primary-shadow: 0 10px 30px rgba(25, 195, 125, 0.08);
+    --primary-strong-shadow: 0 20px 60px rgba(25, 195, 125, 0.06);
+}
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Custom design tokens and overrides - These can be overridden by backend theme */
-/* Unified, modern dark healthcare theme for all of QuickMed */
 :root {
-    --primary-color: #19c37d;         /* Medical green */
+    --primary-color: #19c37d;         
     --primary-hover: #15a76a;
     --primary-light: #1e2d24;         /* Subtle green-tinted dark */
     --background-light: #181c23;      /* Main app background (charcoal/navy) */
@@ -69,20 +92,18 @@ input, select, textarea {
     color: var(--text-muted);
     border-radius: 12px;
     box-shadow: var(--card-shadow);
+    padding: 2.5rem 1.5rem;
+    margin: 2rem auto;
+    text-align: center;
+    max-width: 420px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.25rem;
+    font-size: 1.1rem;
+    font-weight: 500;
+    letter-spacing: 0.01em;
 }
-    --card-shadow: 0 10px 30px rgba(22, 163, 74, 0.2);
-
-    --surface: #0c0f15;
-    --surface-alt: #0f131b;
-    --surface-muted: #111821;
-    --accent-soft: #0f291c;
-    --accent-border: rgba(22, 163, 74, 0.28);
-    --heading-color: #e6f6ec;
-    --primary-shadow: 0 10px 30px rgba(22, 163, 74, 0.32);
-    --primary-strong-shadow: 0 20px 60px rgba(22, 163, 74, 0.35);
-}
-
-/* Dark semantic tokens (used when body.dark or .dark-theme is set) */
 body.dark, .dark-theme {
     --background: 220 12% 8%;         /* very dark navy */
     --foreground: 220 11% 96%;        /* near-white */
@@ -271,7 +292,6 @@ body {
     transition: box-shadow 0.3s ease;
 }
 
-/* Dark theme overrides (moved from home.component.css) ------------------- */
 body.dark,
 .bg-dark {
     --qm-bg: #050505;
@@ -286,7 +306,6 @@ body.dark {
     color: var(--qm-text) !important;
 }
 
-/* Navbar */
 .bg-dark.navbar,
 body.dark .navbar {
     background: #060606 !important;

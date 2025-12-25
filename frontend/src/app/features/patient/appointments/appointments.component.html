@@ -68,7 +68,7 @@
     <div class="date-time-picker">
       <div>
         <label>Appointment Date</label>
-        <input type="date" (change)="onDateChange($event)" />
+          <input type="date" (change)="onDateChange($any($event.target).value)" />
       </div>
       <div>
         <label>Appointment Time</label>
