@@ -124,23 +124,28 @@ export class AdminThemeService {
   applyDefaultTheme(): void {
     const defaultTheme: Theme = {
       id: '',
-      name: 'default',
-      mode: 'light',
-      primaryColor: '#0FA958',
-      primaryHover: '#0C8A49',
-      primaryLight: '#E6F7EF',
-      backgroundLight: '#ffffff',
-      sidebarBg: '#f5f7f9',
-      backgroundGray: '#f3f4f6',
-      textDark: '#0f172a',
-      textGray: '#374151',
-      textMuted: '#6b7280',
-      borderColor: '#e5e7eb',
-      cardShadow: '0 6px 18px rgba(0, 0, 0, 0.06)',
-      statusConfirmed: '#0FA958',
-      statusPending: '#f97316',
-      statusCompleted: '#3b82f6',
-      statusCancelled: '#ef4444',
+      name: 'dark-healthcare',
+      mode: 'dark',
+      // Medical green accent
+      primaryColor: '#19c37d', // medical green
+      primaryHover: '#15a76a',
+      primaryLight: '#1e2d24', // subtle green-tinted dark
+      // Deep dark backgrounds
+      backgroundLight: '#181c23', // main app background (charcoal/navy)
+      sidebarBg: '#15181e', // sidebar, slightly darker
+      backgroundGray: '#232834', // cards/panels, lighter than bg
+      // Text
+      textDark: '#f3f6fa', // off-white for primary text
+      textGray: '#b0b6c3', // muted gray for secondary
+      textMuted: '#7a8191', // even more muted for hints
+      // Borders & shadows
+      borderColor: '#232834', // subtle border, matches card bg
+      cardShadow: '0 4px 24px 0 rgba(20, 30, 40, 0.45)', // soft shadow
+      // Status colors
+      statusConfirmed: '#19c37d', // medical green
+      statusPending: '#3ba3c7', // muted blue/teal
+      statusCompleted: '#2e8bba', // deeper blue
+      statusCancelled: '#e05a5a', // muted red
       isActive: true,
       createdAt: new Date(),
       updatedAt: new Date(),

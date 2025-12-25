@@ -110,4 +110,9 @@ export class DoctorService {
   listDoctors(): Observable<DoctorListItem[]> {
     return this.http.get<DoctorListItem[]>(`${this.API_URL}`);
   }
+
+  // Fetch available time slots for a doctor on a specific date
+  getAvailability(doctorId: string, date: string): Observable<string[]> {
+    return this.http.get<string[]>(`${this.API_URL}/${doctorId}/availability`, { params: { date } });
+  }
 }

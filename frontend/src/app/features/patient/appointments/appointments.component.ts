@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AppointmentService } from '../../../core/services/appointment.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { DoctorService } from '../../../core/services/doctor.service';
 import { Appointment as AppointmentModel } from '../../../core/models/appointment.model';
 import { PayButtonComponent } from '../../../shared/components/pay-button/pay-button.component';
 import { PatientShellComponent } from '../shared/patient-shell/patient-shell.component';
@@ -30,11 +31,16 @@ export class AppointmentsComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly appointmentService = inject(AppointmentService);
   private readonly authService = inject(AuthService);
+  private readonly doctorService = inject(DoctorService);
 
   appointments = signal<AppointmentModel[]>([]);
   isLoading = signal(true);
   searchQuery = signal('');
   activeSegment = signal<'upcoming' | 'completed'>('upcoming');
+
+  availableTimes: string[] = [];
+  selectedDate: string = '';
+  selectedDoctorId: string = '';
 
   visibleAppointments = computed(() => {
     let list = [...this.appointments()];
@@ -116,5 +122,25 @@ export class AppointmentsComponent implements OnInit {
 
   goHome() {
     this.router.navigate(['/']);
+  }
+
+  // Example: Call this when a date and doctor are selected
+  fetchAvailableTimes() {
+    if (!this.selectedDoctorId || !this.selectedDate) return;
+    this.doctorService.getAvailability(this.selectedDoctorId, this.selectedDate)
+      .subscribe(times => this.availableTimes = times);
+  }
+
+  // Example: Call this when the date input changes
+  onDateChange(event: Event) {
+    const input = event.target as HTMLInputElement;
+    this.selectedDate = input.value;
+    this.fetchAvailableTimes();
+  }
+
+  // Example: Call this when the doctor selection changes
+  onDoctorChange(doctorId: string) {
+    this.selectedDoctorId = doctorId;
+    this.fetchAvailableTimes();
   }
 }

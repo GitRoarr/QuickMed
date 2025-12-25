@@ -64,6 +64,20 @@
         <button class="primary-btn" (click)="bookNewAppointment()">Book your next visit</button>
       </div>
     </ng-container>
+
+    <div class="date-time-picker">
+      <div>
+        <label>Appointment Date</label>
+        <input type="date" (change)="onDateChange($event)" />
+      </div>
+      <div>
+        <label>Appointment Time</label>
+        <select>
+          <option value="">Select a time</option>
+          <option *ngFor="let time of availableTimes" [value]="time">{{ time }}</option>
+        </select>
+      </div>
+    </div>
   </div>
 </app-patient-shell>
 

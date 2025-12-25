@@ -4,60 +4,72 @@
 @tailwind utilities;
 
 /* Custom design tokens and overrides - These can be overridden by backend theme */
+/* Unified, modern dark healthcare theme for all of QuickMed */
 :root {
-    --primary-color: #0FA958;
-    --primary-hover: #0C8A49;
-    --primary-light: #E6F7EF;
-    --background-light: #ffffff;
-    --sidebar-bg: #f5f7f9;
-    --background-gray: #f3f4f6;
-    --text-dark: #0f172a;
-    --text-gray: #374151;
-    --text-muted: #6b7280;
-    --border-color: #e5e7eb;
-    --card-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
-    --status-confirmed: #0FA958;
-    --status-pending: #f97316;
-    --status-completed: #3b82f6;
-    --status-cancelled: #ef4444;
+    --primary-color: #19c37d;         /* Medical green */
+    --primary-hover: #15a76a;
+    --primary-light: #1e2d24;         /* Subtle green-tinted dark */
+    --background-light: #181c23;      /* Main app background (charcoal/navy) */
+    --sidebar-bg: #15181e;            /* Sidebar, slightly darker */
+    --background-gray: #232834;       /* Cards/panels, lighter than bg */
+    --text-dark: #f3f6fa;             /* Off-white for primary text */
+    --text-gray: #b0b6c3;             /* Muted gray for secondary */
+    --text-muted: #7a8191;            /* Even more muted for hints */
+    --border-color: #232834;          /* Subtle border, matches card bg */
+    --card-shadow: 0 4px 24px 0 rgba(20, 30, 40, 0.45); /* Soft shadow */
+    --status-confirmed: #19c37d;      /* Medical green */
+    --status-pending: #3ba3c7;        /* Muted blue/teal */
+    --status-completed: #2e8bba;      /* Deeper blue */
+    --status-cancelled: #e05a5a;      /* Muted red */
 
-    /* surface + accent tokens to keep light/dark palettes aligned */
+    /* Surface tokens for consistent backgrounds */
     --surface: var(--background-light);
     --surface-alt: var(--background-gray);
     --surface-muted: var(--sidebar-bg);
-    --accent-soft: #E6F7EF;
-    --accent-border: #a7f3d0;
+    --accent-soft: #1e2d24;
+    --accent-border: #2e8bba;
     --heading-color: var(--text-dark);
-    --primary-shadow: 0 10px 30px rgba(22, 163, 74, 0.18);
-    --primary-strong-shadow: 0 20px 60px rgba(22, 163, 74, 0.15);
+    --primary-shadow: 0 10px 30px rgba(25, 195, 125, 0.10);
+    --primary-strong-shadow: 0 20px 60px rgba(25, 195, 125, 0.08);
 }
 
-/* Semantic tokens used across components (HSL triplets for components that call hsl(var(--...))) */
-:root {
-    --background: 0 0% 100%;           /* white -> used as hsl(var(--background)) */
-    --foreground: 220 13% 9%;          /* dark text */
-    --card: 0 0% 100%;                 /* card background */
-    --border: 220 12% 93%;             /* light border */
-    --muted-foreground: 215 15% 60%;   /* muted text */
-    --primary: 148 84% 36%;            /* Telebirr green */
-    --primary-foreground: 0 0% 100%;   /* white for primary text */
-    --medical-green: 162 50% 35%;
-    --medical-orange: 24 90% 56%;
-    --destructive: 0 75% 60%;
-    --destructive-foreground: 0 0% 100%;
+body {
+    background: var(--background-light);
+    color: var(--text-dark);
 }
 
-.dark-theme {
-    --primary-color: #0FA958;
-    --primary-hover: #0C8A49;
-    --primary-light: #0f291c;
-    --background-light: #0b0f12;
-    --sidebar-bg: #0f1319;
-    --background-gray: #111821;
-    --text-dark: #e6f6ec;
-    --text-gray: #cbd5e1;
-    --text-muted: #94a3b8;
-    --border-color: #1f2937;
+.card, .panel, .section {
+    background: var(--background-gray);
+    box-shadow: var(--card-shadow);
+    border: 1px solid var(--border-color);
+}
+
+.sidebar {
+    background: var(--sidebar-bg);
+}
+
+button, .primary-btn {
+    background: var(--primary-color);
+    color: var(--text-dark);
+    border: none;
+}
+
+button:hover, .primary-btn:hover {
+    background: var(--primary-hover);
+}
+
+input, select, textarea {
+    background: var(--background-gray);
+    color: var(--text-dark);
+    border: 1px solid var(--border-color);
+}
+
+.empty-state {
+    background: var(--background-gray);
+    color: var(--text-muted);
+    border-radius: 12px;
+    box-shadow: var(--card-shadow);
+}
     --card-shadow: 0 10px 30px rgba(22, 163, 74, 0.2);
 
     --surface: #0c0f15;
