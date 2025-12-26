@@ -199,26 +199,27 @@
   box-shadow: 0 40px 70px -55px rgba(15, 15, 15, 0.55);
 }
 
-.patient-shell.dark .panel {
+/* Dark theme overrides using :host-context to cross component boundaries */
+:host-context(.patient-shell.dark) .panel {
   background: #0f1c2f;
   color: #e2e8f0;
   box-shadow: 0 40px 70px -55px rgba(0, 0, 0, 0.7);
   border: 1px solid #1f2937;
 }
-.patient-shell.dark .panel-header h2 { color: #e2e8f0; }
-.patient-shell.dark .text-link { color: #6ef3b0; }
-.patient-shell.dark .appointment-card { border-color: #1f2937; }
-.patient-shell.dark .appointment-doctor { color: #e2e8f0; }
-.patient-shell.dark .appointment-details { color: #cbd5e1; }
-.patient-shell.dark .appointment-details i { color: #6ef3b0; }
-.patient-shell.dark .badge { background: #0b1423; color: #e2e8f0; border: 1px solid #1f2937; }
-.patient-shell.dark .badge-video { background: rgba(16,185,129,0.16); color: #6ef3b0; }
-.patient-shell.dark .prescription-card { border-color: #1f2937; }
-.patient-shell.dark .prescription-name { color: #e2e8f0; }
-.patient-shell.dark .lab-item { border-color: #1f2937; }
-.patient-shell.dark .lab-title { color: #e2e8f0; }
-.patient-shell.dark .lab-results .badge { background: rgba(16,185,129,0.16); color: #6ef3b0; border-color: transparent; }
-.patient-shell.dark .empty-state { background: #0b1423; color: #9fb1c9; border: 1px solid #1f2937; }
+:host-context(.patient-shell.dark) .panel-header h2 { color: #e2e8f0; }
+:host-context(.patient-shell.dark) .text-link { color: #6ef3b0; }
+:host-context(.patient-shell.dark) .appointment-card { border-color: #1f2937; }
+:host-context(.patient-shell.dark) .appointment-doctor { color: #e2e8f0; }
+:host-context(.patient-shell.dark) .appointment-details { color: #cbd5e1; }
+:host-context(.patient-shell.dark) .appointment-details i { color: #6ef3b0; }
+:host-context(.patient-shell.dark) .badge { background: #0b1423; color: #e2e8f0; border: 1px solid #1f2937; }
+:host-context(.patient-shell.dark) .badge-video { background: rgba(16,185,129,0.16); color: #6ef3b0; }
+:host-context(.patient-shell.dark) .prescription-card { border-color: #1f2937; }
+:host-context(.patient-shell.dark) .prescription-name { color: #e2e8f0; }
+:host-context(.patient-shell.dark) .lab-item { border-color: #1f2937; }
+:host-context(.patient-shell.dark) .lab-title { color: #e2e8f0; }
+:host-context(.patient-shell.dark) .lab-results .badge { background: rgba(16,185,129,0.16); color: #6ef3b0; border-color: transparent; }
+:host-context(.patient-shell.dark) .empty-state { background: #0b1423; color: #9fb1c9; border: 1px solid #1f2937; }
 
 .panel-header {
   display: flex;

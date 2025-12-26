@@ -1,0 +1,75 @@
+<div class="patient-detail p-5">
+  <button class="back-btn bg-transparent border-0 text-primary mb-3 cursor-pointer flex items-center gap-2">
+    <i class="bi bi-arrow-left"></i> Back to Patients
+  </button>
+
+  <section *ngIf="patient(); else notFoundTpl">
+    <header class="header flex gap-4 items-center p-4 bg-surface border border-border-color rounded-xl">
+      <div class="avatar w-16 h-16 rounded-full overflow-hidden flex items-center justify-center bg-gray-200">
+        <img *ngIf="patient()?.avatar; else initialsTpl" [src]="patient()?.avatar" alt="Avatar" />
+        <ng-template #initialsTpl>
+          <div class="initials font-bold">{{ getInitials() }}</div>
+        </ng-template>
+      </div>
+      <div>
+        <h1>{{ patient()?.firstName }} {{ patient()?.lastName }}</h1>
+        <p class="text-muted">ID: {{ patient()?.patientId || patient()?.id }}</p>
+        <p class="text-muted">{{ patient()?.email }} · {{ patient()?.phoneNumber }}</p>
+      </div>
+    </header>
+
+    <div class="stats grid grid-cols-3 gap-3 my-4">
+      <div class="stat bg-surface border border-border-color rounded-lg p-3">
+        <span class="label text-sm text-muted">Total Visits</span>
+        <span class="value font-semibold">{{ patient()?.totalAppointments || 0 }}</span>
+      </div>
+      <div class="stat bg-surface border border-border-color rounded-lg p-3">
+        <span class="label text-sm text-muted">Last Status</span>
+        <span class="value font-semibold">{{ patient()?.lastStatus || '—' }}</span>
+      </div>
+      <div class="stat bg-surface border border-border-color rounded-lg p-3">
+        <span class="label text-sm text-muted">Last Seen</span>
+        <span class="value font-semibold">{{ formatLastSeen() }}</span>
+      </div>
+    </div>
+
+    <section class="actions flex gap-2 my-4">
+      <button class="btn btn-primary flex items-center gap-2">
+        <i class="bi bi-chat-dots"></i> Message
+      </button>
+      <button class="btn btn-outline-primary flex items-center gap-2">
+        <i class="bi bi-file-earmark-medical"></i> View Records
+      </button>
+      <button class="btn btn-success flex items-center gap-2">
+        <i class="bi bi-plus-circle"></i> New Appointment
+      </button>
+    </section>
+
+    <section class="panel bg-surface border border-border-color rounded-xl p-4" *ngIf="appointments()?.length">
+      <h3>Recent Appointments</h3>
+      <div class="list flex flex-col gap-2.5">
+        <div class="row grid grid-cols-[2fr_1fr_auto] gap-3 items-center p-2.5 border-b border-dashed border-border-color" *ngFor="let a of appointments()">
+          <div>
+            <span class="eyebrow uppercase text-xs text-muted">{{ a.type }}</span>
+            <div>{{ a.reason || '—' }}</div>
+          </div>
+          <div>
+            <span>{{ a.appointmentDate | date:'mediumDate' }}</span>
+            <span class="text-muted">{{ a.appointmentTime }}</span>
+          </div>
+          <div class="status font-semibold" [class.text-yellow-500]="a.status==='pending'" [class.text-green-600]="a.status==='completed'" [class.text-red-500]="a.status==='cancelled'">
+            {{ a.status | titlecase }}
+          </div>
+        </div>
+      </div>
+    </section>
+  </section>
+
+  <ng-template #loadingTpl>
+    <div class="loading p-8 text-center text-muted">Loading patient details...</div>
+  </ng-template>
+
+  <ng-template #notFoundTpl>
+    <div class="empty p-8 text-center text-muted">Patient not found.</div>
+  </ng-template>
+</div>

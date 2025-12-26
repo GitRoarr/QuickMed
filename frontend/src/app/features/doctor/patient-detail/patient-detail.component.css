@@ -1,0 +1,25 @@
+:host { display: block; }
+.text-muted { color: var(--text-muted); }
+.bg-surface { background: var(--surface); }
+.border-border-color { border-color: var(--border-color); }
+
+.back-btn { cursor: pointer; }
+.header { box-shadow: 0 20px 45px -35px rgba(15,15,15,0.6); }
+.header h1 { margin: 0; font-size: 1.4rem; font-weight: 700; }
+.initials { font-size: 1rem; }
+
+.panel { box-shadow: 0 40px 70px -55px rgba(15,15,15,0.55); }
+.panel h3 { margin: 0 0 .75rem 0; font-size: 1.1rem; }
+.status { font-weight: 600; }
+
+.stats .stat { box-shadow: 0 20px 45px -35px rgba(15,15,15,0.6); }
+.eyebrow { letter-spacing: .08em; }
+.empty, .loading { background: #f8fafc; border-radius: 12px; }
+
+:host-context(body.dark) .bg-surface { background: #0f1c2f; }
+:host-context(body.dark) .border-border-color { border-color: #1f2937; }
+:host-context(body.dark) .text-muted { color: #9fb1c9; }
+:host-context(body.dark) .panel { box-shadow: 0 40px 70px -55px rgba(0,0,0,0.7); }
+:host-context(body.dark) .header { box-shadow: 0 20px 45px -35px rgba(0,0,0,0.7); }
+:host-context(body.dark) .stats .stat { box-shadow: 0 20px 45px -35px rgba(0,0,0,0.7); }
+:host-context(body.dark) .empty, :host-context(body.dark) .loading { background: #0b1423; border: 1px solid #1f2937; color: #9fb1c9; }
