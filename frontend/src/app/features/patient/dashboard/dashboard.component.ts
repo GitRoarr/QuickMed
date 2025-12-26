@@ -7,6 +7,7 @@ import {
   PatientPortalService,
 } from '@core/services/patient-portal.service';
 import { PatientShellComponent } from '../shared/patient-shell/patient-shell.component';
+import { ThemeService } from '@app/core/services/theme.service';
 
 @Component({
   selector: 'app-patient-dashboard',
@@ -17,9 +18,6 @@ import { PatientShellComponent } from '../shared/patient-shell/patient-shell.com
 })
 export class DashboardComponent implements OnInit {
   themeService = inject(ThemeService);
-    get isDarkMode() {
-      return this.themeService.isDarkMode();
-    }
   private readonly patientPortalService = inject(PatientPortalService);
 
   isLoading = signal(true);

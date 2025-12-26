@@ -1,4 +1,4 @@
-<div class="patient-shell" [class.sidebar-open]="sidebarOpen" [class.dark]="themeMode()==='dark'">
+<div class="patient-shell" [class.sidebar-open]="sidebarOpen" [class.dark]="themeService.isDarkMode()">
   <aside class="patient-shell__sidebar">
     <div class="patient-shell__brand" (click)="navigate('/')" title="Back to Home">
       <div style="display:flex;align-items:center;gap:.5rem;">
@@ -55,7 +55,7 @@
         <span class="patient-shell__badge" *ngIf="unreadNotifications() > 0">{{ unreadNotifications() }}</span>
       </button>
       <button class="patient-shell__icon-btn" type="button" (click)="toggleTheme()" title="Toggle theme">
-        <i class="bi" [ngClass]="themeMode()==='dark' ? 'bi-moon' : 'bi-brightness-high'"></i>
+        <i class="bi" [ngClass]="themeService.isDarkMode() ? 'bi-moon' : 'bi-brightness-high'"></i>
       </button>
       <button class="hamburger" type="button" aria-label="Toggle menu" (click)="toggleSidebar()" *ngIf="mobile">
         <span class="hamburger-box">

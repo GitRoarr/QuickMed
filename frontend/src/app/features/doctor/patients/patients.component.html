@@ -1,26 +1,46 @@
 <div class="patients-shell">
+   <!-- Sidebar -->
   <aside class="sidebar">
-    <div class="logo">
-      <div class="mark">QM</div>
-      <div>
-        <p class="eyebrow">QuickMed</p>
-        <strong>Doctor Portal</strong>
+    <div class="sidebar-header" title="Back to Home" (click)="navigate('/')" style="cursor: pointer;">
+      <div class="logo">
+        <div class="logo-icon">
+          <img src="assets/images/QuickMed-Logo.png" alt="QuickMed Logo" class="h-8 w-8 rounded" />
+        </div>
+        <div class="logo-text">
+          <h3>QuickMed</h3>
+          <p>Doctor Portal</p>
+        </div>
       </div>
     </div>
 
-    <nav>
-      <a *ngFor="let item of menuItems" [routerLink]="item.route" routerLinkActive="active">
-        <i class="bi" [ngClass]="item.icon"></i>
-        <span>{{ item.label }}</span>
-      </a>
-    </nav>
+            <nav class="sidebar-nav">
+              <a
+                *ngFor="let item of menuItems"
+                [routerLink]="item.route"
+                routerLinkActive="active"
+                class="nav-item"
+              >
+                <i [class]="'bi ' + item.icon"></i>
+                <span>{{ item.label }}</span>
+                <!-- No badge for patients menu items -->
+              </a>
+            </nav>
 
-    <div class="sidebar-user" *ngIf="currentUser() as user">
-      <div class="avatar">{{ ((user.firstName || '').charAt(0) || 'D') + (user.lastName || '').charAt(0) }}</div>
-      <div>
-        <p class="name">Dr. {{ user.firstName }} {{ user.lastName }}</p>
-        <p class="role">{{ user.specialty || 'Provider' }}</p>
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="user-avatar">
+          <img *ngIf="currentUser()?.avatar; else docInitials" [src]="currentUser()?.avatar" alt="Doctor avatar" />
+          <ng-template #docInitials>{{ getDoctorInitials() }}</ng-template>
+        </div>
+        <div class="user-details">
+          <p class="user-name">Dr. {{ getDoctorName() }}</p>
+          <p class="user-role">{{ getDoctorSpecialty() }}</p>
+        </div>
       </div>
+      <button class="logout-btn" (click)="logout()">
+        <i class="bi bi-box-arrow-right"></i>
+        Logout
+      </button>
     </div>
   </aside>
 

@@ -1,7 +1,7 @@
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { DoctorPatientSummary, DoctorService } from '@core/services/doctor.service';
 import { AuthService } from '@core/services/auth.service';
 
@@ -15,6 +15,7 @@ import { AuthService } from '@core/services/auth.service';
 export class PatientsComponent implements OnInit {
   private doctorService = inject(DoctorService);
   private authService = inject(AuthService);
+  private router = inject(Router);
 
   patients = signal<DoctorPatientSummary[]>([]);
   isLoading = signal(true);
@@ -87,6 +88,39 @@ export class PatientsComponent implements OnInit {
   ];
 
   currentUser = this.authService.currentUser;
+
+  // --- Dashboard sidebar/topbar helpers ---
+  navigate(route: string): void {
+    this.router.navigate([route]);
+  }
+
+  getDoctorName(): string {
+    const user = this.currentUser();
+    if (user) {
+      return `${user.firstName} ${user.lastName}`;
+    }
+    return 'Doctor';
+  }
+
+  getDoctorSpecialty(): string {
+    const user = this.currentUser();
+    return user?.specialty || 'General Practitioner';
+  }
+
+  getDoctorInitials(): string {
+    const name = this.getDoctorName();
+    if (!name) return 'DR';
+    const parts = name.split(' ');
+    if (parts.length >= 2) {
+      return (parts[0][0] + parts[1][0]).toUpperCase();
+    }
+    return name.substring(0, 2).toUpperCase();
+  }
+
+  logout(): void {
+    this.authService.logout();
+    this.router.navigate(['/login']);
+  }
   Math = Math;
 
   ngOnInit(): void {

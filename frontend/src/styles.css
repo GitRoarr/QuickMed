@@ -22,12 +22,12 @@
         --font-mono: var(--font-geist-mono);
 
         /* Light Theme - Clean, Airy, Medical-grade */
-        --background: #f8f9fa;
+        --background: #ffffff;
         --foreground: #1a1a1a;
 
         --surface: #ffffff;
-        --surface-secondary: #f0f2f5;
-        --surface-tertiary: #e8ebf0;
+        --surface-secondary: #f8f9fa;
+        --surface-tertiary: #f0f2f5;
 
         --text-primary: #1a1a1a;
         --text-secondary: #666666;
@@ -118,10 +118,12 @@
 
     /* Dark Theme - Deep, Premium, Eye-friendly */
     body.dark {
-        --background: #0f0f0f;
+        --background: #121212;
         --foreground: #f5f5f5;
 
-        --surface: #1a1a1a;
+        --surface: #1e1e1e;
+        --surface-secondary: #2d2d2d;
+        --surface-tertiary: #3d3d3d;
         --surface-secondary: #252525;
         --surface-tertiary: #303030;
 
@@ -210,10 +212,10 @@
 
     /* Light theme class variant (for explicit light mode) */
     body.light {
-        --background: #f8f9fa;
+        --background: #ffffff;
         --foreground: #1a1a1a;
         --surface: #ffffff;
-        --surface-secondary: #f0f2f5;
+        --surface-secondary: #f8f9fa;
         --surface-tertiary: #e8ebf0;
         --text-primary: #1a1a1a;
         --text-secondary: #666666;
@@ -283,8 +285,8 @@
 }
 /* Light theme variables */
 body.light, .light-theme {
-    --background-light: #f8fafc;
-    --sidebar-bg: #f5f7fa;
+    --background-light: #ffffff;
+    --sidebar-bg: #ffffff;
     --background-gray: #e5e7eb;
     --text-dark: #1e293b;
     --text-gray: #475569;
@@ -635,7 +637,6 @@ body.dark .stat-number {
     color: var(--qm-muted) !important;
 }
 
-/* Buttons */
 body.dark .btn-primary,
 .bg-dark .btn-primary {
     background: var(--qm-accent) !important;
@@ -651,7 +652,6 @@ body.dark .btn-outline-light,
     background: transparent !important;
 }
 
-/* Cards and panels */
 body.dark .feature-card,
 body.dark .benefit-card,
 body.dark .testimonial-card,

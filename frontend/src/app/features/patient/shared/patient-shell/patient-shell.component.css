@@ -416,7 +416,6 @@
 @media (max-width: 1024px) {
   .hamburger { display: inline-block; }
 
-  /* hide nav by default on mobile, show when sidebar-open class present */
   .patient-shell__nav { display: none; }
   .patient-shell.sidebar-open .patient-shell__nav {
     display: flex;
@@ -432,7 +431,6 @@
     z-index: 60;
   }
 
-  /* make profile/logout sit inline and not push content */
   .patient-shell__profile { order: 2; flex: 0 0 auto; }
   .patient-shell__logout { order: 3; }
 }

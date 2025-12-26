@@ -83,6 +83,30 @@ export interface DoctorListItem {
   specialty?: string;
 }
 
+export interface DoctorPatientDetail {
+  patient: {
+    id: string;
+    patientId?: string;
+    firstName: string;
+    lastName: string;
+    email?: string;
+    phoneNumber?: string;
+    avatar?: string;
+    totalAppointments?: number;
+    lastAppointmentDate?: string;
+    lastAppointmentTime?: string;
+    lastStatus?: string;
+  };
+  appointments: Array<{
+    id: string;
+    appointmentDate: string;
+    appointmentTime: string;
+    type: string;
+    status: string;
+    reason?: string;
+  }>;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -114,5 +138,10 @@ export class DoctorService {
   // Fetch available time slots for a doctor on a specific date
   getAvailability(doctorId: string, date: string): Observable<string[]> {
     return this.http.get<string[]>(`${this.API_URL}/${doctorId}/availability`, { params: { date } });
+  }
+
+  // Patient detail for doctor view
+  getPatientDetail(patientId: string): Observable<DoctorPatientDetail> {
+    return this.http.get<DoctorPatientDetail>(`${this.API_URL}/patients/${patientId}`);
   }
 }

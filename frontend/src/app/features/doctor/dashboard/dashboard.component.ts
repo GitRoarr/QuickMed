@@ -1,4 +1,5 @@
 import { Component, OnInit, OnDestroy, signal, inject, HostListener } from '@angular/core';
+import { ThemeService } from '@core/services/theme.service';
 import { CommonModule, DatePipe } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { DoctorService, DoctorDashboardData } from '@core/services/doctor.service';
@@ -14,7 +15,6 @@ interface MenuItem {
   route: string;
   badge?: number;
 }
-
 @Component({
   selector: 'app-doctor-dashboard',
   standalone: true,
@@ -22,12 +22,8 @@ interface MenuItem {
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css']
 })
-import { ThemeService } from '@core/services/theme.service';
 export class DashboardComponent implements OnInit, OnDestroy {
   themeService = inject(ThemeService);
-    get isDarkMode() {
-      return this.themeService.isDarkMode();
-    }
   private doctorService = inject(DoctorService);
   private authService = inject(AuthService);
   private router = inject(Router);
