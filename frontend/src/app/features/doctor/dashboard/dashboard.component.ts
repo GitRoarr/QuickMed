@@ -22,7 +22,12 @@ interface MenuItem {
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css']
 })
+import { ThemeService } from '@core/services/theme.service';
 export class DashboardComponent implements OnInit, OnDestroy {
+  themeService = inject(ThemeService);
+    get isDarkMode() {
+      return this.themeService.isDarkMode();
+    }
   private doctorService = inject(DoctorService);
   private authService = inject(AuthService);
   private router = inject(Router);

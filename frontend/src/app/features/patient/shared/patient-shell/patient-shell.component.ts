@@ -1,4 +1,5 @@
 import { Component, inject, HostListener, OnInit, signal } from '@angular/core';
+import { ThemeService } from '@core/services/theme.service';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { AuthService } from '@core/services/auth.service';
@@ -22,8 +23,7 @@ interface PatientNavItem {
 export class PatientShellComponent implements OnInit {
   sidebarOpen = false;
   mobile = false;
-  themeMode = signal<'light' | 'dark'>('light');
-  private readonly THEME_KEY = 'patient_theme_mode';
+  themeService = inject(ThemeService);
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
   private readonly messageService = inject(MessageService);
@@ -33,6 +33,9 @@ export class PatientShellComponent implements OnInit {
   unreadNotifications = signal(0);
 
   menuItems: PatientNavItem[] = [
+      get isDarkMode() {
+        return this.themeService.isDarkMode();
+      }
     { label: 'Dashboard', icon: 'bi-speedometer2', route: '/patient/dashboard' },
     { label: 'Appointments', icon: 'bi-calendar3', route: '/patient/appointments' },
     { label: 'Find Doctors', icon: 'bi-people', route: '/patient/doctors' },

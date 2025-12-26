@@ -14,7 +14,12 @@ import { AlertMessageComponent } from '@app/shared/components/alert-message/aler
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css']
 })
+import { ThemeService } from '@core/services/theme.service';
 export class DashboardComponent implements OnInit {
+  themeService = inject(ThemeService);
+    get isDarkMode() {
+      return this.themeService.isDarkMode();
+    }
   menuItems = [
     { label: 'Overview', icon: 'grid', route: '/admin/overview' },
     { label: 'Appointments', icon: 'calendar', route: '/admin/appointments' },

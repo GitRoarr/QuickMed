@@ -1,8 +1,9 @@
-<nav class="navbar navbar-expand-lg fixed-top" 
-    [ngClass]="{
-  'bg-light navbar-light': !isDarkMode(),
-  'bg-dark navbar-dark': isDarkMode()
-}">
+<div [ngClass]="isDarkMode() ? 'home-dark-bg' : 'home-light-bg'">
+    <nav class="navbar navbar-expand-lg fixed-top" 
+            [ngClass]="{
+        'bg-light navbar-light': !isDarkMode(),
+        'bg-dark navbar-dark': isDarkMode()
+    }">
   <div class="container">
     <a class="navbar-brand d-flex align-items-center" routerLink="/">
       <img src="assets/images/QuickMed-Logo.png" alt="QuickMed" width="60" height="60" class="rounded-3 me-2" />
@@ -479,4 +480,5 @@
             <p>&copy; 2025 QuickMed. All rights reserved. Built with <i class="bi bi-heart-fill text-primary"></i></p>
         </div>
     </div>
-</footer>
+    </footer>
+</div>
