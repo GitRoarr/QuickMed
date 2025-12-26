@@ -805,7 +805,6 @@ body.dark .navbar .d-flex.align-items-center,
     flex: 0 0 auto !important;
 }
 
-/* ensure toggler and buttons keep their size & position */
 body.dark .navbar .navbar-toggler,
 body.dark .navbar .theme-toggle,
 body.dark .navbar .btn {

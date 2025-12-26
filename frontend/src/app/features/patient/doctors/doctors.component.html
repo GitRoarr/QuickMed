@@ -114,10 +114,12 @@
           </label>
           <label>
             <span>Appointment Time</span>
-            <select formControlName="appointmentTime">
-              <option value="" disabled>Select a time</option>
-              <option *ngFor="let s of availableSlots()" [value]="s.startTime">{{ s.startTime }}</option>
-            </select>
+              <input
+                type="time"
+                formControlName="appointmentTime"
+                required
+                style="width: 100%; border-radius: 12px; padding: 0.65rem 0.85rem; background: var(--surface-alt); box-shadow: inset 0 0 0 1px var(--border-color);"
+              />
           </label>
           <label>
             <span>Notes (optional)</span>
