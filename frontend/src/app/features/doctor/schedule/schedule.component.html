@@ -4,21 +4,13 @@
 
   <main class="flex-1 flex flex-col overflow-hidden relative">
     
-    <div class="px-8 py-4 flex justify-end items-center gap-4 bg-[var(--background)] sticky top-0 z-40">
-      <button class="w-10 h-10 rounded-xl bg-[var(--surface-secondary)] text-[var(--text-secondary)] hover:bg-[var(--primary-light)] hover:text-[var(--primary)] transition-colors flex items-center justify-center" [routerLink]="'/doctor/messages'">
-        <i class="bi bi-chat-dots text-lg"></i>
-      </button>
-      
-      
-      <button class="w-10 h-10 rounded-xl bg-[var(--surface-secondary)] text-[var(--text-secondary)] hover:text-[var(--primary)] transition-all flex items-center justify-center relative overflow-hidden" (click)="setTheme(themeMode() === 'light' ? 'dark' : 'light')">
-        <i class="bi absolute transition-all duration-300" [class.bi-moon-stars-fill]="themeMode() === 'dark'" [class.bi-sun-fill]="themeMode() === 'light'" [class.scale-0]="themeMode() === 'light'" [class.rotate-90]="themeMode() === 'light'" style="transform-origin: center;"></i>
-        <i class="bi bi-brightness-high-fill absolute transition-all duration-300" [class.scale-0]="themeMode() === 'dark'" [class.-rotate-90]="themeMode() === 'dark'"></i>
-      </button>
-
-      <div class="w-10 h-10 rounded-full bg-[var(--primary-light)] border border-[var(--primary)] text-[var(--primary)] flex items-center justify-center font-bold text-sm">
-        {{ getDoctorInitials() }}
-      </div>
-    </div>
+    <app-doctor-header
+      [initials]="getDoctorInitials()"
+      [avatarUrl]="currentUser()?.avatar"
+      [unreadNotifications]="unreadNotifications()"
+      [themeMode]="themeMode()"
+      (themeChange)="setTheme($event)"
+    ></app-doctor-header>
 
     <div class="flex-1 overflow-y-auto px-8 pb-8">
       

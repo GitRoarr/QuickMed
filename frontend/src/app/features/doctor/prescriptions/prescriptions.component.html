@@ -1,136 +1,147 @@
-<div class="doctor-prescriptions">
-  <!-- Sidebar -->
+<div class="flex h-screen bg-[var(--background)] text-[var(--text-primary)] overflow-hidden">
+  <!-- Shared Sidebar -->
   <app-doctor-sidebar></app-doctor-sidebar>
-    <div class="sidebar-header">
-      <div class="logo">
-        <div class="logo-icon">
-          <img src="assets/images/QuickMed-Logo.png" alt="QuickMed Logo" class="h-8 w-8 rounded" />
-        </div>
-        <div class="logo-text">
-          <h3>QuickMed</h3>
-          <p>Doctor Portal</p>
-        </div>
-      </div>
-    </div>
-
-            <nav class="sidebar-nav">
-              <a
-                *ngFor="let item of menuItems()"
-                [routerLink]="item.route"
-                routerLinkActive="active"
-                class="nav-item"
-              >
-                <i [class]="'bi ' + item.icon"></i>
-                <span>{{ item.label }}</span>
-                <span *ngIf="item.badge && item.badge > 0" class="badge">{{ item.badge }}</span>
-              </a>
-            </nav>
-
-    <div class="sidebar-footer">
-      <div class="user-info">
-        <div class="user-avatar">
-          <img *ngIf="currentUser()?.avatar; else docInitials" [src]="currentUser()?.avatar" alt="Doctor avatar" />
-          <ng-template #docInitials>{{ getDoctorInitials() }}</ng-template>
-        </div>
-        <div class="user-details">
-          <p class="user-name">Dr. {{ getDoctorName() }}</p>
-          <p class="user-role">{{ getDoctorSpecialty() }}</p>
-        </div>
-      </div>
-      <button class="logout-btn" (click)="logout()">
-        <i class="bi bi-box-arrow-right"></i>
-        Logout
-      </button>
-    </div>
-  
 
   <!-- Main Content -->
-  <main class="main-content">
-    <header class="content-header">
-      <div>
-        <h1 class="page-title">Prescriptions</h1>
-        <p class="page-subtitle">Create and manage patient prescriptions</p>
+  <div class="flex-1 flex flex-col min-w-0">
+    <!-- Shared Header -->
+    <app-doctor-header
+      [initials]="getDoctorInitials()"
+      [avatarUrl]="currentUser()?.avatar"
+      [unreadNotifications]="unreadNotificationCount()"
+      [themeMode]="themeService.isDarkMode() ? 'dark' : 'light'"
+      (themeChange)="onThemeChange($event)"
+    ></app-doctor-header>
+
+    <!-- Page Content -->
+    <main class="flex-1 overflow-y-auto p-6 lg:p-10">
+      <!-- Page Header -->
+      <div class="mb-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+        <div>
+          <h1 class="text-3xl lg:text-4xl font-bold">Prescriptions</h1>
+          <p class="text-[var(--text-secondary)] mt-3 text-lg">Create and manage digital prescriptions for your patients</p>
+        </div>
+        <button
+          (click)="createNewPrescription()"
+          class="px-6 py-4 bg-[var(--primary)] text-white rounded-2xl font-semibold hover:bg-[var(--primary-hover)] active:bg-[var(--primary-active)] transition shadow-lg flex items-center gap-3"
+        >
+          <i class="bi bi-plus-circle text-xl"></i>
+          New Prescription
+        </button>
       </div>
-      <button class="btn-primary" (click)="createNewPrescription()">
-        <i class="bi bi-plus-circle"></i>
-        New Prescription
-      </button>
-    </header>
 
-    <!-- Search Bar -->
-    <div class="search-section">
-      <div class="search-input-wrapper">
-        <i class="bi bi-search search-icon"></i>
-        <input
-          type="text"
-          placeholder="Search by patient name or medication..."
-          [value]="searchQuery()"
-          (input)="searchQuery.set($any($event.target).value); onSearchChange()"
-          class="search-input"
-        />
+      <!-- Search Bar -->
+      <div class="mb-10">
+        <div class="relative max-w-3xl">
+          <i class="bi bi-search absolute left-5 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] text-xl"></i>
+          <input
+            type="text"
+            placeholder="Search by patient name, medication, or dosage..."
+            [value]="searchQuery()"
+            (input)="searchQuery.set($any($event.target).value); onSearchChange()"
+            class="w-full pl-14 pr-6 py-5 bg-[var(--surface)] border border-[var(--border-light)] rounded-2xl focus:outline-none focus:ring-4 focus:ring-[var(--primary-light)] focus:border-[var(--primary)] transition text-lg"
+          />
+        </div>
       </div>
-    </div>
 
-    <!-- Loading State -->
-    <div *ngIf="isLoading()" class="loading-container">
-      <div class="spinner"></div>
-      <p>Loading prescriptions...</p>
-    </div>
+      <!-- Loading State -->
+      <div *ngIf="isLoading()" class="flex flex-col items-center justify-center py-32">
+        <div class="w-16 h-16 border-4 border-[var(--primary)] border-t-transparent rounded-full animate-spin mb-6"></div>
+        <p class="text-xl text-[var(--text-secondary)]">Loading prescriptions...</p>
+      </div>
 
-    <!-- Prescriptions List -->
-    <div *ngIf="!isLoading()" class="prescriptions-list">
-      <div
-        *ngFor="let prescription of filteredPrescriptions()"
-        class="prescription-card"
-      >
-        <div class="prescription-header">
-          <div class="medication-info">
-            <div class="medication-icon">
-              <i class="bi bi-capsule"></i>
+      <!-- Prescriptions Grid -->
+      <div *ngIf="!isLoading()" class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
+        <div
+          *ngFor="let prescription of filteredPrescriptions(); let i = index"
+          class="bg-[var(--surface)] rounded-3xl border border-[var(--border-light)] shadow-md hover:shadow-2xl transition-all duration-500 overflow-hidden"
+          [@fadeInUp]="i"
+        >
+          <!-- Card Header -->
+          <div class="p-8 border-b border-[var(--border-light)]">
+            <div class="flex items-start justify-between">
+              <div class="flex items-center gap-5">
+                <div class="w-16 h-16 bg-gradient-to-br from-[var(--primary)] to-[var(--primary-active)] rounded-2xl flex items-center justify-center text-white shadow-lg">
+                  <i class="bi bi-capsule text-3xl"></i>
+                </div>
+                <div>
+                  <h3 class="text-xl font-bold">{{ prescription.medication }}</h3>
+                  <p class="text-lg font-medium text-[var(--text-secondary)] mt-1">{{ prescription.dosage }}</p>
+                  <p class="text-sm text-[var(--text-secondary)] mt-2">Patient: {{ getPatientName(prescription) }}</p>
+                </div>
+              </div>
+
+              <span
+                class="px-4 py-2 rounded-full text-sm font-semibold"
+                [class.bg-[var(--success-light)]]="prescription.status === 'active'"
+                [class.text-success-700]="prescription.status === 'active'"
+                [class.bg-blue-100]="prescription.status === 'completed'"
+                [class.text-blue-700]="prescription.status === 'completed'"
+                [class.bg-red-100]="prescription.status === 'cancelled'"
+                [class.text-red-700]="prescription.status === 'cancelled'"
+              >
+                {{ prescription.status | titlecase }}
+              </span>
             </div>
-            <div>
-              <h3 class="medication-name">{{ prescription.medication }} - {{ prescription.dosage }}</h3>
-              <p class="patient-name">Patient: {{ getPatientName(prescription) }}</p>
+          </div>
+
+          <!-- Details -->
+          <div class="p-8 space-y-5">
+            <div class="flex items-center gap-4 text-base">
+              <i class="bi bi-clock text-[var(--primary)] text-xl"></i>
+              <div>
+                <span class="font-medium">Frequency:</span>
+                <span class="text-[var(--text-secondary)] ml-2">{{ prescription.frequency }}</span>
+              </div>
+            </div>
+            <div class="flex items-center gap-4 text-base">
+              <i class="bi bi-calendar-week text-[var(--primary)] text-xl"></i>
+              <div>
+                <span class="font-medium">Duration:</span>
+                <span class="text-[var(--text-secondary)] ml-2">{{ prescription.duration }}</span>
+              </div>
+            </div>
+            <div class="flex items-center gap-4 text-base">
+              <i class="bi bi-calendar-date text-[var(--primary)] text-xl"></i>
+              <div>
+                <span class="font-medium">Issued:</span>
+                <span class="text-[var(--text-secondary)] ml-2">{{ prescription.prescriptionDate | date:'mediumDate' }}</span>
+              </div>
             </div>
           </div>
-          <div class="prescription-status">
-            <span [class]="'status-badge ' + prescription.status">
-              {{ prescription.status | titlecase }}
-            </span>
+
+          <!-- Actions -->
+          <div class="p-8 pt-0 flex gap-4 border-t border-[var(--border-light)]">
+            <button
+              (click)="viewPrescription(prescription)"
+              class="flex-1 py-4 bg-[var(--surface-secondary)] rounded-xl font-semibold hover:bg-[var(--surface-tertiary)] transition flex items-center justify-center gap-2"
+            >
+              <i class="bi bi-eye text-lg"></i>
+              View Details
+            </button>
+            <button
+              (click)="downloadPrescription(prescription)"
+              class="flex-1 py-4 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-xl font-semibold hover:bg-blue-100 dark:hover:bg-blue-900/50 transition flex items-center justify-center gap-2"
+            >
+              <i class="bi bi-download text-lg"></i>
+              Download
+            </button>
           </div>
         </div>
 
-        <div class="prescription-details">
-          <div class="detail-item">
-            <i class="bi bi-clock"></i>
-            <span><strong>Frequency:</strong> {{ prescription.frequency }}</span>
-          </div>
-          <div class="detail-item">
-            <i class="bi bi-calendar"></i>
-            <span><strong>Duration:</strong> {{ prescription.duration }}</span>
-          </div>
-          <div class="detail-item">
-            <i class="bi bi-calendar-date"></i>
-            <span><strong>Date:</strong> {{ prescription.prescriptionDate | date:'yyyy-MM-dd' }}</span>
-          </div>
-        </div>
-
-        <div class="prescription-actions">
-          <button class="action-btn view" (click)="viewPrescription(prescription)">
-            <i class="bi bi-eye"></i>
-            View
-          </button>
-          <button class="action-btn download" (click)="downloadPrescription(prescription)">
-            <i class="bi bi-download"></i>
-            Download
+        <!-- Empty State -->
+        <div *ngIf="filteredPrescriptions().length === 0" class="col-span-full flex flex-col items-center justify-center py-32">
+          <i class="bi bi-prescription2 text-8xl text-[var(--text-muted)] mb-8"></i>
+          <p class="text-2xl font-semibold text-[var(--text-secondary)]">No prescriptions found</p>
+          <p class="text-lg text-[var(--text-secondary)] mt-4">Try adjusting your search or create a new prescription.</p>
+          <button
+            (click)="createNewPrescription()"
+            class="mt-8 px-8 py-4 bg-[var(--primary)] text-white rounded-2xl font-semibold hover:bg-[var(--primary-hover)] transition shadow-lg"
+          >
+            Create First Prescription
           </button>
         </div>
       </div>
-
-      <div *ngIf="filteredPrescriptions().length === 0" class="empty-state">
-        <i class="bi bi-prescription2"></i>
-        <p>No prescriptions found</p>
-      </div>
-    </div>
-  </main>
+    </main>
+  </div>
 </div>

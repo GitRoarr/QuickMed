@@ -1,248 +1,146 @@
-<div class="doctor-dashboard">
-  <!-- Sidebar -->
-  <aside class="sidebar">
-    <div class="sidebar-header" title="Back to Home" (click)="navigate('/')" style="cursor: pointer;">
-      <div class="logo">
-        <div class="logo-icon">
-          <img src="assets/images/QuickMed-Logo.png" alt="QuickMed Logo" class="h-8 w-8 rounded" />
-        </div>
-        <div class="logo-text">
-          <h3>QuickMed</h3>
-          <p>Doctor Portal</p>
-        </div>
-      </div>
-    </div>
+<div class="flex h-screen bg-[var(--bg-primary)] text-[var(--text-primary)] overflow-hidden">
+  <!-- Shared Sidebar -->
+  <app-doctor-sidebar></app-doctor-sidebar>
 
-            <nav class="sidebar-nav">
-              <a
-                *ngFor="let item of menuItems()"
-                [routerLink]="item.route"
-                routerLinkActive="active"
-                class="nav-item"
-              >
-                <i [class]="'bi ' + item.icon"></i>
-                <span>{{ item.label }}</span>
-                <span *ngIf="item.badge && item.badge > 0" class="badge">{{ item.badge }}</span>
-              </a>
-            </nav>
-
-    <div class="sidebar-footer">
-      <div class="user-info">
-        <div class="user-avatar">
-          <img *ngIf="currentUser()?.avatar; else docInitials" [src]="currentUser()?.avatar" alt="Doctor avatar" />
-          <ng-template #docInitials>{{ getDoctorInitials() }}</ng-template>
-        </div>
-        <div class="user-details">
-          <p class="user-name">Dr. {{ getDoctorName() }}</p>
-          <p class="user-role">{{ getDoctorSpecialty() }}</p>
-        </div>
-      </div>
-      <button class="logout-btn" (click)="logout()">
-        <i class="bi bi-box-arrow-right"></i>
-        Logout
-      </button>
-    </div>
-  </aside>
-
-  <!-- Main Content -->
-  <main class="main-content">
-    <div class="doctor-topbar">
-      <div class="doctor-topbar-actions">
-        <button class="icon-btn" [routerLink]="'/doctor/messages'" title="Messages">
-          <i class="bi bi-chat-dots"></i>
-        </button>
-        <button class="icon-btn" [routerLink]="'/doctor/notifications'" title="Notifications">
-          <i class="bi bi-bell"></i>
-        </button>
-        <button class="icon-btn" (click)="setTheme('light')"><i class="bi bi-brightness-high"></i></button>
-        <button class="icon-btn" (click)="setTheme('dark')"><i class="bi bi-moon"></i></button>
-        <div class="avatar-sm">
-          <img *ngIf="currentUser()?.avatar; else docSmall" [src]="currentUser()?.avatar" alt="Doctor" />
-          <ng-template #docSmall>{{ getDoctorInitials() }}</ng-template>
-        </div>
-      </div>
-    </div>
-    <!-- Header -->
-    <header class="content-header">
-      <div>
-        <h1 class="welcome-title">Welcome, Dr. {{ getDoctorName().split(' ')[0] }}</h1>
-        <p class="welcome-subtitle">Here's your patient and appointment overview</p>
-      </div>
-      <div class="header-actions">
-        <div class="notification-wrapper">
-          <button class="icon-button notification-toggle" (click)="toggleNotificationDropdown()" aria-label="Notifications">
-            <i class="bi bi-bell"></i>
-            <span *ngIf="unreadNotificationCount() > 0" class="notification-badge">
-              {{ unreadNotificationCount() > 9 ? '9+' : unreadNotificationCount() }}
-            </span>
-          </button>
-
-          <div *ngIf="showNotificationDropdown()" class="notification-dropdown">
-            <div class="dropdown-header">
-              <div>
-                <p class="dropdown-title">Notifications</p>
-                <p class="dropdown-subtitle">{{ unreadNotificationCount() }} unread</p>
-              </div>
-              <div class="dropdown-actions">
-                <button *ngIf="unreadNotificationCount() > 0" class="link-button" (click)="markAllNotificationsAsRead()">Mark all as read</button>
-                <button class="icon-button ghost" (click)="showNotificationDropdown.set(false)" aria-label="Close notifications">
-                  <i class="bi bi-x-lg"></i>
-                </button>
-              </div>
-            </div>
-
-            <div class="dropdown-body" *ngIf="isLoadingNotifications()">
-              <p>Loading notifications...</p>
-            </div>
-            <div class="dropdown-body" *ngIf="!isLoadingNotifications() && notifications().length === 0">
-              <p>No notifications</p>
-            </div>
-            <div class="dropdown-list" *ngIf="!isLoadingNotifications() && notifications().length > 0">
-              <div
-                class="notification-item"
-                *ngFor="let notification of notifications()"
-                [class.unread]="!notification.read"
-                (click)="markNotificationAsRead(notification.id)">
-                <div class="notification-icon" [class.unread]="!notification.read">
-                  <i [class]="'bi ' + notificationService.getNotificationIcon(notification.type)"></i>
-                </div>
-                <div class="notification-content">
-                  <p class="notification-title">{{ notification.title }}</p>
-                  <p class="notification-message">{{ notification.message }}</p>
-                  <div class="notification-meta">
-                    <span>{{ notification.createdAt | date:'short' }}</span>
-                    <span *ngIf="!notification.read" class="status-dot" aria-hidden="true"></span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </header>
-
-    <!-- Loading State -->
-    <div *ngIf="isLoading()" class="loading-container">
-      <div class="spinner"></div>
-      <p>Loading dashboard...</p>
-    </div>
+  <!-- Main Content Area -->
+  <div class="flex-1 flex flex-col min-w-0">
+    <!-- Shared Header -->
+    <app-doctor-header
+      [initials]="getDoctorInitials()"
+      [avatarUrl]="currentUser()?.avatar"
+      [unreadNotifications]="unreadNotificationCount()"
+      [themeMode]="themeMode()"
+      (themeChange)="setTheme($event)"
+    ></app-doctor-header>
 
     <!-- Dashboard Content -->
-    <div *ngIf="!isLoading() && dashboardData()" class="dashboard-content">
-      <!-- KPI Cards -->
-      <div class="kpi-grid">
-        <div class="kpi-card">
-          <div class="kpi-header">
-            <h3>Today's Appointments</h3>
-            <i class="bi bi-calendar-check kpi-icon"></i>
-          </div>
-          <div class="kpi-value">{{ dashboardData()!.stats.todayAppointments }}</div>
-          <div class="kpi-footer">
-            <span class="kpi-subtext">{{ dashboardData()!.stats.pendingConfirmations }} pending confirmations</span>
-            <span class="kpi-trend positive">
-              <i class="bi bi-arrow-up"></i>
-              {{ dashboardData()!.trends.appointmentsChange }} from yesterday
-            </span>
-          </div>
-        </div>
-
-        <div class="kpi-card">
-          <div class="kpi-header">
-            <h3>Total Patients</h3>
-            <i class="bi bi-people kpi-icon"></i>
-          </div>
-          <div class="kpi-value">{{ dashboardData()!.stats.totalPatients }}</div>
-          <div class="kpi-footer">
-            <span class="kpi-subtext">12 new this month</span>
-            <span class="kpi-trend positive">
-              <i class="bi bi-arrow-up"></i>
-              {{ dashboardData()!.trends.patientsChange }}% from last month
-            </span>
-          </div>
-        </div>
-
-        <div class="kpi-card">
-          <div class="kpi-header">
-            <h3>Avg. Consultation</h3>
-            <i class="bi bi-clock kpi-icon"></i>
-          </div>
-          <div class="kpi-value">{{ dashboardData()!.stats.avgConsultationTime }} min</div>
-          <div class="kpi-footer">
-            <span class="kpi-subtext">Well within target time</span>
-            <span class="kpi-trend positive">
-              <i class="bi bi-arrow-down"></i>
-              {{ abs(dashboardData()!.trends.consultationChange) }} min improvement
-            </span>
-          </div>
-        </div>
-
-        <div class="kpi-card revenue">
-          <div class="kpi-header">
-            <h3>Satisfaction Rate</h3>
-            <i class="bi bi-graph-up kpi-icon"></i>
-          </div>
-          <div class="kpi-value">{{ dashboardData()!.stats.satisfactionRate }}/5</div>
-          <div class="kpi-footer">
-            <span class="kpi-subtext">Based on 45 reviews</span>
-            <span class="kpi-trend positive">
-              <i class="bi bi-arrow-up"></i>
-              {{ dashboardData()!.trends.satisfactionChange }} points
-            </span>
-          </div>
+    <main class="flex-1 overflow-y-auto p-6 lg:p-8 space-y-8">
+      <!-- Page Title & Date -->
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 class="text-2xl lg:text-3xl font-bold">Clinical Overview</h1>
+          <p class="text-sm text-[var(--text-secondary)] mt-1">
+            {{ today | date:'fullDate' }}
+          </p>
         </div>
       </div>
 
-      <!-- Charts Section -->
-      <div class="charts-grid">
-        <!-- Appointment Flow Chart -->
-        <div class="chart-card">
-          <h3 class="chart-title">Today's Appointment Flow</h3>
-          <p class="chart-subtitle">Completed and pending appointments by time</p>
-          <div class="chart-container">
-            <div class="chart-bars">
-              <div *ngFor="let label of getChartData().labels; let i = index" class="bar-wrapper">
-                <div class="bars-group">
-                  <div
-                    class="bar completed"
-                    [style.height.%]="getBarHeight(getCompletedValue(i), getMaxChartValue())"
-                    [title]="'Completed: ' + getCompletedValue(i)"
-                  ></div>
-                  <div
-                    class="bar pending"
-                    [style.height.%]="getBarHeight(getPendingValue(i), getMaxChartValue())"
-                    [title]="'Pending: ' + getPendingValue(i)"
-                  ></div>
-                </div>
-                <div class="bar-label">{{ label }}</div>
-              </div>
+      <!-- Stats Cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="bg-[var(--surface-primary)] rounded-2xl p-6 shadow-sm border border-[var(--border-light)] hover:shadow-lg hover:-translate-y-1 transition-all">
+          <div class="flex items-center justify-between mb-4">
+            <div class="p-3 bg-emerald-100 dark:bg-emerald-900/30 rounded-xl">
+              <i class="bi bi-calendar-check text-xl text-emerald-600 dark:text-emerald-400"></i>
             </div>
-            <div class="chart-legend">
-              <div class="legend-item">
-                <div class="legend-color completed"></div>
-                <span>completed</span>
-              </div>
-              <div class="legend-item">
-                <div class="legend-color pending"></div>
-                <span>pending</span>
-              </div>
+            <span class="text-xs font-bold text-emerald-600 bg-emerald-100 dark:bg-emerald-900/50 px-2 py-1 rounded">+12%</span>
+          </div>
+          <h3 class="text-sm font-medium text-[var(--text-secondary)]">Daily Appointments</h3>
+          <p class="text-3xl font-bold mt-2">{{ dashboardData()?.stats?.todayAppointments || 24 }}</p>
+        </div>
+
+        <div class="bg-[var(--surface-primary)] rounded-2xl p-6 shadow-sm border border-[var(--border-light)] hover:shadow-lg hover:-translate-y-1 transition-all">
+          <div class="flex items-center justify-between mb-4">
+            <div class="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-xl">
+              <i class="bi bi-people text-xl text-blue-600 dark:text-blue-400"></i>
             </div>
+            <span class="text-xs font-bold text-blue-600 bg-blue-100 dark:bg-blue-900/50 px-2 py-1 rounded">+5</span>
+          </div>
+          <h3 class="text-sm font-medium text-[var(--text-secondary)]">Total Patients</h3>
+          <p class="text-3xl font-bold mt-2">{{ dashboardData()?.stats?.totalPatients || 1284 }}</p>
+        </div>
+
+        <div class="bg-[var(--surface-primary)] rounded-2xl p-6 shadow-sm border border-[var(--border-light)] hover:shadow-lg hover:-translate-y-1 transition-all">
+          <div class="flex items-center justify-between mb-4">
+            <div class="p-3 bg-amber-100 dark:bg-amber-900/30 rounded-xl">
+              <i class="bi bi-clipboard-pulse text-xl text-amber-600 dark:text-amber-400"></i>
+            </div>
+            <span class="text-xs font-bold text-amber-600 bg-amber-100 dark:bg-amber-900/50 px-2 py-1 rounded">Urgent</span>
+          </div>
+          <h3 class="text-sm font-medium text-[var(--text-secondary)]">Pending Lab Results</h3>
+          <p class="text-3xl font-bold mt-2">{{ dashboardData()?.stats?.pendingConfirmations || 8 }}</p>
+        </div>
+
+        <div class="bg-gradient-to-br from-emerald-500 to-emerald-700 rounded-2xl p-6 text-white shadow-lg">
+          <div class="flex items-center justify-between mb-4">
+            <div class="p-3 bg-white/20 rounded-xl">
+              <i class="bi bi-star text-xl"></i>
+            </div>
+          </div>
+          <h3 class="text-sm font-medium opacity-90">Patient Satisfaction</h3>
+          <p class="text-3xl font-bold mt-2">4.9 <span class="text-lg">/ 5.0</span></p>
+        </div>
+      </div>
+
+      <!-- Next Patients & Urgent Notifications -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Next Patients Table -->
+        <div class="lg:col-span-2 bg-[var(--surface-primary)] rounded-2xl border border-[var(--border-light)] shadow-sm overflow-hidden">
+          <div class="p-6 border-b border-[var(--border-light)] flex justify-between items-center">
+            <h2 class="text-lg font-bold">Next Patients</h2>
+            <a routerLink="/doctor/appointments" class="text-sm font-semibold text-[var(--primary)] hover:underline">View All →</a>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full">
+              <thead class="bg-[var(--surface-secondary)] text-xs uppercase tracking-wider text-[var(--text-secondary)]">
+                <tr>
+                  <th class="px-6 py-4 text-left">Patient</th>
+                  <th class="px-6 py-4 text-left">Time</th>
+                  <th class="px-6 py-4 text-left">Status</th>
+                  <th class="px-6 py-4 text-left">Action</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-[var(--border-light)]">
+                <tr *ngFor="let apt of dashboardData()?.todayAppointments || []" class="hover:bg-[var(--surface-secondary)] transition-colors">
+                  <td class="px-6 py-4">
+                    <div class="flex items-center gap-3">
+                      <div class="w-9 h-9 rounded-full bg-[var(--surface-tertiary)] flex items-center justify-center text-sm font-bold">
+                        {{ getInitials(apt.patient) }}
+                      </div>
+                      <span class="font-medium">{{ apt.patient }}</span>
+                    </div>
+                  </td>
+                  <td class="px-6 py-4 text-sm">{{ apt.time }}</td>
+                  <td class="px-6 py-4">
+                    <span [class]="apt.status === 'Confirmed' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
+                      " class="inline-flex px-3 py-1 rounded-full text-xs font-medium">
+                      {{ apt.status }}
+                    </span>
+                  </td>
+                  <td class="px-6 py-4">
+                    <button class="text-[var(--primary)] hover:text-[var(--primary-dark)]">
+                      <i class="bi bi-arrow-right-circle text-lg"></i>
+                    </button>
+                  </td>
+                </tr>
+                <tr *ngIf="!(dashboardData()?.todayAppointments?.length)">
+                  <td colspan="4" class="px-6 py-8 text-center text-[var(--text-secondary)]">No upcoming appointments today</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
 
-        <!-- Performance Metrics Chart -->
-        <div class="chart-card">
-          <h3 class="chart-title">Performance Metrics</h3>
-          <p class="chart-subtitle">Patient satisfaction and referrals trend</p>
-          <div class="chart-container">
-            <div class="performance-chart">
-              <div class="chart-placeholder">
-                <p>Performance metrics visualization</p>
-                <small>Jan - Jun 2025</small>
+        <!-- Urgent Notifications -->
+        <div class="bg-[var(--surface-primary)] rounded-2xl border border-[var(--border-light)] shadow-sm p-6">
+          <h2 class="text-lg font-bold mb-5">Urgent Alerts</h2>
+          <div class="space-y-4">
+            <div class="flex gap-4 p-4 rounded-xl border-l-4 border-red-500 bg-red-50 dark:bg-red-900/20">
+              <i class="bi bi-exclamation-triangle text-red-600 text-xl mt-1"></i>
+              <div>
+                <p class="font-semibold text-sm">Critical Lab Result</p>
+                <p class="text-xs text-[var(--text-secondary)] mt-1">Patient #2294 – Abnormal values detected</p>
+              </div>
+            </div>
+            <div class="flex gap-4 p-4 rounded-xl border-l-4 border-blue-500 bg-blue-50 dark:bg-blue-900/20">
+              <i class="bi bi-chat-left-dots text-blue-600 text-xl mt-1"></i>
+              <div>
+                <p class="font-semibold text-sm">New Referral Message</p>
+                <p class="text-xs text-[var(--text-secondary)] mt-1">Dr. Sarah Johnson sent a consultation note</p>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-  </main>
+    </main>
+  </div>
 </div>

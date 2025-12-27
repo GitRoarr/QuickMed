@@ -13,9 +13,10 @@ import { DoctorSidebarComponent } from '../shared/doctor-sidebar/doctor-sidebar.
 
 interface MenuItem {
   label: string;
-  icon: string;
+  icon?: string;
   route: string;
   badge?: number;
+  imgSrc?: string;
 }
 
 @Component({
@@ -109,10 +110,9 @@ export class PatientsComponent implements OnInit {
     }).length;
   });
 
-  Math = Math; // Expose to template
+  Math = Math; 
 
   constructor() {
-    // Theme Effect
     effect(() => {
       const mode = this.themeMode();
       if (mode === 'dark') {
@@ -150,6 +150,7 @@ export class PatientsComponent implements OnInit {
       { label: 'Appointments', icon: 'bi-calendar-check', route: '/doctor/appointments', badge: pendingCount || undefined },
       { label: 'Schedule', icon: 'bi-calendar3', route: '/doctor/schedule' },
       { label: 'My Patients', icon: 'bi-people', route: '/doctor/patients' },
+      { label: 'Prescriptions', route: '/doctor/prescriptions', imgSrc: 'https://img.icons8.com/ios-filled/24/prescription.png' },
       { label: 'Messages', icon: 'bi-chat-dots', route: '/doctor/messages', badge: messageCount || undefined },
       { label: 'Settings', icon: 'bi-gear', route: '/doctor/settings' },
     ]);
@@ -170,7 +171,6 @@ export class PatientsComponent implements OnInit {
     });
   }
 
-  // --- Helpers ---
   getFullName(p: DoctorPatientSummary) {
     return `${p.firstName || ''} ${p.lastName || ''}`.trim();
   }

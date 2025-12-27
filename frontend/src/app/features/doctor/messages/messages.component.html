@@ -1,177 +1,162 @@
-<div class="doctor-messages">
-  <!-- Sidebar -->
-  <app-doctor-sidebar></app-doctor-sidebar>
-    <div class="sidebar-header">
-      <div class="logo">
-        <div class="logo-icon">
-          <img src="assets/images/QuickMed-Logo.png" alt="QuickMed Logo" class="h-8 w-8 rounded" />
-        </div>
-        <div class="logo-text">
-          <h3>QuickMed</h3>
-          <p>Doctor Portal</p>
-        </div>
-      </div>
-    </div>
+<div class="flex-1 flex flex-col min-w-0">
+    <app-doctor-header
+      [initials]="getDoctorInitials()"
+      [avatarUrl]="currentUser()?.avatar"
+      [unreadNotifications]="unreadCount()"
+      [themeMode]="themeService.isDarkMode() ? 'dark' : 'light'"
+      (themeChange)="onThemeChange($event)"
+    ></app-doctor-header>
 
-            <nav class="sidebar-nav">
-              <a
-                *ngFor="let item of menuItems()"
-                [routerLink]="item.route"
-                routerLinkActive="active"
-                class="nav-item"
-              >
-                <i [class]="'bi ' + item.icon"></i>
-                <span>{{ item.label }}</span>
-                <span *ngIf="item.badge && item.badge > 0" class="badge">{{ item.badge }}</span>
-              </a>
-            </nav>
+    <div class="flex-1 flex overflow-hidden">
+      <div class="w-full md:w-96 lg:w-[420px] border-r border-[var(--border-light)] bg-[var(--surface-primary)] flex flex-col">
+        <div class="p-6 border-b border-[var(--border-light)]">
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <h2 class="text-2xl font-bold">Messages</h2>
+              <p class="text-sm text-[var(--text-secondary)] mt-1">{{ unreadCount() }} unread message{{ unreadCount() !== 1 ? 's' : '' }}</p>
+            </div>
+            <button
+              (click)="navigate('/doctor/patients')"
+              class="px-4 py-2 bg-[var(--primary)] text-white rounded-xl font-medium hover:bg-[var(--primary-dark)] transition shadow-md flex items-center gap-2"
+            >
+              <i class="bi bi-plus-circle"></i>
+              New Message
+            </button>
+          </div>
 
-    <div class="sidebar-footer">
-      <div class="user-info">
-        <div class="user-avatar">
-          <img *ngIf="currentUser()?.avatar; else docInitials" [src]="currentUser()?.avatar" alt="Doctor avatar" />
-          <ng-template #docInitials>{{ getDoctorInitials() }}</ng-template>
-        </div>
-        <div class="user-details">
-          <p class="user-name">Dr. {{ getDoctorName() }}</p>
-          <p class="user-role">{{ getDoctorSpecialty() }}</p>
-        </div>
-      </div>
-      <button class="logout-btn" (click)="logout()">
-        <i class="bi bi-box-arrow-right"></i>
-        Logout
-      </button>
-    </div>
-  
-
-  <!-- Main Content -->
-  <main class="main-content">
-    <div class="doctor-topbar">
-      <div class="doctor-topbar-actions">
-        <button class="icon-btn" [routerLink]="'/doctor/messages'" title="Messages">
-          <i class="bi bi-chat-dots"></i>
-        </button>
-        <button class="icon-btn" [routerLink]="'/doctor/notifications'" title="Notifications">
-          <i class="bi bi-bell"></i>
-        </button>
-        <button class="icon-btn" (click)="setTheme('light')"><i class="bi bi-brightness-high"></i></button>
-        <button class="icon-btn" (click)="setTheme('dark')"><i class="bi bi-moon"></i></button>
-        <div class="avatar-sm">
-          <img *ngIf="currentUser()?.avatar; else docSmall" [src]="currentUser()?.avatar" alt="Doctor" />
-          <ng-template #docSmall>{{ getDoctorInitials() }}</ng-template>
-        </div>
-      </div>
-    </div>
-    <div class="messages-container">
-      <!-- Conversations List -->
-      <div class="conversations-panel">
-        <div class="conversations-header">
-          <h2>Messages</h2>
-          <p class="unread-count">{{ unreadCount() }} unread messages from patients</p>
-          <button class="btn-primary" (click)="navigate('/doctor/patients')">
-            <i class="bi bi-plus-circle"></i>
-            New Message
-          </button>
+          <!-- Search -->
+          <div class="relative">
+            <i class="bi bi-search absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]"></i>
+            <input
+              type="text"
+              placeholder="Search conversations..."
+              [value]="searchQuery()"
+              (input)="searchQuery.set($any($event.target).value); onSearchChange()"
+              class="w-full pl-11 pr-5 py-3 bg-[var(--surface-secondary)] border border-[var(--border-light)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)] transition"
+            />
+          </div>
         </div>
 
-        <div class="search-bar">
-          <i class="bi bi-search"></i>
-          <input
-            type="text"
-            placeholder="Search conversations..."
-            [value]="searchQuery()"
-            (input)="searchQuery.set($any($event.target).value); onSearchChange()"
-          />
-        </div>
+        <!-- Conversations List -->
+        <div class="flex-1 overflow-y-auto">
+          <div *ngIf="isLoading()" class="p-8 text-center">
+            <div class="w-10 h-10 border-4 border-[var(--primary)] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p class="text-[var(--text-secondary)]">Loading conversations...</p>
+          </div>
 
-        <div class="conversations-list">
           <div
-            *ngFor="let conversation of conversations()"
-            class="conversation-item"
-            [class.active]="selectedConversation()?.id === conversation.id"
+            *ngFor="let conversation of conversations(); let i = index"
+            class="px-4 py-3 hover:bg-[var(--surface-secondary)] transition cursor-pointer border-b border-[var(--border-light)]"
+            [class.bg-[var(--surface-tertiary)]]="selectedConversation()?.id === conversation.id"
             (click)="selectConversation(conversation)"
+            [@fadeIn]="i"
           >
-            <div class="conversation-avatar">
-              {{ getPatientInitials(conversation) }}
-            </div>
-            <div class="conversation-details">
-              <div class="conversation-header">
-                <h3>{{ getPatientName(conversation) }}</h3>
-                <span class="conversation-time">{{ getTimeAgo(conversation.lastMessageAt) }}</span>
+            <div class="flex items-center gap-4">
+              <div class="w-12 h-12 rounded-full bg-gradient-to-br from-[var(--primary)] to-emerald-600 flex items-center justify-center text-white font-bold text-lg shadow-md">
+                {{ getPatientInitials(conversation) }}
               </div>
-              <p class="conversation-preview">{{ conversation.lastMessageContent || 'No messages yet' }}</p>
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center justify-between">
+                  <h3 class="font-semibold truncate">{{ getPatientName(conversation) }}</h3>
+                  <span class="text-xs text-[var(--text-secondary)]">{{ getTimeAgo(conversation.lastMessageAt) }}</span>
+                </div>
+                <p class="text-sm text-[var(--text-secondary)] truncate mt-1">
+                  {{ conversation.lastMessageContent || 'No messages yet' }}
+                </p>
+              </div>
+              <div *ngIf="conversation.unreadCount > 0" class="w-6 h-6 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold">
+                {{ conversation.unreadCount }}
+              </div>
             </div>
-            <span *ngIf="conversation.unreadCount > 0" class="unread-badge">
-              {{ conversation.unreadCount }}
-            </span>
           </div>
 
-          <div *ngIf="conversations().length === 0 && !isLoading()" class="empty-state">
-            <i class="bi bi-chat-dots"></i>
-            <p>No conversations yet</p>
+          <div *ngIf="!isLoading() && conversations().length === 0" class="p-12 text-center">
+            <i class="bi bi-chat-dots text-5xl text-[var(--text-muted)] mb-4"></i>
+            <p class="text-lg font-medium text-[var(--text-secondary)]">No conversations yet</p>
+            <p class="text-sm text-[var(--text-secondary)] mt-2">Start a new message from Patients</p>
           </div>
         </div>
       </div>
 
-      <!-- Chat Panel -->
-      <div class="chat-panel">
-        <div *ngIf="!selectedConversation()" class="no-selection">
-          <i class="bi bi-chat-left-text"></i>
-          <p>Select a conversation to start messaging</p>
+      <!-- Chat Panel (Right) -->
+      <div class="flex-1 flex flex-col bg-[var(--surface-primary)]">
+        <div *ngIf="!selectedConversation()" class="flex-1 flex items-center justify-center">
+          <div class="text-center">
+            <i class="bi bi-chat-left-text text-6xl text-[var(--text-muted)] mb-6"></i>
+            <p class="text-xl font-medium text-[var(--text-secondary)]">Select a conversation</p>
+            <p class="text-[var(--text-secondary)] mt-2">Click on a patient to view messages</p>
+          </div>
         </div>
 
-        <div *ngIf="selectedConversation()" class="chat-window">
-          <div class="chat-header">
-            <div class="chat-user-info">
-              <div class="chat-avatar">
+        <div *ngIf="selectedConversation()" class="flex flex-col h-full">
+          <!-- Chat Header -->
+          <div class="p-6 border-b border-[var(--border-light)] flex items-center justify-between">
+            <div class="flex items-center gap-4">
+              <div class="w-14 h-14 rounded-full bg-gradient-to-br from-[var(--primary)] to-emerald-600 flex items-center justify-center text-white font-bold text-xl shadow-lg">
                 {{ getPatientInitials(selectedConversation()!) }}
               </div>
               <div>
-                <h3>{{ getPatientName(selectedConversation()!) }}</h3>
-                <p class="user-status">Online now</p>
+                <h3 class="text-lg font-semibold">{{ getPatientName(selectedConversation()!) }}</h3>
+                <p class="text-sm text-emerald-600 dark:text-emerald-400">Online now</p>
               </div>
             </div>
-            <div class="chat-actions">
-              <button class="icon-btn">
-                <i class="bi bi-telephone"></i>
+            <div class="flex gap-3">
+              <button class="p-3 rounded-xl bg-[var(--surface-secondary)] hover:bg-[var(--surface-tertiary)] transition">
+                <i class="bi bi-telephone text-lg"></i>
               </button>
-              <button class="icon-btn">
-                <i class="bi bi-camera-video"></i>
+              <button class="p-3 rounded-xl bg-[var(--surface-secondary)] hover:bg-[var(--surface-tertiary)] transition">
+                <i class="bi bi-camera-video text-lg"></i>
               </button>
-              <button class="icon-btn">
-                <i class="bi bi-three-dots-vertical"></i>
+              <button class="p-3 rounded-xl bg-[var(--surface-secondary)] hover:bg-[var(--surface-tertiary)] transition">
+                <i class="bi bi-three-dots-vertical text-lg"></i>
               </button>
             </div>
           </div>
 
-          <div class="messages-area">
+          <!-- Messages Area -->
+          <div class="flex-1 overflow-y-auto p-6 space-y-4" #messagesContainer>
             <div
-              *ngFor="let message of messages()"
-              class="message"
-              [class.sent]="isMyMessage(message)"
-              [class.received]="!isMyMessage(message)"
+              *ngFor="let message of messages(); let i = index"
+              class="flex"
+              [class.justify-end]="isMyMessage(message)"
+              [class.justify-start]="!isMyMessage(message)"
+              [@fadeInUp]="i"
             >
-              <div class="message-content">
-                <p>{{ message.content }}</p>
-                <span class="message-time">{{ message.createdAt | date:'short' }}</span>
+              <div
+                class="max-w-xs lg:max-w-md px-5 py-3 rounded-2xl shadow-sm"
+                [class.bg-[var(--primary)]]="isMyMessage(message)"
+                [class.text-white]="isMyMessage(message)"
+                [class.bg-[var(--surface-secondary)]]="!isMyMessage(message)"
+                [class.rounded-br-sm]="isMyMessage(message)"
+                [class.rounded-bl-sm]="!isMyMessage(message)"
+              >
+                <p class="text-sm leading-relaxed">{{ message.content }}</p>
+                <p class="text-xs mt-2 opacity-70">{{ message.createdAt | date:'shortTime' }}</p>
               </div>
             </div>
           </div>
 
-          <div class="message-input-area">
-            <input
-              type="text"
-              placeholder="Type your message...."
-              [value]="messageContent()"
-              (input)="messageContent.set($any($event.target).value)"
-              (keyup.enter)="sendMessage()"
-            />
-            <button class="send-btn" (click)="sendMessage()" [disabled]="!messageContent().trim()">
-              <i class="bi bi-send"></i>
-            </button>
+          <!-- Message Input -->
+          <div class="p-6 border-t border-[var(--border-light)]">
+            <div class="flex gap-3">
+              <input
+                type="text"
+                placeholder="Type your message..."
+                [value]="messageContent()"
+                (input)="messageContent.set($any($event.target).value)"
+                (keyup.enter)="sendMessage()"
+                class="flex-1 px-5 py-4 bg-[var(--surface-secondary)] border border-[var(--border-light)] rounded-full focus:outline-none focus:ring-2 focus:ring-[var(--primary)] transition"
+              />
+              <button
+                (click)="sendMessage()"
+                [disabled]="!messageContent().trim()"
+                class="w-14 h-14 bg-[var(--primary)] text-white rounded-full hover:bg-[var(--primary-dark)] disabled:opacity-50 disabled:cursor-not-allowed transition shadow-lg flex items-center justify-center"
+              >
+                <i class="bi bi-send text-lg"></i>
+              </button>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </main>
-</div>
+  </div>

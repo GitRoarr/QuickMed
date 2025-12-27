@@ -12,6 +12,7 @@ import { forkJoin } from 'rxjs';
 import { ToastService } from '@core/services/toast.service';
 import { SchedulingService, DoctorSlot } from '../../../core/services/schedule.service';
 import { DoctorSidebarComponent } from '../shared/doctor-sidebar/doctor-sidebar.component';
+import { DoctorHeaderComponent } from '../shared/doctor-header/doctor-header.component';
 
 interface MenuItem {
   label: string;
@@ -23,7 +24,7 @@ interface MenuItem {
 @Component({
   selector: 'app-doctor-schedule',
   standalone: true,
-  imports: [CommonModule, DatePipe, RouterModule, FormsModule, DoctorSidebarComponent],
+  imports: [CommonModule, DatePipe, RouterModule, FormsModule, DoctorSidebarComponent, DoctorHeaderComponent],
   templateUrl: './schedule.component.html',
   styleUrls: ['./schedule.component.css']
 })

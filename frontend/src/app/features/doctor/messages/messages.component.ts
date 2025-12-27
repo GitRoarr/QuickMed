@@ -1,33 +1,54 @@
-import { Component, OnInit, signal, inject } from '@angular/core';
+import { Component, OnInit, signal, inject, AfterViewChecked, ElementRef, ViewChild } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { AuthService } from '@core/services/auth.service';
-import { DoctorSidebarComponent } from '../shared/doctor-sidebar/doctor-sidebar.component';
-import { MessageService, Conversation, Message } from '@core/services/message.service';
-import { AppointmentService } from '@core/services/appointment.service';
-import { ToastService } from '@core/services/toast.service';
+import { trigger, transition, style, animate } from '@angular/animations';
 
-interface MenuItem {
-  label: string;
-  icon: string;
-  route: string;
-  badge?: number;
-}
+import { DoctorSidebarComponent } from '../shared/doctor-sidebar/doctor-sidebar.component';
+import { DoctorHeaderComponent } from '../shared/doctor-header/doctor-header.component';
+import { MessageService, Conversation, Message } from '@core/services/message.service';
+import { AuthService } from '@core/services/auth.service';
+import { NotificationService } from '@core/services/notification.service';
+import { ThemeService } from '@core/services/theme.service';
+import { ToastService } from '@core/services/toast.service';
 
 @Component({
   selector: 'app-doctor-messages',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, DatePipe, DoctorSidebarComponent],
+  imports: [
+    CommonModule,
+    DatePipe,
+    RouterModule,
+    FormsModule,
+    DoctorSidebarComponent,
+    DoctorHeaderComponent
+  ],
   templateUrl: './messages.component.html',
-  styleUrls: ['./messages.component.css']
+  animations: [
+    trigger('fadeIn', [
+      transition(':enter', [
+        style({ opacity: 0 }),
+        animate('300ms ease-out', style({ opacity: 1 }))
+      ])
+    ]),
+    trigger('fadeInUp', [
+      transition(':enter', [
+        style({ opacity: 0, transform: 'translateY(20px)' }),
+        animate('400ms ease-out', style({ opacity: 1, transform: 'translateY(0)' }))
+      ])
+    ])
+  ]
+  // No styleUrls — Tailwind only
 })
-export class MessagesComponent implements OnInit {
+export class MessagesComponent implements OnInit, AfterViewChecked {
+  @ViewChild('messagesContainer') private messagesContainer!: ElementRef;
+
   private authService = inject(AuthService);
-  private router = inject(Router);
   private messageService = inject(MessageService);
-  private appointmentService = inject(AppointmentService);
+  private notificationService = inject(NotificationService);
+  themeService = inject(ThemeService);
   private toast = inject(ToastService);
+  private router: Router = inject(Router);
 
   conversations = signal<Conversation[]>([]);
   selectedConversation = signal<Conversation | null>(null);
@@ -38,40 +59,18 @@ export class MessagesComponent implements OnInit {
   unreadCount = signal(0);
   currentUser = signal<any>(null);
 
-  menuItems = signal<MenuItem[]>([]);
-
   ngOnInit(): void {
     this.loadUserData();
     this.loadConversations();
     this.loadUnreadCount();
-    this.loadBadgeCounts();
   }
 
-  loadBadgeCounts(): void {
-    this.appointmentService.getPendingCount().subscribe({
-      next: (data) => {
-        this.updateMenuItems(data.count || 0, this.unreadCount());
-      }
-    });
-  }
-
-  updateMenuItems(appointmentCount: number, messageCount: number): void {
-    this.menuItems.set([
-      { label: 'Dashboard', icon: 'bi-house-door', route: '/doctor/dashboard' },
-      { label: 'Appointments', icon: 'bi-calendar-check', route: '/doctor/appointments', badge: appointmentCount > 0 ? appointmentCount : undefined },
-      { label: 'Schedule', icon: 'bi-calendar3', route: '/doctor/schedule' },
-      { label: 'My Patients', icon: 'bi-people', route: '/doctor/patients' },
-      { label: 'Medical Records', icon: 'bi-file-earmark-medical', route: '/doctor/records' },
-      { label: 'Prescriptions', route: '/doctor/prescriptions', imgSrc: 'https://img.icons8.com/ios-filled/24/prescription.png' },
-      { label: 'Messages', icon: 'bi-chat-dots', route: '/doctor/messages', badge: messageCount > 0 ? messageCount : undefined },
-      { label: 'Analytics', icon: 'bi-graph-up', route: '/doctor/analytics' },
-      { label: 'Settings', icon: 'bi-gear', route: '/doctor/settings' },
-    ]);
+  ngAfterViewChecked(): void {
+    this.scrollToBottom();
   }
 
   loadUserData(): void {
-    const user = this.authService.currentUser();
-    this.currentUser.set(user);
+    this.currentUser.set(this.authService.currentUser());
   }
 
   loadConversations(): void {
@@ -80,27 +79,14 @@ export class MessagesComponent implements OnInit {
       next: (data) => {
         this.conversations.set(data);
         this.isLoading.set(false);
-        // Update badge count
-        const totalUnread = data.reduce((sum, conv) => sum + conv.unreadCount, 0);
-        this.unreadCount.set(totalUnread);
       },
-      error: () => {
-        this.isLoading.set(false);
-        this.toast.error('Could not load conversations', { title: 'Messages' });
-      }
+      error: () => this.isLoading.set(false)
     });
   }
 
   loadUnreadCount(): void {
-    this.messageService.getUnreadCount().subscribe({
-      next: (data: any) => {
-        this.unreadCount.set(data.count || 0);
-        this.appointmentService.getPendingCount().subscribe({
-          next: (aptData) => {
-            this.updateMenuItems(aptData.count || 0, data.count || 0);
-          }
-        });
-      }
+    this.notificationService.getUnreadCount().subscribe({
+      next: (count) => this.unreadCount.set(count || 0)
     });
   }
 
@@ -113,12 +99,9 @@ export class MessagesComponent implements OnInit {
     this.messageService.getMessages(conversationId).subscribe({
       next: (data) => {
         this.messages.set(data);
-        // Reload conversations to update unread count
-        this.loadConversations();
+        this.loadConversations(); // Refresh unread counts
       },
-      error: () => {
-        this.toast.error('Could not load messages', { title: 'Messages' });
-      }
+      error: () => this.toast.error('Failed to load messages')
     });
   }
 
@@ -126,16 +109,16 @@ export class MessagesComponent implements OnInit {
     const content = this.messageContent().trim();
     if (!content || !this.selectedConversation()) return;
 
-    this.messageService.sendMessage({ patientId: this.selectedConversation()!.patientId, content }).subscribe({
-      next: (message) => {
+    this.messageService.sendMessage({
+      patientId: this.selectedConversation()!.patientId,
+      content
+    }).subscribe({
+      next: () => {
         this.messageContent.set('');
         this.loadMessages(this.selectedConversation()!.id);
-        this.loadConversations();
-        this.toast.success('Message sent', { position: 'bottom-right' });
+        this.toast.success('Message sent');
       },
-      error: () => {
-        this.toast.error('Delivery failed', { title: 'Try again', duration: 0, position: 'bottom-right' });
-      }
+      error: () => this.toast.error('Failed to send message')
     });
   }
 
@@ -144,78 +127,65 @@ export class MessagesComponent implements OnInit {
   }
 
   getPatientName(conversation: Conversation): string {
-    if (conversation.patient) {
-      return `${conversation.patient.firstName} ${conversation.patient.lastName}`;
-    }
-    return 'Unknown Patient';
+    return conversation.patient
+      ? `${conversation.patient.firstName} ${conversation.patient.lastName}`
+      : 'Unknown Patient';
   }
 
   getPatientInitials(conversation: Conversation): string {
     const name = this.getPatientName(conversation);
-    if (!name) return 'P';
     const parts = name.split(' ');
-    if (parts.length >= 2) {
-      return (parts[0][0] + parts[1][0]).toUpperCase();
-    }
-    return name.substring(0, 1).toUpperCase();
+    return parts.length >= 2
+      ? (parts[0][0] + parts[1][0]).toUpperCase()
+      : name.charAt(0).toUpperCase() || 'P';
   }
 
   getTimeAgo(date: string | undefined): string {
-    if (!date) return '';
-    const now = new Date();
-    const msgDate = new Date(date);
-    const diffMs = now.getTime() - msgDate.getTime();
-    const diffMins = Math.floor(diffMs / 60000);
-    const diffHours = Math.floor(diffMs / 3600000);
-    const diffDays = Math.floor(diffMs / 86400000);
+    if (!date) return '—';
+    const now = Date.now();
+    const msgTime = new Date(date).getTime();
+    const diff = now - msgTime;
+    const minute = 60000;
+    const hour = minute * 60;
+    const day = hour * 24;
 
-    if (diffMins < 1) return 'Just now';
-    if (diffMins < 60) return `${diffMins} min ago`;
-    if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
-    if (diffDays === 1) return 'Yesterday';
-    if (diffDays < 7) return `${diffDays} days ago`;
-    return msgDate.toLocaleDateString();
-  }
-
-  getDoctorName(): string {
-    const user = this.currentUser();
-    if (user) {
-      return `${user.firstName} ${user.lastName}`;
-    }
-    return 'Doctor';
-  }
-
-  getDoctorSpecialty(): string {
-    const user = this.currentUser();
-    return user?.specialty || 'General Practitioner';
+    if (diff < minute) return 'Just now';
+    if (diff < hour) return `${Math.floor(diff / minute)}m ago`;
+    if (diff < day) return `${Math.floor(diff / hour)}h ago`;
+    if (diff < day * 7) return `${Math.floor(diff / day)}d ago`;
+    return new Date(date).toLocaleDateString();
   }
 
   getDoctorInitials(): string {
-    const name = this.getDoctorName();
-    if (!name) return 'DR';
-    const parts = name.split(' ');
-    if (parts.length >= 2) {
-      return (parts[0][0] + parts[1][0]).toUpperCase();
-    }
-    return name.substring(0, 2).toUpperCase();
+    const user = this.currentUser();
+    if (!user) return 'DR';
+    const name = `${user.firstName} ${user.lastName}`;
+    const parts = name.trim().split(' ');
+    return parts.length >= 2
+      ? (parts[0][0] + parts[1][0]).toUpperCase()
+      : name.substring(0, 2).toUpperCase();
   }
 
   isMyMessage(message: Message): boolean {
     return message.senderType === 'doctor';
   }
 
-  logout(): void {
-    this.authService.logout();
-    this.router.navigate(['/login']);
-  }
-
   navigate(route: string): void {
     this.router.navigate([route]);
   }
 
-  setTheme(theme: 'light' | 'dark') {
-    document.body.classList.remove('light', 'dark');
-    document.body.classList.add(theme);
-    localStorage.setItem('theme', theme);
+  onThemeChange(mode: 'light' | 'dark'): void {
+    const isDark = this.themeService.isDarkMode();
+    if (mode === 'dark' && !isDark) {
+      this.themeService.toggleTheme();
+    } else if (mode === 'light' && isDark) {
+      this.themeService.toggleTheme();
+    }
+  }
+
+  private scrollToBottom(): void {
+    if (this.messagesContainer) {
+      this.messagesContainer.nativeElement.scrollTop = this.messagesContainer.nativeElement.scrollHeight;
+    }
   }
 }

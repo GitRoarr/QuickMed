@@ -4,7 +4,13 @@
 
   <main class="flex-1 flex flex-col overflow-hidden relative">
     
-    <app-doctor-header></app-doctor-header>
+    <app-doctor-header
+      [initials]="getDoctorInitials()"
+      [avatarUrl]="currentUser()?.avatar"
+      [unreadNotifications]="unreadNotifications()"
+      [themeMode]="themeMode()"
+      (themeChange)="setTheme($event)"
+    ></app-doctor-header>
 
     <div class="flex-1 overflow-y-auto px-8 pb-8">
       

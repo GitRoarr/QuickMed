@@ -1,43 +1,43 @@
 import { Component, OnInit, signal, inject } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
+import { DoctorSidebarComponent } from '../shared/doctor-sidebar/doctor-sidebar.component';
+import { DoctorHeaderComponent } from '../shared/doctor-header/doctor-header.component';
 import { AuthService } from '@core/services/auth.service';
 import { MedicalRecordService, MedicalRecord } from '@core/services/medical-record.service';
-import { AppointmentService } from '@core/services/appointment.service';
-import { MessageService } from '@core/services/message.service';
-
-interface MenuItem {
-  label: string;
-  icon: string;
-  route: string;
-  badge?: number;
-}
+import { NotificationService } from '@core/services/notification.service';
+import { ThemeService } from '@core/services/theme.service';
 
 @Component({
   selector: 'app-doctor-records',
   standalone: true,
-  imports: [CommonModule, RouterModule, DatePipe],
+  imports: [
+    CommonModule,
+    DatePipe,
+    RouterModule,
+    DoctorSidebarComponent,
+    DoctorHeaderComponent
+  ],
   templateUrl: './records.component.html',
-  styleUrls: ['./records.component.css']
+  // No styleUrls — using Tailwind only
 })
 export class RecordsComponent implements OnInit {
   private authService = inject(AuthService);
-  private router = inject(Router);
   private medicalRecordService = inject(MedicalRecordService);
-  private appointmentService = inject(AppointmentService);
-  private messageService = inject(MessageService);
+  private notificationService = inject(NotificationService);
+  private router = inject(Router);
+  themeService = inject(ThemeService);
 
   records = signal<MedicalRecord[]>([]);
   isLoading = signal(true);
   searchQuery = signal('');
   currentUser = signal<any>(null);
-
-  menuItems = signal<MenuItem[]>([]);
+  unreadNotificationCount = signal(0);
 
   ngOnInit(): void {
     this.loadUserData();
     this.loadRecords();
-    this.loadBadgeCounts();
+    this.loadUnreadNotifications();
   }
 
   loadUserData(): void {
@@ -59,30 +59,10 @@ export class RecordsComponent implements OnInit {
     this.loadRecords();
   }
 
-  loadBadgeCounts(): void {
-    this.appointmentService.getPendingCount().subscribe({
-      next: (apt) => {
-        this.messageService.getUnreadCount().subscribe({
-          next: (msg) => {
-            this.updateMenuItems(apt.count || 0, msg.count || 0);
-          }
-        });
-      }
+  loadUnreadNotifications(): void {
+    this.notificationService.getUnreadCount().subscribe({
+      next: (count) => this.unreadNotificationCount.set(count || 0)
     });
-  }
-
-  updateMenuItems(appointmentCount: number, messageCount: number): void {
-    this.menuItems.set([
-      { label: 'Dashboard', icon: 'bi-house-door', route: '/doctor/dashboard' },
-      { label: 'Appointments', icon: 'bi-calendar-check', route: '/doctor/appointments', badge: appointmentCount || undefined },
-      { label: 'Schedule', icon: 'bi-calendar3', route: '/doctor/schedule' },
-      { label: 'My Patients', icon: 'bi-people', route: '/doctor/patients' },
-      { label: 'Medical Records', icon: 'bi-file-earmark-medical', route: '/doctor/records' },
-      { label: 'Prescriptions', icon: 'bi-prescription2', route: '/doctor/prescriptions' },
-      { label: 'Messages', icon: 'bi-chat-dots', route: '/doctor/messages', badge: messageCount || undefined },
-      { label: 'Analytics', icon: 'bi-graph-up', route: '/doctor/analytics' },
-      { label: 'Settings', icon: 'bi-gear', route: '/doctor/settings' },
-    ]);
   }
 
   viewRecord(record: MedicalRecord): void {
@@ -91,18 +71,18 @@ export class RecordsComponent implements OnInit {
 
   downloadRecord(record: MedicalRecord): void {
     this.medicalRecordService.download(record.id).subscribe({
-      next: (data) => {
-        if (data.url) window.open(data.url, '_blank');
+      next: (res) => {
+        if (res.url) window.open(res.url, '_blank');
       }
     });
   }
 
   deleteRecord(record: MedicalRecord): void {
-    if (!confirm('Are you sure you want to delete this record?')) return;
+    if (!confirm('Are you sure you want to permanently delete this record?')) return;
 
     this.medicalRecordService.delete(record.id).subscribe({
       next: () => this.loadRecords(),
-      error: () => alert('Failed to delete record')
+      error: () => alert('Failed to delete record. Please try again.')
     });
   }
 
@@ -120,42 +100,41 @@ export class RecordsComponent implements OnInit {
     const labels: Record<string, string> = {
       lab: 'Lab Report',
       prescription: 'Prescription',
-      imaging: 'Imaging',
-      diagnosis: 'Diagnosis',
-      other: 'Other'
+      imaging: 'Imaging Study',
+      diagnosis: 'Diagnosis Note',
+      other: 'Other Document'
     };
-    return labels[type] || type;
+    return labels[type] || type.charAt(0).toUpperCase() + type.slice(1);
   }
 
   formatFileSize(bytes?: number): string {
     if (!bytes) return 'N/A';
-    if (bytes < 1024) return `${bytes} B`;
-    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-  }
-
-  getDoctorName(): string {
-    const u = this.currentUser();
-    return u ? `${u.firstName} ${u.lastName}` : 'Doctor';
-  }
-
-  getDoctorSpecialty(): string {
-    return this.currentUser()?.specialty || 'General Practitioner';
+    const units = ['B', 'KB', 'MB', 'GB'];
+    let size = bytes;
+    let unitIndex = 0;
+    while (size >= 1024 && unitIndex < units.length - 1) {
+      size /= 1024;
+      unitIndex++;
+    }
+    return `${size.toFixed(1)} ${units[unitIndex]}`;
   }
 
   getDoctorInitials(): string {
-    const name = this.getDoctorName().split(' ');
-    return name.length >= 2
-      ? (name[0][0] + name[1][0]).toUpperCase()
-      : name[0].substring(0, 2).toUpperCase();
+    const user = this.currentUser();
+    if (!user) return 'DR';
+    const name = `${user.firstName} ${user.lastName}`;
+    const parts = name.trim().split(' ');
+    return parts.length >= 2
+      ? (parts[0][0] + parts[1][0]).toUpperCase()
+      : name.substring(0, 2).toUpperCase();
   }
 
-  logout(): void {
-    this.authService.logout();
-    this.router.navigate(['/login']);
-  }
-
-  navigate(route: string): void {
-    this.router.navigate([route]);
+  onThemeChange(mode: 'light' | 'dark'): void {
+    const isDark = this.themeService.isDarkMode();
+    if (mode === 'dark' && !isDark) {
+      this.themeService.toggleTheme();
+    } else if (mode === 'light' && isDark) {
+      this.themeService.toggleTheme();
+    }
   }
 }
