@@ -8,6 +8,8 @@ import { BadgeService } from '@core/services/badge.service';
 import { MessageService } from '@core/services/message.service';
 import { AppointmentService } from '@core/services/appointment.service';
 import { forkJoin } from 'rxjs';
+import { DoctorHeaderComponent } from '../shared/doctor-header/doctor-header.component';
+import { DoctorSidebarComponent } from '../shared/doctor-sidebar/doctor-sidebar.component';
 
 interface MenuItem {
   label: string;
@@ -19,7 +21,7 @@ interface MenuItem {
 @Component({
   selector: 'app-doctor-patients',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, DatePipe],
+  imports: [CommonModule, RouterModule, FormsModule, DatePipe, DoctorHeaderComponent, DoctorSidebarComponent],
   templateUrl: './patients.component.html',
   styleUrls: ['./patients.component.css']
 })
@@ -39,6 +41,9 @@ export class PatientsComponent implements OnInit {
   searchTerm = signal('');
   statusFilter = signal<'all' | 'active' | 'inactive'>('all');
   sortBy = signal<'recent' | 'visits' | 'alpha'>('recent');
+
+  // Typed status options for template iteration
+  readonly statuses = ['all', 'active', 'inactive'] as const;
 
   // UI/Theme Signals
   themeMode = signal<'light' | 'dark'>('light');

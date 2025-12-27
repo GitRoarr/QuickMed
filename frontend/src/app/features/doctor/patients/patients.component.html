@@ -1,63 +1,16 @@
 <div class="flex h-screen bg-[var(--background)] text-[var(--text-primary)] font-sans transition-colors duration-200">
   
-  <aside class="fixed inset-y-0 left-0 z-50 w-64 flex flex-col bg-[var(--sidebar-bg)] border-r border-[var(--sidebar-border)] transition-transform duration-300 md:translate-x-0 md:static">
-    <div class="p-6 border-b border-[var(--border-light)]">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-[var(--primary)] to-[#15803d] flex items-center justify-center text-white font-bold">
-          <img src="assets/images/QuickMed-Logo.png" alt="QM" class="w-6 h-6 object-contain brightness-0 invert" />
-        </div>
-        <div>
-          <h3 class="text-base font-bold text-[var(--text-primary)] m-0">QuickMed</h3>
-          <p class="text-xs text-[var(--text-secondary)] m-0">Doctor Portal</p>
-        </div>
-      </div>
-    </div>
-
-    <nav class="flex-1 py-4 overflow-y-auto">
-      <a *ngFor="let item of menuItems()" [routerLink]="item.route" routerLinkActive="bg-[var(--sidebar-active-bg)] text-[var(--sidebar-active-text)] font-semibold border-l-4 border-[var(--primary)]" class="flex items-center gap-3 px-6 py-3 text-[var(--sidebar-text)] hover:bg-[var(--sidebar-hover)] hover:text-[var(--text-primary)] transition-colors group relative">
-        <i [class]="'bi ' + item.icon + ' text-lg'"></i>
-        <span>{{ item.label }}</span>
-        <span *ngIf="item.badge && item.badge > 0" class="ml-auto bg-[var(--error)] text-white text-[10px] px-2 py-0.5 rounded-full font-bold">{{ item.badge }}</span>
-      </a>
-    </nav>
-
-    <div class="p-4 border-t border-[var(--border-light)]">
-      <div class="flex items-center gap-3 mb-4">
-        <div class="w-10 h-10 rounded-full bg-[var(--surface-tertiary)] overflow-hidden flex items-center justify-center text-[var(--text-primary)] font-bold border border-[var(--border-light)]">
-          <img *ngIf="currentUser()?.avatar; else docInitials" [src]="currentUser()?.avatar" class="w-full h-full object-cover" />
-          <ng-template #docInitials>{{ getDoctorInitials() }}</ng-template>
-        </div>
-        <div class="overflow-hidden">
-          <p class="truncate text-sm font-semibold text-[var(--text-primary)]">Dr. {{ getDoctorName() }}</p>
-          <p class="truncate text-xs text-[var(--text-secondary)]">{{ getDoctorSpecialty() }}</p>
-        </div>
-      </div>
-      <button (click)="logout()" class="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg bg-[var(--error-light)] text-[var(--error)] hover:bg-[var(--error)] hover:text-white transition-colors font-medium text-sm">
-        <i class="bi bi-box-arrow-right"></i> Logout
-      </button>
-    </div>
-  </aside>
+  <app-doctor-sidebar></app-doctor-sidebar>
 
   <main class="flex-1 flex flex-col overflow-hidden relative">
     
-    <div class="px-8 py-4 flex justify-end items-center gap-4 bg-[var(--background)] sticky top-0 z-40">
-      <button class="w-10 h-10 rounded-xl bg-[var(--surface-secondary)] text-[var(--text-secondary)] hover:bg-[var(--primary-light)] hover:text-[var(--primary)] transition-colors flex items-center justify-center" [routerLink]="'/doctor/messages'">
-        <i class="bi bi-chat-dots text-lg"></i>
-      </button>
-      <button class="w-10 h-10 rounded-xl bg-[var(--surface-secondary)] text-[var(--text-secondary)] hover:bg-[var(--primary-light)] hover:text-[var(--primary)] transition-colors flex items-center justify-center" [routerLink]="'/doctor/notifications'">
-        <i class="bi bi-bell text-lg"></i>
-        <span *ngIf="unreadNotifications() > 0" class="absolute top-2 right-2 w-2 h-2 bg-[var(--error)] rounded-full"></span>
-      </button>
-      
-      <button class="w-10 h-10 rounded-xl bg-[var(--surface-secondary)] text-[var(--text-secondary)] hover:text-[var(--primary)] transition-all flex items-center justify-center relative overflow-hidden" (click)="setTheme(themeMode() === 'light' ? 'dark' : 'light')">
-        <i class="bi absolute transition-all duration-300" [class.bi-moon-stars-fill]="themeMode() === 'dark'" [class.bi-sun-fill]="themeMode() === 'light'" [class.scale-0]="themeMode() === 'light'" [class.rotate-90]="themeMode() === 'light'" style="transform-origin: center;"></i>
-        <i class="bi bi-brightness-high-fill absolute transition-all duration-300" [class.scale-0]="themeMode() === 'dark'" [class.-rotate-90]="themeMode() === 'dark'"></i>
-      </button>
-
-      <div class="w-10 h-10 rounded-full bg-[var(--primary-light)] border border-[var(--primary)] text-[var(--primary)] flex items-center justify-center font-bold text-sm">
-        {{ getDoctorInitials() }}
-      </div>
-    </div>
+    <app-doctor-header
+      [initials]="getDoctorInitials()"
+      [avatarUrl]="currentUser()?.avatar"
+      [unreadNotifications]="unreadNotifications()"
+      [themeMode]="themeMode()"
+      (themeChange)="setTheme($event)"
+    ></app-doctor-header>
 
     <div class="flex-1 overflow-y-auto px-8 pb-8">
       
@@ -65,41 +18,6 @@
         <h1 class="text-2xl font-bold text-[var(--text-primary)] mb-2">My Patients</h1>
         <p class="text-[var(--text-secondary)]">Care continuity and patient management.</p>
       </header>
-
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div class="bg-[var(--surface)] p-5 rounded-2xl border border-[var(--border-light)] shadow-sm">
-          <div class="flex items-center gap-3 mb-2">
-            <div class="p-2 rounded-lg bg-[var(--surface-tertiary)] text-[var(--text-secondary)]"><i class="bi bi-people"></i></div>
-            <span class="text-xs font-bold uppercase text-[var(--text-muted)] tracking-wider">Total Patients</span>
-          </div>
-          <div class="flex items-baseline gap-2">
-            <h2 class="text-3xl font-bold text-[var(--text-primary)]">{{ totalPatients() }}</h2>
-            <span class="text-sm text-[var(--text-secondary)]">{{ recentlySeen() }} seen recently</span>
-          </div>
-        </div>
-
-        <div class="bg-[var(--surface)] p-5 rounded-2xl border border-[var(--border-light)] shadow-sm">
-           <div class="flex items-center gap-3 mb-2">
-            <div class="p-2 rounded-lg bg-[var(--success-light)] text-[var(--success)]"><i class="bi bi-activity"></i></div>
-            <span class="text-xs font-bold uppercase text-[var(--text-muted)] tracking-wider">Active</span>
-          </div>
-          <div class="flex items-baseline gap-2">
-            <h2 class="text-3xl font-bold text-[var(--success)]">{{ activePatients() }}</h2>
-            <span class="text-sm text-[var(--text-secondary)]">{{ inactivePatients() }} inactive</span>
-          </div>
-        </div>
-
-        <div class="bg-[var(--surface)] p-5 rounded-2xl border border-[var(--border-light)] shadow-sm">
-           <div class="flex items-center gap-3 mb-2">
-            <div class="p-2 rounded-lg bg-[var(--info-light)] text-[var(--info)]"><i class="bi bi-graph-up"></i></div>
-            <span class="text-xs font-bold uppercase text-[var(--text-muted)] tracking-wider">Avg Visits</span>
-          </div>
-          <div class="flex items-baseline gap-2">
-            <h2 class="text-3xl font-bold text-[var(--text-primary)]">{{ avgVisits() }}</h2>
-            <span class="text-sm text-[var(--text-secondary)]">per patient</span>
-          </div>
-        </div>
-      </div>
 
       <div class="bg-[var(--surface)] p-4 rounded-2xl border border-[var(--border-light)] shadow-sm mb-6 flex flex-col md:flex-row gap-4 justify-between items-center sticky top-0 z-10">
         <div class="relative w-full md:w-72">
@@ -115,16 +33,16 @@
 
         <div class="flex items-center gap-4 w-full md:w-auto">
           <div class="flex p-1 bg-[var(--surface-tertiary)] rounded-xl">
-             <button *ngFor="let s of ['all','active','inactive']" (click)="statusFilter.set(s)" [class.bg-[var(--surface)]]="statusFilter()===s" [class.text-[var(--primary)]]="statusFilter()===s" [class.shadow-sm]="statusFilter()===s" class="px-3 py-1.5 rounded-lg text-sm font-bold capitalize transition-all text-[var(--text-secondary)]">{{s}}</button>
+            <button *ngFor="let s of statuses" (click)="statusFilter.set(s)" [class.bg-[var(--surface)]]="statusFilter()===s" [class.text-[var(--primary)]]="statusFilter()===s" [class.shadow-sm]="statusFilter()===s" class="px-3 py-1.5 rounded-lg text-sm font-bold capitalize transition-all text-[var(--text-secondary)]">{{s}}</button>
           </div>
           
           <div class="flex items-center gap-2 px-3 py-2 bg-[var(--surface-tertiary)] rounded-xl border border-[var(--border-light)]">
-             <span class="text-xs font-bold text-[var(--text-muted)] uppercase">Sort</span>
-             <select [ngModel]="sortBy()" (ngModelChange)="sortBy.set($event)" class="bg-transparent border-none outline-none font-bold text-sm text-[var(--text-primary)] cursor-pointer">
-               <option value="recent">Recently Seen</option>
-               <option value="visits">Most Visits</option>
-               <option value="alpha">A-Z</option>
-             </select>
+            <span class="text-xs font-bold text-[var(--text-muted)] uppercase">Sort</span>
+            <select [ngModel]="sortBy()" (ngModelChange)="sortBy.set($event)" class="bg-transparent border-none outline-none font-bold text-sm text-[var(--text-primary)] cursor-pointer">
+              <option value="recent">Recently Seen</option>
+              <option value="visits">Most Visits</option>
+              <option value="alpha">A-Z</option>
+            </select>
           </div>
         </div>
       </div>

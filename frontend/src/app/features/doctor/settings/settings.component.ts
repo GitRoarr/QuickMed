@@ -7,6 +7,7 @@ import { SettingsService, DoctorSettings } from '@core/services/settings.service
 import { User } from '@core/models/user.model';
 import { AppointmentService } from '@core/services/appointment.service';
 import { MessageService } from '@core/services/message.service';
+import { DoctorSidebarComponent } from '../shared/doctor-sidebar/doctor-sidebar.component';
 
 interface MenuItem {
   label: string;
@@ -18,7 +19,7 @@ interface MenuItem {
 @Component({
   selector: 'app-doctor-settings',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule],
+  imports: [CommonModule, RouterModule, FormsModule, DoctorSidebarComponent],
   templateUrl: './settings.component.html',
   styleUrls: ['./settings.component.css']
 })

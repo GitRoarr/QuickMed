@@ -3,6 +3,7 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '@core/services/auth.service';
+import { DoctorSidebarComponent } from '../shared/doctor-sidebar/doctor-sidebar.component';
 import { MessageService, Conversation, Message } from '@core/services/message.service';
 import { AppointmentService } from '@core/services/appointment.service';
 import { ToastService } from '@core/services/toast.service';
@@ -17,7 +18,7 @@ interface MenuItem {
 @Component({
   selector: 'app-doctor-messages',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, DatePipe],
+  imports: [CommonModule, RouterModule, FormsModule, DatePipe, DoctorSidebarComponent],
   templateUrl: './messages.component.html',
   styleUrls: ['./messages.component.css']
 })

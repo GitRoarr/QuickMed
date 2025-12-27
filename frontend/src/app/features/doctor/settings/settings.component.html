@@ -1,48 +1,6 @@
 <div class="doctor-settings">
   <!-- Sidebar -->
-  <aside class="sidebar">
-    <div class="sidebar-header">
-      <div class="logo">
-        <div class="logo-icon">
-          <img src="assets/images/QuickMed-Logo.png" alt="QuickMed Logo" class="h-8 w-8 rounded" />
-        </div>
-        <div class="logo-text">
-          <h3>QuickMed</h3>
-          <p>Doctor Portal</p>
-        </div>
-      </div>
-    </div>
-
-            <nav class="sidebar-nav">
-              <a
-                *ngFor="let item of menuItems()"
-                [routerLink]="item.route"
-                routerLinkActive="active"
-                class="nav-item"
-              >
-                <i [class]="'bi ' + item.icon"></i>
-                <span>{{ item.label }}</span>
-                <span *ngIf="item.badge && item.badge > 0" class="badge">{{ item.badge }}</span>
-              </a>
-            </nav>
-
-    <div class="sidebar-footer">
-      <div class="user-info">
-        <div class="user-avatar">
-          <img *ngIf="currentUser()?.avatar; else docInitials" [src]="currentUser()?.avatar" alt="Doctor avatar" />
-          <ng-template #docInitials>{{ getDoctorInitials() }}</ng-template>
-        </div>
-        <div class="user-details">
-          <p class="user-name">Dr. {{ getDoctorName() }}</p>
-          <p class="user-role">{{ getDoctorSpecialty() }}</p>
-        </div>
-      </div>
-      <button class="logout-btn" (click)="logout()">
-        <i class="bi bi-box-arrow-right"></i>
-        Logout
-      </button>
-    </div>
-  </aside>
+  <app-doctor-sidebar></app-doctor-sidebar>
 
   <!-- Main Content -->
   <main class="main-content">

@@ -3,6 +3,7 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { DoctorHeaderComponent } from '../shared/doctor-header/doctor-header.component';
+import { DoctorSidebarComponent } from '../shared/doctor-sidebar/doctor-sidebar.component';
 import { AppointmentService } from '@core/services/appointment.service';
 import { Appointment, AppointmentStatus } from '@core/models/appointment.model';
 import { AuthService } from '@core/services/auth.service';
@@ -22,7 +23,7 @@ interface MenuItem {
 @Component({
   selector: 'app-doctor-appointments',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, DatePipe, DoctorHeaderComponent],
+  imports: [CommonModule, FormsModule, RouterModule, DatePipe, DoctorHeaderComponent, DoctorSidebarComponent],
   templateUrl: './appointments.component.html',
   styleUrls: ['./appointments.component.css'],
 })
