@@ -1,0 +1,35 @@
+<div class="patient-detail">
+  <ng-container *ngIf="!isLoading(); else loading">
+    <div class="header">
+      <div class="avatar">{{ getInitials() }}</div>
+      <div class="info">
+        <h2>{{ patient()?.firstName }} {{ patient()?.lastName }}</h2>
+        <p class="muted">{{ patient()?.email || 'No email' }}</p>
+        <p class="muted">{{ patient()?.phone || 'No phone' }}</p>
+        <p class="muted">Last seen: {{ formatLastSeen() }}</p>
+      </div>
+      <div class="actions">
+        <button class="btn" (click)="navigate('/doctor/patients')">Back</button>
+        <button class="btn primary" (click)="navigate('/doctor/appointments')">New Appointment</button>
+      </div>
+    </div>
+
+    <section class="appointments">
+      <h3>Appointments</h3>
+      <div *ngIf="appointments()?.length; else noAppointments">
+        <ul>
+          <li *ngFor="let appt of appointments()">
+            <span>{{ appt?.date }} {{ appt?.time }}</span>
+            <span class="muted">{{ appt?.reason || appt?.status }}</span>
+          </li>
+        </ul>
+      </div>
+      <ng-template #noAppointments>
+        <p class="muted">No appointments found.</p>
+      </ng-template>
+    </section>
+  </ng-container>
+  <ng-template #loading>
+    <div class="loading">Loading patient...</div>
+  </ng-template>
+</div>
