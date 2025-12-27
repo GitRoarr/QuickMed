@@ -24,7 +24,6 @@
             </button>
           </div>
 
-          <!-- Search -->
           <div class="relative">
             <i class="bi bi-search absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]"></i>
             <input
@@ -37,7 +36,6 @@
           </div>
         </div>
 
-        <!-- Conversations List -->
         <div class="flex-1 overflow-y-auto">
           <div *ngIf="isLoading()" class="p-8 text-center">
             <div class="w-10 h-10 border-4 border-[var(--primary)] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
@@ -78,7 +76,6 @@
         </div>
       </div>
 
-      <!-- Chat Panel (Right) -->
       <div class="flex-1 flex flex-col bg-[var(--surface-primary)]">
         <div *ngIf="!selectedConversation()" class="flex-1 flex items-center justify-center">
           <div class="text-center">
@@ -89,7 +86,6 @@
         </div>
 
         <div *ngIf="selectedConversation()" class="flex flex-col h-full">
-          <!-- Chat Header -->
           <div class="p-6 border-b border-[var(--border-light)] flex items-center justify-between">
             <div class="flex items-center gap-4">
               <div class="w-14 h-14 rounded-full bg-gradient-to-br from-[var(--primary)] to-emerald-600 flex items-center justify-center text-white font-bold text-xl shadow-lg">

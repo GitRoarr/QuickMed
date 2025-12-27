@@ -40,8 +40,8 @@ export class ScheduleComponent implements OnInit {
   unreadNotifications = signal(0);
 
   viewMode = signal<'day' | 'week' | 'month'>('day');
-  // Provide typed view mode options for template iteration
-  viewModes: ('day' | 'week' | 'month')[] = ['day', 'week', 'month'];
+  // Typed view modes for template iteration with literal inference
+  readonly viewModes = ['day', 'week', 'month'] as const;
   slotDurationMinutes = signal(30);
   workingStart = signal('09:00');
   workingEnd = signal('17:00');

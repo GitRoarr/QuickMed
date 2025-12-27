@@ -27,6 +27,7 @@ export class DoctorSidebarComponent implements OnInit {
 
   currentUser = signal<any>(null);
   menuItems = signal<MenuItem[]>([]);
+  loading = signal(true);
 
   ngOnInit(): void {
     this.currentUser.set(this.authService.currentUser());
@@ -39,11 +40,18 @@ export class DoctorSidebarComponent implements OnInit {
         this.messageService.getUnreadCount().subscribe({
           next: (msg) => {
             this.updateMenuItems(apt?.count || 0, msg?.count || 0);
+            this.loading.set(false);
           },
-          error: () => this.updateMenuItems(apt?.count || 0, 0)
+          error: () => {
+            this.updateMenuItems(apt?.count || 0, 0);
+            this.loading.set(false);
+          }
         });
       },
-      error: () => this.updateMenuItems(0, 0)
+      error: () => {
+        this.updateMenuItems(0, 0);
+        this.loading.set(false);
+      }
     });
   }
 

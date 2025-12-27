@@ -126,6 +126,8 @@ export const routes: Routes = [
     path: "doctor",
     canActivate: [authGuard, roleGuard],
     data: { roles: ["doctor"] },
+    loadComponent: () =>
+      import('./features/doctor/layout/doctor-layout.component').then(m => m.DoctorLayoutComponent),
     children: [
       {
         path: "dashboard",

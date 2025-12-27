@@ -1,195 +1,171 @@
-<div class="doctor-analytics">
-  <!-- Sidebar -->
-  <app-doctor-sidebar></app-doctor-sidebar>
-    <div class="sidebar-header">
-      <div class="logo">
-        <div class="logo-icon">
-          <img src="assets/images/QuickMed-Logo.png" alt="QuickMed Logo" class="h-8 w-8 rounded" />
-        </div>
-        <div class="logo-text">
-          <h3>QuickMed</h3>
-          <p>Doctor Portal</p>
-        </div>
-      </div>
-    </div>
+<div class="flex-1 flex flex-col min-w-0">
+  <!-- Shared Header -->
+  <app-doctor-header
+    [initials]="getDoctorInitials()"
+    [avatarUrl]="currentUser()?.avatar"
+    [unreadNotifications]="unreadNotificationCount()"
+    [themeMode]="themeMode()"
+    (themeChange)="setTheme($event)"
+  ></app-doctor-header>
 
-            <nav class="sidebar-nav">
-              <a
-                *ngFor="let item of menuItems()"
-                [routerLink]="item.route"
-                routerLinkActive="active"
-                class="nav-item"
-              >
-                <i [class]="'bi ' + item.icon"></i>
-                <span>{{ item.label }}</span>
-                <span *ngIf="item.badge && item.badge > 0" class="badge">{{ item.badge }}</span>
-              </a>
-            </nav>
-
-    <div class="sidebar-footer">
-      <div class="user-info">
-        <div class="user-avatar">
-          <img *ngIf="currentUser()?.avatar; else docInitials" [src]="currentUser()?.avatar" alt="Doctor avatar" />
-          <ng-template #docInitials>{{ getDoctorInitials() }}</ng-template>
-        </div>
-        <div class="user-details">
-          <p class="user-name">Dr. {{ getDoctorName() }}</p>
-          <p class="user-role">{{ getDoctorSpecialty() }}</p>
-        </div>
-      </div>
-      <button class="logout-btn" (click)="logout()">
-        <i class="bi bi-box-arrow-right"></i>
-        Logout
-      </button>
-    </div>
-  
-
-  <!-- Main Content -->
-  <main class="main-content">
-    <header class="content-header">
-      <div>
-        <h1 class="page-title">Analytics & Performance</h1>
-        <p class="page-subtitle">Your practice performance metrics and insights</p>
-      </div>
-      <div class="period-filters">
-        <button
-          *ngFor="let period of periodOptions"
-          class="period-btn"
-          [class.active]="selectedPeriod() === period.value"
-          (click)="onPeriodChange(period.value)"
-        >
-          {{ period.label }}
-        </button>
-      </div>
-    </header>
-
-    <!-- Loading State -->
-    <div *ngIf="isLoading()" class="loading-container">
-      <div class="spinner"></div>
-      <p>Loading analytics...</p>
-    </div>
-
-    <!-- Analytics Content -->
-    <div *ngIf="!isLoading() && analytics()" class="analytics-content">
-      <!-- KPI Cards -->
-      <div class="kpi-grid">
-        <div class="kpi-card">
-          <div class="kpi-header">
-            <h3>Total Appointments</h3>
-            <i class="bi bi-calendar-check kpi-icon"></i>
-          </div>
-          <div class="kpi-value">{{ analytics()!.kpis.totalAppointments }}</div>
-          <div class="kpi-footer">
-            <span class="kpi-trend positive">
-              <i class="bi bi-arrow-up"></i>
-              +{{ analytics()!.trends.appointmentsChange }}% from last month
-            </span>
-          </div>
+  <!-- Analytics Content -->
+  <main class="flex-1 overflow-y-auto p-6 lg:p-10">
+      <!-- Page Header -->
+      <div class="mb-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+        <div>
+          <h1 class="text-3xl lg:text-4xl font-bold">Analytics & Insights</h1>
+          <p class="text-lg text-[var(--text-secondary)] mt-3">Track your practice performance with real-time data</p>
         </div>
 
-        <div class="kpi-card">
-          <div class="kpi-header">
-            <h3>Completion Rate</h3>
-            <i class="bi bi-check-circle kpi-icon"></i>
-          </div>
-          <div class="kpi-value">{{ analytics()!.kpis.completionRate }}%</div>
-          <div class="kpi-footer">
-            <span class="kpi-trend positive">
-              <i class="bi bi-arrow-up"></i>
-              +{{ analytics()!.trends.completionChange }}% improvement
-            </span>
-          </div>
-        </div>
-
-        <div class="kpi-card">
-          <div class="kpi-header">
-            <h3>Patient Satisfaction</h3>
-            <i class="bi bi-star kpi-icon"></i>
-          </div>
-          <div class="kpi-value">{{ analytics()!.kpis.patientSatisfaction }}/5</div>
-          <div class="kpi-footer">
-            <span class="kpi-trend positive">
-              <i class="bi bi-arrow-up"></i>
-              +{{ analytics()!.trends.satisfactionChange }} points
-            </span>
-          </div>
-        </div>
-
-        <div class="kpi-card">
-          <div class="kpi-header">
-            <h3>New Patients</h3>
-            <i class="bi bi-people kpi-icon"></i>
-          </div>
-          <div class="kpi-value">{{ analytics()!.kpis.newPatients }}</div>
-          <div class="kpi-footer">
-            <span class="kpi-trend positive">
-              <i class="bi bi-arrow-up"></i>
-              +{{ analytics()!.trends.newPatientsChange }} vs last month
-            </span>
-          </div>
+        <!-- Period Selector -->
+        <div class="flex gap-3 flex-wrap">
+          <button
+            *ngFor="let period of periodOptions"
+            (click)="onPeriodChange(period.value)"
+            [class.bg-[var(--primary)]]="selectedPeriod() === period.value"
+            [class.text-white]="selectedPeriod() === period.value"
+            [class.bg-[var(--surface-secondary)]]="selectedPeriod() !== period.value"
+            [class.text-[var(--text-primary)]]="selectedPeriod() !== period.value"
+            class="px-6 py-3 rounded-xl font-semibold hover:opacity-90 transition shadow-md"
+          >
+            {{ period.label }}
+          </button>
         </div>
       </div>
 
-      <!-- Charts -->
-      <div class="charts-grid">
-        <!-- Appointment Trends Chart -->
-        <div class="chart-card">
-          <h3 class="chart-title">Appointment Trends</h3>
-          <p class="chart-subtitle">Completed, cancelled, and no-show appointments</p>
-          <div class="chart-container">
-            <div class="chart-bars">
-              <div *ngFor="let month of getAppointmentTrendData().months; let i = index" class="bar-wrapper">
-                <div class="bars-group">
-                  <div
-                    class="bar completed"
-                    [style.height.%]="getBarHeight(getCompletedValue(i), getMaxChartValue())"
-                    [title]="'Completed: ' + getCompletedValue(i)"
-                  ></div>
-                  <div
-                    class="bar cancelled"
-                    [style.height.%]="getBarHeight(getCancelledValue(i), getMaxChartValue())"
-                    [title]="'Cancelled: ' + getCancelledValue(i)"
-                  ></div>
-                  <div
-                    class="bar noShow"
-                    [style.height.%]="getBarHeight(getNoShowValue(i), getMaxChartValue())"
-                    [title]="'No Show: ' + getNoShowValue(i)"
-                  ></div>
+      <!-- Loading State -->
+      <div *ngIf="isLoading()" class="flex flex-col items-center justify-center py-32">
+        <div class="w-16 h-16 border-4 border-[var(--primary)] border-t-transparent rounded-full animate-spin mb-6"></div>
+        <p class="text-xl text-[var(--text-secondary)]">Loading analytics data...</p>
+      </div>
+
+      <!-- Analytics Content -->
+      <div *ngIf="!isLoading() && analytics()" class="space-y-10">
+        <!-- KPI Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-8">
+          <div class="bg-[var(--surface)] rounded-3xl border border-[var(--border-light)] p-8 shadow-lg hover:shadow-xl transition-all duration-500"
+               [@fadeInUp]>
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-lg font-semibold text-[var(--text-secondary)]">Total Appointments</h3>
+              <div class="w-12 h-12 bg-[var(--success-light)] rounded-xl flex items-center justify-center">
+                <i class="bi bi-calendar-check text-2xl text-[var(--success)]"></i>
+              </div>
+            </div>
+            <p class="text-4xl font-bold mt-4">{{ analytics()!.kpis.totalAppointments }}</p>
+            <p class="text-sm mt-3" [class.text-[var(--success)]]="analytics()!.trends.appointmentsChange >= 0"
+                [class.text-[var(--error)]]="analytics()!.trends.appointmentsChange < 0">
+              {{ analytics()!.trends.appointmentsChange >= 0 ? '+' : '' }}{{ analytics()!.trends.appointmentsChange }}% vs last period
+            </p>
+          </div>
+
+          <div class="bg-[var(--surface)] rounded-3xl border border-[var(--border-light)] p-8 shadow-lg hover:shadow-xl transition-all duration-500"
+               [@fadeInUp]>
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-lg font-semibold text-[var(--text-secondary)]">Completion Rate</h3>
+              <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center">
+                <i class="bi bi-graph-up text-2xl text-blue-600 dark:text-blue-400"></i>
+              </div>
+            </div>
+            <p class="text-4xl font-bold mt-4">{{ analytics()!.kpis.completionRate }}%</p>
+            <p class="text-sm mt-3" [class.text-[var(--success)]]="analytics()!.trends.completionChange >= 0"
+                [class.text-[var(--error)]]="analytics()!.trends.completionChange < 0">
+              {{ analytics()!.trends.completionChange >= 0 ? '+' : '' }}{{ analytics()!.trends.completionChange }}% vs last period
+            </p>
+          </div>
+
+          <div class="bg-[var(--surface)] rounded-3xl border border-[var(--border-light)] p-8 shadow-lg hover:shadow-xl transition-all duration-500"
+               [@fadeInUp]>
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-lg font-semibold text-[var(--text-secondary)]">Patient Satisfaction</h3>
+              <div class="w-12 h-12 bg-amber-100 dark:bg-amber-900/30 rounded-xl flex items-center justify-center">
+                <i class="bi bi-star-fill text-2xl text-amber-600 dark:text-amber-400"></i>
+              </div>
+            </div>
+            <p class="text-4xl font-bold mt-4">{{ analytics()!.kpis.patientSatisfaction }}%</p>
+            <p class="text-sm mt-3" [class.text-[var(--success)]]="analytics()!.trends.satisfactionChange >= 0"
+                [class.text-[var(--error)]]="analytics()!.trends.satisfactionChange < 0">
+              {{ analytics()!.trends.satisfactionChange >= 0 ? '+' : '' }}{{ analytics()!.trends.satisfactionChange }}% vs last period
+            </p>
+          </div>
+
+          <div class="bg-[var(--surface)] rounded-3xl border border-[var(--border-light)] p-8 shadow-lg hover:shadow-xl transition-all duration-500"
+               [@fadeInUp]>
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-lg font-semibold text-[var(--text-secondary)]">New Patients</h3>
+              <div class="w-12 h-12 bg-[var(--primary-light)] rounded-xl flex items-center justify-center">
+                <i class="bi bi-people text-2xl text-[var(--primary)]"></i>
+              </div>
+            </div>
+            <p class="text-4xl font-bold mt-4">{{ analytics()!.kpis.newPatients }}</p>
+            <p class="text-sm mt-3" [class.text-[var(--success)]]="analytics()!.trends.newPatientsChange >= 0"
+                [class.text-[var(--error)]]="analytics()!.trends.newPatientsChange < 0">
+              {{ analytics()!.trends.newPatientsChange >= 0 ? '+' : '' }}{{ analytics()!.trends.newPatientsChange }} vs last period
+            </p>
+          </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="grid grid-cols-1 xl:grid-cols-2 gap-8">
+          <!-- Appointment Trends Bar Chart -->
+          <div class="bg-[var(--surface)] rounded-3xl border border-[var(--border-light)] p-8 shadow-lg"
+               [@fadeInUp]>
+            <h3 class="text-xl font-bold mb-2">Appointment Trends</h3>
+            <p class="text-[var(--text-secondary)] mb-6">Completed, Cancelled & No-Show over time</p>
+
+            <div class="h-64 flex items-end justify-between gap-4">
+              <ng-container *ngFor="let month of getAppointmentTrendData().months; let i = index">
+                <div class="flex-1 flex flex-col items-center gap-2">
+                  <div class="relative w-full flex flex-col justify-end gap-1 h-full">
+                    <!-- Completed -->
+                    <div
+                      class="w-full bg-[var(--success)] rounded-t-md transition-all duration-700"
+                      [style.height.%]="getBarHeight(getCompletedValue(i), getMaxChartValue())"
+                    ></div>
+                    <!-- Cancelled -->
+                    <div
+                      class="w-full bg-[var(--warning)] rounded-t-md transition-all duration-700"
+                      [style.height.%]="getBarHeight(getCancelledValue(i), getMaxChartValue())"
+                    ></div>
+                    <!-- No-Show -->
+                    <div
+                      class="w-full bg-[var(--error)] rounded-t-md transition-all duration-700"
+                      [style.height.%]="getBarHeight(getNoShowValue(i), getMaxChartValue())"
+                    ></div>
+                  </div>
+                  <span class="text-xs text-[var(--text-secondary)] mt-2">{{ month }}</span>
                 </div>
-                <div class="bar-label">{{ month }}</div>
-              </div>
+              </ng-container>
             </div>
-            <div class="chart-legend">
-              <div class="legend-item">
-                <div class="legend-color completed"></div>
-                <span>completed</span>
+
+            <div class="flex justify-center gap-6 mt-6">
+              <div class="flex items-center gap-2">
+                <div class="w-4 h-4 bg-[var(--success)] rounded"></div>
+                <span class="text-sm">Completed</span>
               </div>
-              <div class="legend-item">
-                <div class="legend-color cancelled"></div>
-                <span>cancelled</span>
+              <div class="flex items-center gap-2">
+                <div class="w-4 h-4 bg-[var(--warning)] rounded"></div>
+                <span class="text-sm">Cancelled</span>
               </div>
-              <div class="legend-item">
-                <div class="legend-color noShow"></div>
-                <span>noShow</span>
+              <div class="flex items-center gap-2">
+                <div class="w-4 h-4 bg-[var(--error)] rounded"></div>
+                <span class="text-sm">No-Show</span>
               </div>
             </div>
           </div>
-        </div>
 
-        <!-- Satisfaction Trend Chart -->
-        <div class="chart-card">
-          <h3 class="chart-title">Patient Satisfaction Trend</h3>
-          <p class="chart-subtitle">Average satisfaction rating over time</p>
-          <div class="chart-container">
-            <div class="satisfaction-chart">
-              <div class="chart-placeholder">
-                <p>Satisfaction trend visualization</p>
-                <small>Jan - Jun 2025</small>
+          <!-- Patient Satisfaction Trend (Placeholder for future chart) -->
+          <div class="bg-[var(--surface)] rounded-3xl border border-[var(--border-light)] p-8 shadow-lg flex items-center justify-center"
+               [@fadeInUp]>
+            <div class="text-center">
+              <div class="w-32 h-32 mx-auto mb-6 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center shadow-2xl">
+                <span class="text-5xl font-bold text-white">{{ analytics()!.kpis.patientSatisfaction }}%</span>
               </div>
+              <h3 class="text-2xl font-bold">Patient Satisfaction</h3>
+              <p class="text-[var(--text-secondary)] mt-2">Consistently excellent feedback</p>
+              <p class="text-sm text-[var(--text-muted)] mt-4">Trend chart coming soon</p>
             </div>
           </div>
         </div>
       </div>
-    </div>
   </main>
 </div>

@@ -1,1 +1,33 @@
 :host{display:block}
+
+.skeleton-icon,
+.skeleton-text {
+	position: relative;
+	overflow: hidden;
+	background: var(--surface-tertiary);
+	border-radius: 6px;
+}
+
+.skeleton-icon {
+	width: 20px;
+	height: 20px;
+}
+
+.skeleton-text {
+	height: 12px;
+	display: inline-block;
+}
+
+.skeleton-icon::after,
+.skeleton-text::after {
+	content: '';
+	position: absolute;
+	inset: 0;
+	background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent);
+	animation: shimmer 1.2s infinite;
+}
+
+@keyframes shimmer {
+	0% { transform: translateX(-100%); }
+	100% { transform: translateX(100%); }
+}

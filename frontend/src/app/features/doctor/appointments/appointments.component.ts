@@ -137,8 +137,9 @@ export class AppointmentsComponent implements OnInit {
     this.filteredAppointments.set(result);
   }
 
-  updateStatus(id: string, status: AppointmentStatus): void {
-    this.appointmentService.update(id, { status }).subscribe({
+  updateStatus(id: string | number, status: AppointmentStatus): void {
+    const idStr = String(id);
+    this.appointmentService.update(idStr, { status }).subscribe({
       next: () => {
         const msg = status === AppointmentStatus.CONFIRMED ? 'Appointment Confirmed' : 'Appointment Completed';
         this.toast.success(msg, { title: 'Success' });
