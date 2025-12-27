@@ -1,20 +1,17 @@
-import { Component, OnInit, signal, inject } from "@angular/core";
-import { CommonModule, DatePipe } from "@angular/common";
-import { FormsModule } from "@angular/forms";
-import { Router, RouterModule } from "@angular/router";
-import { AppointmentService } from "@core/services/appointment.service";
-import { Appointment, AppointmentStatus } from "@core/models/appointment.model";
-import { AuthService } from "@core/services/auth.service";
-import { BadgeService } from "@core/services/badge.service";
-import { MessageService } from "@core/services/message.service";
-import { SchedulingService } from '@core/services/schedule.service';
+import { Component, OnInit, signal, inject, effect, computed } from '@angular/core';
+import { CommonModule, DatePipe } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { Router, RouterModule } from '@angular/router';
+import { DoctorHeaderComponent } from '../shared/doctor-header/doctor-header.component';
+import { AppointmentService } from '@core/services/appointment.service';
+import { Appointment, AppointmentStatus } from '@core/models/appointment.model';
+import { AuthService } from '@core/services/auth.service';
+import { BadgeService } from '@core/services/badge.service';
+import { MessageService } from '@core/services/message.service';
+import { NotificationService } from '@core/services/notification.service';
+import { ToastService } from '@core/services/toast.service';
+import { forkJoin } from 'rxjs';
 
-interface AppointmentFilter {
-  status: string;
-  dateRange: string;
-  patient: string;
-
-}
 interface MenuItem {
   label: string;
   icon: string;
@@ -23,127 +20,169 @@ interface MenuItem {
 }
 
 @Component({
-  selector: "app-doctor-appointments",
+  selector: 'app-doctor-appointments',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, DatePipe],
-  templateUrl: "./appointments.component.html",
-  styleUrls: ["./appointments.component.css"],
+  imports: [CommonModule, FormsModule, RouterModule, DatePipe, DoctorHeaderComponent],
+  templateUrl: './appointments.component.html',
+  styleUrls: ['./appointments.component.css'],
 })
 export class AppointmentsComponent implements OnInit {
-  appointments: Appointment[] = [];
-  filteredAppointments: Appointment[] = [];
+  appointments = signal<Appointment[]>([]);
+  filteredAppointments = signal<Appointment[]>([]);
   isLoading = signal(true);
-  searchQuery = signal("");
-  selectedFilter = signal("all");
-  showFilters = signal(false);
-  sortBy = signal("date");
-  sortOrder = signal("desc");
-  selectedDate = signal(new Date().toISOString().split("T")[0]);
-  viewMode = signal("grid");
+  
+  // Filters
+  searchQuery = signal('');
+  selectedStatus = signal<string>('all');
+  
+  // Layout & Theme
+  currentUser = signal<any>(null);
+  menuItems = signal<MenuItem[]>([]);
+  unreadMessages = signal(0);
+  unreadNotifications = signal(0);
+  themeMode = signal<'light' | 'dark'>('light');
 
+  // Enums for HTML
   AppointmentStatus = AppointmentStatus;
 
-  appointmentsBySlot: { [key: string]: Appointment[] } = {};
-
+  private appointmentService = inject(AppointmentService);
   private authService = inject(AuthService);
-  private router = inject(Router);
-  private badgeService = inject(BadgeService);
   private messageService = inject(MessageService);
-  currentUser = signal<any>(null);
-  
-  
+  private notificationService = inject(NotificationService);
+  private toast = inject(ToastService);
+  private router = inject(Router);
 
-   menuItems = signal<MenuItem[]>([
-    { label: "Dashboard", icon: "bi-house-door", route: "/doctor/dashboard" },
-    { label: "Appointments", icon: "bi-calendar-check", route: "/doctor/appointments" },
-    { label: "Schedule", icon: "bi-calendar3", route: "/doctor/schedule" },
-    { label: "My Patients", icon: "bi-people", route: "/doctor/patients" },
-    { label: "Medical Records", icon: "bi-file-earmark-medical", route: "/doctor/records" },
-    { label: "Prescriptions", icon: "bi-prescription2", route: "/doctor/prescriptions" },
-    { label: "Messages", icon: "bi-chat-dots", route: "/doctor/messages" },
-    { label: "Analytics", icon: "bi-graph-up", route: "/doctor/analytics" },
-    { label: "Settings", icon: "bi-gear", route: "/doctor/settings" },
-  ]);
+  // Computed Stats
+  stats = computed(() => {
+    const all = this.appointments();
+    return {
+      total: all.length,
+      pending: all.filter(a => a.status === AppointmentStatus.PENDING).length,
+      confirmed: all.filter(a => a.status === AppointmentStatus.CONFIRMED).length,
+      completed: all.filter(a => a.status === AppointmentStatus.COMPLETED).length
+    };
+  });
 
-  filterOptions = [
-    { value: "all", label: "All Appointments", icon: "bi-list" },
-    { value: "pending", label: "Pending", icon: "bi-clock" },
-    { value: "confirmed", label: "Confirmed", icon: "bi-check-circle" },
-    { value: "completed", label: "Completed", icon: "bi-check2-all" },
-    { value: "cancelled", label: "Cancelled", icon: "bi-x-circle" },
-  ];
+  constructor() {
+    // Sync theme with body
+    effect(() => {
+      const mode = this.themeMode();
+      if (mode === 'dark') {
+        document.body.classList.add('dark');
+        document.body.classList.remove('light');
+      } else {
+        document.body.classList.add('light');
+        document.body.classList.remove('dark');
+      }
+    });
 
-  sortOptions = [
-    { value: "date", label: "Date" },
-    { value: "patient", label: "Patient" },
-    { value: "status", label: "Status" },
-    { value: "time", label: "Time" },
-  ];
-
-  timeSlots: string[] = [];
-
-  private schedulingService = inject(SchedulingService);
-
-  constructor(private appointmentService: AppointmentService) {}
+    // React to filter changes
+    effect(() => {
+      this.applyFilters();
+    });
+  }
 
   ngOnInit(): void {
     this.loadUserData();
     this.loadAppointments();
     this.loadBadgeCounts();
-    this.loadTimeSlotsForSelectedDate();
+    this.loadHeaderCounts();
   }
-
-  loadBadgeCounts(): void {
-    this.appointmentService.getPendingCount().subscribe({
-      next: (data) => {
-        this.updateMenuItems(data.count || 0, this.badgeService.messageCount());
-      }
-    });
-
-    this.messageService.getUnreadCount().subscribe({
-      next: (data) => {
-        this.updateMenuItems(this.badgeService.appointmentCount(), data.count || 0);
-      }
-    });
-  }
-
-updateMenuItems(appointmentCount: number, messageCount: number) {
-  this.menuItems.update(items =>
-    items.map(item => {
-      if (item.label === "Appointments") return { ...item, badge: appointmentCount || undefined };
-      if (item.label === "Messages") return { ...item, badge: messageCount || undefined };
-      return item;
-    })
-  );
-}
-
 
   loadUserData(): void {
-    const user = this.authService.currentUser();
-    this.currentUser.set(user);
+    this.currentUser.set(this.authService.currentUser());
   }
 
-  getDoctorName(): string {
-    const user = this.currentUser();
-    if (user) {
-      return `${user.firstName} ${user.lastName}`;
+  loadAppointments(): void {
+    this.isLoading.set(true);
+    this.appointmentService.getMyAppointments().subscribe({
+      next: (data) => {
+        this.appointments.set(data);
+        this.applyFilters(); // Trigger initial filter
+        this.isLoading.set(false);
+      },
+      error: () => {
+        this.toast.error('Failed to load appointments');
+        this.isLoading.set(false);
+      }
+    });
+  }
+
+  applyFilters(): void {
+    let result = this.appointments();
+    const query = this.searchQuery().toLowerCase();
+    const status = this.selectedStatus();
+
+    // 1. Filter by Status
+    if (status !== 'all') {
+      result = result.filter(a => a.status === status);
     }
-    return 'Doctor';
-  }
 
-  getDoctorSpecialty(): string {
-    const user = this.currentUser();
-    return user?.specialty || 'General Practitioner';
-  }
-
-  getDoctorInitials(): string {
-    const name = this.getDoctorName();
-    if (!name) return 'DR';
-    const parts = name.split(' ');
-    if (parts.length >= 2) {
-      return (parts[0][0] + parts[1][0]).toUpperCase();
+    // 2. Filter by Search (Name or Notes)
+    if (query) {
+      result = result.filter(a => 
+        (a.patient?.firstName?.toLowerCase() || '').includes(query) ||
+        (a.patient?.lastName?.toLowerCase() || '').includes(query) ||
+        (a.notes?.toLowerCase() || '').includes(query)
+      );
     }
-    return name.substring(0, 2).toUpperCase();
+
+    result.sort((a, b) => {
+      const dateA = new Date(`${a.appointmentDate}T${a.appointmentTime}`);
+      const dateB = new Date(`${b.appointmentDate}T${b.appointmentTime}`);
+      return dateB.getTime() - dateA.getTime();
+    });
+
+    this.filteredAppointments.set(result);
+  }
+
+  updateStatus(id: string, status: AppointmentStatus): void {
+    this.appointmentService.update(id, { status }).subscribe({
+      next: () => {
+        const msg = status === AppointmentStatus.CONFIRMED ? 'Appointment Confirmed' : 'Appointment Completed';
+        this.toast.success(msg, { title: 'Success' });
+        this.loadAppointments(); // Reload to refresh lists/stats
+      },
+      error: () => this.toast.error('Action failed', { title: 'Error' })
+    });
+  }
+
+  viewPatientDetails(appt: Appointment): void {
+    if (appt.patientId) {
+      this.router.navigate(['/doctor/patients', appt.patientId]);
+    }
+  }
+
+  // Layout Helpers
+  loadBadgeCounts(): void {
+    forkJoin({
+      pending: this.appointmentService.getPendingCount(),
+      messages: this.messageService.getUnreadCount()
+    }).subscribe(({ pending, messages }) => {
+      this.updateMenuItems(pending.count || 0, messages.count || 0);
+    });
+  }
+
+  loadHeaderCounts(): void {
+    this.notificationService.getUnreadCount().subscribe({
+      next: (count) => this.unreadNotifications.set(count || 0),
+      error: () => this.unreadNotifications.set(0),
+    });
+  }
+
+  updateMenuItems(pendingCount: number, messageCount: number): void {
+    this.menuItems.set([
+      { label: 'Dashboard', icon: 'bi-house-door', route: '/doctor/dashboard' },
+      { label: 'Appointments', icon: 'bi-calendar-check', route: '/doctor/appointments', badge: pendingCount || undefined },
+      { label: 'Schedule', icon: 'bi-calendar3', route: '/doctor/schedule' },
+      { label: 'My Patients', icon: 'bi-people', route: '/doctor/patients' },
+      { label: 'Messages', icon: 'bi-chat-dots', route: '/doctor/messages', badge: messageCount || undefined },
+      { label: 'Settings', icon: 'bi-gear', route: '/doctor/settings' },
+    ]);
+  }
+
+  setTheme(mode: 'light' | 'dark'): void {
+    this.themeMode.set(mode);
   }
 
   logout(): void {
@@ -151,258 +190,27 @@ updateMenuItems(appointmentCount: number, messageCount: number) {
     this.router.navigate(['/login']);
   }
 
-  navigate(route: string): void {
-    this.router.navigate([route]);
+  getDoctorName(): string {
+    const user = this.currentUser();
+    return user ? `${user.firstName} ${user.lastName}` : 'Doctor';
   }
 
-  loadAppointments(): void {
-    this.isLoading.set(true);
-    this.appointmentService.getMyAppointments().subscribe({
-      next: (data) => {
-        this.appointments = data;
-        this.filteredAppointments = [...data];
-        this.applyFilters();
-        this.isLoading.set(false);
-          // refresh time slots after appointments load
-          this.loadTimeSlotsForSelectedDate();
-      },
-      error: () => {
-        this.isLoading.set(false);
-      },
-    });
+  getDoctorSpecialty(): string {
+    return this.currentUser()?.specialty || 'General Practitioner';
   }
 
-  applyFilters(): void {
-    let filtered = [...this.appointments];
-
-    // Search filter
-    if (this.searchQuery()) {
-      const query = this.searchQuery().toLowerCase();
-      filtered = filtered.filter((appointment) =>
-        appointment.patient?.firstName?.toLowerCase().includes(query) ||
-        appointment.patient?.lastName?.toLowerCase().includes(query) ||
-        appointment.notes?.toLowerCase().includes(query)
-      );
-    }
-
-    // Status filter
-    if (this.selectedFilter() !== "all") {
-      filtered = filtered.filter((appointment) => appointment.status === this.selectedFilter());
-    }
-
-    // Date filter
-    if (this.selectedDate()) {
-      filtered = filtered.filter((appointment) => appointment.appointmentDate === this.selectedDate());
-    }
-
-    // Sort
-    filtered.sort((a, b) => {
-      let comparison = 0;
-
-      switch (this.sortBy()) {
-        case "date":
-          comparison = new Date(a.appointmentDate).getTime() - new Date(b.appointmentDate).getTime();
-          break;
-        case "patient":
-          const patientA = `${a.patient?.firstName} ${a.patient?.lastName}`.toLowerCase();
-          const patientB = `${b.patient?.firstName} ${b.patient?.lastName}`.toLowerCase();
-          comparison = patientA.localeCompare(patientB);
-          break;
-        case "status":
-          comparison = a.status.localeCompare(b.status);
-          break;
-        case "time":
-          comparison = a.appointmentTime.localeCompare(b.appointmentTime);
-          break;
-      }
-
-      return this.sortOrder() === "desc" ? -comparison : comparison;
-    });
-
-    this.filteredAppointments = filtered;
-
-    // Update appointmentsBySlot mapping after filtering
-    this.updateAppointmentsBySlot();
-    // ensure time slots reflect selected date's schedule
-    this.loadTimeSlotsForSelectedDate();
+  getDoctorInitials(): string {
+    const name = this.getDoctorName();
+    const parts = name.split(' ');
+    return parts.length >= 2 ? (parts[0][0] + parts[1][0]).toUpperCase() : name.substring(0, 2).toUpperCase();
   }
 
-  // Updated helper function to ensure all timeSlots have entries
-  updateAppointmentsBySlot(): void {
-    const map: { [key: string]: Appointment[] } = {};
-    // Initialize all timeSlots with empty arrays
-    this.timeSlots.forEach((slot) => {
-      map[slot] = [];
-    });
-    // Populate with appointments
-    this.filteredAppointments.forEach((appointment) => {
-      const slot = appointment.appointmentTime;
-      if (map[slot]) {
-        map[slot].push(appointment);
-      }
-    });
-    this.appointmentsBySlot = map;
-  }
-
-  loadTimeSlotsForSelectedDate(): void {
-    const date = this.selectedDate();
-    if (!date) return;
-    // scheduling service returns slots from backend; map them to display strings
-    this.schedulingService.getDaySchedule(date).subscribe({
-      next: (slots) => {
-        const derived = (slots || [])
-          .map((s: any) => (s.startTime && s.endTime ? `${s.startTime}` : s.time || ''))
-          .filter((t: string) => !!t)
-          .sort();
-        this.timeSlots = derived;
-        // rebuild appointments mapping
-        this.updateAppointmentsBySlot();
-      },
-      error: () => {
-        this.timeSlots = [];
-        this.updateAppointmentsBySlot();
-      }
-    });
-  }
-
-  onSearchChange(): void {
-    this.applyFilters();
-  }
-
-  onFilterChange(): void {
-    this.applyFilters();
-  }
-
-  onSortChange(): void {
-    this.applyFilters();
-  }
-
-  onDateChange(): void {
-    this.applyFilters();
-  }
-
-  toggleSortOrder(): void {
-    this.sortOrder.update((order) => (order === "asc" ? "desc" : "asc"));
-    this.applyFilters();
-  }
-
-  toggleFilters(): void {
-    this.showFilters.update((show) => !show);
-  }
-
-  toggleViewMode(): void {
-    this.viewMode.update((mode) => (mode === "grid" ? "calendar" : "grid"));
-  }
-
-  updateStatus(id: string, status: AppointmentStatus): void {
-    this.appointmentService.update(id, { status }).subscribe({
-      next: () => {
-        this.loadAppointments();
-        this.showSuccessNotification(`Appointment ${status.toLowerCase()} successfully`);
-      },
-      error: () => {
-        this.showErrorNotification("Failed to update appointment status");
-      },
-    });
-  }
-
-  addNotes(appointment: Appointment): void {
-    const notes = prompt("Add notes for this appointment:", appointment.notes || "");
-    if (notes !== null) {
-      this.appointmentService.update(appointment.id, { notes }).subscribe({
-        next: () => {
-          this.loadAppointments();
-          this.showSuccessNotification("Notes updated successfully");
-        },
-        error: () => {
-          this.showErrorNotification("Failed to update notes");
-        },
-      });
-    }
-  }
-
-  viewPatientDetails(appointment: Appointment): void {
-    this.router.navigate(["/doctor/patients", appointment.patient?.id]);
-  }
-
-  rescheduleAppointment(appointment: Appointment): void {
-    this.router.navigate(["/doctor/appointments/reschedule", appointment.id]);
-  }
-
-  getStatusClass(status: string): string {
-    switch (status) {
-      case AppointmentStatus.CONFIRMED:
-        return "status-badge confirmed";
-      case AppointmentStatus.PENDING:
-        return "status-badge pending";
-      case AppointmentStatus.CANCELLED:
-        return "status-badge cancelled";
-      case AppointmentStatus.COMPLETED:
-        return "status-badge completed";
-      default:
-        return "status-badge default";
-    }
-  }
-
-  getStatusIcon(status: string): string {
-    switch (status) {
-      case AppointmentStatus.CONFIRMED:
-        return "bi-check-circle";
-      case AppointmentStatus.PENDING:
-        return "bi-clock";
-      case AppointmentStatus.CANCELLED:
-        return "bi-x-circle";
-      case AppointmentStatus.COMPLETED:
-        return "bi-check2-all";
-      default:
-        return "bi-question-circle";
-    }
-  }
-
-  getTodaysAppointments(): Appointment[] {
-    const today = new Date().toISOString().split("T")[0];
-    return this.filteredAppointments
-      .filter((appointment) => appointment.appointmentDate === today)
-      .sort((a, b) => a.appointmentTime.localeCompare(b.appointmentTime));
-  }
-
-  getUpcomingAppointments(): Appointment[] {
-    const today = new Date();
-    return this.filteredAppointments
-      .filter(
-        (appointment) =>
-          new Date(appointment.appointmentDate) >= today &&
-          appointment.status !== "cancelled" &&
-          appointment.status !== "completed"
-      )
-      .slice(0, 5);
-  }
-
-  getAppointmentStats() {
-    const total = this.appointments.length;
-    const pending = this.appointments.filter((a) => a.status === "pending").length;
-    const confirmed = this.appointments.filter((a) => a.status === "confirmed").length;
-    const completed = this.appointments.filter((a) => a.status === "completed").length;
-    const cancelled = this.appointments.filter((a) => a.status === "cancelled").length;
-
-    return { total, pending, confirmed, completed, cancelled };
-  }
-
-  getAppointmentsByTimeSlot(): { [key: string]: Appointment[] } {
-    return this.appointmentsBySlot;
-  }
-
-  showSuccessNotification(message: string): void {
-    console.log("Success:", message);
-  }
-
-  showErrorNotification(message: string): void {
-    console.log("Error:", message);
-  }
-
-  setTheme(theme: 'light' | 'dark') {
-    document.body.classList.remove('light', 'dark');
-    document.body.classList.add(theme);
-    localStorage.setItem('theme', theme);
+  formatTime(time: string): string {
+    if (!time) return '';
+    const [h, m] = time.split(':');
+    const hour = parseInt(h, 10);
+    const period = hour >= 12 ? 'PM' : 'AM';
+    const displayHour = hour % 12 || 12;
+    return `${displayHour}:${m} ${period}`;
   }
 }

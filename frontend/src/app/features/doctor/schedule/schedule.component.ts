@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, inject, computed } from '@angular/core';
+import { Component, OnInit, signal, inject, computed, effect } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -38,16 +38,16 @@ export class ScheduleComponent implements OnInit {
   unreadNotifications = signal(0);
 
   viewMode = signal<'day' | 'week' | 'month'>('day');
+  // Provide typed view mode options for template iteration
+  viewModes: ('day' | 'week' | 'month')[] = ['day', 'week', 'month'];
   slotDurationMinutes = signal(30);
   workingStart = signal('09:00');
   workingEnd = signal('17:00');
-  // Make break optional via toggle
   hasBreak = signal(true);
   breakStart = signal('12:00');
   breakEnd = signal('13:00');
   workingDays = signal<number[]>([1, 2, 3, 4, 5]);
   showAvailabilityEditor = signal(false);
-  showLegend = signal(true);
   themeMode = signal<'light' | 'dark'>('light');
 
   today = new Date();
@@ -60,12 +60,6 @@ export class ScheduleComponent implements OnInit {
   private authService = inject(AuthService);
   private router = inject(Router);
   private toast = inject(ToastService);
-
-  // Availability form state
-  availabilityMode = signal<'single' | 'range'>('single');
-  singleTime = signal('08:00');
-  rangeStart = signal('08:00');
-  rangeEnd = signal('09:00');
 
   weekDays = computed(() => {
     const start = this.getWeekStart(this.selectedDate());
@@ -84,14 +78,18 @@ export class ScheduleComponent implements OnInit {
   noVisibleButHasSlots = computed(() => !this.visibleDaySlots().length && !!(this.daySlots() || []).length);
   nextAppointment = computed(() => this.getNextAppointment());
 
-  getSlots(): DoctorSlot[] {
-    return [...(this.slots() || [])]
-      .map((s) => ({
-        ...s,
-        startTime: s.startTime || s.time || '',
-        endTime: s.endTime || s.startTime || s.time || '',
-      }))
-      .sort((a, b) => (a.startTime || '').localeCompare(b.startTime || ''));
+  constructor() {
+    // Sync theme with body class for global CSS variables
+    effect(() => {
+      const mode = this.themeMode();
+      if (mode === 'dark') {
+        document.body.classList.add('dark');
+        document.body.classList.remove('light');
+      } else {
+        document.body.classList.add('light');
+        document.body.classList.remove('dark');
+      }
+    });
   }
 
   ngOnInit(): void {
@@ -106,16 +104,10 @@ export class ScheduleComponent implements OnInit {
   toggleWorkingDay(day: number): void {
     const set = new Set(this.workingDays());
     set.has(day) ? set.delete(day) : set.add(day);
-    const updated = Array.from(set).sort();
-    this.workingDays.set(updated);
-    this.scheduleService.updateWorkingDays(updated).subscribe({
-      next: () => this.toast.success('Working days updated', { title: 'Schedule' }),
-      error: () => this.toast.error('Failed to update working days', { title: 'Schedule' }),
-    });
+    this.workingDays.set(Array.from(set).sort());
   }
 
   saveAvailability(): void {
-    // Persist current day's availability to backend
     const dateStr = this.toDateOnly(this.selectedDate());
     this.scheduleService.setAvailable(dateStr, this.workingStart(), this.workingEnd()).subscribe({
       next: () => {
@@ -127,36 +119,6 @@ export class ScheduleComponent implements OnInit {
         this.loadSlots();
       },
     });
-  }
-
-  setAvailability(): void {
-    const dateStr = this.toDateOnly(this.selectedDate());
-    if (this.availabilityMode() === 'single') {
-      const time = this.singleTime();
-      this.scheduleService.setAvailable(dateStr, time).subscribe({
-        next: () => {
-          this.toast.success('Marked as available', { title: 'Schedule' });
-          this.loadSlots();
-        },
-        error: () => {
-          this.toast.error('Failed to mark available', { title: 'Schedule' });
-          this.loadSlots();
-        },
-      });
-    } else {
-      const start = this.rangeStart();
-      const end = this.rangeEnd();
-      this.scheduleService.setAvailable(dateStr, start, end).subscribe({
-        next: () => {
-          this.toast.success('Marked as available', { title: 'Schedule' });
-          this.loadSlots();
-        },
-        error: () => {
-          this.toast.error('Failed to mark available', { title: 'Schedule' });
-          this.loadSlots();
-        },
-      });
-    }
   }
 
   loadSlots(): void {
@@ -190,6 +152,16 @@ export class ScheduleComponent implements OnInit {
       });
     }
     return slots;
+  }
+
+  getSlots(): DoctorSlot[] {
+    return [...(this.slots() || [])]
+      .map((s) => ({
+        ...s,
+        startTime: s.startTime || s.time || '',
+        endTime: s.endTime || s.startTime || s.time || '',
+      }))
+      .sort((a, b) => (a.startTime || '').localeCompare(b.startTime || ''));
   }
 
   private mergeAppointmentsIntoSlots(date: Date, baseSlots: DoctorSlot[]): DoctorSlot[] {
@@ -238,10 +210,6 @@ export class ScheduleComponent implements OnInit {
     });
   }
 
-  getSlotStatus(slot: DoctorSlot): string {
-    return slot?.status || 'available';
-  }
-
   getAppointmentForSlot(slot: DoctorSlot, dateStr?: string): Appointment | null {
     const dayStr = dateStr || this.toDateOnly(this.selectedDate());
     const startTime = slot.startTime || slot.time || '';
@@ -259,7 +227,6 @@ export class ScheduleComponent implements OnInit {
     return target.getTime() < now.getTime();
   }
 
-  // ===== Time formatting (12-hour) =====
   formatTime12(time: string | null | undefined): string {
     const t = (time || '').slice(0,5);
     const [hStr, mStr] = t.split(':');
@@ -279,16 +246,11 @@ export class ScheduleComponent implements OnInit {
 
   mapStatus(status: AppointmentStatus | string): 'available' | 'booked' | 'blocked' | 'pending' | 'cancelled' | 'completed' {
     switch (status) {
-      case AppointmentStatus.CONFIRMED:
-        return 'booked';
-      case AppointmentStatus.PENDING:
-        return 'pending';
-      case AppointmentStatus.CANCELLED:
-        return 'cancelled';
-      case AppointmentStatus.COMPLETED:
-        return 'completed';
-      default:
-        return 'booked';
+      case AppointmentStatus.CONFIRMED: return 'booked';
+      case AppointmentStatus.PENDING: return 'pending';
+      case AppointmentStatus.CANCELLED: return 'cancelled';
+      case AppointmentStatus.COMPLETED: return 'completed';
+      default: return 'booked';
     }
   }
 
@@ -297,9 +259,7 @@ export class ScheduleComponent implements OnInit {
       appointments: this.appointmentService.getPendingCount(),
       messages: this.messageService.getUnreadCount()
     }).subscribe(({ appointments, messages }) => {
-      const msgCount = messages.count || 0;
-      this.unreadMessages.set(msgCount);
-      this.updateMenuItems(appointments.count || 0, msgCount);
+      this.updateMenuItems(appointments.count || 0, messages.count || 0);
     });
   }
 
@@ -316,10 +276,7 @@ export class ScheduleComponent implements OnInit {
       { label: 'Appointments', icon: 'bi-calendar-check', route: '/doctor/appointments', badge: appointmentCount || undefined },
       { label: 'Schedule', icon: 'bi-calendar3', route: '/doctor/schedule' },
       { label: 'My Patients', icon: 'bi-people', route: '/doctor/patients' },
-      { label: 'Medical Records', icon: 'bi-file-earmark-medical', route: '/doctor/records' },
-      { label: 'Prescriptions', icon: 'bi-prescription2', route: '/doctor/prescriptions' },
       { label: 'Messages', icon: 'bi-chat-dots', route: '/doctor/messages', badge: messageCount || undefined },
-      { label: 'Analytics', icon: 'bi-graph-up', route: '/doctor/analytics' },
       { label: 'Settings', icon: 'bi-gear', route: '/doctor/settings' },
     ]);
   }
@@ -345,12 +302,9 @@ export class ScheduleComponent implements OnInit {
   getDoctorInitials(): string {
     const name = this.getDoctorName();
     const parts = name.split(' ');
-    return parts.length >= 2
-      ? (parts[0][0] + parts[1][0]).toUpperCase()
-      : name.substring(0, 2).toUpperCase();
+    return parts.length >= 2 ? (parts[0][0] + parts[1][0]).toUpperCase() : name.substring(0, 2).toUpperCase();
   }
 
-  // ==================== APPOINTMENTS ====================
   loadAppointments(): void {
     this.isLoading.set(true);
     this.appointmentService.getMyAppointments().subscribe({
@@ -363,8 +317,7 @@ export class ScheduleComponent implements OnInit {
   }
 
   getSelectedDateAppointments(): Appointment[] {
-    const selected = this.selectedDate();
-    const dateStr = this.toDateOnly(selected);
+    const dateStr = this.toDateOnly(this.selectedDate());
     return this.appointments().filter(apt => apt.appointmentDate === dateStr);
   }
 
@@ -373,7 +326,6 @@ export class ScheduleComponent implements OnInit {
     return this.appointments().filter((apt) => apt.appointmentDate === dateStr).length;
   }
 
-  // ==================== Quick actions ====================
   acceptAppointment(appt: Appointment): void {
     this.updateAppointmentStatus(appt, AppointmentStatus.CONFIRMED, 'Appointment accepted');
   }
@@ -419,32 +371,28 @@ export class ScheduleComponent implements OnInit {
     this.router.navigate(['/call', appt.id]);
   }
 
-  // ==================== CALENDAR ====================
   getCalendarDays(): Date[] {
     const month = this.currentMonth();
     const year = month.getFullYear();
     const firstDay = new Date(year, month.getMonth(), 1);
     const lastDay = new Date(year, month.getMonth() + 1, 0);
     const days: Date[] = [];
-
     const startDay = firstDay.getDay();
+
     for (let i = startDay - 1; i >= 0; i--) {
       const date = new Date(firstDay);
       date.setDate(date.getDate() - (i + 1));
       days.push(date);
     }
-
     for (let i = 1; i <= lastDay.getDate(); i++) {
       days.push(new Date(year, month.getMonth(), i));
     }
-
     const remaining = 42 - days.length;
     for (let i = 1; i <= remaining; i++) {
       const date = new Date(lastDay);
       date.setDate(date.getDate() + i);
       days.push(date);
     }
-
     return days;
   }
 
@@ -457,8 +405,7 @@ export class ScheduleComponent implements OnInit {
   }
 
   isCurrentMonth(date: Date): boolean {
-    const month = this.currentMonth();
-    return date.getMonth() === month.getMonth() && date.getFullYear() === month.getFullYear();
+    return date.getMonth() === this.currentMonth().getMonth();
   }
 
   selectDate(date: Date): void {
@@ -479,19 +426,12 @@ export class ScheduleComponent implements OnInit {
   }
 
   getMonthYear(): string {
-    return this.currentMonth().toLocaleDateString('en-US', {
-      month: 'long',
-      year: 'numeric'
-    });
+    return this.currentMonth().toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
   }
 
   logout(): void {
     this.authService.logout();
     this.router.navigate(['/login']);
-  }
-
-  navigate(route: string): void {
-    this.router.navigate([route]);
   }
 
   setViewMode(mode: 'day' | 'week' | 'month'): void {
@@ -526,7 +466,7 @@ export class ScheduleComponent implements OnInit {
   private getWeekStart(date: Date): Date {
     const d = new Date(date);
     const day = d.getDay();
-    const diff = d.getDate() - day + (day === 0 ? -6 : 1); // Monday as start
+    const diff = d.getDate() - day + (day === 0 ? -6 : 1);
     return new Date(d.setDate(diff));
   }
 
@@ -534,10 +474,7 @@ export class ScheduleComponent implements OnInit {
     const now = new Date();
     const upcoming = this.appointments()
       .filter((apt) => apt.status !== AppointmentStatus.CANCELLED)
-      .map((apt) => {
-        const dt = new Date(`${apt.appointmentDate}T${apt.appointmentTime}`);
-        return { apt, dt };
-      })
+      .map((apt) => ({ apt, dt: new Date(`${apt.appointmentDate}T${apt.appointmentTime}`) }))
       .filter(({ dt }) => dt >= now)
       .sort((a, b) => a.dt.getTime() - b.dt.getTime());
     return upcoming.length ? upcoming[0].apt : null;

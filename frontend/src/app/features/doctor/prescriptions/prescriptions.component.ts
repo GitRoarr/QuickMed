@@ -1,6 +1,7 @@
 import { Component, OnInit, signal, inject } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
+import { DoctorHeaderComponent } from '../shared/doctor-header/doctor-header.component';
 import { AuthService } from '@core/services/auth.service';
 import { PrescriptionService, Prescription } from '@core/services/prescription.service';
 import { AppointmentService } from '@core/services/appointment.service';
@@ -17,7 +18,7 @@ interface MenuItem {
 @Component({
   selector: 'app-doctor-prescriptions',
   standalone: true,
-  imports: [CommonModule, RouterModule, DatePipe],
+  imports: [CommonModule, RouterModule, DatePipe, DoctorHeaderComponent],
   templateUrl: './prescriptions.component.html',
   styleUrls: ['./prescriptions.component.css']
 })

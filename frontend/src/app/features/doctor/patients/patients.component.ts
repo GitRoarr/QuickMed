@@ -1,9 +1,20 @@
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, effect } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { DoctorPatientSummary, DoctorService } from '@core/services/doctor.service';
 import { AuthService } from '@core/services/auth.service';
+import { BadgeService } from '@core/services/badge.service';
+import { MessageService } from '@core/services/message.service';
+import { AppointmentService } from '@core/services/appointment.service';
+import { forkJoin } from 'rxjs';
+
+interface MenuItem {
+  label: string;
+  icon: string;
+  route: string;
+  badge?: number;
+}
 
 @Component({
   selector: 'app-doctor-patients',
@@ -16,13 +27,26 @@ export class PatientsComponent implements OnInit {
   private doctorService = inject(DoctorService);
   private authService = inject(AuthService);
   private router = inject(Router);
+  private badgeService = inject(BadgeService);
+  private appointmentService = inject(AppointmentService);
+  private messageService = inject(MessageService);
 
+  // Data Signals
   patients = signal<DoctorPatientSummary[]>([]);
   isLoading = signal(true);
+  
+  // Filter Signals
   searchTerm = signal('');
   statusFilter = signal<'all' | 'active' | 'inactive'>('all');
   sortBy = signal<'recent' | 'visits' | 'alpha'>('recent');
 
+  // UI/Theme Signals
+  themeMode = signal<'light' | 'dark'>('light');
+  currentUser = signal<any>(null);
+  menuItems = signal<MenuItem[]>([]);
+  unreadNotifications = signal(0); // For topbar
+
+  // Computed Logic
   filteredPatients = computed(() => {
     const term = this.searchTerm().toLowerCase().trim();
     const status = this.statusFilter();
@@ -30,12 +54,14 @@ export class PatientsComponent implements OnInit {
 
     let list = [...this.patients()];
 
+    // Status Filter
     if (status === 'active') {
       list = list.filter(p => p.isActive !== false);
     } else if (status === 'inactive') {
       list = list.filter(p => p.isActive === false);
     }
 
+    // Search Filter
     if (term) {
       list = list.filter(p => {
         const name = this.getFullName(p).toLowerCase();
@@ -45,10 +71,12 @@ export class PatientsComponent implements OnInit {
       });
     }
 
+    // Sort
     list.sort((a, b) => {
       if (sort === 'visits') return (b.totalAppointments || 0) - (a.totalAppointments || 0);
       if (sort === 'alpha') return this.getFullName(a).localeCompare(this.getFullName(b));
-
+      
+      // Default: Recent
       const aDate = this.getLastAppointmentDate(a)?.getTime() || 0;
       const bDate = this.getLastAppointmentDate(b)?.getTime() || 0;
       return bDate - aDate;
@@ -57,6 +85,7 @@ export class PatientsComponent implements OnInit {
     return list;
   });
 
+  // Stats
   totalPatients = computed(() => this.patients().length);
   activePatients = computed(() => this.patients().filter(p => p.isActive !== false).length);
   inactivePatients = computed(() => this.patients().filter(p => p.isActive === false).length);
@@ -75,56 +104,50 @@ export class PatientsComponent implements OnInit {
     }).length;
   });
 
-  menuItems = [
-    { label: 'Dashboard', icon: 'bi-house-door', route: '/doctor/dashboard' },
-    { label: 'Appointments', icon: 'bi-calendar-check', route: '/doctor/appointments' },
-    { label: 'Schedule', icon: 'bi-calendar3', route: '/doctor/schedule' },
-    { label: 'My Patients', icon: 'bi-people', route: '/doctor/patients' },
-    { label: 'Medical Records', icon: 'bi-file-earmark-medical', route: '/doctor/records' },
-    { label: 'Prescriptions', icon: 'bi-prescription2', route: '/doctor/prescriptions' },
-    { label: 'Messages', icon: 'bi-chat-dots', route: '/doctor/messages' },
-    { label: 'Analytics', icon: 'bi-graph-up', route: '/doctor/analytics' },
-    { label: 'Settings', icon: 'bi-gear', route: '/doctor/settings' },
-  ];
+  Math = Math; // Expose to template
 
-  currentUser = this.authService.currentUser;
-
-  // --- Dashboard sidebar/topbar helpers ---
-  navigate(route: string): void {
-    this.router.navigate([route]);
+  constructor() {
+    // Theme Effect
+    effect(() => {
+      const mode = this.themeMode();
+      if (mode === 'dark') {
+        document.body.classList.add('dark');
+        document.body.classList.remove('light');
+      } else {
+        document.body.classList.add('light');
+        document.body.classList.remove('dark');
+      }
+    });
   }
-
-  getDoctorName(): string {
-    const user = this.currentUser();
-    if (user) {
-      return `${user.firstName} ${user.lastName}`;
-    }
-    return 'Doctor';
-  }
-
-  getDoctorSpecialty(): string {
-    const user = this.currentUser();
-    return user?.specialty || 'General Practitioner';
-  }
-
-  getDoctorInitials(): string {
-    const name = this.getDoctorName();
-    if (!name) return 'DR';
-    const parts = name.split(' ');
-    if (parts.length >= 2) {
-      return (parts[0][0] + parts[1][0]).toUpperCase();
-    }
-    return name.substring(0, 2).toUpperCase();
-  }
-
-  logout(): void {
-    this.authService.logout();
-    this.router.navigate(['/login']);
-  }
-  Math = Math;
 
   ngOnInit(): void {
+    this.loadUserData();
     this.loadPatients();
+    this.loadBadgeCounts();
+  }
+
+  loadUserData(): void {
+    this.currentUser.set(this.authService.currentUser());
+  }
+
+  loadBadgeCounts(): void {
+    forkJoin({
+      pending: this.appointmentService.getPendingCount(),
+      messages: this.messageService.getUnreadCount()
+    }).subscribe(({ pending, messages }) => {
+      this.updateMenuItems(pending.count || 0, messages.count || 0);
+    });
+  }
+
+  updateMenuItems(pendingCount: number, messageCount: number): void {
+    this.menuItems.set([
+      { label: 'Dashboard', icon: 'bi-house-door', route: '/doctor/dashboard' },
+      { label: 'Appointments', icon: 'bi-calendar-check', route: '/doctor/appointments', badge: pendingCount || undefined },
+      { label: 'Schedule', icon: 'bi-calendar3', route: '/doctor/schedule' },
+      { label: 'My Patients', icon: 'bi-people', route: '/doctor/patients' },
+      { label: 'Messages', icon: 'bi-chat-dots', route: '/doctor/messages', badge: messageCount || undefined },
+      { label: 'Settings', icon: 'bi-gear', route: '/doctor/settings' },
+    ]);
   }
 
   loadPatients() {
@@ -142,6 +165,7 @@ export class PatientsComponent implements OnInit {
     });
   }
 
+  // --- Helpers ---
   getFullName(p: DoctorPatientSummary) {
     return `${p.firstName || ''} ${p.lastName || ''}`.trim();
   }
@@ -186,9 +210,33 @@ export class PatientsComponent implements OnInit {
   getStatusTone(p: DoctorPatientSummary) {
     if (p.isActive === false) return 'muted';
     const lastStatus = (p.lastStatus || '').toLowerCase();
-    if (lastStatus === 'pending') return 'pending';
-    if (lastStatus === 'cancelled') return 'danger';
+    if (lastStatus === 'pending') return 'warning';
+    if (lastStatus === 'cancelled') return 'error';
     if (lastStatus === 'completed' || lastStatus === 'confirmed') return 'success';
     return 'info';
+  }
+
+  getDoctorName(): string {
+    const user = this.currentUser();
+    return user ? `${user.firstName} ${user.lastName}` : 'Doctor';
+  }
+
+  getDoctorSpecialty(): string {
+    return this.currentUser()?.specialty || 'General Practitioner';
+  }
+
+  getDoctorInitials(): string {
+    const name = this.getDoctorName();
+    const parts = name.split(' ');
+    return parts.length >= 2 ? (parts[0][0] + parts[1][0]).toUpperCase() : name.substring(0, 2).toUpperCase();
+  }
+
+  setTheme(mode: 'light' | 'dark'): void {
+    this.themeMode.set(mode);
+  }
+
+  logout(): void {
+    this.authService.logout();
+    this.router.navigate(['/login']);
   }
 }
