@@ -2,6 +2,7 @@ import { Component, OnInit, signal, inject } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { DoctorHeaderComponent } from '../shared/doctor-header/doctor-header.component';
+import { DoctorSidebarComponent } from '../shared/doctor-sidebar/doctor-sidebar.component';
 import { AuthService } from '@core/services/auth.service';
 import { PrescriptionService, Prescription } from '@core/services/prescription.service';
 import { AppointmentService } from '@core/services/appointment.service';
@@ -18,7 +19,7 @@ interface MenuItem {
 @Component({
   selector: 'app-doctor-prescriptions',
   standalone: true,
-  imports: [CommonModule, RouterModule, DatePipe, DoctorHeaderComponent],
+  imports: [CommonModule, RouterModule, DatePipe, DoctorHeaderComponent, DoctorSidebarComponent],
   templateUrl: './prescriptions.component.html',
   styleUrls: ['./prescriptions.component.css']
 })
@@ -60,7 +61,7 @@ export class PrescriptionsComponent implements OnInit {
       { label: 'Schedule', icon: 'bi-calendar3', route: '/doctor/schedule' },
       { label: 'My Patients', icon: 'bi-people', route: '/doctor/patients' },
       { label: 'Medical Records', icon: 'bi-file-earmark-medical', route: '/doctor/records' },
-      { label: 'Prescriptions', icon: 'bi-prescription2', route: '/doctor/prescriptions' },
+      { label: 'Prescriptions', route: '/doctor/prescriptions', imgSrc: 'https://img.icons8.com/ios-filled/24/prescription.png' },
       { label: 'Messages', icon: 'bi-chat-dots', route: '/doctor/messages', badge: messageCount || undefined },
       { label: 'Analytics', icon: 'bi-graph-up', route: '/doctor/analytics' },
       { label: 'Settings', icon: 'bi-gear', route: '/doctor/settings' }
