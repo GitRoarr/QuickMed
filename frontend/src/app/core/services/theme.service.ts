@@ -12,6 +12,10 @@ export class ThemeService {
       this.isDarkMode.set(true)
       // keep existing class for other logic
       document.documentElement.classList.add("dark-theme")
+      // also add `dark` on documentElement so :root.dark rules apply
+      try {
+        document.documentElement.classList.add("dark")
+      } catch (e) {}
       // also add `dark` on body so component-level CSS targeting `body.dark` applies
       try {
         document.body.classList.add("dark")
@@ -26,11 +30,17 @@ export class ThemeService {
     if (mode === 'dark') {
       document.documentElement.classList.add('dark-theme')
       try {
+        document.documentElement.classList.add('dark')
+      } catch (e) {}
+      try {
         document.body.classList.add('dark')
       } catch (e) {}
       localStorage.setItem('theme', 'dark')
     } else {
       document.documentElement.classList.remove('dark-theme')
+      try {
+        document.documentElement.classList.remove('dark')
+      } catch (e) {}
       try {
         document.body.classList.remove('dark')
       } catch (e) {}
@@ -44,11 +54,17 @@ export class ThemeService {
     if (this.isDarkMode()) {
       document.documentElement.classList.add("dark-theme")
       try {
+        document.documentElement.classList.add("dark")
+      } catch (e) {}
+      try {
         document.body.classList.add("dark")
       } catch (e) {}
       localStorage.setItem("theme", "dark")
     } else {
       document.documentElement.classList.remove("dark-theme")
+      try {
+        document.documentElement.classList.remove("dark")
+      } catch (e) {}
       try {
         document.body.classList.remove("dark")
       } catch (e) {}

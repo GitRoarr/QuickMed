@@ -159,7 +159,9 @@
                           <button *ngIf="appt.isVideoConsultation" (click)="joinCall(appt)" class="p-1.5 rounded-lg bg-[var(--primary)] text-white hover:brightness-110" title="Join Call"><i class="bi bi-camera-video"></i></button>
                           <button *ngIf="appt.status === 'pending'" (click)="acceptAppointment(appt)" class="p-1.5 rounded-lg bg-[var(--success)] text-white hover:brightness-110" title="Accept"><i class="bi bi-check-lg"></i></button>
                           <button (click)="rescheduleAppointment(appt)" class="p-1.5 rounded-lg bg-[var(--surface)] border border-[var(--border-default)] text-[var(--text-primary)] hover:bg-[var(--surface-tertiary)]" title="Reschedule"><i class="bi bi-calendar-event"></i></button>
-                          <button (click)="completeAppointment(appt)" class="p-1.5 rounded-lg bg-[var(--info)] text-white hover:brightness-110" title="Complete"><i class="bi bi-flag"></i></button>
+                          <button (click)="completeAppointment(appt)" class="p-1.5 rounded-lg bg-[var(--info)] text-white hover:brightness-110" title="Complete">
+                            <img src="https://img.icons8.com/ios-filled/20/checkmark.png" alt="Complete" class="w-4 h-4 opacity-90" />
+                          </button>
                           <button (click)="rejectAppointment(appt)" class="p-1.5 rounded-lg bg-[var(--error)] text-white hover:brightness-110" title="Cancel"><i class="bi bi-x-lg"></i></button>
                         </div>
                       </div>

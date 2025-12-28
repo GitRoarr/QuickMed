@@ -64,6 +64,30 @@
           <h3 class="text-sm font-medium opacity-90">Patient Satisfaction</h3>
           <p class="text-3xl font-bold mt-2">4.9 <span class="text-lg">/ 5.0</span></p>
         </div>
+
+        <!-- Revenue Today -->
+        <div class="bg-[var(--surface-primary)] rounded-2xl p-6 shadow-sm border border-[var(--border-light)] hover:shadow-lg hover:-translate-y-1 transition-all">
+          <div class="flex items-center justify-between mb-4">
+            <div class="p-3 bg-indigo-100 dark:bg-indigo-900/30 rounded-xl">
+              <i class="bi bi-cash-coin text-xl text-indigo-600 dark:text-indigo-400"></i>
+            </div>
+            <span class="text-xs font-bold text-indigo-600 bg-indigo-100 dark:bg-indigo-900/50 px-2 py-1 rounded">Today</span>
+          </div>
+          <h3 class="text-sm font-medium text-[var(--text-secondary)]">Revenue</h3>
+          <p class="text-3xl font-bold mt-2">${{ dashboardData()?.stats?.revenueToday || 0 }}</p>
+        </div>
+
+        <!-- Unread Messages -->
+        <div class="bg-[var(--surface-primary)] rounded-2xl p-6 shadow-sm border border-[var(--border-light)] hover:shadow-lg hover:-translate-y-1 transition-all">
+          <div class="flex items-center justify-between mb-4">
+            <div class="p-3 bg-purple-100 dark:bg-purple-900/30 rounded-xl">
+              <i class="bi bi-chat-dots text-xl text-purple-600 dark:text-purple-400"></i>
+            </div>
+            <span class="text-xs font-bold text-purple-600 bg-purple-100 dark:bg-purple-900/50 px-2 py-1 rounded">Inbox</span>
+          </div>
+          <h3 class="text-sm font-medium text-[var(--text-secondary)]">Unread Messages</h3>
+          <p class="text-3xl font-bold mt-2">{{ dashboardData()?.stats?.unreadMessages || 0 }}</p>
+        </div>
       </div>
 
       <!-- Next Patients & Urgent Notifications -->

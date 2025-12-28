@@ -7,7 +7,9 @@ import { CreateDoctorDto } from "./dto/create-doctor.dto";
 import { UpdateDoctorDto } from "./dto/update-doctor.dto";
 import * as bcrypt from "bcrypt";
 import { v4 as uuidv4 } from "uuid";
-import { UserRole, AppointmentStatus } from "../common/index";
+import { UserRole, AppointmentStatus, PaymentStatus } from "../common/index";
+import { Payment } from "../payments/entities/payment.entity";
+import { MessagesService } from "../messages/messages.service";
 import { EmailService } from "../common/services/email.service";
 import { ReviewsService } from "../reviews/reviews.service";
 
@@ -18,8 +20,11 @@ export class DoctorsService {
     private readonly usersRepository: Repository<User>,
     @InjectRepository(Appointment)
     private readonly appointmentsRepository: Repository<Appointment>,
+    @InjectRepository(Payment)
+    private readonly paymentRepository: Repository<Payment>,
     private readonly emailService: EmailService,
-    private readonly reviewsService: ReviewsService
+    private readonly reviewsService: ReviewsService,
+    private readonly messagesService: MessagesService
   ) {}
 
   private sanitizeDoctor(doctor: User) {
@@ -358,6 +363,21 @@ export class DoctorsService {
       },
     });
 
+    // Revenue today (sum of successful payments for this doctor's appointments)
+    const revenueRaw = await this.paymentRepository
+      .createQueryBuilder('payment')
+      .innerJoin(Appointment, 'appointment', 'appointment.id = payment.appointmentId')
+      .where('appointment.doctorId = :doctorId', { doctorId })
+      .andWhere('payment.status = :status', { status: PaymentStatus.SUCCESS })
+      .andWhere('payment.paidAt BETWEEN :start AND :end', { start: today, end: tomorrow })
+      .select('COALESCE(SUM(payment.amount), 0)', 'sum')
+      .getRawOne();
+
+    const revenueToday = Number(revenueRaw?.sum || 0);
+
+    // Unread messages for the doctor
+    const unreadMessages = await this.messagesService.getUnreadCount({ id: doctorId, role: UserRole.DOCTOR });
+
     return {
       stats: {
         todayAppointments: totalToday,
@@ -367,6 +387,8 @@ export class DoctorsService {
         satisfactionRate,
         completedToday,
         confirmedToday,
+        revenueToday,
+        unreadMessages: unreadMessages?.count ?? 0,
       },
       todayAppointments: todayAppointments.map(apt => ({
         id: apt.id,

@@ -122,7 +122,7 @@ export class DashboardComponent implements OnInit {
 
     return [
       { label: 'Total Appointments', value: stats.totalAppointments, icon: 'bi-calendar4-week' },
-      { label: 'Confirmed Visits', value: stats.confirmed, icon: 'bi-check2-circle' },
+      { label: 'Confirmed Visits', value: stats.confirmed, imgSrc: 'https://img.icons8.com/ios-filled/24/approval.png' },
       { label: 'Video Visits', value: stats.videoVisits, icon: 'bi-camera-video' },
       { label: 'In-person Visits', value: stats.inPersonVisits, icon: 'bi-geo-alt' },
     ];

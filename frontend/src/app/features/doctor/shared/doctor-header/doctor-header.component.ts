@@ -1,4 +1,4 @@
-import { Component, inject, Input, Output, EventEmitter, signal, effect } from '@angular/core';
+import { Component, inject, Input, Output, EventEmitter, signal, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 
@@ -9,7 +9,7 @@ import { Router, RouterModule } from '@angular/router';
   templateUrl: './doctor-header.component.html',
   styleUrls: ['./doctor-header.component.css']
 })
-export class DoctorHeaderComponent {
+export class DoctorHeaderComponent implements OnChanges {
   private router = inject(Router);
   // Inputs
   @Input() initials: string = 'DR';
@@ -22,11 +22,10 @@ export class DoctorHeaderComponent {
 
   theme = signal<'light' | 'dark'>(this.themeMode);
 
-  constructor() {
-    effect(() => {
-      const mode = this.theme();
-      document.documentElement.classList.toggle('dark', mode === 'dark');
-    });
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['themeMode'] && changes['themeMode'].currentValue) {
+      this.theme.set(changes['themeMode'].currentValue);
+    }
   }
 
   toggleTheme() {

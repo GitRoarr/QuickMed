@@ -27,7 +27,12 @@
 
     <div class="stats-grid" *ngIf="dashboard()">
       <div class="stat-pill" *ngFor="let stat of getStatsCards()">
-        <i class="bi" [ngClass]="stat.icon"></i>
+        <ng-container *ngIf="stat.imgSrc; else patientStatIcon">
+          <img [src]="stat.imgSrc" alt="{{ stat.label }}" class="w-5 h-5" />
+        </ng-container>
+        <ng-template #patientStatIcon>
+          <i class="bi" [ngClass]="stat.icon"></i>
+        </ng-template>
         <div>
           <p class="pill-label">{{ stat.label }}</p>
           <p class="pill-value">{{ stat.value }}</p>

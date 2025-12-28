@@ -12,6 +12,8 @@ export interface DoctorDashboardData {
     satisfactionRate: number;
     completedToday: number;
     confirmedToday: number;
+    revenueToday?: number;
+    unreadMessages?: number;
   };
   todayAppointments: Array<{
     id: string;

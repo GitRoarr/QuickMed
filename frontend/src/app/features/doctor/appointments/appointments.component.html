@@ -26,21 +26,27 @@
           </div>
         </div>
         <div class="bg-[var(--surface)] p-4 rounded-2xl border border-[var(--border-light)] shadow-sm flex items-center gap-4">
-          <div class="w-12 h-12 rounded-xl bg-[var(--warning-light)] flex items-center justify-center text-[var(--warning)] text-xl"><i class="bi bi-hourglass-split"></i></div>
+          <div class="w-12 h-12 rounded-xl bg-[var(--warning-light)] flex items-center justify-center">
+            <img src="https://img.icons8.com/ios-filled/24/clock.png" alt="Pending" class="w-6 h-6 opacity-80" />
+          </div>
           <div>
             <p class="text-xs text-[var(--text-secondary)] font-bold uppercase">Pending</p>
             <p class="text-2xl font-bold text-[var(--text-primary)]">{{ stats().pending }}</p>
           </div>
         </div>
         <div class="bg-[var(--surface)] p-4 rounded-2xl border border-[var(--border-light)] shadow-sm flex items-center gap-4">
-          <div class="w-12 h-12 rounded-xl bg-[var(--success-light)] flex items-center justify-center text-[var(--success)] text-xl"><i class="bi bi-check-circle"></i></div>
+          <div class="w-12 h-12 rounded-xl bg-[var(--success-light)] flex items-center justify-center">
+            <img src="https://img.icons8.com/ios-filled/24/approval.png" alt="Confirmed" class="w-6 h-6 opacity-80" />
+          </div>
           <div>
             <p class="text-xs text-[var(--text-secondary)] font-bold uppercase">Confirmed</p>
             <p class="text-2xl font-bold text-[var(--text-primary)]">{{ stats().confirmed }}</p>
           </div>
         </div>
         <div class="bg-[var(--surface)] p-4 rounded-2xl border border-[var(--border-light)] shadow-sm flex items-center gap-4">
-          <div class="w-12 h-12 rounded-xl bg-[var(--info-light)] flex items-center justify-center text-[var(--info)] text-xl"><i class="bi bi-check2-all"></i></div>
+          <div class="w-12 h-12 rounded-xl bg-[var(--info-light)] flex items-center justify-center">
+            <img src="https://img.icons8.com/ios-filled/24/checkmark.png" alt="Completed" class="w-6 h-6 opacity-80" />
+          </div>
           <div>
             <p class="text-xs text-[var(--text-secondary)] font-bold uppercase">Completed</p>
             <p class="text-2xl font-bold text-[var(--text-primary)]">{{ stats().completed }}</p>
@@ -57,6 +63,9 @@
             [class.shadow-sm]="selectedStatus() === tab"
             [class.text-[var(--text-secondary)]]="selectedStatus() !== tab"
             class="px-4 py-2 rounded-lg text-sm font-bold capitalize transition-all whitespace-nowrap">
+            <ng-container *ngIf="tab === 'pending'">
+              <img src="https://img.icons8.com/ios-filled/18/clock.png" alt="Pending" class="inline-block w-4 h-4 mr-2 opacity-80 align-[-2px]" />
+            </ng-container>
             {{ tab }}
           </button>
         </div>
@@ -117,7 +126,7 @@
               </button>
 
               <button *ngIf="appt.status === 'confirmed'" (click)="updateStatus(appt.id, AppointmentStatus.COMPLETED)" class="flex-1 md:flex-none px-4 py-2 rounded-lg bg-[var(--info)] text-white font-semibold text-sm hover:brightness-110 transition-all">
-                <i class="bi bi-check2-all mr-1"></i> Complete
+                <img src="https://img.icons8.com/ios-filled/20/checkmark.png" alt="Complete" class="inline-block w-4 h-4 mr-2 opacity-90 align-[-2px]"/> Complete
               </button>
             </div>
 
