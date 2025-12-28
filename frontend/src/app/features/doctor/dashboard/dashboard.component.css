@@ -1,42 +1,160 @@
-/* Custom Animations */
-@keyframes fadeInDown {
-  from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
+:root {
+  --bg: #ffffff;
+  --fg: #111111;
+  --surface: #f9fafb;
+  --border: #e5e7eb;
+  --muted: #6b7280;
+  --primary: #16a34a;
+  --primary-light: #d1fae5;
+  --primary-dark: #15803d;
+  --shadow: rgba(0, 0, 0, 0.1);
 }
 
-@keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+.dark {
+  --bg: #0b0d17;
+  --fg: #ffffff;
+  --surface: #1c1f2b;
+  --border: #2c2f3d;
+  --muted: #9ca3af;
+  --primary: #16a34a;
+  --primary-light: #1f2937;
+  --primary-dark: #15803d;
+  --shadow: rgba(0, 0, 0, 0.5);
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+body {
+  background-color: var(--bg);
+  color: var(--fg);
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont;
+  transition: all 0.4s ease-in-out;
 }
 
-.animate-fade-in-down { animation: fadeInDown 0.5s ease-out forwards; }
-.animate-fade-in-up { animation: fadeInUp 0.6s ease-out forwards; }
-.animate-fade-in { animation: fadeIn 0.8s ease-in forwards; }
-
-/* Custom Scrollbar for Main Content */
 .custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
+  width: 8px;
 }
-
 .custom-scrollbar::-webkit-scrollbar-track {
   background: transparent;
 }
-
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #e2e8f0;
+  background: var(--border);
   border-radius: 10px;
 }
-
 .dark .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #1e293b;
+  background: var(--primary-light);
 }
 
-/* Ensure notifications dropdown handles dark mode properly */
-.notification-dropdown {
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+@keyframes fadeInDown {
+  0% { opacity: 0; transform: translateY(-15px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeInUp {
+  0% { opacity: 0; transform: translateY(15px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+.animate-fade-in-down { animation: fadeInDown 0.6s ease-out forwards; }
+.animate-fade-in-up { animation: fadeInUp 0.6s ease-out forwards; }
+.animate-fade-in { animation: fadeIn 0.8s ease-in forwards; }
+
+.qm-card {
+  border-radius: 1rem;
+  border: 1px solid var(--border);
+  background-color: var(--surface);
+  padding: 1.5rem;
+  box-shadow: 0 8px 15px var(--shadow);
+  transition: all 0.4s ease;
+  cursor: pointer;
+}
+.qm-card:hover {
+  transform: translateY(-5px) scale(1.02);
+  box-shadow: 0 12px 25px var(--shadow);
+}
+
+.qm-card-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--fg);
+}
+
+.qm-stat-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 1rem;
+  background-color: var(--primary-light);
+  color: var(--primary);
+}
+
+.qm-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border-radius: 9999px;
+  background-color: rgba(22, 163, 74, 0.12);
+  color: var(--primary);
+  transition: all 0.3s;
+}
+
+.qm-card.bg-gradient-to-br {
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  color: white;
+  border: none;
+  box-shadow: 0 12px 20px rgba(0,0,0,0.3);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+thead {
+  background-color: var(--surface);
+}
+th, td {
+  padding: 0.75rem;
+  color: var(--fg);
+  text-align: left;
+}
+tbody tr:hover {
+  background-color: rgba(22, 163, 74, 0.08);
+}
+
+.alert {
+  display: flex;
+  gap: 0.75rem;
+  padding: 1rem;
+  border-left-width: 4px;
+  border-radius: 0.75rem;
+  transition: all 0.3s ease;
+}
+.alert-red { background-color: rgba(220, 38, 38, 0.1); border-color: #dc2626; }
+.alert-blue { background-color: rgba(59, 130, 246, 0.1); border-color: #3b82f6; }
+
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 9999px;
+  border: 1px solid var(--border);
+  color: var(--fg);
+  cursor: pointer;
+  transition: all 0.4s ease;
+}
+.theme-toggle:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.qm-subtle-anim {
+  animation: fadeInUp 0.5s ease forwards;
 }

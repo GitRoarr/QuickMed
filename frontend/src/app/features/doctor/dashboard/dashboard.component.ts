@@ -26,8 +26,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   today = new Date();
 
-  dashboardData = signal<DoctorDashboardData | null>(null);
+  dashboardData = signal<DoctorDashboardData & { urgentAlerts?: { title: string; description: string }[] } | null>(null);
   isLoading = signal(true);
+  error = signal<string | null>(null);
   currentUser = signal<any>(null);
   unreadNotificationCount = signal(0);
   themeMode = signal<'light' | 'dark'>(document.documentElement.classList.contains('dark') ? 'dark' : 'light');
@@ -51,12 +52,18 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   loadDashboardData(): void {
     this.isLoading.set(true);
+    this.error.set(null);
     this.doctorService.getDashboardData().subscribe({
       next: (data) => {
+        // Optionally, fetch urgent alerts from backend or derive from data
+        // Here, we assume urgentAlerts is part of the backend response, or you can map/derive as needed
         this.dashboardData.set(data);
         this.isLoading.set(false);
       },
-      error: () => this.isLoading.set(false)
+      error: (err) => {
+        this.error.set('Failed to load dashboard data.');
+        this.isLoading.set(false);
+      }
     });
   }
 

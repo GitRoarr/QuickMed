@@ -56,7 +56,7 @@
               [class.bg-[var(--primary-light)]]="isToday(date) && !isSelected(date)"
               [class.text-[var(--primary)]]="isToday(date) && !isSelected(date)"
               [class.text-[var(--text-muted)]]="!isCurrentMonth(date)"
-              class="aspect-square rounded-xl text-sm flex items-center justify-center hover:bg-[var(--surface-secondary)] transition-all border border-transparent hover:border-[var(--border-default)]">
+              class="aspect-square rounded-xl text-sm flex items-center justify-center hover:bg-[var(--surface-secondary)] transition-all border border-transparent hover:border-[var(--border-default)] max-w-[200px] max-h-[200px] w-full h-full box-border">
               {{ date.getDate() }}
             </button>
           </div>

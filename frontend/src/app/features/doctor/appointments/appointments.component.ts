@@ -65,15 +65,15 @@ export class AppointmentsComponent implements OnInit {
   });
 
   constructor() {
-    // Sync theme with body
+    // Sync theme with <html> element (required for Tailwind dark mode)
     effect(() => {
       const mode = this.themeMode();
       if (mode === 'dark') {
-        document.body.classList.add('dark');
-        document.body.classList.remove('light');
+        document.documentElement.classList.add('dark');
+        document.documentElement.classList.remove('light');
       } else {
-        document.body.classList.add('light');
-        document.body.classList.remove('dark');
+        document.documentElement.classList.add('light');
+        document.documentElement.classList.remove('dark');
       }
     });
 

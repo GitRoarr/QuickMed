@@ -1,164 +1,198 @@
 <div class="flex-1 flex flex-col min-w-0">
-    <!-- Shared Header -->
-    <app-doctor-header
-      [initials]="getDoctorInitials()"
-      [avatarUrl]="currentUser()?.avatar"
-      [unreadNotifications]="unreadNotificationCount()"
-      [themeMode]="themeMode()"
-      (themeChange)="setTheme($event)"
-    ></app-doctor-header>
+  <app-doctor-header
+    [initials]="getDoctorInitials()"
+    [avatarUrl]="currentUser()?.avatar"
+    [unreadNotifications]="unreadNotificationCount()"
+    [themeMode]="themeMode()"
+    (themeChange)="setTheme($event)"
+  ></app-doctor-header>
 
-    <!-- Dashboard Content -->
-    <main class="flex-1 overflow-y-auto p-6 lg:p-8 space-y-8">
-      <!-- Page Title & Date -->
-      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 class="text-2xl lg:text-3xl font-bold">Clinical Overview</h1>
-          <p class="text-sm text-[var(--text-secondary)] mt-1">
-            {{ today | date:'fullDate' }}
-          </p>
+  <main class="flex-1 overflow-y-auto p-6 lg:p-8 space-y-8 custom-scrollbar">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+      <div>
+        <h1 class="text-2xl lg:text-3xl font-bold">Clinical Overview</h1>
+        <p class="text-sm text-[var(--muted)] mt-1">{{ today | date:'fullDate' }}</p>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div class="bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-6 shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+        <div class="flex items-center justify-between mb-4">
+          <div class="p-3 rounded-xl bg-[var(--primary)/0.1] text-[var(--primary)]">
+            <i class="bi bi-calendar-check text-xl"></i>
+          </div>
+          <span class="text-xs font-bold px-2 py-1 rounded-full bg-[var(--primary)/0.1] text-[var(--primary)]">+12%</span>
         </div>
+        <h3 class="text-sm font-medium text-[var(--muted)]">Daily Appointments</h3>
+        <ng-container *ngIf="!isLoading(); else loadingApt">
+          <p class="text-3xl font-bold mt-2">{{ dashboardData()?.stats?.todayAppointments ?? 0 }}</p>
+        </ng-container>
+        <ng-template #loadingApt>
+          <div class="h-8 w-20 bg-gray-200 dark:bg-gray-700 animate-pulse rounded"></div>
+        </ng-template>
       </div>
 
-      <!-- Stats Cards -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div class="bg-[var(--surface-primary)] rounded-2xl p-6 shadow-sm border border-[var(--border-light)] hover:shadow-lg hover:-translate-y-1 transition-all">
-          <div class="flex items-center justify-between mb-4">
-            <div class="p-3 bg-emerald-100 dark:bg-emerald-900/30 rounded-xl">
-              <i class="bi bi-calendar-check text-xl text-emerald-600 dark:text-emerald-400"></i>
-            </div>
-            <span class="text-xs font-bold text-emerald-600 bg-emerald-100 dark:bg-emerald-900/50 px-2 py-1 rounded">+12%</span>
+      <div class="bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-6 shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+        <div class="flex items-center justify-between mb-4">
+          <div class="p-3 rounded-xl bg-[var(--primary)/0.1] text-[var(--primary)]">
+            <i class="bi bi-people text-xl"></i>
           </div>
-          <h3 class="text-sm font-medium text-[var(--text-secondary)]">Daily Appointments</h3>
-          <p class="text-3xl font-bold mt-2">{{ dashboardData()?.stats?.todayAppointments || 24 }}</p>
+          <span class="text-xs font-bold px-2 py-1 rounded-full bg-[var(--primary)/0.1] text-[var(--primary)]">+5</span>
         </div>
-
-        <div class="bg-[var(--surface-primary)] rounded-2xl p-6 shadow-sm border border-[var(--border-light)] hover:shadow-lg hover:-translate-y-1 transition-all">
-          <div class="flex items-center justify-between mb-4">
-            <div class="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-xl">
-              <i class="bi bi-people text-xl text-blue-600 dark:text-blue-400"></i>
-            </div>
-            <span class="text-xs font-bold text-blue-600 bg-blue-100 dark:bg-blue-900/50 px-2 py-1 rounded">+5</span>
-          </div>
-          <h3 class="text-sm font-medium text-[var(--text-secondary)]">Total Patients</h3>
-          <p class="text-3xl font-bold mt-2">{{ dashboardData()?.stats?.totalPatients || 1284 }}</p>
-        </div>
-
-        <div class="bg-[var(--surface-primary)] rounded-2xl p-6 shadow-sm border border-[var(--border-light)] hover:shadow-lg hover:-translate-y-1 transition-all">
-          <div class="flex items-center justify-between mb-4">
-            <div class="p-3 bg-amber-100 dark:bg-amber-900/30 rounded-xl">
-              <i class="bi bi-clipboard-pulse text-xl text-amber-600 dark:text-amber-400"></i>
-            </div>
-            <span class="text-xs font-bold text-amber-600 bg-amber-100 dark:bg-amber-900/50 px-2 py-1 rounded">Urgent</span>
-          </div>
-          <h3 class="text-sm font-medium text-[var(--text-secondary)]">Pending Lab Results</h3>
-          <p class="text-3xl font-bold mt-2">{{ dashboardData()?.stats?.pendingConfirmations || 8 }}</p>
-        </div>
-
-        <div class="bg-gradient-to-br from-emerald-500 to-emerald-700 rounded-2xl p-6 text-white shadow-lg">
-          <div class="flex items-center justify-between mb-4">
-            <div class="p-3 bg-white/20 rounded-xl">
-              <i class="bi bi-star text-xl"></i>
-            </div>
-          </div>
-          <h3 class="text-sm font-medium opacity-90">Patient Satisfaction</h3>
-          <p class="text-3xl font-bold mt-2">4.9 <span class="text-lg">/ 5.0</span></p>
-        </div>
-
-        <!-- Revenue Today -->
-        <div class="bg-[var(--surface-primary)] rounded-2xl p-6 shadow-sm border border-[var(--border-light)] hover:shadow-lg hover:-translate-y-1 transition-all">
-          <div class="flex items-center justify-between mb-4">
-            <div class="p-3 bg-indigo-100 dark:bg-indigo-900/30 rounded-xl">
-              <i class="bi bi-cash-coin text-xl text-indigo-600 dark:text-indigo-400"></i>
-            </div>
-            <span class="text-xs font-bold text-indigo-600 bg-indigo-100 dark:bg-indigo-900/50 px-2 py-1 rounded">Today</span>
-          </div>
-          <h3 class="text-sm font-medium text-[var(--text-secondary)]">Revenue</h3>
-          <p class="text-3xl font-bold mt-2">${{ dashboardData()?.stats?.revenueToday || 0 }}</p>
-        </div>
-
-        <!-- Unread Messages -->
-        <div class="bg-[var(--surface-primary)] rounded-2xl p-6 shadow-sm border border-[var(--border-light)] hover:shadow-lg hover:-translate-y-1 transition-all">
-          <div class="flex items-center justify-between mb-4">
-            <div class="p-3 bg-purple-100 dark:bg-purple-900/30 rounded-xl">
-              <i class="bi bi-chat-dots text-xl text-purple-600 dark:text-purple-400"></i>
-            </div>
-            <span class="text-xs font-bold text-purple-600 bg-purple-100 dark:bg-purple-900/50 px-2 py-1 rounded">Inbox</span>
-          </div>
-          <h3 class="text-sm font-medium text-[var(--text-secondary)]">Unread Messages</h3>
-          <p class="text-3xl font-bold mt-2">{{ dashboardData()?.stats?.unreadMessages || 0 }}</p>
-        </div>
+        <h3 class="text-sm font-medium text-[var(--muted)]">Total Patients</h3>
+        <ng-container *ngIf="!isLoading(); else loadingPatients">
+          <p class="text-3xl font-bold mt-2">{{ dashboardData()?.stats?.totalPatients ?? 0 }}</p>
+        </ng-container>
+        <ng-template #loadingPatients>
+          <div class="h-8 w-20 bg-gray-200 dark:bg-gray-700 animate-pulse rounded"></div>
+        </ng-template>
       </div>
 
-      <!-- Next Patients & Urgent Notifications -->
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- Next Patients Table -->
-        <div class="lg:col-span-2 bg-[var(--surface-primary)] rounded-2xl border border-[var(--border-light)] shadow-sm overflow-hidden">
-          <div class="p-6 border-b border-[var(--border-light)] flex justify-between items-center">
-            <h2 class="text-lg font-bold">Next Patients</h2>
-            <a routerLink="/doctor/appointments" class="text-sm font-semibold text-[var(--primary)] hover:underline">View All →</a>
+      <div class="bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-6 shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+        <div class="flex items-center justify-between mb-4">
+          <div class="p-3 rounded-xl bg-[var(--primary)/0.1] text-[var(--primary)]">
+            <i class="bi bi-clipboard-pulse text-xl"></i>
           </div>
-          <div class="overflow-x-auto">
-            <table class="w-full">
-              <thead class="bg-[var(--surface-secondary)] text-xs uppercase tracking-wider text-[var(--text-secondary)]">
-                <tr>
-                  <th class="px-6 py-4 text-left">Patient</th>
-                  <th class="px-6 py-4 text-left">Time</th>
-                  <th class="px-6 py-4 text-left">Status</th>
-                  <th class="px-6 py-4 text-left">Action</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-[var(--border-light)]">
-                <tr *ngFor="let apt of dashboardData()?.todayAppointments || []" class="hover:bg-[var(--surface-secondary)] transition-colors">
-                  <td class="px-6 py-4">
-                    <div class="flex items-center gap-3">
-                      <div class="w-9 h-9 rounded-full bg-[var(--surface-tertiary)] flex items-center justify-center text-sm font-bold">
-                        {{ getInitials(apt.patient) }}
-                      </div>
-                      <span class="font-medium">{{ apt.patient }}</span>
+          <span class="text-xs font-bold px-2 py-1 rounded-full bg-amber-100 text-amber-700">Urgent</span>
+        </div>
+        <h3 class="text-sm font-medium text-[var(--muted)]">Pending Lab Results</h3>
+        <ng-container *ngIf="!isLoading(); else loadingPending">
+          <p class="text-3xl font-bold mt-2">{{ dashboardData()?.stats?.pendingConfirmations ?? 0 }}</p>
+        </ng-container>
+        <ng-template #loadingPending>
+          <div class="h-8 w-20 bg-gray-200 dark:bg-gray-700 animate-pulse rounded"></div>
+        </ng-template>
+      </div>
+
+      <div class="bg-gradient-to-br from-[var(--primary)] to-[var(--primary-dark)] text-white rounded-2xl p-6 shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+        <div class="flex items-center justify-between mb-4">
+          <div class="p-3 bg-white/20 rounded-xl">
+            <i class="bi bi-star text-xl"></i>
+          </div>
+        </div>
+        <h3 class="text-sm font-medium opacity-90">Patient Satisfaction</h3>
+        <ng-container *ngIf="!isLoading(); else loadingSatisfaction">
+          <p class="text-3xl font-bold mt-2">{{ dashboardData()?.stats?.satisfactionRate ?? 0 }} <span class="text-lg">/ 5.0</span></p>
+        </ng-container>
+        <ng-template #loadingSatisfaction>
+          <div class="h-8 w-20 bg-gray-200 dark:bg-gray-700 animate-pulse rounded"></div>
+        </ng-template>
+      </div>
+
+      <div class="bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-6 shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+        <div class="flex items-center justify-between mb-4">
+          <div class="p-3 rounded-xl bg-[var(--primary)/0.1] text-[var(--primary)]">
+            <i class="bi bi-cash-coin text-xl"></i>
+          </div>
+          <span class="text-xs font-bold px-2 py-1 rounded-full bg-[var(--primary)/0.1] text-[var(--primary)]">Today</span>
+        </div>
+        <h3 class="text-sm font-medium text-[var(--muted)]">Revenue</h3>
+        <ng-container *ngIf="!isLoading(); else loadingRevenue">
+          <p class="text-3xl font-bold mt-2">${{ dashboardData()?.stats?.revenueToday ?? 0 }}</p>
+        </ng-container>
+        <ng-template #loadingRevenue>
+          <div class="h-8 w-20 bg-gray-200 dark:bg-gray-700 animate-pulse rounded"></div>
+        </ng-template>
+      </div>
+
+      <div class="bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-6 shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+        <div class="flex items-center justify-between mb-4">
+          <div class="p-3 rounded-xl bg-[var(--primary)/0.1] text-[var(--primary)]">
+            <i class="bi bi-chat-dots text-xl"></i>
+          </div>
+          <span class="text-xs font-bold px-2 py-1 rounded-full bg-[var(--primary)/0.1] text-[var(--primary)]">Inbox</span>
+        </div>
+        <h3 class="text-sm font-medium text-[var(--muted)]">Unread Messages</h3>
+        <ng-container *ngIf="!isLoading(); else loadingMessages">
+          <p class="text-3xl font-bold mt-2">{{ dashboardData()?.stats?.unreadMessages ?? 0 }}</p>
+        </ng-container>
+        <ng-template #loadingMessages>
+          <div class="h-8 w-20 bg-gray-200 dark:bg-gray-700 animate-pulse rounded"></div>
+        </ng-template>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div class="lg:col-span-2 bg-[var(--surface)] rounded-2xl border border-[var(--border)] shadow-lg overflow-hidden">
+        <div class="p-6 border-b border-[var(--border)] flex justify-between items-center">
+          <h2 class="text-lg font-bold">Next Patients</h2>
+          <a routerLink="/doctor/appointments" class="text-sm font-semibold text-[var(--primary)] hover:underline">View All →</a>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead class="bg-[var(--surface)] text-xs uppercase tracking-wider text-[var(--muted)]">
+              <tr>
+                <th class="px-6 py-4 text-left">Patient</th>
+                <th class="px-6 py-4 text-left">Time</th>
+                <th class="px-6 py-4 text-left">Status</th>
+                <th class="px-6 py-4 text-left">Action</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-[var(--border)]">
+              <ng-container *ngIf="!isLoading(); else loadingAppointments">
+                <tr *ngFor="let apt of dashboardData()?.todayAppointments || []" class="hover:bg-[var(--primary)/0.1] transition-colors">
+                <td class="px-6 py-4">
+                  <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-full bg-[var(--primary)/0.1] flex items-center justify-center text-sm font-bold">
+                      {{ getInitials(apt.patient) }}
                     </div>
-                  </td>
-                  <td class="px-6 py-4 text-sm">{{ apt.time }}</td>
-                  <td class="px-6 py-4">
-                    <span [class]="apt.status === 'Confirmed' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
-                      " class="inline-flex px-3 py-1 rounded-full text-xs font-medium">
-                      {{ apt.status }}
-                    </span>
-                  </td>
-                  <td class="px-6 py-4">
-                    <button class="text-[var(--primary)] hover:text-[var(--primary-dark)]">
-                      <i class="bi bi-arrow-right-circle text-lg"></i>
-                    </button>
-                  </td>
-                </tr>
+                    <span class="font-medium">{{ apt.patient }}</span>
+                  </div>
+                </td>
+                <td class="px-6 py-4 text-sm">{{ apt.time }}</td>
+                <td class="px-6 py-4">
+                  <span [class]="apt.status === 'Confirmed' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'"
+                        class="inline-flex px-3 py-1 rounded-full text-xs font-medium">
+                    {{ apt.status }}
+                  </span>
+                </td>
+                <td class="px-6 py-4">
+                  <button class="text-[var(--primary)] hover:text-[var(--primary-dark)]">
+                    <i class="bi bi-arrow-right-circle text-lg"></i>
+                  </button>
+                </td>
+              </tr>
                 <tr *ngIf="!(dashboardData()?.todayAppointments?.length)">
-                  <td colspan="4" class="px-6 py-8 text-center text-[var(--text-secondary)]">No upcoming appointments today</td>
+                  <td colspan="4" class="px-6 py-8 text-center text-[var(--muted)]">No upcoming appointments today</td>
                 </tr>
-              </tbody>
-            </table>
-          </div>
+              </ng-container>
+              <ng-template #loadingAppointments>
+                <tr *ngFor="let i of [1,2,3,4]">
+                  <td class="px-6 py-4"><div class="h-6 w-32 bg-gray-200 dark:bg-gray-700 animate-pulse rounded"></div></td>
+                  <td class="px-6 py-4"><div class="h-6 w-16 bg-gray-200 dark:bg-gray-700 animate-pulse rounded"></div></td>
+                  <td class="px-6 py-4"><div class="h-6 w-20 bg-gray-200 dark:bg-gray-700 animate-pulse rounded"></div></td>
+                  <td class="px-6 py-4"><div class="h-6 w-8 bg-gray-200 dark:bg-gray-700 animate-pulse rounded"></div></td>
+                </tr>
+              </ng-template>
+            </tbody>
+          </table>
         </div>
+      </div>
 
-        <!-- Urgent Notifications -->
-        <div class="bg-[var(--surface-primary)] rounded-2xl border border-[var(--border-light)] shadow-sm p-6">
-          <h2 class="text-lg font-bold mb-5">Urgent Alerts</h2>
-          <div class="space-y-4">
-            <div class="flex gap-4 p-4 rounded-xl border-l-4 border-red-500 bg-red-50 dark:bg-red-900/20">
+      <div class="bg-[var(--surface)] rounded-2xl border border-[var(--border)] shadow-lg p-6">
+        <h2 class="text-lg font-bold mb-5">Urgent Alerts</h2>
+        <div class="space-y-4">
+          <ng-container *ngIf="!isLoading() && dashboardData()?.urgentAlerts?.length; else loadingAlerts">
+            <div *ngFor="let alert of dashboardData()?.urgentAlerts" class="flex gap-4 p-4 rounded-xl border-l-4 border-red-500 bg-red-50 dark:bg-red-900/20">
               <i class="bi bi-exclamation-triangle text-red-600 text-xl mt-1"></i>
               <div>
-                <p class="font-semibold text-sm">Critical Lab Result</p>
-                <p class="text-xs text-[var(--text-secondary)] mt-1">Patient #2294 – Abnormal values detected</p>
+                <p class="font-semibold text-sm">{{ alert.title }}</p>
+                <p class="text-xs text-[var(--muted)] mt-1">{{ alert.description }}</p>
               </div>
             </div>
-            <div class="flex gap-4 p-4 rounded-xl border-l-4 border-blue-500 bg-blue-50 dark:bg-blue-900/20">
-              <i class="bi bi-chat-left-dots text-blue-600 text-xl mt-1"></i>
-              <div>
-                <p class="font-semibold text-sm">New Referral Message</p>
-                <p class="text-xs text-[var(--text-secondary)] mt-1">Dr. Sarah Johnson sent a consultation note</p>
+            <div *ngIf="!dashboardData()?.urgentAlerts?.length" class="text-[var(--muted)] text-center py-4">No urgent alerts</div>
+          </ng-container>
+          <ng-template #loadingAlerts>
+            <div *ngFor="let i of [1,2]" class="flex gap-4 p-4 rounded-xl border-l-4 border-red-500 bg-gray-200 dark:bg-gray-700 animate-pulse">
+              <div class="h-8 w-8 rounded bg-red-300 dark:bg-red-700"></div>
+              <div class="flex-1">
+                <div class="h-4 w-32 bg-gray-300 dark:bg-gray-800 rounded mb-2"></div>
+                <div class="h-3 w-48 bg-gray-200 dark:bg-gray-700 rounded"></div>
               </div>
             </div>
-          </div>
+          </ng-template>
         </div>
       </div>
-    </main>
-  </div>
+    </div>
+  </main>
+</div>

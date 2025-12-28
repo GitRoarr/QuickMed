@@ -1,814 +1,298 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-@layer utilities {
-    .text-balance {
-        text-wrap: balance;
-    }
+html, body {
+  height: 100%;
+  width: 100%;
+  overflow: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
-
-/* =========================================================================
-     QUICKMED PROFESSIONAL HEALTHCARE THEME SYSTEM
-     Spotify Green (#1DB954) Primary | Light & Dark Modes | WCAG Compliant
-     ========================================================================= */
-
-@layer base {
-    /* Comprehensive CSS variable system for light and dark themes with Spotify Green branding */
-
-    :root {
-        /* Typography */
-        --font-sans: var(--font-geist-sans);
-        --font-mono: var(--font-geist-mono);
-
-        /* Light Theme - Clean, Airy, Medical-grade */
-        --background: #ffffff;
-        --foreground: #1a1a1a;
-
-        --surface: #ffffff;
-        --surface-secondary: #f8f9fa;
-        --surface-tertiary: #f0f2f5;
-
-        --text-primary: #1a1a1a;
-        --text-secondary: #666666;
-        --text-muted: #999999;
-        --text-inverse: #ffffff;
-
-        --border-light: #e1e4e8;
-        --border-default: #d0d7de;
-        --border-dark: #c0c7ce;
-
-        --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-        --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);
-        --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
-        --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.12);
-
-        /* Primary Brand - Spotify Green */
-        --primary: #1db954;
-        --primary-hover: #1ed760;
-        --primary-active: #16a835;
-        --primary-light: #e8f5e9;
-        --primary-lighter: #f1f9f5;
-
-        /* Status Colors */
-        --success: #10b981;
-        --success-light: #ecfdf5;
-        --info: #3b82f6;
-        --info-light: #eff6ff;
-        --warning: #f59e0b;
-        --warning-light: #fffbeb;
-        --error: #ef4444;
-        --error-light: #fef2f2;
-
-        /* Navigation & Sidebar */
-        --navbar-bg: #ffffff;
-        --navbar-text: #1a1a1a;
-        --navbar-border: #e1e4e8;
-
-        --sidebar-bg: #f8f9fa;
-        --sidebar-text: #1a1a1a;
-        --sidebar-text-secondary: #666666;
-        --sidebar-hover: #f0f2f5;
-        --sidebar-active-bg: #e8f5e9;
-        --sidebar-active-text: #1db954;
-        --sidebar-border: #e1e4e8;
-
-        /* Input & Form */
-        --input-bg: #ffffff;
-        --input-border: #d0d7de;
-        --input-focus-border: #1db954;
-        --input-focus-shadow: rgba(29, 185, 84, 0.1);
-        --input-placeholder: #999999;
-        --input-disabled-bg: #f0f2f5;
-        --input-disabled-text: #999999;
-
-        /* Badges & Status */
-        --badge-confirmed-bg: #ecfdf5;
-        --badge-confirmed-text: #10b981;
-        --badge-pending-bg: #fffbeb;
-        --badge-pending-text: #f59e0b;
-        --badge-cancelled-bg: #fef2f2;
-        --badge-cancelled-text: #ef4444;
-
-        /* Overlay & Backdrop */
-        --overlay-bg: rgba(0, 0, 0, 0.5);
-
-        /* Spacing & Radius */
-        --radius: 0.5rem;
-        --radius-lg: 0.75rem;
-
-        /* Existing defaults (kept for compatibility) */
-        --card: #ffffff;
-        --card-foreground: #1a1a1a;
-        --popover: #ffffff;
-        --popover-foreground: #1a1a1a;
-        --primary-foreground: #ffffff;
-        --secondary: #f0f2f5;
-        --secondary-foreground: #1a1a1a;
-        --muted: #f0f2f5;
-        --muted-foreground: #666666;
-        --accent: #1db954;
-        --accent-foreground: #ffffff;
-        --destructive: #ef4444;
-        --destructive-foreground: #ffffff;
-        --border: #e1e4e8;
-        --input: #ffffff;
-        --ring: #1db954;
-    }
-
-    /* Dark Theme - Deep, Premium, Eye-friendly */
-    body.dark {
-        --background: #121212;
-        --foreground: #f5f5f5;
-
-        --surface: #1e1e1e;
-        --surface-secondary: #2d2d2d;
-        --surface-tertiary: #3d3d3d;
-        --surface-secondary: #252525;
-        --surface-tertiary: #303030;
-
-        --text-primary: #f5f5f5;
-        --text-secondary: #b8b8b8;
-        --text-muted: #808080;
-        --text-inverse: #0f0f0f;
-
-        --border-light: #404040;
-        --border-default: #353535;
-        --border-dark: #2a2a2a;
-
-        --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
-        --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4);
-        --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.5);
-        --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.6);
-
-        /* Primary Brand - Spotify Green with subtle glow */
-        --primary: #1ed760;
-        --primary-hover: #1db954;
-        --primary-active: #16a835;
-        --primary-light: #1a3a2a;
-        --primary-lighter: #0f2818;
-
-        /* Status Colors - Adjusted for dark mode */
-        --success: #34d399;
-        --success-light: #064e3b;
-        --info: #60a5fa;
-        --info-light: #0c2340;
-        --warning: #fbbf24;
-        --warning-light: #3f2f00;
-        --error: #f87171;
-        --error-light: #4c0519;
-
-        /* Navigation & Sidebar */
-        --navbar-bg: #1a1a1a;
-        --navbar-text: #f5f5f5;
-        --navbar-border: #303030;
-
-        --sidebar-bg: #0f0f0f;
-        --sidebar-text: #f5f5f5;
-        --sidebar-text-secondary: #b8b8b8;
-        --sidebar-hover: #252525;
-        --sidebar-active-bg: #1a3a2a;
-        --sidebar-active-text: #1ed760;
-        --sidebar-border: #303030;
-
-        /* Input & Form */
-        --input-bg: #1a1a1a;
-        --input-border: #353535;
-        --input-focus-border: #1ed760;
-        --input-focus-shadow: rgba(30, 215, 96, 0.15);
-        --input-placeholder: #808080;
-        --input-disabled-bg: #252525;
-        --input-disabled-text: #606060;
-
-        /* Badges & Status */
-        --badge-confirmed-bg: #064e3b;
-        --badge-confirmed-text: #34d399;
-        --badge-pending-bg: #3f2f00;
-        --badge-pending-text: #fbbf24;
-        --badge-cancelled-bg: #4c0519;
-        --badge-cancelled-text: #f87171;
-
-        /* Overlay & Backdrop */
-        --overlay-bg: rgba(0, 0, 0, 0.7);
-
-        /* Existing defaults (kept for compatibility) */
-        --card: #1a1a1a;
-        --card-foreground: #f5f5f5;
-        --popover: #1a1a1a;
-        --popover-foreground: #f5f5f5;
-        --primary-foreground: #0f0f0f;
-        --secondary: #252525;
-        --secondary-foreground: #f5f5f5;
-        --muted: #252525;
-        --muted-foreground: #b8b8b8;
-        --accent: #1ed760;
-        --accent-foreground: #0f0f0f;
-        --destructive: #f87171;
-        --destructive-foreground: #0f0f0f;
-        --border: #353535;
-        --input: #1a1a1a;
-        --ring: #1ed760;
-    }
-
-    /* Light theme class variant (for explicit light mode) */
-    body.light {
-        --background: #ffffff;
-        --foreground: #1a1a1a;
-        --surface: #ffffff;
-        --surface-secondary: #f8f9fa;
-        --surface-tertiary: #e8ebf0;
-        --text-primary: #1a1a1a;
-        --text-secondary: #666666;
-        --text-muted: #999999;
-        --text-inverse: #ffffff;
-        --border-light: #e1e4e8;
-        --border-default: #d0d7de;
-        --border-dark: #c0c7ce;
-        --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-        --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);
-        --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
-        --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.12);
-        --primary: #1db954;
-        --primary-hover: #1ed760;
-        --primary-active: #16a835;
-        --primary-light: #e8f5e9;
-        --primary-lighter: #f1f9f5;
-        --success: #10b981;
-        --success-light: #ecfdf5;
-        --info: #3b82f6;
-        --info-light: #eff6ff;
-        --warning: #f59e0b;
-        --warning-light: #fffbeb;
-        --error: #ef4444;
-        --error-light: #fef2f2;
-        --navbar-bg: #ffffff;
-        --navbar-text: #1a1a1a;
-        --navbar-border: #e1e4e8;
-        --sidebar-bg: #f8f9fa;
-        --sidebar-text: #1a1a1a;
-        --sidebar-text-secondary: #666666;
-        --sidebar-hover: #f0f2f5;
-        --sidebar-active-bg: #e8f5e9;
-        --sidebar-active-text: #1db954;
-        --sidebar-border: #e1e4e8;
-        --input-bg: #ffffff;
-        --input-border: #d0d7de;
-        --input-focus-border: #1db954;
-        --input-focus-shadow: rgba(29, 185, 84, 0.1);
-        --input-placeholder: #999999;
-        --input-disabled-bg: #f0f2f5;
-        --input-disabled-text: #999999;
-        --badge-confirmed-bg: #ecfdf5;
-        --badge-confirmed-text: #10b981;
-        --badge-pending-bg: #fffbeb;
-        --badge-pending-text: #f59e0b;
-        --badge-cancelled-bg: #fef2f2;
-        --badge-cancelled-text: #ef4444;
-        --overlay-bg: rgba(0, 0, 0, 0.5);
-        --card: #ffffff;
-        --card-foreground: #1a1a1a;
-        --popover: #ffffff;
-        --popover-foreground: #1a1a1a;
-        --primary-foreground: #ffffff;
-        --secondary: #f0f2f5;
-        --secondary-foreground: #1a1a1a;
-        --muted: #f0f2f5;
-        --muted-foreground: #666666;
-        --accent: #1db954;
-        --accent-foreground: #ffffff;
-        --destructive: #ef4444;
-        --destructive-foreground: #ffffff;
-        --border: #e1e4e8;
-        --input: #ffffff;
-        --ring: #1db954;
-    }
+body::-webkit-scrollbar, html::-webkit-scrollbar {
+  display: none;
 }
-/* Light theme variables */
-body.light, .light-theme {
-    --background-light: #ffffff;
-    --sidebar-bg: #ffffff;
-    --background-gray: #e5e7eb;
-    --text-dark: #1e293b;
-    --text-gray: #475569;
-    --text-muted: #64748b;
-    --border-color: #d1d5db;
-    --card-shadow: 0 4px 24px 0 rgba(20, 30, 40, 0.10);
-    --primary-color: #19c37d;
-    --primary-hover: #15a76a;
-    --primary-light: #e6f7ef;
-    --status-confirmed: #19c37d;
-    --status-pending: #3ba3c7;
-    --status-completed: #2e8bba;
-    --status-cancelled: #e05a5a;
-    --surface: #ffffff;
-    --surface-alt: #f3f4f6;
-    --surface-muted: #f5f7fa;
-    --accent-soft: #e6f7ef;
-    --accent-border: #2e8bba;
-    --heading-color: #1e293b;
-    --primary-shadow: 0 10px 30px rgba(25, 195, 125, 0.08);
-    --primary-strong-shadow: 0 20px 60px rgba(25, 195, 125, 0.06);
+.main, .app-root, main, .flex-1, .overflow-y-auto, .overflow-auto {
+  overflow-y: auto !important;
+  scrollbar-width: none;
+}
+.main::-webkit-scrollbar, .app-root::-webkit-scrollbar, main::-webkit-scrollbar, .flex-1::-webkit-scrollbar, .overflow-y-auto::-webkit-scrollbar, .overflow-auto::-webkit-scrollbar {
+  display: none;
 }
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-    --primary-color: #19c37d;         
-    --primary-hover: #15a76a;
-    --primary-light: #1e2d24;         /* Subtle green-tinted dark */
-    --background-light: #181c23;      /* Main app background (charcoal/navy) */
-    --sidebar-bg: #15181e;            /* Sidebar, slightly darker */
-    --background-gray: #232834;       /* Cards/panels, lighter than bg */
-    --text-dark: #f3f6fa;             /* Off-white for primary text */
-    --text-gray: #b0b6c3;             /* Muted gray for secondary */
-    --text-muted: #7a8191;            /* Even more muted for hints */
-    --border-color: #232834;          /* Subtle border, matches card bg */
-    --card-shadow: 0 4px 24px 0 rgba(20, 30, 40, 0.45); /* Soft shadow */
-    --status-confirmed: #19c37d;      /* Medical green */
-    --status-pending: #3ba3c7;        /* Muted blue/teal */
-    --status-completed: #2e8bba;      /* Deeper blue */
-    --status-cancelled: #e05a5a;      /* Muted red */
-
-    /* Surface tokens for consistent backgrounds */
-    --surface: var(--background-light);
-    --surface-alt: var(--background-gray);
-    --surface-muted: var(--sidebar-bg);
-    --accent-soft: #1e2d24;
-    --accent-border: #2e8bba;
-    --heading-color: var(--text-dark);
-    --primary-shadow: 0 10px 30px rgba(25, 195, 125, 0.10);
-    --primary-strong-shadow: 0 20px 60px rgba(25, 195, 125, 0.08);
+  --bg: #ffffff;
+  --fg: #111111;
+  --surface: #f9fafb;
+  --border: #e5e7eb;
+  --muted: #6b7280;
+  --primary: #16a34a;
+  --primary-hover: #15803d;
+  --shadow: rgba(0, 0, 0, 0.1);
+}
+.dark {
+  --bg: #0b0d17;
+  --fg: #ffffff;
+  --surface: #1c1f2b;
+  --border: #2c2f3d;
+  --muted: #9ca3af;
+  --primary: #16a34a;
+  --primary-hover: #15803d;
+  --shadow: rgba(0, 0, 0, 0.5);
 }
 
 body {
-    background: var(--background-light);
-    color: var(--text-dark);
+  background-color: var(--bg);
+  color: var(--fg);
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont;
+  transition: all 0.3s;
 }
 
-.card, .panel, .section {
-    background: var(--background-gray);
-    box-shadow: var(--card-shadow);
-    border: 1px solid var(--border-color);
-}
-
-.sidebar {
-    background: var(--sidebar-bg);
-}
-
-button, .primary-btn {
-    background: var(--primary-color);
-    color: var(--text-dark);
-    border: none;
-}
-
-button:hover, .primary-btn:hover {
-    background: var(--primary-hover);
-}
-
-input, select, textarea {
-    background: var(--background-gray);
-    color: var(--text-dark);
-    border: 1px solid var(--border-color);
-}
-
-.empty-state {
-    background: var(--background-gray);
-    color: var(--text-muted);
-    border-radius: 12px;
-    box-shadow: var(--card-shadow);
-    padding: 2.5rem 1.5rem;
-    margin: 2rem auto;
-    text-align: center;
-    max-width: 420px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1.25rem;
-    font-size: 1.1rem;
-    font-weight: 500;
-    letter-spacing: 0.01em;
-}
-body.dark, .dark-theme {
-    --background: 220 12% 8%;         /* very dark navy */
-    --foreground: 220 11% 96%;        /* near-white */
-    --card: 220 14% 10%;               /* card surface */
-    --border: 220 14% 12%;             /* dark border */
-    --muted-foreground: 210 10% 60%;
-    --primary: 148 84% 36%;
-    --primary-foreground: 0 0% 100%;
-    --medical-green: 162 50% 35%;
-    --medical-orange: 24 90% 56%;
-    --destructive: 0 75% 60%;
-    --destructive-foreground: 0 0% 100%;
-}
-
-/* Map Bootstrap "success" palette to our primary color for consistency */
-:root {
-    --bs-success: var(--primary-color);
-    --bs-success-rgb: 15, 169, 88; /* match #0FA958 */
-    --bs-success-bg-subtle: var(--primary-light);
-    --bs-success-border-subtle: var(--accent-border);
-    --bs-success-text-emphasis: var(--primary-hover);
-}
-
-.dark-theme, body.dark {
-    --bs-success: var(--primary-color);
-    --bs-success-rgb: 15, 169, 88;
-    --bs-success-bg-subtle: var(--accent-soft);
-    --bs-success-border-subtle: var(--accent-border);
-    --bs-success-text-emphasis: #d6ffe8;
-}
-
-/* Ensure buttons, text, and backgrounds use primary color when success is referenced */
-.btn-success {
-    background-color: var(--primary-color) !important;
-    border-color: var(--primary-color) !important;
-    color: #ffffff !important;
-}
-
-.btn-success:hover,
-.btn-success:focus {
-    background-color: var(--primary-hover) !important;
-    border-color: var(--primary-hover) !important;
-    color: #ffffff !important;
-}
-
-.btn-outline-success {
-    border-color: var(--primary-color) !important;
-    color: var(--primary-color) !important;
-}
-
-.btn-outline-success:hover,
-.btn-outline-success:focus {
-    background-color: var(--primary-color) !important;
-    border-color: var(--primary-color) !important;
-    color: #ffffff !important;
-}
-
-.text-success,
-.link-success {
-    color: var(--primary-color) !important;
-}
-
-.bg-success {
-    background-color: var(--primary-color) !important;
-}
-
-.border-success {
-    border-color: var(--primary-color) !important;
-}
-
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    background-color: var(--surface);
-    color: var(--text-dark);
-}
-
-.btn-primary {
-    background-color: var(--primary-color);
-    border-color: var(--primary-color);
-    color: #ffffff;
-    font-weight: 600;
-    transition: all 0.2s ease-in-out;
-}
-
-.btn-primary:hover {
-    background-color: var(--primary-hover);
-    border-color: var(--primary-hover);
-    color: #ffffff;
-}
-
-.btn-outline-primary {
-    border-color: var(--primary-color);
-    color: var(--primary-color);
-    font-weight: 600;
-}
-
-.btn-outline-primary:hover {
-    background-color: var(--primary-color);
-    border-color: var(--primary-color);
-    color: #ffffff;
-}
-
-.text-primary {
-    color: var(--primary-color) !important;
-}
-
-.sidebar {
-    background-color: var(--sidebar-bg);
-    min-height: 100vh;
-    position: fixed;
-    left: 0;
-    top: 0;
-    width: 250px;
-    padding: 20px;
-    z-index: 100;
-    border-right: 1px solid var(--border-color);
-}
-
-.main-content {
-    margin-left: 250px;
-    padding: 20px;
-    min-height: 100vh;
-}
-
-.theme-toggle {
-    background: transparent;
-    border: 2px solid var(--border-color);
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    color: var(--text-dark);
-}
-
-.theme-toggle:hover {
-    border-color: var(--primary-color);
-    color: var(--primary-color);
-    transform: rotate(180deg);
-}
-
-/* Enhanced theme-toggle visuals that respond to semantic variables */
-.theme-toggle {
-    border-color: hsl(var(--border) / 0.6);
-    color: hsl(var(--foreground));
-    background: transparent;
-    box-shadow: 0 6px 20px -12px rgba(0,0,0,0.25);
-}
-.theme-toggle .moon, .theme-toggle .sun { transition: transform 0.35s ease, opacity 0.25s ease; }
-.theme-toggle.active { transform: rotate(0deg) scale(1.02); }
-.theme-toggle.active .sun { transform: scale(0.85); opacity: 0.0; }
-.theme-toggle.active .moon { transform: scale(1); opacity: 1; }
-.theme-toggle .moon { transform: scale(0.6); opacity: 0; }
-.theme-toggle .sun { transform: scale(1); opacity: 1; }
-
-.theme-toggle i {
-    font-size: 1.2rem;
-}
-
-@media (max-width: 768px) {
-    .sidebar {
-        width: 100%;
-        position: relative;
-        min-height: auto;
-    }
-    .main-content {
-        margin-left: 0;
-    }
+.app-root {
+  min-height: 100vh;
+  width: 100%;
+  background-color: var(--bg);
+  color: var(--fg);
 }
 
 .card {
-    background-color: var(--background-light);
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    box-shadow: var(--card-shadow);
-    padding: 20px;
-    transition: box-shadow 0.3s ease;
+  border-radius: 1rem;
+  border-width: 1px;
+  padding: 1.5rem;
+  transition: all 0.3s;
+  background-color: var(--surface);
+  border-color: var(--border);
+  box-shadow: 0 4px 6px var(--shadow);
 }
 
-body.dark,
-.bg-dark {
-    --qm-bg: #050505;
-    --qm-surface: rgba(10,11,12,0.7);
-    --qm-text: #e6f6ec;
-    --qm-muted: #98bfa8;
-    --qm-accent: #0FA958;
+.sidebar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  height: 100vh;
+  width: 16rem;
+  border-right-width: 1px;
+  background-color: var(--surface);
+  border-color: var(--border);
+  transition: all 0.3s;
 }
 
-body.dark {
-    background: var(--qm-bg) !important;
-    color: var(--qm-text) !important;
+.main {
+  margin-left: 16rem;
+  min-height: 100vh;
+  padding: 1.5rem;
+  transition: all 0.3s;
 }
 
-.bg-dark.navbar,
-body.dark .navbar {
-    background: #060606 !important;
-    border-bottom: 1px solid rgba(15,169,88,0.06) !important;
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  border-radius: 0.75rem;
+  padding: 0.75rem 1rem;
+  font-weight: 500;
+  transition: all 0.3s;
+  color: var(--muted);
+}
+.nav-item:hover {
+  background-color: rgba(22, 163, 74, 0.08);
+  color: var(--primary);
+}
+.nav-item.active {
+  background-color: rgba(22, 163, 74, 0.15);
+  color: var(--primary);
 }
 
-body.dark .navbar-brand .brand-name,
-body.dark .navbar-brand img {
-    filter: none !important;
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.75rem;
+  padding: 0.625rem 1.25rem;
+  font-weight: 600;
+  transition: all 0.3s;
+  background-color: var(--primary);
+  color: #fff;
+  cursor: pointer;
+}
+.btn:hover {
+  background-color: var(--primary-hover);
+}
+.btn-ghost {
+  background: transparent;
+  color: var(--fg);
+}
+.btn-ghost:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+.dark .btn-ghost:hover {
+  background-color: rgba(255, 255, 255, 0.06);
 }
 
-body.dark .nav-link,
-.bg-dark .nav-link {
-    color: var(--qm-muted) !important;
+.input {
+  width: 100%;
+  border-radius: 0.75rem;
+  padding: 0.75rem 1rem;
+  outline: none;
+  transition: all 0.3s;
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--fg);
+}
+.input:focus {
+  border-color: var(--primary);
 }
 
-body.dark .nav-link:hover,
-.bg-dark .nav-link:hover {
-    color: var(--qm-accent) !important;
+.badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 9999px;
+  padding: 0.25rem 0.75rem;
+  font-size: 1rem;
+  font-weight: 500;
+  background-color: rgba(22, 163, 74, 0.12);
+  color: var(--primary);
 }
 
-/* Theme toggle / avatar */
-body.dark .theme-toggle {
-    background: rgba(255,255,255,0.03) !important;
-    box-shadow: 0 0 0 4px rgba(15,169,88,0.06) inset;
+.divider {
+  height: 1px;
+  width: 100%;
+  background-color: var(--border);
+  transition: all 0.3s;
 }
 
-/* Hero */
-body.dark .hero-section {
-    background: linear-gradient(180deg, rgba(3,6,4,0.9) 0%, rgba(1,4,3,0.95) 100%) !important;
+.theme-toggle {
+  display: flex;
+  height: 2.5rem;
+  width: 2.5rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  border-width: 1px;
+  transition: all 0.3s;
+  border-color: var(--border);
+  color: var(--fg);
+  cursor: pointer;
+}
+.theme-toggle:hover {
+  border-color: var(--primary);
+  color: var(--primary);
 }
 
-body.dark .hero-title {
-    color: #ffffff !important;
+.card-header, .card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+.card-body {
+  margin-top: 0.5rem;
 }
 
-body.dark .text-primary {
-    color: var(--qm-accent) !important;
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+.table th, .table td {
+  border-bottom: 1px solid var(--border);
+  padding: 0.75rem;
+  color: var(--fg);
+}
+.table th {
+  text-align: left;
+  font-weight: 600;
 }
 
-body.dark .hero-description,
-body.dark .stat-label,
-body.dark .stat-number {
-    color: var(--qm-muted) !important;
+.alert {
+  padding: 1rem;
+  border-radius: 0.75rem;
+  background-color: rgba(220, 38, 38, 0.1);
+  color: #dc2626;
+  margin-bottom: 1rem;
 }
 
-body.dark .btn-primary,
-.bg-dark .btn-primary {
-    background: var(--qm-accent) !important;
-    border-color: rgba(22,163,74,0.95) !important;
-    color: #fff !important;
-    box-shadow: 0 10px 30px rgba(22,163,74,0.12) !important;
+.toast {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  background-color: var(--surface);
+  color: var(--fg);
+  border-radius: 0.75rem;
+  padding: 1rem 1.5rem;
+  box-shadow: 0 4px 6px var(--shadow);
+  z-index: 9999;
 }
 
-body.dark .btn-outline-light,
-.bg-dark .btn-outline-light {
-    color: #ffffff !important;
-    border-color: rgba(255,255,255,0.08) !important;
-    background: transparent !important;
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 10px var(--shadow);
 }
 
-body.dark .feature-card,
-body.dark .benefit-card,
-body.dark .testimonial-card,
-body.dark .image-card {
-    background: linear-gradient(180deg, rgba(8,10,8,0.6), rgba(7,9,7,0.55)) !important;
-    border: 1px solid rgba(22,163,74,0.06) !important;
-    box-shadow: 0 20px 60px rgba(6,9,6,0.6) !important;
-    color: var(--qm-text) !important;
+.table tr:hover {
+  background-color: rgba(22, 163, 74, 0.08);
 }
 
-body.dark .stat-icon,
-body.dark .feature-icon {
-    background: rgba(22,163,74,0.06) !important;
-    color: var(--qm-accent) !important;
+.sidebar-header {
+  padding: 1rem;
+  font-weight: 700;
+  font-size: 1.25rem;
+  color: var(--fg);
 }
 
-/* Testimonials and footer */
-body.dark .testimonial-text,
-body.dark .footer-description,
-body.dark .footer-links a,
-body.dark .footer-contact li {
-    color: var(--qm-muted) !important;
+.sidebar-footer {
+  position: absolute;
+  bottom: 1rem;
+  width: 100%;
+  padding: 1rem;
+  text-align: center;
+  font-size: 0.875rem;
+  color: var(--muted);
 }
 
-body.dark .footer {
-    background: #030403 !important;
-    border-top: 1px solid rgba(22,163,74,0.04) !important;
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  background-color: var(--surface);
+  color: var(--fg);
+  transition: all 0.3s;
+  cursor: pointer;
+}
+.icon-btn:hover {
+  background-color: rgba(22, 163, 74, 0.1);
 }
 
-/* Floating badges, glows */
-body.dark .floating-badge,
-body.dark .badge-1 {
-    background: var(--qm-accent) !important;
-    color: #fff !important;
-    box-shadow: 0 10px 40px rgba(22,163,74,0.18) !important;
+.avatar {
+  border-radius: 9999px;
+  width: 2.5rem;
+  height: 2.5rem;
+  display: inline-block;
+  overflow: hidden;
 }
 
-/* CTA section */
-body.dark .cta-section {
-    background: linear-gradient(135deg, rgba(9,40,16,0.6), rgba(7,20,12,0.9));
-    border-top: 1px solid rgba(22,163,74,0.06);
+@media (max-width: 1024px) {
+  .main {
+    margin-left: 0;
+    padding: 1rem;
+  }
+  .sidebar {
+    width: 100%;
+    height: auto;
+    position: relative;
+    border-right: none;
+  }
 }
 
-/* Ensure text contrast on small components */
-body.dark .btn-link,
-body.dark .btn {
-    color: #e6f6ec !important;
-}
-
-/* Make sure the navbar actions stay visible on dark */
-body.dark .navbar .btn,
-body.dark .navbar .user-avatar-wrapper,
-body.dark .navbar .theme-toggle {
-    z-index: 1500 !important;
-}
-
-/* small tweak for boxed layouts (keep both themes aligned) */
-@media (min-width: 992px) {
-    body.dark .navbar .container,
-    .navbar .container {
-        max-width: 1200px;
-        padding-left: 1.5rem;
-        padding-right: 1.5rem;
-    }
-}
-
-/* End dark theme overrides --------------------------------------------- */
-
-/* Ensure navbar layout is identical in dark mode (brand left, nav centered, actions right) */
-
-/* container should be a flex row and spread items across */
-body.dark .navbar .container,
-.bg-dark .navbar .container {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: space-between !important;
-    gap: 1rem !important;
-}
-
-/* keep brand left */
-body.dark .navbar-brand,
-.bg-dark .navbar-brand {
-    order: 0;
-    flex: 0 0 auto !important;
-}
-
-/* keep nav centered */
-body.dark .navbar-collapse,
-.bg-dark .navbar-collapse {
-    order: 1;
-    display: flex !important;
-    justify-content: center !important;
-    align-items: center !important;
-    flex: 1 1 auto !important;
-    min-width: 0 !important;
-}
-
-body.dark .navbar-nav,
-.bg-dark .navbar-nav {
-    display: flex !important;
-    flex-direction: row !important;
-    gap: 1.25rem !important;
-    margin-left: auto !important;
-    margin-right: auto !important;
-}
-
-/* keep action group (theme toggle, buttons, avatar) on the right */
-body.dark .navbar .d-flex.align-items-center,
-.bg-dark .navbar .d-flex.align-items-center {
-    order: 2;
-    display: flex !important;
-    align-items: center !important;
-    gap: 1rem !important;
-}
-
-/* Light + Dark: enforce identical header positioning globally */
-.navbar .container {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: space-between !important;
-    gap: 1rem !important;
-}
-
-.navbar .navbar-brand {
-    order: 0;
-    flex: 0 0 auto !important;
-}
-
-.navbar .navbar-collapse {
-    order: 1;
-    display: flex !important;
-    justify-content: center !important;
-    align-items: center !important;
-    flex: 1 1 auto !important;
-    min-width: 0 !important;
-}
-
-.navbar .navbar-nav {
-    display: flex !important;
-    flex-direction: row !important;
-    gap: 1.25rem !important;
-    margin-left: auto !important;
-    margin-right: auto !important;
-}
-
-.navbar .d-flex.align-items-center {
-    order: 2;
-    display: flex !important;
-    align-items: center !important;
-    gap: 1rem !important;
-    flex: 0 0 auto !important;
-}
-
-body.dark .navbar .navbar-toggler,
-body.dark .navbar .theme-toggle,
-body.dark .navbar .btn {
-    visibility: visible !important;
-    opacity: 1 !important;
-    pointer-events: auto !important;
+@media (max-width: 640px) {
+  .nav-item {
+    padding: 0.5rem 0.75rem;
+  }
+  .btn {
+    padding: 0.5rem 1rem;
+  }
+  .input {
+    padding: 0.5rem 0.75rem;
+  }
 }
