@@ -1,4 +1,8 @@
-<div class="flex-1 flex flex-col min-w-0 bg-[var(--background)]">
+<div
+  class="min-h-screen transition-colors duration-700 ease-in-out"
+  [class.bg-white]="!themeService.isDarkMode()"
+  [class.bg-black]="themeService.isDarkMode()"
+>
 
   <app-doctor-header
     [initials]="getDoctorInitials()"
@@ -8,133 +12,111 @@
     (themeChange)="onThemeChange($event)"
   ></app-doctor-header>
 
-  <main class="flex-1 overflow-y-auto p-6 lg:p-10">
+  <main class="max-w-7xl mx-auto px-6 py-10">
 
-    <div class="mb-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-12">
       <div>
-        <h1 class="text-4xl font-bold text-[var(--text-primary)]">Prescriptions</h1>
-        <p class="mt-3 text-lg text-[var(--text-secondary)]">
-          Create and manage digital prescriptions for your patients
+        <h1
+          class="text-4xl font-extrabold tracking-tight transition-colors duration-700"
+          [class.text-black]="!themeService.isDarkMode()"
+          [class.text-white]="themeService.isDarkMode()"
+        >
+          Prescriptions
+        </h1>
+        <p
+          class="mt-3 text-lg transition-colors duration-700"
+          [class.text-gray-600]="!themeService.isDarkMode()"
+          [class.text-gray-400]="themeService.isDarkMode()"
+        >
+          Manage and issue digital prescriptions
         </p>
       </div>
 
       <button
         (click)="createNewPrescription()"
-        class="px-6 py-4 rounded-2xl font-semibold text-white bg-[var(--primary)] hover:bg-[var(--primary-hover)] active:bg-[var(--primary-active)] shadow-lg transition-all flex items-center gap-3"
+        class="px-7 py-4 rounded-2xl font-semibold text-white bg-gradient-to-r from-[#1ED760] to-[#1DB954] hover:from-[#21e065] hover:to-[#1ed760] shadow-[0_10px_20px_rgba(29,185,84,0.35)] hover:shadow-[0_15px_25px_rgba(29,185,84,0.45)] focus:outline-none focus:ring-2 focus:ring-[#1DB954] active:scale-95 transition-all"
       >
-        <i class="bi bi-plus-circle text-xl"></i>
-        New Prescription
+        + New Prescription
       </button>
     </div>
 
-    <div class="mb-10">
-      <div class="relative max-w-3xl">
-        <i class="bi bi-search absolute left-5 top-1/2 -translate-y-1/2 text-xl text-[var(--text-muted)]"></i>
-        <input
-          type="text"
-          placeholder="Search by patient, medication, dosage..."
-          [value]="searchQuery()"
-          (input)="searchQuery.set($any($event.target).value); onSearchChange()"
-          class="w-full pl-14 pr-6 py-5 rounded-2xl text-lg bg-[var(--surface)] border border-[var(--border-light)] focus:outline-none focus:ring-4 focus:ring-[var(--primary-light)] focus:border-[var(--primary)] transition"
-        />
-      </div>
+    <div class="mb-12">
+      <input
+        type="text"
+        placeholder="Search prescriptions..."
+        [value]="searchQuery()"
+        (input)="searchQuery.set($any($event.target).value); onSearchChange()"
+        class="w-full max-w-3xl px-6 py-5 rounded-2xl outline-none transition-all duration-700 border"
+        [class.bg-white]="!themeService.isDarkMode()"
+        [class.text-black]="!themeService.isDarkMode()"
+        [class.border-gray-300]="!themeService.isDarkMode()"
+        [class.bg-zinc-900]="themeService.isDarkMode()"
+        [class.text-white]="themeService.isDarkMode()"
+        [class.border-zinc-700]="themeService.isDarkMode()"
+      />
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
 
-      <ng-container *ngIf="isLoading(); else content">
+      <ng-container *ngIf="isLoading(); else loaded">
 
         <div
           *ngFor="let _ of skeletons"
-          class="rounded-3xl border border-[var(--border-light)] bg-[var(--surface)] shadow-md p-8 animate-pulse"
-        >
-          <div class="flex items-center gap-5 mb-6">
-            <div class="w-16 h-16 rounded-2xl bg-[var(--surface-secondary)]"></div>
-            <div class="flex-1 space-y-3">
-              <div class="h-5 w-3/4 rounded bg-[var(--surface-secondary)]"></div>
-              <div class="h-4 w-1/2 rounded bg-[var(--surface-secondary)]"></div>
-            </div>
-          </div>
-
-          <div class="space-y-4">
-            <div class="h-4 w-full rounded bg-[var(--surface-secondary)]"></div>
-            <div class="h-4 w-5/6 rounded bg-[var(--surface-secondary)]"></div>
-            <div class="h-4 w-2/3 rounded bg-[var(--surface-secondary)]"></div>
-          </div>
-
-          <div class="flex gap-4 mt-8">
-            <div class="h-12 flex-1 rounded-xl bg-[var(--surface-secondary)]"></div>
-            <div class="h-12 flex-1 rounded-xl bg-[var(--surface-secondary)]"></div>
-          </div>
-        </div>
+          class="h-80 rounded-3xl animate-pulse"
+          [class.bg-gray-200]="!themeService.isDarkMode()"
+          [class.bg-zinc-800]="themeService.isDarkMode()"
+        ></div>
 
       </ng-container>
 
-      <ng-template #content>
+      <ng-template #loaded>
 
         <div
-          *ngFor="let p of filteredPrescriptions(); let i = index"
-          class="bg-[var(--surface)] rounded-3xl border border-[var(--border-light)] shadow-md hover:shadow-xl transition-all duration-500 overflow-hidden"
-          [@fadeInUp]
+          *ngFor="let p of filteredPrescriptions()"
+          class="rounded-3xl overflow-hidden transform hover:-translate-y-2 transition-all duration-700"
+          [class.bg-white]="!themeService.isDarkMode()"
+          [class.text-black]="!themeService.isDarkMode()"
+          [class.shadow-xl]="!themeService.isDarkMode()"
+          [class.bg-zinc-900]="themeService.isDarkMode()"
+          [class.text-white]="themeService.isDarkMode()"
+          [class.border]="themeService.isDarkMode()"
+          [class.border-zinc-700]="themeService.isDarkMode()"
+          [@fadeUp]
         >
-          <div class="p-8 border-b border-[var(--border-light)] flex justify-between">
-            <div>
-              <h3 class="text-xl font-bold text-[var(--text-primary)]">
-                {{ p.medication }}
-              </h3>
-              <p class="mt-1 text-[var(--text-secondary)]">
-                {{ p.dosage }}
-              </p>
-              <p class="mt-2 text-sm text-[var(--text-muted)]">
-                Patient: {{ getPatientName(p) }}
-              </p>
-            </div>
 
-            <span
-              class="px-4 py-2 rounded-full text-sm font-semibold"
-              [style.background]="getStatusBg(p.status)"
-              [style.color]="getStatusText(p.status)"
-            >
-              {{ p.status | titlecase }}
-            </span>
+          <div class="p-7 border-b"
+            [class.border-gray-200]="!themeService.isDarkMode()"
+            [class.border-zinc-700]="themeService.isDarkMode()"
+          >
+            <h3 class="text-xl font-bold">{{ p.medication }}</h3>
+            <p class="opacity-70 mt-1">{{ p.dosage }}</p>
+            <p class="mt-2 text-sm opacity-60">Patient: {{ getPatientName(p) }}</p>
           </div>
 
-          <div class="p-8 space-y-4 text-[var(--text-secondary)]">
+          <div class="p-7 space-y-3 opacity-80">
             <div>Frequency: {{ p.frequency }}</div>
             <div>Duration: {{ p.duration }}</div>
-            <div>Issued: {{ p.prescriptionDate | date:'mediumDate' }}</div>
+            <div>Date: {{ p.prescriptionDate | date }}</div>
           </div>
 
-          <div class="p-8 pt-0 flex gap-4 border-t border-[var(--border-light)]">
+          <div class="p-7 pt-0 flex gap-4">
             <button
-              (click)="viewPrescription(p)"
-              class="flex-1 py-4 rounded-xl font-semibold bg-[var(--surface-secondary)] hover:bg-[var(--surface-tertiary)] transition"
+              class="flex-1 py-3 rounded-xl font-semibold transition-all"
+              [class.bg-gray-100]="!themeService.isDarkMode()"
+              [class.hover:bg-gray-200]="!themeService.isDarkMode()"
+              [class.bg-zinc-800]="themeService.isDarkMode()"
+              [class.hover:bg-zinc-700]="themeService.isDarkMode()"
             >
               View
             </button>
+
             <button
-              (click)="downloadPrescription(p)"
-              class="flex-1 py-4 rounded-xl font-semibold text-[var(--primary)] bg-[var(--primary-light)] hover:bg-[var(--primary-lighter)] transition"
+              class="flex-1 py-3 rounded-xl font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:scale-105 transition-all"
             >
               Download
             </button>
           </div>
-        </div>
 
-        <div
-          *ngIf="filteredPrescriptions().length === 0"
-          class="col-span-full flex flex-col items-center justify-center py-32 text-center"
-        >
-          <i class="bi bi-prescription2 text-8xl text-[var(--text-muted)] mb-8"></i>
-          <p class="text-2xl font-semibold text-[var(--text-secondary)]">
-            No prescriptions found
-          </p>
-          <button
-            (click)="createNewPrescription()"
-            class="mt-8 px-8 py-4 rounded-2xl font-semibold text-white bg-[var(--primary)] hover:bg-[var(--primary-hover)] transition"
-          >
-            Create First Prescription
-          </button>
         </div>
 
       </ng-template>

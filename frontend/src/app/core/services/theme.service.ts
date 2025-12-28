@@ -21,6 +21,23 @@ export class ThemeService {
     }
   }
 
+  setTheme(mode: 'light' | 'dark'): void {
+    this.isDarkMode.set(mode === 'dark')
+    if (mode === 'dark') {
+      document.documentElement.classList.add('dark-theme')
+      try {
+        document.body.classList.add('dark')
+      } catch (e) {}
+      localStorage.setItem('theme', 'dark')
+    } else {
+      document.documentElement.classList.remove('dark-theme')
+      try {
+        document.body.classList.remove('dark')
+      } catch (e) {}
+      localStorage.setItem('theme', 'light')
+    }
+  }
+
   toggleTheme(): void {
     this.isDarkMode.update((value) => !value)
 

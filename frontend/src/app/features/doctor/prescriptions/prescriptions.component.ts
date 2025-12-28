@@ -1,43 +1,35 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
-import { Router, RouterModule } from '@angular/router';
+import { Router } from '@angular/router';
 import { trigger, transition, style, animate } from '@angular/animations';
 
 import { DoctorHeaderComponent } from '../shared/doctor-header/doctor-header.component';
-import { DoctorSidebarComponent } from '../shared/doctor-sidebar/doctor-sidebar.component';
-
+import { ThemeService } from '@core/services/theme.service';
 import { AuthService } from '@core/services/auth.service';
 import { PrescriptionService, Prescription } from '@core/services/prescription.service';
 import { NotificationService } from '@core/services/notification.service';
-import { ThemeService } from '@core/services/theme.service';
 
 @Component({
   selector: 'app-doctor-prescriptions',
   standalone: true,
-  imports: [
-    CommonModule,
-    DatePipe,
-    RouterModule,
-    DoctorHeaderComponent,
-    DoctorSidebarComponent
-  ],
+  imports: [CommonModule, DatePipe, DoctorHeaderComponent],
   templateUrl: './prescriptions.component.html',
   animations: [
-    trigger('fadeInUp', [
+    trigger('fadeUp', [
       transition(':enter', [
-        style({ opacity: 0, transform: 'translateY(24px)' }),
-        animate('600ms cubic-bezier(0.16, 1, 0.3, 1)', style({ opacity: 1, transform: 'translateY(0)' }))
+        style({ opacity: 0, transform: 'translateY(30px)' }),
+        animate('700ms cubic-bezier(.16,1,.3,1)', style({ opacity: 1, transform: 'translateY(0)' }))
       ])
     ])
   ]
 })
 export class PrescriptionsComponent implements OnInit {
 
-  private authService = inject(AuthService);
-  private prescriptionService = inject(PrescriptionService);
-  private notificationService = inject(NotificationService);
-  private router = inject(Router);
   themeService = inject(ThemeService);
+  private auth = inject(AuthService);
+  private service = inject(PrescriptionService);
+  private notify = inject(NotificationService);
+  private router = inject(Router);
 
   prescriptions = signal<Prescription[]>([]);
   filteredPrescriptions = signal<Prescription[]>([]);
@@ -49,19 +41,17 @@ export class PrescriptionsComponent implements OnInit {
   skeletons = Array(6);
 
   ngOnInit(): void {
-    this.currentUser.set(this.authService.currentUser());
-    this.loadPrescriptions();
-    this.notificationService.getUnreadCount().subscribe(c =>
-      this.unreadNotificationCount.set(c || 0)
-    );
+    this.currentUser.set(this.auth.currentUser());
+    this.load();
+    this.notify.getUnreadCount().subscribe(c => this.unreadNotificationCount.set(c || 0));
   }
 
-  loadPrescriptions(): void {
+  load(): void {
     this.isLoading.set(true);
-    this.prescriptionService.getAll(this.searchQuery() || undefined).subscribe({
-      next: data => {
-        this.prescriptions.set(data);
-        this.filteredPrescriptions.set(data);
+    this.service.getAll(this.searchQuery() || undefined).subscribe({
+      next: d => {
+        this.prescriptions.set(d);
+        this.filteredPrescriptions.set(d);
         this.isLoading.set(false);
       },
       error: () => this.isLoading.set(false)
@@ -69,41 +59,16 @@ export class PrescriptionsComponent implements OnInit {
   }
 
   onSearchChange(): void {
-    this.loadPrescriptions();
+    this.load();
   }
 
   getPatientName(p: Prescription): string {
-    return p.patient
-      ? `${p.patient.firstName} ${p.patient.lastName}`
-      : 'Unknown Patient';
+    return p.patient ? `${p.patient.firstName} ${p.patient.lastName}` : 'Unknown';
   }
 
   getDoctorInitials(): string {
     const u = this.currentUser();
-    if (!u) return 'DR';
-    return (u.firstName[0] + u.lastName[0]).toUpperCase();
-  }
-
-  getStatusBg(status: string): string {
-    if (status === 'active') return 'var(--success-light)';
-    if (status === 'completed') return 'var(--info-light)';
-    if (status === 'cancelled') return 'var(--error-light)';
-    return 'var(--surface-secondary)';
-  }
-
-  getStatusText(status: string): string {
-    if (status === 'active') return 'var(--success)';
-    if (status === 'completed') return 'var(--info)';
-    if (status === 'cancelled') return 'var(--error)';
-    return 'var(--text-secondary)';
-  }
-
-  viewPrescription(p: Prescription): void {
-    console.log(p);
-  }
-
-  downloadPrescription(p: Prescription): void {
-    console.log(p);
+    return u ? (u.firstName[0] + u.lastName[0]).toUpperCase() : 'DR';
   }
 
   createNewPrescription(): void {
@@ -111,8 +76,8 @@ export class PrescriptionsComponent implements OnInit {
   }
 
   onThemeChange(mode: 'light' | 'dark'): void {
-    const isDark = this.themeService.isDarkMode();
-    if (mode === 'dark' && !isDark) this.themeService.toggleTheme();
-    if (mode === 'light' && isDark) this.themeService.toggleTheme();
+    const dark = this.themeService.isDarkMode();
+    if (mode === 'dark' && !dark) this.themeService.toggleTheme();
+    if (mode === 'light' && dark) this.themeService.toggleTheme();
   }
 }
