@@ -16,7 +16,7 @@
       <a *ngFor="let item of menuItems()" [routerLink]="item.route" routerLinkActive="bg-[var(--sidebar-active-bg)] text-[var(--sidebar-active-text)] font-semibold border-l-4 border-[var(--primary)]" class="flex items-center gap-3 px-6 py-3 text-[var(--sidebar-text)] hover:bg-[var(--sidebar-hover)] hover:text-[var(--text-primary)] transition-colors group relative">
         <ng-container *ngIf="item.imgSrc; else iconTpl">
           <img 
-            [src]="item.label === 'Prescriptions' && themeService?.isDarkMode && themeService.isDarkMode() ? 'assets/images/icons8-pill-50.png' : item.imgSrc" 
+            [src]="item.label === 'Prescriptions' && themeService.isDarkMode() ? 'assets/images/icons8-pill-50.png' : item.imgSrc" 
             alt="{{ item.label }}" 
             class="w-5 h-5 opacity-80 sidebar-pill-icon" 
           />

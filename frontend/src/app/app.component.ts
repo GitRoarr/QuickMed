@@ -1,5 +1,6 @@
 
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, inject } from "@angular/core";
+import { ThemeService } from '@core/services/theme.service';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet } from "@angular/router";
 import { ToastContainerComponent } from "@shared/components/toast/toast-container.component";
@@ -14,27 +15,18 @@ import { ToastContainerComponent } from "@shared/components/toast/toast-containe
   `
 })
 export class AppComponent implements OnInit {
-  isDark = false;
+  themeService = inject(ThemeService);
 
   ngOnInit() {
+    // ThemeService constructor already applies the saved theme
+    // Optionally, re-apply on init to guarantee
     const saved = localStorage.getItem('theme');
     if (saved === 'dark' || saved === 'light') {
-      this.setTheme(saved);
+      this.themeService.setTheme(saved as 'dark' | 'light');
     } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      this.setTheme('dark');
+      this.themeService.setTheme('dark');
     } else {
-      this.setTheme('light');
+      this.themeService.setTheme('light');
     }
-  }
-
-  toggleTheme() {
-    this.setTheme(this.isDark ? 'light' : 'dark');
-  }
-
-  setTheme(theme: 'light' | 'dark') {
-    document.body.classList.toggle('dark', theme === 'dark');
-    document.body.classList.toggle('light', theme === 'light');
-    this.isDark = theme === 'dark';
-    localStorage.setItem('theme', theme);
   }
 }
