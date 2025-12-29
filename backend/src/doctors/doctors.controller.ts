@@ -3,6 +3,7 @@ import { DoctorsService } from './doctors.service';
 import { CreateDoctorDto } from './dto/create-doctor.dto';
 import { UpdateDoctorDto } from './dto/update-doctor.dto';
 import { SetDoctorPasswordDto } from './dto/set-doctor-password.dto';
+import { UpdateDoctorSettingsDto } from './dto/update-doctor-settings.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -30,6 +31,20 @@ export class DoctorsController {
   @UseGuards(JwtAuthGuard)
   getDashboardData(@CurrentUser() user: User) {
     return this.doctorsService.getDashboardData(user.id);
+  }
+
+  @Get('settings')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.DOCTOR)
+  getSettings(@CurrentUser() user: User) {
+    return this.doctorsService.getSettings(user.id);
+  }
+
+  @Patch('settings')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.DOCTOR)
+  updateSettings(@CurrentUser() user: User, @Body() dto: UpdateDoctorSettingsDto) {
+    return this.doctorsService.updateSettings(user.id, dto);
   }
 
   @Get('stats')

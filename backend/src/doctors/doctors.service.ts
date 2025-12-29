@@ -5,6 +5,7 @@ import { User } from "../users/entities/user.entity";
 import { Appointment } from "../appointments/entities/appointment.entity";
 import { CreateDoctorDto } from "./dto/create-doctor.dto";
 import { UpdateDoctorDto } from "./dto/update-doctor.dto";
+import { UpdateDoctorSettingsDto } from "./dto/update-doctor-settings.dto";
 import * as bcrypt from "bcrypt";
 import { v4 as uuidv4 } from "uuid";
 import { UserRole, AppointmentStatus, PaymentStatus } from "../common/index";
@@ -237,6 +238,31 @@ export class DoctorsService {
     const doctor = await this.usersRepository.findOne({ where: { id, role: UserRole.DOCTOR } });
     if (!doctor) throw new NotFoundException('Doctor not found');
     return doctor;
+  }
+
+  async getSettings(doctorId: string) {
+    const doctor = await this.findOne(doctorId);
+    // Example: return only settings fields
+    return {
+      notificationsEnabled: doctor.notificationsEnabled ?? true,
+      theme: doctor.theme ?? 'light',
+      // Add more fields as needed
+    };
+  }
+
+  async updateSettings(doctorId: string, dto: UpdateDoctorSettingsDto) {
+    const doctor = await this.findOne(doctorId);
+    if (dto.notificationsEnabled !== undefined) doctor.notificationsEnabled = dto.notificationsEnabled;
+    if (dto.theme !== undefined) doctor.theme = dto.theme;
+    // Add more fields as needed
+    await this.usersRepository.save(doctor);
+    return {
+      success: true,
+      settings: {
+        notificationsEnabled: doctor.notificationsEnabled,
+        theme: doctor.theme,
+      },
+    };
   }
 
   async update(id: string, updateDoctorDto: UpdateDoctorDto): Promise<User> {

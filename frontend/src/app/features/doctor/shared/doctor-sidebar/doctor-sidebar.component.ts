@@ -1,4 +1,5 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
+import { ThemeService } from '@core/services/theme.service';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { AuthService } from '@core/services/auth.service';
@@ -18,9 +19,10 @@ interface MenuItem {
   standalone: true,
   imports: [CommonModule, RouterModule],
   templateUrl: './doctor-sidebar.component.html',
-  styleUrls: ['./doctor-sidebar.component.css']
+  styleUrls: ['./doctor-sidebar.component.css', './sidebar-pill-icon.css']
 })
 export class DoctorSidebarComponent implements OnInit {
+    themeService = inject(ThemeService);
   private authService = inject(AuthService);
   private appointmentService = inject(AppointmentService);
   private messageService = inject(MessageService);

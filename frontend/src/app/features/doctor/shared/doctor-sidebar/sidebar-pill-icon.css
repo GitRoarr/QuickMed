@@ -1,0 +1,8 @@
+.sidebar-pill-icon {
+  filter: grayscale(1) brightness(0.7);
+}
+.dark .sidebar-pill-icon {
+  filter: grayscale(1) brightness(0.5);
+  /* Use a gray color for the icon in dark mode */
+  opacity: 0.7;
+}

@@ -102,6 +102,13 @@ export class User extends BaseEntity {
   @Column({ type: 'boolean', default: true })
   isActive: boolean;
 
+  // Doctor settings fields
+  @Column({ type: 'boolean', default: true })
+  notificationsEnabled: boolean;
+
+  @Column({ type: 'varchar', default: 'light' })
+  theme: string;
+
   @Column({ nullable: true })
   inviteToken: string; // Unique per active invitation (enforced in application logic)
 
