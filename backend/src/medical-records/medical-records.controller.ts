@@ -1,4 +1,5 @@
-import { Controller, Post, Body, UseGuards, Get, Param, Delete, Query } from "@nestjs/common";
+import { Controller, Post, Body, UseGuards, Get, Param, Delete, Query, UploadedFile, UseInterceptors } from "@nestjs/common";
+import { FileInterceptor } from '@nestjs/platform-express';
 import { MedicalRecordsService } from "./medical-records.service";
 import { CreateMedicalRecordDto } from "./dto/create-medical-record.dto";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
@@ -11,6 +12,11 @@ import { UserRole } from "../common/index";
 export class MedicalRecordsController {
   constructor(private readonly recordsService: MedicalRecordsService) {}
 
+  @Post('upload')
+  @UseInterceptors(FileInterceptor('file'))
+  uploadRecord(@UploadedFile() file: Express.Multer.File, @Body('patientId') patientId: string, @Body('doctorId') doctorId: string) {
+    return this.recordsService.saveRecordFile(file, patientId, doctorId);
+  }
   @Post()
   create(@Body() dto: CreateMedicalRecordDto, @CurrentUser() user: User) {
     if (!dto.doctorId) {

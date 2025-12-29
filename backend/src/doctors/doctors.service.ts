@@ -318,21 +318,17 @@ export class DoctorsService {
     const uniquePatients = new Set(allAppointments.map(a => a.patientId));
     const totalPatients = uniquePatients.size;
 
-    // Calculate average consultation time (mock for now - can be calculated from actual data)
-    const avgConsultationTime = 32; // minutes
+    const avgConsultationTime = 32;
 
-    // Calculate satisfaction rate from reviews
     const { average: satisfactionRate, count: satisfactionCount } = await this.reviewsService.getDoctorRating(doctorId);
 
-    // Get appointments by time slot for today
     const appointmentsByTime: { [key: string]: { completed: number; pending: number } } = {};
     const timeSlots = ['09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00'];
     timeSlots.forEach(slot => {
       appointmentsByTime[slot] = { completed: 0, pending: 0 };
     });
-
     todayAppointments.forEach(apt => {
-      const timeSlot = apt.appointmentTime.substring(0, 5); // Get HH:MM
+      const timeSlot = apt.appointmentTime.substring(0, 5);
       const slot = timeSlots.find(s => s === timeSlot) || timeSlot;
       if (!appointmentsByTime[slot]) {
         appointmentsByTime[slot] = { completed: 0, pending: 0 };
@@ -344,7 +340,6 @@ export class DoctorsService {
       }
     });
 
-    // Get recent patients (last 5 unique patients)
     const recentPatients = Array.from(uniquePatients)
       .slice(0, 5)
       .map(patientId => {
@@ -353,7 +348,6 @@ export class DoctorsService {
       })
       .filter(Boolean);
 
-    // Calculate trends (mock for now - can be calculated from historical data)
     const yesterday = new Date(today);
     yesterday.setDate(yesterday.getDate() - 1);
     const yesterdayAppointments = await this.appointmentsRepository.count({
@@ -363,19 +357,17 @@ export class DoctorsService {
       },
     });
 
-    // Revenue today (sum of successful payments for this doctor's appointments)
     const revenueRaw = await this.paymentRepository
       .createQueryBuilder('payment')
       .innerJoin(Appointment, 'appointment', 'appointment.id = payment.appointmentId')
       .where('appointment.doctorId = :doctorId', { doctorId })
-      .andWhere('payment.status = :status', { status: PaymentStatus.SUCCESS })
+      .andWhere('payment.status = :status', { status: PaymentStatus.PAID })
       .andWhere('payment.paidAt BETWEEN :start AND :end', { start: today, end: tomorrow })
       .select('COALESCE(SUM(payment.amount), 0)', 'sum')
       .getRawOne();
 
     const revenueToday = Number(revenueRaw?.sum || 0);
 
-    // Unread messages for the doctor
     const unreadMessages = await this.messagesService.getUnreadCount({ id: doctorId, role: UserRole.DOCTOR });
 
     return {
@@ -467,10 +459,8 @@ export class DoctorsService {
     const total = allAppointments.length;
     const completionRate = total > 0 ? (completed / total) * 100 : 0;
 
-    // Get unique patients
     const uniquePatients = new Set(allAppointments.map(a => a.patientId));
     
-    // Calculate new patients (patients who had their first appointment in this period)
     const firstAppointments = await this.appointmentsRepository
       .createQueryBuilder('appointment')
       .select('MIN(appointment.appointmentDate)', 'firstDate')
@@ -483,7 +473,6 @@ export class DoctorsService {
       (fa: any) => new Date(fa.firstDate) >= startDate
     ).length;
 
-    // Group appointments by month for trends
     const monthlyData: { [key: string]: { completed: number; cancelled: number; noShow: number } } = {};
     allAppointments.forEach(apt => {
       const monthKey = new Date(apt.appointmentDate).toISOString().substring(0, 7); // YYYY-MM

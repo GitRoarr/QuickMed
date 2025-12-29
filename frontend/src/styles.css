@@ -1,3 +1,41 @@
+/* Patient Satisfaction Card Custom Styles */
+.patient-satisfaction-card {
+  box-shadow: 0 6px 32px 0 rgba(0,0,0,0.18), 0 1.5px 4px 0 rgba(0,0,0,0.12);
+  border: 1.5px solid var(--border);
+  border-radius: 1.25rem;
+  background: linear-gradient(135deg, var(--surface) 80%, var(--primary)/0.08 100%);
+  position: relative;
+  overflow: hidden;
+  transition: box-shadow 0.3s, border-color 0.3s, transform 0.2s;
+}
+.patient-satisfaction-card:hover {
+  box-shadow: 0 12px 48px 0 rgba(0,0,0,0.28), 0 3px 12px 0 rgba(0,0,0,0.18);
+  border-color: var(--primary);
+  transform: translateY(-4px) scale(1.02);
+}
+.patient-satisfaction-card .icon {
+  background: var(--primary);
+  color: #fff;
+  border-radius: 1rem;
+  box-shadow: 0 2px 8px 0 rgba(22,163,74,0.10);
+}
+.patient-satisfaction-card .title {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: var(--muted);
+  margin-bottom: 0.5rem;
+}
+.patient-satisfaction-card .score {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--primary);
+  letter-spacing: 1px;
+}
+.patient-satisfaction-card .max-score {
+  font-size: 1.2rem;
+  color: var(--muted);
+  font-weight: 400;
+}
 html, body {
   height: 100%;
   width: 100%;
@@ -107,7 +145,7 @@ body {
   color: var(--primary);
 }
 
-/* .btn */
+
 .btn {
   display: inline-flex;
   align-items: center;

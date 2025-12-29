@@ -43,21 +43,22 @@
             <button (click)="nextMonth()" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-[var(--surface-secondary)] text-[var(--text-secondary)] transition-colors"><i class="bi bi-chevron-right"></i></button>
           </div>
 
-          <div class="grid grid-cols-7 gap-2 mb-2 text-center">
-            <div *ngFor="let day of ['S','M','T','W','T','F','S']" class="text-xs font-bold text-[var(--text-muted)] py-1">{{ day }}</div>
+          <div class="calendar-grid mb-2 text-center">
+            <div *ngFor="let day of ['Sun','Mon','Tue','Wed','Thu','Fri','Sat']" class="calendar-day-label">{{ day[0] }}</div>
           </div>
-          <div class="grid grid-cols-7 gap-2">
+          <div class="calendar-grid">
             <button 
               *ngFor="let date of getCalendarDays()" 
               (click)="selectDate(date)"
-              [class.bg-[var(--primary)]]="isSelected(date)"
-              [class.text-white]="isSelected(date)"
-              [class.font-bold]="isSelected(date)"
-              [class.bg-[var(--primary-light)]]="isToday(date) && !isSelected(date)"
-              [class.text-[var(--primary)]]="isToday(date) && !isSelected(date)"
-              [class.text-[var(--text-muted)]]="!isCurrentMonth(date)"
-              class="aspect-square rounded-xl text-sm flex items-center justify-center hover:bg-[var(--surface-secondary)] transition-all border border-transparent hover:border-[var(--border-default)] max-w-[200px] max-h-[200px] w-full h-full box-border">
-              {{ date.getDate() }}
+              [ngClass]="{
+                'calendar-day-selected': isSelected(date),
+                'calendar-day-today': isToday(date) && !isSelected(date),
+                'calendar-day-outside': !isCurrentMonth(date),
+                'calendar-day': true
+              }"
+              >
+              <span>{{ date.getDate() }}</span>
+              <span *ngIf="hasAppointments(date)" class="calendar-dot"></span>
             </button>
           </div>
 

@@ -30,8 +30,8 @@
 }
 
 body.dark, :root.dark {
-  --tab-bg: #0f0f0f;
-  --tab-btn-bg: #0f0f0f;
+  --tab-bg: #182135;
+  --tab-btn-bg: #232e47;
 }
 /* Custom Scrollbar for the sidebar and main content */
 ::-webkit-scrollbar {

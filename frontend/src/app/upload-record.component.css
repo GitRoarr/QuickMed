@@ -1,0 +1,23 @@
+.upload-btn {
+  background: #16a34a;
+  color: #fff;
+  border: none;
+  border-radius: 16px;
+  padding: 24px 48px;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+.icon {
+  font-size: 24px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

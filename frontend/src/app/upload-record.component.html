@@ -1,0 +1,16 @@
+
+<input type="file" #fileInput style="display: none" (change)="onFileSelected($event)" />
+<button class="upload-btn" (click)="fileInput.click()" [disabled]="uploading">
+  <span class="icon">+</span> Upload Record
+</button>
+
+<div *ngIf="uploading" style="margin-top: 16px; color: #16a34a;">Uploading...</div>
+<div *ngIf="uploadResult" style="margin-top: 16px; color: #16a34a;">
+  <strong>Upload successful!</strong><br />
+  <span *ngIf="uploadResult.url">
+    <a [href]="uploadResult.url" target="_blank">View uploaded file</a>
+  </span>
+</div>
+<div *ngIf="uploadError" style="margin-top: 16px; color: #dc2626;">
+  <strong>{{ uploadError }}</strong>
+</div>

@@ -1,4 +1,6 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { join } from 'path';
+import { writeFileSync } from 'fs';
+import { Injectable, NotFoundException, ForbiddenException, BadRequestException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { MedicalRecord, MedicalRecordType } from "./entities/medical-record.entity";
@@ -38,14 +40,33 @@ export class MedicalRecordsService {
 
     const saved = await this.recordsRepository.save(record);
 
-    // update patient count if exists
-    try {
-      this.usersService.update(patient.id, { medicalRecordsCount: (patient as any).medicalRecordsCount ? (patient as any).medicalRecordsCount + 1 : 1 });
-    } catch (e) {
-      // ignore update failures
+    return saved;
+  }
+
+  async saveRecordFile(file: Express.Multer.File, patientId: string, doctorId?: string) {
+    if (!file) throw new BadRequestException('No file uploaded');
+    if (file.size > 10 * 1024 * 1024) throw new BadRequestException('File too large (max 10MB)');
+    if (!['application/pdf', 'image/png', 'image/jpeg'].includes(file.mimetype)) {
+      throw new BadRequestException('Invalid file type. Only PDF, PNG, JPEG allowed.');
     }
 
-    return saved;
+    const uploadPath = join(__dirname, '../../uploads', file.originalname);
+    writeFileSync(uploadPath, file.buffer);
+
+    const createDto: any = {
+      patientId,
+      doctorId,
+      title: file.originalname,
+      fileUrl: `/uploads/${file.originalname}`,
+      fileSize: file.size,
+      type: 'FILE',
+    };
+    const record = await this.create(createDto);
+    return {
+      message: 'File uploaded successfully',
+      record,
+      url: createDto.fileUrl,
+    };
   }
 
   async findByPatient(patientId: string) {
@@ -82,5 +103,6 @@ export class MedicalRecordsService {
       throw new NotFoundException('Record not found or access denied');
     }
     await this.recordsRepository.remove(rec);
+    return { deleted: true };
   }
 }
