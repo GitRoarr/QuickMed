@@ -1,16 +1,15 @@
 <div class="patient-shell" [class.sidebar-open]="sidebarOpen" [class.dark]="themeService.isDarkMode()">
   <aside class="patient-shell__sidebar">
     <div class="patient-shell__brand" (click)="navigate('/')" title="Back to Home">
-      <div style="display:flex;align-items:center;gap:.5rem;">
+      <div class="brand-container">
         <div class="brand-icon">
-          <img src="assets/images/QuickMed-Logo.png" alt="QuickMed Logo" class="h-8 w-8 rounded" />
+          <img src="assets/images/QuickMed-Logo.png" alt="QuickMed Logo" />
         </div>
-        <div>
+        <div class="brand-text">
           <p class="brand-title">QuickMed</p>
           <p class="brand-subtitle">Patient Portal</p>
         </div>
       </div>
-
     </div>
 
     <nav class="patient-shell__nav" [attr.aria-hidden]="!sidebarOpen && mobile">
@@ -19,9 +18,11 @@
         class="patient-shell__nav-item"
         [routerLink]="item.route"
         routerLinkActive="active"
-        [routerLinkActiveOptions]="{ exact: item.exact !== false }">
+        [routerLinkActiveOptions]="{ exact: item.exact !== false }"
+        (click)="closeSidebar()"
+      >
         <i class="bi" [ngClass]="item.icon"></i>
-        <span (click)="closeSidebar()">{{ item.label }}</span>
+        <span>{{ item.label }}</span>
       </a>
     </nav>
 
@@ -66,4 +67,3 @@
     <ng-content></ng-content>
   </main>
 </div>
-

@@ -11,11 +11,16 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: #ffffff;
+  background: var(--card-bg);
   padding: 1.75rem 2.4rem;
   border-radius: 22px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border);
   box-shadow: 0 30px 80px -60px rgba(15, 23, 42, 0.55);
+}
+
+:host-context(.patient-shell.dark) .dashboard-header {
+  background: var(--surface);
+  border: 1px solid #1f2937;
 }
 
 .dashboard-header h1 {

@@ -1,5 +1,6 @@
 <app-patient-shell active="profile">
   <div class="profile-page" *ngIf="user() as profile">
+    <!-- Hero Section -->
     <div class="hero">
       <div class="avatar">
         <img *ngIf="profile.avatar; else initials" [src]="profile.avatar" alt="{{ profile.firstName }}" />
@@ -13,9 +14,11 @@
       </div>
     </div>
 
+    <!-- Profile Form -->
     <form class="edit-grid" [formGroup]="profileForm" (ngSubmit)="saveProfile()">
+      <!-- Personal Info -->
       <div class="info-card span-2">
-        <h3>Personal</h3>
+        <h3>Personal Info</h3>
         <div class="two-col">
           <label>
             <span>First Name</span>
@@ -36,8 +39,9 @@
         </div>
       </div>
 
+      <!-- Health Info -->
       <div class="info-card span-2">
-        <h3>Health</h3>
+        <h3>Health Info</h3>
         <div class="two-col">
           <label>
             <span>Blood Type</span>
@@ -70,13 +74,15 @@
         </div>
       </div>
 
+      <!-- Account Info -->
       <div class="info-card">
-        <h3>Account</h3>
+        <h3>Account Info</h3>
         <p>Member since {{ profile.createdAt | date:'MMMM y' }}</p>
         <p>Last update {{ profile.updatedAt | date:'mediumDate' }}</p>
         <p class="muted">Patient ID: {{ profile.patientId || profile.id }}</p>
       </div>
 
+      <!-- Actions -->
       <div class="actions">
         <button class="primary" type="submit" [disabled]="profileForm.invalid || saving()">
           {{ saving() ? 'Saving...' : 'Save changes' }}
@@ -85,4 +91,3 @@
     </form>
   </div>
 </app-patient-shell>
-

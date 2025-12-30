@@ -7,12 +7,17 @@
           <h1>Stay in touch with your care team</h1>
         </div>
         <div class="header-actions">
-          <button class="icon-btn"><i class="bi bi-telephone"></i></button>
-          <button class="icon-btn"><i class="bi bi-camera-video"></i></button>
+          <button class="icon-btn" aria-label="Call doctor">
+            <i class="bi bi-telephone"></i>
+          </button>
+          <button class="icon-btn" aria-label="Video call doctor">
+            <i class="bi bi-camera-video"></i>
+          </button>
         </div>
       </div>
 
       <div class="messages-layout">
+        <!-- Conversations Sidebar -->
         <aside class="conversations">
           <div class="search-field">
             <i class="bi bi-search"></i>
@@ -30,9 +35,11 @@
               *ngFor="let conversation of conversations()"
               [class.active]="selectedConversation()?.id === conversation.id"
               (click)="selectConversation(conversation)">
+              
               <div class="avatar">
-                {{ conversation.doctor?.firstName?.charAt(0) || 'D' }}
+                {{ conversation.doctor?.firstName?.charAt(0) || conversation.doctor?.lastName?.charAt(0) || 'U' }}
               </div>
+              
               <div class="conversation-meta">
                 <div class="meta-row">
                   <p>{{ getRecipientName(conversation) }}</p>
@@ -40,21 +47,32 @@
                 </div>
                 <p class="preview">{{ conversation.lastMessageContent || 'New conversation' }}</p>
               </div>
+              
               <span class="pill" *ngIf="conversation.unreadCount">{{ conversation.unreadCount }}</span>
             </button>
           </div>
         </aside>
 
+        <!-- Chat View -->
         <section class="chat-view" *ngIf="selectedConversation(); else emptyState">
           <header class="chat-header">
             <div>
               <p class="chat-title">{{ getRecipientName(selectedConversation()!) }}</p>
-              <p class="status">Online now</p>
+              <!-- Remove recipient property, fallback to 'Online'/'Offline' logic or remove if not available -->
+              <!-- <p class="status">
+                {{ selectedConversation()?.recipient?.online ? 'Online now' : 'Offline' }}
+              </p> -->
             </div>
             <div class="header-actions">
-              <button class="icon-btn"><i class="bi bi-telephone"></i></button>
-              <button class="icon-btn"><i class="bi bi-camera-video"></i></button>
-              <button class="icon-btn"><i class="bi bi-three-dots"></i></button>
+              <button class="icon-btn" aria-label="Call doctor">
+                <i class="bi bi-telephone"></i>
+              </button>
+              <button class="icon-btn" aria-label="Video call doctor">
+                <i class="bi bi-camera-video"></i>
+              </button>
+              <button class="icon-btn" aria-label="More options">
+                <i class="bi bi-three-dots"></i>
+              </button>
             </div>
           </header>
 
@@ -63,6 +81,7 @@
               *ngFor="let message of messages()"
               class="message-row"
               [class.mine]="isOwnMessage(message)">
+              
               <div class="message-bubble">
                 <p>{{ message.content }}</p>
                 <span>{{ message.createdAt | date:'shortTime' }}</span>
@@ -75,8 +94,13 @@
               rows="2"
               placeholder="Type your message..."
               [(ngModel)]="messageContent"
-              (keyup.enter)="sendMessage()"></textarea>
-            <button class="primary-btn" (click)="sendMessage()" [disabled]="!messageContent().trim()">
+              (keydown.enter)="sendMessage(); $event.preventDefault()"></textarea>
+            
+            <button
+              class="primary-btn"
+              (click)="sendMessage()"
+              [disabled]="!messageContent().trim()"
+              [attr.aria-disabled]="!messageContent().trim()">
               Send
             </button>
           </footer>
@@ -87,7 +111,9 @@
 </app-patient-shell>
 
 <ng-template #loadingConversations>
-  <div class="empty-state">Loading conversations...</div>
+  <div class="empty-state">
+    Loading conversations...
+  </div>
 </ng-template>
 
 <ng-template #emptyState>
@@ -95,4 +121,3 @@
     <p>Select a conversation to get started</p>
   </div>
 </ng-template>
-

@@ -6,13 +6,13 @@
 
 .page-header h1 {
   margin: 0;
-  color: #0f172a;
+  color: var(--fg);
 }
 
 .eyebrow {
   text-transform: uppercase;
   letter-spacing: 0.2em;
-  color: #94a3b8;
+  color: var(--muted);
   font-size: 0.8rem;
 }
 
@@ -29,16 +29,16 @@
   gap: 1rem;
   flex-wrap: wrap;
   padding: 0.75rem 1rem;
-  background: #fff;
+  background: var(--surface);
   border-radius: 16px;
-  box-shadow: 0 25px 45px -45px rgba(15, 15, 15, 0.6);
+  box-shadow: 0 25px 45px -45px rgba(15, 15, 15, 0.06);
 }
 
 .filter-label {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  color: #0f172a;
+  color: var(--fg);
   font-weight: 600;
 }
 
@@ -55,9 +55,9 @@
 }
 
 .filter-chip {
-  border: 1px solid #e2e8f0;
-  background: #fff;
-  color: #475569;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--fg);
   border-radius: 999px;
   padding: 0.45rem 0.9rem;
   cursor: pointer;
@@ -66,26 +66,26 @@
 }
 
 .filter-chip.active {
-  background: rgba(15, 157, 88, 0.12);
-  color: #0f9d58;
+  background: var(--primary-light);
+  color: var(--primary);
   border-color: rgba(15, 157, 88, 0.35);
 }
 
 .stat-card {
-  background: #fff;
+  background: var(--surface);
   border-radius: 16px;
   padding: 1rem;
-  box-shadow: 0 25px 45px -45px rgba(15, 15, 15, 0.6);
+  box-shadow: 0 25px 45px -45px rgba(15, 15, 15, 0.06);
 }
 
 .stat-card p {
   margin: 0;
-  color: #94a3b8;
+  color: var(--muted);
 }
 
 .stat-card h2 {
   margin: 0.35rem 0 0;
-  color: #0f172a;
+  color: var(--fg);
 }
 
 .records-list {
@@ -95,10 +95,10 @@
 }
 
 .record-card {
-  background: #fff;
+  background: var(--surface);
   border-radius: 16px;
   padding: 1rem 1.25rem;
-  box-shadow: 0 25px 45px -45px rgba(15, 15, 15, 0.6);
+  box-shadow: 0 25px 45px -45px rgba(15, 15, 15, 0.06);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -109,12 +109,12 @@
 .record-title {
   margin: 0;
   font-weight: 600;
-  color: #0f172a;
+  color: var(--fg);
 }
 
 .muted {
   margin: 0.15rem 0;
-  color: #94a3b8;
+  color: var(--muted);
 }
 
 .tag {
@@ -122,8 +122,8 @@
   margin-top: 0.25rem;
   padding: 0.2rem 0.75rem;
   border-radius: 999px;
-  background: rgba(15, 157, 88, 0.12);
-  color: #0f9d58;
+  background: var(--primary-light);
+  color: var(--primary);
   font-size: 0.8rem;
   font-weight: 600;
 }
@@ -136,7 +136,7 @@
 .text-btn {
   border: none;
   background: transparent;
-  color: #94a3b8;
+  color: var(--muted);
   font-weight: 600;
   cursor: pointer;
 }
@@ -145,8 +145,8 @@
   border: none;
   border-radius: 999px;
   padding: 0.5rem 1.1rem;
-  background: rgba(15, 157, 88, 0.12);
-  color: #0f9d58;
+  background: var(--primary-light);
+  color: var(--primary);
   cursor: pointer;
   font-weight: 600;
 }
@@ -155,16 +155,16 @@
   padding: 2rem;
   text-align: center;
   border-radius: 16px;
-  background: #f8fafc;
-  color: #94a3b8;
+  background: var(--surface);
+  color: var(--muted);
 }
 
 .spinner {
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  border: 3px solid #e2e8f0;
-  border-top-color: #0f9d58;
+  border: 3px solid var(--border);
+  border-top-color: var(--primary);
   animation: spin 1s linear infinite;
   margin: 0 auto 0.75rem;
 }
@@ -175,3 +175,34 @@
   }
 }
 
+/* Dark theme overrides */
+.patient-shell.dark .records-page .page-header h1,
+.patient-shell.dark .records-page .filter-label,
+.patient-shell.dark .records-page .stat-card h2,
+.patient-shell.dark .records-page .record-title {
+  color: var(--fg);
+}
+
+.patient-shell.dark .records-page .eyebrow,
+.patient-shell.dark .records-page .stat-card p,
+.patient-shell.dark .records-page .muted,
+.patient-shell.dark .records-page .text-btn,
+.patient-shell.dark .records-page .empty-state {
+  color: var(--muted);
+}
+
+.patient-shell.dark .records-page .filter-bar,
+.patient-shell.dark .records-page .stat-card,
+.patient-shell.dark .records-page .record-card,
+.patient-shell.dark .records-page .empty-state {
+  background: var(--bg);
+  box-shadow: 0 25px 45px -45px rgba(0, 0, 0, 0.3);
+}
+
+.patient-shell.dark .records-page .filter-chip.active,
+.patient-shell.dark .records-page .tag,
+.patient-shell.dark .records-page .primary-btn {
+  background: var(--primary-dark);
+  color: var(--primary-light);
+  border-color: var(--primary-dark);
+}

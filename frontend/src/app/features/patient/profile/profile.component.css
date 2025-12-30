@@ -1,13 +1,71 @@
-.profile-page { display: flex; flex-direction: column; gap: 1.5rem; }
+/* =========================
+   Global Variables & Base
+========================= */
+:root {
+  --bg: #ffffff;
+  --fg: #111111;
+  --surface: #f9fafb;
+  --border: #e5e7eb;
+  --muted: #6b7280;
+  --primary: #16a34a;
+  --primary-light: #d1fae5;
+  --primary-dark: #15803d;
+  --shadow: rgba(0, 0, 0, 0.15);
+}
+
+/* =========================
+   Patient Shell Dark Mode
+========================= */
+.patient-shell.dark {
+  --bg: #0b1423;
+  --fg: #e2e8f0;
+  --surface: #0f1c2f;
+  --border: #1f2937;
+  --muted: #9fb1c9;
+  --primary: #10b981;
+  --primary-light: rgba(16,185,129,0.12);
+  --primary-dark: #0f9d58;
+  --shadow: rgba(0,0,0,0.7);
+}
+
+/* =========================
+   General Reset
+========================= */
+body, html {
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', sans-serif;
+  background: var(--bg);
+  color: var(--fg);
+}
+
+/* =========================
+   Helper Classes
+========================= */
+.muted { color: var(--muted); }
+.text-center { text-align: center; }
+.flex { display: flex; }
+.grid { display: grid; }
+.gap-1 { gap: 1rem; }
+.gap-05 { gap: 0.5rem; }
+
+/* =========================
+   Profile Page
+========================= */
+.profile-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
 
 .hero {
   display: flex;
   align-items: center;
   gap: 1rem;
-  background: #fff;
+  background: var(--surface);
   padding: 1.5rem;
   border-radius: 20px;
-  box-shadow: 0 40px 70px -55px rgba(15, 15, 15, 0.55);
+  box-shadow: 0 40px 70px -55px var(--shadow);
 }
 
 .avatar {
@@ -15,7 +73,7 @@
   height: 72px;
   border-radius: 50%;
   background: #ecfdf5;
-  color: #0f9d58;
+  color: var(--primary-dark);
   display: grid;
   place-items: center;
   font-size: 1.5rem;
@@ -23,29 +81,17 @@
   overflow: hidden;
 }
 
-.avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.muted {
-  margin: 0;
-  color: #94a3b8;
-}
-
-.info-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 1rem;
-}
+.avatar img { width: 100%; height: 100%; object-fit: cover; }
 
 .info-card {
-  background: #fff;
+  background: var(--surface);
   border-radius: 16px;
   padding: 1.25rem;
-  box-shadow: 0 25px 45px -40px rgba(15, 15, 15, 0.6);
+  box-shadow: 0 25px 45px -40px var(--shadow);
 }
+
+.info-card h3 { margin-top: 0; color: var(--fg); }
+.info-card p { margin: 0.25rem 0; color: #475569; }
 
 .edit-grid {
   display: grid;
@@ -54,46 +100,59 @@
   align-items: start;
 }
 
-.info-card {
-  background: #fff;
-  border-radius: 16px;
-  padding: 1.25rem;
-  box-shadow: 0 25px 45px -40px rgba(15, 15, 15, 0.6);
-}
-
-.info-card h3 { margin-top: 0; color: #0f172a; }
-.info-card p { margin: 0.25rem 0; color: #475569; }
-
 .two-col {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 0.75rem 1rem;
 }
 
-label { display: flex; flex-direction: column; gap: 0.35rem; font-weight: 600; color: #0f172a; }
-label span { font-size: 0.9rem; color: #475569; font-weight: 600; }
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-weight: 600;
+  color: var(--fg);
+}
+
+label span {
+  font-size: 0.9rem;
+  color: #475569;
+  font-weight: 600;
+}
+
 input {
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border);
   border-radius: 12px;
   padding: 0.55rem 0.75rem;
   font-size: 0.95rem;
   transition: border 0.2s, box-shadow 0.2s;
+  background: #fff;
+  color: var(--fg);
 }
-input:focus { outline: none; border-color: #0f9d58; box-shadow: 0 0 0 3px rgba(15, 157, 88, 0.12); }
-input:disabled { background: #f8fafc; color: #94a3b8; }
+
+input:focus {
+  outline: none;
+  border-color: var(--primary-dark);
+  box-shadow: 0 0 0 3px var(--primary-light);
+}
+
+input:disabled {
+  background: #f8fafc;
+  color: var(--muted);
+}
 
 .span-2 { grid-column: span 2; }
 
+/* Actions */
 .actions {
   display: flex;
-  align-items: center;
   justify-content: flex-end;
   gap: 0.75rem;
   grid-column: 1 / -1;
 }
 
 .actions .primary {
-  background: #0f9d58;
+  background: var(--primary-dark);
   color: #fff;
   border: none;
   padding: 0.75rem 1.25rem;
@@ -103,16 +162,161 @@ input:disabled { background: #f8fafc; color: #94a3b8; }
   box-shadow: 0 18px 35px -20px rgba(15, 157, 88, 0.85);
 }
 
-.actions .primary:disabled { opacity: 0.6; cursor: not-allowed; box-shadow: none; }
-
-.patient-shell.dark .info-card { background: #0f1c2f; border: 1px solid #1f2937; box-shadow: 0 25px 45px -40px rgba(0,0,0,0.7); }
-.patient-shell.dark input { background: #0b1423; border-color: #1f2937; color: #e2e8f0; }
-.patient-shell.dark label span { color: #9fb1c9; }
-.patient-shell.dark .actions .primary { background: #10b981; color: #0b1423; box-shadow: 0 18px 35px -20px rgba(16,185,129,0.7); }
-
-@media (max-width: 768px) {
-  .span-2 { grid-column: span 1; }
-  .actions { justify-content: stretch; }
-  .actions .primary { width: 100%; text-align: center; justify-content: center; }
+.actions .primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  box-shadow: none;
 }
 
+/* =========================
+   Records Page
+========================= */
+.records-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.page-header h1 { margin: 0; color: var(--fg); }
+.eyebrow { text-transform: uppercase; letter-spacing: 0.2em; color: var(--muted); font-size: 0.8rem; }
+
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+}
+
+.stat-card {
+  background: var(--surface);
+  border-radius: 16px;
+  padding: 1rem;
+  box-shadow: 0 25px 45px -45px var(--shadow);
+}
+
+.stat-card p { margin: 0; color: var(--muted); }
+.stat-card h2 { margin: 0.35rem 0 0; color: var(--fg); }
+
+.records-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.record-card {
+  background: var(--surface);
+  border-radius: 16px;
+  padding: 1rem 1.25rem;
+  box-shadow: 0 25px 45px -45px var(--shadow);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.record-title { margin: 0; font-weight: 600; color: var(--fg); }
+.muted { margin: 0.15rem 0; color: var(--muted); }
+
+.tag {
+  display: inline-block;
+  margin-top: 0.25rem;
+  padding: 0.2rem 0.75rem;
+  border-radius: 999px;
+  background: var(--primary-light);
+  color: var(--primary-dark);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.record-actions { display: flex; gap: 0.75rem; }
+
+.text-btn {
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.primary-btn {
+  border: none;
+  border-radius: 999px;
+  padding: 0.5rem 1.1rem;
+  background: var(--primary-light);
+  color: var(--primary-dark);
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.empty-state {
+  padding: 2rem;
+  text-align: center;
+  border-radius: 16px;
+  background: #f8fafc;
+  color: var(--muted);
+}
+
+.spinner {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 3px solid #e2e8f0;
+  border-top-color: var(--primary-dark);
+  animation: spin 1s linear infinite;
+  margin: 0 auto 0.75rem;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* =========================
+   Messages Page
+========================= */
+.patient-messages {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.messages-panel {
+  background: var(--surface);
+  border-radius: 20px;
+  padding: 1.5rem;
+  box-shadow: 0 40px 70px -55px var(--shadow);
+}
+
+.messages-layout { display: grid; grid-template-columns: 320px 1fr; gap: 1.5rem; }
+.conversations { background: #f8fafc; border-radius: 18px; padding: 1rem; display: flex; flex-direction: column; gap: 1rem; }
+
+.search-field input {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 0.65rem 0.75rem 0.65rem 2.5rem;
+  font-size: 0.95rem;
+  background: #fff;
+}
+
+.conversation-item {
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  border-radius: 14px;
+  cursor: pointer;
+  text-align: left;
+  align-items: center;
+  transition: background 0.2s, box-shadow 0.2s;
+}
+
+.conversation-item.active,
+.conversation-item:hover {
+  background: #fff;
+  box-shadow: 0 10px 25px -18px var(--shadow);
+}
+
+.avatar { width: 44px; height: 44px; border-radius: 14px; display: grid; place-items: center; font-weight: 600; color: var(--fg); background: #e2e8f0; }
+
+.message-row.mine .message-bubble { background: var(--primary-dark); color: #fff; }
+
+/* Responsive */
+@media (max-width: 900px) { .messages-layout { grid-template-columns: 1fr; } }
+@media (max-width: 768px) { .span-2 { grid-column: span 1; } .actions { justify-content: stretch; } .actions .primary { width: 100%; text-align: center; justify-content: center; } .hero { flex-direction: column; align-items: flex-start; } }
