@@ -61,6 +61,8 @@ export class HomeComponent implements OnInit {
   profilePhone = signal('')
   profileSpecialty = signal('')
   profileBio = signal('')
+  profileDropdownOpen = signal(false) // <-- ADD THIS
+
   private selectedAvatarFile: File | null = null
 
   constructor(
@@ -278,6 +280,14 @@ export class HomeComponent implements OnInit {
     this.profileBio.set(user.bio || '')
     this.editProfileOpen.set(true)
   }
+  toggleProfileDropdown(): void { // <-- ADD THIS
+  this.profileDropdownOpen.set(!this.profileDropdownOpen())
+}
+
+closeProfileDropdown(): void { // <-- ADD THIS
+  this.profileDropdownOpen.set(false)
+}
+
 
   closeEditProfile(): void {
     this.editProfileOpen.set(false)
