@@ -443,13 +443,13 @@
 
 <section
   class="relative overflow-hidden py-24 transition-colors duration-300"
-  [ngClass]="isDarkMode ? 'home-dark-bg' : 'home-light-bg'">
+  [ngClass]="isDarkMode() ? 'home-dark-bg' : 'home-light-bg'">
 
   <!-- Background Gradient -->
   <div
     class="absolute inset-0"
     [ngStyle]="{
-      'background': isDarkMode 
+      'background': isDarkMode() 
         ? 'linear-gradient(to bottom right, var(--primary)/20, transparent)' 
         : 'linear-gradient(to bottom right, var(--primary)/10, var(--primary)/5)'
     }">
@@ -459,13 +459,13 @@
     <div class="max-w-3xl mx-auto text-center animate-[fadeUp_0.6s_ease-out]">
 
       <!-- Section Heading -->
-      <h2 [ngClass]="isDarkMode ? 'text-white' : 'text-neutral-900'"
+      <h2 [ngClass]="isDarkMode() ? 'text-white' : 'text-neutral-900'"
           class="text-4xl md:text-5xl font-extrabold tracking-tight mb-6">
         Ready to feel better?
       </h2>
 
       <!-- Section Description -->
-      <p [ngClass]="isDarkMode ? 'text-neutral-400' : 'text-neutral-600'"
+      <p [ngClass]="isDarkMode() ? 'text-neutral-400' : 'text-neutral-600'"
          class="text-lg md:text-xl mb-10">
         Join thousands of happy patients who’ve discovered a better way to manage their health.
       </p>
@@ -493,7 +493,7 @@
           </span>
         </button>
 
-        <p [ngClass]="isDarkMode ? 'text-neutral-400' : 'text-neutral-500'" class="text-sm">
+        <p [ngClass]="isDarkMode() ? 'text-neutral-400' : 'text-neutral-500'" class="text-sm">
           No credit card required. Free forever.
         </p>
       </div>
@@ -505,12 +505,12 @@
 
 <section *ngIf="editProfileOpen()"
          class="fixed inset-0 z-50 flex items-center justify-center transition-colors duration-300"
-         [ngClass]="isDarkMode ? 'home-dark-bg' : 'home-light-bg'"
+         [ngClass]="isDarkMode() ? 'home-dark-bg' : 'home-light-bg'"
          style="background-color: rgba(0,0,0,0.6); backdrop-filter: blur(6px);">
 
   <div
     class="relative w-full max-w-xl mx-4 rounded-3xl shadow-2xl animate-[fadeIn_0.35s_ease-out]"
-    [ngClass]="isDarkMode ? 'bg-neutral-900 text-neutral-100' : 'bg-white text-neutral-900'">
+    [ngClass]="isDarkMode() ? 'bg-neutral-900 text-neutral-100' : 'bg-white text-neutral-900'">
 
     <!-- Close Button -->
     <button
@@ -518,7 +518,7 @@
       aria-label="Close"
       (click)="closeEditProfile()"
       class="absolute top-4 right-4 transition"
-      [ngClass]="isDarkMode ? 'hover:text-white text-neutral-400' : 'hover:text-neutral-700 text-neutral-400'">
+      [ngClass]="isDarkMode() ? 'hover:text-white text-neutral-400' : 'hover:text-neutral-700 text-neutral-400'">
       <i class="bi bi-x-lg text-xl"></i>
     </button>
 
@@ -537,7 +537,7 @@
         <div class="relative group cursor-pointer" (click)="avatarInput.click()">
           <div
             class="w-28 h-28 rounded-full overflow-hidden flex items-center justify-center transition-transform duration-300 group-hover:scale-105"
-            [ngClass]="isDarkMode ? 'bg-neutral-700 ring-primary/20' : 'bg-neutral-200 ring-primary/20'">
+            [ngClass]="isDarkMode() ? 'bg-neutral-700 ring-primary/20' : 'bg-neutral-200 ring-primary/20'">
             
             <img *ngIf="avatarPreview(); else initialsAvatar"
                  [src]="avatarPreview()!"
@@ -563,7 +563,7 @@
 
         <input
           class="w-full rounded-xl border px-4 py-3 text-sm focus:outline-none focus:ring-2"
-          [ngClass]="isDarkMode ? 'border-neutral-700 bg-transparent text-neutral-100 focus:ring-primary' : 'border-neutral-300 bg-transparent text-neutral-900 focus:ring-primary'"
+          [ngClass]="isDarkMode() ? 'border-neutral-700 bg-transparent text-neutral-100 focus:ring-primary' : 'border-neutral-300 bg-transparent text-neutral-900 focus:ring-primary'"
           placeholder="First Name"
           [ngModel]="profileFirstName()"
           (ngModelChange)="profileFirstName.set($event)" />
