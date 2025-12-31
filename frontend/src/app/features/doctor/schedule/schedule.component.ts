@@ -1,4 +1,5 @@
-import { Component, OnInit, signal, inject, computed, effect } from '@angular/core';
+import { Component, OnInit, signal, computed, effect } from '@angular/core';
+import { SettingsService } from '@core/services/settings.service';
 import { CommonModule, DatePipe } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -38,6 +39,18 @@ interface MenuItem {
   styleUrls: ['./schedule.component.css']
 })
 export class ScheduleComponent implements OnInit {
+  readonly DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  constructor(
+    private settingsService: SettingsService,
+    private badgeService: BadgeService,
+    private scheduleService: SchedulingService,
+    private appointmentService: AppointmentService,
+    private messageService: MessageService,
+    private notificationService: NotificationService,
+    private authService: AuthService,
+    private router: Router,
+    private toast: ToastService
+  ) {}
     private updateAppointmentStatus(appt: Appointment, status: AppointmentStatus, successMsg: string): void {
       this.appointmentService.update(appt.id, { status }).subscribe({
         next: () => { this.toast.success(successMsg, { title: 'Appointments' }); this.loadAppointments(); },
@@ -114,10 +127,22 @@ export class ScheduleComponent implements OnInit {
   }
 
   saveAvailability(): void {
-    const dateStr = this.toDateOnly(this.selectedDate());
-    this.scheduleService.setAvailable(dateStr, this.workingStart(), this.workingEnd()).subscribe({
-      next: () => { this.toast.success('Availability saved', { title: 'Schedule' }); this.loadSlots(); },
-      error: () => { this.toast.error('Failed to save availability', { title: 'Schedule' }); this.loadSlots(); }
+    // Convert workingDays (numbers) to availableDays (names)
+    const availableDays = this.workingDays().map(d => this.DAY_NAMES[d]);
+    // Save to settings (ensure backend gets availableDays)
+    this.settingsService.updateSettings({
+      availableDays,
+      startTime: this.workingStart(),
+      endTime: this.workingEnd()
+    }).subscribe({
+      next: () => {
+        this.toast.success('Availability saved', { title: 'Schedule' });
+        this.loadSlots();
+      },
+      error: () => {
+        this.toast.error('Failed to save availability', { title: 'Schedule' });
+        this.loadSlots();
+      }
     });
   }
 
@@ -215,14 +240,7 @@ export class ScheduleComponent implements OnInit {
 
   today = new Date();
 
-  private badgeService = inject(BadgeService);
-  private scheduleService = inject(SchedulingService);
-  private appointmentService = inject(AppointmentService);
-  private messageService = inject(MessageService);
-  private notificationService = inject(NotificationService);
-  private authService = inject(AuthService);
-  private router = inject(Router);
-  private toast = inject(ToastService);
+
 
   weekDays = computed(() => {
     const start = this.getWeekStart(this.selectedDate());
@@ -243,13 +261,7 @@ export class ScheduleComponent implements OnInit {
   noVisibleButHasSlots = computed(() => !this.visibleDaySlots().length && !!this.daySlots().length);
   nextAppointment = computed(() => this.getNextAppointment());
 
-  constructor() {
-    effect(() => {
-      const mode = this.themeMode();
-      document.body.classList.toggle('dark', mode === 'dark');
-      document.body.classList.toggle('light', mode === 'light');
-    });
-  }
+
 
   ngOnInit(): void {
     this.loadUserData();

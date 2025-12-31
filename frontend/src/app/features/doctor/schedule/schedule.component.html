@@ -64,7 +64,15 @@
 
           <div class="mt-6 pt-6 border-t border-[var(--border-light)] flex flex-col md:flex-row gap-4 items-center justify-between">
             <div class="flex gap-1">
-              <button *ngFor="let d of [0,1,2,3,4,5,6]" (click)="toggleWorkingDay(d)" [class.bg-[var(--text-primary)]]="workingDays().includes(d)" [class.text-[var(--background)]]="workingDays().includes(d)" [class.border-[var(--text-primary)]]="workingDays().includes(d)" class="w-8 h-8 rounded-lg border border-[var(--border-default)] flex items-center justify-center text-xs font-bold transition-all hover:border-[var(--primary)]">
+              <button
+                *ngFor="let d of [0,1,2,3,4,5,6]"
+                (click)="toggleWorkingDay(d)"
+                [ngClass]="{
+                  'bg-[var(--primary)] text-white border-[var(--primary)]': workingDays().includes(d),
+                  'bg-red-500 text-white border-red-500': !workingDays().includes(d)
+                }"
+                class="w-8 h-8 rounded-lg border flex items-center justify-center text-xs font-bold transition-all hover:border-[var(--primary)]"
+              >
                 {{ ['S','M','T','W','T','F','S'][d] }}
               </button>
             </div>

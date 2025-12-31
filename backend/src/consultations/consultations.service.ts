@@ -77,7 +77,7 @@ export class ConsultationsService {
 
     return {
       averageConsultationMinutes: avgDuration,
-      satisfactionRate: avgRating, // 0..5
+      satisfactionRate: avgRating,
       reviewsCount: rated.length,
       sampleSize: list.length,
       period: {
