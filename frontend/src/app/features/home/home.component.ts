@@ -17,6 +17,24 @@ import { OnInit, signal } from "@angular/core"
   styleUrls: ["./home.component.css"],
 })
 export class HomeComponent implements OnInit {
+  steps = [
+    {
+      number: 1,
+      title: 'Sign Up',
+      description: 'Create your free account in seconds and set up your profile.'
+    },
+    {
+      number: 2,
+      title: 'Book & Consult',
+      description: 'Book appointments, chat with doctors, and get prescriptions online.'
+    },
+    {
+      number: 3,
+      title: 'Manage Health',
+      description: 'Access your records, track progress, and stay healthy with ease.'
+    }
+  ];
+  mobileMenuOpen = false;
   currentUser = this.authService.currentUser
   isDarkMode = this.themeService.isDarkMode
   happyPatients = signal<number | null>(null)

@@ -1,484 +1,728 @@
 <div [ngClass]="isDarkMode() ? 'home-dark-bg' : 'home-light-bg'">
-    <nav class="navbar navbar-expand-lg fixed-top" 
-            [ngClass]="{
-        'bg-light navbar-light': !isDarkMode(),
-        'bg-dark navbar-dark': isDarkMode()
-    }">
-  <div class="container">
-    <a class="navbar-brand d-flex align-items-center" routerLink="/">
-      <img src="assets/images/QuickMed-Logo.png" alt="QuickMed" width="60" height="60" class="rounded-3 me-2" />
-      <span class="fw-bold fs-5">QuickMed</span>
+<nav 
+  class="fixed top-0 w-full z-50 shadow-md transition-colors duration-300" 
+  [ngClass]="isDarkMode() ? 'bg-gray-900 text-white' : 'bg-white text-gray-900'">
+  <div class="container mx-auto px-4 flex items-center justify-between h-16">
+
+    <!-- Brand -->
+    <a routerLink="/" class="flex items-center gap-2">
+      <img src="assets/images/QuickMed-Logo.png" alt="QuickMed" class="w-12 h-12 rounded-2xl shadow-md" />
+      <span class="font-bold text-lg sm:text-xl">QuickMed</span>
     </a>
 
-    
+    <!-- Nav Links -->
+    <ul class="hidden lg:flex gap-6 font-medium">
+      <li><a href="#features" class="hover:text-green-500 transition">Features</a></li>
+      <li><a href="#how-it-works" class="hover:text-green-500 transition">How It Works</a></li>
+      <li><a href="#testimonials" class="hover:text-green-500 transition">Testimonials</a></li>
+    </ul>
 
-    <div class="collapse navbar-collapse" id="navbarNav">
-      <ul class="navbar-nav mx-auto">
-        <li class="nav-item"><a class="nav-link fw-medium" href="#features">Features</a></li>
-        <li class="nav-item"><a class="nav-link fw-medium" href="#how-it-works">How It Works</a></li>
-        <li class="nav-item"><a class="nav-link fw-medium" href="#testimonials">Testimonials</a></li>
-      </ul>
+    <!-- Right Actions -->
+    <div class="flex items-center gap-4">
 
-      <div class="d-flex align-items-center gap-3">
-        <button 
-          class="theme-toggle" 
-          (click)="toggleTheme()"
-          [attr.aria-label]="isDarkMode() ? 'Switch to Light Mode' : 'Switch to Dark Mode'"
-          [ngClass]="{ 'dark': isDarkMode() }">
-          <div class="icon-wrapper sun-wrapper" *ngIf="!isDarkMode()">
-            <img src="https://img.icons8.com/?size=100&id=6Z2mGj6qDVv4&format=png&color=000000" alt="Sun" />
-          </div>
-          <div class="icon-wrapper moon-wrapper" *ngIf="isDarkMode()">
-            <img src="https://img.icons8.com/?size=100&id=6DXM8bs2tFSU&format=png&color=ffffff" alt="Moon" />
-          </div>
-        </button>
-
-        <ng-container *ngIf="!currentUser(); else loggedIn">
-          <a routerLink="/login" class="btn px-4 btn-outline-primary">Log In</a>
-          <a routerLink="/register" class="btn btn-success px-4">Get Started</a>
+      <!-- Theme Toggle -->
+      <button 
+        (click)="toggleTheme()"
+        class="p-2 rounded-full border border-gray-300 dark:border-gray-600 hover:bg-gray-200 dark:hover:bg-gray-700 transition"
+        [attr.aria-label]="isDarkMode() ? 'Switch to Light Mode' : 'Switch to Dark Mode'">
+        <ng-container *ngIf="!isDarkMode(); else moonIcon">
+          <img src="https://img.icons8.com/?size=100&id=6Z2mGj6qDVv4&format=png&color=000000" alt="Sun" class="w-6 h-6" />
         </ng-container>
-
-                <ng-template #loggedIn>
-                    <div class="d-flex align-items-center gap-3">
-                        <div class="user-avatar-wrapper d-flex align-items-center gap-2" style="cursor: pointer;" (click)="navigateToDashboard()">
-              <img 
-                *ngIf="currentUser()?.avatar; else initialsAvatar"
-                [src]="currentUser()?.avatar!" 
-                alt="Avatar" 
-                class="rounded-circle" 
-                width="40" height="40" />
-              <ng-template #initialsAvatar>
-                 <div class="placeholder-avatar rounded-circle text-white fw-bold d-flex align-items-center justify-content-center"
-                     style="width: 40px; height: 40px; background-color: var(--primary-color); font-size: 16px;">
-                  {{ getInitials(currentUser()?.firstName, currentUser()?.lastName) }}
-                </div>
-              </ng-template>
-              <span class="fw-medium">{{ currentUser()?.firstName }}</span>
-
-                            <!-- Hover dropdown -->
-                            <div class="profile-menu" (click)="$event.stopPropagation()">
-                                <button type="button" class="dropdown-item" (click)="$event.stopPropagation(); openEditProfile()">Edit Profile</button>
-                                <button type="button" class="dropdown-item text-danger" (click)="$event.stopPropagation(); logout()">Logout</button>
-                            </div>
-            </div>
-          </div>
+        <ng-template #moonIcon>
+          <img src="https://img.icons8.com/?size=100&id=6DXM8bs2tFSU&format=png&color=ffffff" alt="Moon" class="w-6 h-6" />
         </ng-template>
-      </div>
+      </button>
+
+      <!-- Authentication Buttons -->
+      <ng-container *ngIf="!currentUser(); else loggedIn">
+        <a routerLink="/login" class="px-4 py-2 rounded-lg border border-green-500 text-green-500 hover:bg-green-50 dark:hover:bg-gray-800 transition">Log In</a>
+        <a routerLink="/register" class="px-4 py-2 rounded-lg bg-green-500 text-white hover:bg-green-600 transition">Get Started</a>
+      </ng-container>
+
+      <!-- Logged In User -->
+      <ng-template #loggedIn>
+        <div class="relative group">
+          <div class="flex items-center gap-2 cursor-pointer" (click)="navigateToDashboard()">
+            <img *ngIf="currentUser()?.avatar; else initialsAvatar"
+                 [src]="currentUser()?.avatar!" 
+                 alt="Avatar" 
+                 class="w-10 h-10 rounded-full shadow-sm" />
+            <ng-template #initialsAvatar>
+              <div class="w-10 h-10 rounded-full bg-green-500 text-white font-bold flex items-center justify-center">
+                {{ getInitials(currentUser()?.firstName, currentUser()?.lastName) }}
+              </div>
+            </ng-template>
+            <span class="font-medium">{{ currentUser()?.firstName }}</span>
+          </div>
+
+          <!-- Dropdown Menu -->
+          <div 
+            class="absolute right-0 mt-2 w-40 bg-white dark:bg-gray-800 shadow-lg rounded-lg py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
+            <button type="button" class="block w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg" (click)="openEditProfile()">Edit Profile</button>
+            <button type="button" class="block w-full text-left px-4 py-2 text-red-500 hover:bg-red-100 dark:hover:bg-red-700 rounded-lg" (click)="logout()">Logout</button>
+          </div>
+        </div>
+      </ng-template>
+
     </div>
+
+    <button class="lg:hidden p-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 transition" (click)="mobileMenuOpen = !mobileMenuOpen">
+      <i class="bi bi-list text-2xl"></i>
+    </button>
+
+  </div>
+
+  <div *ngIf="mobileMenuOpen" class="lg:hidden bg-white dark:bg-gray-900 w-full px-4 py-2 space-y-2 transition-all">
+    <a href="#features" class="block py-2 px-2 rounded hover:bg-green-50 dark:hover:bg-gray-800">Features</a>
+    <a href="#how-it-works" class="block py-2 px-2 rounded hover:bg-green-50 dark:hover:bg-gray-800">How It Works</a>
+    <a href="#testimonials" class="block py-2 px-2 rounded hover:bg-green-50 dark:hover:bg-gray-800">Testimonials</a>
+    <ng-container *ngIf="!currentUser()">
+      <a routerLink="/login" class="block py-2 px-2 rounded hover:bg-green-50 dark:hover:bg-gray-800">Log In</a>
+      <a routerLink="/register" class="block py-2 px-2 rounded bg-green-500 text-white hover:bg-green-600">Get Started</a>
+    </ng-container>
   </div>
 </nav>
 
 
-
-
-
-<section class="hero-section">
-    <div class="container">
-        <div class="row align-items-center">
-            <div class="col-lg-6">
-                <div class="hero-content">
-                    <h1 class="hero-title hero-title-animated inline-flex items-baseline gap-2">
-                        <span>Your Health,</span>
-                        <span class="text-primary">Your Priority</span>
-                    </h1>
-                    <p class="hero-description">
-                        Book appointments in seconds, connect with top doctors instantly, and manage your health journey with a smile. Because healthcare should feel good.
-                    </p>
-                    <div class="hero-actions">
-                                                <button class="btn btn-primary btn-lg px-5" (click)="navigateToDashboard()">
-                            Book Your First Appointment
-                            <img class="inline-icon ms-2" src="https://img.icons8.com/?size=100&id=26138&format=png&color=ffffff" alt="Next" />
-                        </button>
-                                                <a href="#how-it-works" class="btn btn-link text-light" *ngIf="!isDarkMode()">
-              Watch Demo
-              <i class="bi bi-play-circle ms-2"></i>
-            </a>
-                    </div>
-                    <div class="hero-stats">
-                        <div class="stat-item">
-                            <div class="stat-icon">
-                                <i class="bi bi-people-fill"></i>
-                            </div>
-                            <div>
-                                <div class="stat-number">
-                                  {{
-                                    happyPatients() !== null
-                                      ? (happyPatients()! | number:'1.0-0') + '+'
-                                      : '—'
-                                  }}
-                                </div>
-                                <div class="stat-label">Happy Patients</div>
-                            </div>
-                        </div>
-                        <div class="stat-divider"></div>
-                        <div class="stat-item">
-                            <div class="stat-icon">
-                                                                <img src="https://img.icons8.com/?size=100&id=8ggStxqyboK5&format=png&color=0FA958" alt="Rating icon" />
-                            </div>
-                            <div>
-                                <div class="stat-number">
-                                  {{
-                                    platformRating() !== null
-                                      ? (platformRating()! | number:'1.1-1') + '/5'
-                                      : '—'
-                                  }}
-                                </div>
-                                <div class="stat-label">Rating</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-6">
-                <div class="hero-image">
-                    <div class="image-card">
-                        <img src="assets/images/QuickMed-Logo.png" alt="Healthcare professionals" class="img-fluid">
-                        <div class="floating-badge badge-1">
-                            <i class="bi bi-heart-pulse-fill"></i>
-                            <span>Health Tracking</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
+<section class="hero-section py-16" [ngClass]="isDarkMode() ? 'bg-gray-900 text-white' : 'bg-white text-gray-900'">
+  <div class="container mx-auto px-4">
+    <div class="flex flex-col lg:flex-row items-center gap-12">
+      
+      <!-- Hero Content -->
+      <div class="lg:w-1/2 space-y-6">
+        <h1 class="text-4xl sm:text-5xl font-extrabold leading-tight">
+          <span>Your Health,</span>
+          <span class="text-green-500">Your Priority</span>
+        </h1>
+        <p class="text-lg sm:text-xl text-gray-500 dark:text-gray-300">
+          Book appointments in seconds, connect with top doctors instantly, and manage your health journey with a smile.
+        </p>
+        <div class="flex flex-wrap gap-4 items-center">
+          <button 
+            (click)="navigateToDashboard()"
+            class="bg-green-500 hover:bg-green-600 text-white px-8 py-3 rounded-2xl shadow-lg transition-all flex items-center gap-2">
+            Book Your First Appointment
+            <img class="w-5 h-5" src="https://img.icons8.com/?size=100&id=26138&format=png&color=ffffff" alt="Next" />
+          </button>
+          <a href="#how-it-works" 
+             class="text-green-500 hover:text-green-600 font-medium flex items-center gap-1"
+             *ngIf="!isDarkMode()">
+            Watch Demo
+            <i class="bi bi-play-circle"></i>
+          </a>
         </div>
+
+        <!-- Stats -->
+        <div class="flex gap-6 mt-6">
+          <div class="flex items-center gap-3 bg-gray-100 dark:bg-gray-800 p-4 rounded-xl shadow">
+            <i class="bi bi-people-fill text-green-500 text-2xl"></i>
+            <div>
+              <div class="font-bold text-xl">
+                {{ happyPatients() !== null ? (happyPatients()! | number:'1.0-0') + '+' : '—' }}
+              </div>
+              <div class="text-gray-500 dark:text-gray-400 text-sm">Happy Patients</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-3 bg-gray-100 dark:bg-gray-800 p-4 rounded-xl shadow">
+            <img src="https://img.icons8.com/?size=100&id=8ggStxqyboK5&format=png&color=0FA958" class="w-8 h-8" alt="Rating" />
+            <div>
+              <div class="font-bold text-xl">
+                {{ platformRating() !== null ? (platformRating()! | number:'1.1-1') + '/5' : '—' }}
+              </div>
+              <div class="text-gray-500 dark:text-gray-400 text-sm">Rating</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Hero Image -->
+      <div class="lg:w-1/2 relative">
+        <div class="rounded-3xl overflow-hidden shadow-2xl">
+          <img src="assets/images/QuickMed-Logo.png" alt="Healthcare" class="w-full h-auto object-cover" />
+          <div class="absolute top-4 left-4 bg-green-500 text-white px-3 py-1 rounded-full flex items-center gap-2 animate-bounce shadow-lg">
+            <i class="bi bi-heart-pulse-fill"></i>
+            <span>Health Tracking</span>
+          </div>
+        </div>
+      </div>
+
     </div>
-    <div class="hero-decoration"></div>
+  </div>
+  <!-- Decorative background -->
+  <div class="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-green-100 to-white opacity-20 pointer-events-none dark:from-gray-800 dark:to-gray-900"></div>
 </section>
 
-<section class="benefits-section" id="features">
-    <div class="container">
-        <div class="section-header text-center">
-            <h2 class="section-title">Everything you need, nothing you don't</h2>
-            <p class="section-subtitle">Powerful, reliable, fast. Make healthcare management feel like a breeze.</p>
-        </div>
-        <div class="row g-4">
-            <div class="col-md-6 col-lg-3">
-                <div class="benefit-card">
-                    <div class="benefit-icon">
-                        <i class="bi bi-clock-history"></i>
-                    </div>
-                    <h4>Smart Scheduling</h4>
-                    <p>Easy one-click tool and ultra-sleek UI for instant appointment booking.</p>
-                </div>
-            </div>
-            <div class="col-md-6 col-lg-3">
-                <div class="benefit-card">
-                    <div class="benefit-icon">
-                        <img src="https://img.icons8.com/?size=100&id=63256&format=png&color=0FA958" alt="Zero Wait icon" />
-                    </div>
-                    <h4>Zero Wait Times</h4>
-                    <p>Get matched with a doctor in your city. No more waiting in queues.</p>
-                </div>
-            </div>
-            <div class="col-md-6 col-lg-3">
-                <div class="benefit-card">
-                    <div class="benefit-icon">
-                        <img src="https://img.icons8.com/?size=100&id=13068&format=png&color=0FA958" alt="Telemedicine icon" />
-                    </div>
-                    <h4>Telemedicine Ready</h4>
-                    <p>Video calls with doctors, secure screen sharing, and digital prescriptions.</p>
-                </div>
-            </div>
-            <div class="col-md-6 col-lg-3">
-                <div class="benefit-card">
-                    <div class="benefit-icon">
-                        <img src="https://img.icons8.com/?size=100&id=59778&format=png&color=0FA958" alt="Health records icon" />
-                    </div>
-                    <h4>Health Records</h4>
-                    <p>All your medical history in one secure and accessible place.</p>
-                </div>
-            </div>
-        
-           
-        </div>
-    </div>
-</section>
 
-<section class="how-it-works-section" id="how-it-works">
-    <div class="container">
-        <div class="section-header text-center">
-            <h2 class="section-title">Get started in 3 simple steps</h2>
-            <p class="section-subtitle">It's so easy you'll wonder why healthcare wasn't always like this</p>
-        </div>
-        <div class="row g-5">
-            <div class="col-md-4">
-                <div class="step-card">
-                    <div class="step-number">1</div>
-                    <h3>Create Your Profile</h3>
-                    <p>Sign up in seconds. Add your health info, insurance, and preferences.</p>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="step-card">
-                    <div class="step-number">2</div>
-                    <h3>Find Your Doctor</h3>
-                    <p>Browse specialists, read reviews, and pick the perfect match for you.</p>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="step-card">
-                    <div class="step-number">3</div>
-                    <h3>Book & Meet</h3>
-                    <p>Choose a time slot, confirm instantly, and meet your doctor online or in-person.</p>
-                </div>
-            </div>
-        </div>
-        <div class="text-center mt-5">
-                        <button class="btn btn-primary btn-lg px-5" (click)="navigateToDashboard()">
-                Start Your Journey
-                <img class="inline-icon ms-2" src="https://img.icons8.com/?size=100&id=26138&format=png&color=ffffff" alt="Next" />
-            </button>
-        </div>
-    </div>
-</section>
-
-<!-- Testimonials Section -->
-<section class="testimonials-section" id="testimonials">
-    <div class="container">
-        <div class="section-header text-center">
-            <h2 class="section-title">Loved by patients and doctors</h2>
-            <p class="section-subtitle">Don't just take our word for it</p>
-        </div>
-        <div class="row g-4" *ngIf="testimonials().length; else testimonialsFallback">
-            <div class="col-md-4" *ngFor="let testimonial of testimonials(); trackBy: trackTestimonial">
-                <div class="testimonial-card">
-                    <div class="stars">
-                        <i
-                          class="bi"
-                          *ngFor="let star of getStarArray(testimonial.rating); let i = index"
-                          [ngClass]="star ? 'bi-star-fill text-warning' : 'bi-star'"
-                          aria-hidden="true"
-                        ></i>
-                    </div>
-                    <p class="testimonial-text">"{{ testimonial.comment }}"</p>
-                    <div class="testimonial-author">
-                        <div class="author-avatar" *ngIf="testimonial.patientAvatar">
-                            <img [src]="testimonial.patientAvatar" alt="{{ testimonial.patientName }} avatar" />
-                        </div>
-                        <div>
-                            <div class="author-name">{{ testimonial.patientName || 'Patient' }}</div>
-                            <div class="author-role">{{ testimonial.patientRole || 'Patient' }}</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <ng-template #testimonialsFallback>
-          <div class="text-center text-muted">Testimonials are loading. Check back shortly.</div>
-        </ng-template>
-
-                <div class="text-center mt-4" *ngIf="!reviewSubmitted()">
-                    <button class="btn btn-primary btn-lg review-cta" type="button" (click)="openReviewModal()">
-                        <i class="bi bi-pen me-2"></i>
-                        Write a Review
-                    </button>
-                </div>
+<section class="py-16" [ngClass]="isDarkMode() ? 'bg-gray-900 text-gray-100' : 'bg-gray-50 text-gray-900'" id="features">
+  <div class="container mx-auto px-4">
+    <!-- Section Header -->
+    <div class="text-center mb-12">
+      <h2 class="text-3xl font-bold mb-3">Everything you need, nothing you don't</h2>
+      <p class="text-lg text-gray-500 dark:text-gray-400">Powerful, reliable, fast. Make healthcare management feel like a breeze.</p>
     </div>
 
-        <div class="review-overlay" *ngIf="reviewModalOpen()">
-            <div class="review-modal">
-                <button class="btn-close" aria-label="Close" (click)="closeReviewModal()"></button>
-                <h3 class="review-title">Share Your Experience</h3>
-                <p class="review-subtitle">Help others by sharing your feedback about QuickMed</p>
-
-                <div class="review-group">
-                    <label class="review-label">Your Rating</label>
-                    <div class="rating-stars"
-                             (mouseleave)="setReviewHover(reviewRating())">
-                            <button type="button"
-                                        class="star-button"
-                                        *ngFor="let star of [1,2,3,4,5]"
-                                        (mouseenter)="setReviewHover(star)"
-                                        (click)="setReviewRating(star)"
-                                        [ngClass]="{ filled: reviewHover() >= star || reviewRating() >= star }"
-                                [attr.aria-label]="'Rate ' + star + ' star'">
-                            <i class="bi" [ngClass]="(reviewHover() >= star || reviewRating() >= star) ? 'bi-star-fill' : 'bi-star'"></i>
-                        </button>
-                    </div>
-                </div>
-
-                <div class="review-group">
-                    <label class="review-label">Your Review</label>
-                    <textarea
-                        class="form-control review-textarea"
-                        rows="5"
-                        placeholder="Tell us about your experience with QuickMed..."
-                        [ngModel]="reviewText()"
-                        (ngModelChange)="reviewText.set($event)"
-                        [maxLength]="reviewCharLimit"
-                    ></textarea>
-                    <div class="review-meta">
-                        <small>Minimum 10 characters</small>
-                        <small>{{ reviewCharCount }}/{{ reviewCharLimit }}</small>
-                    </div>
-                </div>
-
-                <div class="review-error" *ngIf="reviewError()">
-                    {{ reviewError() }}
-                </div>
-
-                <div class="d-grid">
-                    <button class="btn btn-success btn-lg" type="button" [disabled]="!canSubmitReview()" (click)="submitReview()">
-                        {{ reviewSubmitting() ? 'Submitting...' : 'Submit Review' }}
-                    </button>
-                </div>
-            </div>
+    <!-- Benefits Grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+      <!-- Benefit Card -->
+      <div class="p-6 rounded-2xl shadow-lg transition-transform transform hover:-translate-y-2 hover:shadow-2xl"
+           [ngClass]="isDarkMode() ? 'bg-gray-800' : 'bg-white'">
+        <div class="flex justify-center mb-4">
+          <i class="bi bi-clock-history text-4xl text-green-500"></i>
         </div>
-</section>
+        <h4 class="text-xl font-semibold mb-2 text-center">Smart Scheduling</h4>
+        <p class="text-center text-gray-500 dark:text-gray-300">Easy one-click tool and ultra-sleek UI for instant appointment booking.</p>
+      </div>
 
-<!-- CTA Section -->
-<section class="cta-section">
-    <div class="container">
-        <div class="cta-content text-center">
-            <h2 class="cta-title">Ready to feel better?</h2>
-            <p class="cta-subtitle">Join thousands of happy patients who've discovered a better way to manage their health</p>
-                        <button class="btn btn-primary btn-lg px-5" (click)="navigateToDashboard()">
-                Get Started for Free
-                <img class="inline-icon ms-2" src="https://img.icons8.com/?size=100&id=26138&format=png&color=ffffff" alt="Next" />
-            </button>
-            <p class="cta-note">No credit card required. Free forever.</p>
+      <div class="p-6 rounded-2xl shadow-lg transition-transform transform hover:-translate-y-2 hover:shadow-2xl"
+           [ngClass]="isDarkMode() ? 'bg-gray-800' : 'bg-white'">
+        <div class="flex justify-center mb-4">
+          <img src="https://img.icons8.com/?size=100&id=63256&format=png&color=0FA958" class="w-12 h-12" alt="Zero Wait icon">
         </div>
+        <h4 class="text-xl font-semibold mb-2 text-center">Zero Wait Times</h4>
+        <p class="text-center text-gray-500 dark:text-gray-300">Get matched with a doctor in your city. No more waiting in queues.</p>
+      </div>
+
+      <div class="p-6 rounded-2xl shadow-lg transition-transform transform hover:-translate-y-2 hover:shadow-2xl"
+           [ngClass]="isDarkMode() ? 'bg-gray-800' : 'bg-white'">
+        <div class="flex justify-center mb-4">
+          <img src="https://img.icons8.com/?size=100&id=13068&format=png&color=0FA958" class="w-12 h-12" alt="Telemedicine icon">
+        </div>
+        <h4 class="text-xl font-semibold mb-2 text-center">Telemedicine Ready</h4>
+        <p class="text-center text-gray-500 dark:text-gray-300">Video calls with doctors, secure screen sharing, and digital prescriptions.</p>
+      </div>
+
+      <div class="p-6 rounded-2xl shadow-lg transition-transform transform hover:-translate-y-2 hover:shadow-2xl"
+           [ngClass]="isDarkMode() ? 'bg-gray-800' : 'bg-white'">
+        <div class="flex justify-center mb-4">
+          <img src="https://img.icons8.com/?size=100&id=59778&format=png&color=0FA958" class="w-12 h-12" alt="Health Records icon">
+        </div>
+        <h4 class="text-xl font-semibold mb-2 text-center">Health Records</h4>
+        <p class="text-center text-gray-500 dark:text-gray-300">All your medical history in one secure and accessible place.</p>
+      </div>
     </div>
+  </div>
 </section>
 
-<!-- Edit Profile Modal -->
-<section>
-    <div class="review-overlay" *ngIf="editProfileOpen()">
-        <div class="review-modal profile-modal">
-            <button class="btn-close" aria-label="Close" (click)="closeEditProfile()"></button>
-            <h3 class="review-title">Edit Profile</h3>
-            <p class="review-subtitle">Update your information and profile picture</p>
 
-            <div class="review-group">
-                <label class="review-label">Profile Picture</label>
-                <div class="profile-avatar-row">
-                    <div class="profile-avatar-preview rounded-circle" role="button" aria-label="Upload profile picture" (click)="avatarInput.click()">
-                        <img *ngIf="avatarPreview(); else avatarInitials" [src]="avatarPreview()!" alt="Avatar preview" />
-                        <ng-template #avatarInitials>
-                            <div class="initials">{{ getInitials(profileFirstName(), profileLastName()) }}</div>
-                        </ng-template>
-                        <span class="avatar-add-badge" aria-hidden="true"><i class="bi bi-plus-lg"></i></span>
-                    </div>
-                    <div>
-                        <input #avatarInput class="visually-hidden" type="file" accept="image/*" (change)="onAvatarSelected($event)" />
-                    </div>
-                </div>
-            </div>
+<section
+  id="how-it-works"
+  class="relative py-24 transition-colors duration-300"
+  [ngClass]="isDarkMode() ? 'home-dark-bg' : 'home-light-bg'">
 
-            <div class="review-group">
-                <label class="review-label">First Name</label>
-                <input class="form-control" type="text" [ngModel]="profileFirstName()" (ngModelChange)="profileFirstName.set($event)" />
-            </div>
+  <div class="container mx-auto px-6">
 
-            <div class="review-group">
-                <label class="review-label">Last Name</label>
-                <input class="form-control" type="text" [ngModel]="profileLastName()" (ngModelChange)="profileLastName.set($event)" />
-            </div>
-
-            <div class="review-group">
-                <label class="review-label">Email</label>
-                <input class="form-control" type="email" [ngModel]="profileEmail()" (ngModelChange)="profileEmail.set($event)" />
-            </div>
-
-            <div class="review-group">
-                <label class="review-label">Phone</label>
-                <input class="form-control" type="tel" [ngModel]="profilePhone()" (ngModelChange)="profilePhone.set($event)" />
-            </div>
-
-            <!-- Doctor-only fields -->
-            <div class="review-group" *ngIf="currentUser()?.role === 'doctor'">
-                <label class="review-label">Specialty</label>
-                <input class="form-control" type="text" [ngModel]="profileSpecialty()" (ngModelChange)="profileSpecialty.set($event)" />
-            </div>
-            <div class="review-group" *ngIf="currentUser()?.role === 'doctor'">
-                <label class="review-label">Bio</label>
-                <textarea class="form-control" rows="4" [ngModel]="profileBio()" (ngModelChange)="profileBio.set($event)"></textarea>
-            </div>
-
-            <div class="review-error" *ngIf="profileError()">{{ profileError() }}</div>
-
-            <div class="d-grid">
-                <button class="btn btn-primary btn-lg" type="button" [disabled]="!canSubmitProfile()" (click)="submitProfile()">
-                    {{ profileSubmitting() ? 'Saving...' : 'Save Changes' }}
-                </button>
-            </div>
-        </div>
+    <!-- Section Header -->
+    <div class="max-w-2xl mx-auto text-center mb-20 animate-[fadeUp_0.6s_ease-out]">
+        <h2 class="text-4xl md:text-5xl font-extrabold mb-4"
+          [ngClass]="isDarkMode() ? 'text-white' : 'text-neutral-900'">
+        Get started in 3 simple steps
+      </h2>
+      <p class="text-lg leading-relaxed"
+        [ngClass]="isDarkMode() ? 'text-neutral-400' : 'text-neutral-600'">
+        It’s so easy you’ll wonder why healthcare wasn’t always like this
+      </p>
     </div>
+
+    <!-- Steps Grid -->
+    <div class="grid gap-10 md:grid-cols-3 relative">
+
+      <!-- Connector Line for Desktop -->
+      <div class="absolute hidden md:block top-1/2 left-0 right-0 h-px
+                  bg-gradient-to-r from-transparent via-[var(--primary)/40] to-transparent">
+      </div>
+
+      <!-- Step Card -->
+      <ng-container *ngFor="let step of steps">
+        <div
+          class="relative group rounded-3xl p-8
+                 border shadow-lg transition-all duration-300 hover:-translate-y-2"
+          [ngClass]="isDarkMode() 
+                      ? 'bg-neutral-900 border-neutral-800 hover:shadow-xl' 
+                      : 'bg-neutral-50 border-neutral-200 hover:shadow-xl'">
+
+          <!-- Step Number -->
+          <div class="absolute -top-6 left-6 w-12 h-12 rounded-full
+                      flex items-center justify-center text-xl font-bold
+                      shadow-lg"
+               [ngStyle]="{'background-color': 'var(--primary)', 'color': '#fff', 'box-shadow': '0 0 10px var(--primary)'}">
+            {{step.number}}
+          </div>
+
+            <h3 class="mt-8 text-xl font-semibold mb-3"
+              [ngClass]="isDarkMode() ? 'text-white' : 'text-neutral-900'">
+            {{step.title}}
+          </h3>
+
+           <p class="leading-relaxed"
+             [ngClass]="isDarkMode() ? 'text-neutral-400' : 'text-neutral-600'">
+            {{step.description}}
+          </p>
+        </div>
+      </ng-container>
+    </div>
+
+    <!-- Action Button -->
+    <div class="text-center mt-16">
+      <button
+        (click)="navigateToDashboard()"
+        class="inline-flex items-center gap-3 px-10 py-4 rounded-2xl text-lg font-semibold
+               shadow-xl transition-transform duration-300 hover:scale-105 active:scale-95"
+        [ngStyle]="{
+          'background-color': 'var(--primary)',
+          'color': '#fff',
+          'box-shadow': '0 10px 20px var(--primary)/30'
+        }">
+
+        Start Your Journey
+
+        <span class="flex items-center justify-center w-6 h-6 rounded-full
+                     transition-transform duration-300 group-hover:translate-x-1"
+              [ngStyle]="{'background-color': 'rgba(255,255,255,0.2)'}">
+          <img src="https://img.icons8.com/?size=100&id=26138&format=png&color=ffffff"
+               class="w-4 h-4" />
+        </span>
+      </button>
+    </div>
+
+  </div>
 </section>
+
+<section
+  id="testimonials"
+  class="relative py-24 transition-colors duration-300"
+  [ngClass]="isDarkMode() ? 'home-dark-bg' : 'home-light-bg'">
+
+  <div class="container mx-auto px-6">
+
+    <!-- Section Header -->
+    <div class="text-center max-w-2xl mx-auto mb-16 animate-[fadeUp_0.6s_ease-out]">
+        <h2 class="text-4xl md:text-5xl font-extrabold mb-4"
+          [ngClass]="isDarkMode() ? 'text-white' : 'text-neutral-900'">
+        Loved by patients and doctors
+      </h2>
+      <p class="text-lg"
+        [ngClass]="isDarkMode() ? 'text-neutral-400' : 'text-neutral-600'">
+        Don’t just take our word for it
+      </p>
+    </div>
+
+    <!-- Testimonials Grid -->
+    <div
+      class="grid gap-8 md:grid-cols-2 lg:grid-cols-3"
+      *ngIf="testimonials().length; else testimonialsFallback">
+
+      <div
+        *ngFor="let testimonial of testimonials(); trackBy: trackTestimonial"
+        class="rounded-3xl p-8 border shadow-lg transition-all duration-300 hover:-translate-y-2"
+        [ngClass]="isDarkMode() 
+              ? 'bg-neutral-900 border-neutral-800 hover:shadow-xl' 
+              : 'bg-neutral-50 border-neutral-200 hover:shadow-xl'">
+
+        <!-- Rating Stars -->
+        <div class="flex mb-4">
+          <i
+            class="text-lg"
+            *ngFor="let star of getStarArray(testimonial.rating)"
+            [ngClass]="star ? 'bi bi-star-fill text-warning' : 'bi bi-star text-neutral-400'">
+          </i>
+        </div>
+
+        <!-- Comment -->
+        <p [ngClass]="isDarkMode() ? 'text-neutral-300' : 'text-neutral-700'" class="mb-6 leading-relaxed">
+          “{{ testimonial.comment }}”
+        </p>
+
+        <!-- Patient Info -->
+        <div class="flex items-center gap-4">
+          <div *ngIf="testimonial.patientAvatar"
+               class="w-12 h-12 rounded-full overflow-hidden ring-2"
+               [ngStyle]="{'ring-color': 'var(--primary)/30'}">
+            <img [src]="testimonial.patientAvatar" class="w-full h-full object-cover" />
+          </div>
+
+          <div>
+            <div [ngClass]="isDarkMode() ? 'text-white' : 'text-neutral-900'" class="font-semibold">
+              {{ testimonial.patientName || 'Patient' }}
+            </div>
+            <div [ngClass]="isDarkMode() ? 'text-neutral-400' : 'text-neutral-500'" class="text-sm">
+              {{ testimonial.patientRole || 'Patient' }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Fallback -->
+    <ng-template #testimonialsFallback>
+      <div [ngClass]="isDarkMode() ? 'text-neutral-400' : 'text-neutral-500'" class="text-center">
+        Testimonials are loading. Check back shortly.
+      </div>
+    </ng-template>
+
+    <!-- Write Review Button -->
+    <div class="text-center mt-14" *ngIf="!reviewSubmitted()">
+      <button
+        (click)="openReviewModal()"
+        class="inline-flex items-center gap-3 px-8 py-4 rounded-2xl text-lg font-semibold shadow-lg transition-transform duration-300 hover:scale-105 active:scale-95"
+        [ngStyle]="{'background-color': 'var(--primary)', 'color': '#fff', 'box-shadow': '0 10px 20px var(--primary)/30'}">
+
+        <i class="bi bi-pen"></i>
+        Write a Review
+      </button>
+    </div>
+  </div>
+
+  <!-- Review Modal -->
+  <div *ngIf="reviewModalOpen()" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+
+        <div class="w-full max-w-lg mx-4 rounded-3xl shadow-2xl animate-[fadeUp_0.35s_ease-out]"
+          [ngClass]="isDarkMode() ? 'bg-neutral-900 text-neutral-100' : 'bg-white text-neutral-900'">
+
+      <!-- Close Button -->
+      <button aria-label="Close" (click)="closeReviewModal()"
+              class="absolute top-4 right-4 text-neutral-400 hover:text-neutral-700 dark:hover:text-white">
+        <i class="bi bi-x-lg text-xl"></i>
+      </button>
+
+      <div class="p-8 space-y-8">
+
+        <div class="text-center">
+          <h3 class="text-2xl font-semibold">Share Your Experience</h3>
+          <p [ngClass]="isDarkMode() ? 'text-neutral-400' : 'text-neutral-500'" class="text-sm">
+            Help others by sharing your feedback
+          </p>
+        </div>
+
+        <!-- Rating Stars -->
+        <div class="flex justify-center gap-2" (mouseleave)="setReviewHover(reviewRating())">
+          <button
+            *ngFor="let star of [1,2,3,4,5]"
+            (mouseenter)="setReviewHover(star)"
+            (click)="setReviewRating(star)"
+            class="text-2xl transition-transform hover:scale-125"
+            [ngClass]="reviewHover() >= star || reviewRating() >= star
+              ? 'text-warning bi bi-star-fill'
+              : 'text-neutral-400 bi bi-star'">
+          </button>
+        </div>
+
+        <!-- Review Text -->
+        <textarea
+          rows="5"
+          class="w-full rounded-xl border px-4 py-3 text-sm focus:outline-none focus:ring-2"
+          [ngClass]="isDarkMode() ? 'border-neutral-700 bg-transparent text-neutral-100 focus:ring-primary' 
+                                : 'border-neutral-300 bg-transparent text-neutral-900 focus:ring-primary'"
+          placeholder="Tell us about your experience..."
+          [ngModel]="reviewText()"
+          (ngModelChange)="reviewText.set($event)"
+          [maxLength]="reviewCharLimit">
+        </textarea>
+
+        <div class="flex justify-between text-sm" [ngClass]="isDarkMode() ? 'text-neutral-400' : 'text-neutral-500'">
+          <span>Minimum 10 characters</span>
+          <span>{{ reviewCharCount }}/{{ reviewCharLimit }}</span>
+        </div>
+
+        <div *ngIf="reviewError()" class="text-sm text-red-500 text-center">
+          {{ reviewError() }}
+        </div>
+
+        <!-- Submit Button -->
+        <button
+          class="w-full rounded-xl py-3 text-lg font-semibold hover:scale-[1.02] active:scale-[0.98] transition-transform disabled:opacity-50"
+          [ngStyle]="{'background-color': 'var(--primary)', 'color': '#fff'}"
+          [disabled]="!canSubmitReview()"
+          (click)="submitReview()">
+          {{ reviewSubmitting() ? 'Submitting...' : 'Submit Review' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<section
+  class="relative overflow-hidden py-24 transition-colors duration-300"
+  [ngClass]="isDarkMode ? 'home-dark-bg' : 'home-light-bg'">
+
+  <!-- Background Gradient -->
+  <div
+    class="absolute inset-0"
+    [ngStyle]="{
+      'background': isDarkMode 
+        ? 'linear-gradient(to bottom right, var(--primary)/20, transparent)' 
+        : 'linear-gradient(to bottom right, var(--primary)/10, var(--primary)/5)'
+    }">
+  </div>
+
+  <div class="relative container mx-auto px-6">
+    <div class="max-w-3xl mx-auto text-center animate-[fadeUp_0.6s_ease-out]">
+
+      <!-- Section Heading -->
+      <h2 [ngClass]="isDarkMode ? 'text-white' : 'text-neutral-900'"
+          class="text-4xl md:text-5xl font-extrabold tracking-tight mb-6">
+        Ready to feel better?
+      </h2>
+
+      <!-- Section Description -->
+      <p [ngClass]="isDarkMode ? 'text-neutral-400' : 'text-neutral-600'"
+         class="text-lg md:text-xl mb-10">
+        Join thousands of happy patients who’ve discovered a better way to manage their health.
+      </p>
+
+      <!-- Button & Subtext -->
+      <div class="flex flex-col items-center gap-4">
+
+        <button
+          (click)="navigateToDashboard()"
+          class="group inline-flex items-center gap-3 px-10 py-4 rounded-2xl text-lg font-semibold shadow-xl transition-all duration-300 hover:scale-105 active:scale-95"
+          [ngStyle]="{
+            'background-color': 'var(--primary)',
+            'color': '#fff',
+            'box-shadow': '0 10px 20px var(--primary)/30'
+          }">
+
+          Get Started for Free
+
+          <span
+            class="flex items-center justify-center w-6 h-6 rounded-full bg-white/20 group-hover:translate-x-1 transition-transform duration-300">
+
+            <img
+              src="https://img.icons8.com/?size=100&id=26138&format=png&color=ffffff"
+              class="w-4 h-4" />
+          </span>
+        </button>
+
+        <p [ngClass]="isDarkMode ? 'text-neutral-400' : 'text-neutral-500'" class="text-sm">
+          No credit card required. Free forever.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+<section *ngIf="editProfileOpen()"
+         class="fixed inset-0 z-50 flex items-center justify-center transition-colors duration-300"
+         [ngClass]="isDarkMode ? 'home-dark-bg' : 'home-light-bg'"
+         style="background-color: rgba(0,0,0,0.6); backdrop-filter: blur(6px);">
+
+  <div
+    class="relative w-full max-w-xl mx-4 rounded-3xl shadow-2xl animate-[fadeIn_0.35s_ease-out]"
+    [ngClass]="isDarkMode ? 'bg-neutral-900 text-neutral-100' : 'bg-white text-neutral-900'">
+
+    <!-- Close Button -->
+    <button
+      type="button"
+      aria-label="Close"
+      (click)="closeEditProfile()"
+      class="absolute top-4 right-4 transition"
+      [ngClass]="isDarkMode ? 'hover:text-white text-neutral-400' : 'hover:text-neutral-700 text-neutral-400'">
+      <i class="bi bi-x-lg text-xl"></i>
+    </button>
+
+    <div class="p-8 space-y-8">
+
+      <!-- Heading -->
+      <div class="text-center space-y-1">
+        <h3 class="text-2xl font-semibold tracking-tight">Edit Profile</h3>
+        <p [ngClass]="isDarkMode ? 'text-neutral-400' : 'text-neutral-500'" class="text-sm">
+          Update your personal information
+        </p>
+      </div>
+
+      <!-- Avatar Upload -->
+      <div class="flex justify-center">
+        <div class="relative group cursor-pointer" (click)="avatarInput.click()">
+          <div
+            class="w-28 h-28 rounded-full overflow-hidden flex items-center justify-center transition-transform duration-300 group-hover:scale-105"
+            [ngClass]="isDarkMode ? 'bg-neutral-700 ring-primary/20' : 'bg-neutral-200 ring-primary/20'">
+            
+            <img *ngIf="avatarPreview(); else initialsAvatar"
+                 [src]="avatarPreview()!"
+                 class="w-full h-full object-cover" />
+
+            <ng-template #initialsAvatar>
+              <span class="text-3xl font-bold text-primary">
+                {{ getInitials(profileFirstName(), profileLastName()) }}
+              </span>
+            </ng-template>
+          </div>
+
+          <div class="absolute bottom-1 right-1 w-9 h-9 rounded-full bg-primary text-white flex items-center justify-center shadow-lg group-hover:rotate-12 transition-transform">
+            <i class="bi bi-camera-fill"></i>
+          </div>
+
+          <input #avatarInput type="file" accept="image/*" class="hidden" (change)="onAvatarSelected($event)" />
+        </div>
+      </div>
+
+      <!-- Profile Inputs -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+
+        <input
+          class="w-full rounded-xl border px-4 py-3 text-sm focus:outline-none focus:ring-2"
+          [ngClass]="isDarkMode ? 'border-neutral-700 bg-transparent text-neutral-100 focus:ring-primary' : 'border-neutral-300 bg-transparent text-neutral-900 focus:ring-primary'"
+          placeholder="First Name"
+          [ngModel]="profileFirstName()"
+          (ngModelChange)="profileFirstName.set($event)" />
+
+        <input
+          class="w-full rounded-xl border px-4 py-3 text-sm focus:outline-none focus:ring-2"
+          [ngClass]="isDarkMode ? 'border-neutral-700 bg-transparent text-neutral-100 focus:ring-primary' : 'border-neutral-300 bg-transparent text-neutral-900 focus:ring-primary'"
+          placeholder="Last Name"
+          [ngModel]="profileLastName()"
+          (ngModelChange)="profileLastName.set($event)" />
+
+        <input
+          type="email"
+          class="w-full rounded-xl border px-4 py-3 text-sm focus:outline-none focus:ring-2 md:col-span-2"
+          [ngClass]="isDarkMode ? 'border-neutral-700 bg-transparent text-neutral-100 focus:ring-primary' : 'border-neutral-300 bg-transparent text-neutral-900 focus:ring-primary'"
+          placeholder="Email Address"
+          [ngModel]="profileEmail()"
+          (ngModelChange)="profileEmail.set($event)" />
+
+        <input
+          type="tel"
+          class="w-full rounded-xl border px-4 py-3 text-sm focus:outline-none focus:ring-2 md:col-span-2"
+          [ngClass]="isDarkMode ? 'border-neutral-700 bg-transparent text-neutral-100 focus:ring-primary' : 'border-neutral-300 bg-transparent text-neutral-900 focus:ring-primary'"
+          placeholder="Phone Number"
+          [ngModel]="profilePhone()"
+          (ngModelChange)="profilePhone.set($event)" />
+
+        <input
+          *ngIf="currentUser()?.role === 'doctor'"
+          class="w-full rounded-xl border px-4 py-3 text-sm focus:outline-none focus:ring-2 md:col-span-2"
+          [ngClass]="isDarkMode ? 'border-neutral-700 bg-transparent text-neutral-100 focus:ring-primary' : 'border-neutral-300 bg-transparent text-neutral-900 focus:ring-primary'"
+          placeholder="Specialty"
+          [ngModel]="profileSpecialty()"
+          (ngModelChange)="profileSpecialty.set($event)" />
+
+        <textarea
+          *ngIf="currentUser()?.role === 'doctor'"
+          rows="4"
+          class="w-full rounded-xl border px-4 py-3 text-sm focus:outline-none focus:ring-2 md:col-span-2"
+          [ngClass]="isDarkMode ? 'border-neutral-700 bg-transparent text-neutral-100 focus:ring-primary' : 'border-neutral-300 bg-transparent text-neutral-900 focus:ring-primary'"
+          placeholder="Short bio"
+          [ngModel]="profileBio()"
+          (ngModelChange)="profileBio.set($event)">
+        </textarea>
+
+      </div>
+
+      <!-- Error Message -->
+      <div *ngIf="profileError()" class="text-sm text-red-500 text-center">
+        {{ profileError() }}
+      </div>
+
+      <!-- Save Button -->
+      <button
+        class="w-full rounded-xl py-3 text-lg font-semibold transition-transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50"
+        [disabled]="!canSubmitProfile()"
+        (click)="submitProfile()"
+        [ngStyle]="{ 'background-color': 'var(--primary)', 'color': '#fff' }">
+
+        {{ profileSubmitting() ? 'Saving...' : 'Save Changes' }}
+      </button>
+
+    </div>
+  </div>
+</section>
+
+
 
 <!-- Footer -->
-<footer class="footer">
-    <div class="container">
-        <div class="row g-4">
-            <div class="col-lg-4">
-                <div class="footer-brand">
-                    <div class="d-flex align-items-center mb-3">
-                        <div class="logo-icon me-2">
-                            <img src="assets/images/QuickMed-Logo.png" alt="QuickMed logo" />
-                        </div>
-                        <span class="brand-name">QuickMed</span>
-                    </div>
-                    <p class="footer-description">Your trusted healthcare booking platform. Making healthcare accessible, one appointment at a time.</p>
-                    <div class="social-links">
-                        <a href="#" class="social-link">
-                            <i class="bi bi-facebook"></i>
-                        </a>
-                        <a href="#" class="social-link">
-                            <i class="bi bi-twitter"></i>
-                        </a>
-                        <a href="#" class="social-link">
-                            <i class="bi bi-instagram"></i>
-                        </a>
-                        <a href="#" class="social-link">
-                            <i class="bi bi-linkedin"></i>
-                        </a>
-                    </div>
-                </div>
+<footer class="footer transition-colors duration-300" [ngClass]="isDarkMode ? 'home-dark-bg text-neutral-100' : 'home-light-bg text-neutral-900'">
+  <div class="container mx-auto px-6 py-12">
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-8">
+
+      <!-- Brand -->
+      <div class="md:col-span-4">
+        <div class="footer-brand">
+          <div class="flex items-center mb-3">
+            <div class="logo-icon mr-2">
+              <img src="assets/images/QuickMed-Logo.png" alt="QuickMed logo" class="h-10 w-auto" />
             </div>
-            <div class="col-lg-2 col-md-4">
-                <h5 class="footer-title">Product</h5>
-                <ul class="footer-links">
-                    <li><a href="#">Features</a></li>
-                    <li><a href="#">Pricing</a></li>
-                    <li><a href="#">Security</a></li>
-                    <li><a href="#">Roadmap</a></li>
-                </ul>
-            </div>
-            <div class="col-lg-2 col-md-4">
-                <h5 class="footer-title">Company</h5>
-                <ul class="footer-links">
-                    <li><a href="#">About Us</a></li>
-                    <li><a href="#">Careers</a></li>
-                    <li><a href="#">Blog</a></li>
-                    <li><a href="#">Press</a></li>
-                </ul>
-            </div>
-            <div class="col-lg-2 col-md-4">
-                <h5 class="footer-title">Resources</h5>
-                <ul class="footer-links">
-                    <li><a href="#">Help Center</a></li>
-                    <li><a href="#">Contact</a></li>
-                    <li><a href="#">Privacy</a></li>
-                    <li><a href="#">Terms</a></li>
-                </ul>
-            </div>
-            <div class="col-lg-2 col-md-12">
-                <h5 class="footer-title">Contact</h5>
-                <ul class="footer-contact">
-                    <li>
-                        <i class="bi bi-envelope me-2"></i>
-                        <a href="mailto:girmaenkuchille&#64;gmail.com">girmaenkuchille&#64;gmail.com</a>
-                    </li>
-                    <li>
-                        <i class="bi bi-telephone me-2"></i>
-                        <span>+251920189715</span>
-                    </li>
-                </ul>
-            </div>
+            <span class="brand-name font-bold text-xl">QuickMed</span>
+          </div>
+          <p class="footer-description text-sm text-neutral-600 dark:text-neutral-400">
+            Your trusted healthcare booking platform. Making healthcare accessible, one appointment at a time.
+          </p>
+          <div class="flex gap-3 mt-4">
+            <a href="#" class="social-link text-neutral-600 dark:text-neutral-400 hover:text-primary transition">
+              <i class="bi bi-facebook text-lg"></i>
+            </a>
+            <a href="#" class="social-link text-neutral-600 dark:text-neutral-400 hover:text-primary transition">
+              <i class="bi bi-twitter text-lg"></i>
+            </a>
+            <a href="#" class="social-link text-neutral-600 dark:text-neutral-400 hover:text-primary transition">
+              <i class="bi bi-instagram text-lg"></i>
+            </a>
+            <a href="#" class="social-link text-neutral-600 dark:text-neutral-400 hover:text-primary transition">
+              <i class="bi bi-linkedin text-lg"></i>
+            </a>
+          </div>
         </div>
-        <div class="footer-bottom">
-            <p>&copy; 2025 QuickMed. All rights reserved. Built with <i class="bi bi-heart-fill text-primary"></i></p>
-        </div>
+      </div>
+
+      <!-- Product Links -->
+      <div class="md:col-span-2">
+        <h5 class="footer-title font-semibold mb-3">Product</h5>
+        <ul class="footer-links space-y-2 text-sm">
+          <li><a href="#" class="hover:text-primary transition">Features</a></li>
+          <li><a href="#" class="hover:text-primary transition">Pricing</a></li>
+          <li><a href="#" class="hover:text-primary transition">Security</a></li>
+          <li><a href="#" class="hover:text-primary transition">Roadmap</a></li>
+        </ul>
+      </div>
+
+      <!-- Company Links -->
+      <div class="md:col-span-2">
+        <h5 class="footer-title font-semibold mb-3">Company</h5>
+        <ul class="footer-links space-y-2 text-sm">
+          <li><a href="#" class="hover:text-primary transition">About Us</a></li>
+          <li><a href="#" class="hover:text-primary transition">Careers</a></li>
+          <li><a href="#" class="hover:text-primary transition">Blog</a></li>
+          <li><a href="#" class="hover:text-primary transition">Press</a></li>
+        </ul>
+      </div>
+
+      <!-- Resources Links -->
+      <div class="md:col-span-2">
+        <h5 class="footer-title font-semibold mb-3">Resources</h5>
+        <ul class="footer-links space-y-2 text-sm">
+          <li><a href="#" class="hover:text-primary transition">Help Center</a></li>
+          <li><a href="#" class="hover:text-primary transition">Contact</a></li>
+          <li><a href="#" class="hover:text-primary transition">Privacy</a></li>
+          <li><a href="#" class="hover:text-primary transition">Terms</a></li>
+        </ul>
+      </div>
+
+      <!-- Contact -->
+      <div class="md:col-span-2">
+        <h5 class="footer-title font-semibold mb-3">Contact</h5>
+        <ul class="footer-contact space-y-2 text-sm">
+          <li class="flex items-center gap-2">
+            <i class="bi bi-envelope"></i>
+            <a href="mailto:girmaenkuchille&#64;gmail.com" class="hover:text-primary transition">girmaenkuchille&#64;gmail.com</a>
+          </li>
+          <li class="flex items-center gap-2">
+            <i class="bi bi-telephone"></i>
+            <span>+251920189715</span>
+          </li>
+        </ul>
+      </div>
     </div>
-    </footer>
+
+    <!-- Footer Bottom -->
+    <div class="footer-bottom mt-10 text-center text-sm text-neutral-500 dark:text-neutral-400">
+      <p>
+        &copy; 2025 QuickMed. All rights reserved. Built with
+        <i class="bi bi-heart-fill" [ngStyle]="{ color: 'var(--primary)' }"></i>
+      </p>
+    </div>
+  </div>
+</footer>
+
 </div>
