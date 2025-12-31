@@ -1,4 +1,4 @@
-import { Component } from "@angular/core"
+import { Component, HostListener } from "@angular/core"
 import { CommonModule } from "@angular/common"
 import { FormsModule } from "@angular/forms"
 import { Router, RouterLink } from "@angular/router"
@@ -52,6 +52,7 @@ export class HomeComponent implements OnInit {
   doctorOptions = signal<{ id: string; name: string }[]>([])
   selectedDoctorId = signal<string | null>(null)
   editProfileOpen = signal(false)
+  profileDropdownOpen = signal(false) // <-- ADD THIS
   profileSubmitting = signal(false)
   profileError = signal<string | null>(null)
   avatarPreview = signal<string | null>(null)
@@ -61,8 +62,6 @@ export class HomeComponent implements OnInit {
   profilePhone = signal('')
   profileSpecialty = signal('')
   profileBio = signal('')
-  profileDropdownOpen = signal(false) // <-- ADD THIS
-
   private selectedAvatarFile: File | null = null
 
   constructor(
@@ -136,28 +135,10 @@ export class HomeComponent implements OnInit {
   }
 
   logout(): void {
-    this.authService.logout()
+    this.closeProfileDropdown();
+    this.authService.logout();
   }
 
-  navigateToDashboard(): void {
-    const user = this.currentUser()
-    if (!user) {
-      this.router.navigate(["/login"])
-      return
-    }
-
-    switch (user.role) {
-      case "patient":
-        this.router.navigate(["/patient/dashboard"])
-        break
-      case "doctor":
-        this.router.navigate(["/doctor/dashboard"])
-        break
-      case "admin":
-        this.router.navigate(["/admin/dashboard"])
-        break
-    }
-  }
 
   toggleTheme(): void {
     this.themeService.toggleTheme()
@@ -263,6 +244,7 @@ export class HomeComponent implements OnInit {
     this.reviewSubmitted.set(true)
   }
   openEditProfile(): void {
+    this.closeProfileDropdown();
     const user = this.currentUser()
     if (!user) {
       this.router.navigate(['/login'], { queryParams: { redirect: '/' } })
@@ -281,18 +263,94 @@ export class HomeComponent implements OnInit {
     this.editProfileOpen.set(true)
   }
   toggleProfileDropdown(): void { // <-- ADD THIS
-  this.profileDropdownOpen.set(!this.profileDropdownOpen())
-}
+    this.profileDropdownOpen.set(!this.profileDropdownOpen())
+  }
 
-closeProfileDropdown(): void { // <-- ADD THIS
-  this.profileDropdownOpen.set(false)
-}
+  closeProfileDropdown(): void { // <-- ADD THIS
+    this.profileDropdownOpen.set(false)
+  }
 
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void { // <-- ADD THIS
+    const target = event.target as HTMLElement
+    if (!target.closest('.profile-dropdown-container')) {
+      this.closeProfileDropdown()
+    }
+  }
 
   closeEditProfile(): void {
     this.editProfileOpen.set(false)
   }
 
+  navigateToDashboard(): void {
+    this.closeProfileDropdown() // <-- ADD THIS
+    const user = this.currentUser()
+    if (!user) {
+      this.router.navigate(["/login"])
+      return
+    }
+    switch (user.role) {
+      case "patient":
+        this.router.navigate(["/patient/dashboard"])
+        break
+      case "doctor":
+        this.router.navigate(["/doctor/dashboard"])
+        break
+      case "admin":
+        this.router.navigate(["/admin/dashboard"])
+        break
+    }
+  }
+
+  navigateToProfile(): void {
+    const user = this.currentUser()
+    if (!user) {
+      this.router.navigate(['/login'])
+      return
+    }
+    switch (user.role) {
+      case 'patient':
+        this.router.navigate(['/patient/profile'])
+        break
+      case 'doctor':
+        this.router.navigate(['/doctor/settings'])
+        break
+      case 'admin':
+        this.router.navigate(['/admin/dashboard'])
+        break
+      default:
+        this.router.navigate(['/'])
+        break
+    }
+  }
+ getUserAvatar(): string {
+  const user = this.currentUser()
+  return user?.avatar || 'assets/images/profile-placeholder.png'
+}
+getInitials(firstName?: string, lastName?: string): string {
+  if (!firstName && !lastName) return '?'
+  const firstInitial = firstName ? firstName.charAt(0).toUpperCase() : ''
+  const lastInitial = lastName ? lastName.charAt(0).toUpperCase() : ''
+  return `${firstInitial}${lastInitial}`
+}
+navbarClasses() {
+    return {
+      "bg-light": !this.isDarkMode(),
+      "bg-dark": this.isDarkMode(),
+      "navbar-light": !this.isDarkMode(),
+      "navbar-dark": this.isDarkMode(),
+      "text-dark": !this.isDarkMode(),
+      "text-white": this.isDarkMode(),
+    };
+  }
+
+  getStarArray(rating: number): number[] {
+    return Array.from({ length: 5 }, (_, idx) => idx < rating ? 1 : 0);
+  }
+
+  trackTestimonial(_index: number, testimonial: FeaturedTestimonial): string {
+    return testimonial.id;
+  }
   onAvatarSelected(event: Event): void {
     const input = event.target as HTMLInputElement
     const file = input.files?.[0] || null
@@ -363,55 +421,5 @@ closeProfileDropdown(): void { // <-- ADD THIS
       },
     })
   }
-  navigateToProfile(): void {
-    const user = this.currentUser()
-    if (!user) {
-      this.router.navigate(['/login'])
-      return
-    }
-    switch (user.role) {
-      case 'patient':
-        this.router.navigate(['/patient/profile'])
-        break
-      case 'doctor':
-        this.router.navigate(['/doctor/settings'])
-        break
-      case 'admin':
-        this.router.navigate(['/admin/dashboard'])
-        break
-      default:
-        this.router.navigate(['/'])
-        break
-    }
-  }
- getUserAvatar(): string {
-  const user = this.currentUser()
-  return user?.avatar || 'assets/images/profile-placeholder.png'
-}
-getInitials(firstName?: string, lastName?: string): string {
-  if (!firstName && !lastName) return '?'
-  const firstInitial = firstName ? firstName.charAt(0).toUpperCase() : ''
-  const lastInitial = lastName ? lastName.charAt(0).toUpperCase() : ''
-  return `${firstInitial}${lastInitial}`
-}
-navbarClasses() {
-    return {
-      "bg-light": !this.isDarkMode(),
-      "bg-dark": this.isDarkMode(),
-      "navbar-light": !this.isDarkMode(),
-      "navbar-dark": this.isDarkMode(),
-      "text-dark": !this.isDarkMode(),
-      "text-white": this.isDarkMode(),
-    };
-  }
-
-  getStarArray(rating: number): number[] {
-    return Array.from({ length: 5 }, (_, idx) => idx < rating ? 1 : 0);
-  }
-
-  trackTestimonial(_index: number, testimonial: FeaturedTestimonial): string {
-    return testimonial.id;
-  }
-
 
 }

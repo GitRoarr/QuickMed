@@ -102,7 +102,14 @@ export class ScheduleComponent implements OnInit {
 
   toggleWorkingDay(day: number): void {
     const set = new Set(this.workingDays());
-    set.has(day) ? set.delete(day) : set.add(day);
+    const wasSelected = set.has(day);
+    if (wasSelected) {
+      set.delete(day);
+      this.toast.info(`${['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][day]} removed from availability.`, { title: 'Schedule' });
+    } else {
+      set.add(day);
+      this.toast.success(`${['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][day]} added to availability!`, { title: 'Schedule' });
+    }
     this.workingDays.set(Array.from(set).sort());
   }
 

@@ -29,8 +29,12 @@ export class SettingsService {
     return settings;
   }
 
-  async updateSettings(doctorId: string, updateData: Partial<DoctorSettings>): Promise<DoctorSettings> {
+  async updateSettings(doctorId: string, updateData: Partial<DoctorSettings & { workingDays?: number[] }>): Promise<DoctorSettings> {
     let settings = await this.getSettings(doctorId);
+    if (updateData.workingDays && Array.isArray(updateData.workingDays)) {
+      const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+      updateData.availableDays = updateData.workingDays.map((d) => DAY_NAMES[d]);
+    }
     Object.assign(settings, updateData);
     return this.settingsRepository.save(settings);
   }
