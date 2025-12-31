@@ -1,56 +1,55 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { SettingsService } from './settings.service';
-import { getRepositoryToken } from '@nestjs/typeorm';
 import { DoctorSettings } from './entities/doctor-settings.entity';
 import { User } from '../users/entities/user.entity';
-import { Repository } from 'typeorm';
 
-describe('SettingsService', () => {
+describe('SettingsService (integration)', () => {
   let service: SettingsService;
-  let settingsRepo: Repository<DoctorSettings>;
-  let usersRepo: Repository<User>;
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        SettingsService,
-        {
-          provide: getRepositoryToken(DoctorSettings),
-          useClass: Repository,
-        },
-        {
-          provide: getRepositoryToken(User),
-          useClass: Repository,
-        },
+      imports: [
+        TypeOrmModule.forRoot({
+          type: 'sqlite',
+          database: ':memory:',
+          dropSchema: true,
+          entities: [DoctorSettings, User],
+          synchronize: true,
+        }),
+        TypeOrmModule.forFeature([DoctorSettings, User]),
       ],
+      providers: [SettingsService],
     }).compile();
 
-    service = module.get<SettingsService>(SettingsService);
-    settingsRepo = module.get<Repository<DoctorSettings>>(getRepositoryToken(DoctorSettings));
-    usersRepo = module.get<Repository<User>>(getRepositoryToken(User));
+    service = module.get(SettingsService);
   });
 
   it('should update workingDays and set availableDays', async () => {
     const doctorId = 'doctor-123';
-    const workingDays = [1, 2, 3, 4, 5];
-    const expectedAvailableDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
-    const settings = { doctorId } as DoctorSettings;
 
-    jest.spyOn(service, 'getSettings').mockResolvedValue(settings);
-    jest.spyOn(settingsRepo, 'save').mockImplementation(async (s) => s as any);
+    await service.updateSettings(doctorId, {
+      workingDays: [1, 2, 3, 4, 5],
+    });
 
-    const result = await service.updateSettings(doctorId, { workingDays });
-    expect(result.availableDays).toEqual(expectedAvailableDays);
+    const settings = await service.getSettings(doctorId);
+
+    expect(settings.availableDays).toEqual([
+      'Monday',
+      'Tuesday',
+      'Wednesday',
+      'Thursday',
+      'Friday',
+    ]);
   });
 
   it('should not set availableDays if workingDays is not provided', async () => {
-    const doctorId = 'doctor-123';
-    const settings = { doctorId } as DoctorSettings;
+    const doctorId = 'doctor-456';
 
-    jest.spyOn(service, 'getSettings').mockResolvedValue(settings);
-    jest.spyOn(settingsRepo, 'save').mockImplementation(async (s) => s as any);
+    await service.updateSettings(doctorId, {});
 
-    const result = await service.updateSettings(doctorId, {});
-    expect(result.availableDays).toBeUndefined();
+    const settings = await service.getSettings(doctorId);
+
+    expect(settings.availableDays).toBeUndefined();
   });
 });

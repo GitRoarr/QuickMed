@@ -207,6 +207,19 @@ export class ScheduleComponent implements OnInit {
       error: () => this.toast.error('Failed to block slot', { title: 'Schedule' })
     });
   }
+  
+removeSlot(slot: DoctorSlot, date: Date | string): void {
+  this.scheduleService.removeSlot(
+    date,
+    slot.startTime || slot.time || '',
+    slot.endTime,
+    this.authService.currentUser()?.id
+  ).subscribe({
+    next: () => this.toast.success('Slot removed successfully', { title: 'Schedule' }),
+    error: () => this.toast.error('Failed to remove slot', { title: 'Schedule' })
+  });
+}
+
 
   openNextAppointmentDay(): void {
     const next = this.nextAppointment();
@@ -294,6 +307,8 @@ export class ScheduleComponent implements OnInit {
       }))
       .sort((a, b) => a.startTime.localeCompare(b.startTime));
   }
+  
+
 
   private buildDaySlots(date: Date): DoctorSlot[] {
     const base = this.getSlots();

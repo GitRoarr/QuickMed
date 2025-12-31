@@ -6,7 +6,7 @@ import { environment } from '@environments/environment';
 export interface DoctorSlot {
   startTime?: string;
   endTime?: string;
-  time?: string; // legacy fallback
+  time?: string;
   status: 'available' | 'booked' | 'blocked' | 'pending' | 'cancelled' | 'completed';
   appointmentId?: string;
   blockedReason?: string | null;
@@ -26,8 +26,7 @@ export class SchedulingService {
   constructor(private http: HttpClient) {}
 
   private normalizeDate(date: Date | string): string {
-    if (typeof date === 'string') return date;
-    return date.toISOString().split('T')[0];
+    return typeof date === 'string' ? date : date.toISOString().split('T')[0];
   }
 
   private withDoctorHeader(doctorId?: string) {
@@ -41,7 +40,6 @@ export class SchedulingService {
       .pipe(map(res => res.slots));
   }
 
-  // Public read for patients without needing x-doctor-id header
   getDaySchedulePublic(doctorId: string, date: Date | string): Observable<DoctorSlot[]> {
     const formatted = this.normalizeDate(date);
     return this.http
@@ -68,6 +66,13 @@ export class SchedulingService {
       ? { date: this.normalizeDate(date), startTime, endTime }
       : { date: this.normalizeDate(date), time: startTime };
     return this.http.post(`${this.API_URL}/unblock`, payload, this.withDoctorHeader(doctorId));
+  }
+
+  removeSlot(date: Date | string, startTime: string, endTime?: string, doctorId?: string): Observable<any> {
+    const payload = endTime
+      ? { date: this.normalizeDate(date), startTime, endTime }
+      : { date: this.normalizeDate(date), time: startTime };
+    return this.http.post(`${this.API_URL}/remove`, payload, this.withDoctorHeader(doctorId));
   }
 
   getMonthlyOverview(year: number, month: number): Observable<any> {
