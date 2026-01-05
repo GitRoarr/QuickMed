@@ -45,30 +45,30 @@ export class SchedulesService {
 
   async getDaySchedule(doctorId: string, date: string | Date) {
     const dateObj = this.normalizeToDate(date);
-
     let sched = await this.repo.findOne({ where: { doctorId, date: dateObj } });
+    const dateStr = dateObj instanceof Date ? dateObj.toISOString().split('T')[0] : String(dateObj);
 
-    const dateStr =
-      dateObj instanceof Date
-        ? dateObj.toISOString().split('T')[0]
-        : String(dateObj);
-
+    // Always generate base slots from settings for working days
     const baseSlots = await this.getDefaultSlotsFromSettings(doctorId, dateObj);
+    // If no explicit schedule is saved, use base slots only
     const storedSlots = sched?.slots || [];
     const appointmentSlots = await this.getBookedSlots(doctorId, dateObj);
-    const mergedSlots = this.mergeSlots(baseSlots, storedSlots, appointmentSlots);
+    let mergedSlots = this.mergeSlots(baseSlots, storedSlots, appointmentSlots);
+
+    // If no slots at all, and baseSlots is empty, return empty (not a working day)
+    if (!mergedSlots.length && !baseSlots.length) {
+      return { date: dateStr, slots: [] };
+    }
 
     // Auto-block past-time available slots
     const today = this.normalizeToDate(new Date());
     const isPastDay = dateObj.getTime() < today.getTime();
-
     const toDateTime = (d: Date, time: string) => {
       const [h, m] = (time || '').slice(0,5).split(':').map(Number);
       const dt = new Date(d);
       dt.setHours(h || 0, m || 0, 0, 0);
       return dt;
     };
-
     const now = new Date();
     const finalSlots = mergedSlots.map((s) => {
       if (s.status !== 'available') return s;
@@ -80,7 +80,6 @@ export class SchedulesService {
       }
       return s;
     });
-
     return { date: dateStr, slots: finalSlots };
   }
   async setSingleSlotStatus(
@@ -218,6 +217,32 @@ export class SchedulesService {
     await this.repo.save(sched);
 
     return { success: true, slot };
+  }
+
+  async removeSlot(
+    doctorId: string,
+    date: string | Date,
+    startTime: string,
+    endTime?: string,
+  ): Promise<{ success: boolean }> {
+    const { startTime: safeStart, endTime: safeEnd } = this.normalizeRange(startTime, endTime);
+    const dateObj = this.normalizeToDate(date);
+
+    const sched = await this.repo.findOne({ where: { doctorId, date: dateObj } });
+    if (!sched) return { success: true };
+
+    const before = (sched.slots || []).length;
+    sched.slots = (sched.slots || []).filter(
+      (s) => !(s.startTime === safeStart && s.endTime === safeEnd),
+    );
+
+    if ((sched.slots || []).length === 0) {
+      await this.repo.remove(sched);
+    } else if ((sched.slots || []).length !== before) {
+      await this.repo.save(sched);
+    }
+
+    return { success: true };
   }
 
   private async getBookedSlots(doctorId: string, date: Date): Promise<Slot[]> {

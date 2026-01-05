@@ -10,6 +10,6 @@ import { SettingsModule } from '../settings/settings.module';
   imports: [TypeOrmModule.forFeature([DoctorSchedule, Appointment]), SettingsModule],
   providers: [SchedulesService],
   controllers: [SchedulesController],
-  exports: [SchedulesService], // <-- ensure service is exported
+  exports: [SchedulesService], 
 })
 export class SchedulesModule {}

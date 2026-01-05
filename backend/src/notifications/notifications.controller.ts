@@ -97,6 +97,9 @@ export class NotificationsController {
 
   @Get('unread-count')
   async getUnreadCount(@Request() req) {
+    if (!req.user || !req.user.id) {
+      return { count: 0 };
+    }
     const count = await this.notificationsService.getUnreadCount(req.user.id);
     return { count };
   }

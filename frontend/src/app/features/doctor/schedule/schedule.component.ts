@@ -51,6 +51,10 @@ export class ScheduleComponent implements OnInit {
     private router: Router,
     private toast: ToastService
   ) {}
+
+  goHome() {
+    this.router.navigate(['/']);
+  }
     private updateAppointmentStatus(appt: Appointment, status: AppointmentStatus, successMsg: string): void {
       this.appointmentService.update(appt.id, { status }).subscribe({
         next: () => { this.toast.success(successMsg, { title: 'Appointments' }); this.loadAppointments(); },

@@ -59,6 +59,15 @@ export class SchedulesController {
     }
   }
 
+  @Post('remove')
+  async removeSlot(@Req() req: any, @Body() body: UpdateSlotDto) {
+    const doctorId = req.user?.id ?? req.user?.sub ?? req.headers['x-doctor-id'];
+    const start = body.startTime ?? body.time;
+    const end = body.endTime ?? start;
+
+    return this.svc.removeSlot(doctorId, body.date, start!, end!);
+  }
+
   @Get('overview')
   async getOverview(@Req() req: any, @Query('year') year: string, @Query('month') month: string) {
     const doctorId = req.user?.id ?? req.user?.sub ?? req.headers['x-doctor-id'];

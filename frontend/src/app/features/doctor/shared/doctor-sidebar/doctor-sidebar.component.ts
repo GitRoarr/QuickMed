@@ -1,4 +1,5 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
+import { Router } from '@angular/router';
 import { ThemeService } from '@core/services/theme.service';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
@@ -22,7 +23,8 @@ interface MenuItem {
   styleUrls: ['./doctor-sidebar.component.css', './sidebar-pill-icon.css']
 })
 export class DoctorSidebarComponent implements OnInit {
-    themeService = inject(ThemeService);
+  themeService = inject(ThemeService);
+  private router = inject(Router);
   private authService = inject(AuthService);
   private appointmentService = inject(AppointmentService);
   private messageService = inject(MessageService);
@@ -34,6 +36,11 @@ export class DoctorSidebarComponent implements OnInit {
   ngOnInit(): void {
     this.currentUser.set(this.authService.currentUser());
     this.loadBadges();
+  }
+
+  onLogoClick(event: Event) {
+    event.preventDefault();
+    this.router.navigate(['/doctor/dashboard']);
   }
 
   loadBadges(): void {
