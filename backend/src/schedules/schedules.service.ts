@@ -304,30 +304,38 @@ export class SchedulesService {
   }
 
   private async getDefaultSlotsFromSettings(
-    doctorId: string,
-    date: Date,
-  ): Promise<Slot[]> {
-    const settings = await this.settingsService.getSettings(doctorId).catch(() => null);
-    if (!settings || !settings.startTime || !settings.endTime) return [];
+  doctorId: string,
+  date: Date,
+): Promise<Slot[]> {
+  const settings = await this.settingsService.getSettings(doctorId).catch(() => null);
+  if (!settings || !settings.startTime || !settings.endTime) return [];
 
-    const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-    const dayName = dayNames[date.getDay()];
-    const availableDays = settings.availableDays || [];
-    if (availableDays.length && !availableDays.includes(dayName)) return [];
-
-    const duration = settings.appointmentDuration || 30;
-    const slots: Slot[] = [];
-    let current = settings.startTime.slice(0, 5);
-    const end = settings.endTime.slice(0, 5);
-
-    while (current < end) {
-      const next = this.addMinutes(current, duration);
-      slots.push({ startTime: current, endTime: next, status: 'available' });
-      current = next;
-    }
-
-    return slots;
+  const dayIndex = date.getDay();
+  const workingDayNumbers = settings.workingDays || [];
+  if (workingDayNumbers.length > 0 && !workingDayNumbers.includes(dayIndex)) {
+    return [];
   }
+
+  const duration = settings.appointmentDuration || 30;
+  const slots: Slot[] = [];
+  let current = settings.startTime.slice(0, 5);
+  const end = settings.endTime.slice(0, 5);
+
+  while (current < end) {
+    const next = this.addMinutes(current, duration);
+    if (next <= end) {
+      slots.push({
+        startTime: current,
+        endTime: next,
+        status: 'available',
+      });
+    }
+    current = next;
+  }
+
+  return slots;
+}
+
 
   private toTimeString(t: any): string {
     if (!t) return '';
@@ -397,12 +405,17 @@ export class SchedulesService {
       .sort((a, b) => a - b);
   }
 
-  async updateDoctorWorkingDays(doctorId: string, days: number[]): Promise<{ success: boolean; days: number[] }>{
-    const names = (days || [])
-      .map((d) => this.numberToDayName(d))
-      .filter((n): n is string => !!n);
+ async updateDoctorWorkingDays(
+  doctorId: string,
+  days: number[],
+): Promise<{ success: boolean; days: number[] }> {
+  const sortedDays = days.sort((a, b) => a - b);
 
-    await this.settingsService.updateSettings(doctorId, { availableDays: names });
-    return { success: true, days: days.sort((a, b) => a - b) };
-  }
+  await this.settingsService.updateSettings(doctorId, {
+    workingDays: sortedDays,
+  });
+
+  return { success: true, days: sortedDays };
+}
+
 }

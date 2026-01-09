@@ -78,14 +78,15 @@ export class User extends BaseEntity {
   @Column({ nullable: true })
   licenseNumber: string;
 
-  @Column({ type: 'simple-array', nullable: true })
-  availableDays: string[];
-
   @Column({ nullable: true })
   startTime: string;
 
   @Column({ nullable: true })
   endTime: string;
+
+
+  @Column({ type: 'simple-array', nullable: true })
+  availableDays: string[];
 
   @Column({ nullable: true })
   department: string;
@@ -102,7 +103,6 @@ export class User extends BaseEntity {
   @Column({ type: 'boolean', default: true })
   isActive: boolean;
 
-  // Doctor settings fields
   @Column({ type: 'boolean', default: true })
   notificationsEnabled: boolean;
 
@@ -110,7 +110,7 @@ export class User extends BaseEntity {
   theme: string;
 
   @Column({ nullable: true })
-  inviteToken: string; // Unique per active invitation (enforced in application logic)
+  inviteToken: string;
 
   @Column({ type: 'timestamp', nullable: true })
   inviteExpiresAt: Date;
