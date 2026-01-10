@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, Output, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { AdminThemeService } from '../../../../core/services/admin-theme.service';
+import { ThemeService } from '@core/services/theme.service';
 
 @Component({
   selector: 'app-header',
@@ -17,8 +17,11 @@ export class HeaderComponent implements OnInit {
   @Output() searchChange = new EventEmitter<string>();
 
   searchQuery: string = '';
-  themeService = inject(AdminThemeService);
-  isDarkMode = signal(false);
+  themeService = inject(ThemeService);
+  
+  get isDarkMode(): boolean {
+    return this.themeService.isDarkMode();
+  }
 
   onNewAppointmentClick() {
     this.newAppointmentClick.emit();
@@ -29,37 +32,22 @@ export class HeaderComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.checkDarkMode();
-  }
-
-  checkDarkMode() {
-    const isDark = document.documentElement.classList.contains('dark') || 
-                   localStorage.getItem('darkMode') === 'true';
-    this.isDarkMode.set(isDark);
+    // ThemeService already handles initialization in constructor
   }
 
   toggleDarkMode() {
-    const newMode = !this.isDarkMode();
-    this.isDarkMode.set(newMode);
-    
-    if (newMode) {
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('darkMode', 'true');
-    } else {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('darkMode', 'false');
-    }
-    
-    this.themeService.applyTheme(this.themeService.currentTheme()!);
+    this.themeService.toggleTheme();
   }
 
   onButtonHover(event: Event, isEnter: boolean): void {
     const target = event.target as HTMLElement;
-    const theme = this.themeService.currentTheme();
     if (target) {
-      target.style.backgroundColor = isEnter 
-        ? (theme?.primaryHover || '#059669')
-        : (theme?.primaryColor || '#10b981');
+      // Use CSS classes for hover instead of inline styles
+      if (isEnter) {
+        target.classList.add('hover');
+      } else {
+        target.classList.remove('hover');
+      }
     }
   }
 }

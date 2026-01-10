@@ -111,7 +111,39 @@ export class AppointmentsService {
         return this.timeWithinSlot(timeStr, start, end);
       });
 
-      if (slot && (slot.status === 'blocked' || slot.status === 'booked')) {
+      if (!slot) {
+        // Check if it's a working day - if settings exist and this day is not a working day, reject
+        const settings = await this.settingsService.getSettings(assignedDoctorId).catch(() => null);
+        if (settings) {
+          const availableDays = settings.availableDays || [];
+          const appointmentDateObj = new Date(appointmentDate);
+          const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+          const appointmentDay = dayNames[appointmentDateObj.getDay()];
+          const normalizedDays = (availableDays || []).map((d: string) => d.toLowerCase());
+          const dayLower = appointmentDay.toLowerCase();
+          const shortMap: Record<string, string> = {
+            sunday: 'sun', monday: 'mon', tuesday: 'tue', wednesday: 'wed',
+            thursday: 'thu', friday: 'fri', saturday: 'sat'
+          };
+          if (!normalizedDays.includes(dayLower) && !normalizedDays.includes(shortMap[dayLower])) {
+            throw new BadRequestException(`Doctor is not available on ${appointmentDay}`);
+          }
+          
+          // Check if time is within working hours
+          if (settings.startTime && settings.endTime) {
+            const [startHour, startMin] = settings.startTime.split(':').map(Number);
+            const [endHour, endMin] = settings.endTime.split(':').map(Number);
+            const [apptHour, apptMin] = timeStr.split(':').map(Number);
+            const startMinutes = startHour * 60 + startMin;
+            const endMinutes = endHour * 60 + endMin;
+            const apptMinutes = apptHour * 60 + apptMin;
+            
+            if (apptMinutes < startMinutes || apptMinutes >= endMinutes) {
+              throw new BadRequestException(`Doctor is only available between ${settings.startTime} and ${settings.endTime}`);
+            }
+          }
+        }
+      } else if (slot && (slot.status === 'blocked' || slot.status === 'booked')) {
         throw new BadRequestException('Selected slot is not available. Please pick another time.');
       }
     } catch (err) {
@@ -136,17 +168,22 @@ export class AppointmentsService {
 
     const savedAppointment = await this.appointmentsRepository.save(appointment);
 
+    // Mark the slot as booked in the schedule
     try {
       const dateStr = this.toDateString(savedAppointment.appointmentDate);
       const timeStr = this.toTimeString(savedAppointment.appointmentTime);
+      // Use setSlotStatus to mark the slot as booked and link it to the appointment
       await this.schedulesService.setSlotStatus(
         String(savedAppointment.doctorId),
         dateStr,
         timeStr,
-        'booked'
+        'booked',
+        undefined,
+        savedAppointment.id
       );
     } catch (e) {
       console.error('Failed to mark schedule slot booked', e);
+      // Don't fail appointment creation if schedule update fails
     }
 
     const patient = await this.usersService.findOne(patientId);

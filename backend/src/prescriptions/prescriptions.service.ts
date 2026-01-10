@@ -5,6 +5,7 @@ import { Prescription, PrescriptionStatus } from './entities/prescription.entity
 import { CreatePrescriptionDto } from './dto/create-prescription.dto';
 import { User } from '../users/entities/user.entity';
 import { UserRole } from '../common/index';
+import { Appointment } from '../appointments/entities/appointment.entity';
 
 @Injectable()
 export class PrescriptionsService {
@@ -14,9 +15,30 @@ export class PrescriptionsService {
   ) {}
 
   async create(createDto: CreatePrescriptionDto, doctorId: string): Promise<Prescription> {
+    let appointment = undefined;
+    if (createDto.appointmentId) {
+      appointment = await this.prescriptionsRepository.manager.findOne(Appointment, {
+        where: { id: createDto.appointmentId },
+        relations: ['patient', 'doctor'],
+      });
+      
+      if (appointment) {
+        // Ensure the appointment belongs to this doctor
+        if (appointment.doctorId !== doctorId) {
+          throw new ForbiddenException('Cannot create prescription for another doctor\'s appointment');
+        }
+        // Use appointment's patient if not specified
+        if (!createDto.patientId && appointment.patientId) {
+          createDto.patientId = appointment.patientId;
+        }
+      }
+    }
+
     const prescription = this.prescriptionsRepository.create({
       ...createDto,
       doctorId,
+      appointment,
+      appointmentId: createDto.appointmentId,
       prescriptionDate: createDto.prescriptionDate ? new Date(createDto.prescriptionDate) : new Date(),
       status: createDto.status || PrescriptionStatus.ACTIVE,
     });
@@ -27,7 +49,23 @@ export class PrescriptionsService {
   async findAll(doctorId: string): Promise<Prescription[]> {
     return this.prescriptionsRepository.find({
       where: { doctorId },
-      relations: ['patient', 'doctor'],
+      relations: ['patient', 'doctor', 'appointment'],
+      order: { prescriptionDate: 'DESC' },
+    });
+  }
+
+  async findByAppointment(appointmentId: string, doctorId: string): Promise<Prescription[]> {
+    return this.prescriptionsRepository.find({
+      where: { appointmentId, doctorId },
+      relations: ['patient', 'doctor', 'appointment'],
+      order: { prescriptionDate: 'DESC' },
+    });
+  }
+
+  async findByPatient(patientId: string, doctorId: string): Promise<Prescription[]> {
+    return this.prescriptionsRepository.find({
+      where: { patientId, doctorId },
+      relations: ['patient', 'doctor', 'appointment'],
       order: { prescriptionDate: 'DESC' },
     });
   }

@@ -186,18 +186,26 @@ export class DoctorsComponent implements OnInit {
     const doctor = this.selectedDoctor();
     if (!doctor) return;
     const date = dateStr || this.appointmentForm.value.appointmentDate;
-    if (!date) return;
+    if (!date) {
+      this.availableSlots.set([]);
+      return;
+    }
     this.schedulingService.getDaySchedulePublic(doctor.id, date).subscribe({
       next: (slots) => {
         const available = (slots || []).filter(s => s.status === 'available');
-        // Normalize time values to HH:mm
-        const normalize = (s: DoctorSlot) => (s.startTime || s.time || '').slice(0,5);
-        // Keep unique times and sort
-        const times = Array.from(new Set(available.map(normalize))).sort();
-        this.availableSlots.set(times.map(t => ({ startTime: t, status: 'available' } as DoctorSlot)));
+        // Normalize time values to HH:mm and include end time
+        const normalized = available.map(s => ({
+          startTime: (s.startTime || s.time || '').slice(0, 5),
+          endTime: (s.endTime || s.startTime || s.time || '').slice(0, 5),
+          status: s.status
+        } as DoctorSlot));
+        // Remove duplicates and sort
+        const unique = Array.from(new Map(normalized.map(s => [s.startTime, s])).values())
+          .sort((a, b) => (a.startTime || '').localeCompare(b.startTime || ''));
+        this.availableSlots.set(unique);
         // If current selected time not in list, clear it
         const current = this.appointmentForm.value.appointmentTime;
-        if (!times.includes(current)) {
+        if (current && !unique.some(s => s.startTime === current)) {
           this.appointmentForm.patchValue({ appointmentTime: '' });
         }
       },
@@ -205,6 +213,28 @@ export class DoctorsComponent implements OnInit {
         this.availableSlots.set([]);
       }
     });
+  }
+
+  selectTimeSlot(slot: DoctorSlot): void {
+    const time = slot.startTime || slot.time || '';
+    this.appointmentForm.patchValue({ appointmentTime: time });
+  }
+
+  isTimeSlotSelected(slot: DoctorSlot): boolean {
+    return this.appointmentForm.value.appointmentTime === (slot.startTime || slot.time || '');
+  }
+
+  formatSlotTime(slot: DoctorSlot): string {
+    const start = slot.startTime || slot.time || '';
+    const end = slot.endTime || '';
+    if (!start) return '';
+    const formatTime = (t: string) => {
+      const [h, m] = t.split(':').map(Number);
+      const period = h >= 12 ? 'PM' : 'AM';
+      const hr = h % 12 || 12;
+      return `${hr}:${String(m).padStart(2, '0')} ${period}`;
+    };
+    return end ? `${formatTime(start)} - ${formatTime(end)}` : formatTime(start);
   }
 
   onDateChange(): void {

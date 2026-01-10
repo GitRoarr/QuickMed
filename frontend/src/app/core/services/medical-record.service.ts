@@ -35,6 +35,7 @@ export interface CreateMedicalRecordDto {
   recordDate?: string;
   patientId: string;
   doctorId?: string;
+  appointmentId?: string;
   fileUrl?: string;
   notes?: string;
   description?: string;
@@ -66,8 +67,20 @@ export class MedicalRecordService {
     return this.http.get<MedicalRecord[]>(`${this.API_URL}/patient/${patientId}`);
   }
 
+  getByAppointment(appointmentId: string): Observable<MedicalRecord[]> {
+    return this.http.get<MedicalRecord[]>(`${this.API_URL}/appointment/${appointmentId}`);
+  }
+
   getOne(id: string): Observable<MedicalRecord> {
     return this.http.get<MedicalRecord>(`${this.API_URL}/${id}`);
+  }
+
+  uploadFile(file: File, patientId: string, doctorId?: string): Observable<any> {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('patientId', patientId);
+    if (doctorId) formData.append('doctorId', doctorId);
+    return this.http.post<any>(`${this.API_URL}/upload`, formData);
   }
 
   download(id: string): Observable<{ url: string }> {

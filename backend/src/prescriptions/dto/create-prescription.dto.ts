@@ -15,6 +15,10 @@ export class CreatePrescriptionDto {
   patientId: string;
 
   @IsString()
+  @IsOptional()
+  appointmentId?: string;
+
+  @IsString()
   @IsNotEmpty()
   frequency: string;
 

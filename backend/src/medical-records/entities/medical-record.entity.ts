@@ -1,5 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn, UpdateDateColumn } from "typeorm";
 import { User } from "../../users/entities/user.entity";
+import { Appointment } from "../../appointments/entities/appointment.entity";
 
 export enum MedicalRecordType {
   LAB = 'lab',
@@ -51,6 +52,13 @@ export class MedicalRecord {
 
   @Column({ nullable: true })
   status?: string; // 'verified', 'pending', 'rejected'
+
+  @ManyToOne(() => Appointment, { nullable: true })
+  @JoinColumn({ name: 'appointmentId' })
+  appointment?: Appointment;
+
+  @Column({ nullable: true })
+  appointmentId?: string;
 
   @CreateDateColumn()
   createdAt: Date;

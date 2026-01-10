@@ -112,15 +112,35 @@
             <span>Appointment Date</span>
             <input type="date" formControlName="appointmentDate" [min]="getCurrentDate()" (change)="onDateChange()" />
           </label>
+          
           <label>
-            <span>Appointment Time</span>
+            <span>Available Time Slots</span>
+            <div class="slot-selector" *ngIf="availableSlots().length > 0; else noSlots">
+              <div class="slots-grid">
+                <button
+                  type="button"
+                  *ngFor="let slot of availableSlots()"
+                  (click)="selectTimeSlot(slot)"
+                  [class.selected]="isTimeSlotSelected(slot)"
+                  class="slot-btn"
+                  [title]="formatSlotTime(slot)"
+                >
+                  {{ formatSlotTime(slot) }}
+                </button>
+              </div>
               <input
-                type="time"
+                type="hidden"
                 formControlName="appointmentTime"
-                required
-                style="width: 100%; border-radius: 12px; padding: 0.65rem 0.85rem; background: var(--surface-alt); box-shadow: inset 0 0 0 1px var(--border-color);"
               />
+            </div>
+            <ng-template #noSlots>
+              <div class="no-slots-message">
+                <p *ngIf="appointmentForm.value.appointmentDate">No available slots for this date. Please select another date.</p>
+                <p *ngIf="!appointmentForm.value.appointmentDate">Please select a date to see available time slots.</p>
+              </div>
+            </ng-template>
           </label>
+          
           <label>
             <span>Notes (optional)</span>
             <textarea rows="3" formControlName="notes" placeholder="Add special requests..."></textarea>
@@ -128,7 +148,7 @@
 
           <div class="modal-actions">
             <button type="button" class="text-btn" (click)="closeBookingForm()">Cancel</button>
-            <button type="submit" class="primary-btn" [disabled]="appointmentForm.invalid">
+            <button type="submit" class="primary-btn" [disabled]="appointmentForm.invalid || !appointmentForm.value.appointmentTime">
               <i class="bi bi-check-circle"></i>
               Confirm Booking
             </button>

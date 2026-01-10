@@ -1,6 +1,7 @@
 import { Entity, Column, ManyToOne, JoinColumn } from 'typeorm';
 import { BaseEntity } from '../../common/entities/base.entity';
 import { User } from '../../users/entities/user.entity';
+import { Appointment } from '../../appointments/entities/appointment.entity';
 
 export enum PrescriptionStatus {
   ACTIVE = 'active',
@@ -51,4 +52,11 @@ export class Prescription extends BaseEntity {
 
   @Column({ type: 'text', nullable: true })
   instructions: string;
+
+  @ManyToOne(() => Appointment, { nullable: true })
+  @JoinColumn({ name: 'appointmentId' })
+  appointment?: Appointment;
+
+  @Column({ nullable: true })
+  appointmentId?: string;
 }

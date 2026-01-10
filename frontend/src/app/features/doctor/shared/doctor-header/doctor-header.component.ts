@@ -1,6 +1,7 @@
 import { Component, inject, Input, Output, EventEmitter, signal, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
+import { ThemeService } from '@core/services/theme.service';
 
 @Component({
   selector: 'app-doctor-header',
@@ -11,26 +12,31 @@ import { Router, RouterModule } from '@angular/router';
 })
 export class DoctorHeaderComponent implements OnChanges {
   private router = inject(Router);
+  themeService = inject(ThemeService);
+  
   // Inputs
   @Input() initials: string = 'DR';
   @Input() avatarUrl?: string | null;
   @Input() unreadNotifications: number = 0;
-  @Input() themeMode: 'light' | 'dark' = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+  @Input() themeMode: 'light' | 'dark' = this.themeService.isDarkMode() ? 'dark' : 'light';
 
   // Output
   @Output() themeChange = new EventEmitter<'light' | 'dark'>();
 
-  theme = signal<'light' | 'dark'>(this.themeMode);
+  get theme(): 'light' | 'dark' {
+    return this.themeService.isDarkMode() ? 'dark' : 'light';
+  }
 
   ngOnChanges(changes: SimpleChanges): void {
+    // Sync with ThemeService if themeMode input changes
     if (changes['themeMode'] && changes['themeMode'].currentValue) {
-      this.theme.set(changes['themeMode'].currentValue);
+      this.themeService.setTheme(changes['themeMode'].currentValue);
     }
   }
 
   toggleTheme() {
-    const next = this.theme() === 'light' ? 'dark' : 'light';
-    this.theme.set(next);
+    this.themeService.toggleTheme();
+    const next = this.themeService.isDarkMode() ? 'dark' : 'light';
     this.themeChange.emit(next);
   }
 

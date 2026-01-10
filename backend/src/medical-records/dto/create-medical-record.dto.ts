@@ -22,6 +22,10 @@ export class CreateMedicalRecordDto {
 
   @IsString()
   @IsOptional()
+  appointmentId?: string;
+
+  @IsString()
+  @IsOptional()
   fileUrl?: string;
 
   @IsString()

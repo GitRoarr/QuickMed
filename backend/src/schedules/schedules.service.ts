@@ -70,13 +70,13 @@ export class SchedulesService {
       return dt;
     };
     const now = new Date();
-    const finalSlots = mergedSlots.map((s) => {
+    const finalSlots: Slot[] = mergedSlots.map((s) => {
       if (s.status !== 'available') return s;
-      if (isPastDay) return { ...s, status: 'blocked' };
+      if (isPastDay) return { ...s, status: 'blocked' as const };
       const end = s.endTime || s.startTime || s.time || '';
       const endDt = toDateTime(dateObj, end);
       if (endDt.getTime() < now.getTime()) {
-        return { ...s, status: 'blocked' };
+        return { ...s, status: 'blocked' as const };
       }
       return s;
     });
@@ -88,9 +88,10 @@ export class SchedulesService {
     time: string,
     status: 'available' | 'blocked' | 'booked',
     reason?: string,
+    appointmentId?: string | null,
   ) {
     const range = this.normalizeRange(time, undefined);
-    return this.saveSlot(doctorId, date, range.startTime, range.endTime, status, reason);
+    return this.saveSlot(doctorId, date, range.startTime, range.endTime, status, reason, appointmentId);
   }
 
   async setRangeSlotStatus(
@@ -100,6 +101,7 @@ export class SchedulesService {
     endTime: string,
     status: 'available' | 'blocked' | 'booked',
     reason?: string,
+    appointmentId?: string | null,
   ) {
     const range = this.normalizeRange(startTime, endTime);
     return this.saveSlot(
@@ -109,6 +111,7 @@ export class SchedulesService {
       range.endTime,
       status,
       reason,
+      appointmentId,
     );
   }
 
@@ -119,6 +122,7 @@ export class SchedulesService {
     time: string,
     status: 'available' | 'blocked' | 'booked',
     reason?: string,
+    appointmentId?: string | null,
   ): Promise<{ success: boolean; slot: Slot }>;
   async setSlotStatus(
     doctorId: string,
@@ -127,6 +131,7 @@ export class SchedulesService {
     endTime: string,
     status: 'available' | 'blocked' | 'booked',
     reason?: string,
+    appointmentId?: string | null,
   ): Promise<{ success: boolean; slot: Slot }>;
   async setSlotStatus(
     doctorId: string,
@@ -135,6 +140,7 @@ export class SchedulesService {
     arg4: string | 'available' | 'blocked' | 'booked',
     arg5?: 'available' | 'blocked' | 'booked' | string,
     arg6?: string,
+    arg7?: string | null,
   ): Promise<{ success: boolean; slot: Slot }> {
     const isStatus = (v: any): v is 'available' | 'blocked' | 'booked' =>
       v === 'available' || v === 'blocked' || v === 'booked';
@@ -143,16 +149,18 @@ export class SchedulesService {
       const time = arg3;
       const status = arg4;
       const reason = typeof arg5 === 'string' ? arg5 : undefined;
+      const appointmentId = typeof arg6 === 'string' ? arg6 : (arg6 === null ? null : undefined);
       const range = this.normalizeRange(time);
-      return this.saveSlot(doctorId, date, range.startTime, range.endTime, status, reason);
+      return this.saveSlot(doctorId, date, range.startTime, range.endTime, status, reason, appointmentId);
     }
 
     const startTime = arg3;
     const endTime = String(arg4);
     const status = (arg5 as 'available' | 'blocked' | 'booked') ?? 'available';
-    const reason = arg6;
+    const reason = typeof arg6 === 'string' ? arg6 : undefined;
+    const appointmentId = typeof arg7 === 'string' ? arg7 : (arg7 === null ? null : undefined);
     const range = this.normalizeRange(startTime, endTime);
-    return this.saveSlot(doctorId, date, range.startTime, range.endTime, status, reason);
+    return this.saveSlot(doctorId, date, range.startTime, range.endTime, status, reason, appointmentId);
   }
 
 
@@ -163,6 +171,7 @@ export class SchedulesService {
     endTime: string,
     status: 'available' | 'blocked' | 'booked',
     reason?: string,
+    appointmentId?: string | null,
   ): Promise<{ success: boolean; slot: Slot }> {
     const { startTime: safeStart, endTime: safeEnd } = this.normalizeRange(
       startTime,
@@ -170,12 +179,14 @@ export class SchedulesService {
     );
     const dateObj = this.normalizeToDate(date);
 
-    // Prevent modifying past time slots
-    const localEnd = new Date(dateObj);
-    const [eh, em] = safeEnd.split(':').map(Number);
-    localEnd.setHours((eh || 0), (em || 0), 0, 0);
-    if (localEnd.getTime() < Date.now()) {
-      throw new BadRequestException('Cannot modify past time slot');
+    // Prevent modifying past time slots (unless it's marking as booked from appointment creation)
+    if (status !== 'booked') {
+      const localEnd = new Date(dateObj);
+      const [eh, em] = safeEnd.split(':').map(Number);
+      localEnd.setHours((eh || 0), (em || 0), 0, 0);
+      if (localEnd.getTime() < Date.now()) {
+        throw new BadRequestException('Cannot modify past time slot');
+      }
     }
 
     let sched = await this.repo.findOne({
@@ -192,25 +203,36 @@ export class SchedulesService {
 
     const slots = sched.slots || [];
 
-    let slot = slots.find(
-      (s) => s.startTime === safeStart && s.endTime === safeEnd,
-    );
+    // Find slot that overlaps with this time range
+    let slot = slots.find((s) => {
+      const sStart = this.normalizeRange(s.startTime || s.time || '', s.endTime).startTime;
+      const sEnd = this.normalizeRange(s.startTime || s.time || '', s.endTime).endTime;
+      // Check if times overlap
+      return (safeStart >= sStart && safeStart < sEnd) || 
+             (safeEnd > sStart && safeEnd <= sEnd) ||
+             (safeStart <= sStart && safeEnd >= sEnd);
+    });
 
     if (!slot) {
       slot = {
         startTime: safeStart,
         endTime: safeEnd,
         status,
-        appointmentId: null,
+        appointmentId: appointmentId ?? (status === 'booked' ? null : null),
         blockedReason: status === 'blocked' ? reason ?? null : null,
       };
       slots.push(slot);
     } else {
       slot.status = status;
       slot.blockedReason = status === 'blocked' ? reason ?? null : null;
-      if (status !== 'booked') {
+      if (status === 'booked') {
+        slot.appointmentId = appointmentId ?? slot.appointmentId;
+      } else {
         slot.appointmentId = null;
       }
+      // Update time range to match
+      slot.startTime = safeStart;
+      slot.endTime = safeEnd;
     }
 
     sched.slots = slots;
@@ -417,5 +439,56 @@ export class SchedulesService {
 
   return { success: true, days: sortedDays };
 }
+
+  // Get week schedule for a doctor (patient-facing)
+  async getWeekSchedule(doctorId: string, startDate: string): Promise<{ date: string; slots: Slot[] }[]> {
+    const start = this.normalizeToDate(startDate);
+    const weekDays: { date: string; slots: Slot[] }[] = [];
+
+    for (let i = 0; i < 7; i++) {
+      const currentDate = new Date(start);
+      currentDate.setDate(start.getDate() + i);
+      const dateStr = currentDate.toISOString().split('T')[0];
+      const daySchedule = await this.getDaySchedule(doctorId, dateStr);
+      weekDays.push(daySchedule);
+    }
+
+    return weekDays;
+  }
+
+  // Get available dates for a doctor (days with at least one available slot)
+  async getAvailableDates(doctorId: string, startDate: string, days: number = 30): Promise<string[]> {
+    const start = this.normalizeToDate(startDate);
+    const availableDates: string[] = [];
+
+    for (let i = 0; i < days; i++) {
+      const currentDate = new Date(start);
+      currentDate.setDate(start.getDate() + i);
+      const dateStr = currentDate.toISOString().split('T')[0];
+      const daySchedule = await this.getDaySchedule(doctorId, dateStr);
+      
+      // Check if there's at least one available slot (not blocked, not booked, not in the past)
+      const hasAvailable = daySchedule.slots.some(slot => {
+        if (slot.status !== 'available') return false;
+        
+        // Check if slot is in the past
+        const today = this.normalizeToDate(new Date());
+        if (currentDate.getTime() < today.getTime()) return false;
+        
+        const slotEnd = slot.endTime || slot.startTime || slot.time || '';
+        const [h, m] = (slotEnd || '').slice(0, 5).split(':').map(Number);
+        const slotDateTime = new Date(currentDate);
+        slotDateTime.setHours(h || 0, m || 0, 0, 0);
+        
+        return slotDateTime.getTime() >= Date.now();
+      });
+
+      if (hasAvailable) {
+        availableDates.push(dateStr);
+      }
+    }
+
+    return availableDates;
+  }
 
 }

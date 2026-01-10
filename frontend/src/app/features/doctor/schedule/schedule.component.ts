@@ -131,21 +131,28 @@ export class ScheduleComponent implements OnInit {
   }
 
   saveAvailability(): void {
-    // Convert workingDays (numbers) to availableDays (names)
-    const availableDays = this.workingDays().map(d => this.DAY_NAMES[d]);
-    // Save to settings (ensure backend gets availableDays)
-    this.settingsService.updateSettings({
-      availableDays,
-      startTime: this.workingStart(),
-      endTime: this.workingEnd()
-    }).subscribe({
+    // Save working days to schedule service
+    this.scheduleService.updateWorkingDays(this.workingDays()).subscribe({
       next: () => {
-        this.toast.success('Availability saved', { title: 'Schedule' });
-        this.loadSlots();
+        // Also update settings for working hours and slot duration
+        const availableDays = this.workingDays().map(d => this.DAY_NAMES[d]);
+        this.settingsService.updateSettings({
+          availableDays,
+          startTime: this.workingStart(),
+          endTime: this.workingEnd(),
+          appointmentDuration: this.slotDurationMinutes()
+        }).subscribe({
+          next: () => {
+            this.toast.success('Availability saved successfully', { title: 'Schedule' });
+            this.loadSlots();
+          },
+          error: () => {
+            this.toast.error('Failed to save availability settings', { title: 'Schedule' });
+          }
+        });
       },
       error: () => {
-        this.toast.error('Failed to save availability', { title: 'Schedule' });
-        this.loadSlots();
+        this.toast.error('Failed to save working days', { title: 'Schedule' });
       }
     });
   }
@@ -284,8 +291,50 @@ removeSlot(slot: DoctorSlot, date: Date | string): void {
     this.loadUserData();
     this.loadAppointments();
     this.loadBadgeCounts();
+    this.loadSettings();
     this.loadSlots();
     this.loadHeaderCounts();
+    this.loadWorkingDays();
+  }
+
+  loadSettings(): void {
+    this.settingsService.getSettings().subscribe({
+      next: (settings) => {
+        if (settings) {
+          this.workingStart.set(settings.startTime || '09:00');
+          this.workingEnd.set(settings.endTime || '17:00');
+          this.slotDurationMinutes.set(settings.appointmentDuration || 30);
+          // Convert availableDays (names) to workingDays (numbers)
+          const dayMap: Record<string, number> = {
+            'Sunday': 0, 'Monday': 1, 'Tuesday': 2, 'Wednesday': 3,
+            'Thursday': 4, 'Friday': 5, 'Saturday': 6
+          };
+          const days = (settings.availableDays || [])
+            .map((name: string) => dayMap[name])
+            .filter((d: number | undefined): d is number => d !== undefined)
+            .sort();
+          if (days.length > 0) {
+            this.workingDays.set(days);
+          }
+        }
+      },
+      error: () => {
+        // Use defaults if settings fail to load
+      }
+    });
+  }
+
+  loadWorkingDays(): void {
+    this.scheduleService.getDoctorWorkingDays().subscribe({
+      next: (days) => {
+        if (days && days.length > 0) {
+          this.workingDays.set(days);
+        }
+      },
+      error: () => {
+        // Ignore errors, use existing value
+      }
+    });
   }
 
   hasAppointments(date: Date): boolean {

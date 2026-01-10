@@ -79,6 +79,32 @@ export class ReceptionistController {
     return this.receptionistService.getDashboardInsights({ doctorId, status });
   }
 
+  @Get('appointments')
+  @Roles(UserRole.RECEPTIONIST, UserRole.ADMIN)
+  async listAppointments(
+    @Query('date') date?: string,
+    @Query('doctorId') doctorId?: string,
+    @Query('status') status?: string,
+    @Query('patientId') patientId?: string,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+  ) {
+    return this.receptionistService.listAppointments({
+      date,
+      doctorId,
+      status,
+      patientId,
+      startDate,
+      endDate,
+    });
+  }
+
+  @Get('appointments/:id')
+  @Roles(UserRole.RECEPTIONIST, UserRole.ADMIN)
+  async getAppointment(@Param('id') id: string) {
+    return this.appointmentsService.findOne(id);
+  }
+
   // Invitation endpoints (public - no auth required for setting password)
   @Post('invite')
   @UseGuards(JwtAuthGuard, RolesGuard)

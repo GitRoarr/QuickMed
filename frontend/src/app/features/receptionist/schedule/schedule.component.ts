@@ -3,6 +3,7 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { SchedulingService, DoctorSlot } from '@core/services/schedule.service';
 import { DoctorService, DoctorListItem } from '@core/services/doctor.service';
+import { ThemeService } from '@core/services/theme.service';
 import { HeaderComponent } from '@app/features/admin/shared/header';
 import { SidebarComponent } from '@app/features/admin/shared/sidebar';
 import { ToastService } from '@core/services/toast.service';
@@ -18,6 +19,7 @@ export class ReceptionistScheduleComponent implements OnInit {
   private readonly schedulingService = inject(SchedulingService);
   private readonly doctorService = inject(DoctorService);
   private readonly toast = inject(ToastService);
+  themeService = inject(ThemeService);
 
   doctors = signal<DoctorListItem[]>([]);
   slots = signal<DoctorSlot[]>([]);

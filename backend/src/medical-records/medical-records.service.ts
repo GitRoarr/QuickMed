@@ -23,6 +23,14 @@ export class MedicalRecordsService {
       doctor = await this.usersService.findOne(createDto.doctorId);
     }
 
+    let appointment = undefined;
+    if (createDto.appointmentId) {
+      const { Appointment } = await import('../appointments/entities/appointment.entity');
+      appointment = await this.recordsRepository.manager.findOne(Appointment, {
+        where: { id: createDto.appointmentId },
+      });
+    }
+
     const record = this.recordsRepository.create({
       title: createDto.title,
       type: createDto.type ?? MedicalRecordType.OTHER,
@@ -31,6 +39,8 @@ export class MedicalRecordsService {
       patientId: createDto.patientId,
       doctor,
       doctorId: createDto.doctorId,
+      appointment,
+      appointmentId: createDto.appointmentId,
       fileUrl: createDto.fileUrl,
       notes: createDto.notes,
       description: createDto.description,
@@ -70,7 +80,18 @@ export class MedicalRecordsService {
   }
 
   async findByPatient(patientId: string) {
-    return this.recordsRepository.find({ where: { patient: { id: patientId } }, relations: ['doctor', 'patient'] });
+    return this.recordsRepository.find({
+      where: { patient: { id: patientId } },
+      relations: ['doctor', 'patient', 'appointment'],
+      order: { recordDate: 'DESC', createdAt: 'DESC' },
+    });
+  }
+
+  async findByAppointment(appointmentId: string) {
+    return this.recordsRepository.find({
+      where: { appointmentId },
+      relations: ['doctor', 'patient', 'appointment'],
+    });
   }
 
   async findByDoctor(doctorId: string, search?: string) {

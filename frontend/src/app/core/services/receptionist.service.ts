@@ -44,4 +44,27 @@ export class ReceptionistService {
     const qs = new URLSearchParams(params).toString();
     return this.http.get<any>(`${this.API_URL}/dashboard${qs ? `?${qs}` : ''}`);
   }
+
+  listAppointments(filters?: {
+    date?: string;
+    doctorId?: string;
+    status?: string;
+    patientId?: string;
+    startDate?: string;
+    endDate?: string;
+  }): Observable<any[]> {
+    const params: any = {};
+    if (filters?.date) params.date = filters.date;
+    if (filters?.doctorId) params.doctorId = filters.doctorId;
+    if (filters?.status) params.status = filters.status;
+    if (filters?.patientId) params.patientId = filters.patientId;
+    if (filters?.startDate) params.startDate = filters.startDate;
+    if (filters?.endDate) params.endDate = filters.endDate;
+    const qs = new URLSearchParams(params).toString();
+    return this.http.get<any[]>(`${this.API_URL}/appointments${qs ? `?${qs}` : ''}`);
+  }
+
+  getAppointment(id: string): Observable<any> {
+    return this.http.get<any>(`${this.API_URL}/appointments/${id}`);
+  }
 }

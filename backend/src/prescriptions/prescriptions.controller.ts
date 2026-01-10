@@ -17,9 +17,20 @@ export class PrescriptionsController {
   }
 
   @Get()
-  findAll(@CurrentUser() user: User, @Query('search') search?: string) {
+  findAll(
+    @CurrentUser() user: User,
+    @Query('search') search?: string,
+    @Query('appointmentId') appointmentId?: string,
+    @Query('patientId') patientId?: string,
+  ) {
     if (search) {
       return this.prescriptionsService.search(user.id, search);
+    }
+    if (appointmentId) {
+      return this.prescriptionsService.findByAppointment(appointmentId, user.id);
+    }
+    if (patientId) {
+      return this.prescriptionsService.findByPatient(patientId, user.id);
     }
     return this.prescriptionsService.findAll(user.id);
   }

@@ -266,4 +266,51 @@ export class ReceptionistService {
       await queryRunner.release();
     }
   }
+
+  async listAppointments(filters?: {
+    date?: string;
+    doctorId?: string;
+    status?: string;
+    patientId?: string;
+    startDate?: string;
+    endDate?: string;
+  }) {
+    const qb = this.appointmentRepo
+      .createQueryBuilder('a')
+      .leftJoinAndSelect('a.patient', 'patient')
+      .leftJoinAndSelect('a.doctor', 'doctor')
+      .leftJoinAndSelect('a.receptionist', 'receptionist')
+      .orderBy('a.appointmentDate', 'DESC')
+      .addOrderBy('a.appointmentTime', 'ASC');
+
+    if (filters?.date) {
+      const date = new Date(filters.date);
+      date.setHours(0, 0, 0, 0);
+      const nextDay = new Date(date);
+      nextDay.setDate(nextDay.getDate() + 1);
+      qb.where('a.appointmentDate >= :date', { date })
+        .andWhere('a.appointmentDate < :nextDay', { nextDay });
+    } else if (filters?.startDate && filters?.endDate) {
+      const start = new Date(filters.startDate);
+      start.setHours(0, 0, 0, 0);
+      const end = new Date(filters.endDate);
+      end.setHours(23, 59, 59, 999);
+      qb.where('a.appointmentDate >= :start', { start })
+        .andWhere('a.appointmentDate <= :end', { end });
+    }
+
+    if (filters?.doctorId) {
+      qb.andWhere('a.doctorId = :doctorId', { doctorId: filters.doctorId });
+    }
+
+    if (filters?.status) {
+      qb.andWhere('a.status = :status', { status: filters.status });
+    }
+
+    if (filters?.patientId) {
+      qb.andWhere('a.patientId = :patientId', { patientId: filters.patientId });
+    }
+
+    return qb.getMany();
+  }
 }

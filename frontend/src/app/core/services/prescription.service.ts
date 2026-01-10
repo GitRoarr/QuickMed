@@ -25,6 +25,7 @@ export interface CreatePrescriptionDto {
   medication: string;
   dosage: string;
   patientId: string;
+  appointmentId?: string;
   frequency: string;
   duration: string;
   prescriptionDate?: string;
@@ -45,10 +46,16 @@ export class PrescriptionService {
     return this.http.post<Prescription>(this.API_URL, data);
   }
 
-  getAll(search?: string): Observable<Prescription[]> {
+  getAll(search?: string, appointmentId?: string, patientId?: string): Observable<Prescription[]> {
     let params = new HttpParams();
     if (search) {
       params = params.set('search', search);
+    }
+    if (appointmentId) {
+      params = params.set('appointmentId', appointmentId);
+    }
+    if (patientId) {
+      params = params.set('patientId', patientId);
     }
     return this.http.get<Prescription[]>(this.API_URL, { params });
   }

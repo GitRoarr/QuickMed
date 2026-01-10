@@ -100,4 +100,20 @@ export class SchedulingService {
       }
     });
   }
+
+  // Patient-facing methods
+  getWeekSchedule(doctorId: string, startDate: string): Observable<DayScheduleResponse[]> {
+    const formatted = this.normalizeDate(startDate);
+    return this.http.get<DayScheduleResponse[]>(`${this.API_URL}/public/${doctorId}/week/${formatted}`);
+  }
+
+  getAvailableDates(doctorId: string, startDate: string, days: number = 30): Observable<string[]> {
+    const formatted = this.normalizeDate(startDate);
+    return this.http.get<string[]>(`${this.API_URL}/public/${doctorId}/available-dates`, {
+      params: {
+        startDate: formatted,
+        days: days.toString()
+      }
+    });
+  }
 }

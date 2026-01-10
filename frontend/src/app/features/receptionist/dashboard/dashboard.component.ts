@@ -1,6 +1,7 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReceptionistService } from '@app/core/services/receptionist.service';
+import { ThemeService } from '@core/services/theme.service';
 import { HeaderComponent } from '@app/features/admin/shared/header';
 import { SidebarComponent } from '@app/features/admin/shared/sidebar';
 
@@ -13,6 +14,7 @@ import { SidebarComponent } from '@app/features/admin/shared/sidebar';
 })
 export class DashboardComponent implements OnInit {
   private readonly receptionistService = inject(ReceptionistService);
+  themeService = inject(ThemeService);
 
   todayAppointments = signal<any[]>([]);
   pendingPayments = signal<any[]>([]);

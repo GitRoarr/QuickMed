@@ -6,6 +6,7 @@ import { DoctorHeaderComponent } from '../shared/doctor-header/doctor-header.com
 import { DoctorService, DoctorDashboardData } from '@core/services/doctor.service';
 import { AuthService } from '@core/services/auth.service';
 import { NotificationService } from '@core/services/notification.service';
+import { ThemeService } from '@core/services/theme.service';
 
 @Component({
   selector: 'app-doctor-dashboard',
@@ -23,6 +24,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private doctorService = inject(DoctorService);
   private authService = inject(AuthService);
   private notificationService = inject(NotificationService);
+  themeService = inject(ThemeService);
 
   today = new Date();
 
@@ -31,7 +33,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
   error = signal<string | null>(null);
   currentUser = signal<any>(null);
   unreadNotificationCount = signal(0);
-  themeMode = signal<'light' | 'dark'>(document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+  
+  get themeMode(): 'light' | 'dark' {
+    return this.themeService.isDarkMode() ? 'dark' : 'light';
+  }
 
   private notificationIntervalId: any;
 
@@ -90,16 +95,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   setTheme(mode: 'light' | 'dark'): void {
-    this.themeMode.set(mode);
-    document.documentElement.classList.toggle('dark', mode === 'dark');
-    if (mode === 'dark') {
-      document.documentElement.classList.remove('light');
-    } else {
-      document.documentElement.classList.add('light');
-    }
-    try {
-      localStorage.setItem('theme', mode);
-    } catch {}
+    this.themeService.setTheme(mode);
   }
 
   getInitials(name?: string): string {
