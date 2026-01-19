@@ -1,5 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { NotificationsService } from './notifications.service';
+import { NotificationsGateway } from './notifications.gateway';
 import { Appointment } from '../appointments/entities/appointment.entity';
 import { User } from '../users/entities/user.entity';
 import { NotificationType, NotificationPriority, UserRole, AppointmentType } from '../common/index';
@@ -7,7 +8,21 @@ import { Notification } from './entities/notification.entity';
 
 @Injectable()
 export class NotificationIntegrationService {
-  constructor(private readonly notificationsService: NotificationsService) {}
+  private notificationsGateway: NotificationsGateway | null = null;
+
+  constructor(
+    private readonly notificationsService: NotificationsService,
+  ) {}
+
+  setGateway(gateway: NotificationsGateway): void {
+    this.notificationsGateway = gateway;
+  }
+
+  private async emitNotification(userId: string, notification: Notification): Promise<void> {
+    if (this.notificationsGateway) {
+      await this.notificationsGateway.sendNotification(userId, notification);
+    }
+  }
 
   async createAppointmentNotification(
     appointment: Appointment,
@@ -70,15 +85,17 @@ export class NotificationIntegrationService {
     }
 
     if (patient) {
-      await this.notificationsService.sendToUser(patient.id, notificationData as Notification);
+      const notification = await this.notificationsService.sendToUser(patient.id, notificationData as Notification);
+      await this.emitNotification(patient.id, notification);
     }
 
     if (doctor) {
-      await this.notificationsService.sendToUser(doctor.id, {
+      const doctorNotification = await this.notificationsService.sendToUser(doctor.id, {
         ...notificationData,
         title: `Patient Appointment - ${notificationData.title}`,
         message: `Patient ${patient?.firstName} ${patient?.lastName} - ${notificationData.message}`,
       } as Notification);
+      await this.emitNotification(doctor.id, doctorNotification);
     }
   }
 
@@ -155,7 +172,9 @@ export class NotificationIntegrationService {
         break;
     }
 
-    await this.notificationsService.sendToUser(patientId, notificationData as Notification);
+    const notification = await this.notificationsService.sendToUser(patientId, notificationData as Notification);
+    // Send real-time notification
+    await this.notificationsGateway.sendNotification(patientId, notification);
   }
 
   async createSystemNotification(
@@ -164,13 +183,14 @@ export class NotificationIntegrationService {
     message: string,
     priority: 'low' | 'medium' | 'high' | 'urgent' = 'medium',
   ): Promise<void> {
-    await this.notificationsService.sendToUser(userId, {
+    const notification = await this.notificationsService.sendToUser(userId, {
       type: NotificationType.SYSTEM,
       priority: priority as NotificationPriority,
       title,
       message,
       userId,
     } as Notification);
+    await this.emitNotification(userId, notification);
   }
 
   async createBulkSystemNotification(
@@ -179,12 +199,16 @@ export class NotificationIntegrationService {
     message: string,
     priority: 'low' | 'medium' | 'high' | 'urgent' = 'medium',
   ): Promise<void> {
-    await this.notificationsService.sendToUsers(userIds, {
+    const notifications = await this.notificationsService.sendToUsers(userIds, {
       type: NotificationType.SYSTEM,
       priority: priority as NotificationPriority,
       title,
       message,
     } as Notification);
+    // Send real-time notifications
+    for (let i = 0; i < notifications.length; i++) {
+      await this.emitNotification(userIds[i], notifications[i]);
+    }
   }
 
   async createRoleBasedNotification(

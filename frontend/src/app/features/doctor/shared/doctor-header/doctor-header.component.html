@@ -10,7 +10,7 @@
         <span *ngIf="unreadNotifications > 0" class="dot"></span>
       </button>
       <button class="icon" title="Toggle Theme" (click)="toggleTheme()">
-        <i class="bi" [class.bi-brightness-high-fill]="theme() === 'light'" [class.bi-moon-stars-fill]="theme() === 'dark'"></i>
+        <i class="bi" [class.bi-brightness-high-fill]="theme === 'light'" [class.bi-moon-stars-fill]="theme === 'dark'"></i>
       </button>
       <button class="avatar" title="Profile" (click)="goTo('/doctor/settings')">
         <img *ngIf="avatarUrl; else initialsTpl" [src]="avatarUrl" alt="avatar" />

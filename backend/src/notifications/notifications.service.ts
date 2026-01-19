@@ -191,6 +191,15 @@ export class NotificationsService {
     return await this.notificationRepository.save(notification);
   }
 
+  // Helper method to emit real-time notification (called by gateway)
+  async sendToUserAndEmit(userId: string, notificationData: Partial<CreateNotificationDto>, gateway?: any): Promise<Notification> {
+    const notification = await this.sendToUser(userId, notificationData);
+    if (gateway) {
+      await gateway.sendNotification(userId, notification);
+    }
+    return notification;
+  }
+
   async sendToUsers(userIds: string[], notificationData: Partial<CreateNotificationDto>): Promise<Notification[]> {
     const notifications = userIds.map(userId => 
       this.notificationRepository.create({

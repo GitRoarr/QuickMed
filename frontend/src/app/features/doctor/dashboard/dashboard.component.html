@@ -3,7 +3,7 @@
     [initials]="getDoctorInitials()"
     [avatarUrl]="currentUser()?.avatar"
     [unreadNotifications]="unreadNotificationCount()"
-    [themeMode]="themeMode()"
+      [themeMode]="themeMode"
     (themeChange)="setTheme($event)"
   ></app-doctor-header>
 

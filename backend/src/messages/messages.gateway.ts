@@ -63,21 +63,60 @@ export class MessagesGateway implements OnGatewayConnection, OnGatewayDisconnect
   @SubscribeMessage('sendMessage')
   async handleSendMessage(
     client: Socket,
-    payload: { content: string; patientId?: string; doctorId?: string },
+    payload: { content: string; patientId?: string; doctorId?: string; conversationId?: string },
   ) {
     const user = client.data.user as { id: string; role: UserRole } | undefined;
     if (!user || !payload?.content) {
+      client.emit('error', { message: 'Invalid message payload' });
       return;
     }
 
-    const message = await this.messagesService.sendMessageFromUser(user, payload);
-    if (!message) {
-      return;
-    }
+    try {
+      const message = await this.messagesService.sendMessageFromUser(user, payload as any);
+      if (!message) {
+        client.emit('error', { message: 'Failed to send message' });
+        return;
+      }
 
-    this.server.to(message.conversationId).emit('message', message);
-    this.server.to(message.receiverId).emit('conversationUpdated', {
-      conversationId: message.conversationId,
+      // Emit to conversation room
+      this.server.to(message.conversationId).emit('message', {
+        id: message.id,
+        content: message.content,
+        senderId: message.senderId,
+        receiverId: message.receiverId,
+        conversationId: message.conversationId,
+        senderType: message.senderType,
+        isRead: message.isRead,
+        createdAt: message.createdAt,
+        sender: message.sender,
+        receiver: message.receiver,
+      });
+
+      // Notify receiver about new message
+      this.server.to(message.receiverId).emit('conversationUpdated', {
+        conversationId: message.conversationId,
+        lastMessage: message.content,
+        lastMessageAt: message.createdAt,
+      });
+
+      // Confirm to sender
+      client.emit('messageSent', { messageId: message.id });
+    } catch (error) {
+      console.error('[MessagesGateway] Error sending message:', error);
+      client.emit('error', { message: 'Failed to send message', error: error.message });
+    }
+  }
+
+  @SubscribeMessage('typing')
+  handleTyping(client: Socket, payload: { conversationId: string; isTyping: boolean }) {
+    const user = client.data.user as { id: string; role: UserRole } | undefined;
+    if (!user || !payload?.conversationId) return;
+
+    // Emit typing status to conversation (excluding sender)
+    client.to(payload.conversationId).emit('userTyping', {
+      userId: user.id,
+      conversationId: payload.conversationId,
+      isTyping: payload.isTyping,
     });
   }
 

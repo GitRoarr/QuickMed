@@ -1,6 +1,13 @@
 import { NestFactory } from "@nestjs/core"
 import { ValidationPipe } from "@nestjs/common"
 import { AppModule } from "./app.module"
+import * as dotenv from "dotenv"
+import { join } from "path"
+
+// Load environment variables early so services using process.env see them
+dotenv.config({ path: join(__dirname, "..", ".env") }) // ts-node / src
+dotenv.config({ path: join(__dirname, "..", "..", ".env") }) // compiled dist
+dotenv.config() // fallback to CWD
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule)
