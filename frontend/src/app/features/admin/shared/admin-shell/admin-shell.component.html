@@ -1,0 +1,57 @@
+<div class="admin-shell" [class.sidebar-open]="sidebarOpen()" [class.dark]="themeService.isDarkMode()">
+  <aside class="admin-shell__sidebar">
+    <div class="admin-shell__brand" (click)="navigate('/')" title="Back to Home">
+      <div class="brand-container">
+        <div class="brand-icon">
+          <img src="assets/images/QuickMed-Logo.png" alt="QuickMed Logo" />
+        </div>
+        <div class="brand-text">
+          <p class="brand-title">QuickMed</p>
+          <p class="brand-subtitle">Admin Portal</p>
+        </div>
+      </div>
+    </div>
+
+    <nav class="admin-shell__nav" [attr.aria-hidden]="!sidebarOpen() && mobile()">
+      <a
+        *ngFor="let item of menuItems"
+        class="admin-shell__nav-item"
+        [routerLink]="item.route"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: item.exact !== false }"
+        (click)="closeSidebar()"
+      >
+        <i class="bi" [ngClass]="item.icon"></i>
+        <span>{{ item.label }}</span>
+      </a>
+    </nav>
+
+    <div class="admin-shell__profile" *ngIf="currentUser() as user">
+      <div class="avatar">
+        <span *ngIf="!user.avatar">
+          {{ (user.firstName?.charAt(0) || 'A') + (user.lastName?.charAt(0) || 'D') }}
+        </span>
+        <img *ngIf="user.avatar" [src]="user.avatar" alt="{{ user.firstName }}" />
+      </div>
+      <div>
+        <p class="profile-name">{{ user.firstName }} {{ user.lastName }}</p>
+        <p class="profile-role">Administrator</p>
+      </div>
+    </div>
+
+    <button class="admin-shell__logout" type="button" (click)="logout(); closeSidebar()">
+      <i class="bi bi-box-arrow-right"></i>
+      Logout
+    </button>
+  </aside>
+
+  <main class="admin-shell__content">
+    <div class="admin-shell__topbar">
+      <app-header 
+        [searchPlaceholder]="searchPlaceholder"
+        [unreadNotifications]="unreadNotifications()"
+      ></app-header>
+    </div>
+    <ng-content></ng-content>
+  </main>
+</div>

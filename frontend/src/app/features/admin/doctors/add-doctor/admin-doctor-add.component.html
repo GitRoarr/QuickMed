@@ -1,12 +1,12 @@
-<div class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 py-8 px-4 sm:px-6 lg:px-8">
-  <div class="max-w-4xl mx-auto">
+<div class="add-doctor-page">
+  <div class="add-doctor-container">
     <!-- Back Button with Animation -->
     <button 
       (click)="back()" 
-      class="group mb-6 flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-all duration-300 transform hover:translate-x-[-4px]"
+      class="back-btn"
     >
-      <i class="bi bi-arrow-left text-xl group-hover:scale-110 transition-transform duration-300"></i>
-      <span class="font-medium">Back to Doctors</span>
+      <i class="bi bi-arrow-left"></i>
+      <span>Back to Doctors</span>
     </button>
 
     <!-- Alert Message -->
@@ -21,210 +21,207 @@
     </div>
 
     <!-- Main Card with Glassmorphism Effect -->
-    <div class="bg-white/80 backdrop-blur-lg rounded-2xl shadow-2xl border border-white/20 overflow-hidden animate-slide-up">
+    <div class="main-card animate-slide-up">
       <!-- Header Section with Gradient -->
-      <div class="bg-gradient-to-r from-blue-600 via-blue-500 to-green-500 p-8 text-white relative overflow-hidden">
-        <div class="absolute inset-0 opacity-20" style="background-image: url('data:image/svg+xml,%3Csvg width=&quot;60&quot; height=&quot;60&quot; viewBox=&quot;0 0 60 60&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot;%3E%3Cg fill=&quot;none&quot; fill-rule=&quot;evenodd&quot;%3E%3Cg fill=&quot;%23ffffff&quot; fill-opacity=&quot;0.1&quot;%3E%3Cpath d=&quot;M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z&quot;/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');"></div>
-        <div class="relative z-10">
-          <div class="flex items-center gap-4 mb-2">
-            <div class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm animate-bounce-slow">
-              <i class="bi bi-person-plus-fill text-3xl"></i>
-            </div>
-            <div>
-              <h1 class="text-3xl font-bold mb-1 animate-fade-in">Add New Doctor</h1>
-              <p class="text-blue-100 text-sm">Invite a medical professional to join QuickMed</p>
-            </div>
+      <div class="card-header">
+        <div class="header-pattern"></div>
+        <div class="header-content">
+          <div class="header-icon-container">
+            <i class="bi bi-person-plus-fill"></i>
+          </div>
+          <div>
+            <h1 class="card-title animate-fade-in">Add New Doctor</h1>
+            <p class="card-subtitle">Invite a medical professional to join QuickMed</p>
           </div>
         </div>
       </div>
 
       <!-- Form Section -->
-      <form [formGroup]="form" (ngSubmit)="submit()" class="p-8 space-y-6">
+      <form [formGroup]="form" (ngSubmit)="submit()" class="form-container">
         <!-- Name Fields - Side by Side -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="form-row">
           <div class="form-group animate-fade-in-delay-1">
-            <label class="block text-sm font-semibold text-gray-700 mb-2">
-              <i class="bi bi-person-fill text-blue-500 mr-2"></i>First Name
+            <label class="form-label">
+              <i class="bi bi-person-fill"></i>First Name
             </label>
-            <div class="relative">
+            <div class="input-wrapper">
               <input 
                 formControlName="firstName" 
                 type="text"
                 placeholder="Enter first name"
-                class="w-full px-4 py-3 pl-12 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-300 outline-none bg-gray-50 focus:bg-white"
-                [class.border-red-300]="form.get('firstName')?.invalid && form.get('firstName')?.touched"
+                class="form-input"
+                [class.input-error]="form.get('firstName')?.invalid && form.get('firstName')?.touched"
               />
-              <i class="bi bi-person absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+              <i class="bi bi-person input-icon"></i>
             </div>
             <p *ngIf="form.get('firstName')?.invalid && form.get('firstName')?.touched" 
-               class="text-red-500 text-xs mt-1 animate-shake">First name is required</p>
+               class="error-message animate-shake">First name is required</p>
           </div>
 
           <div class="form-group animate-fade-in-delay-2">
-            <label class="block text-sm font-semibold text-gray-700 mb-2">
-              <i class="bi bi-person-fill text-blue-500 mr-2"></i>Last Name
+            <label class="form-label">
+              <i class="bi bi-person-fill"></i>Last Name
             </label>
-            <div class="relative">
+            <div class="input-wrapper">
               <input 
                 formControlName="lastName" 
                 type="text"
                 placeholder="Enter last name"
-                class="w-full px-4 py-3 pl-12 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-300 outline-none bg-gray-50 focus:bg-white"
-                [class.border-red-300]="form.get('lastName')?.invalid && form.get('lastName')?.touched"
+                class="form-input"
+                [class.input-error]="form.get('lastName')?.invalid && form.get('lastName')?.touched"
               />
-              <i class="bi bi-person absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+              <i class="bi bi-person input-icon"></i>
             </div>
             <p *ngIf="form.get('lastName')?.invalid && form.get('lastName')?.touched" 
-               class="text-red-500 text-xs mt-1 animate-shake">Last name is required</p>
+               class="error-message animate-shake">Last name is required</p>
           </div>
         </div>
 
         <!-- Email Field -->
         <div class="form-group animate-fade-in-delay-3">
-          <label class="block text-sm font-semibold text-gray-700 mb-2">
-            <i class="bi bi-envelope-fill text-green-500 mr-2"></i>Email Address
+          <label class="form-label">
+            <i class="bi bi-envelope-fill"></i>Email Address
           </label>
-          <div class="relative">
+          <div class="input-wrapper">
             <input 
               formControlName="email" 
               type="email"
               placeholder="doctor@example.com"
-              class="w-full px-4 py-3 pl-12 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:ring-4 focus:ring-green-100 transition-all duration-300 outline-none bg-gray-50 focus:bg-white"
-              [class.border-red-300]="form.get('email')?.invalid && form.get('email')?.touched"
+              class="form-input"
+              [class.input-error]="form.get('email')?.invalid && form.get('email')?.touched"
             />
-            <i class="bi bi-envelope absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+            <i class="bi bi-envelope input-icon"></i>
           </div>
           <p *ngIf="form.get('email')?.invalid && form.get('email')?.touched" 
-             class="text-red-500 text-xs mt-1 animate-shake">
+             class="error-message animate-shake">
             {{ form.get('email')?.errors?.['email'] ? 'Invalid email format' : 'Email is required' }}
           </p>
         </div>
 
         <!-- Specialty and License - Side by Side -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="form-row">
           <div class="form-group animate-fade-in-delay-4">
-            <label class="block text-sm font-semibold text-gray-700 mb-2">
-              <i class="bi bi-briefcase-fill text-purple-500 mr-2"></i>Specialty
+            <label class="form-label">
+              <i class="bi bi-briefcase-fill"></i>Specialty
             </label>
-            <div class="relative">
+            <div class="input-wrapper">
               <input 
                 formControlName="specialty" 
                 type="text"
                 placeholder="e.g., Cardiology, Pediatrics"
-                class="w-full px-4 py-3 pl-12 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:ring-4 focus:ring-purple-100 transition-all duration-300 outline-none bg-gray-50 focus:bg-white"
-                [class.border-red-300]="form.get('specialty')?.invalid && form.get('specialty')?.touched"
+                class="form-input"
+                [class.input-error]="form.get('specialty')?.invalid && form.get('specialty')?.touched"
               />
-              <i class="bi bi-briefcase absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+              <i class="bi bi-briefcase input-icon"></i>
             </div>
             <p *ngIf="form.get('specialty')?.invalid && form.get('specialty')?.touched" 
-               class="text-red-500 text-xs mt-1 animate-shake">Specialty is required</p>
+               class="error-message animate-shake">Specialty is required</p>
           </div>
 
           <div class="form-group animate-fade-in-delay-5">
-            <label class="block text-sm font-semibold text-gray-700 mb-2">
-              <i class="bi bi-shield-check text-orange-500 mr-2"></i>License Number
+            <label class="form-label">
+              <i class="bi bi-shield-check"></i>License Number
             </label>
-            <div class="relative">
+            <div class="input-wrapper">
               <input 
                 formControlName="licenseNumber" 
                 type="text"
                 placeholder="MD-12345"
-                class="w-full px-4 py-3 pl-12 border-2 border-gray-200 rounded-xl focus:border-orange-500 focus:ring-4 focus:ring-orange-100 transition-all duration-300 outline-none bg-gray-50 focus:bg-white"
-                [class.border-red-300]="form.get('licenseNumber')?.invalid && form.get('licenseNumber')?.touched"
+                class="form-input"
+                [class.input-error]="form.get('licenseNumber')?.invalid && form.get('licenseNumber')?.touched"
               />
-              <i class="bi bi-shield-check absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+              <i class="bi bi-shield-check input-icon"></i>
             </div>
             <p *ngIf="form.get('licenseNumber')?.invalid && form.get('licenseNumber')?.touched" 
-               class="text-red-500 text-xs mt-1 animate-shake">License number is required</p>
+               class="error-message animate-shake">License number is required</p>
           </div>
         </div>
 
         <!-- Phone Number -->
         <div class="form-group animate-fade-in-delay-6">
-          <label class="block text-sm font-semibold text-gray-700 mb-2">
-            <i class="bi bi-telephone-fill text-indigo-500 mr-2"></i>Phone Number
+          <label class="form-label">
+            <i class="bi bi-telephone-fill"></i>Phone Number
           </label>
-          <div class="relative">
+          <div class="input-wrapper">
             <input 
               formControlName="phoneNumber" 
               type="tel"
               placeholder="+1 (555) 123-4567"
-              class="w-full px-4 py-3 pl-12 border-2 border-gray-200 rounded-xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 transition-all duration-300 outline-none bg-gray-50 focus:bg-white"
-              [class.border-red-300]="form.get('phoneNumber')?.invalid && form.get('phoneNumber')?.touched"
+              class="form-input"
+              [class.input-error]="form.get('phoneNumber')?.invalid && form.get('phoneNumber')?.touched"
             />
-            <i class="bi bi-telephone absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+            <i class="bi bi-telephone input-icon"></i>
           </div>
           <p *ngIf="form.get('phoneNumber')?.invalid && form.get('phoneNumber')?.touched" 
-             class="text-red-500 text-xs mt-1 animate-shake">Phone number is required</p>
+             class="error-message animate-shake">Phone number is required</p>
         </div>
 
         <!-- Bio/Description -->
         <div class="form-group animate-fade-in-delay-7">
-          <label class="block text-sm font-semibold text-gray-700 mb-2">
-            <i class="bi bi-file-text-fill text-pink-500 mr-2"></i>Bio / Description
+          <label class="form-label">
+            <i class="bi bi-file-text-fill"></i>Bio / Description
           </label>
-          <div class="relative">
+          <div class="textarea-wrapper">
             <textarea 
               formControlName="bio" 
               rows="4"
               placeholder="Tell us about the doctor's experience, education, and expertise..."
-              class="w-full px-4 py-3 pl-12 border-2 border-gray-200 rounded-xl focus:border-pink-500 focus:ring-4 focus:ring-pink-100 transition-all duration-300 outline-none bg-gray-50 focus:bg-white resize-none"
-              [class.border-red-300]="form.get('bio')?.invalid && form.get('bio')?.touched"
+              class="form-textarea"
+              [class.input-error]="form.get('bio')?.invalid && form.get('bio')?.touched"
             ></textarea>
-            <i class="bi bi-file-text absolute left-4 top-4 text-gray-400"></i>
+            <i class="bi bi-file-text textarea-icon"></i>
           </div>
           <p *ngIf="form.get('bio')?.invalid && form.get('bio')?.touched" 
-             class="text-red-500 text-xs mt-1 animate-shake">Bio is required</p>
+             class="error-message animate-shake">Bio is required</p>
         </div>
 
         <!-- Submit Button -->
-        <div class="pt-4 animate-fade-in-delay-8">
+        <div class="submit-section animate-fade-in-delay-8">
           <button
             type="submit"
             [disabled]="form.invalid || loading"
-            class="w-full group relative overflow-hidden bg-gradient-to-r from-blue-600 via-blue-500 to-green-500 text-white font-bold py-4 px-8 rounded-xl shadow-lg hover:shadow-2xl transform hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+            class="submit-btn"
           >
-            <span class="relative z-10 flex items-center justify-center gap-3">
-              <i *ngIf="!loading" class="bi bi-send-fill text-xl group-hover:translate-x-1 transition-transform duration-300"></i>
+            <span class="btn-content">
+              <i *ngIf="!loading" class="bi bi-send-fill"></i>
               <span *ngIf="!loading">Send Invitation</span>
-              <span *ngIf="loading" class="flex items-center gap-2">
-                <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <span *ngIf="loading" class="loading-content">
+                <svg class="spinner" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                   <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                   <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
                 Sending Invitation...
               </span>
             </span>
-            <div class="absolute inset-0 bg-gradient-to-r from-green-500 to-blue-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
           </button>
         </div>
       </form>
     </div>
 
     <!-- Invite Link Section -->
-    <div *ngIf="inviteLink" class="mt-8 bg-gradient-to-r from-green-50 to-blue-50 border-2 border-dashed border-green-300 rounded-2xl p-6 animate-slide-up shadow-lg">
-      <div class="flex items-start gap-4">
-        <div class="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0 animate-pulse">
-          <i class="bi bi-check-circle-fill text-white text-2xl"></i>
+    <div *ngIf="inviteLink" class="invite-link-card animate-slide-up">
+      <div class="invite-link-content">
+        <div class="success-icon">
+          <i class="bi bi-check-circle-fill"></i>
         </div>
-        <div class="flex-1">
-          <h3 class="text-xl font-bold text-green-800 mb-2 flex items-center gap-2">
+        <div class="invite-link-body">
+          <h3 class="invite-link-title">
             <i class="bi bi-link-45deg"></i>
             Invitation Link Generated
           </h3>
-          <p class="text-sm text-gray-600 mb-4">
+          <p class="invite-link-description">
             Copy this link and share it with the doctor to complete their onboarding. The link will expire in 7 days.
           </p>
-          <div class="flex items-center gap-3 flex-wrap">
+          <div class="invite-link-actions">
             <input 
               type="text" 
               [value]="inviteLink" 
               readonly 
-              class="flex-1 px-4 py-3 bg-white border-2 border-green-200 rounded-xl focus:border-green-500 focus:ring-2 focus:ring-green-100 outline-none text-sm font-mono"
+              class="invite-link-input"
             />
             <button 
               (click)="copyInviteLink()" 
-              class="px-6 py-3 bg-green-500 text-white rounded-xl hover:bg-green-600 transform hover:scale-105 active:scale-95 transition-all duration-200 shadow-md hover:shadow-lg flex items-center gap-2 font-semibold"
+              class="copy-btn"
             >
               <i class="bi bi-clipboard-check"></i>
               Copy Link

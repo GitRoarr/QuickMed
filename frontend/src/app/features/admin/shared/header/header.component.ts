@@ -13,6 +13,7 @@ import { ThemeService } from '@core/services/theme.service';
 export class HeaderComponent implements OnInit {
   @Input() searchPlaceholder: string = 'Search patients, appointments...';
   @Input() showNewAppointmentButton: boolean = true;
+  @Input() unreadNotifications: number = 0;
   @Output() newAppointmentClick = new EventEmitter<void>();
   @Output() searchChange = new EventEmitter<string>();
 

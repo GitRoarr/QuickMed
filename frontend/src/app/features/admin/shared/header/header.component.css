@@ -1,238 +1,174 @@
-.bg-white {
-  background-color: white;
+/* Admin Header - Matching Patient/Doctor Dashboard Styling */
+:root {
+  --admin-bg: #ffffff;
+  --admin-fg: #111111;
+  --admin-surface: #f9fafb;
+  --admin-border: #e5e7eb;
+  --admin-muted: #6b7280;
+  --admin-primary: #16a34a;
+  --admin-primary-light: #d1fae5;
+  --admin-primary-dark: #15803d;
+  --admin-shadow: rgba(0, 0, 0, 0.1);
 }
 
-.border-b {
-  border-bottom-width: 1px;
+.dark {
+  --admin-bg: #0b0d17;
+  --admin-fg: #ffffff;
+  --admin-surface: #1c1f2b;
+  --admin-border: #2c2f3d;
+  --admin-muted: #9ca3af;
+  --admin-primary: #16a34a;
+  --admin-primary-light: #1f2937;
+  --admin-primary-dark: #15803d;
+  --admin-shadow: rgba(0, 0, 0, 0.5);
 }
 
-.border-gray-200 {
-  border-color: #e5e7eb;
+.admin-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  padding: 12px;
+  background: transparent;
 }
 
-.px-8 {
-  padding-left: 2rem;
-  padding-right: 2rem;
-}
-
-.py-4 {
-  padding-top: 1rem;
-  padding-bottom: 1rem;
-}
-
-.flex {
+.header-bar {
   display: flex;
-}
-
-.justify-between {
-  justify-content: space-between;
-}
-
-.items-center {
   align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  background: var(--admin-surface, #fff);
+  backdrop-filter: saturate(180%) blur(8px);
+  border: 1px solid var(--admin-border, #e6e6e6);
+  border-radius: 9999px;
+  padding: 8px 16px;
+  transition: background 0.3s, border-color 0.3s;
 }
 
-.gap-8 {
-  gap: 2rem;
-}
-
-.flex-1 {
-  flex: 1 1 0%;
-}
-
-.max-w-md {
+.search-container {
+  position: relative;
+  flex: 1;
   max-width: 28rem;
 }
 
-.w-full {
+.search-container i {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--admin-muted);
+  font-size: 16px;
+}
+
+.search-input {
   width: 100%;
-}
-
-.px-4 {
-  padding-left: 1rem;
-  padding-right: 1rem;
-}
-
-.py-2 {
-  padding-top: 0.5rem;
-  padding-bottom: 0.5rem;
-}
-
-.bg-gray-100 {
-  background-color: #f3f4f6;
-}
-
-.border {
-  border-width: 1px;
-}
-
-.border-gray-300 {
-  border-color: #d1d5db;
-}
-
-.rounded-lg {
-  border-radius: 0.5rem;
-}
-
-.text-sm {
+  padding: 0.75rem 1rem 0.75rem 2.5rem;
+  border: 1px solid var(--admin-border);
+  border-radius: 12px;
+  background: var(--admin-bg);
+  color: var(--admin-fg);
   font-size: 0.875rem;
-  line-height: 1.25rem;
+  transition: all 0.2s ease;
 }
 
-.text-gray-700 {
-  color: #374151;
+.search-input:focus {
+  outline: none;
+  border-color: var(--admin-primary);
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.1);
 }
 
-.placeholder-gray-500::placeholder {
-  color: #6b7280;
+.search-input::placeholder {
+  color: var(--admin-muted);
 }
 
-.gap-6 {
-  gap: 1.5rem;
+.actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
 }
 
-.relative {
+.icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: 1px solid var(--admin-border);
+  background: var(--admin-surface);
+  color: var(--admin-fg);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.icon:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+  border-color: var(--admin-primary);
+}
+
+.icon i {
+  font-size: 18px;
+}
+
+.icon.relative {
   position: relative;
 }
 
-.w-10 {
-  width: 2.5rem;
-}
-
-.h-10 {
-  height: 2.5rem;
-}
-
-.rounded-full {
+.dot {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 8px;
+  height: 8px;
+  background: #ef4444;
   border-radius: 9999px;
 }
 
-.text-gray-600 {
-  color: #4b5563;
-}
-
-.cursor-pointer {
-  cursor: pointer;
-}
-
-.absolute {
-  position: absolute;
-}
-
-.top-0 {
-  top: 0;
-}
-
-.right-0 {
-  right: 0;
-}
-
-.w-3 {
-  width: 0.75rem;
-}
-
-.h-3 {
-  height: 0.75rem;
-}
-
-.bg-red-500 {
-  background-color: #ef4444;
-}
-
-.border-2 {
-  border-width: 2px;
-}
-
-.border-white {
-  border-color: white;
-}
-
-.text-white {
-  color: white;
-}
-
-.font-semibold {
-  font-weight: 600;
-}
-
-.transition {
-  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  transition-duration: 150ms;
-}
-
-.toggle-switch-header {
-  position: relative;
-  display: flex;
+.avatar {
+  display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 9999px;
+  border: 1px solid var(--admin-border);
+  background: var(--admin-surface);
   cursor: pointer;
+  transition: background 0.3s, border-color 0.3s;
 }
 
-.toggle-switch-header input {
-  opacity: 0;
-  width: 0;
-  height: 0;
+.avatar span {
+  font-weight: 600;
+  color: var(--admin-fg);
+  font-size: 0.875rem;
 }
 
-.slider-header {
-  position: relative;
-  width: 44px;
-  height: 24px;
-  background-color: #ccc;
-  transition: 0.3s;
-  border-radius: 24px;
+.avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 9999px;
 }
 
-.slider-header:before {
-  position: absolute;
-  content: "";
-  height: 18px;
-  width: 18px;
-  left: 3px;
-  bottom: 3px;
-  background-color: white;
-  transition: 0.3s;
-  border-radius: 50%;
+/* Dark theme adjustments */
+.dark .admin-header .header-bar {
+  background: var(--admin-surface);
+  border-color: var(--admin-border);
 }
 
-.toggle-switch-header input:checked + .slider-header {
-  background-color: #10b981;
+.dark .icon {
+  background: var(--admin-surface);
+  border-color: var(--admin-border);
+  color: var(--admin-fg);
 }
 
-.toggle-switch-header input:checked + .slider-header:before {
-  transform: translateX(20px);
+.dark .icon:hover {
+  border-color: var(--admin-primary);
+  box-shadow: 0 6px 16px rgba(22, 163, 74, 0.15);
 }
 
-.toggle-switch-header i {
-  font-size: 1.1rem;
-  color: #6b7280;
-}
-
-.dark .bg-white {
-  background-color: #1a1a1a;
-}
-
-.dark .border-gray-200 {
-  border-color: #404040;
-}
-
-.dark .bg-gray-100 {
-  background-color: #2d2d2d;
-}
-
-.dark .border-gray-300 {
-  border-color: #404040;
-}
-
-.dark .text-gray-700 {
-  color: #e5e7eb;
-}
-
-.dark .text-gray-600 {
-  color: #9ca3af;
-}
-
-.dark .toggle-switch-header i {
-  color: #e5e7eb;
+.dark .search-input {
+  background: var(--admin-bg);
+  color: var(--admin-fg);
+  border-color: var(--admin-border);
 }

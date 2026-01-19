@@ -43,7 +43,6 @@
         <div class="relative flex items-center group">
           <div class="flex items-center gap-2 cursor-pointer profile-dropdown-container"
             (mouseenter)="profileDropdownOpen.set(true)"
-            (mouseleave)="profileDropdownOpen.set(false)"
             (click)="navigateToDashboard()">
             <img *ngIf="currentUser()?.avatar; else initialsAvatar"
                  [src]="currentUser()?.avatar!" 
@@ -91,7 +90,9 @@
 <!-- Dropdown Menu moved from nav to hero section -->
 <div *ngIf="currentUser()"
      class="fixed right-8 top-16 w-48 rounded-b-lg shadow-lg pt-2 pb-4 z-50 border-x border-b transition-all duration-300 transform pointer-events-auto
-            bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700"
+       bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 profile-dropdown-panel"
+     (mouseenter)="profileDropdownOpen.set(true)"
+     (mouseleave)="closeProfileDropdown()"
      [ngClass]="{
        'opacity-0 scale-95 -translate-y-2 invisible': !profileDropdownOpen(),
        'opacity-100 scale-100 translate-y-0 visible': profileDropdownOpen()

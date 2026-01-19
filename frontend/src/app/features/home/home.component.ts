@@ -273,7 +273,9 @@ export class HomeComponent implements OnInit {
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void { // <-- ADD THIS
     const target = event.target as HTMLElement
-    if (!target.closest('.profile-dropdown-container')) {
+    const insideTrigger = target.closest('.profile-dropdown-container')
+    const insidePanel = target.closest('.profile-dropdown-panel')
+    if (!insideTrigger && !insidePanel) {
       this.closeProfileDropdown()
     }
   }
