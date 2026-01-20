@@ -62,7 +62,7 @@ body::-webkit-scrollbar, html::-webkit-scrollbar {
 :root {
   --bg: #ffffff;
   --fg: #111111;
-  --surface: #f9fafb; /* light card background */
+  --surface: #ffffff; /* light card background */
   --border: #e5e7eb;
   --muted: #6b7280;
   --primary: #16a34a;
@@ -72,7 +72,7 @@ body::-webkit-scrollbar, html::-webkit-scrollbar {
 .dark {
   --bg: #0b0d17; /* dark background */
   --fg: #ffffff; /* text */
-  --surface: #1c1f2b; /* dark card */
+  --surface: #1e1e1e; /* dark card */
   --border: #2c2f3d; /* card border */
   --muted: #9ca3af; /* muted text */
   --primary: #16a34a;
@@ -100,9 +100,40 @@ body {
   border-radius: 1rem;
   border-width: 1px;
   padding: 1.5rem;
-  transition: all 0.2s;
+  transition: background-color 0.25s ease, box-shadow 0.25s ease, transform 0.2s ease;
   background-color: var(--surface);
   border-color: var(--border);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+  animation: cardIn 240ms ease both;
+}
+
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.18);
+}
+
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Elevate common admin cards globally for consistency */
+:where(.stat-card, .metric-card, .settings-section, .appointments-container, .appointment-card, .patient-card, .table-card, .chart-card, .modal-card) {
+  background: var(--surface);
+  border-color: var(--border);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+  transition: background-color 0.25s ease, box-shadow 0.25s ease, transform 0.2s ease, border-color 0.25s ease;
+  animation: cardIn 240ms ease both;
+}
+
+:where(.stat-card, .metric-card, .settings-section, .appointments-container, .appointment-card, .patient-card, .table-card, .chart-card, .modal-card):hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 32px rgba(0,0,0,0.2);
+}
+
+/* Ensure dark theme exact surface color on admin cards */
+.dark :where(.stat-card, .metric-card, .settings-section, .appointments-container, .appointment-card, .patient-card, .table-card, .chart-card, .modal-card) {
+  background: #1e1e1e;
 }
 
 /* .sidebar */

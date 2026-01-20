@@ -1,11 +1,10 @@
 import { Component, OnInit, signal, inject } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { SidebarComponent } from '../shared/sidebar';
-import { HeaderComponent } from '../shared/header';
+import { AdminShellComponent } from '../shared/admin-shell';
 import { AdminService } from '../../../core/services/admin.service';
 import { ConsultationsService, ConsultationStats } from '../../../core/services/consultations.service';
-import { AdminThemeService } from '../../../core/services/admin-theme.service';
+import { ThemeService } from '@core/services/theme.service';
 
 interface AnalyticsData {
   appointmentsByDate: { [key: string]: number };
@@ -31,29 +30,17 @@ interface AnalyticsData {
 @Component({
   selector: 'app-analytics',
   standalone: true,
-  imports: [CommonModule, FormsModule, SidebarComponent, HeaderComponent, DatePipe],
+  imports: [CommonModule, FormsModule, AdminShellComponent, DatePipe],
   templateUrl: './analytics.component.html',
   styleUrls: ['./analytics.component.css']
 })
 export class AnalyticsComponent implements OnInit {
-  menuItems = [
-    { label: 'Overview', icon: 'grid', route: '/admin/overview' },
-    { label: 'Appointments', icon: 'calendar', route: '/admin/appointments' },
-    { label: 'Patients', icon: 'people', route: '/admin/patients' },
-    { label: 'Doctors', icon: 'stethoscope', route: '/admin/doctors' },
-    { label: 'Receptionists', icon: 'headset', route: '/admin/receptionists' },
-    { label: 'User Management', icon: 'person-gear', route: '/admin/users' },
-    { label: 'Analytics', icon: 'bar-chart', route: '/admin/analytics' },
-    { label: 'Settings', icon: 'gear', route: '/admin/settings' }
-  ];
 
   analytics = signal<AnalyticsData | null>(null);
   isLoading = signal(false);
   consultationStats = signal<ConsultationStats | null>(null);
   startDate = signal(new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]);
   endDate = signal(new Date().toISOString().split('T')[0]);
-
-  themeService = inject(AdminThemeService);
 
   constructor(private adminService: AdminService, private consultationsService: ConsultationsService) {}
 

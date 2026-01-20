@@ -1,30 +1,18 @@
 import { Component, OnInit, signal, inject } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { SidebarComponent } from '../shared/sidebar';
-import { HeaderComponent } from '../shared/header';
-import { AdminThemeService, Theme } from '../../../core/services/admin-theme.service';
+import { AdminShellComponent } from '../shared/admin-shell';
 import { AdminService } from '../../../core/services/admin.service';
+import { AdminThemeService, Theme } from '@core/services/admin-theme.service';
 
 @Component({
   selector: 'app-settings',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, SidebarComponent, HeaderComponent, DatePipe],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, AdminShellComponent, DatePipe],
   templateUrl: './settings.component.html',
   styleUrls: ['./settings.component.css']
 })
 export class SettingsComponent implements OnInit {
-  menuItems = [
-    { label: 'Overview', icon: 'grid', route: '/admin/overview' },
-    { label: 'Appointments', icon: 'calendar', route: '/admin/appointments' },
-    { label: 'Patients', icon: 'people', route: '/admin/patients' },
-    { label: 'Doctors', icon: 'stethoscope', route: '/admin/doctors' },
-    { label: 'Receptionists', icon: 'headset', route: '/admin/receptionists' },
-    { label: 'User Management', icon: 'person-gear', route: '/admin/users' },
-    { label: 'Analytics', icon: 'bar-chart', route: '/admin/analytics' },
-    { label: 'Settings', icon: 'gear', route: '/admin/settings' }
-  ];
-
   themeService = inject(AdminThemeService);
   adminService = inject(AdminService);
   fb = inject(FormBuilder);

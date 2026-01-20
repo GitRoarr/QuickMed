@@ -1,8 +1,7 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { SidebarComponent } from '../shared/sidebar';
-import { HeaderComponent } from '../shared/header';
+import { AdminShellComponent } from '../shared/admin-shell';
 import { AdminService } from '@app/core/services/admin.service';
 import { AppointmentService } from '@app/core/services/appointment.service';
 import { AlertMessageComponent } from '@app/shared/components/alert-message/alert-message.component';
@@ -10,7 +9,7 @@ import { AlertMessageComponent } from '@app/shared/components/alert-message/aler
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, SidebarComponent, HeaderComponent, AlertMessageComponent],
+  imports: [CommonModule, FormsModule, AdminShellComponent, AlertMessageComponent],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css']
 })
@@ -20,15 +19,6 @@ export class DashboardComponent implements OnInit {
     get isDarkMode() {
       return this.themeService.isDarkMode();
     }
-  menuItems = [
-    { label: 'Overview', icon: 'grid', route: '/admin/overview' },
-    { label: 'Appointments', icon: 'calendar', route: '/admin/appointments' },
-    { label: 'Patients', icon: 'people', route: '/admin/patients' },
-    { label: 'Doctors', icon: 'https://img.icons8.com/ios-filled/50/000000/stethoscope.png', route: '/admin/doctors' },
-    { label: 'User Management', icon: 'https://img.icons8.com/ios-filled/50/000000/user-group.png', route: '/admin/users' },
-    { label: 'Analytics', icon: 'bar-chart', route: '/admin/analytics' },
-    { label: 'Settings', icon: 'gear', route: '/admin/settings' }
-  ];
 
 
   ngOnInit() {

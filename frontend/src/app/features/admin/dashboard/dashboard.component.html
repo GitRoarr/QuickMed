@@ -1,138 +1,133 @@
-<app-sidebar title="QuickMed Admin Portal" [menuItems]="menuItems"></app-sidebar>
-
-
-<div class="ml-60 bg-gray-50 min-h-screen">
-  <app-header></app-header>
-
-  <div class="p-8 max-w-7xl">
+<app-admin-shell searchPlaceholder="Search dashboard data...">
+  <div class="admin-page-content dashboard-page">
     <div class="grid grid-cols-6 gap-4 mb-8">
-      <div class="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-lg transition">
+      <div class="stat-card">
         <div class="flex justify-between items-center mb-3">
-          <span class="text-xs text-gray-600 font-medium">Total Appointments</span>
+          <span class="text-xs font-medium stat-label">Total Appointments</span>
           <span class="text-xl">📅</span>
         </div>
-        <div class="text-2xl font-bold text-gray-900">1,284</div>
-        <div class="text-xs text-green-600 font-medium">+18.2% from last month</div>
+        <div class="text-2xl font-bold stat-value">1,284</div>
+        <div class="text-xs font-medium stat-change">+18.2% from last month</div>
       </div>
 
-      <div class="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-lg transition">
+      <div class="stat-card">
         <div class="flex justify-between items-center mb-3">
-          <span class="text-xs text-gray-600 font-medium">Total Patients</span>
+          <span class="text-xs font-medium stat-label">Total Patients</span>
           <span class="text-xl">👥</span>
         </div>
-        <div class="text-2xl font-bold text-gray-900">892</div>
-        <div class="text-xs text-green-600 font-medium">+23.1% from last month</div>
+        <div class="text-2xl font-bold stat-value">892</div>
+        <div class="text-xs font-medium stat-change">+23.1% from last month</div>
       </div>
 
-      <div class="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-lg transition">
+      <div class="stat-card">
         <div class="flex justify-between items-center mb-3">
-          <span class="text-xs text-gray-600 font-medium">Revenue</span>
+          <span class="text-xs font-medium stat-label">Revenue</span>
           <span class="text-xl">💵</span>
         </div>
-        <div class="text-2xl font-bold text-gray-900">$48,392</div>
-        <div class="text-xs text-green-600 font-medium">+23.1% from last month</div>
+        <div class="text-2xl font-bold stat-value">$48,392</div>
+        <div class="text-xs font-medium stat-change">+23.1% from last month</div>
       </div>
 
-      <div class="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-lg transition">
+      <div class="stat-card">
         <div class="flex justify-between items-center mb-3">
-          <span class="text-xs text-gray-600 font-medium">Pending</span>
+          <span class="text-xs font-medium stat-label">Pending</span>
           <span class="text-xl">⏱️</span>
         </div>
-        <div class="text-2xl font-bold text-gray-900">24</div>
-        <div class="text-xs text-green-600 font-medium">-4.3% from last month</div>
+        <div class="text-2xl font-bold stat-value">24</div>
+        <div class="text-xs font-medium stat-change">-4.3% from last month</div>
       </div>
 
-      <div class="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-lg transition">
+      <div class="stat-card">
         <div class="flex justify-between items-center mb-3">
-          <span class="text-xs text-gray-600 font-medium">Completed Today</span>
+          <span class="text-xs font-medium stat-label">Completed Today</span>
           <span class="text-xl">✅</span>
         </div>
-        <div class="text-2xl font-bold text-gray-900">18</div>
-        <div class="text-xs text-green-600 font-medium">+6.1% from last month</div>
+        <div class="text-2xl font-bold stat-value">18</div>
+        <div class="text-xs font-medium stat-change">+6.1% from last month</div>
       </div>
 
-      <div class="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-lg transition">
+      <div class="stat-card">
         <div class="flex justify-between items-center mb-3">
-          <span class="text-xs text-gray-600 font-medium">Avg. Wait Time</span>
+          <span class="text-xs font-medium stat-label">Avg. Wait Time</span>
           <span class="text-xl">📈</span>
         </div>
-        <div class="text-2xl font-bold text-gray-900">12 min</div>
-        <div class="text-xs text-green-600 font-medium">-2.4% from last month</div>
+        <div class="text-2xl font-bold stat-value">12 min</div>
+        <div class="text-xs font-medium stat-change">-2.4% from last month</div>
       </div>
     </div>
 
     <!-- Charts Grid -->
     <div class="grid grid-cols-2 gap-6 mb-6">
-      <div class="bg-white border border-gray-200 rounded-lg p-6">
+      <div class="dash-card p-6">
         <div class="mb-6">
-          <h3 class="text-lg font-bold text-gray-900">Appointments Overview</h3>
-          <p class="text-sm text-gray-600">Monthly appointment trends</p>
+          <h3 class="text-lg font-bold">Appointments Overview</h3>
+          <p class="text-sm">Monthly appointment trends</p>
         </div>
         <div class="h-48 flex items-end justify-center gap-3">
-          <div class="w-8 bg-gray-300 rounded" style="height: 60%"></div>
-          <div class="w-8 bg-gray-300 rounded" style="height: 75%"></div>
-          <div class="w-8 bg-gray-300 rounded" style="height: 85%"></div>
-          <div class="w-8 bg-gray-300 rounded" style="height: 90%"></div>
-          <div class="w-8 bg-gray-300 rounded" style="height: 95%"></div>
-          <div class="w-8 bg-gray-300 rounded" style="height: 100%"></div>
+          <div class="w-8 chart-bar" style="height: 60%"></div>
+          <div class="w-8 chart-bar" style="height: 75%"></div>
+          <div class="w-8 chart-bar" style="height: 85%"></div>
+          <div class="w-8 chart-bar" style="height: 90%"></div>
+          <div class="w-8 chart-bar" style="height: 95%"></div>
+          <div class="w-8 chart-bar" style="height: 100%"></div>
         </div>
       </div>
 
-      <div class="bg-white border border-gray-200 rounded-lg p-6">
+      <div class="dash-card p-6">
         <div class="mb-6">
-          <h3 class="text-lg font-bold text-gray-900">Doctor Schedule</h3>
-          <p class="text-sm text-gray-600">Today's on-duty doctors</p>
+          <h3 class="text-lg font-bold">Doctor Schedule</h3>
+          <p class="text-sm">Today's on-duty doctors</p>
         </div>
         <div class="space-y-4">
-          <div class="flex items-start gap-4 pb-4 border-b border-gray-200">
+          <div class="flex items-start gap-4 pb-4 border-b dash-border">
             <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center text-sm font-bold text-green-600">MI</div>
             <div class="flex-1">
-              <div class="font-semibold text-gray-900">Dr. Michael Chen</div>
-              <div class="text-xs text-gray-600">Cardiology</div>
-              <div class="text-xs text-gray-600">08:00 AM - 04:00 PM</div>
+              <div class="font-semibold">Dr. Michael Chen</div>
+              <div class="text-xs">Cardiology</div>
+              <div class="text-xs">08:00 AM - 04:00 PM</div>
             </div>
             <div class="text-right">
               <span class="inline-block px-2 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-full">Active</span>
-              <div class="text-xs text-gray-600 mt-2">12 patients</div>
+              <div class="text-xs mt-2">12 patients</div>
             </div>
           </div>
 
-          <div class="flex items-start gap-4 pb-4 border-b border-gray-200">
+          <div class="flex items-start gap-4 pb-4 border-b dash-border">
             <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center text-sm font-bold text-green-600">EM</div>
             <div class="flex-1">
-              <div class="font-semibold text-gray-900">Dr. Emily Rodriguez</div>
-              <div class="text-xs text-gray-600">Pediatrics</div>
-              <div class="text-xs text-gray-600">09:00 AM - 05:00 PM</div>
+              <div class="font-semibold">Dr. Emily Rodriguez</div>
+              <div class="text-xs">Pediatrics</div>
+              <div class="text-xs">09:00 AM - 05:00 PM</div>
             </div>
             <div class="text-right">
               <span class="inline-block px-2 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-full">Active</span>
-              <div class="text-xs text-gray-600 mt-2">15 patients</div>
+              <div class="text-xs mt-2">15 patients</div>
             </div>
           </div>
 
-          <div class="flex items-start gap-4 pb-4 border-b border-gray-200">
+          <div class="flex items-start gap-4 pb-4 border-b dash-border">
             <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center text-sm font-bold text-green-600">SA</div>
             <div class="flex-1">
-              <div class="font-semibold text-gray-900">Dr. Sarah Thompson</div>
-              <div class="text-xs text-gray-600">Orthopedics</div>
-              <div class="text-xs text-gray-600">10:00 AM - 06:00 PM</div>
+              <div class="font-semibold">Dr. Sarah Thompson</div>
+              <div class="text-xs">Orthopedics</div>
+              <div class="text-xs">10:00 AM - 06:00 PM</div>
             </div>
             <div class="text-right">
               <span class="inline-block px-2 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-full">Active</span>
-              <div class="text-xs text-gray-600 mt-2">8 patients</div>
+              <div class="text-xs mt-2">8 patients</div>
             </div>
           </div>
 
           <div class="flex items-start gap-4">
             <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center text-sm font-bold text-green-600">JA</div>
             <div class="flex-1">
-              <div class="font-semibold text-gray-900">Dr. James Wilson</div>
-              <div class="text-xs text-gray-600">Dermatology</div>
-              <div class="text-xs text-gray-600">01:00 PM - 09:00 PM</div>
+              <div class="font-semibold">Dr. James Wilson</div>
+              <div class="text-xs">Dermatology</div>
+              <div class="text-xs">01:00 PM - 09:00 PM</div>
             </div>
             <div class="text-right">
               <span class="inline-block px-2 py-1 text-xs font-semibold text-orange-700 bg-orange-100 rounded-full">Scheduled</span>
-              <div class="text-xs text-gray-600 mt-2">10 patients</div>
+              <div class="text-xs mt-2">10 patients</div>
             </div>
           </div>
         </div>
@@ -140,24 +135,24 @@
     </div>
 
     <!-- Appointments List -->
-    <div class="bg-white border border-gray-200 rounded-lg p-6">
+    <div class="dash-card p-6">
       <div class="flex justify-between items-center mb-6">
         <div>
-          <h3 class="text-lg font-bold text-gray-900">Today's Appointments</h3>
-          <p class="text-sm text-gray-600">5 appointments scheduled</p>
+          <h3 class="text-lg font-bold">Today's Appointments</h3>
+          <p class="text-sm">5 appointments scheduled</p>
         </div>
           <div class="flex items-center gap-3">
-            <a href="#" class="text-sm font-medium text-gray-700 hover:text-gray-900">View Calendar</a>
+            <a href="#" class="text-sm font-medium">View Calendar</a>
             <button class="px-3 py-2 bg-green-600 text-white rounded-md" (click)="openNewAppointment()">New Appointment</button>
           </div>
       </div>
 
       <div class="space-y-4">
-        <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-green-500">
+        <div class="list-item">
           <div class="flex-1">
-            <div class="font-semibold text-gray-900">Sarah Johnson</div>
-            <div class="text-sm text-gray-600">Annual Checkup</div>
-            <div class="flex gap-2 text-xs text-gray-600 mt-1">
+            <div class="font-semibold">Sarah Johnson</div>
+            <div class="text-sm">Annual Checkup</div>
+            <div class="flex gap-2 text-xs mt-1">
               <span>📍 In-Person</span>
               <span>•</span>
               <span>Dr. Michael Chen</span>
@@ -165,17 +160,17 @@
           </div>
           <span class="px-2 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-full">confirmed</span>
           <div class="text-right ml-6">
-            <div class="font-semibold text-gray-900">09:00 AM</div>
-            <div class="text-xs text-gray-600">Today</div>
+            <div class="font-semibold">09:00 AM</div>
+            <div class="text-xs">Today</div>
           </div>
           <button class="ml-4 text-gray-400 hover:text-gray-600">⋮</button>
         </div>
 
-        <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-green-500">
+        <div class="list-item">
           <div class="flex-1">
-            <div class="font-semibold text-gray-900">James Wilson</div>
-            <div class="text-sm text-gray-600">Follow-up Consultation</div>
-            <div class="flex gap-2 text-xs text-gray-600 mt-1">
+            <div class="font-semibold">James Wilson</div>
+            <div class="text-sm">Follow-up Consultation</div>
+            <div class="flex gap-2 text-xs mt-1">
               <span>📹 Video Call</span>
               <span>•</span>
               <span>Dr. Emily Rodriguez</span>
@@ -183,17 +178,17 @@
           </div>
           <span class="px-2 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-full">confirmed</span>
           <div class="text-right ml-6">
-            <div class="font-semibold text-gray-900">10:30 AM</div>
-            <div class="text-xs text-gray-600">Today</div>
+            <div class="font-semibold">10:30 AM</div>
+            <div class="text-xs">Today</div>
           </div>
           <button class="ml-4 text-gray-400 hover:text-gray-600">⋮</button>
         </div>
 
-        <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-green-500">
+        <div class="list-item">
           <div class="flex-1">
-            <div class="font-semibold text-gray-900">Maria Garcia</div>
-            <div class="text-sm text-gray-600">Lab Results Review</div>
-            <div class="flex gap-2 text-xs text-gray-600 mt-1">
+            <div class="font-semibold">Maria Garcia</div>
+            <div class="text-sm">Lab Results Review</div>
+            <div class="flex gap-2 text-xs mt-1">
               <span>📍 In-Person</span>
               <span>•</span>
               <span>Dr. Michael Chen</span>
@@ -201,17 +196,17 @@
           </div>
           <span class="px-2 py-1 text-xs font-semibold text-orange-700 bg-orange-100 rounded-full">pending</span>
           <div class="text-right ml-6">
-            <div class="font-semibold text-gray-900">11:00 AM</div>
-            <div class="text-xs text-gray-600">Today</div>
+            <div class="font-semibold">11:00 AM</div>
+            <div class="text-xs">Today</div>
           </div>
           <button class="ml-4 text-gray-400 hover:text-gray-600">⋮</button>
         </div>
 
-        <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-green-500">
+        <div class="list-item">
           <div class="flex-1">
-            <div class="font-semibold text-gray-900">Robert Brown</div>
-            <div class="text-sm text-gray-600">Physical Therapy</div>
-            <div class="flex gap-2 text-xs text-gray-600 mt-1">
+            <div class="font-semibold">Robert Brown</div>
+            <div class="text-sm">Physical Therapy</div>
+            <div class="flex gap-2 text-xs mt-1">
               <span>📍 In-Person</span>
               <span>•</span>
               <span>Dr. Sarah Thompson</span>
@@ -219,17 +214,17 @@
           </div>
           <span class="px-2 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-full">confirmed</span>
           <div class="text-right ml-6">
-            <div class="font-semibold text-gray-900">02:00 PM</div>
-            <div class="text-xs text-gray-600">Today</div>
+            <div class="font-semibold">02:00 PM</div>
+            <div class="text-xs">Today</div>
           </div>
           <button class="ml-4 text-gray-400 hover:text-gray-600">⋮</button>
         </div>
 
-        <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-green-500">
+        <div class="list-item">
           <div class="flex-1">
-            <div class="font-semibold text-gray-900">Lisa Anderson</div>
-            <div class="text-sm text-gray-600">Prescription Renewal</div>
-            <div class="flex gap-2 text-xs text-gray-600 mt-1">
+            <div class="font-semibold">Lisa Anderson</div>
+            <div class="text-sm">Prescription Renewal</div>
+            <div class="flex gap-2 text-xs mt-1">
               <span>📹 Video Call</span>
               <span>•</span>
               <span>Dr. Emily Rodriguez</span>
@@ -237,8 +232,8 @@
           </div>
           <span class="px-2 py-1 text-xs font-semibold text-blue-700 bg-blue-100 rounded-full">completed</span>
           <div class="text-right ml-6">
-            <div class="font-semibold text-gray-900">03:30 PM</div>
-            <div class="text-xs text-gray-600">Today</div>
+            <div class="font-semibold">03:30 PM</div>
+            <div class="text-xs">Today</div>
           </div>
           <button class="ml-4 text-gray-400 hover:text-gray-600">⋮</button>
         </div>
@@ -247,7 +242,7 @@
 
     <!-- New Appointment Modal -->
     <div *ngIf="showNewAppointment()" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <div class="bg-white rounded-lg w-full max-w-2xl p-6">
+      <div class="modal-card w-full max-w-2xl p-6">
         <div class="flex justify-between items-center mb-4">
           <h3 class="text-lg font-semibold">New Appointment</h3>
           <button class="text-gray-500" (click)="closeNewAppointment()">✕</button>
@@ -299,4 +294,4 @@
       </div>
     </div>
   </div>
-</div>
+</app-admin-shell>

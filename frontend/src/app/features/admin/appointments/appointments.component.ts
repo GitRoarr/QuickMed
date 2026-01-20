@@ -1,12 +1,11 @@
 import { Component, OnInit, OnDestroy, signal, inject, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { SidebarComponent } from '../shared/sidebar';
-import { HeaderComponent } from '../shared/header';
+import { AdminShellComponent } from '../shared/admin-shell';
+import { SidebarComponent } from '../shared/sidebar/sidebar.component';
 import { NgbModal, NgbModalModule } from '@ng-bootstrap/ng-bootstrap';
 import { AdminService, Appointment, User } from '../../../core/services/admin.service';
 import { AppointmentStatus } from '../../../core/models/appointment.model';
-import { AdminThemeService } from '../../../core/services/admin-theme.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { Notification } from '../../../core/models/notification.model';
 import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
@@ -14,20 +13,11 @@ import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
 @Component({
   selector: 'app-appointments',
   standalone: true,
-  imports: [CommonModule, FormsModule, SidebarComponent, HeaderComponent, NgbModalModule],
+  imports: [CommonModule, FormsModule, AdminShellComponent, SidebarComponent, NgbModalModule],
   templateUrl: './appointments.component.html',
   styleUrls: ['./appointments.component.css']
 })
 export class AppointmentsComponent implements OnInit {
-  menuItems = [
-    { label: 'Overview', icon: 'grid', route: '/admin/overview' },
-    { label: 'Appointments', icon: 'calendar', route: '/admin/appointments' },
-    { label: 'Patients', icon: 'people', route: '/admin/patients' },
-    { label: 'Doctors', icon: 'stethoscope', route: '/admin/doctors' },
-    { label: 'User Management', icon: 'person-gear', route: '/admin/users' },
-    { label: 'Analytics', icon: 'bar-chart', route: '/admin/analytics' },
-    { label: 'Settings', icon: 'gear', route: '/admin/settings' }
-  ];
 
   appointments = signal<Appointment[]>([]);
   filteredAppointments = signal<Appointment[]>([]);
@@ -40,6 +30,18 @@ export class AppointmentsComponent implements OnInit {
   viewMode = signal<'list' | 'calendar'>('list');
   totalAppointments = signal(0);
   
+  // Sidebar menu items (for app-sidebar usage in template)
+  menuItems: { label: string; icon: string; route: string }[] = [
+    { label: 'Overview', icon: 'bi-grid', route: '/admin/overview' },
+    { label: 'Appointments', icon: 'bi-calendar', route: '/admin/appointments' },
+    { label: 'Patients', icon: 'bi-people', route: '/admin/patients' },
+    { label: 'Doctors', icon: 'bi-stethoscope', route: '/admin/doctors' },
+    { label: 'Receptionists', icon: 'bi-headset', route: '/admin/receptionists' },
+    { label: 'User Management', icon: 'bi-person-gear', route: '/admin/users' },
+    { label: 'Analytics', icon: 'bi-bar-chart', route: '/admin/analytics' },
+    { label: 'Settings', icon: 'bi-gear', route: '/admin/settings' },
+  ];
+  
   // Notification state
   showNotificationDropdown = signal(false);
   notifications = signal<Notification[]>([]);
@@ -48,6 +50,7 @@ export class AppointmentsComponent implements OnInit {
   
   // Calendar state
   showCalendarModal = signal(false);
+  
   calendarDate = signal(new Date());
   calendarAppointments = signal<{ [key: string]: Appointment[] }>({});
   
@@ -99,7 +102,6 @@ export class AppointmentsComponent implements OnInit {
   
   alertMessage = signal<{ type: 'success' | 'error', text: string } | null>(null);
 
-  themeService = inject(AdminThemeService);
   notificationService = inject(NotificationService);
 
   constructor(
@@ -452,18 +454,17 @@ export class AppointmentsComponent implements OnInit {
   }
 
   getStatusColor(status: string): string {
-    const theme = this.themeService.currentTheme();
     switch (status) {
       case 'confirmed':
-        return theme?.statusConfirmed || '#10b981';
+        return '#16a34a'; // Green
       case 'pending':
-        return theme?.statusPending || '#f97316';
+        return '#f97316'; // Orange
       case 'completed':
-        return theme?.statusCompleted || '#3b82f6';
+        return '#3b82f6'; // Blue
       case 'cancelled':
-        return theme?.statusCancelled || '#ef4444';
+        return '#ef4444'; // Red
       default:
-        return '#6b7280';
+        return '#6b7280'; // Gray
     }
   }
 
@@ -517,11 +518,14 @@ export class AppointmentsComponent implements OnInit {
 
   onButtonHover(event: Event, isEnter: boolean): void {
     const target = event.target as HTMLElement;
-    const theme = this.themeService.currentTheme();
     if (target) {
-      target.style.backgroundColor = isEnter 
-        ? (theme?.primaryHover || '#059669')
-        : (theme?.primaryColor || '#10b981');
+      if (isEnter) {
+        target.style.opacity = '0.9';
+        target.style.transform = 'translateY(-1px)';
+      } else {
+        target.style.opacity = '1';
+        target.style.transform = 'translateY(0)';
+      }
     }
   }
 

@@ -2,8 +2,7 @@ import { Component, OnInit, signal } from "@angular/core"
 import { Router } from "@angular/router"
 import { CommonModule } from "@angular/common"
 import { FormBuilder, FormGroup, ReactiveFormsModule } from "@angular/forms"
-import { SidebarComponent } from "../shared/sidebar"
-import { HeaderComponent } from "../shared/header"
+import { AdminShellComponent } from "../shared/admin-shell"
 
 import {
   AdminService,
@@ -14,7 +13,7 @@ import {
 @Component({
   selector: "app-admin-doctors",
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, SidebarComponent, HeaderComponent],
+  imports: [CommonModule, ReactiveFormsModule, AdminShellComponent],
   templateUrl: "./admin-doctors.component.html",
   styleUrls: ["./admin-doctors.component.scss"],
 })
@@ -29,17 +28,6 @@ export class AdminDoctorsComponent implements OnInit {
   specialties = signal<string[]>([])
   filterForm!: FormGroup
   message = signal<{ type: "success" | "error"; text: string } | null>(null)
-
-  menuItems = [
-    { label: "Overview", icon: "grid", route: "/admin/overview" },
-    { label: "Appointments", icon: "calendar", route: "/admin/appointments" },
-    { label: "Patients", icon: "people", route: "/admin/patients" },
-    { label: "Doctors", icon: "stethoscope", route: "/admin/doctors" },
-    { label: "Receptionists", icon: "headset", route: "/admin/receptionists" },
-    { label: "User Management", icon: "person-gear", route: "/admin/users" },
-    { label: "Analytics", icon: "bar-chart", route: "/admin/analytics" },
-    { label: "Settings", icon: "gear", route: "/admin/settings" },
-  ]
 
   constructor(
     private adminService: AdminService,

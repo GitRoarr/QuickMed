@@ -2,8 +2,7 @@ import { Component, OnInit, DestroyRef, inject, signal } from "@angular/core"
 import { CommonModule, DatePipe } from "@angular/common"
 import { AlertMessageComponent } from '@app/shared/components/alert-message/alert-message.component';
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop"
-import { SidebarComponent } from "../shared/sidebar"
-import { HeaderComponent } from "../shared/header"
+import { AdminShellComponent } from "../shared/admin-shell"
 import {
   AdminService,
   AdminStats,
@@ -42,7 +41,7 @@ interface AppointmentCard {
 @Component({
   selector: "app-admin-overview",
   standalone: true,
-  imports: [CommonModule, SidebarComponent, HeaderComponent, DatePipe, AlertMessageComponent],
+  imports: [CommonModule, AdminShellComponent, DatePipe, AlertMessageComponent],
   templateUrl: "./overview.component.html",
   styleUrls: ["./overview.component.css"],
 })
@@ -59,16 +58,6 @@ export class OverviewComponent implements OnInit {
 
   isLoading = signal<boolean>(true)
   errorMessage = signal<string>("")
-
-  menuItems = [
-    { label: "Overview", icon: "grid", route: "/admin/overview" },
-    { label: "Appointments", icon: "calendar", route: "/admin/appointments" },
-    { label: "Patients", icon: "people", route: "/admin/patients" },
-    { label: "Doctors", icon: "stethoscope", route: "/admin/doctors" },
-    { label: "User Management", icon: "person-gear", route: "/admin/users" },
-    { label: "Analytics", icon: "bar-chart", route: "/admin/analytics" },
-    { label: "Settings", icon: "gear", route: "/admin/settings" },
-  ]
 
   ngOnInit(): void {
     this.fetchDashboard()

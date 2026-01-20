@@ -1,8 +1,7 @@
 import { Component, OnInit, OnDestroy, inject, signal, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { SidebarComponent } from '../shared/sidebar';
-import { HeaderComponent } from '../shared/header';
+import { AdminShellComponent } from '../shared/admin-shell';
 import { AdminService, User } from '@app/core/services/admin.service';
 import { AlertMessageComponent } from '@app/shared/components/alert-message/alert-message.component';
 import { NgbModal, NgbModalModule } from '@ng-bootstrap/ng-bootstrap';
@@ -12,7 +11,7 @@ import { firstValueFrom } from 'rxjs';
 @Component({
   selector: 'app-user-management',
   standalone: true,
-  imports: [CommonModule, FormsModule, SidebarComponent, HeaderComponent, AlertMessageComponent, NgbModalModule],
+  imports: [CommonModule, FormsModule, AdminShellComponent, AlertMessageComponent, NgbModalModule],
   templateUrl: './user-management.component.html',
   styleUrls: ['./user-management.component.css']
 })

@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input, inject } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
-import { AdminThemeService } from '../../../../core/services/admin-theme.service';
+import { ThemeService } from '@core/services/theme.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -13,7 +13,7 @@ import { AdminThemeService } from '../../../../core/services/admin-theme.service
 export class SidebarComponent {
   @Input() title: string = '';
   @Input() menuItems: { label: string; icon: string; route: string }[] = [];
-  themeService = inject(AdminThemeService);
+  themeService = inject(ThemeService);
 
   constructor(private router: Router) {}
 

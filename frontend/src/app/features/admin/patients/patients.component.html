@@ -1,33 +1,24 @@
-<app-sidebar title="QuickMed Admin Portal" [menuItems]="menuItems"></app-sidebar>
+<app-admin-shell searchPlaceholder="Search patients by name or ID...">
+  <div class="admin-page-content patients-page">
+    <div class="patients-header">
+      <div class="filter-pills">
+        <button class="pill-btn" (click)="changeFilter('all')" [class.active]="statusFilter === 'all'">All</button>
+        <button class="pill-btn" (click)="changeFilter('active')" [class.active]="statusFilter === 'active'">Active</button>
+        <button class="pill-btn" (click)="changeFilter('pending')" [class.active]="statusFilter === 'pending'">Pending</button>
+      </div>
+      <div class="header-actions">
+        <button class="secondary-btn" type="button" (click)="refresh()">
+          <i class="bi bi-arrow-clockwise"></i>
+          Refresh
+        </button>
+        <button class="primary-btn" type="button" (click)="toggleAddPatientForm()">
+          <i class="bi bi-person-plus-fill"></i>
+          {{ showAddPatientForm() ? "Close" : "Add New Patient" }}
+        </button>
+      </div>
+    </div>
 
-<div class="ml-60 bg-gray-50 min-h-screen">
-  <div class="bg-white border-b border-gray-200 px-8 py-5 flex flex-wrap gap-4 items-center">
-    <div class="flex-1 max-w-2xl relative">
-      <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-        <i class="bi bi-search"></i>
-      </span>
-      <input
-        type="text"
-        placeholder="Search patients by name or ID..."
-        class="w-full pl-10 pr-4 py-2.5 bg-gray-100 border border-gray-200 rounded-lg text-sm text-gray-700 placeholder-gray-500 focus:border-[#1DB954] focus:ring-[#1DB954]/30"
-        (input)="onSearch($event)"
-      />
-    </div>
-    <div class="flex items-center gap-3">
-      <button class="pill-btn" (click)="changeFilter('all')" [class.active]="statusFilter === 'all'">All</button>
-      <button class="pill-btn" (click)="changeFilter('active')" [class.active]="statusFilter === 'active'">Active</button>
-      <button class="pill-btn" (click)="changeFilter('pending')" [class.active]="statusFilter === 'pending'">Pending</button>
-    </div>
-    <div class="flex items-center gap-3">
-      <button class="ghost-btn" type="button" (click)="refresh()">Refresh</button>
-      <button class="cta-btn" type="button" (click)="toggleAddPatientForm()">
-        <i class="bi bi-person-plus-fill text-base"></i>
-        {{ showAddPatientForm() ? "Close" : "Add New Patient" }}
-      </button>
-    </div>
-  </div>
-
-  <div class="p-8 max-w-7xl">
+    <div class="patients-content">
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
       <div *ngFor="let card of summaryCards()" class="metric-card" [ngClass]="card.tone">
         <div class="text-sm text-gray-500">{{ card.label }}</div>
@@ -218,5 +209,6 @@
         </ng-template>
       </div>
     </ng-template>
+    </div>
   </div>
-</div>
+</app-admin-shell>

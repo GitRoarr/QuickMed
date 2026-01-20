@@ -1,9 +1,5 @@
-<app-sidebar title="QuickMed Admin Portal" [menuItems]="menuItems"></app-sidebar>
-
-<div class="ml-60 bg-gray-50 min-h-screen">
-  <app-header></app-header>
-
-  <div class="p-8 max-w-7xl">
+<app-admin-shell searchPlaceholder="Search users by name, email, or role...">
+  <div class="admin-page-content user-management-page">
     <!-- Alert Message -->
     <app-alert-message 
       *ngIf="userMessage()" 
@@ -12,7 +8,7 @@
     </app-alert-message>
 
     <div class="flex items-center justify-between mb-6">
-      <h2 class="text-2xl font-bold text-gray-900">User Management</h2>
+      <h2 class="text-2xl font-bold">User Management</h2>
       <div class="flex gap-3">
         <button 
           (click)="exportUsers()"
@@ -31,38 +27,38 @@
 
     <!-- Stats Cards -->
     <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 mb-8">
-      <div class="bg-white border border-gray-200 rounded-lg p-4">
+      <div class="bg-white border border-gray-200 rounded-lg p-4 um-stat-card">
         <div class="text-xs text-gray-600 font-medium mb-2">Total Users</div>
-        <div class="text-2xl font-bold text-gray-900">{{ totalUsers() }}</div>
+        <div class="text-2xl font-bold">{{ totalUsers() }}</div>
       </div>
-      <div class="bg-white border border-gray-200 rounded-lg p-4">
+      <div class="bg-white border border-gray-200 rounded-lg p-4 um-stat-card">
         <div class="text-xs text-gray-600 font-medium mb-2">Patients</div>
         <div class="text-2xl font-bold text-blue-600">{{ totalPatients() }}</div>
       </div>
-      <div class="bg-white border border-gray-200 rounded-lg p-4">
+      <div class="bg-white border border-gray-200 rounded-lg p-4 um-stat-card">
         <div class="text-xs text-gray-600 font-medium mb-2">Doctors</div>
         <div class="text-2xl font-bold text-green-600">{{ totalDoctors() }}</div>
       </div>
-      <div class="bg-white border border-gray-200 rounded-lg p-4">
+      <div class="bg-white border border-gray-200 rounded-lg p-4 um-stat-card">
         <div class="text-xs text-gray-600 font-medium mb-2">Admins</div>
         <div class="text-2xl font-bold text-purple-600">{{ totalAdmins() }}</div>
       </div>
-      <div class="bg-white border border-gray-200 rounded-lg p-4">
+      <div class="bg-white border border-gray-200 rounded-lg p-4 um-stat-card">
         <div class="text-xs text-gray-600 font-medium mb-2">Receptionists</div>
         <div class="text-2xl font-bold text-gray-600">{{ totalReceptionists() }}</div>
       </div>
-      <div class="bg-white border border-gray-200 rounded-lg p-4">
+      <div class="bg-white border border-gray-200 rounded-lg p-4 um-stat-card">
         <div class="text-xs text-gray-600 font-medium mb-2">Active</div>
         <div class="text-2xl font-bold text-green-600">{{ activeUsers() }}</div>
       </div>
-      <div class="bg-white border border-gray-200 rounded-lg p-4">
+      <div class="bg-white border border-gray-200 rounded-lg p-4 um-stat-card">
         <div class="text-xs text-gray-600 font-medium mb-2">Inactive</div>
         <div class="text-2xl font-bold text-orange-600">{{ inactiveUsers() }}</div>
       </div>
     </div>
 
     <!-- Search and Filters -->
-    <div class="bg-white border border-gray-200 rounded-lg p-4 mb-6">
+    <div class="bg-white border border-gray-200 rounded-lg p-4 mb-6 um-card">
       <div class="flex flex-col md:flex-row items-center gap-4">
         <div class="flex-1 w-full">
           <input 
@@ -125,7 +121,7 @@
     </div>
 
     <!-- Users List -->
-    <div class="bg-white border border-gray-200 rounded-lg p-6">
+    <div class="bg-white border border-gray-200 rounded-lg p-6 um-card">
       <!-- Loading State -->
       <div *ngIf="isLoading()" class="text-center py-8">
         <p class="text-gray-500">Loading users...</p>
@@ -146,7 +142,7 @@
         <!-- User Items -->
         <div 
           *ngFor="let user of filteredUsers()" 
-          class="flex items-start gap-4 p-4 border border-gray-200 rounded-lg hover:border-green-500 hover:shadow-md transition">
+          class="flex items-start gap-4 p-4 border border-gray-200 rounded-lg hover:border-green-500 hover:shadow-md transition user-item">
           <input 
             type="checkbox"
             [checked]="selectedUsers().has(user.id)"
@@ -258,7 +254,6 @@
       </div>
     </div>
   </div>
-</div>
 
 <!-- Create User Modal -->
 <ng-template #createModal let-modal>
@@ -489,3 +484,4 @@
     </button>
   </div>
 </ng-template>
+</app-admin-shell>

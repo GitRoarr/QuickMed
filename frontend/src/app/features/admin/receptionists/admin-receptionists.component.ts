@@ -1,14 +1,13 @@
 import { Component, OnInit, signal } from "@angular/core"
 import { CommonModule } from "@angular/common"
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from "@angular/forms"
-import { SidebarComponent } from "../shared/sidebar"
-import { HeaderComponent } from "../shared/header"
+import { AdminShellComponent } from "../shared/admin-shell"
 import { AdminService, User } from "@app/core/services/admin.service"
 
 @Component({
   selector: "app-admin-receptionists",
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, SidebarComponent, HeaderComponent],
+  imports: [CommonModule, ReactiveFormsModule, AdminShellComponent],
   templateUrl: "./admin-receptionists.component.html",
   styleUrls: ["./admin-receptionists.component.scss"],
 })
@@ -18,17 +17,6 @@ export class AdminReceptionistsComponent implements OnInit {
   filterForm!: FormGroup
   inviteForm!: FormGroup
   message = signal<{ type: "success" | "error"; text: string } | null>(null)
-
-  menuItems = [
-    { label: "Overview", icon: "grid", route: "/admin/overview" },
-    { label: "Appointments", icon: "calendar", route: "/admin/appointments" },
-    { label: "Patients", icon: "people", route: "/admin/patients" },
-    { label: "Doctors", icon: "stethoscope", route: "/admin/doctors" },
-    { label: "Receptionists", icon: "headset", route: "/admin/receptionists" },
-    { label: "User Management", icon: "person-gear", route: "/admin/users" },
-    { label: "Analytics", icon: "bar-chart", route: "/admin/analytics" },
-    { label: "Settings", icon: "gear", route: "/admin/settings" },
-  ]
 
   constructor(private adminService: AdminService, private fb: FormBuilder) {}
 

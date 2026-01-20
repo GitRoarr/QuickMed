@@ -3,7 +3,7 @@
     <div class="admin-shell__brand" (click)="navigate('/')" title="Back to Home">
       <div class="brand-container">
         <div class="brand-icon">
-          <img src="assets/images/QuickMed-Logo.png" alt="QuickMed Logo" />
+          <img [src]="themeService.isDarkMode() ? brandIconDarkUrl : brandIconLightUrl" alt="QuickMed Logo" />
         </div>
         <div class="brand-text">
           <p class="brand-title">QuickMed</p>
@@ -21,7 +21,12 @@
         [routerLinkActiveOptions]="{ exact: item.exact !== false }"
         (click)="closeSidebar()"
       >
-        <i class="bi" [ngClass]="item.icon"></i>
+        <ng-container *ngIf="item.iconImgLight || item.iconImgDark; else iconClass">
+          <img class="nav-icon-img" [src]="themeService.isDarkMode() ? item.iconImgDark : item.iconImgLight" [alt]="item.label + ' icon'" />
+        </ng-container>
+        <ng-template #iconClass>
+          <i class="bi" [ngClass]="item.icon"></i>
+        </ng-template>
         <span>{{ item.label }}</span>
       </a>
     </nav>

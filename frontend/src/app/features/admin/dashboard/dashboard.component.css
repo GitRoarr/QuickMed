@@ -1,30 +1,203 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* Dashboard Page - Theming */
+:host {
+  --admin-bg: #ffffff;
+  --admin-fg: #111111;
+  --admin-surface: #ffffff;
+  --admin-border: #e5e7eb;
+  --admin-muted: #6b7280;
+  --admin-primary: #16a34a;
+  --admin-primary-light: #d1fae5;
+  --admin-primary-dark: #15803d;
+  --admin-shadow: rgba(0, 0, 0, 0.1);
+}
 
-/* New Appointment modal styles */
+/* Force black sections/cards in dark theme */
+:host-context(.admin-shell.dark) {
+  --admin-bg: #000000;
+  --admin-fg: #ffffff;
+  --admin-surface: #000000;
+  --admin-border: #1f2937;
+  --admin-muted: #b3b3b3;
+  --admin-shadow: rgba(0, 0, 0, 0.7);
+}
+
+.dashboard-page {
+  padding: 0;
+}
+
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.stat-card {
+  background: var(--admin-surface);
+  border: 1px solid var(--admin-border);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 15px var(--admin-shadow);
+  animation: cardGlow 6s ease-in-out infinite;
+}
+
+.stat-card:hover {
+  border-color: var(--admin-primary);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px rgba(22, 163, 74, 0.2);
+}
+
+.stat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.stat-label {
+  font-size: 0.875rem;
+  color: var(--admin-muted);
+  font-weight: 500;
+}
+
+.stat-icon {
+  font-size: 1.5rem;
+  opacity: 0.7;
+}
+
+.stat-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--admin-fg);
+  margin: 0.5rem 0;
+}
+
+.stat-change {
+  font-size: 0.75rem;
+  color: var(--admin-primary);
+  font-weight: 600;
+}
+
+/* Dashboard cards and list items */
+.dash-card {
+  background: var(--admin-surface);
+  border: 1px solid var(--admin-border);
+  border-radius: 1rem;
+  box-shadow: 0 4px 15px var(--admin-shadow);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  animation: cardGlow 6s ease-in-out infinite;
+}
+
+.dash-card:hover { border-color: var(--admin-primary); }
+
+.list-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--admin-border);
+  background: var(--admin-surface);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.list-item:hover { border-color: var(--admin-primary); box-shadow: 0 6px 18px rgba(22,163,74,0.15); }
+
+.chart-bar {
+  background: rgba(156, 163, 175, 0.4);
+  border-radius: 0.5rem;
+}
+
+.dash-border { border-color: var(--admin-border); }
+
+@keyframes cardGlow {
+  0%, 100% { box-shadow: 0 4px 15px var(--admin-shadow); }
+  50% { box-shadow: 0 0 24px rgba(22, 163, 74, 0.18); }
+}
+
+/* Dark theme utility overrides */
+:host-context(.admin-shell.dark) .text-gray-900,
+:host-context(.admin-shell.dark) .text-gray-700 { color: var(--admin-fg) !important; }
+:host-context(.admin-shell.dark) .text-gray-600,
+:host-context(.admin-shell.dark) .text-gray-500 { color: var(--admin-muted) !important; }
+:host-context(.admin-shell.dark) .bg-white { background: var(--admin-surface) !important; }
+:host-context(.admin-shell.dark) .border-gray-200,
+:host-context(.admin-shell.dark) .border-gray-300 { border-color: var(--admin-border) !important; }
+
 .modal-overlay {
-	position: fixed;
-	inset: 0;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	background: rgba(0,0,0,0.45);
-	z-index: 60;
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 60;
+  backdrop-filter: blur(4px);
 }
 
 .modal-card {
-	background: white;
-	border-radius: 10px;
-	padding: 1.25rem;
-	width: 100%;
-	max-width: 900px;
+  background: var(--admin-surface);
+  border: 1px solid var(--admin-border);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  width: 100%;
+  max-width: 900px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px var(--admin-shadow);
 }
 
 .btn-new-appointment {
-	background: #16a34a;
-	color: white;
-	padding: 0.5rem 0.9rem;
-	border-radius: 6px;
-	font-weight: 600;
+  background: var(--admin-primary);
+  color: white;
+  padding: 0.625rem 1.25rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.25);
+}
+
+.btn-new-appointment:hover {
+  background: var(--admin-primary-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(22, 163, 74, 0.35);
+}
+
+/* Form inputs in modal */
+.modal-card input,
+.modal-card select,
+.modal-card textarea {
+  width: 100%;
+  padding: 0.625rem 0.75rem;
+  border: 1px solid var(--admin-border);
+  border-radius: 0.5rem;
+  background: var(--admin-bg);
+  color: var(--admin-fg);
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+}
+
+.modal-card input:focus,
+.modal-card select:focus,
+.modal-card textarea:focus {
+  outline: none;
+  border-color: var(--admin-primary);
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.1);
+}
+
+.modal-card label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--admin-fg);
+  margin-bottom: 0.5rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .stat-grid {
+    grid-template-columns: 1fr;
+  }
 }
