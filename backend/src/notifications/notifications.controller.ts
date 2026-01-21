@@ -11,6 +11,7 @@ import {
   HttpStatus,
   HttpCode,
   Request,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import { NotificationsService } from './notifications.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -45,51 +46,6 @@ export class NotificationsController {
     );
   }
 
-  @Get(':id')
-  async findOne(@Param('id') id: string) {
-    return await this.notificationsService.findOne(id);
-  }
-
-  @Post()
-  @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN) // Fixed: Changed from 'admin' to UserRole.ADMIN
-  @HttpCode(HttpStatus.CREATED)
-  async create(@Body() createNotificationDto: CreateNotificationDto) {
-    return await this.notificationsService.create(createNotificationDto);
-  }
-
-  @Put(':id')
-  async update(
-    @Param('id') id: string,
-    @Body() updateNotificationDto: UpdateNotificationDto,
-  ) {
-    return await this.notificationsService.update(id, updateNotificationDto);
-  }
-
-  @Delete(':id')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  async remove(@Param('id') id: string) {
-    await this.notificationsService.remove(id);
-  }
-
-  @Put(':id/read')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  async markAsRead(@Param('id') id: string) {
-    await this.notificationsService.markAsRead(id);
-  }
-
-  @Put('read-all')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  async markAllAsRead(@Request() req) {
-    await this.notificationsService.markAllAsRead(req.user.id);
-  }
-
-  @Delete('delete-all')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  async deleteAll(@Request() req) {
-    await this.notificationsService.deleteAllForUser(req.user.id);
-  }
-
   @Get('stats')
   async getStats(@Request() req) {
     return await this.notificationsService.getStats(req.user.id);
@@ -118,6 +74,68 @@ export class NotificationsController {
       req.user.id,
       preferencesDto,
     );
+  }
+
+  @Get('templates')
+  async getTemplates() {
+    return await this.notificationsService.getTemplates();
+  }
+
+  @Post('templates')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN) // Fixed: Changed from 'admin' to UserRole.ADMIN
+  @HttpCode(HttpStatus.CREATED)
+  async createTemplate(@Body() createTemplateDto: CreateNotificationTemplateDto) {
+    return await this.notificationsService.createTemplate(createTemplateDto);
+  }
+
+  @Put('templates/:id')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN) // Fixed: Changed from 'admin' to UserRole.ADMIN
+  async updateTemplate(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() updateTemplateDto: UpdateNotificationTemplateDto,
+  ) {
+    return await this.notificationsService.updateTemplate(id, updateTemplateDto);
+  }
+
+  @Delete('templates/:id')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN) // Fixed: Changed from 'admin' to UserRole.ADMIN
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async deleteTemplate(@Param('id', ParseUUIDPipe) id: string) {
+    await this.notificationsService.deleteTemplate(id);
+  }
+
+  @Get('history')
+  async getHistory(
+    @Query('userId') userId?: string,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+  ) {
+    const start = startDate ? new Date(startDate) : undefined;
+    const end = endDate ? new Date(endDate) : undefined;
+    return await this.notificationsService.getHistory(userId, start, end);
+  }
+
+  @Get('analytics')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN) // Fixed: Changed from 'admin' to UserRole.ADMIN
+  async getAnalytics(
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+  ) {
+    const start = startDate ? new Date(startDate) : undefined;
+    const end = endDate ? new Date(endDate) : undefined;
+    return await this.notificationsService.getAnalytics(start, end);
+  }
+
+  @Post()
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN) // Fixed: Changed from 'admin' to UserRole.ADMIN
+  @HttpCode(HttpStatus.CREATED)
+  async create(@Body() createNotificationDto: CreateNotificationDto) {
+    return await this.notificationsService.create(createNotificationDto);
   }
 
   @Post('send')
@@ -159,58 +177,41 @@ export class NotificationsController {
     );
   }
 
-  @Get('templates')
-  async getTemplates() {
-    return await this.notificationsService.getTemplates();
-  }
-
-  @Post('templates')
-  @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN) // Fixed: Changed from 'admin' to UserRole.ADMIN
-  @HttpCode(HttpStatus.CREATED)
-  async createTemplate(@Body() createTemplateDto: CreateNotificationTemplateDto) {
-    return await this.notificationsService.createTemplate(createTemplateDto);
-  }
-
-  @Put('templates/:id')
-  @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN) // Fixed: Changed from 'admin' to UserRole.ADMIN
-  async updateTemplate(
-    @Param('id') id: string,
-    @Body() updateTemplateDto: UpdateNotificationTemplateDto,
-  ) {
-    return await this.notificationsService.updateTemplate(id, updateTemplateDto);
-  }
-
-  @Delete('templates/:id')
-  @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN) // Fixed: Changed from 'admin' to UserRole.ADMIN
+  @Put('read-all')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async deleteTemplate(@Param('id') id: string) {
-    await this.notificationsService.deleteTemplate(id);
+  async markAllAsRead(@Request() req) {
+    await this.notificationsService.markAllAsRead(req.user.id);
   }
 
-  @Get('history')
-  async getHistory(
-    @Query('userId') userId?: string,
-    @Query('startDate') startDate?: string,
-    @Query('endDate') endDate?: string,
-  ) {
-    const start = startDate ? new Date(startDate) : undefined;
-    const end = endDate ? new Date(endDate) : undefined;
-    return await this.notificationsService.getHistory(userId, start, end);
+  @Put(':id/read')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async markAsRead(@Param('id', ParseUUIDPipe) id: string) {
+    await this.notificationsService.markAsRead(id);
   }
 
-  @Get('analytics')
-  @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN) // Fixed: Changed from 'admin' to UserRole.ADMIN
-  async getAnalytics(
-    @Query('startDate') startDate?: string,
-    @Query('endDate') endDate?: string,
+  @Put(':id')
+  async update(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() updateNotificationDto: UpdateNotificationDto,
   ) {
-    const start = startDate ? new Date(startDate) : undefined;
-    const end = endDate ? new Date(endDate) : undefined;
-    return await this.notificationsService.getAnalytics(start, end);
+    return await this.notificationsService.update(id, updateNotificationDto);
+  }
+
+  @Delete('delete-all')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async deleteAll(@Request() req) {
+    await this.notificationsService.deleteAllForUser(req.user.id);
+  }
+
+  @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async remove(@Param('id', ParseUUIDPipe) id: string) {
+    await this.notificationsService.remove(id);
+  }
+
+  @Get(':id')
+  async findOne(@Param('id', ParseUUIDPipe) id: string) {
+    return await this.notificationsService.findOne(id);
   }
 
   @Post('cleanup')

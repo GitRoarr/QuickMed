@@ -133,7 +133,48 @@ body {
 
 /* Ensure dark theme exact surface color on admin cards */
 .dark :where(.stat-card, .metric-card, .settings-section, .appointments-container, .appointment-card, .patient-card, .table-card, .chart-card, .modal-card) {
-  background: #1e1e1e;
+  background: #0b0b0b; /* pure black surface in dark theme */
+  border-color: transparent;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55), 0 0 24px rgba(22, 163, 74, 0.06);
+}
+
+/* Force black backgrounds for common utility classes inside admin dark theme */
+.admin-shell.dark :where(.card,
+  .stat-card,
+  .dash-card,
+  .um-card,
+  .um-stat-card,
+  .appointment-card,
+  .table-card,
+  .chart-card,
+  .list-item,
+  .panel,
+  .section,
+  section) {
+  background-color: #0b0b0b !important;
+  border-color: transparent !important;
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.6), 0 0 24px rgba(22, 163, 74, 0.06) !important;
+}
+
+/* Override Tailwind/utility light backgrounds within admin dark theme */
+.admin-shell.dark :where(.bg-white,
+  .bg-gray-50, .bg-gray-100,
+  .bg-slate-50, .bg-slate-100,
+  .bg-zinc-50, .bg-zinc-100,
+  .bg-neutral-50, .bg-neutral-100,
+  .bg-stone-50, .bg-stone-100,
+  .bg-emerald-50) {
+  background-color: #0b0b0b !important;
+}
+
+/* Also support global dark class on root/body (outside admin-shell) */
+.dark :where(.bg-white,
+  .bg-gray-50, .bg-gray-100,
+  .bg-slate-50, .bg-slate-100,
+  .bg-zinc-50, .bg-zinc-100,
+  .bg-neutral-50, .bg-neutral-100,
+  .bg-stone-50, .bg-stone-100) {
+  background-color: #0b0b0b !important;
 }
 
 /* .sidebar */

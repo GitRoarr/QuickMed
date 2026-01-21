@@ -1,297 +1,207 @@
-<app-admin-shell searchPlaceholder="Search dashboard data...">
+<app-admin-shell searchPlaceholder="Search patients, appointments...">
   <div class="admin-page-content dashboard-page">
-    <div class="grid grid-cols-6 gap-4 mb-8">
-      <div class="stat-card">
-        <div class="flex justify-between items-center mb-3">
-          <span class="text-xs font-medium stat-label">Total Appointments</span>
-          <span class="text-xl">📅</span>
+
+    <!-- Top KPI cards - larger, cleaner, better hierarchy -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-8">
+      <div class="stat-card primary">
+        <div class="stat-header">
+          <span class="stat-label">Total Appointments</span>
+          <span class="stat-icon">📅</span>
         </div>
-        <div class="text-2xl font-bold stat-value">1,284</div>
-        <div class="text-xs font-medium stat-change">+18.2% from last month</div>
+        <div class="stat-value">0</div>
+        <div class="stat-meta">0 today • 0 this week</div>
+      </div>
+
+      <div class="stat-card primary">
+        <div class="stat-header">
+          <span class="stat-label">Total Patients</span>
+          <span class="stat-icon">👥</span>
+        </div>
+        <div class="stat-value">1</div>
+        <div class="stat-meta">3 users total</div>
+      </div>
+
+      <div class="stat-card accent">
+        <div class="stat-header">
+          <span class="stat-label">Revenue</span>
+          <span class="stat-icon">💸</span>
+        </div>
+        <div class="stat-value">$0</div>
+        <div class="stat-meta">Est $150 per consult</div>
       </div>
 
       <div class="stat-card">
-        <div class="flex justify-between items-center mb-3">
-          <span class="text-xs font-medium stat-label">Total Patients</span>
-          <span class="text-xl">👥</span>
+        <div class="stat-header">
+          <span class="stat-label">Pending Appointments</span>
+          <span class="stat-icon">⏳</span>
         </div>
-        <div class="text-2xl font-bold stat-value">892</div>
-        <div class="text-xs font-medium stat-change">+23.1% from last month</div>
+        <div class="stat-value">0</div>
+        <div class="stat-meta">0 confirmed</div>
       </div>
 
       <div class="stat-card">
-        <div class="flex justify-between items-center mb-3">
-          <span class="text-xs font-medium stat-label">Revenue</span>
-          <span class="text-xl">💵</span>
+        <div class="stat-header">
+          <span class="stat-label">Completed</span>
+          <span class="stat-icon">✓</span>
         </div>
-        <div class="text-2xl font-bold stat-value">$48,392</div>
-        <div class="text-xs font-medium stat-change">+23.1% from last month</div>
+        <div class="stat-value">0</div>
+        <div class="stat-meta">0 cancelled</div>
       </div>
 
       <div class="stat-card">
-        <div class="flex justify-between items-center mb-3">
-          <span class="text-xs font-medium stat-label">Pending</span>
-          <span class="text-xl">⏱️</span>
+        <div class="stat-header">
+          <span class="stat-label">Avg Wait Time</span>
+          <span class="stat-icon">⏱</span>
         </div>
-        <div class="text-2xl font-bold stat-value">24</div>
-        <div class="text-xs font-medium stat-change">-4.3% from last month</div>
-      </div>
-
-      <div class="stat-card">
-        <div class="flex justify-between items-center mb-3">
-          <span class="text-xs font-medium stat-label">Completed Today</span>
-          <span class="text-xl">✅</span>
-        </div>
-        <div class="text-2xl font-bold stat-value">18</div>
-        <div class="text-xs font-medium stat-change">+6.1% from last month</div>
-      </div>
-
-      <div class="stat-card">
-        <div class="flex justify-between items-center mb-3">
-          <span class="text-xs font-medium stat-label">Avg. Wait Time</span>
-          <span class="text-xl">📈</span>
-        </div>
-        <div class="text-2xl font-bold stat-value">12 min</div>
-        <div class="text-xs font-medium stat-change">-2.4% from last month</div>
+        <div class="stat-value">30 min</div>
+        <div class="stat-meta">Satisfaction 4.5/5</div>
       </div>
     </div>
 
-    <!-- Charts Grid -->
-    <div class="grid grid-cols-2 gap-6 mb-6">
-      <div class="dash-card p-6">
-        <div class="mb-6">
-          <h3 class="text-lg font-bold">Appointments Overview</h3>
-          <p class="text-sm">Monthly appointment trends</p>
+    <!-- Momentum + System Health row -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+
+      <div class="dash-card col-span-2 p-6">
+        <div class="flex items-center justify-between mb-5">
+          <div>
+            <h3 class="section-title">Appointment Momentum</h3>
+            <p class="section-subtitle">Live snapshot of today's pipeline</p>
+          </div>
+          <a href="#" class="text-sm text-emerald-400 hover:text-emerald-300 font-medium">View calendar →</a>
         </div>
-        <div class="h-48 flex items-end justify-center gap-3">
-          <div class="w-8 chart-bar" style="height: 60%"></div>
-          <div class="w-8 chart-bar" style="height: 75%"></div>
-          <div class="w-8 chart-bar" style="height: 85%"></div>
-          <div class="w-8 chart-bar" style="height: 90%"></div>
-          <div class="w-8 chart-bar" style="height: 95%"></div>
-          <div class="w-8 chart-bar" style="height: 100%"></div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
+          <div class="momentum-pill">
+            <div class="pill-value">0</div>
+            <div class="pill-label">Today</div>
+          </div>
+          <div class="momentum-pill">
+            <div class="pill-value">0</div>
+            <div class="pill-label">This Week</div>
+          </div>
+          <div class="momentum-pill">
+            <div class="pill-value">0</div>
+            <div class="pill-label">This Month</div>
+          </div>
+          <div class="momentum-pill warning">
+            <div class="pill-value">0</div>
+            <div class="pill-label">Pending</div>
+          </div>
+        </div>
+
+        <div class="mt-8 text-center text-gray-500 text-sm py-10 border border-dashed border-gray-700 rounded-xl">
+          No upcoming appointments for today.
         </div>
       </div>
 
       <div class="dash-card p-6">
-        <div class="mb-6">
-          <h3 class="text-lg font-bold">Doctor Schedule</h3>
-          <p class="text-sm">Today's on-duty doctors</p>
-        </div>
+        <h3 class="section-title mb-5">System Health</h3>
         <div class="space-y-4">
-          <div class="flex items-start gap-4 pb-4 border-b dash-border">
-            <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center text-sm font-bold text-green-600">MI</div>
-            <div class="flex-1">
-              <div class="font-semibold">Dr. Michael Chen</div>
-              <div class="text-xs">Cardiology</div>
-              <div class="text-xs">08:00 AM - 04:00 PM</div>
-            </div>
-            <div class="text-right">
-              <span class="inline-block px-2 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-full">Active</span>
-              <div class="text-xs mt-2">12 patients</div>
-            </div>
+          <div class="health-item">
+            <span class="health-label">Database</span>
+            <span class="status-dot healthy">healthy</span>
           </div>
-
-          <div class="flex items-start gap-4 pb-4 border-b dash-border">
-            <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center text-sm font-bold text-green-600">EM</div>
-            <div class="flex-1">
-              <div class="font-semibold">Dr. Emily Rodriguez</div>
-              <div class="text-xs">Pediatrics</div>
-              <div class="text-xs">09:00 AM - 05:00 PM</div>
-            </div>
-            <div class="text-right">
-              <span class="inline-block px-2 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-full">Active</span>
-              <div class="text-xs mt-2">15 patients</div>
-            </div>
+          <div class="health-item">
+            <span class="health-label">API</span>
+            <span class="status-dot healthy">healthy</span>
           </div>
-
-          <div class="flex items-start gap-4 pb-4 border-b dash-border">
-            <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center text-sm font-bold text-green-600">SA</div>
-            <div class="flex-1">
-              <div class="font-semibold">Dr. Sarah Thompson</div>
-              <div class="text-xs">Orthopedics</div>
-              <div class="text-xs">10:00 AM - 06:00 PM</div>
-            </div>
-            <div class="text-right">
-              <span class="inline-block px-2 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-full">Active</span>
-              <div class="text-xs mt-2">8 patients</div>
-            </div>
+          <div class="health-item">
+            <span class="health-label">Storage</span>
+            <span class="status-dot healthy">healthy</span>
           </div>
-
-          <div class="flex items-start gap-4">
-            <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center text-sm font-bold text-green-600">JA</div>
-            <div class="flex-1">
-              <div class="font-semibold">Dr. James Wilson</div>
-              <div class="text-xs">Dermatology</div>
-              <div class="text-xs">01:00 PM - 09:00 PM</div>
-            </div>
-            <div class="text-right">
-              <span class="inline-block px-2 py-1 text-xs font-semibold text-orange-700 bg-orange-100 rounded-full">Scheduled</span>
-              <div class="text-xs mt-2">10 patients</div>
-            </div>
+          <div class="health-item">
+            <span class="health-label">Notifications</span>
+            <span class="status-dot healthy">healthy</span>
           </div>
         </div>
       </div>
+
     </div>
 
-    <!-- Appointments List -->
-    <div class="dash-card p-6">
-      <div class="flex justify-between items-center mb-6">
-        <div>
-          <h3 class="text-lg font-bold">Today's Appointments</h3>
-          <p class="text-sm">5 appointments scheduled</p>
-        </div>
-          <div class="flex items-center gap-3">
-            <a href="#" class="text-sm font-medium">View Calendar</a>
-            <button class="px-3 py-2 bg-green-600 text-white rounded-md" (click)="openNewAppointment()">New Appointment</button>
+    <!-- Today's Appointments / Doctor Coverage section -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+      <div class="dash-card p-6 lg:col-span-2">
+        <div class="flex items-center justify-between mb-6">
+          <div>
+            <h3 class="section-title">Today's Appointments</h3>
+            <p class="section-subtitle">No appointments scheduled for today.</p>
           </div>
+          <button class="btn-primary" (click)="openNewAppointment()">New Appointment</button>
+        </div>
+        <div class="empty-state">
+          <div class="empty-icon">🗓️</div>
+          <h4 class="empty-title">No engagements today</h4>
+          <p class="empty-text">Schedule your first appointment to get started.</p>
+        </div>
       </div>
 
-      <div class="space-y-4">
-        <div class="list-item">
-          <div class="flex-1">
-            <div class="font-semibold">Sarah Johnson</div>
-            <div class="text-sm">Annual Checkup</div>
-            <div class="flex gap-2 text-xs mt-1">
-              <span>📍 In-Person</span>
-              <span>•</span>
-              <span>Dr. Michael Chen</span>
-            </div>
-          </div>
-          <span class="px-2 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-full">confirmed</span>
-          <div class="text-right ml-6">
-            <div class="font-semibold">09:00 AM</div>
-            <div class="text-xs">Today</div>
-          </div>
-          <button class="ml-4 text-gray-400 hover:text-gray-600">⋮</button>
-        </div>
-
-        <div class="list-item">
-          <div class="flex-1">
-            <div class="font-semibold">James Wilson</div>
-            <div class="text-sm">Follow-up Consultation</div>
-            <div class="flex gap-2 text-xs mt-1">
-              <span>📹 Video Call</span>
-              <span>•</span>
-              <span>Dr. Emily Rodriguez</span>
-            </div>
-          </div>
-          <span class="px-2 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-full">confirmed</span>
-          <div class="text-right ml-6">
-            <div class="font-semibold">10:30 AM</div>
-            <div class="text-xs">Today</div>
-          </div>
-          <button class="ml-4 text-gray-400 hover:text-gray-600">⋮</button>
-        </div>
-
-        <div class="list-item">
-          <div class="flex-1">
-            <div class="font-semibold">Maria Garcia</div>
-            <div class="text-sm">Lab Results Review</div>
-            <div class="flex gap-2 text-xs mt-1">
-              <span>📍 In-Person</span>
-              <span>•</span>
-              <span>Dr. Michael Chen</span>
-            </div>
-          </div>
-          <span class="px-2 py-1 text-xs font-semibold text-orange-700 bg-orange-100 rounded-full">pending</span>
-          <div class="text-right ml-6">
-            <div class="font-semibold">11:00 AM</div>
-            <div class="text-xs">Today</div>
-          </div>
-          <button class="ml-4 text-gray-400 hover:text-gray-600">⋮</button>
-        </div>
-
-        <div class="list-item">
-          <div class="flex-1">
-            <div class="font-semibold">Robert Brown</div>
-            <div class="text-sm">Physical Therapy</div>
-            <div class="flex gap-2 text-xs mt-1">
-              <span>📍 In-Person</span>
-              <span>•</span>
-              <span>Dr. Sarah Thompson</span>
-            </div>
-          </div>
-          <span class="px-2 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-full">confirmed</span>
-          <div class="text-right ml-6">
-            <div class="font-semibold">02:00 PM</div>
-            <div class="text-xs">Today</div>
-          </div>
-          <button class="ml-4 text-gray-400 hover:text-gray-600">⋮</button>
-        </div>
-
-        <div class="list-item">
-          <div class="flex-1">
-            <div class="font-semibold">Lisa Anderson</div>
-            <div class="text-sm">Prescription Renewal</div>
-            <div class="flex gap-2 text-xs mt-1">
-              <span>📹 Video Call</span>
-              <span>•</span>
-              <span>Dr. Emily Rodriguez</span>
-            </div>
-          </div>
-          <span class="px-2 py-1 text-xs font-semibold text-blue-700 bg-blue-100 rounded-full">completed</span>
-          <div class="text-right ml-6">
-            <div class="font-semibold">03:30 PM</div>
-            <div class="text-xs">Today</div>
-          </div>
-          <button class="ml-4 text-gray-400 hover:text-gray-600">⋮</button>
+      <div class="dash-card p-6">
+        <h3 class="section-title mb-5">Doctor Coverage</h3>
+        <p class="section-subtitle mb-6">Most active clinicians today</p>
+        <div class="empty-state compact">
+          <div class="empty-icon small">👨‍⚕️</div>
+          <h4 class="empty-title">No active doctors</h4>
+          <p class="empty-text">Check doctor availability</p>
         </div>
       </div>
+
     </div>
 
-    <!-- New Appointment Modal -->
-    <div *ngIf="showNewAppointment()" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <div class="modal-card w-full max-w-2xl p-6">
-        <div class="flex justify-between items-center mb-4">
-          <h3 class="text-lg font-semibold">New Appointment</h3>
-          <button class="text-gray-500" (click)="closeNewAppointment()">✕</button>
+    <!-- New Appointment Modal (improved styling only) -->
+    <div *ngIf="showNewAppointment()" class="modal-overlay">
+      <div class="modal-card">
+        <div class="flex justify-between items-center mb-6">
+          <h3 class="modal-title">New Appointment</h3>
+          <button class="modal-close" (click)="closeNewAppointment()">✕</button>
         </div>
+
         <app-alert-message *ngIf="apptAlert()" [message]="apptAlert()!.text" [type]="apptAlert()!.type" [visible]="true" [autoDismiss]="true"></app-alert-message>
 
-        <div class="grid grid-cols-2 gap-3">
-          <label>
-            Patient
-            <select class="p-2 border rounded w-full" [ngModel]="apptPatientId()" (ngModelChange)="apptPatientId.set($event)">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          <label class="form-group">
+            <span class="form-label">Patient</span>
+            <select class="form-input" [ngModel]="apptPatientId()" (ngModelChange)="apptPatientId.set($event)">
               <option value="">Select patient</option>
               <option *ngFor="let p of patients()" [value]="p.id">{{p.firstName}} {{p.lastName}} — {{p.email}}</option>
             </select>
           </label>
 
-          <label>
-            Doctor
-            <select class="p-2 border rounded w-full" [ngModel]="apptDoctorId()" (ngModelChange)="apptDoctorId.set($event)">
+          <label class="form-group">
+            <span class="form-label">Doctor</span>
+            <select class="form-input" [ngModel]="apptDoctorId()" (ngModelChange)="apptDoctorId.set($event)">
               <option value="">Select doctor</option>
               <option *ngFor="let d of doctors()" [value]="d.id">{{d.firstName}} {{d.lastName}} — {{d.specialty || 'Doctor'}}</option>
             </select>
           </label>
 
-          <label>
-            Date
-            <input type="date" class="p-2 border rounded w-full" [ngModel]="apptDate()" (ngModelChange)="apptDate.set($event)" />
+          <label class="form-group">
+            <span class="form-label">Date</span>
+            <input type="date" class="form-input" [ngModel]="apptDate()" (ngModelChange)="apptDate.set($event)" />
           </label>
 
-          <label>
-            Time
-            <input type="time" class="p-2 border rounded w-full" [ngModel]="apptTime()" (ngModelChange)="apptTime.set($event)" />
+          <label class="form-group">
+            <span class="form-label">Time</span>
+            <input type="time" class="form-input" [ngModel]="apptTime()" (ngModelChange)="apptTime.set($event)" />
           </label>
 
-          <label class="col-span-2">
-            Video consultation
-            <input type="checkbox" class="ml-2" [ngModel]="apptIsVideo()" (ngModelChange)="apptIsVideo.set($event)" />
+          <label class="form-group col-span-1 sm:col-span-2 flex items-center gap-3">
+            <input type="checkbox" class="form-checkbox" [ngModel]="apptIsVideo()" (ngModelChange)="apptIsVideo.set($event)" />
+            <span class="form-label inline">Video consultation</span>
           </label>
 
-          <label class="col-span-2">
-            Notes
-            <textarea class="p-2 border rounded w-full" rows="3" [ngModel]="apptNotes()" (ngModelChange)="apptNotes.set($event)"></textarea>
+          <label class="form-group col-span-1 sm:col-span-2">
+            <span class="form-label">Notes</span>
+            <textarea class="form-textarea" rows="3" [ngModel]="apptNotes()" (ngModelChange)="apptNotes.set($event)"></textarea>
           </label>
         </div>
 
-        <div class="mt-4 flex justify-end gap-3">
-          <button class="px-4 py-2 border rounded" (click)="closeNewAppointment()">Cancel</button>
-          <button class="px-4 py-2 bg-green-600 text-white rounded" (click)="createAppointment()">Create Appointment</button>
+        <div class="mt-8 flex justify-end gap-4">
+          <button class="btn-secondary" (click)="closeNewAppointment()">Cancel</button>
+          <button class="btn-primary" (click)="createAppointment()">Create Appointment</button>
         </div>
       </div>
     </div>
+
   </div>
 </app-admin-shell>

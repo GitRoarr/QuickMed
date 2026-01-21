@@ -13,6 +13,7 @@ import { UpdateAppointmentDto } from '../appointments/dto/update-appointment.dto
 import { UserRole, AppointmentStatus, AppointmentType } from '../common/index';
 import { AdminStatsService, AdminStats } from './admin.stats.service';
 import { DoctorsService } from '../doctors/doctors.service';
+import { ReviewsService } from '../reviews/reviews.service';
 
 export interface AdminDashboardData {
   stats: AdminStats;
@@ -40,6 +41,7 @@ export class AdminService {
     ,
     private readonly emailService?: EmailService,
     private readonly smsService?: SmsService,
+    private readonly reviewsService?: ReviewsService,
   ) {}
 
   // -------------------- Dashboard --------------------
@@ -454,6 +456,17 @@ async getSystemHealth(): Promise<{
 
     const doctors = await query.orderBy('doctor.createdAt', 'DESC').getMany();
 
+    // Fetch aggregated ratings per doctor when reviews service is available
+    let allRatings: { [doctorId: string]: { average: number; count: number } } = {};
+    if (this.reviewsService && typeof this.reviewsService.getAllDoctorRatings === 'function') {
+      try {
+        allRatings = await this.reviewsService.getAllDoctorRatings();
+      } catch (e) {
+        // non-fatal: keep ratings defaulted below
+        allRatings = {};
+      }
+    }
+
     const cards = doctors.map((doctor) => {
       const appointments = doctor.doctorAppointments || [];
       const uniquePatients = new Set(
@@ -462,8 +475,8 @@ async getSystemHealth(): Promise<{
           .filter((id) => !!id),
       );
 
-      const ratingBase = 4 + (appointments.length % 10) / 10;
-      const rating = Math.min(5, Number(ratingBase.toFixed(1)));
+      const ratingData = allRatings[doctor.id];
+      const rating = ratingData ? Math.min(5, Number(ratingData.average.toFixed(1))) : 0;
 
       const statusLabel = doctor.isActive
         ? 'active'

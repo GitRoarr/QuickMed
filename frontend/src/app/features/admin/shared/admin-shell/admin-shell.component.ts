@@ -27,23 +27,19 @@ export class AdminShellComponent implements OnInit {
   unreadNotifications = signal(0);
   currentUser = signal<any>(null);
 
-  // Sidebar brand icon per theme
   brandIconLightUrl = 'https://img.icons8.com/?size=100&id=Rv1HRKHN3ri7&format=png&color=000000';
   brandIconDarkUrl = 'https://img.icons8.com/?size=100&id=Rv1HRKHN3ri7&format=png&color=FFFFFF';
-
-  // Doctor icon (nav item) per theme
-  // Local assets for doctor icon per theme
   doctorIconLightUrl = 'assets/icons/doctor-light.png';
   doctorIconDarkUrl = 'assets/icons/doctor-dark.png';
 
-  // Shared menu items for all admin pages (supports either Bootstrap icon class or image URLs)
   menuItems: { label: string; icon?: string; iconImgLight?: string; iconImgDark?: string; route: string; exact?: boolean }[] = [
     { label: "Overview", icon: "bi-grid", route: "/admin/overview", exact: true },
     { label: "Appointments", icon: "bi-calendar", route: "/admin/appointments" },
     { label: "Patients", icon: "bi-people", route: "/admin/patients" },
     { label: "Doctors", route: "/admin/doctors", iconImgLight: this.doctorIconLightUrl, iconImgDark: this.doctorIconDarkUrl },
     { label: "Receptionists", icon: "bi-headset", route: "/admin/receptionists" },
-    { label: "User Management", icon: "bi-person-gear", route: "/admin/users" },
+    // Use a widely supported Bootstrap icon to ensure visibility
+    { label: "User Management", icon: "bi-people", route: "/admin/users" },
     { label: "Analytics", icon: "bi-bar-chart", route: "/admin/analytics" },
     { label: "Settings", icon: "bi-gear", route: "/admin/settings" },
   ];

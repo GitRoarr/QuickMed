@@ -6,7 +6,7 @@ import { AdminService } from '@app/core/services/admin.service';
 import { AppointmentService } from '@app/core/services/appointment.service';
 import { AlertMessageComponent } from '@app/shared/components/alert-message/alert-message.component';
 
-@Component({
+Component({
   selector: 'app-dashboard',
   standalone: true,
   imports: [CommonModule, FormsModule, AdminShellComponent, AlertMessageComponent],
