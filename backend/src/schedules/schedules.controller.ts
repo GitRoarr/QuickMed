@@ -7,13 +7,6 @@ import { UpdateSlotDto } from './dto/update-slot.dto';
 export class SchedulesController {
   constructor(private readonly svc: SchedulesService) {}
 
-  @UseGuards(JwtAuthGuard)
-  @Get(':date')
-  async getDay(@Req() req: any, @Param('date') date: string) {
-    const doctorId = req.user?.id ?? req.user?.sub ?? req.headers['x-doctor-id'];
-    return this.svc.getDaySchedule(doctorId, date);
-  }
-
   // Public variant for patients to request a specific doctor's schedule without relying on auth user
   @Get('public/:doctorId/:date')
   async getDayPublic(@Param('doctorId') doctorId: string, @Param('date') date: string) {
@@ -114,5 +107,13 @@ export class SchedulesController {
   async updateWorkingDays(@Req() req: any, @Body() body: { days: number[] }) {
     const doctorId = req.user?.id ?? req.user?.sub ?? req.headers['x-doctor-id'];
     return this.svc.updateDoctorWorkingDays(doctorId, body.days || []);
+  }
+
+  // Keep this catch-all day route last so it does not steal static routes like "working-days"
+  @UseGuards(JwtAuthGuard)
+  @Get(':date')
+  async getDay(@Req() req: any, @Param('date') date: string) {
+    const doctorId = req.user?.id ?? req.user?.sub ?? req.headers['x-doctor-id'];
+    return this.svc.getDaySchedule(doctorId, date);
   }
 }

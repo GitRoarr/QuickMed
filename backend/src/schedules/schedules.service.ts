@@ -48,17 +48,10 @@ export class SchedulesService {
     let sched = await this.repo.findOne({ where: { doctorId, date: dateObj } });
     const dateStr = dateObj instanceof Date ? dateObj.toISOString().split('T')[0] : String(dateObj);
 
-    // Always generate base slots from settings for working days
-    const baseSlots = await this.getDefaultSlotsFromSettings(doctorId, dateObj);
-    // If no explicit schedule is saved, use base slots only
+    // Manual-only: use stored slots and booked appointments; do not auto-generate from settings
     const storedSlots = sched?.slots || [];
     const appointmentSlots = await this.getBookedSlots(doctorId, dateObj);
-    let mergedSlots = this.mergeSlots(baseSlots, storedSlots, appointmentSlots);
-
-    // If no slots at all, and baseSlots is empty, return empty (not a working day)
-    if (!mergedSlots.length && !baseSlots.length) {
-      return { date: dateStr, slots: [] };
-    }
+    let mergedSlots = this.mergeSlots(storedSlots, appointmentSlots);
 
     // Auto-block past-time available slots
     const today = this.normalizeToDate(new Date());
@@ -431,7 +424,17 @@ export class SchedulesService {
   doctorId: string,
   days: number[],
 ): Promise<{ success: boolean; days: number[] }> {
-  const sortedDays = days.sort((a, b) => a - b);
+  if (!doctorId) {
+    throw new BadRequestException('Doctor id missing for working days update');
+  }
+
+  const safeDays = Array.isArray(days)
+    ? days
+        .map((d) => Number(d))
+        .filter((d) => Number.isInteger(d) && d >= 0 && d <= 6)
+    : [];
+
+  const sortedDays = [...safeDays].sort((a, b) => a - b);
 
   await this.settingsService.updateSettings(doctorId, {
     workingDays: sortedDays,

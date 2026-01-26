@@ -19,6 +19,7 @@ yarn-error.log
 *.launch
 .settings/
 *.sublime-workspace
+//home/girma/Desktop/QuickMed/DOCTOR_SCHEDULE_README.md
 
 # Visual Studio Code
 .vscode/*
