@@ -19,6 +19,7 @@ import { ThemeService } from '@core/services/theme.service';
     DoctorHeaderComponent
   ],
   templateUrl: './dashboard.component.html',
+  styleUrls: ['./dashboard.component.css']
 })
 export class DashboardComponent implements OnInit, OnDestroy {
   private doctorService = inject(DoctorService);

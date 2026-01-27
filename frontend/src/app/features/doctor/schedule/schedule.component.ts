@@ -20,6 +20,7 @@ import { AvailabilityTemplate } from '@core/models/availability-template.model';
 import { DailyStats } from '@core/models/doctor-analytics.model';
 import { DoctorHeaderComponent } from '../shared/doctor-header/doctor-header.component';
 
+
 @Component({
   selector: 'app-doctor-schedule',
   standalone: true,
@@ -65,7 +66,6 @@ export class ScheduleComponent implements OnInit {
   draggedSlot = signal<DoctorSlot | null>(null);
   today = new Date();
 
-  // Computed values
   weekDays = computed(() => {
     const start = this.getWeekStart(this.selectedDate());
     return Array.from({ length: 7 }, (_, i) => {
@@ -279,7 +279,6 @@ export class ScheduleComponent implements OnInit {
     this.selectDate(new Date(next.appointmentDate));
   }
 
-  // Template Management
   loadTemplates(): void {
     this.templateService.getTemplates().subscribe({
       next: templates => this.templates.set(templates),
@@ -307,7 +306,6 @@ export class ScheduleComponent implements OnInit {
     });
   }
 
-  // Analytics
   loadAnalytics(): void {
     this.analyticsService.getTodayStats().subscribe({
       next: stats => this.todayStats.set(stats),
@@ -315,7 +313,6 @@ export class ScheduleComponent implements OnInit {
     });
   }
 
-  // Drag and Drop
   onDragStart(event: DragEvent, slot: DoctorSlot): void {
     this.draggedSlot.set(slot);
     if (event.dataTransfer) {
@@ -328,7 +325,6 @@ export class ScheduleComponent implements OnInit {
     this.draggedSlot.set(null);
   }
 
-  // Empty state actions
   enableDay(): void {
     const dayOfWeek = this.selectedDate().getDay();
     if (!this.workingDays().includes(dayOfWeek)) {
@@ -354,7 +350,6 @@ export class ScheduleComponent implements OnInit {
     });
   }
 
-  // Helper methods
   hasAppointments(date: Date): boolean {
     return this.appointments().some(a =>
       new Date(a.appointmentDate).toDateString() === date.toDateString()

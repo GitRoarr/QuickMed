@@ -1,33 +1,31 @@
 :root {
-  --bg: #f4f7fb;
+  --bg: #ffffff;
   --fg: #0f172a;
   --surface: #ffffff;
   --border: #e2e8f0;
   --muted: #64748b;
-  --primary: #0ea5e9;
-  --primary-light: #e0f2fe;
-  --primary-dark: #0284c7;
-  --accent: #f97316;
+  --primary: #16a34a;
+  --primary-light: #e6f6ed;
+  --primary-dark: #15803d;
+  --accent: #f59e0b;
   --shadow: rgba(15, 23, 42, 0.08);
 }
 
 .dark {
-  --bg: #0b1220;
+  --bg: #000000;
   --fg: #e2e8f0;
   --surface: #0f172a;
   --border: #1e293b;
   --muted: #94a3b8;
-  --primary: #38bdf8;
-  --primary-light: #0b1220;
-  --primary-dark: #0ea5e9;
-  --accent: #fb923c;
-  --shadow: rgba(8, 47, 73, 0.35);
+  --primary: #22c55e;
+  --primary-light: #0f172a;
+  --primary-dark: #16a34a;
+  --accent: #f59e0b;
+  --shadow: rgba(10, 49, 24, 0.35);
 }
 
 body {
-  background: radial-gradient(circle at 20% 20%, rgba(14,165,233,0.08), transparent 35%),
-              radial-gradient(circle at 80% 0%, rgba(249,115,22,0.08), transparent 35%),
-              var(--bg);
+  background: var(--bg);
   color: var(--fg);
   font-family: 'Manrope', 'Inter', system-ui, -apple-system, BlinkMacSystemFont;
   transition: all 0.4s ease-in-out;
@@ -90,10 +88,10 @@ body {
 .qm-card.satisfaction {
   position: relative;
   overflow: hidden;
-  background: linear-gradient(135deg, #0ea5e9, #38bdf8);
+  background: linear-gradient(135deg, #16a34a, #22c55e);
   color: white;
   border: none;
-  box-shadow: 0 20px 40px rgba(14,165,233,0.35);
+  box-shadow: 0 20px 40px rgba(22, 197, 94, 0.28);
 }
 
 .satisfaction .title { color: rgba(255,255,255,0.85); }
@@ -135,7 +133,7 @@ body {
   background: linear-gradient(135deg, var(--primary), var(--primary-dark));
   color: white;
   border: none;
-  box-shadow: 0 12px 20px rgba(0,0,0,0.3);
+  box-shadow: 0 12px 20px rgba(0,0,0,0.25);
 }
 
 .hero-card {
@@ -143,16 +141,16 @@ body {
   overflow: hidden;
   border-radius: 20px;
   padding: 24px;
-  background: linear-gradient(120deg, #0ea5e9, #38bdf8 45%, #0ea5e9 90%);
+  background: linear-gradient(115deg, #16a34a, #22c55e 46%, #15803d 100%);
   color: #0b1220;
-  border: 1px solid rgba(255,255,255,0.3);
-  box-shadow: 0 30px 60px rgba(14,165,233,0.35);
+  border: 1px solid rgba(255,255,255,0.28);
+  box-shadow: 0 30px 60px rgba(22,163,74,0.28);
 }
 
 .dark .hero-card {
   color: #e2e8f0;
-  background: linear-gradient(120deg, #0b1220, #0ea5e9 50%, #0b1220 100%);
-  border-color: rgba(56,189,248,0.25);
+  background: linear-gradient(120deg, #0b1220, #15803d 52%, #0b1220 100%);
+  border-color: rgba(34,197,94,0.35);
 }
 
 .hero-main {
