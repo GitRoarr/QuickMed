@@ -392,7 +392,6 @@ export class SchedulesService {
     return overview.blockedDays;
   }
 
-  // ===== Working days (availability) =====
   private numberToDayName(n: number): string | null {
     const names = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
     return n >= 0 && n < 7 ? names[n] : null;
@@ -443,7 +442,6 @@ export class SchedulesService {
   return { success: true, days: sortedDays };
 }
 
-  // Get week schedule for a doctor (patient-facing)
   async getWeekSchedule(doctorId: string, startDate: string): Promise<{ date: string; slots: Slot[] }[]> {
     const start = this.normalizeToDate(startDate);
     const weekDays: { date: string; slots: Slot[] }[] = [];
@@ -459,7 +457,6 @@ export class SchedulesService {
     return weekDays;
   }
 
-  // Get available dates for a doctor (days with at least one available slot)
   async getAvailableDates(doctorId: string, startDate: string, days: number = 30): Promise<string[]> {
     const start = this.normalizeToDate(startDate);
     const availableDates: string[] = [];
@@ -469,12 +466,9 @@ export class SchedulesService {
       currentDate.setDate(start.getDate() + i);
       const dateStr = currentDate.toISOString().split('T')[0];
       const daySchedule = await this.getDaySchedule(doctorId, dateStr);
-      
-      // Check if there's at least one available slot (not blocked, not booked, not in the past)
-      const hasAvailable = daySchedule.slots.some(slot => {
+            const hasAvailable = daySchedule.slots.some(slot => {
         if (slot.status !== 'available') return false;
         
-        // Check if slot is in the past
         const today = this.normalizeToDate(new Date());
         if (currentDate.getTime() < today.getTime()) return false;
         

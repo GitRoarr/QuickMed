@@ -11,14 +11,12 @@ export class DoctorSettings extends BaseEntity {
   @Column({ unique: true })
   doctorId: string;
 
-  // Profile Settings
   @Column({ nullable: true })
   officeAddress: string;
 
   @Column({ nullable: true })
   officePhone: string;
 
-  // Notification Settings
   @Column({ type: 'boolean', default: true })
   emailNotifications: boolean;
 
@@ -31,10 +29,8 @@ export class DoctorSettings extends BaseEntity {
   @Column({ type: 'boolean', default: true })
   messageNotifications: boolean;
 
-  // Availability Settings
   @Column({ type: 'simple-array', nullable: true })
-  availableDays: string[]; // ['Monday', 'Tuesday', etc.]
-
+  availableDays: string[];
   @Column({ nullable: true })
   startTime: string; // e.g., "09:00"
 
@@ -44,14 +40,31 @@ export class DoctorSettings extends BaseEntity {
   @Column({ type: 'int', nullable: true })
   appointmentDuration: number; // in minutes
 
-  // Billing Settings
+  // Active Period Settings
+  @Column({ type: 'date', nullable: true })
+  validFrom: Date; // start date of availability period
+
+  @Column({ type: 'date', nullable: true })
+  validTo: Date; // end date of availability period
+
+  // Buffer Time Settings
+  @Column({ type: 'int', default: 0 })
+  bufferMinutes: number; // buffer time between appointments
+
+  // Default Template Reference
+  @Column({ nullable: true })
+  defaultTemplateId: string; // reference to default availability template
+
+  // Break Configuration Reference
+  @Column({ nullable: true })
+  breakConfigId: string; // reference to break configuration
+
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   consultationFee: number;
 
   @Column({ nullable: true })
   paymentMethod: string;
 
-  // Privacy & Security
   @Column({ type: 'boolean', default: true })
   twoFactorAuth: boolean;
 

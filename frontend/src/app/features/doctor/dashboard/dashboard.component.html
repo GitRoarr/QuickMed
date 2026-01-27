@@ -8,15 +8,47 @@
   ></app-doctor-header>
 
   <main class="flex-1 overflow-y-auto p-6 lg:p-8 space-y-8 custom-scrollbar">
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-      <div>
-        <h1 class="text-2xl lg:text-3xl font-bold">Clinical Overview</h1>
-        <p class="text-sm text-[var(--muted)] mt-1">{{ today | date:'fullDate' }}</p>
+    <section class="hero-card">
+      <div class="hero-main">
+        <div class="hero-avatar">
+          <span *ngIf="!currentUser()?.avatar" class="hero-avatar__initials">{{ getDoctorInitials() }}</span>
+          <img *ngIf="currentUser()?.avatar" [src]="currentUser()?.avatar" alt="Doctor avatar" />
+        </div>
+        <div>
+          <p class="hero-kicker">Today · {{ today | date:'fullDate' }}</p>
+          <h1 class="hero-title">Welcome back, Dr. {{ currentUser()?.firstName || 'Clinician' }}.</h1>
+          <p class="hero-subtitle">{{ currentUser()?.specialty || 'Leading care, one patient at a time.' }}</p>
+          <div class="hero-chips">
+            <div class="hero-chip">
+              <span class="chip-label">Appointments</span>
+              <span class="chip-value">{{ dashboardData()?.stats?.todayAppointments ?? 0 }}</span>
+            </div>
+            <div class="hero-chip">
+              <span class="chip-label">Patients</span>
+              <span class="chip-value">{{ dashboardData()?.stats?.totalPatients ?? 0 }}</span>
+            </div>
+            <div class="hero-chip accent">
+              <span class="chip-label">Unread</span>
+              <span class="chip-value">{{ dashboardData()?.stats?.unreadMessages ?? 0 }}</span>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
+      <div class="hero-actions">
+        <a routerLink="/doctor/schedule" class="hero-btn primary">
+          <i class="bi bi-calendar3"></i>
+          Open Schedule
+        </a>
+        <a routerLink="/doctor/appointments" class="hero-btn ghost">
+          <i class="bi bi-people"></i>
+          View Patients
+        </a>
+      </div>
+      <div class="hero-glow"></div>
+    </section>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-      <div class="bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-6 shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+      <div class="qm-card highlight">
         <div class="flex items-center justify-between mb-4">
           <div class="p-3 rounded-xl bg-[var(--primary)/0.1] text-[var(--primary)]">
             <i class="bi bi-calendar-check text-xl"></i>
@@ -32,7 +64,7 @@
         </ng-template>
       </div>
 
-      <div class="bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-6 shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+      <div class="qm-card">
         <div class="flex items-center justify-between mb-4">
           <div class="p-3 rounded-xl bg-[var(--primary)/0.1] text-[var(--primary)]">
             <i class="bi bi-people text-xl"></i>
@@ -48,7 +80,7 @@
         </ng-template>
       </div>
 
-      <div class="bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-6 shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+      <div class="qm-card warning">
         <div class="flex items-center justify-between mb-4">
           <div class="p-3 rounded-xl bg-[var(--primary)/0.1] text-[var(--primary)]">
             <i class="bi bi-clipboard-pulse text-xl"></i>
@@ -64,7 +96,7 @@
         </ng-template>
       </div>
 
-      <div class="bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-6 shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 patient-satisfaction-card">
+      <div class="qm-card satisfaction">
         <div class="flex items-center justify-between mb-4">
           <div class="p-3 rounded-xl bg-[var(--primary)/0.1] text-[var(--primary)] icon">
             <i class="bi bi-star text-xl"></i>
@@ -81,7 +113,7 @@
         </ng-template>
       </div>
 
-      <div class="bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-6 shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+      <div class="qm-card">
         <div class="flex items-center justify-between mb-4">
           <div class="p-3 rounded-xl bg-[var(--primary)/0.1] text-[var(--primary)]">
             <i class="bi bi-cash-coin text-xl"></i>
@@ -97,7 +129,7 @@
         </ng-template>
       </div>
 
-      <div class="bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-6 shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+      <div class="qm-card">
         <div class="flex items-center justify-between mb-4">
           <div class="p-3 rounded-xl bg-[var(--primary)/0.1] text-[var(--primary)]">
             <i class="bi bi-chat-dots text-xl"></i>
@@ -115,9 +147,9 @@
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <div class="lg:col-span-2 bg-[var(--surface)] rounded-2xl border border-[var(--border)] shadow-lg overflow-hidden">
+      <div class="lg:col-span-2 bg-[var(--surface)] rounded-2xl border border-[var(--border)] shadow-xl overflow-hidden">
         <div class="p-6 border-b border-[var(--border)] flex justify-between items-center">
-          <h2 class="text-lg font-bold">Next Patients</h2>
+          <h2 class="text-lg font-bold flex items-center gap-2"><i class="bi bi-heart-pulse-fill text-[var(--primary)]"></i> Next Patients</h2>
           <a routerLink="/doctor/appointments" class="text-sm font-semibold text-[var(--primary)] hover:underline">View All →</a>
         </div>
         <div class="overflow-x-auto">
@@ -171,8 +203,8 @@
         </div>
       </div>
 
-      <div class="bg-[var(--surface)] rounded-2xl border border-[var(--border)] shadow-lg p-6">
-        <h2 class="text-lg font-bold mb-5">Urgent Alerts</h2>
+      <div class="bg-[var(--surface)] rounded-2xl border border-[var(--border)] shadow-xl p-6">
+        <h2 class="text-lg font-bold mb-5 flex items-center gap-2"><i class="bi bi-broadcast-pin text-red-600"></i> Urgent Alerts</h2>
         <div class="space-y-4">
           <ng-container *ngIf="!isLoading() && dashboardData()?.urgentAlerts?.length; else loadingAlerts">
             <div *ngFor="let alert of dashboardData()?.urgentAlerts" class="flex gap-4 p-4 rounded-xl border-l-4 border-red-500 bg-red-50 dark:bg-red-900/20">
