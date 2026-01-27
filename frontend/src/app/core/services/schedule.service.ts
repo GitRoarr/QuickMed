@@ -23,7 +23,7 @@ export interface DayScheduleResponse {
 export class SchedulingService {
   private readonly API_URL = `${environment.apiUrl}/doctors/schedule`;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   private normalizeDate(date: Date | string): string {
     return typeof date === 'string' ? date : date.toISOString().split('T')[0];
@@ -101,7 +101,6 @@ export class SchedulingService {
     });
   }
 
-  // Patient-facing methods
   getWeekSchedule(doctorId: string, startDate: string): Observable<DayScheduleResponse[]> {
     const formatted = this.normalizeDate(startDate);
     return this.http.get<DayScheduleResponse[]>(`${this.API_URL}/public/${doctorId}/week/${formatted}`);
@@ -115,5 +114,8 @@ export class SchedulingService {
         days: days.toString()
       }
     });
+  }
+  generateSlots(data: any): Observable<any> {
+    return this.http.post(`${this.API_URL}/generate`, data);
   }
 }

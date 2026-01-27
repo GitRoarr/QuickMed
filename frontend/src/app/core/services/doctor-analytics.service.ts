@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '@environments/environment';
 import { DailyStats, WeeklySummary, DoctorAnalytics } from '../models/doctor-analytics.model';
@@ -17,7 +17,10 @@ export class DoctorAnalyticsService {
     }
 
     getWeekStats(startDate?: string): Observable<WeeklySummary> {
-        const params = startDate ? { startDate } : {};
+        const params = startDate
+            ? new HttpParams().set('startDate', startDate)
+            : undefined;
+
         return this.http.get<WeeklySummary>(`${this.API_URL}/week`, { params });
     }
 

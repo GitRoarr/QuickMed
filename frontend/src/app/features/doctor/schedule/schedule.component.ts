@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, computed, effect } from '@angular/core';
+import { Component, OnInit, signal, computed } from '@angular/core';
 import { SettingsService } from '@core/services/settings.service';
 import { CommonModule, DatePipe } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
@@ -7,60 +7,93 @@ import { forkJoin } from 'rxjs';
 
 import { AppointmentService } from '@core/services/appointment.service';
 import { AuthService } from '@core/services/auth.service';
-import { BadgeService } from '@core/services/badge.service';
 import { MessageService } from '@core/services/message.service';
 import { NotificationService } from '@core/services/notification.service';
 import { ToastService } from '@core/services/toast.service';
 import { SchedulingService, DoctorSlot } from '../../../core/services/schedule.service';
+import { AvailabilityTemplateService } from '@core/services/availability-template.service';
+import { DoctorAnalyticsService } from '@core/services/doctor-analytics.service';
+import { ConflictDetectionService } from '@core/services/conflict-detection.service';
 
 import { Appointment, AppointmentStatus } from '@core/models/appointment.model';
-import { DoctorSidebarComponent } from '../shared/doctor-sidebar/doctor-sidebar.component';
+import { AvailabilityTemplate } from '@core/models/availability-template.model';
+import { DailyStats } from '@core/models/doctor-analytics.model';
 import { DoctorHeaderComponent } from '../shared/doctor-header/doctor-header.component';
-
-interface MenuItem {
-  label: string;
-  icon: string;
-  route: string;
-  badge?: number;
-}
 
 @Component({
   selector: 'app-doctor-schedule',
   standalone: true,
-  imports: [
-    CommonModule,
-    DatePipe,
-    RouterModule,
-    FormsModule,
-    DoctorSidebarComponent,
-    DoctorHeaderComponent
-  ],
+  imports: [CommonModule, DatePipe, RouterModule, FormsModule, DoctorHeaderComponent],
   templateUrl: './schedule.component.html',
   styleUrls: ['./schedule.component.css']
 })
 export class ScheduleComponent implements OnInit {
   readonly DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  readonly viewModes = ['day', 'week', 'month'] as const;
+
   constructor(
     private settingsService: SettingsService,
-    private badgeService: BadgeService,
     private scheduleService: SchedulingService,
     private appointmentService: AppointmentService,
     private messageService: MessageService,
     private notificationService: NotificationService,
     private authService: AuthService,
     private router: Router,
-    private toast: ToastService
-  ) {}
+    private toast: ToastService,
+    private templateService: AvailabilityTemplateService,
+    private analyticsService: DoctorAnalyticsService,
+    private conflictService: ConflictDetectionService
+  ) { }
 
-  goHome() {
-    this.router.navigate(['/']);
+  // Signals
+  appointments = signal<Appointment[]>([]);
+  slots = signal<DoctorSlot[]>([]);
+  templates = signal<AvailabilityTemplate[]>([]);
+  todayStats = signal<DailyStats | null>(null);
+  isLoading = signal(true);
+  selectedDate = signal(new Date());
+  currentMonth = signal(new Date());
+  currentUser = signal<any>(null);
+  unreadNotifications = signal(0);
+  viewMode = signal<'day' | 'week' | 'month'>('day');
+  slotDurationMinutes = signal(30);
+  workingStart = signal('09:00');
+  workingEnd = signal('17:00');
+  workingDays = signal<number[]>([]);
+  themeMode = signal<'light' | 'dark'>('light');
+  showTemplateDropdown = signal(false);
+  draggedSlot = signal<DoctorSlot | null>(null);
+  today = new Date();
+
+  // Computed values
+  weekDays = computed(() => {
+    const start = this.getWeekStart(this.selectedDate());
+    return Array.from({ length: 7 }, (_, i) => {
+      const d = new Date(start);
+      d.setDate(d.getDate() + i);
+      return d;
+    });
+  });
+
+  daySlots = computed(() => this.buildDaySlots(this.selectedDate()));
+  visibleDaySlots = computed(() =>
+    this.daySlots()
+      .filter(s => (s.status || 'available') !== 'blocked')
+      .filter(s => !this.isPastSlot(s))
+  );
+  nextAppointment = computed(() => this.getNextAppointment());
+
+  ngOnInit(): void {
+    this.loadUserData();
+    this.loadAppointments();
+    this.loadSettings();
+    this.loadSlots();
+    this.loadHeaderCounts();
+    this.loadWorkingDays();
+    this.loadTemplates();
+    this.loadAnalytics();
   }
-    private updateAppointmentStatus(appt: Appointment, status: AppointmentStatus, successMsg: string): void {
-      this.appointmentService.update(appt.id, { status }).subscribe({
-        next: () => { this.toast.success(successMsg, { title: 'Appointments' }); this.loadAppointments(); },
-        error: () => this.toast.error('Failed to update appointment', { title: 'Appointments' })
-      });
-    }
+
   getDoctorInitials(): string {
     const user = this.currentUser();
     if (!user) return 'DR';
@@ -122,19 +155,18 @@ export class ScheduleComponent implements OnInit {
     const wasSelected = set.has(day);
     if (wasSelected) {
       set.delete(day);
-      this.toast.info(`${['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][day]} removed from availability.`, { title: 'Schedule' });
+      this.toast.info(`${this.DAY_NAMES[day]} removed from availability.`, { title: 'Schedule' });
     } else {
       set.add(day);
-      this.toast.success(`${['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][day]} added to availability!`, { title: 'Schedule' });
+      this.toast.success(`${this.DAY_NAMES[day]} added to availability!`, { title: 'Schedule' });
     }
     this.workingDays.set(Array.from(set).sort());
+    this.saveAvailability();
   }
 
   saveAvailability(): void {
-    // Save working days to schedule service
     this.scheduleService.updateWorkingDays(this.workingDays()).subscribe({
       next: () => {
-        // Also update settings for working hours and slot duration
         const availableDays = this.workingDays().map(d => this.DAY_NAMES[d]);
         this.settingsService.updateSettings({
           availableDays,
@@ -146,14 +178,10 @@ export class ScheduleComponent implements OnInit {
             this.toast.success('Availability saved successfully', { title: 'Schedule' });
             this.loadSlots();
           },
-          error: () => {
-            this.toast.error('Failed to save availability settings', { title: 'Schedule' });
-          }
+          error: () => this.toast.error('Failed to save availability settings', { title: 'Schedule' })
         });
       },
-      error: () => {
-        this.toast.error('Failed to save working days', { title: 'Schedule' });
-      }
+      error: () => this.toast.error('Failed to save working days', { title: 'Schedule' })
     });
   }
 
@@ -168,14 +196,14 @@ export class ScheduleComponent implements OnInit {
   }
 
   formatTime12(time: string | null | undefined): string {
-    const t = (time || '').slice(0,5);
+    const t = (time || '').slice(0, 5);
     const [hStr, mStr] = t.split(':');
     const h = Number(hStr || 0);
     const m = Number(mStr || 0);
     if (Number.isNaN(h) || Number.isNaN(m)) return t || '';
     const period = h >= 12 ? 'PM' : 'AM';
     const hr = h % 12 || 12;
-    return `${hr}:${String(m).padStart(2,'0')} ${period}`;
+    return `${hr}:${String(m).padStart(2, '0')} ${period}`;
   }
 
   formatRange12(start?: string | null, end?: string | null): string {
@@ -193,16 +221,23 @@ export class ScheduleComponent implements OnInit {
 
   rejectAppointment(appt: Appointment): void {
     this.appointmentService.cancel(appt.id).subscribe({
-      next: () => { this.toast.success('Appointment cancelled', { title: 'Appointments' }); this.loadAppointments(); },
+      next: () => {
+        this.toast.success('Appointment cancelled', { title: 'Appointments' });
+        this.loadAppointments();
+        this.loadAnalytics();
+      },
       error: () => this.toast.error('Failed to cancel appointment', { title: 'Appointments' })
     });
   }
 
   rescheduleAppointment(appt: Appointment): void {
-    const newTime = prompt('Enter new time (HH:mm)', appt.appointmentTime.slice(0,5));
+    const newTime = prompt('Enter new time (HH:mm)', appt.appointmentTime.slice(0, 5));
     if (!newTime) return;
     this.appointmentService.update(appt.id, { appointmentTime: newTime }).subscribe({
-      next: () => { this.toast.success('Appointment rescheduled', { title: 'Appointments' }); this.loadAppointments(); },
+      next: () => {
+        this.toast.success('Appointment rescheduled', { title: 'Appointments' });
+        this.loadAppointments();
+      },
       error: () => this.toast.error('Failed to reschedule appointment', { title: 'Appointments' })
     });
   }
@@ -214,23 +249,28 @@ export class ScheduleComponent implements OnInit {
   blockSlot(slot: DoctorSlot): void {
     const dateStr = this.toDateOnly(this.selectedDate());
     this.scheduleService.blockSlot(dateStr, slot.startTime!, slot.endTime!).subscribe({
-      next: () => { this.toast.success('Slot blocked', { title: 'Schedule' }); this.loadSlots(); },
+      next: () => {
+        this.toast.success('Slot blocked', { title: 'Schedule' });
+        this.loadSlots();
+      },
       error: () => this.toast.error('Failed to block slot', { title: 'Schedule' })
     });
   }
-  
-removeSlot(slot: DoctorSlot, date: Date | string): void {
-  this.scheduleService.removeSlot(
-    date,
-    slot.startTime || slot.time || '',
-    slot.endTime,
-    this.authService.currentUser()?.id
-  ).subscribe({
-    next: () => this.toast.success('Slot removed successfully', { title: 'Schedule' }),
-    error: () => this.toast.error('Failed to remove slot', { title: 'Schedule' })
-  });
-}
 
+  removeSlot(slot: DoctorSlot, date: Date | string): void {
+    this.scheduleService.removeSlot(
+      date,
+      slot.startTime || slot.time || '',
+      slot.endTime,
+      this.authService.currentUser()?.id
+    ).subscribe({
+      next: () => {
+        this.toast.success('Slot removed successfully', { title: 'Schedule' });
+        this.loadSlots();
+      },
+      error: () => this.toast.error('Failed to remove slot', { title: 'Schedule' })
+    });
+  }
 
   openNextAppointmentDay(): void {
     const next = this.nextAppointment();
@@ -239,104 +279,82 @@ removeSlot(slot: DoctorSlot, date: Date | string): void {
     this.selectDate(new Date(next.appointmentDate));
   }
 
-  appointments = signal<Appointment[]>([]);
-  slots = signal<DoctorSlot[]>([]);
-  isLoading = signal(true);
-  selectedDate = signal(new Date());
-  currentMonth = signal(new Date());
-  currentUser = signal<any>(null);
-  menuItems = signal<MenuItem[]>([]);
-  unreadMessages = signal(0);
-  unreadNotifications = signal(0);
-
-  viewMode = signal<'day' | 'week' | 'month'>('day');
-  readonly viewModes = ['day', 'week', 'month'] as const;
-
-  slotDurationMinutes = signal(30);
-  workingStart = signal('09:00');
-  workingEnd = signal('17:00');
-  hasBreak = signal(true);
-  breakStart = signal('12:00');
-  breakEnd = signal('13:00');
-  workingDays = signal<number[]>([1, 2, 3, 4, 5]);
-  showAvailabilityEditor = signal(false);
-  themeMode = signal<'light' | 'dark'>('light');
-
-  today = new Date();
-
-
-
-  weekDays = computed(() => {
-    const start = this.getWeekStart(this.selectedDate());
-    return Array.from({ length: 7 }, (_, i) => {
-      const d = new Date(start);
-      d.setDate(d.getDate() + i);
-      return d;
+  // Template Management
+  loadTemplates(): void {
+    this.templateService.getTemplates().subscribe({
+      next: templates => this.templates.set(templates),
+      error: () => this.toast.error('Failed to load templates', { title: 'Templates' })
     });
-  });
-
-  daySlots = computed(() => this.buildDaySlots(this.selectedDate()));
-  hasBlockedSlots = computed(() => this.daySlots().some(s => (s.status || 'available') === 'blocked'));
-  visibleDaySlots = computed(() =>
-    this.daySlots()
-      .filter(s => (s.status || 'available') !== 'blocked')
-      .filter(s => !this.isPastSlot(s))
-  );
-  noVisibleButHasSlots = computed(() => !this.visibleDaySlots().length && !!this.daySlots().length);
-  nextAppointment = computed(() => this.getNextAppointment());
-
-
-
-  ngOnInit(): void {
-    this.loadUserData();
-    this.loadAppointments();
-    this.loadBadgeCounts();
-    this.loadSettings();
-    this.loadSlots();
-    this.loadHeaderCounts();
-    this.loadWorkingDays();
   }
 
-  loadSettings(): void {
-    this.settingsService.getSettings().subscribe({
-      next: (settings) => {
-        if (settings) {
-          this.workingStart.set(settings.startTime || '09:00');
-          this.workingEnd.set(settings.endTime || '17:00');
-          this.slotDurationMinutes.set(settings.appointmentDuration || 30);
-          // Convert availableDays (names) to workingDays (numbers)
-          const dayMap: Record<string, number> = {
-            'Sunday': 0, 'Monday': 1, 'Tuesday': 2, 'Wednesday': 3,
-            'Thursday': 4, 'Friday': 5, 'Saturday': 6
-          };
-          const days = (settings.availableDays || [])
-            .map((name: string) => dayMap[name])
-            .filter((d: number | undefined): d is number => d !== undefined)
-            .sort();
-          if (days.length > 0) {
-            this.workingDays.set(days);
-          }
-        }
+  applyTemplate(template: AvailabilityTemplate): void {
+    this.workingDays.set(template.workingDays);
+    this.workingStart.set(template.startTime);
+    this.workingEnd.set(template.endTime);
+    this.slotDurationMinutes.set(template.slotDuration);
+    this.showTemplateDropdown.set(false);
+    this.toast.success(`Template "${template.name}" applied`, { title: 'Templates' });
+  }
+
+  createPresets(): void {
+    this.templateService.createPresets().subscribe({
+      next: presets => {
+        this.toast.success(`${presets.length} preset templates created`, { title: 'Templates' });
+        this.loadTemplates();
+        this.showTemplateDropdown.set(false);
       },
-      error: () => {
-        // Use defaults if settings fail to load
-      }
+      error: () => this.toast.error('Failed to create presets', { title: 'Templates' })
     });
   }
 
-  loadWorkingDays(): void {
-    this.scheduleService.getDoctorWorkingDays().subscribe({
-      next: (days) => {
-        if (days && days.length > 0) {
-          this.workingDays.set(days);
-        }
+  // Analytics
+  loadAnalytics(): void {
+    this.analyticsService.getTodayStats().subscribe({
+      next: stats => this.todayStats.set(stats),
+      error: () => console.error('Failed to load analytics')
+    });
+  }
+
+  // Drag and Drop
+  onDragStart(event: DragEvent, slot: DoctorSlot): void {
+    this.draggedSlot.set(slot);
+    if (event.dataTransfer) {
+      event.dataTransfer.effectAllowed = 'move';
+      event.dataTransfer.setData('text/html', '');
+    }
+  }
+
+  onDragEnd(event: DragEvent): void {
+    this.draggedSlot.set(null);
+  }
+
+  // Empty state actions
+  enableDay(): void {
+    const dayOfWeek = this.selectedDate().getDay();
+    if (!this.workingDays().includes(dayOfWeek)) {
+      this.toggleWorkingDay(dayOfWeek);
+      this.saveAvailability();
+    }
+  }
+
+  generateSlots(): void {
+    const data = {
+      date: this.toDateOnly(this.selectedDate()),
+      startTime: this.workingStart(),
+      endTime: this.workingEnd(),
+      slotDuration: this.slotDurationMinutes()
+    };
+
+    this.scheduleService.generateSlots(data).subscribe({
+      next: (res) => {
+        this.toast.success('Slots generated successfully', { title: 'Schedule' });
+        this.loadSlots();
       },
-      error: () => {
-        // Ignore errors, use existing value
-      }
+      error: () => this.toast.error('Failed to generate slots', { title: 'Schedule' })
     });
   }
 
+  // Helper methods
   hasAppointments(date: Date): boolean {
     return this.appointments().some(a =>
       new Date(a.appointmentDate).toDateString() === date.toDateString()
@@ -360,8 +378,6 @@ removeSlot(slot: DoctorSlot, date: Date | string): void {
       }))
       .sort((a, b) => a.startTime.localeCompare(b.startTime));
   }
-  
-
 
   private buildDaySlots(date: Date): DoctorSlot[] {
     const base = this.getSlots();
@@ -397,29 +413,43 @@ removeSlot(slot: DoctorSlot, date: Date | string): void {
     }
   }
 
-  loadBadgeCounts(): void {
-    forkJoin({
-      appointments: this.appointmentService.getPendingCount(),
-      messages: this.messageService.getUnreadCount()
-    }).subscribe(({ appointments, messages }) => {
-      this.updateMenuItems(appointments.count || 0, messages.count || 0);
-    });
-  }
-
   loadHeaderCounts(): void {
     this.notificationService.getUnreadCount().subscribe(c =>
       this.unreadNotifications.set(c || 0)
     );
   }
 
-  updateMenuItems(apt: number, msg: number): void {
-    this.menuItems.set([
-      { label: 'Dashboard', icon: 'bi-house-door', route: '/doctor/dashboard' },
-      { label: 'Appointments', icon: 'bi-calendar-check', route: '/doctor/appointments', badge: apt || undefined },
-      { label: 'Schedule', icon: 'bi-calendar3', route: '/doctor/schedule' },
-      { label: 'Messages', icon: 'bi-chat-dots', route: '/doctor/messages', badge: msg || undefined },
-      { label: 'Settings', icon: 'bi-gear', route: '/doctor/settings' }
-    ]);
+  loadSettings(): void {
+    this.settingsService.getSettings().subscribe({
+      next: (settings) => {
+        if (settings) {
+          this.workingStart.set(settings.startTime || '09:00');
+          this.workingEnd.set(settings.endTime || '17:00');
+          this.slotDurationMinutes.set(settings.appointmentDuration || 30);
+          const dayMap: Record<string, number> = {
+            'Sunday': 0, 'Monday': 1, 'Tuesday': 2, 'Wednesday': 3,
+            'Thursday': 4, 'Friday': 5, 'Saturday': 6
+          };
+          const days = (settings.availableDays || [])
+            .map((name: string) => dayMap[name])
+            .filter((d: number | undefined): d is number => d !== undefined)
+            .sort();
+          this.workingDays.set(days);
+        }
+      },
+      error: () => { }
+    });
+  }
+
+  loadWorkingDays(): void {
+    this.scheduleService.getDoctorWorkingDays().subscribe({
+      next: (days) => {
+        if (days) {
+          this.workingDays.set(days);
+        }
+      },
+      error: () => { }
+    });
   }
 
   loadUserData(): void {
@@ -432,6 +462,7 @@ removeSlot(slot: DoctorSlot, date: Date | string): void {
       next: d => {
         this.appointments.set(d);
         this.isLoading.set(false);
+        this.loadAnalytics();
       },
       error: () => this.isLoading.set(false)
     });
@@ -473,8 +504,14 @@ removeSlot(slot: DoctorSlot, date: Date | string): void {
       .sort((a, b) => a.t.getTime() - b.t.getTime())[0]?.a || null;
   }
 
-  logout(): void {
-    this.authService.logout();
-    this.router.navigate(['/login']);
+  private updateAppointmentStatus(appt: Appointment, status: AppointmentStatus, successMsg: string): void {
+    this.appointmentService.update(appt.id, { status }).subscribe({
+      next: () => {
+        this.toast.success(successMsg, { title: 'Appointments' });
+        this.loadAppointments();
+        this.loadAnalytics();
+      },
+      error: () => this.toast.error('Failed to update appointment', { title: 'Appointments' })
+    });
   }
 }

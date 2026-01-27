@@ -5,6 +5,10 @@ import { DoctorSchedule, Slot } from './schedule.entity';
 import { Appointment } from '../appointments/entities/appointment.entity';
 import { AppointmentStatus } from '../common/index';
 import { SettingsService } from '../settings/settings.service';
+import { AvailabilityTemplateService } from './availability-template.service';
+import { GenerateSlotsDto } from './dto/generate-slots.dto';
+import { ApplyTemplateDto } from './dto/apply-template.dto';
+import { BulkSlotUpdateDto } from './dto/bulk-slot-update.dto';
 
 @Injectable()
 export class SchedulesService {
@@ -14,7 +18,8 @@ export class SchedulesService {
     @InjectRepository(Appointment)
     private readonly appointmentsRepo: Repository<Appointment>,
     private readonly settingsService: SettingsService,
-  ) {}
+    private readonly templateService: AvailabilityTemplateService,
+  ) { }
 
   private addMinutes(time: string, minutes: number): string {
     const [h, m] = time.split(':').map(Number);
@@ -57,7 +62,7 @@ export class SchedulesService {
     const today = this.normalizeToDate(new Date());
     const isPastDay = dateObj.getTime() < today.getTime();
     const toDateTime = (d: Date, time: string) => {
-      const [h, m] = (time || '').slice(0,5).split(':').map(Number);
+      const [h, m] = (time || '').slice(0, 5).split(':').map(Number);
       const dt = new Date(d);
       dt.setHours(h || 0, m || 0, 0, 0);
       return dt;
@@ -201,9 +206,9 @@ export class SchedulesService {
       const sStart = this.normalizeRange(s.startTime || s.time || '', s.endTime).startTime;
       const sEnd = this.normalizeRange(s.startTime || s.time || '', s.endTime).endTime;
       // Check if times overlap
-      return (safeStart >= sStart && safeStart < sEnd) || 
-             (safeEnd > sStart && safeEnd <= sEnd) ||
-             (safeStart <= sStart && safeEnd >= sEnd);
+      return (safeStart >= sStart && safeStart < sEnd) ||
+        (safeEnd > sStart && safeEnd <= sEnd) ||
+        (safeStart <= sStart && safeEnd >= sEnd);
     });
 
     if (!slot) {
@@ -319,37 +324,37 @@ export class SchedulesService {
   }
 
   private async getDefaultSlotsFromSettings(
-  doctorId: string,
-  date: Date,
-): Promise<Slot[]> {
-  const settings = await this.settingsService.getSettings(doctorId).catch(() => null);
-  if (!settings || !settings.startTime || !settings.endTime) return [];
+    doctorId: string,
+    date: Date,
+  ): Promise<Slot[]> {
+    const settings = await this.settingsService.getSettings(doctorId).catch(() => null);
+    if (!settings || !settings.startTime || !settings.endTime) return [];
 
-  const dayIndex = date.getDay();
-  const workingDayNumbers = settings.workingDays || [];
-  if (workingDayNumbers.length > 0 && !workingDayNumbers.includes(dayIndex)) {
-    return [];
-  }
-
-  const duration = settings.appointmentDuration || 30;
-  const slots: Slot[] = [];
-  let current = settings.startTime.slice(0, 5);
-  const end = settings.endTime.slice(0, 5);
-
-  while (current < end) {
-    const next = this.addMinutes(current, duration);
-    if (next <= end) {
-      slots.push({
-        startTime: current,
-        endTime: next,
-        status: 'available',
-      });
+    const dayIndex = date.getDay();
+    const workingDayNumbers = settings.workingDays || [];
+    if (workingDayNumbers.length > 0 && !workingDayNumbers.includes(dayIndex)) {
+      return [];
     }
-    current = next;
-  }
 
-  return slots;
-}
+    const duration = settings.appointmentDuration || 30;
+    const slots: Slot[] = [];
+    let current = settings.startTime.slice(0, 5);
+    const end = settings.endTime.slice(0, 5);
+
+    while (current < end) {
+      const next = this.addMinutes(current, duration);
+      if (next <= end) {
+        slots.push({
+          startTime: current,
+          endTime: next,
+          status: 'available',
+        });
+      }
+      current = next;
+    }
+
+    return slots;
+  }
 
 
   private toTimeString(t: any): string {
@@ -393,7 +398,7 @@ export class SchedulesService {
   }
 
   private numberToDayName(n: number): string | null {
-    const names = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    const names = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
     return n >= 0 && n < 7 ? names[n] : null;
   }
 
@@ -419,28 +424,28 @@ export class SchedulesService {
       .sort((a, b) => a - b);
   }
 
- async updateDoctorWorkingDays(
-  doctorId: string,
-  days: number[],
-): Promise<{ success: boolean; days: number[] }> {
-  if (!doctorId) {
-    throw new BadRequestException('Doctor id missing for working days update');
-  }
+  async updateDoctorWorkingDays(
+    doctorId: string,
+    days: number[],
+  ): Promise<{ success: boolean; days: number[] }> {
+    if (!doctorId) {
+      throw new BadRequestException('Doctor id missing for working days update');
+    }
 
-  const safeDays = Array.isArray(days)
-    ? days
+    const safeDays = Array.isArray(days)
+      ? days
         .map((d) => Number(d))
         .filter((d) => Number.isInteger(d) && d >= 0 && d <= 6)
-    : [];
+      : [];
 
-  const sortedDays = [...safeDays].sort((a, b) => a - b);
+    const sortedDays = [...safeDays].sort((a, b) => a - b);
 
-  await this.settingsService.updateSettings(doctorId, {
-    workingDays: sortedDays,
-  });
+    await this.settingsService.updateSettings(doctorId, {
+      workingDays: sortedDays,
+    });
 
-  return { success: true, days: sortedDays };
-}
+    return { success: true, days: sortedDays };
+  }
 
   async getWeekSchedule(doctorId: string, startDate: string): Promise<{ date: string; slots: Slot[] }[]> {
     const start = this.normalizeToDate(startDate);
@@ -466,17 +471,17 @@ export class SchedulesService {
       currentDate.setDate(start.getDate() + i);
       const dateStr = currentDate.toISOString().split('T')[0];
       const daySchedule = await this.getDaySchedule(doctorId, dateStr);
-            const hasAvailable = daySchedule.slots.some(slot => {
+      const hasAvailable = daySchedule.slots.some(slot => {
         if (slot.status !== 'available') return false;
-        
+
         const today = this.normalizeToDate(new Date());
         if (currentDate.getTime() < today.getTime()) return false;
-        
+
         const slotEnd = slot.endTime || slot.startTime || slot.time || '';
         const [h, m] = (slotEnd || '').slice(0, 5).split(':').map(Number);
         const slotDateTime = new Date(currentDate);
         slotDateTime.setHours(h || 0, m || 0, 0, 0);
-        
+
         return slotDateTime.getTime() >= Date.now();
       });
 
@@ -488,4 +493,341 @@ export class SchedulesService {
     return availableDates;
   }
 
+  /**
+   * Generate slots for a day or date range based on time parameters
+   */
+  async generateSlotsForDay(
+    doctorId: string,
+    dto: GenerateSlotsDto,
+  ): Promise<{ date: string; slots: Slot[] }[]> {
+    const startDate = this.normalizeToDate(dto.date);
+    const endDate = dto.endDate ? this.normalizeToDate(dto.endDate) : startDate;
+    const slotDuration = dto.slotDuration || 30;
+    const bufferMinutes = dto.bufferMinutes || 0;
+    const breaks = dto.breaks || [];
+
+    const results: { date: string; slots: Slot[] }[] = [];
+
+    // Generate slots for each day in the range
+    let currentDate = new Date(startDate);
+    while (currentDate <= endDate) {
+      const slots: Slot[] = [];
+      let currentTime = dto.startTime;
+
+      while (currentTime < dto.endTime) {
+        const slotEnd = this.addMinutes(currentTime, slotDuration);
+
+        // Check if this slot overlaps with a break
+        const isBreak = breaks.some(
+          (b) => currentTime < b.endTime && slotEnd > b.startTime,
+        );
+
+        if (!isBreak && slotEnd <= dto.endTime) {
+          slots.push({
+            startTime: currentTime,
+            endTime: slotEnd,
+            status: 'available',
+          });
+        }
+
+        currentTime = this.addMinutes(slotEnd, bufferMinutes);
+      }
+
+      // Save the generated slots
+      const dateStr = currentDate.toISOString().split('T')[0];
+      await this.bulkSaveSlots(doctorId, currentDate, slots);
+      results.push({ date: dateStr, slots });
+
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+
+    return results;
+  }
+
+  /**
+   * Helper method to save multiple slots at once
+   */
+  private async bulkSaveSlots(
+    doctorId: string,
+    date: Date,
+    slots: Slot[],
+  ): Promise<void> {
+    let sched = await this.repo.findOne({
+      where: { doctorId, date: this.normalizeToDate(date) },
+    });
+
+    if (!sched) {
+      sched = this.repo.create({
+        doctorId,
+        date: this.normalizeToDate(date),
+        slots: [],
+      });
+    }
+
+    // Merge with existing slots (don't overwrite booked slots)
+    const existingSlots = sched.slots || [];
+    const bookedSlots = existingSlots.filter((s) => s.status === 'booked');
+
+    // Merge new slots with booked slots
+    const mergedSlots = this.mergeSlots(bookedSlots, slots);
+    sched.slots = mergedSlots;
+
+    await this.repo.save(sched);
+  }
+
+  /**
+   * Apply a template to specific dates or date range
+   */
+  async applyTemplateToDateRange(
+    doctorId: string,
+    dto: ApplyTemplateDto,
+  ): Promise<{ date: string; slots: Slot[] }[]> {
+    // Get the template
+    const template = await this.templateService.getTemplate(
+      dto.templateId,
+      doctorId,
+    );
+
+    if (!template) {
+      throw new BadRequestException('Template not found');
+    }
+
+    const startDate = this.normalizeToDate(dto.startDate);
+    const endDate = dto.endDate
+      ? this.normalizeToDate(dto.endDate)
+      : startDate;
+
+    const results: { date: string; slots: Slot[] }[] = [];
+
+    // Apply template to each day in the range
+    let currentDate = new Date(startDate);
+    while (currentDate <= endDate) {
+      const dayOfWeek = currentDate.getDay();
+
+      // Only generate slots if this day is in the template's working days
+      if (template.workingDays.includes(dayOfWeek)) {
+        const slots: Slot[] = [];
+        let currentTime = template.startTime;
+
+        while (currentTime < template.endTime) {
+          const slotEnd = this.addMinutes(
+            currentTime,
+            template.slotDuration || 30,
+          );
+
+          // Check if this slot overlaps with a break
+          const isBreak = (template.breaks || []).some(
+            (b) => currentTime < b.endTime && slotEnd > b.startTime,
+          );
+
+          if (!isBreak && slotEnd <= template.endTime) {
+            slots.push({
+              startTime: currentTime,
+              endTime: slotEnd,
+              status: 'available',
+            });
+          }
+
+          currentTime = this.addMinutes(
+            slotEnd,
+            template.bufferMinutes || 0,
+          );
+        }
+
+        // Save the generated slots
+        const dateStr = currentDate.toISOString().split('T')[0];
+        await this.bulkSaveSlots(doctorId, currentDate, slots);
+        results.push({ date: dateStr, slots });
+      }
+
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+
+    return results;
+  }
+
+  /**
+   * Bulk update slot statuses within a time range
+   */
+  async bulkUpdateSlotStatus(
+    doctorId: string,
+    dto: BulkSlotUpdateDto,
+  ): Promise<{ success: boolean; updatedSlots: number }> {
+    const dateObj = this.normalizeToDate(dto.date);
+    const { startTime: safeStart, endTime: safeEnd } = this.normalizeRange(
+      dto.startTime,
+      dto.endTime,
+    );
+
+    let sched = await this.repo.findOne({
+      where: { doctorId, date: dateObj },
+    });
+
+    if (!sched) {
+      // No schedule exists, create new slots if status is available or blocked
+      if (dto.status === 'booked') {
+        throw new BadRequestException(
+          'Cannot book slots that do not exist',
+        );
+      }
+
+      sched = this.repo.create({
+        doctorId,
+        date: dateObj,
+        slots: [],
+      });
+    }
+
+    let updatedCount = 0;
+    const slots = sched.slots || [];
+
+    // Find all slots that fall within the time range
+    for (const slot of slots) {
+      const slotStart = slot.startTime || slot.time || '';
+      const slotEnd = slot.endTime || slotStart;
+
+      // Check if slot overlaps with the update range
+      const overlaps =
+        (slotStart >= safeStart && slotStart < safeEnd) ||
+        (slotEnd > safeStart && slotEnd <= safeEnd) ||
+        (slotStart <= safeStart && slotEnd >= safeEnd);
+
+      if (overlaps) {
+        // Don't update booked slots unless explicitly allowing
+        if (slot.status === 'booked' && dto.status !== 'booked') {
+          continue;
+        }
+
+        slot.status = dto.status;
+        slot.blockedReason =
+          dto.status === 'blocked' ? dto.reason || null : null;
+        slot.appointmentId =
+          dto.status === 'booked' ? dto.appointmentId || null : null;
+        updatedCount++;
+      }
+    }
+
+    // If no slots exist in this range, create them
+    if (updatedCount === 0 && dto.status !== 'booked') {
+      // Generate slots for this time range with default duration
+      let currentTime = safeStart;
+      const slotDuration = 30; // Default duration
+
+      while (currentTime < safeEnd) {
+        const slotEnd = this.addMinutes(currentTime, slotDuration);
+        if (slotEnd <= safeEnd) {
+          slots.push({
+            startTime: currentTime,
+            endTime: slotEnd,
+            status: dto.status,
+            blockedReason:
+              dto.status === 'blocked' ? dto.reason || null : null,
+          });
+          updatedCount++;
+        }
+        currentTime = slotEnd;
+      }
+    }
+
+    sched.slots = slots;
+    await this.repo.save(sched);
+
+    return { success: true, updatedSlots: updatedCount };
+  }
+
+  /**
+   * Get detailed week schedule with appointment info
+   */
+  async getWeekScheduleDetailed(
+    doctorId: string,
+    startDate: string,
+  ): Promise<
+    {
+      date: string;
+      dayOfWeek: number;
+      slots: Slot[];
+      appointmentCount: number;
+      availableCount: number;
+      blockedCount: number;
+    }[]
+  > {
+    const start = this.normalizeToDate(startDate);
+    const weekDays = [];
+
+    for (let i = 0; i < 7; i++) {
+      const currentDate = new Date(start);
+      currentDate.setDate(start.getDate() + i);
+      const dateStr = currentDate.toISOString().split('T')[0];
+      const daySchedule = await this.getDaySchedule(doctorId, dateStr);
+
+      const appointmentCount = daySchedule.slots.filter(
+        (s) => s.status === 'booked',
+      ).length;
+      const availableCount = daySchedule.slots.filter(
+        (s) => s.status === 'available',
+      ).length;
+      const blockedCount = daySchedule.slots.filter(
+        (s) => s.status === 'blocked',
+      ).length;
+
+      weekDays.push({
+        date: dateStr,
+        dayOfWeek: currentDate.getDay(),
+        slots: daySchedule.slots,
+        appointmentCount,
+        availableCount,
+        blockedCount,
+      });
+    }
+
+    return weekDays;
+  }
+
+  /**
+   * Get month overview with stats per day
+   */
+  async getMonthScheduleOverview(
+    doctorId: string,
+    year: number,
+    month: number,
+  ): Promise<
+    {
+      date: string;
+      appointmentCount: number;
+      availableCount: number;
+      blockedCount: number;
+      hasSlots: boolean;
+    }[]
+  > {
+    const mm = String(month).padStart(2, '0');
+    const lastDay = new Date(year, month, 0).getDate();
+    const days = [];
+
+    for (let day = 1; day <= lastDay; day++) {
+      const dateStr = `${year}-${mm}-${String(day).padStart(2, '0')}`;
+      const daySchedule = await this.getDaySchedule(doctorId, dateStr);
+
+      const appointmentCount = daySchedule.slots.filter(
+        (s) => s.status === 'booked',
+      ).length;
+      const availableCount = daySchedule.slots.filter(
+        (s) => s.status === 'available',
+      ).length;
+      const blockedCount = daySchedule.slots.filter(
+        (s) => s.status === 'blocked',
+      ).length;
+
+      days.push({
+        date: dateStr,
+        appointmentCount,
+        availableCount,
+        blockedCount,
+        hasSlots: daySchedule.slots.length > 0,
+      });
+    }
+
+    return days;
+  }
+
 }
+

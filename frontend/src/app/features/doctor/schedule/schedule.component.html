@@ -1,30 +1,63 @@
-
 <div class="flex-1 flex flex-col font-sans transition-colors duration-200">
-
   <main class="flex-1 flex flex-col overflow-hidden relative">
-    
-    <app-doctor-header
-      [initials]="getDoctorInitials()"
-      [avatarUrl]="currentUser()?.avatar"
-      [unreadNotifications]="unreadNotifications()"
-      [themeMode]="themeMode()"
-      (themeChange)="setTheme($event)"
-    ></app-doctor-header>
+    <!-- Doctor Header -->
+    <app-doctor-header [initials]="getDoctorInitials()" [avatarUrl]="currentUser()?.avatar"
+      [unreadNotifications]="unreadNotifications()" [themeMode]="themeMode()"
+      (themeChange)="setTheme($event)"></app-doctor-header>
 
     <div class="flex-1 overflow-y-auto px-8 pb-8">
-      
-      <header class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 bg-[var(--surface)] p-6 rounded-2xl shadow-sm border border-[var(--border-light)]">
+
+      <!-- Page Header with Template Selector -->
+      <header
+        class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 bg-[var(--surface)] p-6 rounded-2xl shadow-sm border border-[var(--border-light)] hover-lift">
         <div>
           <h1 class="text-2xl font-bold text-[var(--text-primary)] mb-1">Schedule</h1>
-          <p class="text-[var(--text-secondary)] text-sm">Manage availability and view appointments.</p>
+          <p class="text-[var(--text-secondary)] text-sm">Manage availability, templates, and view appointments.</p>
         </div>
-        <div class="flex items-center gap-3">
-          <div class="bg-[var(--surface-tertiary)] p-1 rounded-xl flex">
-            <button *ngFor="let m of viewModes" (click)="setViewMode(m)" [class.bg-[var(--primary)]]="viewMode()===m" [class.text-white]="viewMode()===m" [class.text-[var(--text-secondary)]]="viewMode()!==m" [class.shadow-md]="viewMode()===m" class="px-4 py-1.5 rounded-lg text-sm font-semibold capitalize transition-all">{{ m }}</button>
+        <div class="flex items-center gap-3 flex-wrap">
+          <!-- Template Selector -->
+          <div class="relative template-selector">
+            <button (click)="showTemplateDropdown.set(!showTemplateDropdown())"
+              class="flex items-center gap-2 bg-[var(--surface-tertiary)] hover:bg-[var(--surface-secondary)] px-4 py-2 rounded-xl border border-[var(--border-light)] text-sm font-semibold text-[var(--text-primary)] transition-all">
+              <i class="bi bi-layout-text-sidebar"></i>
+              <span>Template</span>
+              <i class="bi" [class.bi-chevron-down]="!showTemplateDropdown()"
+                [class.bi-chevron-up]="showTemplateDropdown()"></i>
+            </button>
+
+            <!-- Template Dropdown -->
+            <div *ngIf="showTemplateDropdown()" class="template-dropdown">
+              <div *ngFor="let template of templates()" (click)="applyTemplate(template)" class="template-item">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <p class="font-semibold text-[var(--text-primary)]">{{ template.name }}</p>
+                    <p class="text-xs text-[var(--text-secondary)] mt-0.5">{{ template.description }}</p>
+                  </div>
+                  <span *ngIf="template.isDefault" class="template-badge">Default</span>
+                </div>
+              </div>
+              <div (click)="createPresets()" class="template-item border-t-2 border-[var(--primary-light)]">
+                <p class="font-semibold text-[var(--primary)]"><i class="bi bi-plus-circle mr-2"></i>Load Presets</p>
+              </div>
+            </div>
           </div>
-          <div class="flex items-center gap-2 bg-[var(--surface-tertiary)] px-3 py-1.5 rounded-xl border border-[var(--border-light)]">
+
+          <!-- View Mode Toggle -->
+          <div class="bg-[var(--surface-tertiary)] p-1 rounded-xl flex">
+            <button *ngFor="let m of viewModes" (click)="setViewMode(m)" [class.bg-[var(--primary)]]="viewMode()===m"
+              [class.text-white]="viewMode()===m" [class.text-[var(--text-secondary)]]="viewMode()!==m"
+              [class.shadow-md]="viewMode()===m"
+              class="px-4 py-1.5 rounded-lg text-sm font-semibold capitalize transition-all">
+              {{ m }}
+            </button>
+          </div>
+
+          <!-- Slot Duration Selector -->
+          <div
+            class="flex items-center gap-2 bg-[var(--surface-tertiary)] px-3 py-1.5 rounded-xl border border-[var(--border-light)]">
             <span class="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">Slot</span>
-            <select [ngModel]="slotDurationMinutes()" (ngModelChange)="slotDurationMinutes.set(+$event)" class="bg-transparent border-none outline-none font-bold text-[var(--text-primary)] text-sm cursor-pointer focus:ring-0">
+            <select [ngModel]="slotDurationMinutes()" (ngModelChange)="slotDurationMinutes.set(+$event)"
+              class="bg-transparent border-none outline-none font-bold text-[var(--text-primary)] text-sm cursor-pointer focus:ring-0">
               <option [value]="15">15m</option>
               <option [value]="20">20m</option>
               <option [value]="30">30m</option>
@@ -35,82 +68,107 @@
         </div>
       </header>
 
+      <!-- Main Grid: Calendar + Analytics -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-        
+
+        <!-- Calendar & Working Days -->
         <div class="lg:col-span-2 bg-[var(--surface)] border border-[var(--border-light)] rounded-2xl shadow-sm p-6">
           <div class="flex items-center justify-between mb-4">
-            <button (click)="previousMonth()" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-[var(--surface-secondary)] text-[var(--text-secondary)] transition-colors"><i class="bi bi-chevron-left"></i></button>
+            <button (click)="previousMonth()"
+              class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-[var(--surface-secondary)] text-[var(--text-secondary)] transition-colors">
+              <i class="bi bi-chevron-left"></i>
+            </button>
             <h2 class="text-lg font-bold text-[var(--primary)]">{{ getMonthYear() }}</h2>
-            <button (click)="nextMonth()" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-[var(--surface-secondary)] text-[var(--text-secondary)] transition-colors"><i class="bi bi-chevron-right"></i></button>
+            <button (click)="nextMonth()"
+              class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-[var(--surface-secondary)] text-[var(--text-secondary)] transition-colors">
+              <i class="bi bi-chevron-right"></i>
+            </button>
           </div>
 
           <div class="calendar-grid mb-2 text-center">
-            <div *ngFor="let day of ['Sun','Mon','Tue','Wed','Thu','Fri','Sat']" class="calendar-day-label">{{ day[0] }}</div>
+            <div *ngFor="let day of ['Sun','Mon','Tue','Wed','Thu','Fri','Sat']" class="calendar-day-label">{{ day[0] }}
+            </div>
           </div>
           <div class="calendar-grid">
-            <button 
-              *ngFor="let date of getCalendarDays()" 
-              (click)="selectDate(date)"
-              [ngClass]="{
+            <button *ngFor="let date of getCalendarDays()" (click)="selectDate(date)" [ngClass]="{
                 'calendar-day-selected': isSelected(date),
                 'calendar-day-today': isToday(date) && !isSelected(date),
                 'calendar-day-outside': !isCurrentMonth(date),
                 'calendar-day': true
-              }"
-              >
+              }">
               <span>{{ date.getDate() }}</span>
               <span *ngIf="hasAppointments(date)" class="calendar-dot"></span>
             </button>
           </div>
 
-          <div class="mt-6 pt-6 border-t border-[var(--border-light)] flex flex-col md:flex-row gap-4 items-center justify-between">
+          <!-- Working Days & Time -->
+          <div
+            class="mt-6 pt-6 border-t border-[var(--border-light)] flex flex-col md:flex-row gap-4 items-center justify-between">
             <div class="flex gap-1">
-              <button
-                *ngFor="let d of [0,1,2,3,4,5,6]"
-                (click)="toggleWorkingDay(d)"
-                [ngClass]="{
+              <button *ngFor="let d of [0,1,2,3,4,5,6]" (click)="toggleWorkingDay(d)" [ngClass]="{
                   'bg-[var(--primary)] text-white border-[var(--primary)]': workingDays().includes(d),
                   'bg-red-500 text-white border-red-500': !workingDays().includes(d)
                 }"
-                class="w-8 h-8 rounded-lg border flex items-center justify-center text-xs font-bold transition-all hover:border-[var(--primary)]"
-              >
+                class="w-8 h-8 rounded-lg border flex items-center justify-center text-xs font-bold transition-all hover:border-[var(--primary)] hover-lift">
                 {{ ['S','M','T','W','T','F','S'][d] }}
               </button>
             </div>
             <div class="flex items-center gap-2">
-              <input type="time" [ngModel]="workingStart()" (ngModelChange)="workingStart.set($event)" class="bg-[var(--input-bg)] border border-[var(--input-border)] rounded-lg px-2 py-1 text-sm font-semibold text-[var(--text-primary)] focus:border-[var(--primary)] outline-none">
+              <input type="time" [ngModel]="workingStart()" (ngModelChange)="workingStart.set($event)"
+                class="bg-[var(--input-bg)] border border-[var(--input-border)] rounded-lg px-2 py-1 text-sm font-semibold text-[var(--text-primary)] focus:border-[var(--primary)] outline-none">
               <span class="text-[var(--text-muted)]">-</span>
-              <input type="time" [ngModel]="workingEnd()" (ngModelChange)="workingEnd.set($event)" class="bg-[var(--input-bg)] border border-[var(--input-border)] rounded-lg px-2 py-1 text-sm font-semibold text-[var(--text-primary)] focus:border-[var(--primary)] outline-none">
-              <button (click)="saveAvailability()" class="ml-2 px-3 py-1.5 bg-[var(--primary-light)] text-[var(--primary)] rounded-lg text-sm font-bold hover:bg-[var(--primary)] hover:text-white transition-colors">Save</button>
+              <input type="time" [ngModel]="workingEnd()" (ngModelChange)="workingEnd.set($event)"
+                class="bg-[var(--input-bg)] border border-[var(--input-border)] rounded-lg px-2 py-1 text-sm font-semibold text-[var(--text-primary)] focus:border-[var(--primary)] outline-none">
+              <button (click)="saveAvailability()"
+                class="ml-2 px-3 py-1.5 bg-[var(--primary-light)] text-[var(--primary)] rounded-lg text-sm font-bold hover:bg-[var(--primary)] hover:text-white transition-colors">
+                Save
+              </button>
             </div>
           </div>
         </div>
 
-        <div class="bg-[var(--surface)] border border-[var(--border-light)] rounded-2xl shadow-sm p-6 flex flex-col">
-          <div class="flex items-start justify-between mb-6">
-            <div>
-              <p class="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)] mb-1">Today</p>
-              <h3 class="text-xl font-bold text-[var(--text-primary)]">{{ today | date:'EEEE, MMM d' }}</h3>
+        <!-- Analytics Widget + Next Appointment -->
+        <div class="space-y-6">
+          <!-- Next Appointment Card -->
+          <div class="bg-[var(--surface)] border border-[var(--border-light)] rounded-2xl shadow-sm p-6">
+            <div class="flex items-start justify-between mb-4">
+              <div>
+                <p class="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)] mb-1">Today</p>
+                <h3 class="text-lg font-bold text-[var(--text-primary)]">{{ today | date:'EEEE, MMM d' }}</h3>
+              </div>
+              <span
+                class="bg-[var(--surface-tertiary)] text-[var(--text-primary)] text-xs font-bold px-3 py-1 rounded-full">
+                {{ getSelectedDateAppointments().length }} Appts
+              </span>
             </div>
-            <span class="bg-[var(--surface-tertiary)] text-[var(--text-primary)] text-xs font-bold px-3 py-1 rounded-full">{{ getSelectedDateAppointments().length }} Appts</span>
-          </div>
 
-          <div class="flex-1 flex flex-col justify-center">
             <ng-container *ngIf="nextAppointment(); else noNext">
-              <div class="p-4 bg-[var(--surface-secondary)] rounded-xl border border-[var(--border-light)]">
+              <div class="p-4 bg-[var(--surface-secondary)] rounded-xl border border-[var(--border-light)] hover-lift">
                 <p class="text-xs text-[var(--text-muted)] mb-2">Up Next</p>
                 <div class="flex items-center gap-3 mb-3">
-                  <div class="w-10 h-10 rounded-full bg-[var(--primary-light)] text-[var(--primary)] flex items-center justify-center font-bold text-sm">
+                  <div
+                    class="w-10 h-10 rounded-full bg-[var(--primary-light)] text-[var(--primary)] flex items-center justify-center font-bold text-sm">
                     {{ nextAppointment()?.patient?.firstName?.charAt(0) }}
                   </div>
                   <div>
-                    <h4 class="font-bold text-[var(--text-primary)] text-sm leading-tight">{{ nextAppointment()?.patient?.firstName }} {{ nextAppointment()?.patient?.lastName }}</h4>
-                    <p class="text-xs text-[var(--text-secondary)] mt-0.5">{{ formatTime12(nextAppointment()?.appointmentTime) }} • {{ nextAppointment()?.isVideoConsultation ? 'Online' : 'In-person' }}</p>
+                    <h4 class="font-bold text-[var(--text-primary)] text-sm leading-tight">
+                      {{ nextAppointment()?.patient?.firstName }} {{ nextAppointment()?.patient?.lastName }}
+                    </h4>
+                    <p class="text-xs text-[var(--text-secondary)] mt-0.5">
+                      {{ formatTime12(nextAppointment()?.appointmentTime) }} •
+                      {{ nextAppointment()?.isVideoConsultation ? 'Online' : 'In-person' }}
+                    </p>
                   </div>
                 </div>
                 <div class="flex gap-2">
-                  <button *ngIf="nextAppointment()?.isVideoConsultation" (click)="joinCall(nextAppointment()!)" class="flex-1 bg-[var(--primary)] text-white text-xs font-bold py-2 rounded-lg hover:bg-[var(--primary-hover)] transition-colors">Join Call</button>
-                  <button (click)="openNextAppointmentDay()" class="flex-1 bg-[var(--surface)] border border-[var(--border-default)] text-[var(--text-primary)] text-xs font-bold py-2 rounded-lg hover:bg-[var(--surface-tertiary)] transition-colors">View Day</button>
+                  <button *ngIf="nextAppointment()?.isVideoConsultation" (click)="joinCall(nextAppointment()!)"
+                    class="flex-1 bg-[var(--primary)] text-white text-xs font-bold py-2 rounded-lg hover:bg-[var(--primary-hover)] transition-colors">
+                    Join Call
+                  </button>
+                  <button (click)="openNextAppointmentDay()"
+                    class="flex-1 bg-[var(--surface)] border border-[var(--border-default)] text-[var(--text-primary)] text-xs font-bold py-2 rounded-lg hover:bg-[var(--surface-tertiary)] transition-colors">
+                    View Day
+                  </button>
                 </div>
               </div>
             </ng-container>
@@ -121,217 +179,204 @@
               </div>
             </ng-template>
           </div>
+
+          <!-- Analytics Widget -->
+          <div class="analytics-card" *ngIf="todayStats()">
+            <div class="flex items-center justify-between mb-4">
+              <h4 class="font-bold text-[var(--text-primary)]">Today's Stats</h4>
+              <i class="bi bi-graph-up text-[var(--primary)]"></i>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <p class="stat-number">{{ todayStats()?.totalPatients || 0 }}</p>
+                <p class=" stat-label">Patients</p>
+              </div>
+              <div>
+                <p class="stat-number">{{ todayStats()?.missedAppointments || 0 }}</p>
+                <p class="stat-label">Missed</p>
+              </div>
+              <div class="col-span-2">
+                <p class="text-xl font-bold text-[var(--text-primary)]">
+                  {{ todayStats()?.averageConsultationMinutes || 0 | number:'1.0-0' }} min
+                </p>
+                <p class="stat-label">Avg Consultation</p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-<section
-  class="border border-[var(--border-light)] rounded-2xl shadow-sm overflow-hidden flex flex-col min-h-[500px] bg-[var(--surface)] dark:bg-[var(--surface-tertiary)]"
->
-  <!-- Header -->
-  <div
-    class="p-4 border-b border-[var(--border-light)] flex items-center justify-between bg-[var(--surface-tertiary)]"
-  >
-    <h3 class="font-bold text-[var(--text-primary)] flex items-center gap-2">
-      <i class="bi bi-calendar-day text-[var(--primary)]"></i>
-      {{ selectedDate() | date: 'MMMM d, yyyy' }}
-    </h3>
-    <div class="flex items-center gap-2">
-      <span
-        class="text-xs font-semibold px-2 py-1 bg-[var(--surface)] rounded border border-[var(--border-light)] text-[var(--text-secondary)]"
-      >
-        {{ slotDurationMinutes() }}m Slots
-      </span>
-    </div>
-  </div>
 
-  <!-- Body -->
-  <div class="flex-1 overflow-y-auto p-4">
-    <ng-container [ngSwitch]="viewMode()">
-      <!-- Day View -->
-      <div *ngSwitchCase="'day'" class="space-y-3">
-        <ng-container *ngIf="visibleDaySlots().length; else emptyState">
-          <div
-            *ngFor="let slot of visibleDaySlots()"
-            class="group flex gap-4 transition-all duration-200"
-          >
-            <!-- Time Label -->
-            <div
-              class="w-24 pt-3 text-right text-xs font-bold text-[var(--text-muted)] font-mono"
-            >
-              {{ formatRange12(slot.startTime, slot.endTime) }}
-            </div>
+      <!-- Timeline Schedule View -->
+      <section
+        class="border border-[var(--border-light)] rounded-2xl shadow-sm overflow-hidden flex flex-col min-h-[600px] bg-[var(--surface)]">
+        <!-- Section Header -->
+        <div
+          class="p-4 border-b border-[var(--border-light)] flex items-center justify-between bg-[var(--surface-tertiary)]">
+          <h3 class="font-bold text-[var(--text-primary)] flex items-center gap-2">
+            <i class="bi bi-calendar-day text-[var(--primary)]"></i>
+            {{ selectedDate() | date: 'MMMM d, yyyy' }}
+          </h3>
+          <div class="flex items-center gap-2">
+            <span
+              class="text-xs font-semibold px-2 py-1 bg-[var(--surface)] rounded border border-[var(--border-light)] text-[var(--text-secondary)]">
+              {{ slotDurationMinutes() }}m Slots
+            </span>
+          </div>
+        </div>
 
-            <!-- Slot Card -->
-            <div
-              class="flex-1 p-4 rounded-xl border border-[var(--border-light)] transition-all duration-200 relative"
-              [ngClass]="{
-                'bg-[var(--surface-secondary)] border-l-4 border-l-[var(--border-default)]': !getAppointmentForSlot(slot),
-                'bg-[var(--badge-confirmed-bg)] border-l-4 border-l-[var(--success)]': getAppointmentForSlot(slot)?.status === 'confirmed',
-                'bg-[var(--badge-pending-bg)] border-l-4 border-l-[var(--warning)]': getAppointmentForSlot(slot)?.status === 'pending',
-                'bg-[var(--badge-cancelled-bg)] border-l-4 border-l-[var(--error)] opacity-75': getAppointmentForSlot(slot)?.status === 'cancelled',
-                'bg-[var(--info-light)] border-l-4 border-l-[var(--info)]': getAppointmentForSlot(slot)?.status === 'completed'
-              }"
-            >
-              <!-- Appointment -->
-              <ng-container *ngIf="getAppointmentForSlot(slot) as appt; else availableSlot">
-                <div
-                  class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4"
-                >
-                  <div>
-                    <div class="flex items-center gap-2 mb-1">
-                      <h4 class="font-bold text-[var(--text-primary)] text-sm">
-                        {{ appt.patient?.firstName }} {{ appt.patient?.lastName }}
-                      </h4>
-                      <span
-                        *ngIf="appt.isVideoConsultation"
-                        class="text-[10px] bg-[var(--info)] text-white px-1.5 py-0.5 rounded font-bold"
-                        ><i class="bi bi-camera-video-fill"></i> Online</span
-                      >
+        <!-- Timeline Body -->
+        <div class="flex-1 overflow-y-auto p-6">
+          <ng-container [ngSwitch]="viewMode()">
+
+            <!-- Day View - Timeline Style -->
+            <div *ngSwitchCase="'day'">
+              <ng-container *ngIf="visibleDaySlots().length; else emptyState">
+                <div class="space-y-2">
+                  <div *ngFor="let slot of visibleDaySlots()" class="group flex gap-4 transition-all duration-200">
+                    <!-- Time Label -->
+                    <div class="w-24 pt-3 text-right text-xs font-bold text-[var(--text-muted)] font-mono">
+                      {{ formatRange12(slot.startTime, slot.endTime) }}
                     </div>
-                    <p class="text-xs text-[var(--text-secondary)]">
-                      {{ appt.appointmentType || 'Consultation' }} •
-                      {{ appt.reason || 'No details' }}
-                    </p>
-                  </div>
 
-                  <!-- Actions -->
-                  <div
-                    class="flex flex-wrap gap-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
-                  >
-                    <button
-                      *ngIf="appt.isVideoConsultation"
-                      (click)="joinCall(appt)"
-                      class="p-1.5 rounded-lg bg-[var(--primary)] text-white hover:brightness-110"
-                      title="Join Call"
-                    >
-                      <i class="bi bi-camera-video"></i>
-                    </button>
-                    <button
-                      *ngIf="appt.status === 'pending'"
-                      (click)="acceptAppointment(appt)"
-                      class="p-1.5 rounded-lg bg-[var(--success)] text-white hover:brightness-110"
-                      title="Accept"
-                    >
-                      <i class="bi bi-check-lg"></i>
-                    </button>
-                    <button
-                      (click)="rescheduleAppointment(appt)"
-                      class="p-1.5 rounded-lg bg-[var(--surface)] border border-[var(--border-default)] text-[var(--text-primary)] hover:bg-[var(--surface-tertiary)]"
-                      title="Reschedule"
-                    >
-                      <i class="bi bi-calendar-event"></i>
-                    </button>
-                    <button
-                      (click)="completeAppointment(appt)"
-                      class="p-1.5 rounded-lg bg-[var(--info)] text-white hover:brightness-110"
-                      title="Complete"
-                    >
-                      <img
-                        src="https://img.icons8.com/ios-filled/20/checkmark.png"
-                        alt="Complete"
-                        class="w-4 h-4 opacity-90"
-                      />
-                    </button>
-                    <button
-                      (click)="rejectAppointment(appt)"
-                      class="p-1.5 rounded-lg bg-[var(--error)] text-white hover:brightness-110"
-                      title="Cancel"
-                    >
-                      <i class="bi bi-x-lg"></i>
-                    </button>
+                    <!-- Slot Card - with drag support -->
+                    <div
+                      class="flex-1 p-4 rounded-xl border border-[var(--border-light)] transition-all duration-200 relative slot-hover"
+                      [draggable]="getAppointmentForSlot(slot) ? true : false" (dragstart)="onDragStart($event, slot)"
+                      (dragend)="onDragEnd($event)" [ngClass]="{
+                        'bg-[var(--surface-secondary)] border-l-4 border-l-[var(--border-default)]': !getAppointmentForSlot(slot),
+                        'timeline-slot-confirmed': getAppointmentForSlot(slot)?.status === 'confirmed',
+                        'timeline-slot-pending': getAppointmentForSlot(slot)?.status === 'pending',
+                        'timeline-slot-cancelled': getAppointmentForSlot(slot)?.status === 'cancelled',
+                        'bg-[var(--info-light)] border-l-4 border-l-[var(--info)]': getAppointmentForSlot(slot)?.status === 'completed',
+                        'slot-draggable': getAppointmentForSlot(slot)
+                      }">
+                      <!-- Appointment Content -->
+                      <ng-container *ngIf="getAppointmentForSlot(slot) as appt; else availableSlot">
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                          <div>
+                            <div class="flex items-center gap-2 mb-1">
+                              <h4 class="font-bold text-[var(--text-primary)] text-sm">
+                                {{ appt.patient?.firstName }} {{ appt.patient?.lastName }}
+                              </h4>
+                              <span *ngIf="appt.isVideoConsultation"
+                                class="text-[10px] bg-[var(--info)] text-white px-1.5 py-0.5 rounded font-bold">
+                                <i class="bi bi-camera-video-fill"></i> Online
+                              </span>
+                            </div>
+                            <p class="text-xs text-[var(--text-secondary)]">
+                              {{ appt.appointmentType || 'Consultation' }} • {{ appt.reason || 'No details' }}
+                            </p>
+                          </div>
+
+                          <!-- Action Buttons -->
+                          <div
+                            class="flex flex-wrap gap-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                            <button *ngIf="appt.isVideoConsultation" (click)="joinCall(appt)"
+                              class="p-1.5 rounded-lg bg-[var(--primary)] text-white hover:brightness-110"
+                              title="Join Call">
+                              <i class="bi bi-camera-video"></i>
+                            </button>
+                            <button *ngIf="appt.status === 'pending'" (click)="acceptAppointment(appt)"
+                              class="p-1.5 rounded-lg bg-[var(--success)] text-white hover:brightness-110"
+                              title="Accept">
+                              <i class="bi bi-check-lg"></i>
+                            </button>
+                            <button (click)="rescheduleAppointment(appt)"
+                              class="p-1.5 rounded-lg bg-[var(--surface)] border border-[var(--border-default)] text-[var(--text-primary)] hover:bg-[var(--surface-tertiary)]"
+                              title="Reschedule">
+                              <i class="bi bi-calendar-event"></i>
+                            </button>
+                            <button (click)="completeAppointment(appt)"
+                              class="p-1.5 rounded-lg bg-[var(--info)] text-white hover:brightness-110"
+                              title="Complete">
+                              <i class="bi bi-check-circle"></i>
+                            </button>
+                            <button (click)="rejectAppointment(appt)"
+                              class="p-1.5 rounded-lg bg-[var(--error)] text-white hover:brightness-110" title="Cancel">
+                              <i class="bi bi-x-lg"></i>
+                            </button>
+                          </div>
+                        </div>
+                      </ng-container>
+
+                      <!-- Available Slot -->
+                      <ng-template #availableSlot>
+                        <div class="flex justify-between items-center h-full">
+                          <span class="text-sm font-medium text-[var(--text-muted)] flex items-center gap-2">
+                            <i class="bi bi-circle text-[8px] text-[var(--success)]"></i>
+                            Available
+                          </span>
+                          <div class="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button (click)="blockSlot(slot)"
+                              class="text-xs font-bold text-[var(--error)] hover:bg-[var(--error-light)] px-3 py-1.5 rounded-lg transition-colors">
+                              Block
+                            </button>
+                            <button (click)="removeSlot(slot, selectedDate())"
+                              class="text-xs font-bold text-[var(--warning)] hover:bg-[var(--warning-light)] px-3 py-1.5 rounded-lg transition-colors">
+                              Remove
+                            </button>
+                          </div>
+                        </div>
+                      </ng-template>
+                    </div>
                   </div>
                 </div>
               </ng-container>
-
-              <!-- Available Slot -->
-              <ng-template #availableSlot>
-                <div class="flex justify-between items-center h-full">
-                  <span
-                    class="text-sm font-medium text-[var(--text-muted)] flex items-center gap-2"
-                  >
-                    <i class="bi bi-circle text-[8px] text-[var(--success)]"></i>
-                    Available
-                  </span>
-                  <div
-                    class="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                  >
-                    <button
-                      (click)="blockSlot(slot)"
-                      class="text-xs font-bold text-[var(--error)] hover:bg-[var(--error-light)] px-3 py-1.5 rounded-lg transition-colors"
-                    >
-                      Block
-                    </button>
-                    <button
-                      (click)="removeSlot(slot, selectedDate())"
-                      class="text-xs font-bold text-[var(--warning)] hover:bg-[var(--warning-light)] px-3 py-1.5 rounded-lg transition-colors"
-                    >
-                      Remove
-                    </button>
-                  </div>
-                </div>
-              </ng-template>
             </div>
-          </div>
-        </ng-container>
-      </div>
 
-      <!-- Week View -->
-      <div *ngSwitchCase="'week'" class="grid grid-cols-1 md:grid-cols-7 gap-4">
-        <div
-          *ngFor="let d of weekDays()"
-          class="bg-[var(--surface-secondary)] rounded-xl p-4 border border-[var(--border-light)] min-h-[150px] flex flex-col items-center justify-center text-center"
-        >
-          <div class="text-xs font-bold uppercase text-[var(--text-muted)] mb-1">
-            {{ d | date: 'EEE' }}
-          </div>
-          <div class="text-lg font-bold text-[var(--text-primary)] mb-2">
-            {{ d | date: 'd' }}
-          </div>
-          <div
-            class="text-xs px-2 py-1 rounded-full bg-[var(--surface)] border border-[var(--border-light)] text-[var(--text-secondary)]"
-          >
-            {{ countAppointmentsForDate(d) }} appts
-          </div>
+            <!-- Week View -->
+            <div *ngSwitchCase="'week'" class="grid grid-cols-1 md:grid-cols-7 gap-4">
+              <div *ngFor="let d of weekDays()"
+                class="bg-[var(--surface-secondary)] rounded-xl p-4 border border-[var(--border-light)] min-h-[150px] flex flex-col items-center justify-center text-center hover-lift">
+                <div class="text-xs font-bold uppercase text-[var(--text-muted)] mb-1">{{ d | date: 'EEE' }}</div>
+                <div class="text-lg font-bold text-[var(--text-primary)] mb-2">{{ d | date: 'd' }}</div>
+                <div
+                  class="text-xs px-2 py-1 rounded-full bg-[var(--surface)] border border-[var(--border-light)] text-[var(--text-secondary)]">
+                  {{ countAppointmentsForDate(d) }} appts
+                </div>
+              </div>
+            </div>
+
+            <!-- Month View -->
+            <div *ngSwitchCase="'month'" class="flex flex-col items-center justify-center h-64 text-center">
+              <div
+                class="w-16 h-16 rounded-full bg-[var(--surface-secondary)] flex items-center justify-center text-[var(--primary)] text-2xl mb-4">
+                <i class="bi bi-calendar-month"></i>
+              </div>
+              <p class="text-[var(--text-primary)] font-bold">Month View</p>
+              <p class="text-[var(--text-secondary)] text-sm max-w-xs">
+                Use the calendar widget above to navigate days. Summary statistics for the month are visible in the
+                dashboard.
+              </p>
+            </div>
+          </ng-container>
+
+          <!-- Empty State -->
+          <ng-template #emptyState>
+            <div
+              class="flex flex-col items-center justify-center py-16 text-center bg-[var(--surface-secondary)] rounded-2xl border border-dashed border-[var(--border-default)]">
+              <div
+                class="w-16 h-16 bg-[var(--surface)] rounded-full flex items-center justify-center text-[var(--text-muted)] text-2xl mb-4 shadow-sm">
+                <i class="bi bi-calendar-plus"></i>
+              </div>
+              <h3 class="text-[var(--text-primary)] font-bold mb-1">No slots available</h3>
+              <p class="text-[var(--text-secondary)] text-sm mb-4 max-w-md">
+                This day might be marked as non-working, or you haven't generated slots yet.
+              </p>
+              <div class="flex gap-3">
+                <button (click)="enableDay()"
+                  class="px-4 py-2 bg-[var(--primary)] text-white rounded-lg font-semibold text-sm hover:bg-[var(--primary-hover)] transition-colors">
+                  Enable Day
+                </button>
+                <button (click)="generateSlots()"
+                  class="px-4 py-2 bg-[var(--surface)] border border-[var(--border-default)] text-[var(--text-primary)] rounded-lg font-semibold text-sm hover:bg-[var(--surface-tertiary)] transition-colors">
+                  Generate Slots
+                </button>
+              </div>
+            </div>
+          </ng-template>
         </div>
-      </div>
-
-      <!-- Month View -->
-      <div
-        *ngSwitchCase="'month'"
-        class="flex flex-col items-center justify-center h-64 text-center"
-      >
-        <div
-          class="w-16 h-16 rounded-full bg-[var(--surface-secondary)] flex items-center justify-center text-[var(--primary)] text-2xl mb-4"
-        >
-          <i class="bi bi-calendar-month"></i>
-        </div>
-        <p class="text-[var(--text-primary)] font-bold">Month View</p>
-        <p class="text-[var(--text-secondary)] text-sm max-w-xs">
-          Use the calendar widget on the left to navigate days. Summary statistics
-          for the month are visible in the dashboard.
-        </p>
-      </div>
-    </ng-container>
-
-    <ng-template #emptyState>
-      <div
-        class="flex flex-col items-center justify-center py-12 text-center bg-[var(--surface-secondary)] rounded-2xl border border-dashed border-[var(--border-default)]"
-      >
-        <div
-          class="w-16 h-16 bg-[var(--surface)] rounded-full flex items-center justify-center text-[var(--text-muted)] text-2xl mb-4 shadow-sm"
-        >
-          <i class="bi bi-calendar-plus"></i>
-        </div>
-        <h3 class="text-[var(--text-primary)] font-bold mb-1">No slots generated</h3>
-        <p class="text-[var(--text-secondary)] text-sm mb-4 max-w-md">
-          There are no slots visible for this day. This might be because the day is
-          marked as non-working, or you haven't generated slots yet.
-        </p>
-      </div>
-    </ng-template>
-  </div>
-</section>
-
-
+      </section>
     </div>
   </main>
 </div>

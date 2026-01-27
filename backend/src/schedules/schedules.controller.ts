@@ -2,10 +2,13 @@ import { Controller, Get, Post, Body, Param, Query, Req, UseGuards } from '@nest
 import { SchedulesService } from './schedules.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { UpdateSlotDto } from './dto/update-slot.dto';
+import { GenerateSlotsDto } from './dto/generate-slots.dto';
+import { ApplyTemplateDto } from './dto/apply-template.dto';
+import { BulkSlotUpdateDto } from './dto/bulk-slot-update.dto';
 
 @Controller('doctors/schedule')
 export class SchedulesController {
-  constructor(private readonly svc: SchedulesService) {}
+  constructor(private readonly svc: SchedulesService) { }
 
   // Public variant for patients to request a specific doctor's schedule without relying on auth user
   @Get('public/:doctorId/:date')
@@ -109,6 +112,46 @@ export class SchedulesController {
     return this.svc.updateDoctorWorkingDays(doctorId, body.days || []);
   }
 
+  // Slot Generation
+  @UseGuards(JwtAuthGuard)
+  @Post('generate')
+  async generateSlots(@Req() req: any, @Body() body: GenerateSlotsDto) {
+    const doctorId = req.user?.id ?? req.user?.sub ?? req.headers['x-doctor-id'];
+    return this.svc.generateSlotsForDay(doctorId, body);
+  }
+
+  // Apply Template
+  @UseGuards(JwtAuthGuard)
+  @Post('apply-template')
+  async applyTemplate(@Req() req: any, @Body() body: ApplyTemplateDto) {
+    const doctorId = req.user?.id ?? req.user?.sub ?? req.headers['x-doctor-id'];
+    return this.svc.applyTemplateToDateRange(doctorId, body);
+  }
+
+  // Bulk Update
+  @UseGuards(JwtAuthGuard)
+  @Post('bulk-update')
+  async bulkUpdate(@Req() req: any, @Body() body: BulkSlotUpdateDto) {
+    const doctorId = req.user?.id ?? req.user?.sub ?? req.headers['x-doctor-id'];
+    return this.svc.bulkUpdateSlotStatus(doctorId, body);
+  }
+
+  // Enhanced Week View
+  @UseGuards(JwtAuthGuard)
+  @Get('week-detailed/:startDate')
+  async getWeekDetailed(@Req() req: any, @Param('startDate') startDate: string) {
+    const doctorId = req.user?.id ?? req.user?.sub ?? req.headers['x-doctor-id'];
+    return this.svc.getWeekScheduleDetailed(doctorId, startDate);
+  }
+
+  // Month Overview
+  @UseGuards(JwtAuthGuard)
+  @Get('month-overview')
+  async getMonthOverview(@Req() req: any, @Query('year') year: string, @Query('month') month: string) {
+    const doctorId = req.user?.id ?? req.user?.sub ?? req.headers['x-doctor-id'];
+    return this.svc.getMonthScheduleOverview(doctorId, Number(year), Number(month));
+  }
+
   // Keep this catch-all day route last so it does not steal static routes like "working-days"
   @UseGuards(JwtAuthGuard)
   @Get(':date')
@@ -117,3 +160,4 @@ export class SchedulesController {
     return this.svc.getDaySchedule(doctorId, date);
   }
 }
+
