@@ -5,9 +5,8 @@ import { User } from '../../users/entities/user.entity';
 
 export enum PaymentStatus {
   PENDING = 'pending',
-  SUCCESS = 'success',
+  PAID = 'paid',
   FAILED = 'failed',
-  CANCELLED = 'cancelled',
 }
 
 export enum PaymentMethod {

@@ -66,6 +66,20 @@
   cursor: default;
 }
 
+.calendar-day-past {
+  opacity: 0.25;
+  cursor: not-allowed !important;
+  pointer-events: none;
+  /* Block clicks entirely */
+}
+
+.calendar-day-past:hover {
+  transform: none !important;
+  background: var(--surface-secondary) !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
 .calendar-dot {
   width: 5px;
   height: 5px;

@@ -14,7 +14,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
-import { UserRole,} from '../common/index';
+import { UserRole, } from '../common/index';
 import { User } from '@/users/entities/user.entity';
 
 import { StripeService } from './stripe.service';
@@ -27,25 +27,9 @@ export class PaymentsController {
   constructor(
     private readonly stripeService: StripeService,
     private readonly cashService: CashService,
-  ) {}
+  ) { }
 
   // Stripe Payment Endpoints
-  @Post('stripe/checkout')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.PATIENT, UserRole.ADMIN, UserRole.RECEPTIONIST)
-  @HttpCode(HttpStatus.OK)
-  async createStripeCheckout(
-    @Body() dto: CreateStripePaymentDto,
-    @CurrentUser() user: User,
-  ) {
-    return this.stripeService.createCheckoutSession(
-      dto.appointmentId,
-      user.id,
-      dto.email || user.email,
-      dto.amount,
-    );
-  }
-
   @Post('stripe/create-intent')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.PATIENT, UserRole.ADMIN, UserRole.RECEPTIONIST)

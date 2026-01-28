@@ -183,6 +183,14 @@ export class DoctorsComponent implements OnInit {
       return;
     }
 
+    // New: Check if time is within doctor's working range
+    if (!this.isWithinDoctorRange(time)) {
+      const doctor = this.selectedDoctor();
+      const range = doctor ? `${this.formatTime12(doctor.startTime || '09:00')} - ${this.formatTime12(doctor.endTime || '17:00')}` : 'working hours';
+      this.toast.error(`Please select a time within the doctor\'s ${range}`, { title: 'Invalid Selection' });
+      return;
+    }
+
     const payload = {
       doctorId: this.selectedDoctor()!.id,
       appointmentDate: date,
@@ -220,6 +228,31 @@ export class DoctorsComponent implements OnInit {
     const currentM = now.getMinutes();
 
     return h < currentH || (h === currentH && m < currentM);
+  }
+
+  private isWithinDoctorRange(timeStr: string): boolean {
+    const doctor = this.selectedDoctor();
+    if (!doctor || !doctor.startTime || !doctor.endTime) return true; // Fallback if no specific range
+
+    const toMin = (t: string) => {
+      const [h, m] = t.split(':').map(Number);
+      return h * 60 + m;
+    };
+
+    const currentMin = toMin(timeStr);
+    const startMin = toMin(doctor.startTime);
+    const endMin = toMin(doctor.endTime);
+
+    return currentMin >= startMin && currentMin < endMin;
+  }
+
+  private formatTime12(time: string): string {
+    const [hStr, mStr] = time.split(':');
+    const h = Number(hStr);
+    const m = Number(mStr);
+    const period = h >= 12 ? 'PM' : 'AM';
+    const hr = h % 12 || 12;
+    return `${hr}:${String(m).padStart(2, '0')} ${period}`;
   }
 
   loadAvailableSlots(dateStr?: string): void {

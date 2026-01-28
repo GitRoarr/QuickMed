@@ -5,6 +5,14 @@ import { provideAnimations } from "@angular/platform-browser/animations"
 import { routes } from "./app.routes"
 import { authInterceptor } from "./core/interceptors/auth.interceptor"
 
+import { provideNgxStripe } from 'ngx-stripe';
+import { environment } from '../environments/environment';
+
 export const appConfig: ApplicationConfig = {
-  providers: [provideRouter(routes), provideHttpClient(withInterceptors([authInterceptor])), provideAnimations()],
+  providers: [
+    provideRouter(routes),
+    provideHttpClient(withInterceptors([authInterceptor])),
+    provideAnimations(),
+    provideNgxStripe(environment.stripePublishableKey)
+  ],
 }

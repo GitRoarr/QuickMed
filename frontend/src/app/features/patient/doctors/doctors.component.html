@@ -111,16 +111,17 @@
             <input type="date" formControlName="appointmentDate" [min]="getCurrentDate()" (change)="onDateChange()" />
           </label>
 
-          <label>
-            <span>Available Time Slots</span>
+          <label class="mt-4">
+            <span class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-3 block">Available Time
+              Slots</span>
             <div class="slot-selector" *ngIf="availableSlots().length > 0; else noSlots">
 
               <!-- Morning Sessions -->
-              <div *ngIf="morningSlots().length > 0" class="session-group mb-4">
-                <p class="session-label">🌅 Morning (09:00 AM – 12:00 PM)</p>
+              <div *ngIf="morningSlots().length > 0" class="session-group mb-6">
+                <p class="session-label">🌅 MORNING (09:00 AM – 12:00 PM)</p>
                 <div class="slots-grid">
                   <button type="button" *ngFor="let slot of morningSlots()" (click)="selectTimeSlot(slot)"
-                    [class.selected]="isTimeSlotSelected(slot)" class="slot-btn" [title]="formatSlotTime(slot)">
+                    [class.selected]="isTimeSlotSelected(slot)" class="slot-btn">
                     {{ formatSlotTime(slot) }}
                   </button>
                 </div>
@@ -128,10 +129,10 @@
 
               <!-- Evening Sessions -->
               <div *ngIf="eveningSlots().length > 0" class="session-group">
-                <p class="session-label">🌆 Evening (02:00 PM – 08:00 PM)</p>
+                <p class="session-label">🌆 EVENING (02:00 PM – 08:00 PM)</p>
                 <div class="slots-grid">
                   <button type="button" *ngFor="let slot of eveningSlots()" (click)="selectTimeSlot(slot)"
-                    [class.selected]="isTimeSlotSelected(slot)" class="slot-btn" [title]="formatSlotTime(slot)">
+                    [class.selected]="isTimeSlotSelected(slot)" class="slot-btn">
                     {{ formatSlotTime(slot) }}
                   </button>
                 </div>

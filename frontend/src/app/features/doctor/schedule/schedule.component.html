@@ -82,8 +82,9 @@
                   'calendar-day-selected': isSelected(date),
                   'calendar-day-today': isToday(date) && !isSelected(date),
                   'calendar-day-outside': !isCurrentMonth(date),
+                  'calendar-day-past': isPastDay(date) && !isToday(date),
                   'calendar-day': true
-                }">
+                }" [disabled]="isPastDay(date)">
                 <span>{{ date.getDate() }}</span>
                 <span *ngIf="hasAppointments(date)" class="calendar-dot"></span>
               </button>

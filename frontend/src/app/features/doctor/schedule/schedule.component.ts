@@ -162,6 +162,14 @@ export class ScheduleComponent implements OnInit {
     return date.getMonth() === this.currentMonth().getMonth();
   }
 
+  isPastDay(date: Date): boolean {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const checkDate = new Date(date);
+    checkDate.setHours(0, 0, 0, 0);
+    return checkDate.getTime() < today.getTime();
+  }
+
   toggleWorkingDay(day: number): void {
     const set = new Set(this.workingDays());
     const wasSelected = set.has(day);
@@ -587,6 +595,10 @@ export class ScheduleComponent implements OnInit {
   }
 
   selectDate(date: Date): void {
+    if (this.isPastDay(date)) {
+      this.toast.warning('You cannot select past dates for scheduling.', { title: 'Schedule' });
+      return;
+    }
     this.selectedDate.set(date);
     // If selecting a date outside current month view, update current month
     if (date.getMonth() !== this.currentMonth().getMonth() || date.getFullYear() !== this.currentMonth().getFullYear()) {

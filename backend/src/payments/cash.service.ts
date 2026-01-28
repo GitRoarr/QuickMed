@@ -11,7 +11,7 @@ export class CashService {
     private readonly paymentsRepo: Repository<Payment>,
     @InjectRepository(Appointment)
     private readonly appointmentsRepo: Repository<Appointment>,
-  ) {}
+  ) { }
 
   async recordCashPayment(
     appointmentId: string,
@@ -34,7 +34,7 @@ export class CashService {
       appointmentId,
       patientId,
       amount: paymentAmount,
-      status: PaymentStatus.SUCCESS,
+      status: PaymentStatus.PAID,
       method: PaymentMethod.CASH,
       currency,
       description: note || `Cash payment for appointment ${appointmentId}`,

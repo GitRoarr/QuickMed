@@ -1,86 +1,92 @@
 <div class="payment-container">
   <div class="payment-card" *ngIf="!loading() && appointment()">
     <div class="payment-header">
-      <h1>Complete Payment</h1>
-      <p class="subtitle">Secure payment for your appointment</p>
+      <h1>Payment Details</h1>
+      <p class="subtitle">Please review and complete your payment</p>
     </div>
 
-    <div class="appointment-summary" *ngIf="appointment()">
+    <!-- Appointment Summary -->
+    <div class="appointment-summary">
       <div class="summary-header">
-        <i class="bi bi-calendar-check"></i>
-        <h3>Appointment Details</h3>
+        <i class="bi bi-calendar-check-fill"></i>
+        <h3>Appointment Summary</h3>
       </div>
-      
-      <div class="summary-content">
+
+      <div class="summary-grid">
         <div class="summary-item">
-          <span class="label">Date:</span>
-          <span class="value">{{ appointment()?.appointmentDate | date:'fullDate' }}</span>
+          <span class="label">Doctor</span>
+          <span class="value">Dr. {{ appointment()?.doctor?.firstName }} {{ appointment()?.doctor?.lastName }}</span>
         </div>
         <div class="summary-item">
-          <span class="label">Time:</span>
+          <span class="label">Expertise</span>
+          <span class="value">{{ appointment()?.doctor?.specialty }}</span>
+        </div>
+        <div class="summary-item">
+          <span class="label">Date</span>
+          <span class="value">{{ appointment()?.appointmentDate | date:'mediumDate' }}</span>
+        </div>
+        <div class="summary-item">
+          <span class="label">Time Slot</span>
           <span class="value">{{ appointment()?.appointmentTime }}</span>
         </div>
-        <div class="summary-item" *ngIf="appointment()?.doctor">
-          <span class="label">Doctor:</span>
-          <span class="value">{{ appointment()?.doctor?.firstName }} {{ appointment()?.doctor?.lastName }}</span>
+      </div>
+    </div>
+
+    <!-- Pricing Summary -->
+    <div class="pricing-section">
+      <span class="price-label">Total Amount Due</span>
+      <span class="price-value">USD 50.00</span>
+    </div>
+
+    <!-- Payment Method Selector -->
+    <div class="payment-method-selector">
+      <span class="section-label">Select Payment Method</span>
+      <div class="method-options">
+        <div class="method-card" [class.active]="paymentMethod() === 'CARD'" (click)="setPaymentMethod('CARD')">
+          <i class="bi bi-credit-card-2-front"></i>
+          <span>Pay with Card</span>
         </div>
-        <div class="summary-item" *ngIf="appointment()?.appointmentType">
-          <span class="label">Type:</span>
-          <span class="value">{{ appointment()?.appointmentType }}</span>
+        <div class="method-card" [class.active]="paymentMethod() === 'CASH'" (click)="setPaymentMethod('CASH')">
+          <i class="bi bi-cash-stack"></i>
+          <span>Pay at Clinic</span>
         </div>
       </div>
     </div>
 
-    <div class="payment-amount">
-      <div class="amount-display">
-        <span class="currency">USD</span>
-        <span class="amount">50</span>
-      </div>
-      <p class="amount-label">Appointment Fee</p>
-    </div>
-
-    <div class="payment-methods">
-      <div class="method-card active">
-        <i class="bi bi-credit-card"></i>
-        <div>
-          <h4>Chapa Payment</h4>
-          <p>Secure online payment via Chapa</p>
-        </div>
-        <i class="bi bi-check-circle-fill"></i>
+    <!-- Stripe Card Element -->
+    <div class="stripe-element-container" *ngIf="paymentMethod() === 'CARD'">
+      <div id="stripe-card-element">
+        <!-- Stripe.js Card Element will be injected here -->
       </div>
     </div>
 
+    <!-- Cash Payment Message -->
+    <div class="cash-note" *ngIf="paymentMethod() === 'CASH'">
+      <i class="bi bi-info-circle-fill"></i>
+      <p>Secure your slot now. You can pay the total amount at the clinic reception during your visit.</p>
+    </div>
+
+    <!-- Error Handling -->
     <div class="error-message" *ngIf="error()">
-      <i class="bi bi-exclamation-circle"></i>
+      <i class="bi bi-exclamation-triangle-fill"></i>
       <span>{{ error() }}</span>
     </div>
 
+    <!-- Actions -->
     <div class="payment-actions">
-      <button 
-        class="btn-cancel" 
-        (click)="cancel()"
-        [disabled]="processing()">
+      <button class="btn-secondary" (click)="cancel()" [disabled]="processing()">
         Cancel
       </button>
-      <button 
-        class="btn-pay" 
-        (click)="proceedToPayment()"
-        [disabled]="processing() || appointment()?.paymentStatus === 'paid'">
-        <span *ngIf="!processing()">Pay Now</span>
-        <span *ngIf="processing()">
-          <i class="bi bi-hourglass-split"></i> Processing...
-        </span>
+      <button class="btn-primary" (click)="confirmPayment()" [disabled]="processing() || !paymentMethod()">
+        <span *ngIf="processing()" class="loading-spinner"></span>
+        {{ processing() ? 'Processing...' : (paymentMethod() === 'CARD' ? 'Secure Checkout' : 'Confirm Appointment') }}
       </button>
-    </div>
-
-    <div class="security-note">
-      <i class="bi bi-shield-check"></i>
-      <p>Your payment is secured by Chapa. We never store your card details.</p>
     </div>
   </div>
 
+  <!-- Full Page Loading State -->
   <div class="loading-state" *ngIf="loading()">
-    <div class="spinner"></div>
-    <p>Loading appointment details...</p>
+    <div class="loading-spinner" style="width: 3rem; height: 3rem; border-width: 3px;"></div>
+    <p class="mt-4 font-semibold opacity-75">Loading details...</p>
   </div>
 </div>

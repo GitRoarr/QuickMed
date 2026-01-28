@@ -54,7 +54,7 @@ export class StripeService {
 
     const paymentIntent = await this.stripe.paymentIntents.create({
       amount: amountInCents,
-      currency: 'usd', 
+      currency: 'usd',
       metadata: {
         appointmentId,
         patientId,
@@ -85,77 +85,6 @@ export class StripeService {
     };
   }
 
-  async createCheckoutSession(
-    appointmentId: string,
-    patientId: string,
-    email: string,
-    amount?: number,
-  ): Promise<{ checkoutUrl: string; sessionId: string }> {
-    if (!this.stripe) {
-      throw new BadRequestException('Stripe is not configured on the server.');
-    }
-
-    const appointment = await this.appointmentsService.findOne(appointmentId);
-    if (!appointment) {
-      throw new NotFoundException('Appointment not found');
-    }
-
-    const paymentAmount = amount || 50;
-    if (paymentAmount <= 0) {
-      throw new BadRequestException('Invalid payment amount');
-    }
-
-    const amountInCents = Math.round(paymentAmount * 100);
-    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:4200';
-
-    const session = await this.stripe.checkout.sessions.create({
-      mode: 'payment',
-      customer_email: email,
-      payment_method_types: ['card'],
-      line_items: [
-        {
-          price_data: {
-            currency: 'usd',
-            product_data: {
-              name: `Appointment ${appointmentId}`,
-              description: `Payment for appointment ${appointmentId}`,
-            },
-            unit_amount: amountInCents,
-          },
-          quantity: 1,
-        },
-      ],
-      success_url: `${frontendUrl}/payments/success?session_id={CHECKOUT_SESSION_ID}&appointmentId=${appointmentId}`,
-      cancel_url: `${frontendUrl}/payments/cancel?appointmentId=${appointmentId}`,
-      metadata: {
-        appointmentId,
-        patientId,
-        email,
-      },
-    });
-
-    const payment = this.paymentRepository.create({
-      transactionId: session.id,
-      appointmentId,
-      patientId,
-      amount: paymentAmount,
-      status: PaymentStatus.PENDING,
-      method: PaymentMethod.STRIPE,
-      currency: 'USD',
-      description: `Payment for appointment ${appointmentId}`,
-      stripeResponse: session as any,
-      returnUrl: `${frontendUrl}/payments/success`,
-      callbackUrl: `${process.env.BACKEND_URL || 'http://localhost:3000'}/payments/stripe/webhook`,
-    });
-
-    await this.paymentRepository.save(payment);
-
-    return {
-      checkoutUrl: session.url!,
-      sessionId: session.id,
-    };
-  }
-
   async confirmPayment(paymentIntentId: string): Promise<Payment> {
     if (!this.stripe) {
       throw new BadRequestException('Stripe is not configured on the server.');
@@ -171,7 +100,7 @@ export class StripeService {
     }
 
     if (paymentIntent.status === 'succeeded') {
-      payment.status = PaymentStatus.SUCCESS;
+      payment.status = PaymentStatus.PAID;
       payment.paidAt = new Date();
       payment.stripeResponse = paymentIntent as any;
 
@@ -179,7 +108,7 @@ export class StripeService {
         paymentStatus: 'paid',
       });
     } else if (paymentIntent.status === 'canceled') {
-      payment.status = PaymentStatus.CANCELLED;
+      payment.status = PaymentStatus.FAILED;
       payment.failureReason = 'Payment was canceled';
     } else if (paymentIntent.status === 'requires_payment_method') {
       payment.status = PaymentStatus.FAILED;

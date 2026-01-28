@@ -14,8 +14,8 @@ export interface PaymentDetails {
   appointmentId: string;
   patientId: string;
   amount: number;
-  status: 'pending' | 'success' | 'failed' | 'cancelled';
-  method: 'stripe' | 'cash' | 'card';
+  status: 'pending' | 'paid' | 'failed';
+  method: 'card' | 'cash';
   currency: string;
   description: string;
   paidAt?: string;
@@ -29,11 +29,7 @@ export interface PaymentDetails {
 export class PaymentService {
   private apiUrl = `${environment.apiUrl}/payments`;
 
-  constructor(private http: HttpClient) {}
-
-  createStripeCheckout(data: { appointmentId: string; email?: string; amount?: number }): Observable<InitializePaymentResponse> {
-    return this.http.post<InitializePaymentResponse>(`${this.apiUrl}/stripe/checkout`, data);
-  }
+  constructor(private http: HttpClient) { }
 
   createStripePaymentIntent(data: { appointmentId: string; email?: string; amount?: number }): Observable<{ clientSecret: string; paymentIntentId: string }> {
     return this.http.post<{ clientSecret: string; paymentIntentId: string }>(`${this.apiUrl}/stripe/create-intent`, data);
