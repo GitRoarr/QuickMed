@@ -238,6 +238,52 @@
   animation: slideInRight 0.3s ease-out;
 }
 
+/* Template Selector */
+.template-selector {
+  position: relative;
+  min-width: 200px;
+}
+
+.template-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: 0.5rem;
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  border-radius: 0.75rem;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+  z-index: 50;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.template-item {
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.template-item:last-child {
+  border-bottom: none;
+}
+
+.template-item:hover {
+  background: var(--surface-secondary);
+}
+
+.template-badge {
+  display: inline-block;
+  padding: 0.125rem 0.5rem;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  border-radius: 9999px;
+  background: var(--primary-light);
+  color: var(--primary);
+}
 
 /* Conflict Warning */
 .conflict-warning {
@@ -405,4 +451,60 @@ select:focus-visible {
   100% {
     background-position: -200% 0;
   }
+}
+
+/* Session Cards */
+.session-card {
+  background: var(--surface);
+  border: 2px solid var(--border-light);
+  border-radius: 1.5rem;
+  padding: 1.5rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.session-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  border-color: var(--primary);
+}
+
+.session-disabled {
+  opacity: 0.6;
+  filter: grayscale(0.5);
+  background: var(--surface-tertiary);
+  border-style: dashed;
+}
+
+.session-disabled:hover {
+  transform: none;
+  border-color: var(--border-light);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
+/* Custom Toggle colors */
+.session-card .sr-only:checked+div {
+  background-color: var(--success) !important;
+}
+
+/* Ensure icons are large and vibrant */
+.session-card span.text-3xl {
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
 }

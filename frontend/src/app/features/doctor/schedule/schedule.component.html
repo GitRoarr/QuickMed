@@ -15,6 +15,33 @@
           <p class="text-[var(--text-secondary)] text-sm">Manage availability, templates, and view appointments.</p>
         </div>
         <div class="flex items-center gap-3 flex-wrap">
+          <!-- Template Selector -->
+          <div class="relative template-selector">
+            <button (click)="showTemplateDropdown.set(!showTemplateDropdown())"
+              class="flex items-center gap-2 bg-[var(--surface-tertiary)] hover:bg-[var(--surface-secondary)] px-4 py-2 rounded-xl text-sm font-semibold text-[var(--text-primary)] transition-all shadow-sm">
+              <i class="bi bi-layout-text-sidebar"></i>
+              <span>Template</span>
+              <i class="bi" [class.bi-chevron-down]="!showTemplateDropdown()"
+                [class.bi-chevron-up]="showTemplateDropdown()"></i>
+            </button>
+
+            <!-- Template Dropdown -->
+            <div *ngIf="showTemplateDropdown()" class="template-dropdown">
+              <div *ngFor="let template of templates()" (click)="applyTemplate(template)" class="template-item">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <p class="font-semibold text-[var(--text-primary)]">{{ template.name }}</p>
+                    <p class="text-xs text-[var(--text-secondary)] mt-0.5">{{ template.description }}</p>
+                  </div>
+                  <span *ngIf="template.isDefault" class="template-badge">Default</span>
+                </div>
+              </div>
+              <div (click)="createPresets()" class="template-item border-t-2 border-[var(--primary-light)]">
+                <p class="font-semibold text-[var(--primary)]"><i class="bi bi-plus-circle mr-2"></i>Load Presets</p>
+              </div>
+            </div>
+          </div>
+
           <!-- View Mode Toggle -->
           <div class="bg-[var(--surface-tertiary)] p-1 rounded-xl flex">
             <button *ngFor="let m of viewModes" (click)="setViewMode(m)" [class.bg-[var(--primary)]]="viewMode()===m"
@@ -177,6 +204,74 @@
           </div>
         </div>
       </div>
+
+      <!-- Session-Based Schedule View -->
+      <section class="bg-[var(--surface)] p-6 rounded-2xl shadow-md transition-all">
+        <div class="flex items-center justify-between mb-6">
+          <h3 class="text-xl font-bold text-[var(--text-primary)]">Daily Session Manager</h3>
+          <div class="flex items-center gap-4">
+            <span class="text-sm font-semibold text-[var(--text-secondary)]">{{ selectedDate() | date:'MMMM d, yyyy'
+              }}</span>
+            <button (click)="saveSessionSchedule()"
+              class="px-6 py-2 bg-[var(--primary)] text-white rounded-xl font-bold shadow-lg hover:bg-[var(--primary-hover)] hover-lift transition-all">
+              Save Schedule
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <!-- Session Cards -->
+          <div *ngFor="let sessionKey of ['morning', 'break', 'evening']" class="session-card"
+            [class.session-disabled]="!sessions()[sessionKey]">
+
+            <div class="flex items-start justify-between mb-4">
+              <div class="flex items-center gap-3">
+                <span class="text-3xl">{{ SESSION_CONFIG[sessionKey].icon }}</span>
+                <div>
+                  <h4 class="font-bold text-[var(--text-primary)]">{{ SESSION_CONFIG[sessionKey].label }}</h4>
+                  <p class="text-xs text-[var(--text-secondary)]">{{ SESSION_CONFIG[sessionKey].time }}</p>
+                  <p *ngIf="sessionKey === 'break'" class="text-[10px] text-[var(--text-muted)] mt-0.5">No appointments
+                  </p>
+                </div>
+              </div>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" [checked]="sessions()[sessionKey]" (change)="toggleSession(sessionKey)"
+                  class="sr-only peer">
+                <div
+                  class="w-11 h-6 bg-[var(--surface-tertiary)] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[var(--success)]">
+                </div>
+              </label>
+            </div>
+
+            <div class="flex items-center justify-between mt-4 pt-4 border-t border-[var(--border-light)]">
+              <span class="text-xs font-bold uppercase tracking-wider"
+                [class.text-[var(--success)]]="sessions()[sessionKey]"
+                [class.text-[var(--text-muted)]]="!sessions()[sessionKey]">
+                {{ sessions()[sessionKey] ? (sessionKey === 'break' ? 'Enabled 🟡' : 'Enabled 🟢') : 'Disabled' }}
+              </span>
+              <button *ngIf="sessionKey !== 'break' && sessions()[sessionKey]"
+                (click)="toggleSessionPreview(sessionKey)"
+                class="text-xs font-bold text-[var(--primary)] hover:underline">
+                {{ expandedSessions()[sessionKey] ? 'Hide Slots' : 'Preview Slots' }}
+              </button>
+            </div>
+
+            <!-- Slot Preview area -->
+            <div *ngIf="expandedSessions()[sessionKey] && sessionKey !== 'break'"
+              class="mt-4 p-3 bg-[var(--surface-secondary)] rounded-xl overflow-hidden animate-fade-in">
+              <div class="flex flex-wrap gap-2">
+                <span *ngFor="let slot of getSessionSlots(sessionKey)"
+                  class="text-[10px] font-bold px-2 py-1 bg-[var(--surface)] rounded shadow-sm">
+                  {{ slot.startTime }}
+                </span>
+                <p *ngIf="!getSessionSlots(sessionKey).length" class="text-xs text-[var(--text-muted)] py-2">
+                  Save to see generated slots.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
     </div>
   </main>

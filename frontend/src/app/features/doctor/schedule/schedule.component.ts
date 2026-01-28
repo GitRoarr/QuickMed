@@ -11,9 +11,12 @@ import { MessageService } from '@core/services/message.service';
 import { NotificationService } from '@core/services/notification.service';
 import { ToastService } from '@core/services/toast.service';
 import { SchedulingService, DoctorSlot } from '../../../core/services/schedule.service';
+import { AvailabilityTemplateService } from '@core/services/availability-template.service';
 import { DoctorAnalyticsService } from '@core/services/doctor-analytics.service';
+import { ConflictDetectionService } from '@core/services/conflict-detection.service';
 
 import { Appointment, AppointmentStatus } from '@core/models/appointment.model';
+import { AvailabilityTemplate } from '@core/models/availability-template.model';
 import { DailyStats } from '@core/models/doctor-analytics.model';
 import { DoctorHeaderComponent } from '../shared/doctor-header/doctor-header.component';
 
@@ -38,12 +41,15 @@ export class ScheduleComponent implements OnInit {
     private authService: AuthService,
     private router: Router,
     private toast: ToastService,
-    private analyticsService: DoctorAnalyticsService
+    private templateService: AvailabilityTemplateService,
+    private analyticsService: DoctorAnalyticsService,
+    private conflictService: ConflictDetectionService
   ) { }
 
   // Signals
   appointments = signal<Appointment[]>([]);
   slots = signal<DoctorSlot[]>([]);
+  templates = signal<AvailabilityTemplate[]>([]);
   todayStats = signal<DailyStats | null>(null);
   isLoading = signal(true);
   selectedDate = signal(new Date());
@@ -56,7 +62,16 @@ export class ScheduleComponent implements OnInit {
   workingEnd = signal('18:00');
   workingDays = signal<number[]>([]);
   themeMode = signal<'light' | 'dark'>('light');
+  showTemplateDropdown = signal(false);
   draggedSlot = signal<DoctorSlot | null>(null);
+  sessions = signal<{ morning: boolean; break: boolean; evening: boolean }>({ morning: false, break: false, evening: false });
+  expandedSessions = signal<Record<string, boolean>>({ morning: false, break: false, evening: false });
+
+  readonly SESSION_CONFIG = {
+    morning: { label: 'Morning', icon: '🌅', time: '09:00 AM – 12:00 PM', start: '09:00', end: '12:00' },
+    break: { label: 'Break', icon: '☕', time: '12:00 PM – 02:00 PM', start: '12:00', end: '14:00' },
+    evening: { label: 'Evening', icon: '🌆', time: '02:00 PM – 08:00 PM', start: '14:00', end: '20:00' },
+  };
 
   today = new Date();
 
@@ -84,6 +99,7 @@ export class ScheduleComponent implements OnInit {
     this.loadSlots();
     this.loadHeaderCounts();
     this.loadWorkingDays();
+    this.loadTemplates();
     this.loadAnalytics();
   }
 
@@ -272,6 +288,33 @@ export class ScheduleComponent implements OnInit {
     this.selectDate(new Date(next.appointmentDate));
   }
 
+  loadTemplates(): void {
+    this.templateService.getTemplates().subscribe({
+      next: templates => this.templates.set(templates),
+      error: () => this.toast.error('Failed to load templates', { title: 'Templates' })
+    });
+  }
+
+  applyTemplate(template: AvailabilityTemplate): void {
+    this.workingDays.set(template.workingDays);
+    this.workingStart.set(template.startTime);
+    this.workingEnd.set(template.endTime);
+    this.slotDurationMinutes.set(template.slotDuration);
+    this.showTemplateDropdown.set(false);
+    this.toast.success(`Template "${template.name}" applied`, { title: 'Templates' });
+  }
+
+  createPresets(): void {
+    this.templateService.createPresets().subscribe({
+      next: presets => {
+        this.toast.success(`${presets.length} preset templates created`, { title: 'Templates' });
+        this.loadTemplates();
+        this.showTemplateDropdown.set(false);
+      },
+      error: () => this.toast.error('Failed to create presets', { title: 'Templates' })
+    });
+  }
+
   loadAnalytics(): void {
     this.analyticsService.getTodayStats().subscribe({
       next: stats => this.todayStats.set(stats),
@@ -316,6 +359,47 @@ export class ScheduleComponent implements OnInit {
     });
   }
 
+  saveSessionSchedule(): void {
+    const data = {
+      date: this.toDateOnly(this.selectedDate()),
+      sessions: this.sessions(),
+      slotDuration: this.slotDurationMinutes()
+    };
+
+    this.scheduleService.updateSessions(data.date, data.sessions, data.slotDuration).subscribe({
+      next: () => {
+        this.toast.success('Session schedule saved', { title: 'Schedule' });
+        this.loadSlots();
+      },
+      error: () => this.toast.error('Failed to save session schedule', { title: 'Schedule' })
+    });
+  }
+
+  toggleSession(sessionKey: string): void {
+    const current = this.sessions() as any;
+    this.sessions.set({
+      ...current,
+      [sessionKey]: !current[sessionKey]
+    });
+  }
+
+  toggleSessionPreview(sessionKey: string): void {
+    const current = this.expandedSessions();
+    this.expandedSessions.set({
+      ...current,
+      [sessionKey]: !current[sessionKey]
+    });
+  }
+
+  getSessionSlots(sessionKey: string): DoctorSlot[] {
+    const config = (this.SESSION_CONFIG as any)[sessionKey];
+    if (!config) return [];
+    return this.slots().filter(s => {
+      const start = s.startTime || s.time || '';
+      return start >= config.start && start < config.end;
+    });
+  }
+
   hasAppointments(date: Date): boolean {
     return this.appointments().some(a =>
       new Date(a.appointmentDate).toDateString() === date.toDateString()
@@ -327,12 +411,18 @@ export class ScheduleComponent implements OnInit {
     this.scheduleService.getDaySchedule(dateStr).subscribe({
       next: res => {
         this.slots.set(res.slots || []);
+        if (res.sessions) {
+          this.sessions.set(res.sessions);
+        } else {
+          this.sessions.set({ morning: false, break: false, evening: false });
+        }
         if (res.slotDuration) {
           this.slotDurationMinutes.set(res.slotDuration);
         }
       },
       error: () => {
         this.slots.set([]);
+        this.sessions.set({ morning: false, break: false, evening: false });
       }
     });
   }

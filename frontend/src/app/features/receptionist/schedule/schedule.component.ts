@@ -75,8 +75,8 @@ export class ReceptionistScheduleComponent implements OnInit {
     if (!doctorId || !this.selectedDate()) return;
     this.isLoading.set(true);
     this.schedulingService.getDaySchedule(this.selectedDate(), doctorId).subscribe({
-      next: (res) => {
-        this.slots.set(res.slots || []);
+      next: (slots) => {
+        this.slots.set(slots || []);
         this.isLoading.set(false);
       },
       error: () => {
