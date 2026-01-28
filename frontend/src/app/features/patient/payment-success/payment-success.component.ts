@@ -36,7 +36,7 @@ export class PaymentSuccessComponent implements OnInit {
     this.paymentService.getStripeTransaction(transactionId).subscribe({
       next: (payment) => {
         this.payment.set(payment);
-        this.verified.set(!!payment && payment.status === 'success');
+        this.verified.set(!!payment && payment.status === 'paid');
         this.loading.set(false);
       },
       error: (err) => {

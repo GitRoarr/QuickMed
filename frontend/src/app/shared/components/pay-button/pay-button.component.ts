@@ -58,24 +58,7 @@ export class PayButtonComponent {
         }
       });
     } else {
-      const paymentData = {
-        appointmentId: this.appointmentId,
-        email: user?.email,
-      };
-      this.paymentService.createStripeCheckout(paymentData).subscribe({
-        next: (response) => {
-          if (response.checkoutUrl) {
-            window.location.href = response.checkoutUrl;
-          } else {
-            this.error.set('Failed to get Stripe checkout URL');
-            this.processing.set(false);
-          }
-        },
-        error: (err) => {
-          this.error.set(err.error?.message || 'Failed to start payment');
-          this.processing.set(false);
-        }
-      });
+      this.goToPayment();
     }
   }
 
