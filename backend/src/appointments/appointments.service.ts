@@ -1,12 +1,12 @@
 import { Injectable, NotFoundException, BadRequestException, ForbiddenException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { In, Repository } from "typeorm";
-import { Appointment} from "./entities/appointment.entity";
-import {AppointmentStatus,UserRole,PaymentStatus} from '../common/index'
+import { Appointment } from "./entities/appointment.entity";
+import { AppointmentStatus, UserRole, PaymentStatus } from '../common/index'
 import { CreateAppointmentDto } from "./dto/create-appointment.dto";
 import { UpdateAppointmentDto } from "./dto/update-appointment.dto";
 import { UsersService } from "../users/users.service";
-import { User} from "../users/entities/user.entity";
+import { User } from "../users/entities/user.entity";
 import { SettingsService } from "../settings/settings.service";
 import { SchedulesService } from '../schedules/schedules.service';
 import { NotificationIntegrationService } from '../notifications/notification-integration.service';
@@ -20,7 +20,7 @@ export class AppointmentsService {
     private readonly settingsService: SettingsService,
     private readonly schedulesService: SchedulesService,
     private readonly notificationIntegrationService: NotificationIntegrationService,
-  ) {}
+  ) { }
 
   async create(createAppointmentDto: CreateAppointmentDto, patientId: string): Promise<Appointment> {
     const { doctorId, appointmentDate, appointmentTime, notes, receptionistId } = createAppointmentDto;
@@ -61,48 +61,39 @@ export class AppointmentsService {
       throw new BadRequestException(`Doctor is not available on ${appointmentDay}`);
     }
 
-    if (settings?.startTime && settings?.endTime) {
-      const [startHour, startMin] = settings.startTime.split(':').map(Number);
-      const [endHour, endMin] = settings.endTime.split(':').map(Number);
-      const [apptHour, apptMin] = appointmentTime.split(':').map(Number);
-      const startMinutes = startHour * 60 + startMin;
-      const endMinutes = endHour * 60 + endMin;
-      const apptMinutes = apptHour * 60 + apptMin;
+    const dateStr = this.toDateString(appointmentDate);
+    const timeStr = this.toTimeString(appointmentTime);
+    const now = new Date();
+    const isToday = dateStr === this.toDateString(now);
 
-      if (apptMinutes < startMinutes || apptMinutes >= endMinutes) {
-        throw new BadRequestException(`Doctor is only available between ${settings.startTime} and ${settings.endTime}`);
+    // Prevent booking past times for today (already checked above? Let's keep it safe)
+    const [apptHour, apptMin] = timeStr.split(':').map(Number);
+    const apptTotalMins = apptHour * 60 + apptMin;
+    if (isToday) {
+      const currentTotalMins = now.getHours() * 60 + now.getMinutes();
+      if (apptTotalMins < currentTotalMins) {
+        throw new BadRequestException("Cannot book an appointment for a time that has already passed today.");
       }
     }
 
-    const existingAppointment = await this.appointmentsRepository.findOne({
+    // Conflict Check
+    const conflictStatuses = [AppointmentStatus.CONFIRMED, AppointmentStatus.PENDING];
+    const conflictingAppointment = await this.appointmentsRepository.findOne({
       where: {
         doctorId: assignedDoctorId,
-        appointmentDate,
-        appointmentTime,
-        status: AppointmentStatus.CONFIRMED,
+        appointmentDate: dateStr as any,
+        appointmentTime: timeStr,
+        status: In(conflictStatuses) as any,
       },
     });
 
-    if (existingAppointment) {
-      throw new BadRequestException("This time slot is already booked. Please choose another time.");
+    if (conflictingAppointment) {
+      const msg = conflictingAppointment.status === AppointmentStatus.CONFIRMED
+        ? "This time slot is already booked."
+        : "This time slot has a pending appointment.";
+      throw new BadRequestException(`${msg} Please choose another time.`);
     }
 
-    const pendingAppointment = await this.appointmentsRepository.findOne({
-      where: {
-        doctorId: assignedDoctorId,
-        appointmentDate,
-        appointmentTime,
-        status: AppointmentStatus.PENDING,
-      },
-    });
-
-    if (pendingAppointment) {
-      throw new BadRequestException("This time slot has a pending appointment. Please choose another time.");
-    }
-
-    // Respect the doctor's schedule: block booking if the slot is blocked or not available
-    const dateStr = this.toDateString(appointmentDate);
-    const timeStr = this.toTimeString(appointmentTime);
     try {
       const day = await this.schedulesService.getDaySchedule(assignedDoctorId, dateStr);
       const slot = (day?.slots || []).find((s: any) => {
@@ -112,10 +103,10 @@ export class AppointmentsService {
       });
 
       if (!slot) {
-        // Check if it's a working day - if settings exist and this day is not a working day, reject
+        // Fallback: If no explicit slot is found, check global settings
         const settings = await this.settingsService.getSettings(assignedDoctorId).catch(() => null);
         if (settings) {
-          const availableDays = settings.availableDays || [];
+          const availableDays = settings.availableDays || doctor.availableDays || [];
           const appointmentDateObj = new Date(appointmentDate);
           const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
           const appointmentDay = dayNames[appointmentDateObj.getDay()];
@@ -125,11 +116,12 @@ export class AppointmentsService {
             sunday: 'sun', monday: 'mon', tuesday: 'tue', wednesday: 'wed',
             thursday: 'thu', friday: 'fri', saturday: 'sat'
           };
+
           if (!normalizedDays.includes(dayLower) && !normalizedDays.includes(shortMap[dayLower])) {
             throw new BadRequestException(`Doctor is not available on ${appointmentDay}`);
           }
-          
-          // Check if time is within working hours
+
+          // Check if time is within fallback working hours
           if (settings.startTime && settings.endTime) {
             const [startHour, startMin] = settings.startTime.split(':').map(Number);
             const [endHour, endMin] = settings.endTime.split(':').map(Number);
@@ -137,11 +129,14 @@ export class AppointmentsService {
             const startMinutes = startHour * 60 + startMin;
             const endMinutes = endHour * 60 + endMin;
             const apptMinutes = apptHour * 60 + apptMin;
-            
+
             if (apptMinutes < startMinutes || apptMinutes >= endMinutes) {
               throw new BadRequestException(`Doctor is only available between ${settings.startTime} and ${settings.endTime}`);
             }
           }
+        } else {
+          // No settings AND no slot -> reject to be safe
+          throw new BadRequestException("This time slot is not available in the doctor's schedule.");
         }
       } else if (slot && (slot.status === 'blocked' || slot.status === 'booked')) {
         throw new BadRequestException('Selected slot is not available. Please pick another time.');
@@ -150,7 +145,6 @@ export class AppointmentsService {
       if (err instanceof BadRequestException) {
         throw err;
       }
-      // If schedule lookup fails, continue with appointment creation to avoid hard failures.
       console.warn('Schedule lookup failed during appointment creation', err);
     }
 
@@ -415,12 +409,12 @@ export class AppointmentsService {
       const startTime = settings?.startTime || doc.startTime;
       const endTime = settings?.endTime || doc.endTime;
       if (startTime && endTime) {
-        const [sh, sm] = String(startTime).slice(0,5).split(':').map(Number);
-        const [eh, em] = String(endTime).slice(0,5).split(':').map(Number);
-        const [ah, am] = String(timeStr).slice(0,5).split(':').map(Number);
-        const sMin = (sh||0)*60 + (sm||0);
-        const eMin = (eh||0)*60 + (em||0);
-        const aMin = (ah||0)*60 + (am||0);
+        const [sh, sm] = String(startTime).slice(0, 5).split(':').map(Number);
+        const [eh, em] = String(endTime).slice(0, 5).split(':').map(Number);
+        const [ah, am] = String(timeStr).slice(0, 5).split(':').map(Number);
+        const sMin = (sh || 0) * 60 + (sm || 0);
+        const eMin = (eh || 0) * 60 + (em || 0);
+        const aMin = (ah || 0) * 60 + (am || 0);
         if (aMin < sMin || aMin >= eMin) continue;
       }
 

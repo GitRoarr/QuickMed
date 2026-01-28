@@ -1,5 +1,5 @@
 <aside
-  class="fixed inset-y-0 left-0 z-50 w-64 flex flex-col overflow-y-auto bg-[var(--sidebar-bg)] shadow-2xl transition-transform duration-300 md:translate-x-0 md:static">
+  class="fixed inset-y-0 left-0 z-50 w-64 flex flex-col overflow-y-auto bg-[var(--sidebar-bg)] shadow-2xl transition-transform duration-300 md:translate-x-0 md:static border-r border-[var(--surface-tertiary)]">
   <div class="p-6">
     <a routerLink="/doctor/dashboard" (click)="onLogoClick($event)"
       class="flex items-center gap-3 group cursor-pointer">
@@ -17,10 +17,10 @@
   </div>
 
   <ng-container *ngIf="!loading(); else sidebarSkeleton">
-    <nav class="flex-1 py-4 overflow-y-auto">
+    <nav class="flex-1 py-4 overflow-y-auto px-3">
       <a *ngFor="let item of menuItems()" [routerLink]="item.route"
         routerLinkActive="bg-[var(--sidebar-active-bg)] text-[var(--sidebar-active-text)] font-semibold border-l-4 border-[var(--primary)]"
-        class="flex items-center gap-3 px-6 py-3 text-[var(--sidebar-text)] hover:bg-[var(--sidebar-hover)] hover:text-[var(--text-primary)] transition-colors group relative">
+        class="flex items-center gap-3 px-4 py-2.5 text-[var(--sidebar-text)] hover:bg-[var(--sidebar-hover)] hover:text-[var(--text-primary)] transition-colors group relative rounded-lg">
         <ng-container *ngIf="item.imgSrc; else iconTpl">
           <img
             [src]="item.label === 'Prescriptions' && themeService.isDarkMode() ? 'assets/images/icons8-pill-50.png' : item.imgSrc"
@@ -38,7 +38,7 @@
   </ng-container>
 
   <ng-template #sidebarSkeleton>
-    <nav class="flex-1 py-4 overflow-y-auto">
+    <nav class="flex-1 py-4 overflow-y-auto px-3">
       <div class="px-6 py-3 flex items-center gap-3">
         <span class="skeleton-icon"></span>
         <span class="skeleton-text w-24"></span>
@@ -74,7 +74,7 @@
     </nav>
   </ng-template>
 
-  <div class="p-4">
+  <div class="p-4 border-t border-[var(--surface-tertiary)]">
     <div class="flex items-center gap-3 mb-4">
       <div
         class="w-10 h-10 rounded-full bg-[var(--surface-tertiary)] overflow-hidden flex items-center justify-center text-[var(--text-primary)] font-bold shadow-sm">
@@ -88,7 +88,7 @@
       </div>
     </div>
     <button (click)="logout()"
-      class="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg bg-red-600 text-white hover:bg-red-700 transition-all font-semibold text-sm shadow-lg shadow-red-500/20 active:scale-95">
+      class="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg bg-red-600 text-white hover:bg-red-700 transition-all font-bold text-sm shadow-lg shadow-red-500/20 active:scale-95 focus:outline-none focus:ring-2 focus:ring-red-400/60">
       <i class="bi bi-box-arrow-right"></i> Logout
     </button>
   </div>

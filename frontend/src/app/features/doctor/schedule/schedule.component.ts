@@ -385,11 +385,61 @@ export class ScheduleComponent implements OnInit {
   }
 
   toggleSession(sessionKey: string): void {
+    if (this.isSessionPassed(sessionKey)) {
+      this.toast.warning('This session has already passed for today.', { title: 'Schedule' });
+      return;
+    }
     const current = this.sessions() as any;
     this.sessions.set({
       ...current,
       [sessionKey]: !current[sessionKey]
     });
+  }
+
+  isSessionPassed(sessionKey: string): boolean {
+    const isToday = this.selectedDate().toDateString() === new Date().toDateString();
+    if (!isToday) return false;
+
+    const config = (this.SESSION_CONFIG as any)[sessionKey];
+    if (!config) return false;
+
+    const now = new Date();
+    const currentMinutes = now.getHours() * 60 + now.getMinutes();
+
+    const [endH, endM] = config.end.split(':').map(Number);
+    const sessionEndMinutes = endH * 60 + endM;
+
+    return currentMinutes >= sessionEndMinutes;
+  }
+
+  isSessionActive(sessionKey: string): boolean {
+    const isToday = this.selectedDate().toDateString() === new Date().toDateString();
+    if (!isToday) return false;
+
+    const config = (this.SESSION_CONFIG as any)[sessionKey];
+    if (!config) return false;
+
+    const [startH, startM] = config.start.split(':').map(Number);
+    const [endH, endM] = config.end.split(':').map(Number);
+
+    const now = new Date();
+    const currentMinutes = now.getHours() * 60 + now.getMinutes();
+    const startMin = startH * 60 + startM;
+    const endMin = endH * 60 + endM;
+
+    return currentMinutes >= startMin && currentMinutes < endMin;
+  }
+
+  isSlotPassed(time: string): boolean {
+    const isToday = this.selectedDate().toDateString() === new Date().toDateString();
+    if (!isToday) return false;
+
+    const now = new Date();
+    const [h, m] = time.split(':').map(Number);
+    const slotMinutes = h * 60 + m;
+    const currentMinutes = now.getHours() * 60 + now.getMinutes();
+
+    return currentMinutes > slotMinutes;
   }
 
   toggleSessionPreview(sessionKey: string): void {

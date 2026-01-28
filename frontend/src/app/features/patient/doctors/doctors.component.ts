@@ -9,6 +9,8 @@ import { PatientShellComponent } from '../shared/patient-shell/patient-shell.com
 import { ReviewService, CreateReviewDto } from '../../../core/services/review.service';
 import { SchedulingService, DoctorSlot } from '../../../core/services/schedule.service';
 
+import { ToastService } from '../../../core/services/toast.service';
+
 @Component({
   selector: 'app-patient-doctors',
   standalone: true,
@@ -60,7 +62,8 @@ export class DoctorsComponent implements OnInit {
     private userService: UserService,
     private appointmentService: AppointmentService,
     private reviewService: ReviewService,
-    private schedulingService: SchedulingService
+    private schedulingService: SchedulingService,
+    private toast: ToastService
   ) {
     this.appointmentForm = this.fb.group({
       appointmentDate: ['', Validators.required],
@@ -171,10 +174,19 @@ export class DoctorsComponent implements OnInit {
       return;
     }
 
+    const date = this.appointmentForm.value.appointmentDate;
+    const time = this.appointmentForm.value.appointmentTime;
+
+    // Creative Prevention: Double-check past time before submitting
+    if (this.isPastTime(date, time)) {
+      this.toast.error('You cannot book for passed time', { title: 'Time Expired' });
+      return;
+    }
+
     const payload = {
       doctorId: this.selectedDoctor()!.id,
-      appointmentDate: this.appointmentForm.value.appointmentDate,
-      appointmentTime: this.appointmentForm.value.appointmentTime,
+      appointmentDate: date,
+      appointmentTime: time,
       notes: this.appointmentForm.value.notes,
     };
 
@@ -182,6 +194,7 @@ export class DoctorsComponent implements OnInit {
       next: (res) => {
         // successfully created - redirect to payment
         this.closeBookingForm();
+        this.toast.success('Appointment requested successfully!', { title: 'Success' });
         this.router.navigate(['/patient/payment'], {
           queryParams: { appointmentId: res.id }
         });
@@ -189,11 +202,24 @@ export class DoctorsComponent implements OnInit {
       error: (err) => {
         console.error('Failed to book appointment', err);
         const serverMsg = err?.error?.message || err?.message || 'Failed to book appointment. Please try again.';
-        // If message is array (class-validator), join it
         const msg = Array.isArray(serverMsg) ? serverMsg.join('\n') : serverMsg;
-        alert(msg);
+        this.toast.error(msg, { title: 'Booking Error' });
       }
     });
+  }
+
+  private isPastTime(dateStr: string, timeStr: string): boolean {
+    const now = new Date();
+    const todayStr = this.getCurrentDate();
+    if (dateStr < todayStr) return true;
+    if (dateStr > todayStr) return false;
+
+    // It's today, check time
+    const [h, m] = timeStr.split(':').map(Number);
+    const currentH = now.getHours();
+    const currentM = now.getMinutes();
+
+    return h < currentH || (h === currentH && m < currentM);
   }
 
   loadAvailableSlots(dateStr?: string): void {
@@ -206,7 +232,14 @@ export class DoctorsComponent implements OnInit {
     }
     this.schedulingService.getDaySchedulePublic(doctor.id, date).subscribe({
       next: (slots) => {
-        const available = (slots || []).filter(s => s.status === 'available');
+        // Filter out slots that are NOT 'available' OR are in the past
+        const available = (slots || []).filter(s => {
+          if (s.status !== 'available') return false;
+
+          const time = s.startTime || s.time || '';
+          return !this.isPastTime(date, time);
+        });
+
         // Normalize time values to HH:mm and include end time
         const normalized = available.map(s => ({
           startTime: (s.startTime || s.time || '').slice(0, 5),

@@ -176,6 +176,37 @@ export class SchedulesService {
     sched.sessions = sessions;
     sched.slotDuration = slotDuration;
 
+    // Creative Enhancement: Automatically update doctor settings if sessions expand their windows
+    try {
+      let minStart = 1440; // 24h in mins
+      let maxEnd = 0;
+      let hasActiveSession = false;
+
+      for (const [key, active] of Object.entries(sessions)) {
+        if (active) {
+          const config = (SESSIONS as any)[key];
+          if (config) {
+            hasActiveSession = true;
+            const start = this.toMinutes(config.start);
+            const end = this.toMinutes(config.end);
+            if (start < minStart) minStart = start;
+            if (end > maxEnd) maxEnd = end;
+          }
+        }
+      }
+
+      if (hasActiveSession) {
+        const updateSettings: any = {};
+        updateSettings.startTime = this.fromMinutes(minStart);
+        updateSettings.endTime = this.fromMinutes(maxEnd);
+
+        // Sync these to global settings to prevent validation mismatches
+        await this.settingsService.updateSettings(doctorId, updateSettings);
+      }
+    } catch (e) {
+      console.warn('Failed to sync settings with sessions', e);
+    }
+
     try {
       await this.repo.save(sched);
       return this.getDaySchedule(doctorId, date);

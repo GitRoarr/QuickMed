@@ -220,7 +220,8 @@
 
         <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
           <div *ngFor="let sessionKey of ['morning', 'break', 'evening']" class="session-card relative overflow-hidden"
-            [class.session-disabled]="!sessions()[sessionKey]">
+            [class.session-disabled]="!sessions()[sessionKey] || isSessionPassed(sessionKey)"
+            [class.opacity-50]="isSessionPassed(sessionKey)">
 
             <div class="flex items-start justify-between mb-6">
               <div class="flex items-center gap-4">
@@ -229,28 +230,40 @@
                   {{ SESSION_CONFIG[sessionKey].icon }}
                 </div>
                 <div>
-                  <h4 class="font-bold text-lg text-[var(--text-primary)] tracking-tight">{{
-                    SESSION_CONFIG[sessionKey].label }}</h4>
+                  <div class="flex items-center gap-2">
+                    <h4 class="font-bold text-lg text-[var(--text-primary)] tracking-tight">{{
+                      SESSION_CONFIG[sessionKey].label }}</h4>
+                    <span *ngIf="isSessionActive(sessionKey)"
+                      class="px-2 py-0.5 bg-red-500 text-white text-[10px] font-black rounded-full animate-pulse">LIVE</span>
+                  </div>
                   <p class="text-xs font-bold text-[var(--primary)]">{{ SESSION_CONFIG[sessionKey].time }}</p>
                 </div>
               </div>
-              <label class="relative inline-flex items-center cursor-pointer">
+              <label class="relative inline-flex items-center cursor-pointer"
+                [class.cursor-not-allowed]="isSessionPassed(sessionKey)">
                 <input type="checkbox" [checked]="sessions()[sessionKey]" (change)="toggleSession(sessionKey)"
-                  class="sr-only peer">
+                  [disabled]="isSessionPassed(sessionKey)" class="sr-only peer">
                 <div
                   class="w-12 h-7 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-[var(--primary)]">
                 </div>
               </label>
             </div>
 
-            <p *ngIf="sessionKey === 'break'" class="text-xs text-[var(--text-muted)] font-medium mb-6">No appointments
+            <p *ngIf="sessionKey === 'break' && !isSessionPassed(sessionKey)"
+              class="text-xs text-[var(--text-muted)] font-medium mb-6">No appointments
               will be booked during this interval.</p>
+            <p *ngIf="isSessionPassed(sessionKey)" class="text-xs text-red-500 font-bold mb-6 flex items-center gap-1">
+              <i class="bi bi-clock-history"></i>
+              Time passed for today
+            </p>
 
             <div class="flex items-center justify-between mt-auto pt-6 border-t border-[var(--border-light)]">
               <span class="text-xs font-extrabold uppercase tracking-widest"
-                [class.text-[var(--primary)]]="sessions()[sessionKey]"
-                [class.text-[var(--text-muted)]]="!sessions()[sessionKey]">
-                {{ sessions()[sessionKey] ? (sessionKey === 'break' ? 'Suspended' : 'Active') : 'Disabled' }}
+                [class.text-[var(--primary)]]="sessions()[sessionKey] && !isSessionPassed(sessionKey)"
+                [class.text-red-500]="isSessionPassed(sessionKey)"
+                [class.text-[var(--text-muted)]]="!sessions()[sessionKey] && !isSessionPassed(sessionKey)">
+                {{ isSessionPassed(sessionKey) ? 'Expired' : (sessions()[sessionKey] ? (sessionKey === 'break' ?
+                'Suspended' : 'Active') : 'Disabled') }}
               </span>
               <button *ngIf="sessionKey !== 'break' && sessions()[sessionKey]"
                 (click)="toggleSessionPreview(sessionKey)"
@@ -265,7 +278,10 @@
               class="mt-6 p-4 bg-[var(--surface-tertiary)] rounded-2xl animate-fade-in max-h-48 overflow-y-auto">
               <div class="flex flex-wrap gap-2">
                 <span *ngFor="let slot of getSessionSlots(sessionKey)"
-                  class="text-[10px] font-bold px-3 py-1.5 bg-[var(--surface)] text-[var(--text-primary)] rounded-lg shadow-sm border border-[var(--border-light)]">
+                  class="text-[10px] font-bold px-3 py-1.5 bg-[var(--surface)] rounded-lg shadow-sm border border-[var(--border-light)] transition-all"
+                  [class.opacity-40]="isSlotPassed(slot.startTime)" [class.line-through]="isSlotPassed(slot.startTime)"
+                  [class.text-[var(--text-muted)]]="isSlotPassed(slot.startTime)"
+                  [class.text-[var(--text-primary)]]="!isSlotPassed(slot.startTime)">
                   {{ slot.startTime }}
                 </span>
                 <p *ngIf="!getSessionSlots(sessionKey).length"

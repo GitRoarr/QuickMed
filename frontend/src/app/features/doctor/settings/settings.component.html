@@ -1,173 +1,253 @@
-<div class="flex h-screen bg-[var(--background)] text-[var(--text-primary)] overflow-hidden">
-  <div class="flex-1 flex flex-col min-w-0">
-    <app-doctor-header [initials]="getDoctorInitials()" [avatarUrl]="currentUser()?.avatar"
-      [unreadNotifications]="unreadNotificationCount()"
-      (themeChange)="themeService.setTheme($event)"></app-doctor-header>
+<div class="flex-1 flex flex-col min-w-0 bg-[var(--bg)] settings-container">
+  <app-doctor-header [initials]="getDoctorInitials()" [avatarUrl]="currentUser()?.avatar"
+    [unreadNotifications]="unreadNotificationCount()" (themeChange)="themeService.setTheme($event)"></app-doctor-header>
 
-    <main class="flex-1 overflow-y-auto p-6 lg:p-10">
-      <div class="max-w-5xl mx-auto">
-        <div class="mb-10">
-          <h1 class="text-3xl lg:text-4xl font-bold">Settings</h1>
-          <p class="text-lg text-[var(--text-secondary)] mt-3">Manage your profile, availability, billing, and privacy
-            preferences</p>
+  <main class="flex-1 overflow-y-auto p-4 md:p-8 lg:p-12">
+    <div class="max-w-6xl mx-auto">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
+        <div>
+          <h1 class="text-4xl font-extrabold text-[var(--text-primary)] tracking-tight">Settings</h1>
+          <p class="text-[var(--text-secondary)] mt-2 font-medium">Fine-tune your professional workspace and profile.
+          </p>
         </div>
-        <div class="flex flex-wrap gap-3 mb-10 pb-4">
+
+        <!-- Tab Navigation -->
+        <div class="bg-[var(--surface-tertiary)] p-1.5 rounded-2xl flex flex-wrap gap-1 shadow-inner">
           <button *ngFor="let tab of tabs" (click)="activeTab.set(tab.value)"
-            class="tab-btn px-6 py-4 font-semibold transition" [class.active]="activeTab() === tab.value">
+            class="tab-btn px-6 py-3 font-bold text-sm flex items-center gap-2 transition-all duration-300"
+            [class.active]="activeTab() === tab.value">
+            <i class="bi" [ngClass]="tab.icon"></i>
             {{ tab.label }}
           </button>
         </div>
+      </div>
 
-        <div *ngIf="isLoading()" class="flex flex-col items-center justify-center py-20">
-          <div class="w-16 h-16 border-4 border-[var(--primary)] border-t-transparent rounded-full animate-spin mb-6">
+      <!-- Loading State -->
+      <div *ngIf="isLoading()"
+        class="flex flex-col items-center justify-center py-32 rounded-3xl bg-[var(--surface)] border border-[var(--border-light)]">
+        <div class="w-16 h-16 border-4 border-[var(--primary)] border-t-transparent rounded-full animate-spin mb-8">
+        </div>
+        <p class="text-xl font-bold text-[var(--text-primary)]">Syncing your data...</p>
+      </div>
+
+      <!-- Settings Content -->
+      <div *ngIf="!isLoading()" class="space-y-12 animate-fade-in-up">
+
+        <!-- Profile Tab -->
+        <div *ngIf="activeTab() === 'profile'" class="settings-card p-8 md:p-12">
+          <div class="flex items-center gap-4 mb-10">
+            <div
+              class="w-16 h-16 rounded-2xl bg-[var(--primary-light)] text-[var(--primary)] flex items-center justify-center text-3xl shadow-sm">
+              <i class="bi bi-person-badge"></i>
+            </div>
+            <div>
+              <h2 class="text-2xl font-extrabold text-[var(--text-primary)]">Profile Information</h2>
+              <p class="text-sm text-[var(--text-muted)] mt-1 font-medium">Update patient-facing profile details.</p>
+            </div>
           </div>
-          <p class="text-xl text-[var(--text-secondary)]">Loading settings...</p>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-8">
+            <div class="space-y-2">
+              <label class="form-label">First Name</label>
+              <input type="text" [(ngModel)]="profileForm.firstName" placeholder="Dr. John" class="form-input" />
+            </div>
+            <div class="space-y-2">
+              <label class="form-label">Last Name</label>
+              <input type="text" [(ngModel)]="profileForm.lastName" placeholder="Smith" class="form-input" />
+            </div>
+            <div class="space-y-2">
+              <label class="form-label">Professional Email</label>
+              <input type="email" [(ngModel)]="profileForm.email" placeholder="john.smith@clinic.com"
+                class="form-input" />
+            </div>
+            <div class="space-y-2">
+              <label class="form-label">Contact Number</label>
+              <input type="tel" [(ngModel)]="profileForm.phone" placeholder="+1 234 567 890" class="form-input" />
+            </div>
+            <div class="space-y-2">
+              <label class="form-label">Medical Specialty</label>
+              <input type="text" [(ngModel)]="profileForm.specialty" placeholder="Cardiologist" class="form-input" />
+            </div>
+            <div class="space-y-2">
+              <label class="form-label">License Number</label>
+              <input type="text" [(ngModel)]="profileForm.licenseNumber" placeholder="MD-XXXXXX" class="form-input" />
+            </div>
+          </div>
+
+          <div class="mt-12 flex justify-end border-t border-[var(--border-light)] pt-8">
+            <button (click)="saveProfile()" [disabled]="isSaving()" class="save-btn">
+              <i class="bi bi-check-circle-fill" *ngIf="!isSaving()"></i>
+              <span *ngIf="isSaving()"
+                class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+              {{ isSaving() ? 'Saving Changes...' : 'Save Profile' }}
+            </button>
+          </div>
         </div>
 
-        <div *ngIf="!isLoading()" class="space-y-10">
-          <div *ngIf="activeTab() === 'profile'" class="bg-[var(--surface)] rounded-3xl p-8 shadow-lg transition-all">
-            <h2 class="text-2xl font-bold mb-6">Profile Information</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label class="block text-sm font-medium text-[var(--text-secondary)] mb-2">First Name</label>
-                <input type="text" [(ngModel)]="profileForm.firstName"
-                  class="w-full px-5 py-4 bg-[var(--surface-secondary)] rounded-xl focus:outline-none focus:ring-4 focus:ring-[var(--primary-light)] transition shadow-sm" />
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-[var(--text-secondary)] mb-2">Last Name</label>
-                <input type="text" [(ngModel)]="profileForm.lastName"
-                  class="w-full px-5 py-4 bg-[var(--surface-secondary)] rounded-xl focus:outline-none focus:ring-4 focus:ring-[var(--primary-light)] transition shadow-sm" />
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-[var(--text-secondary)] mb-2">Email</label>
-                <input type="email" [(ngModel)]="profileForm.email"
-                  class="w-full px-5 py-4 bg-[var(--surface-secondary)] rounded-xl focus:outline-none focus:ring-4 focus:ring-[var(--primary-light)] transition shadow-sm" />
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-[var(--text-secondary)] mb-2">Phone</label>
-                <input type="tel" [(ngModel)]="profileForm.phone"
-                  class="w-full px-5 py-4 bg-[var(--surface-secondary)] rounded-xl focus:outline-none focus:ring-4 focus:ring-[var(--primary-light)] transition shadow-sm" />
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-[var(--text-secondary)] mb-2">Specialty</label>
-                <input type="text" [(ngModel)]="profileForm.specialty"
-                  class="w-full px-5 py-4 bg-[var(--surface-secondary)] rounded-xl focus:outline-none focus:ring-4 focus:ring-[var(--primary-light)] transition shadow-sm" />
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-[var(--text-secondary)] mb-2">License Number</label>
-                <input type="text" [(ngModel)]="profileForm.licenseNumber"
-                  class="w-full px-5 py-4 bg-[var(--surface-secondary)] rounded-xl focus:outline-none focus:ring-4 focus:ring-[var(--primary-light)] transition shadow-sm" />
-              </div>
+        <!-- Availability Tab -->
+        <div *ngIf="activeTab() === 'availability'" class="settings-card p-8 md:p-12">
+          <div class="flex items-center gap-4 mb-10">
+            <div
+              class="w-16 h-16 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center text-3xl shadow-sm">
+              <i class="bi bi-calendar-check"></i>
             </div>
-            <div class="mt-8 flex justify-end">
-              <button (click)="saveProfile()" [disabled]="isSaving()"
-                class="px-8 py-4 bg-[var(--primary)] text-white rounded-xl font-semibold hover:bg-[var(--primary-hover)] disabled:opacity-70 transition shadow-lg flex items-center gap-3">
-                <span *ngIf="isSaving()"
-                  class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                Save Profile
-              </button>
-            </div>
-          </div>
-          <div *ngIf="activeTab() === 'availability'"
-            class="bg-[var(--surface)] rounded-3xl p-8 shadow-lg transition-all">
-            <h2 class="text-2xl font-bold mb-6">Clinic Availability</h2>
-            <div class="space-y-8">
-              <div>
-                <p class="text-sm font-medium text-[var(--text-secondary)] mb-4">Available Days</p>
-                <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-4">
-                  <button *ngFor="let day of daysOfWeek" (click)="toggleDay(day)"
-                    class="py-4 rounded-xl font-medium transition"
-                    [class.bg-[var(--primary)]]="availabilitySettings.availableDays.includes(day)"
-                    [class.text-white]="availabilitySettings.availableDays.includes(day)"
-                    [class.bg-[var(--surface-secondary)]]="!availabilitySettings.availableDays.includes(day)"
-                    [class.text-[var(--text-primary)]]="!availabilitySettings.availableDays.includes(day)">
-                    {{ day }}
-                  </button>
-                </div>
-              </div>
-
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label class="block text-sm font-medium text-[var(--text-secondary)] mb-2">Start Time</label>
-                  <input type="time" [(ngModel)]="availabilitySettings.startTime"
-                    class="w-full px-5 py-4 bg-[var(--surface-secondary)] rounded-xl focus:outline-none focus:ring-4 focus:ring-[var(--primary-light)] transition shadow-sm" />
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-[var(--text-secondary)] mb-2">End Time</label>
-                  <input type="time" [(ngModel)]="availabilitySettings.endTime"
-                    class="w-full px-5 py-4 bg-[var(--surface-secondary)] rounded-xl focus:outline-none focus:ring-4 focus:ring-[var(--primary-light)] transition shadow-sm" />
-                </div>
-              </div>
-            </div>
-            <div class="mt-8 flex justify-end">
-              <button (click)="saveSettings()" [disabled]="isSaving()"
-                class="px-8 py-4 bg-[var(--primary)] text-white rounded-xl font-semibold hover:bg-[var(--primary-hover)] disabled:opacity-70 transition shadow-lg flex items-center gap-3">
-                <span *ngIf="isSaving()"
-                  class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                Save Availability
-              </button>
+            <div>
+              <h2 class="text-2xl font-extrabold text-[var(--text-primary)]">Clinic Availability</h2>
+              <p class="text-sm text-[var(--text-muted)] mt-1 font-medium">Define your standard working hours.</p>
             </div>
           </div>
 
-          <div *ngIf="activeTab() === 'billing'" class="bg-[var(--surface)] rounded-3xl p-8 shadow-lg transition-all">
-            <h2 class="text-2xl font-bold mb-6">Billing & Payments</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label class="block text-sm font-medium text-[var(--text-secondary)] mb-2">Consultation Fee
-                  (USD)</label>
-                <input type="number" [(ngModel)]="billingSettings.consultationFee" placeholder="e.g. 150"
-                  class="w-full px-5 py-4 bg-[var(--surface-secondary)] rounded-xl focus:outline-none focus:ring-4 focus:ring-[var(--primary-light)] transition shadow-sm" />
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-[var(--text-secondary)] mb-2">Preferred Payment
-                  Method</label>
-                <select [(ngModel)]="billingSettings.paymentMethod"
-                  class="w-full px-5 py-4 bg-[var(--surface-secondary)] rounded-xl focus:outline-none focus:ring-4 focus:ring-[var(--primary-light)] transition shadow-sm">
-                  <option value="bank">Bank Transfer</option>
-                  <option value="card">Credit Card</option>
-                  <option value="insurance">Insurance Billing</option>
-                </select>
+          <div class="space-y-12">
+            <div>
+              <label class="form-label mb-6">Standard Working Days</label>
+              <div class="flex flex-wrap gap-4">
+                <button *ngFor="let day of daysOfWeek" (click)="toggleDay(day)" class="day-btn flex-1 min-w-[120px]"
+                  [class.active]="availabilitySettings.availableDays.includes(day)">
+                  {{ day }}
+                </button>
               </div>
             </div>
-            <div class="mt-8 flex justify-end">
-              <button (click)="saveSettings()" [disabled]="isSaving()"
-                class="px-8 py-4 bg-[var(--primary)] text-white rounded-xl font-semibold hover:bg-[var(--primary-hover)] disabled:opacity-70 transition shadow-lg">
-                Save Billing Settings
-              </button>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 bg-[var(--surface-secondary)] p-8 rounded-3xl">
+              <div class="space-y-3">
+                <label class="form-label">Clinic Opens</label>
+                <div class="relative">
+                  <i class="bi bi-clock absolute left-5 top-1/2 -translate-y-1/2 text-[var(--text-muted)]"></i>
+                  <input type="time" [(ngModel)]="availabilitySettings.startTime" class="form-input pl-12" />
+                </div>
+              </div>
+              <div class="space-y-3">
+                <label class="form-label">Clinic Closes</label>
+                <div class="relative">
+                  <i class="bi bi-clock-fill absolute left-5 top-1/2 -translate-y-1/2 text-[var(--text-muted)]"></i>
+                  <input type="time" [(ngModel)]="availabilitySettings.endTime" class="form-input pl-12" />
+                </div>
+              </div>
             </div>
           </div>
 
-          <div *ngIf="activeTab() === 'privacy'" class="bg-[var(--surface)] rounded-3xl p-8 shadow-lg transition-all">
-            <h2 class="text-2xl font-bold mb-6">Privacy & Security</h2>
-            <div class="space-y-6">
-              <label class="flex items-center justify-between py-4 px-6 bg-[var(--surface-secondary)] rounded-xl">
-                <div>
-                  <p class="font-medium">Two-Factor Authentication</p>
-                  <p class="text-sm text-[var(--text-secondary)] mt-1">Add an extra layer of security to your account
-                  </p>
+          <div class="mt-12 flex justify-end border-t border-[var(--border-light)] pt-8">
+            <button (click)="saveSettings()" [disabled]="isSaving()" class="save-btn">
+              <i class="bi bi-cloud-arrow-up-fill" *ngIf="!isSaving()"></i>
+              <span *ngIf="isSaving()"
+                class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+              Commit Settings
+            </button>
+          </div>
+        </div>
+
+        <!-- Billing Tab -->
+        <div *ngIf="activeTab() === 'billing'" class="settings-card p-8 md:p-12">
+          <div class="flex items-center gap-4 mb-10">
+            <div
+              class="w-16 h-16 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center text-3xl shadow-sm">
+              <i class="bi bi-credit-card"></i>
+            </div>
+            <div>
+              <h2 class="text-2xl font-extrabold text-[var(--text-primary)]">Billing & Payments</h2>
+              <p class="text-sm text-[var(--text-muted)] mt-1 font-medium">Manage consultation fees and payouts.</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+            <div class="space-y-3">
+              <label class="form-label">Consultation Fee (USD)</label>
+              <div class="relative">
+                <span class="absolute left-5 top-1/2 -translate-y-1/2 font-bold text-[var(--text-muted)]">$</span>
+                <input type="number" [(ngModel)]="billingSettings.consultationFee" placeholder="150"
+                  class="form-input pl-10" />
+              </div>
+            </div>
+            <div class="space-y-3">
+              <label class="form-label">Preferred Payout Method</label>
+              <select [(ngModel)]="billingSettings.paymentMethod" class="form-input form-select">
+                <option value="bank">Bank Transfer (Swift)</option>
+                <option value="card">Credit/Debit Card</option>
+                <option value="insurance">Direct Insurance Billing</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="mt-12 p-6 bg-amber-50 rounded-2xl border border-amber-100">
+            <div class="flex gap-4">
+              <i class="bi bi-info-circle text-amber-600 text-xl"></i>
+              <p class="text-sm text-amber-800 font-medium leading-relaxed">
+                Fees are updated immediately but will only apply to new appointments booked after the change. Your
+                current active appointments will retain their original pricing.
+              </p>
+            </div>
+          </div>
+
+          <div class="mt-12 flex justify-end border-t border-[var(--border-light)] pt-8">
+            <button (click)="saveSettings()" [disabled]="isSaving()"
+              class="save-btn bg-amber-600 hover:bg-amber-700 shadow-amber-100">
+              <i class="bi bi-shield-check" *ngIf="!isSaving()"></i>
+              Update Billing
+            </button>
+          </div>
+        </div>
+
+        <!-- Privacy Tab -->
+        <div *ngIf="activeTab() === 'privacy'" class="settings-card p-8 md:p-12">
+          <div class="flex items-center gap-4 mb-10">
+            <div
+              class="w-16 h-16 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center text-3xl shadow-sm">
+              <i class="bi bi-shield-lock"></i>
+            </div>
+            <div>
+              <h2 class="text-2xl font-extrabold text-[var(--text-primary)]">Privacy & Security</h2>
+              <p class="text-sm text-[var(--text-muted)] mt-1 font-medium">Control your account security and data
+                sharing.</p>
+            </div>
+          </div>
+
+          <div class="space-y-6">
+            <div
+              class="group flex items-center justify-between p-6 bg-[var(--surface-secondary)] rounded-3xl border border-transparent hover:border-purple-200 transition-all">
+              <div class="flex gap-5">
+                <div class="w-12 h-12 rounded-xl bg-white flex items-center justify-center text-xl shadow-sm">
+                  <i class="bi bi-key text-purple-600"></i>
                 </div>
-                <input type="checkbox" [(ngModel)]="privacySettings.twoFactorAuth"
-                  class="w-6 h-6 text-[var(--primary)] rounded focus:ring-[var(--primary-light)]" />
+                <div>
+                  <p class="font-bold text-lg">Two-Factor Authentication</p>
+                  <p class="text-sm text-[var(--text-muted)] font-medium mt-1">Add an extra layer of security via mobile
+                    authenticator</p>
+                </div>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" [(ngModel)]="privacySettings.twoFactorAuth">
+                <span class="slider"></span>
               </label>
+            </div>
 
-              <label class="flex items-center justify-between py-4 px-6 bg-[var(--surface-secondary)] rounded-xl">
-                <div>
-                  <p class="font-medium">Allow Patients to View Records</p>
-                  <p class="text-sm text-[var(--text-secondary)] mt-1">Share medical records directly with patients</p>
+            <div
+              class="group flex items-center justify-between p-6 bg-[var(--surface-secondary)] rounded-3xl border border-transparent hover:border-purple-200 transition-all">
+              <div class="flex gap-5">
+                <div class="w-12 h-12 rounded-xl bg-white flex items-center justify-center text-xl shadow-sm">
+                  <i class="bi bi-people text-purple-600"></i>
                 </div>
-                <input type="checkbox" [(ngModel)]="privacySettings.shareDataWithPatients"
-                  class="w-6 h-6 text-[var(--primary)] rounded focus:ring-[var(--primary-light)]" />
+                <div>
+                  <p class="font-bold text-lg">Patient Record Sharing</p>
+                  <p class="text-sm text-[var(--text-muted)] font-medium mt-1">Allow verified patients to view their
+                    medical records online</p>
+                </div>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" [(ngModel)]="privacySettings.shareDataWithPatients">
+                <span class="slider"></span>
               </label>
             </div>
-            <div class="mt-8 flex justify-end">
-              <button (click)="saveSettings()" [disabled]="isSaving()"
-                class="px-8 py-4 bg-[var(--primary)] text-white rounded-xl font-semibold hover:bg-[var(--primary-hover)] disabled:opacity-70 transition shadow-lg">
-                Save Privacy Settings
-              </button>
-            </div>
+          </div>
+
+          <div class="mt-12 flex justify-end border-t border-[var(--border-light)] pt-8">
+            <button (click)="saveSettings()" [disabled]="isSaving()"
+              class="save-btn bg-purple-600 hover:bg-purple-700 shadow-purple-100">
+              <i class="bi bi-safe2" *ngIf="!isSaving()"></i>
+              Secure Settings
+            </button>
           </div>
         </div>
       </div>
-    </main>
-  </div>
+    </div>
+  </main>
 </div>

@@ -8,6 +8,7 @@ import { AuthService } from '@core/services/auth.service';
 import { SettingsService, DoctorSettings } from '@core/services/settings.service';
 import { NotificationService } from '@core/services/notification.service';
 import { ThemeService } from '@core/services/theme.service';
+import { ToastService } from '@core/services/toast.service';
 
 @Component({
   selector: 'app-doctor-settings',
@@ -19,11 +20,13 @@ import { ThemeService } from '@core/services/theme.service';
     DoctorHeaderComponent
   ],
   templateUrl: './settings.component.html',
+  styleUrls: ['./settings.component.css']
 })
 export class SettingsComponent implements OnInit {
   private authService = inject(AuthService);
   private settingsService = inject(SettingsService);
   private notificationService = inject(NotificationService);
+  private toast = inject(ToastService);
   themeService = inject(ThemeService);
 
   currentUser = signal<any>(null);
@@ -34,10 +37,10 @@ export class SettingsComponent implements OnInit {
   unreadNotificationCount = signal(0);
 
   tabs = [
-    { label: 'Profile', value: 'profile' as const },
-    { label: 'Availability', value: 'availability' as const },
-    { label: 'Billing', value: 'billing' as const },
-    { label: 'Privacy & Security', value: 'privacy' as const },
+    { label: 'Profile', value: 'profile' as const, icon: 'bi-person-circle' },
+    { label: 'Availability', value: 'availability' as const, icon: 'bi-calendar-check' },
+    { label: 'Billing', value: 'billing' as const, icon: 'bi-credit-card' },
+    { label: 'Security', value: 'privacy' as const, icon: 'bi-shield-lock' },
   ] as const;
 
   daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
@@ -107,7 +110,10 @@ export class SettingsComponent implements OnInit {
         };
         this.isLoading.set(false);
       },
-      error: () => this.isLoading.set(false)
+      error: () => {
+        this.toast.error('Failed to load settings', { title: 'Settings' });
+        this.isLoading.set(false);
+      }
     });
   }
 
@@ -118,20 +124,30 @@ export class SettingsComponent implements OnInit {
   }
 
   toggleDay(day: string): void {
-    const days = this.availabilitySettings.availableDays;
+    const days = [...this.availabilitySettings.availableDays];
     const index = days.indexOf(day);
     if (index > -1) {
       days.splice(index, 1);
     } else {
       days.push(day);
     }
+    this.availabilitySettings.availableDays = days;
   }
 
   saveProfile(): void {
     this.isSaving.set(true);
-    // Update profile via auth or user service
-    this.isSaving.set(false);
-    alert('Profile updated successfully');
+    this.settingsService.updateProfile(this.profileForm).subscribe({
+      next: (updatedUser) => {
+        this.authService.setUser(updatedUser);
+        this.currentUser.set(updatedUser);
+        this.toast.success('Profile updated successfully', { title: 'Success' });
+        this.isSaving.set(false);
+      },
+      error: () => {
+        this.toast.error('Failed to update profile', { title: 'Error' });
+        this.isSaving.set(false);
+      }
+    });
   }
 
   saveSettings(): void {
@@ -149,11 +165,11 @@ export class SettingsComponent implements OnInit {
     this.settingsService.updateSettings(updatedSettings).subscribe({
       next: () => {
         this.isSaving.set(false);
-        alert('Settings saved successfully');
+        this.toast.success('Settings saved successfully', { title: 'Success' });
       },
       error: () => {
         this.isSaving.set(false);
-        alert('Failed to save settings');
+        this.toast.error('Failed to save settings', { title: 'Error' });
       }
     });
   }
