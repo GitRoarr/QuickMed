@@ -9,7 +9,7 @@ import { DoctorSidebarComponent } from '../shared/doctor-sidebar/doctor-sidebar.
   imports: [CommonModule, RouterModule, DoctorSidebarComponent],
   template: `
     <div class="flex h-screen bg-[var(--bg-primary)] text-[var(--text-primary)] overflow-hidden">
-      <app-doctor-sidebar class="sticky top-0 h-screen overflow-y-auto"></app-doctor-sidebar>
+      <app-doctor-sidebar class="sticky top-0 h-screen"></app-doctor-sidebar>
       <div class="flex-1 min-w-0">
         <router-outlet></router-outlet>
       </div>

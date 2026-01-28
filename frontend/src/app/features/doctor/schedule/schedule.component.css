@@ -4,7 +4,8 @@
 .calendar-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 12px;
+  gap: 8px;
+  /* Reduced from 12px */
 }
 
 .calendar-day-label {
@@ -18,19 +19,25 @@
 
 /* Calendar Day Buttons */
 .calendar-day {
-  aspect-ratio: 1;
+  aspect-ratio: 1.1;
+  /* Slightly less square/bulky */
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  border-radius: 12px;
+  border-radius: 10px;
+  /* Reduced from 12px */
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
+  /* Reduced from 0.9rem */
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   background: var(--surface-secondary);
   color: var(--text-primary);
   border: 1px solid transparent;
+  max-width: 80px;
+  /* Constrain growth */
+  margin: 0 auto;
 }
 
 .calendar-day:hover:not(.calendar-day-outside) {
@@ -76,8 +83,10 @@
 .session-card {
   background: var(--surface);
   border: 1px solid var(--border-light);
-  border-radius: 1.25rem;
-  padding: 1.5rem;
+  border-radius: 1rem;
+  /* Reduced from 1.25rem */
+  padding: 1.25rem;
+  /* Reduced from 1.5rem */
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
 }
@@ -111,7 +120,8 @@ input[type="time"] {
 
 /* Stats Layout */
 .stat-number {
-  font-size: 1.75rem;
+  font-size: 1.5rem;
+  /* Reduced from 1.75rem */
   font-weight: 800;
   color: var(--text-primary);
   line-height: 1;

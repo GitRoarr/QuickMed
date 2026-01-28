@@ -430,7 +430,8 @@ export class ScheduleComponent implements OnInit {
     return currentMinutes >= startMin && currentMinutes < endMin;
   }
 
-  isSlotPassed(time: string): boolean {
+  isSlotPassed(time?: string): boolean {
+    if (!time) return false;
     const isToday = this.selectedDate().toDateString() === new Date().toDateString();
     if (!isToday) return false;
 

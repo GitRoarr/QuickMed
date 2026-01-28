@@ -5,14 +5,14 @@
       [unreadNotifications]="unreadNotifications()" [themeMode]="themeMode()"
       (themeChange)="setTheme($event)"></app-doctor-header>
 
-    <div class="flex-1 overflow-y-auto px-4 md:px-8 pb-8 space-y-8 animate-fade-in-up">
+    <div class="flex-1 overflow-y-auto px-4 md:px-8 pb-8 space-y-6 animate-fade-in-up">
 
       <!-- Page Header -->
       <header
         class="flex flex-col xl:flex-row xl:items-center justify-between gap-6 py-6 border-b border-[var(--border-light)]">
         <div>
-          <h1 class="text-3xl font-extrabold text-[var(--text-primary)] tracking-tight">Schedule</h1>
-          <p class="text-[var(--text-secondary)] text-sm font-medium mt-1">Manage your professional availability and
+          <h1 class="text-2xl font-extrabold text-[var(--text-primary)] tracking-tight">Schedule</h1>
+          <p class="text-[var(--text-secondary)] text-xs font-medium mt-1">Manage your professional availability and
             appointments.</p>
         </div>
 
@@ -49,10 +49,10 @@
 
         <!-- Left: Calendar Card -->
         <div class="lg:col-span-8 space-y-6">
-          <div class="bg-[var(--surface)] rounded-3xl shadow-xl border border-[var(--border-light)] p-8">
+          <div class="bg-[var(--surface)] rounded-3xl shadow-xl border border-[var(--border-light)] p-6">
             <div class="flex items-center justify-between mb-8">
               <div class="flex items-center gap-4">
-                <h2 class="text-2xl font-bold text-[var(--text-primary)]">{{ getMonthYear() }}</h2>
+                <h2 class="text-xl font-bold text-[var(--text-primary)]">{{ getMonthYear() }}</h2>
                 <div class="flex gap-1">
                   <button (click)="previousMonth()"
                     class="p-2 rounded-xl hover:bg-[var(--surface-tertiary)] text-[var(--text-secondary)] transition-all">
@@ -90,7 +90,7 @@
             </div>
 
             <!-- Working Settings -->
-            <div class="mt-10 pt-8 border-t border-[var(--border-light)]">
+            <div class="mt-8 pt-6 border-t border-[var(--border-light)]">
               <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
                 <div class="space-y-3">
                   <label
@@ -129,7 +129,7 @@
 
         <!-- Right: Today's Overview -->
         <div class="lg:col-span-4 space-y-6">
-          <div class="bg-[var(--surface)] p-8 rounded-3xl shadow-xl border border-[var(--border-light)] sticky top-6">
+          <div class="bg-[var(--surface)] p-6 rounded-3xl shadow-xl border border-[var(--border-light)] sticky top-6">
             <div class="flex items-center justify-between mb-8">
               <div>
                 <p class="text-xs font-bold text-[var(--text-muted)] uppercase tracking-widest mb-1">Overview</p>
@@ -204,15 +204,15 @@
       </div>
 
       <!-- Mid Section: Session Manager -->
-      <section class="bg-[var(--surface)] p-8 md:p-10 rounded-3xl shadow-xl border border-[var(--border-light)]">
+      <section class="bg-[var(--surface)] p-6 md:p-8 rounded-3xl shadow-xl border border-[var(--border-light)]">
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
           <div>
-            <h3 class="text-2xl font-extrabold text-[var(--text-primary)]">Daily Session Manager</h3>
-            <p class="text-[var(--text-secondary)] text-sm font-medium mt-1">Configure available morning, break, and
+            <h3 class="text-xl font-extrabold text-[var(--text-primary)]">Daily Session Manager</h3>
+            <p class="text-[var(--text-secondary)] text-xs font-medium mt-1">Configure available morning, break, and
               evening slots.</p>
           </div>
           <button (click)="saveSessionSchedule()"
-            class="px-8 py-4 bg-[var(--primary)] text-white rounded-2xl font-bold shadow-xl hover:bg-[var(--primary-hover)] transition-all transform hover:-translate-y-1 flex items-center gap-2">
+            class="px-6 py-3 bg-[var(--primary)] text-white rounded-2xl font-bold shadow-xl hover:bg-[var(--primary-hover)] transition-all transform hover:-translate-y-1 flex items-center gap-2">
             <i class="bi bi-cloud-check"></i>
             Commit Schedule
           </button>
