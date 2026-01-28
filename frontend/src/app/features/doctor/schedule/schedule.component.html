@@ -15,32 +15,7 @@
           <p class="text-[var(--text-secondary)] text-sm">Manage availability, templates, and view appointments.</p>
         </div>
         <div class="flex items-center gap-3 flex-wrap">
-          <!-- Template Selector -->
-          <div class="relative template-selector">
-            <button (click)="showTemplateDropdown.set(!showTemplateDropdown())"
-              class="flex items-center gap-2 bg-[var(--surface-tertiary)] hover:bg-[var(--surface-secondary)] px-4 py-2 rounded-xl text-sm font-semibold text-[var(--text-primary)] transition-all shadow-sm">
-              <i class="bi bi-layout-text-sidebar"></i>
-              <span>Template</span>
-              <i class="bi" [class.bi-chevron-down]="!showTemplateDropdown()"
-                [class.bi-chevron-up]="showTemplateDropdown()"></i>
-            </button>
 
-            <!-- Template Dropdown -->
-            <div *ngIf="showTemplateDropdown()" class="template-dropdown">
-              <div *ngFor="let template of templates()" (click)="applyTemplate(template)" class="template-item">
-                <div class="flex items-center justify-between">
-                  <div>
-                    <p class="font-semibold text-[var(--text-primary)]">{{ template.name }}</p>
-                    <p class="text-xs text-[var(--text-secondary)] mt-0.5">{{ template.description }}</p>
-                  </div>
-                  <span *ngIf="template.isDefault" class="template-badge">Default</span>
-                </div>
-              </div>
-              <div (click)="createPresets()" class="template-item border-t-2 border-[var(--primary-light)]">
-                <p class="font-semibold text-[var(--primary)]"><i class="bi bi-plus-circle mr-2"></i>Load Presets</p>
-              </div>
-            </div>
-          </div>
 
           <!-- View Mode Toggle -->
           <div class="bg-[var(--surface-tertiary)] p-1 rounded-xl flex">

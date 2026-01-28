@@ -11,12 +11,12 @@ import { MessageService } from '@core/services/message.service';
 import { NotificationService } from '@core/services/notification.service';
 import { ToastService } from '@core/services/toast.service';
 import { SchedulingService, DoctorSlot } from '../../../core/services/schedule.service';
-import { AvailabilityTemplateService } from '@core/services/availability-template.service';
+
 import { DoctorAnalyticsService } from '@core/services/doctor-analytics.service';
 import { ConflictDetectionService } from '@core/services/conflict-detection.service';
 
 import { Appointment, AppointmentStatus } from '@core/models/appointment.model';
-import { AvailabilityTemplate } from '@core/models/availability-template.model';
+
 import { DailyStats } from '@core/models/doctor-analytics.model';
 import { DoctorHeaderComponent } from '../shared/doctor-header/doctor-header.component';
 
@@ -41,7 +41,7 @@ export class ScheduleComponent implements OnInit {
     private authService: AuthService,
     private router: Router,
     private toast: ToastService,
-    private templateService: AvailabilityTemplateService,
+
     private analyticsService: DoctorAnalyticsService,
     private conflictService: ConflictDetectionService
   ) { }
@@ -49,7 +49,7 @@ export class ScheduleComponent implements OnInit {
   // Signals
   appointments = signal<Appointment[]>([]);
   slots = signal<DoctorSlot[]>([]);
-  templates = signal<AvailabilityTemplate[]>([]);
+
   todayStats = signal<DailyStats | null>(null);
   isLoading = signal(true);
   selectedDate = signal(new Date());
@@ -62,7 +62,7 @@ export class ScheduleComponent implements OnInit {
   workingEnd = signal('18:00');
   workingDays = signal<number[]>([]);
   themeMode = signal<'light' | 'dark'>('light');
-  showTemplateDropdown = signal(false);
+
   draggedSlot = signal<DoctorSlot | null>(null);
   sessions = signal<Record<string, boolean>>({ morning: false, break: false, evening: false });
   expandedSessions = signal<Record<string, boolean>>({ morning: false, break: false, evening: false });
@@ -99,7 +99,7 @@ export class ScheduleComponent implements OnInit {
     this.loadSlots();
     this.loadHeaderCounts();
     this.loadWorkingDays();
-    this.loadTemplates();
+
     this.loadAnalytics();
   }
 
@@ -288,32 +288,7 @@ export class ScheduleComponent implements OnInit {
     this.selectDate(new Date(next.appointmentDate));
   }
 
-  loadTemplates(): void {
-    this.templateService.getTemplates().subscribe({
-      next: templates => this.templates.set(templates),
-      error: () => this.toast.error('Failed to load templates', { title: 'Templates' })
-    });
-  }
 
-  applyTemplate(template: AvailabilityTemplate): void {
-    this.workingDays.set(template.workingDays);
-    this.workingStart.set(template.startTime);
-    this.workingEnd.set(template.endTime);
-    this.slotDurationMinutes.set(template.slotDuration);
-    this.showTemplateDropdown.set(false);
-    this.toast.success(`Template "${template.name}" applied`, { title: 'Templates' });
-  }
-
-  createPresets(): void {
-    this.templateService.createPresets().subscribe({
-      next: presets => {
-        this.toast.success(`${presets.length} preset templates created`, { title: 'Templates' });
-        this.loadTemplates();
-        this.showTemplateDropdown.set(false);
-      },
-      error: () => this.toast.error('Failed to create presets', { title: 'Templates' })
-    });
-  }
 
   loadAnalytics(): void {
     this.analyticsService.getTodayStats().subscribe({
