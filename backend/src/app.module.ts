@@ -46,6 +46,7 @@ import { WebRtcModule } from "./webrtc/webrtc.module";
 
     AuthModule,
     UsersModule,
+    SchedulesModule,
     DoctorsModule,
     AppointmentsModule,
     NotificationsModule,
@@ -58,7 +59,6 @@ import { WebRtcModule } from "./webrtc/webrtc.module";
     SettingsModule,
     ReviewsModule,
     PatientPortalModule,
-    SchedulesModule,
     ConsultationsModule,
     WebRtcModule,
   ],

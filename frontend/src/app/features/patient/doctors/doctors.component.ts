@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormsModule } from '@angular/forms';
 import { UserService } from '../../../core/services/user.service';
@@ -28,7 +28,21 @@ export class DoctorsComponent implements OnInit {
   searchQuery = signal('');
   selectedSpecialty = signal('all');
   availableSlots = signal<DoctorSlot[]>([]);
-  
+
+  morningSlots = computed(() =>
+    this.availableSlots().filter(s => {
+      const time = s.startTime || s.time || '';
+      return time >= '09:00' && time < '12:00';
+    })
+  );
+
+  eveningSlots = computed(() =>
+    this.availableSlots().filter(s => {
+      const time = s.startTime || s.time || '';
+      return time >= '14:00' && time < '20:00';
+    })
+  );
+
   appointmentForm: FormGroup;
 
   specialties = [
@@ -65,7 +79,7 @@ export class DoctorsComponent implements OnInit {
     this.userService.getDoctors().subscribe({
       next: (docs: any[]) => {
         // Backend now returns doctors with availability, rating, and experience
-        const dayNames = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+        const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
         const todayName = dayNames[new Date().getDay()];
         const normalize = (s: string) => (s || '').toLowerCase();
         const isAvailableToday = (d: any) => {
@@ -74,8 +88,8 @@ export class DoctorsComponent implements OnInit {
           if (!hasDays) return false;
           const normalizedDays = days.map(normalize);
           // Support both full and short day names
-          const shortNames: Record<string,string> = {
-            sunday:'sun', monday:'mon', tuesday:'tue', wednesday:'wed', thursday:'thu', friday:'fri', saturday:'sat'
+          const shortNames: Record<string, string> = {
+            sunday: 'sun', monday: 'mon', tuesday: 'tue', wednesday: 'wed', thursday: 'thu', friday: 'fri', saturday: 'sat'
           };
           const tn = normalize(todayName);
           return normalizedDays.includes(tn) || normalizedDays.includes(shortNames[tn]);
@@ -111,7 +125,7 @@ export class DoctorsComponent implements OnInit {
     let filtered = [...this.doctors()];
 
     if (this.selectedSpecialty() !== 'all') {
-      filtered = filtered.filter(doc => 
+      filtered = filtered.filter(doc =>
         (doc.specialty ?? '').toLowerCase() === this.selectedSpecialty().toLowerCase()
       );
     }

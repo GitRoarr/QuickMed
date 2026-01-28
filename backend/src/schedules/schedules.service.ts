@@ -10,6 +10,12 @@ import { GenerateSlotsDto } from './dto/generate-slots.dto';
 import { ApplyTemplateDto } from './dto/apply-template.dto';
 import { BulkSlotUpdateDto } from './dto/bulk-slot-update.dto';
 
+const SESSIONS = {
+  morning: { start: '09:00', end: '12:00', allowSlots: true },
+  break: { start: '12:00', end: '14:00', allowSlots: false },
+  evening: { start: '14:00', end: '20:00', allowSlots: true },
+};
+
 @Injectable()
 export class SchedulesService {
   constructor(
@@ -20,6 +26,49 @@ export class SchedulesService {
     private readonly settingsService: SettingsService,
     private readonly templateService: AvailabilityTemplateService,
   ) { }
+
+  private toMinutes(time: string): number {
+    const [h, m] = time.split(':').map(Number);
+    return h * 60 + m;
+  }
+
+  private fromMinutes(minutes: number): string {
+    const h = Math.floor(minutes / 60);
+    const m = minutes % 60;
+    return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+  }
+
+  private generateSlots(start: string, end: string, duration: number): string[] {
+    const slots: string[] = [];
+    let current = this.toMinutes(start);
+    const endTime = this.toMinutes(end);
+
+    while (current + duration <= endTime) {
+      slots.push(this.fromMinutes(current));
+      current += duration;
+    }
+
+    return slots;
+  }
+
+  private getDaySlots(availability: { sessions: any; slotDuration: number }): Record<string, string[]> {
+    const result: Record<string, string[]> = {};
+
+    for (const session in availability.sessions) {
+      if (!availability.sessions[session]) continue;
+
+      const config = (SESSIONS as any)[session];
+      if (!config || !config.allowSlots) continue;
+
+      result[session] = this.generateSlots(
+        config.start,
+        config.end,
+        availability.slotDuration,
+      );
+    }
+
+    return result;
+  }
 
   private addMinutes(time: string, minutes: number): string {
     const [h, m] = time.split(':').map(Number);
@@ -53,10 +102,31 @@ export class SchedulesService {
     let sched = await this.repo.findOne({ where: { doctorId, date: dateObj } });
     const dateStr = dateObj instanceof Date ? dateObj.toISOString().split('T')[0] : String(dateObj);
 
+    // If session-based availability is defined, generate slots from sessions
+    let sessionSlots: Slot[] = [];
+    if (sched?.sessions) {
+      const generated = this.getDaySlots({
+        sessions: sched.sessions,
+        slotDuration: sched.slotDuration || 30,
+      });
+
+      for (const session in generated) {
+        generated[session].forEach((timeStr) => {
+          const startTime = timeStr;
+          const endTime = this.addMinutes(timeStr, sched?.slotDuration || 30);
+          sessionSlots.push({
+            startTime,
+            endTime,
+            status: 'available',
+          });
+        });
+      }
+    }
+
     // Manual-only: use stored slots and booked appointments; do not auto-generate from settings
     const storedSlots = sched?.slots || [];
     const appointmentSlots = await this.getBookedSlots(doctorId, dateObj);
-    let mergedSlots = this.mergeSlots(storedSlots, appointmentSlots);
+    let mergedSlots = this.mergeSlots(sessionSlots, storedSlots, appointmentSlots);
 
     // Auto-block past-time available slots
     const today = this.normalizeToDate(new Date());
@@ -78,7 +148,36 @@ export class SchedulesService {
       }
       return s;
     });
-    return { date: dateStr, slots: finalSlots };
+    return {
+      date: dateStr,
+      slots: finalSlots,
+      sessions: sched?.sessions || null,
+      slotDuration: sched?.slotDuration || 30,
+    };
+  }
+
+  async updateSessionAvailability(
+    doctorId: string,
+    date: string | Date,
+    sessions: { morning: boolean; break: boolean; evening: boolean },
+    slotDuration: number = 30,
+  ) {
+    const dateObj = this.normalizeToDate(date);
+    let sched = await this.repo.findOne({ where: { doctorId, date: dateObj } });
+
+    if (!sched) {
+      sched = this.repo.create({
+        doctorId,
+        date: dateObj,
+        slots: [],
+      });
+    }
+
+    sched.sessions = sessions;
+    sched.slotDuration = slotDuration;
+
+    await this.repo.save(sched);
+    return this.getDaySchedule(doctorId, date);
   }
   async setSingleSlotStatus(
     doctorId: string,

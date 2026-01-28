@@ -10,10 +10,7 @@
     <div class="search-controls">
       <div class="search-input">
         <i class="bi bi-search"></i>
-        <input
-          type="text"
-          placeholder="Search by name, specialty, or expertise..."
-          [(ngModel)]="searchQuery"
+        <input type="text" placeholder="Search by name, specialty, or expertise..." [(ngModel)]="searchQuery"
           (ngModelChange)="onSearchChange()" />
       </div>
       <div class="filter-select">
@@ -97,7 +94,8 @@
         <div class="doctor-summary">
           <div class="avatar small">
             <ng-container *ngIf="selectedDoctor()?.avatar; else selectedInitial">
-              <img [src]="selectedDoctor()?.avatar!" alt="Dr. {{ selectedDoctor()?.firstName }} {{ selectedDoctor()?.lastName }}" />
+              <img [src]="selectedDoctor()?.avatar!"
+                alt="Dr. {{ selectedDoctor()?.firstName }} {{ selectedDoctor()?.lastName }}" />
             </ng-container>
             <ng-template #selectedInitial>{{ getSelectedDoctorInitial() }}</ng-template>
           </div>
@@ -112,35 +110,44 @@
             <span>Appointment Date</span>
             <input type="date" formControlName="appointmentDate" [min]="getCurrentDate()" (change)="onDateChange()" />
           </label>
-          
+
           <label>
             <span>Available Time Slots</span>
             <div class="slot-selector" *ngIf="availableSlots().length > 0; else noSlots">
-              <div class="slots-grid">
-                <button
-                  type="button"
-                  *ngFor="let slot of availableSlots()"
-                  (click)="selectTimeSlot(slot)"
-                  [class.selected]="isTimeSlotSelected(slot)"
-                  class="slot-btn"
-                  [title]="formatSlotTime(slot)"
-                >
-                  {{ formatSlotTime(slot) }}
-                </button>
+
+              <!-- Morning Sessions -->
+              <div *ngIf="morningSlots().length > 0" class="session-group mb-4">
+                <p class="session-label">🌅 Morning (09:00 AM – 12:00 PM)</p>
+                <div class="slots-grid">
+                  <button type="button" *ngFor="let slot of morningSlots()" (click)="selectTimeSlot(slot)"
+                    [class.selected]="isTimeSlotSelected(slot)" class="slot-btn" [title]="formatSlotTime(slot)">
+                    {{ formatSlotTime(slot) }}
+                  </button>
+                </div>
               </div>
-              <input
-                type="hidden"
-                formControlName="appointmentTime"
-              />
+
+              <!-- Evening Sessions -->
+              <div *ngIf="eveningSlots().length > 0" class="session-group">
+                <p class="session-label">🌆 Evening (02:00 PM – 08:00 PM)</p>
+                <div class="slots-grid">
+                  <button type="button" *ngFor="let slot of eveningSlots()" (click)="selectTimeSlot(slot)"
+                    [class.selected]="isTimeSlotSelected(slot)" class="slot-btn" [title]="formatSlotTime(slot)">
+                    {{ formatSlotTime(slot) }}
+                  </button>
+                </div>
+              </div>
+
+              <input type="hidden" formControlName="appointmentTime" />
             </div>
             <ng-template #noSlots>
               <div class="no-slots-message">
-                <p *ngIf="appointmentForm.value.appointmentDate">No available slots for this date. Please select another date.</p>
+                <p *ngIf="appointmentForm.value.appointmentDate">No available slots for this date. Please select another
+                  date.</p>
                 <p *ngIf="!appointmentForm.value.appointmentDate">Please select a date to see available time slots.</p>
               </div>
             </ng-template>
           </label>
-          
+
           <label>
             <span>Notes (optional)</span>
             <textarea rows="3" formControlName="notes" placeholder="Add special requests..."></textarea>
@@ -148,7 +155,8 @@
 
           <div class="modal-actions">
             <button type="button" class="text-btn" (click)="closeBookingForm()">Cancel</button>
-            <button type="submit" class="primary-btn" [disabled]="appointmentForm.invalid || !appointmentForm.value.appointmentTime">
+            <button type="submit" class="primary-btn"
+              [disabled]="appointmentForm.invalid || !appointmentForm.value.appointmentTime">
               <i class="bi bi-check-circle"></i>
               Confirm Booking
             </button>
@@ -170,21 +178,14 @@
       <div class="modal-body" *ngIf="ratingDoctor() as rd">
         <p class="mb-3">How was your experience with Dr. {{ rd.firstName }} {{ rd.lastName }}?</p>
         <div class="rating-input">
-          <button
-            type="button"
-            *ngFor="let star of [1,2,3,4,5]"
-            class="star-btn"
-            [class.active]="star <= ratingValue()"
+          <button type="button" *ngFor="let star of [1,2,3,4,5]" class="star-btn" [class.active]="star <= ratingValue()"
             (click)="setRating(star)">
             <i class="bi" [ngClass]="star <= ratingValue() ? 'bi-star-fill' : 'bi-star'"></i>
           </button>
         </div>
         <div class="modal-actions">
           <button type="button" class="text-btn" (click)="closeRating()">Cancel</button>
-          <button
-            type="button"
-            class="primary-btn"
-            [disabled]="ratingValue() === 0 || ratingSubmitting()"
+          <button type="button" class="primary-btn" [disabled]="ratingValue() === 0 || ratingSubmitting()"
             (click)="submitRating()">
             Submit rating
           </button>

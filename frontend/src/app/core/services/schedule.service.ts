@@ -33,11 +33,15 @@ export class SchedulingService {
     return doctorId ? { headers: { 'x-doctor-id': doctorId } } : {};
   }
 
-  getDaySchedule(date: Date | string, doctorId?: string): Observable<DoctorSlot[]> {
+  getDaySchedule(date: Date | string, doctorId?: string): Observable<DayScheduleResponse & { sessions: any, slotDuration: number }> {
     const formatted = this.normalizeDate(date);
     return this.http
-      .get<DayScheduleResponse>(`${this.API_URL}/${formatted}`, this.withDoctorHeader(doctorId))
-      .pipe(map(res => res.slots));
+      .get<any>(`${this.API_URL}/${formatted}`, this.withDoctorHeader(doctorId));
+  }
+
+  updateSessions(date: Date | string, sessions: any, slotDuration: number, doctorId?: string): Observable<any> {
+    const payload = { date: this.normalizeDate(date), sessions, slotDuration };
+    return this.http.post(`${this.API_URL}/sessions`, payload, this.withDoctorHeader(doctorId));
   }
 
   getDaySchedulePublic(doctorId: string, date: Date | string): Observable<DoctorSlot[]> {

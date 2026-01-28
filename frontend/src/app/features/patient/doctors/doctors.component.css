@@ -352,3 +352,26 @@
 .no-slots-message p {
   margin: 0;
 }
+
+/* Session Grouping Styles */
+.session-group {
+  border-bottom: 1px solid var(--border-color, #e0e0e0);
+  padding-bottom: 1rem;
+}
+
+.session-group:last-of-type {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.session-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-muted, #94a3b8);
+  margin-bottom: 0.75rem;
+  letter-spacing: 0.05em;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}

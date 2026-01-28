@@ -151,5 +151,20 @@ export class SchedulesController {
     const doctorId = req.user?.id ?? req.user?.sub ?? req.headers['x-doctor-id'];
     return this.svc.getDaySchedule(doctorId, date);
   }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('sessions')
+  async updateSessions(
+    @Req() req: any,
+    @Body() body: { date: string; sessions: any; slotDuration: number },
+  ) {
+    const doctorId = req.user?.id ?? req.user?.sub ?? req.headers['x-doctor-id'];
+    return this.svc.updateSessionAvailability(
+      doctorId,
+      body.date,
+      body.sessions,
+      body.slotDuration,
+    );
+  }
 }
 

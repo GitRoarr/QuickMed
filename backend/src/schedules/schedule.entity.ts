@@ -27,4 +27,14 @@ export class DoctorSchedule {
 
   @Column({ type: 'jsonb', default: () => "'[]'" })
   slots: Slot[];
+
+  @Column({ type: 'jsonb', nullable: true })
+  sessions: {
+    morning: boolean;
+    break: boolean;
+    evening: boolean;
+  };
+
+  @Column({ type: 'int', default: 30 })
+  slotDuration: number;
 }
