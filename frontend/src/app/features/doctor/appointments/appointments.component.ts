@@ -28,6 +28,7 @@ interface MenuItem {
   styleUrls: ['./appointments.component.css'],
 })
 export class AppointmentsComponent implements OnInit {
+  today = new Date();
   appointments = signal<Appointment[]>([]);
   filteredAppointments = signal<Appointment[]>([]);
   isLoading = signal(true);

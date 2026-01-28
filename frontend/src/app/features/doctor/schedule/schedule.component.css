@@ -1,52 +1,135 @@
-/* Minimalist Medical Dark Schedule Styles */
+/* Professional Medical Schedule Styles */
 
-.section {
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-}
-
-/* Calendar Grid */
+/* Layout & Containers */
 .calendar-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 8px;
+  gap: 12px;
 }
 
-.calendar-day-btn {
-  background: transparent;
-  cursor: pointer;
+.calendar-day-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding-bottom: 8px;
 }
 
-.calendar-day-btn:hover:not(.opacity-20) {
-  border-color: rgba(255, 255, 255, 0.2);
-  background: rgba(255, 255, 255, 0.02);
+/* Calendar Day Buttons */
+.calendar-day {
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  background: var(--surface-secondary);
+  color: var(--text-primary);
+  border: 1px solid transparent;
 }
 
-/* Custom Scrollbar for inner content */
-::-webkit-scrollbar {
-  width: 4px;
+.calendar-day:hover:not(.calendar-day-outside) {
+  background: var(--surface-tertiary);
+  transform: translateY(-2px);
+  border-color: var(--primary-light);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
-::-webkit-scrollbar-track {
-  background: transparent;
+.calendar-day-selected {
+  background: var(--primary) !important;
+  color: white !important;
+  box-shadow: 0 8px 16px var(--primary-light);
+  transform: scale(1.05);
+  z-index: 10;
 }
 
-::-webkit-scrollbar-thumb {
-  background: var(--border);
-  border-radius: 10px;
+.calendar-day-today {
+  border: 2px solid var(--primary);
+  color: var(--primary);
+  font-weight: 800;
 }
 
-/* Toggle Switches & Inputs */
-input[type="time"]::-webkit-calendar-picker-indicator {
-  filter: invert(1);
+.calendar-day-outside {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.calendar-dot {
+  width: 5px;
+  height: 5px;
+  background: var(--primary);
+  border-radius: 50%;
+  position: absolute;
+  bottom: 6px;
+}
+
+.calendar-day-selected .calendar-dot {
+  background: white;
+}
+
+/* Session Cards Refined */
+.session-card {
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  border-radius: 1.25rem;
+  padding: 1.5rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+}
+
+.session-card:hover:not(.session-disabled) {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+  border-color: var(--primary);
+}
+
+.session-disabled {
+  opacity: 0.5;
+  background: var(--surface-tertiary);
+  border-style: dashed;
+}
+
+/* Glassmorphism Effect for certain elements */
+.glass-effect {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Custom Time Inputs */
+input[type="time"] {
+  appearance: none;
+  -webkit-appearance: none;
+  border: 1px solid var(--border-light);
+}
+
+/* Stats Layout */
+.stat-number {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1;
+}
+
+.stat-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  margin-top: 4px;
 }
 
 /* Animations */
-@keyframes fadeIn {
+@keyframes fadeInUp {
   from {
     opacity: 0;
-    transform: translateY(8px);
+    transform: translateY(15px);
   }
 
   to {
@@ -55,48 +138,20 @@ input[type="time"]::-webkit-calendar-picker-indicator {
   }
 }
 
-.animate-fade-in {
-  animation: fadeIn 0.4s ease-out forwards;
+.animate-fade-in-up {
+  animation: fadeInUp 0.5s ease-out forwards;
 }
 
-/* Session Cards Refined */
-.session-card {
-  background: var(--surface);
-  border: 2px solid var(--border-light);
-  border-radius: 1.5rem;
-  padding: 1.5rem;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  overflow: hidden;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+  .calendar-grid {
+    gap: 8px;
+  }
 }
 
-.session-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-  border-color: var(--primary);
-}
-
-.session-disabled {
-  opacity: 0.6;
-  filter: grayscale(0.5);
-  background: var(--surface-tertiary);
-  border-style: dashed;
-}
-
-.session-disabled:hover {
-  transform: none;
-  border-color: var(--border-light);
-}
-
-/* Custom Toggle colors */
-.session-card .sr-only:checked+div {
-  background-color: var(--success) !important;
-}
-
-/* Typography */
-h1,
-h2,
-h3 {
-  letter-spacing: -0.01em;
+@media (max-width: 640px) {
+  .calendar-day {
+    font-size: 0.8rem;
+    border-radius: 8px;
+  }
 }

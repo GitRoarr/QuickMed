@@ -4,7 +4,7 @@ import { User } from '../users/entities/user.entity';
 export type Slot = {
   startTime?: string;
   endTime?: string;
-  time?: string; // legacy single time support
+  time?: string; 
   status: 'available' | 'booked' | 'blocked';
   appointmentId?: string | null;
   blockedReason?: string | null;

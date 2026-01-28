@@ -176,8 +176,13 @@ export class SchedulesService {
     sched.sessions = sessions;
     sched.slotDuration = slotDuration;
 
-    await this.repo.save(sched);
-    return this.getDaySchedule(doctorId, date);
+    try {
+      await this.repo.save(sched);
+      return this.getDaySchedule(doctorId, date);
+    } catch (error) {
+      console.error('Error saving session availability:', error);
+      throw error;
+    }
   }
   async setSingleSlotStatus(
     doctorId: string,

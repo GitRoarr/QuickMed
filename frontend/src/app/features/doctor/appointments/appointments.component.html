@@ -6,159 +6,217 @@
       [unreadNotifications]="unreadNotifications()" [themeMode]="themeMode()"
       (themeChange)="setTheme($event)"></app-doctor-header>
 
-    <div class="flex-1 overflow-y-auto px-8 pb-8">
+    <div class="flex-1 overflow-y-auto px-6 md:px-10 pb-10 custom-scrollbar">
 
-      <header class="mb-8">
-        <h1 class="text-2xl font-bold text-[var(--fg)] mb-2">Appointments</h1>
-        <p class="text-[var(--muted)]">Manage patient bookings and consultations.</p>
+      <!-- Header Section -->
+      <header class="mb-8 mt-4 animate-fade-in" style="animation-delay: 0.0s">
+        <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div>
+            <h1 class="text-3xl font-extrabold text-[var(--fg)] tracking-tight">Appointments</h1>
+            <p class="text-[var(--text-secondary)] mt-1 text-lg">Manage your patient schedule and consultations</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-sm font-semibold text-[var(--text-muted)]">{{ today | date:'fullDate' }}</span>
+          </div>
+        </div>
       </header>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <!-- Stats Grid -->
+      <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-10 animate-fade-in"
+        style="animation-delay: 0.1s">
+        <!-- Total Card (Gradient) -->
         <div
-          class="bg-[var(--surface)] p-4 rounded-2xl shadow-md flex items-center gap-4 hover:shadow-lg transition-all duration-300">
-          <div
-            class="w-12 h-12 rounded-xl bg-[var(--primary-light)] flex items-center justify-center text-[var(--primary)] text-xl shadow-sm">
-            <i class="bi bi-calendar"></i>
+          class="gradient-card-primary p-6 rounded-3xl shadow-lg relative overflow-hidden transform hover:-translate-y-1 transition-all duration-300">
+          <div class="absolute right-[-20px] top-[-20px] opacity-20">
+            <i class="bi bi-calendar-range text-9xl"></i>
           </div>
-          <div>
-            <p class="text-xs text-[var(--text-secondary)] dark:text-gray-400 font-bold uppercase">Total</p>
-            <p class="text-2xl font-bold text-[var(--text-primary)] dark:text-white">{{ stats().total }}</p>
+          <div class="relative z-10">
+            <p class="text-blue-100 text-sm font-bold uppercase tracking-wider mb-1">Total Bookings</p>
+            <h2 class="text-4xl font-bold">{{ stats().total }}</h2>
+            <p class="text-blue-50 text-xs mt-2 opacity-80">All time appointments</p>
           </div>
         </div>
-        <div
-          class="bg-[var(--surface)] p-4 rounded-2xl shadow-md flex items-center gap-4 hover:shadow-lg transition-all duration-300">
-          <div class="w-12 h-12 rounded-xl bg-[var(--primary-light)] flex items-center justify-center">
-            <i class="bi bi-clock text-[var(--primary)] text-2xl"></i>
-          </div>
-          <div>
-            <p class="text-xs text-[var(--text-secondary)] dark:text-gray-400 font-bold uppercase">Pending</p>
-            <p class="text-2xl font-bold text-[var(--text-primary)] dark:text-white">{{ stats().pending }}</p>
-          </div>
-        </div>
-        <div
-          class="bg-[var(--surface)] p-4 rounded-2xl shadow-md flex items-center gap-4 hover:shadow-lg transition-all duration-300">
-          <div class="w-12 h-12 rounded-xl bg-[var(--primary-light)] flex items-center justify-center">
-            <i class="bi bi-check2-circle text-[var(--primary)] text-2xl"></i>
-          </div>
-          <div>
-            <p class="text-xs text-[var(--text-secondary)] dark:text-gray-400 font-bold uppercase">Confirmed</p>
-            <p class="text-2xl font-bold text-[var(--text-primary)] dark:text-white">{{ stats().confirmed }}</p>
-          </div>
-        </div>
-        <div
-          class="bg-[var(--surface)] p-4 rounded-2xl shadow-md flex items-center gap-4 hover:shadow-lg transition-all duration-300">
-          <div class="w-12 h-12 rounded-xl bg-[var(--primary-light)] flex items-center justify-center">
-            <i class="bi bi-check-lg text-[var(--primary)] text-2xl"></i>
-          </div>
-          <div>
-            <p class="text-xs text-[var(--text-secondary)] dark:text-gray-400 font-bold uppercase">Completed</p>
-            <p class="text-2xl font-bold text-[var(--text-primary)] dark:text-white">{{ stats().completed }}</p>
-          </div>
-        </div>
-      </div>
 
+        <!-- Pending Card -->
+        <div
+          class="glass-panel p-6 rounded-3xl shadow-sm hover:shadow-md transition-all duration-300 border-l-4 border-yellow-400">
+          <div class="flex justify-between items-start">
+            <div>
+              <p class="text-[var(--text-muted)] text-xs font-bold uppercase tracking-wider mb-1">Pending</p>
+              <h2 class="text-3xl font-bold text-[var(--fg)]">{{ stats().pending }}</h2>
+            </div>
+            <div class="w-10 h-10 rounded-full bg-yellow-100 text-yellow-600 flex items-center justify-center">
+              <i class="bi bi-clock-history text-lg"></i>
+            </div>
+          </div>
+          <p class="text-xs text-[var(--text-secondary)] mt-3">Awaiting confirmation</p>
+        </div>
+
+        <!-- Confirmed Card -->
+        <div
+          class="glass-panel p-6 rounded-3xl shadow-sm hover:shadow-md transition-all duration-300 border-l-4 border-green-500">
+          <div class="flex justify-between items-start">
+            <div>
+              <p class="text-[var(--text-muted)] text-xs font-bold uppercase tracking-wider mb-1">Confirmed</p>
+              <h2 class="text-3xl font-bold text-[var(--fg)]">{{ stats().confirmed }}</h2>
+            </div>
+            <div class="w-10 h-10 rounded-full bg-green-100 text-green-600 flex items-center justify-center">
+              <i class="bi bi-check-lg text-lg"></i>
+            </div>
+          </div>
+          <p class="text-xs text-[var(--text-secondary)] mt-3">Ready for visit</p>
+        </div>
+
+        <!-- Completed Card -->
+        <div
+          class="glass-panel p-6 rounded-3xl shadow-sm hover:shadow-md transition-all duration-300 border-l-4 border-blue-500">
+          <div class="flex justify-between items-start">
+            <div>
+              <p class="text-[var(--text-muted)] text-xs font-bold uppercase tracking-wider mb-1">Completed</p>
+              <h2 class="text-3xl font-bold text-[var(--fg)]">{{ stats().completed }}</h2>
+            </div>
+            <div class="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center">
+              <i class="bi bi-clipboard-check text-lg"></i>
+            </div>
+          </div>
+          <p class="text-xs text-[var(--text-secondary)] mt-3">Successfully finished</p>
+        </div>
+      </section>
+
+      <!-- Filters & Search Toolbar -->
       <div
-        class="bg-[var(--surface)] p-4 rounded-2xl shadow-md mb-6 flex flex-col md:flex-row gap-4 justify-between items-center transition-all">
-        <div class="status-tab-group w-full md:w-auto overflow-x-auto">
+        class="glass-panel p-2 rounded-2xl mb-8 flex flex-col md:flex-row items-center justify-between gap-4 sticky top-0 z-20 backdrop-blur-xl animate-fade-in"
+        style="animation-delay: 0.2s">
+        <!-- Status Tabs -->
+        <div
+          class="flex items-center gap-1 p-1 bg-[var(--surface-secondary)] rounded-xl w-full md:w-auto overflow-x-auto custom-scrollbar">
           <button *ngFor="let tab of ['all', 'pending', 'confirmed', 'completed', 'cancelled']"
-            (click)="selectedStatus.set(tab)" [ngClass]="{'status-tab-btn': true, 'active': selectedStatus() === tab}"
-            class="px-5 py-2 text-sm capitalize transition-all whitespace-nowrap flex items-center gap-2 min-w-[110px] justify-center focus:outline-none focus:ring-2 focus:ring-[var(--primary)]">
-            <ng-container *ngIf="tab === 'pending'">
-              <img src='https://img.icons8.com/ios-filled/18/clock.png' alt='Pending'
-                class="inline-block w-4 h-4 align-[-2px]" />
-            </ng-container>
-            <ng-container *ngIf="tab === 'confirmed'">
-              <img src='https://img.icons8.com/ios-filled/18/approval.png' alt='Confirmed'
-                class="inline-block w-4 h-4 align-[-2px]" />
-            </ng-container>
-            <ng-container *ngIf="tab === 'completed'">
-              <img src='https://img.icons8.com/ios-filled/18/checkmark.png' alt='Completed'
-                class="inline-block w-4 h-4 align-[-2px]" />
-            </ng-container>
-            {{ tab.charAt(0).toUpperCase() + tab.slice(1) }}
+            (click)="selectedStatus.set(tab)" [class.bg-[var(--surface)]]="selectedStatus() === tab"
+            [class.text-[var(--primary)]]="selectedStatus() === tab" [class.shadow-sm]="selectedStatus() === tab"
+            [class.text-[var(--text-secondary)]]="selectedStatus() !== tab"
+            class="px-4 py-2 rounded-lg text-sm font-bold capitalize transition-all duration-200 whitespace-nowrap hover:text-[var(--primary)]">
+            {{ tab }}
           </button>
         </div>
 
-        <div class="relative w-full md:w-64">
-          <i class="bi bi-search absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]"></i>
+        <!-- Search -->
+        <div class="relative w-full md:w-72 mr-1">
+          <i class="bi bi-search absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)]"></i>
           <input type="text" [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event)"
-            placeholder="Search patient..."
-            class="w-full pl-10 pr-4 py-2.5 bg-[var(--surface)] rounded-xl text-sm text-[var(--fg)] focus:ring-2 focus:ring-[var(--primary)]/20 outline-none transition-all shadow-md">
+            placeholder="Search patients..."
+            class="w-full pl-11 pr-4 py-3 bg-[var(--bg)] border-none rounded-xl text-sm font-medium text-[var(--fg)] focus:ring-2 focus:ring-[var(--primary)] focus:bg-[var(--surface)] transition-all outline-none">
         </div>
       </div>
 
-      <div class="space-y-4">
+      <!-- Appointments List -->
+      <div class="space-y-4 animate-fade-in" style="animation-delay: 0.3s">
+
         <ng-container *ngIf="isLoading(); else listContent">
-          <div *ngFor="let i of [1,2,3]" class="animate-pulse bg-[var(--surface)] h-24 rounded-2xl shadow-sm"></div>
+          <!-- Skeleton Loading -->
+          <div *ngFor="let i of [1,2,3,4]" class="glass-panel h-32 rounded-3xl animate-pulse"></div>
         </ng-container>
 
         <ng-template #listContent>
           <div *ngFor="let appt of filteredAppointments()"
-            class="bg-[var(--surface)] p-5 rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 flex flex-col md:flex-row gap-6 items-start md:items-center">
+            class="glass-panel p-5 rounded-3xl hover:translate-x-2 transition-all duration-300 group relative overflow-hidden">
 
-            <div
-              class="flex-shrink-0 w-full md:w-20 bg-[var(--bg)] rounded-xl p-2 flex flex-row md:flex-col items-center justify-center text-center">
-              <span class="text-xs font-bold text-[var(--primary)] uppercase tracking-wider">{{ appt.appointmentDate |
-                date:'MMM' }}</span>
-              <span class="text-2xl font-bold text-gray-900 dark:text-white ml-2 md:ml-0">{{ appt.appointmentDate |
-                date:'d' }}</span>
-              <span class="text-xs text-gray-500 dark:text-gray-400 ml-auto md:ml-0 md:mt-1">{{
-                formatTime(appt.appointmentTime) }}</span>
-            </div>
+            <!-- Status Line Indicator -->
+            <div class="absolute left-0 top-0 bottom-0 w-1.5" [ngClass]="{
+                'bg-yellow-400': appt.status === 'pending',
+                'bg-green-500': appt.status === 'confirmed',
+                'bg-blue-500': appt.status === 'completed',
+                'bg-red-500': appt.status === 'cancelled'
+              }"></div>
 
-            <div class="flex-1 min-w-0">
-              <div class="flex items-center gap-3 mb-1">
-                <h3 class="text-lg font-bold text-[var(--fg)] truncate">{{ appt.patient?.firstName }} {{
-                  appt.patient?.lastName }}</h3>
-                <span [ngClass]="{
-                  'bg-yellow-50 dark:bg-zinc-800 text-yellow-600 dark:text-yellow-400': appt.status === 'pending',
-                  'bg-green-50 dark:bg-zinc-800 text-green-600 dark:text-green-400': appt.status === 'confirmed',
-                  'bg-blue-50 dark:bg-zinc-800 text-blue-600 dark:text-blue-400': appt.status === 'completed',
-                  'bg-red-50 dark:bg-zinc-800 text-red-600 dark:text-red-400': appt.status === 'cancelled'
-                }" class="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full">
-                  {{ appt.status }}
-                </span>
+            <div class="flex flex-col md:flex-row gap-6 md:items-center pl-3">
+
+              <!-- Date Big Box -->
+              <div class="flex-shrink-0">
+                <div
+                  class="bg-[var(--surface-secondary)] dark:bg-[var(--surface-tertiary)] w-20 h-20 rounded-2xl flex flex-col items-center justify-center text-center shadow-inner">
+                  <span class="text-xs font-bold text-[var(--primary)] uppercase tracking-wider mb-1">{{
+                    appt.appointmentDate | date:'MMM' }}</span>
+                  <span class="text-2xl font-black text-[var(--fg)] leading-none">{{ appt.appointmentDate | date:'d'
+                    }}</span>
+                  <span class="text-[10px] text-[var(--text-muted)] mt-1 font-semibold">{{ appt.appointmentDate |
+                    date:'EEE' }}</span>
+                </div>
               </div>
 
-              <div class="flex flex-wrap gap-x-4 gap-y-1 text-sm text-[var(--muted)]">
-                <span class="flex items-center gap-1"><i class="bi" [class.bi-camera-video]="appt.isVideoConsultation"
-                    [class.bi-geo-alt]="!appt.isVideoConsultation"></i> {{ appt.isVideoConsultation ? 'Online
-                  Consultation' : 'In-Person Visit' }}</span>
-                <span class="hidden md:inline text-[var(--border-default)]">|</span>
-                <span class="truncate">{{ appt.reason || 'No specific reason provided' }}</span>
+              <!-- Main Info -->
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-3 mb-2">
+                  <h3
+                    class="text-xl font-bold text-[var(--fg)] group-hover:text-[var(--primary)] transition-colors truncate">
+                    {{ appt.patient?.firstName }} {{ appt.patient?.lastName }}
+                  </h3>
+                  <span [ngClass]="{
+                    'bg-yellow-100 text-yellow-700': appt.status === 'pending',
+                    'bg-green-100 text-green-700': appt.status === 'confirmed',
+                    'bg-blue-100 text-blue-700': appt.status === 'completed',
+                    'bg-red-100 text-red-700': appt.status === 'cancelled'
+                  }" class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide">
+                    {{ appt.status }}
+                  </span>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2 text-sm text-[var(--text-secondary)]">
+                  <div class="flex items-center gap-2">
+                    <div
+                      class="w-8 h-8 rounded-full bg-[var(--bg)] flex items-center justify-center text-[var(--primary)]">
+                      <i class="bi" [class.bi-camera-video-fill]="appt.isVideoConsultation"
+                        [class.bi-hospital-fill]="!appt.isVideoConsultation"></i>
+                    </div>
+                    <span>{{ appt.isVideoConsultation ? 'Video Consultation' : 'In-Person Visit' }}</span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <div
+                      class="w-8 h-8 rounded-full bg-[var(--bg)] flex items-center justify-center text-[var(--text-muted)]">
+                      <i class="bi bi-clock-fill"></i>
+                    </div>
+                    <span class="font-medium text-[var(--fg)]">{{ formatTime(appt.appointmentTime) }}</span>
+                  </div>
+                </div>
               </div>
+
+              <!-- Actions -->
+              <div
+                class="flex flex-row md:flex-col gap-2 w-full md:w-auto mt-2 md:mt-0 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300">
+                <!-- Action Buttons specific to status -->
+                <button *ngIf="appt.status === 'pending'" (click)="updateStatus(appt.id, AppointmentStatus.CONFIRMED)"
+                  class="bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white px-5 py-2 rounded-xl text-xs font-bold shadow-lg transform hover:scale-105 transition-all flex items-center justify-center gap-2">
+                  <i class="bi bi-check-lg text-lg"></i> Accept
+                </button>
+
+                <button *ngIf="appt.status === 'confirmed'" (click)="updateStatus(appt.id, AppointmentStatus.COMPLETED)"
+                  class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl text-xs font-bold shadow-lg transform hover:scale-105 transition-all flex items-center justify-center gap-2">
+                  <i class="bi bi-check2-circle text-lg"></i> Complete
+                </button>
+
+                <button (click)="viewPatientDetails(appt)"
+                  class="bg-[var(--surface-secondary)] hover:bg-[var(--surface-tertiary)] text-[var(--fg)] px-5 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2">
+                  View Details
+                </button>
+              </div>
+
             </div>
-
-            <div class="flex items-center gap-2 w-full md:w-auto mt-2 md:mt-0">
-              <button (click)="viewPatientDetails(appt)"
-                class="flex-1 md:flex-none px-4 py-2 rounded-lg bg-[var(--bg)] text-[var(--muted)] font-semibold text-sm hover:text-[var(--fg)] transition-colors">
-                Details
-              </button>
-
-              <button *ngIf="appt.status === 'pending'" (click)="updateStatus(appt.id, AppointmentStatus.CONFIRMED)"
-                class="flex-1 md:flex-none px-4 py-2 rounded-lg bg-[var(--primary)] text-white font-semibold text-sm hover:brightness-110 transition-all shadow-lg shadow-[rgba(29,185,84,0.2)]">
-                <i class="bi bi-check-lg mr-1"></i> Accept
-              </button>
-
-              <button *ngIf="appt.status === 'confirmed'" (click)="updateStatus(appt.id, AppointmentStatus.COMPLETED)"
-                class="flex-1 md:flex-none px-4 py-2 rounded-lg bg-blue-600 dark:bg-blue-500 text-white font-semibold text-sm hover:brightness-110 transition-all">
-                <img src="https://img.icons8.com/ios-filled/20/checkmark.png" alt="Complete"
-                  class="inline-block w-4 h-4 mr-2 opacity-90 align-[-2px]" /> Complete
-              </button>
-            </div>
-
           </div>
 
+          <!-- Empty State -->
           <div *ngIf="filteredAppointments().length === 0"
-            class="text-center py-16 bg-[var(--surface)] rounded-2xl shadow-md">
-            <div
-              class="w-16 h-16 bg-[var(--primary-light)] rounded-full flex items-center justify-center text-[var(--primary)] text-3xl mx-auto mb-4 shadow-sm">
-              <i class="bi bi-calendar-x"></i>
+            class="flex flex-col items-center justify-center py-20 text-center animate-fade-in">
+            <div class="w-24 h-24 bg-[var(--surface-secondary)] rounded-full flex items-center justify-center mb-6">
+              <i class="bi bi-calendar-x text-4xl text-[var(--text-muted)]"></i>
             </div>
-            <h3 class="text-lg font-bold text-[var(--fg)]">No appointments found</h3>
-            <p class="text-[var(--muted)] text-sm">Try adjusting your status filters or search query.</p>
+            <h3 class="text-xl font-bold text-[var(--fg)] mb-2">No Appointments Found</h3>
+            <p class="text-[var(--text-secondary)]">There are no appointments matching your current filters.</p>
+            <button (click)="selectedStatus.set('all'); searchQuery.set('')"
+              class="mt-6 text-[var(--primary)] font-bold hover:underline">
+              Clear Filters
+            </button>
           </div>
         </ng-template>
+
       </div>
 
     </div>

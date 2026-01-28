@@ -62,6 +62,9 @@ export class ScheduleComponent implements OnInit {
   workingEnd = signal('18:00');
   workingDays = signal<number[]>([]);
   themeMode = signal<'light' | 'dark'>('light');
+  newSlotStart = signal('09:00');
+  newSlotEnd = signal('09:30');
+  newSlotSaving = signal(false);
 
   draggedSlot = signal<DoctorSlot | null>(null);
   sessions = signal<Record<string, boolean>>({ morning: false, break: false, evening: false });
@@ -278,6 +281,37 @@ export class ScheduleComponent implements OnInit {
         this.loadSlots();
       },
       error: () => this.toast.error('Failed to remove slot', { title: 'Schedule' })
+    });
+  }
+
+  createSlot(): void {
+    const start = (this.newSlotStart() || '').slice(0, 5);
+    const end = (this.newSlotEnd() || '').slice(0, 5);
+
+    if (!start || !end) {
+      this.toast.error('Select start and end time', { title: 'Schedule' });
+      return;
+    }
+
+    const toMinutes = (t: string) => {
+      const [h, m] = t.split(':').map(Number);
+      return (h || 0) * 60 + (m || 0);
+    };
+
+    if (toMinutes(end) <= toMinutes(start)) {
+      this.toast.error('End time must be after start time', { title: 'Schedule' });
+      return;
+    }
+
+    const dateStr = this.toDateOnly(this.selectedDate());
+    this.newSlotSaving.set(true);
+    this.scheduleService.setAvailable(dateStr, start, end).subscribe({
+      next: () => {
+        this.toast.success('Slot added', { title: 'Schedule' });
+        this.loadSlots();
+      },
+      error: () => this.toast.error('Failed to add slot', { title: 'Schedule' }),
+      complete: () => this.newSlotSaving.set(false)
     });
   }
 
@@ -503,7 +537,16 @@ export class ScheduleComponent implements OnInit {
 
   selectDate(date: Date): void {
     this.selectedDate.set(date);
+    // If selecting a date outside current month view, update current month
+    if (date.getMonth() !== this.currentMonth().getMonth() || date.getFullYear() !== this.currentMonth().getFullYear()) {
+      this.currentMonth.set(new Date(date.getFullYear(), date.getMonth(), 1));
+    }
     this.loadSlots();
+  }
+
+  selectToday(): void {
+    const today = new Date();
+    this.selectDate(today);
   }
 
   previousMonth(): void {
