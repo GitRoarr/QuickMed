@@ -58,8 +58,8 @@ export class ScheduleComponent implements OnInit {
   unreadNotifications = signal(0);
   viewMode = signal<'day' | 'week' | 'month'>('day');
   slotDurationMinutes = signal(30);
-  workingStart = signal('09:00');
-  workingEnd = signal('17:00');
+  workingStart = signal('02:00');
+  workingEnd = signal('18:00');
   workingDays = signal<number[]>([]);
   themeMode = signal<'light' | 'dark'>('light');
   showTemplateDropdown = signal(false);

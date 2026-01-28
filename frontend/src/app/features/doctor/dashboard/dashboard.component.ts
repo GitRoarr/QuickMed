@@ -61,8 +61,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.error.set(null);
     this.doctorService.getDashboardData().subscribe({
       next: (data) => {
-        // Optionally, fetch urgent alerts from backend or derive from data
-        // Here, we assume urgentAlerts is part of the backend response, or you can map/derive as needed
         this.dashboardData.set(data);
         this.isLoading.set(false);
       },

@@ -106,12 +106,24 @@ export class AvailabilityTemplateService {
     async createPresetTemplates(doctorId: string): Promise<AvailabilityTemplate[]> {
         const presets: CreateTemplateDto[] = [
             {
+                name: 'Custom Clinic (2AM-6PM)',
+                workingDays: [1, 2, 3, 4, 5],
+                startTime: '02:00',
+                endTime: '18:00',
+                slotDuration: 30,
+                bufferMinutes: 0,
+                breaks: [{ startTime: '12:00', endTime: '13:30', label: 'Lunch Break' }],
+                description: 'Full day schedule from 2 AM to 6 PM with lunch break',
+                isDefault: true
+            },
+            {
                 name: 'Weekdays 9-5',
                 workingDays: [1, 2, 3, 4, 5],
                 startTime: '09:00',
                 endTime: '17:00',
                 slotDuration: 30,
-                bufferMinutes: 5, breaks: [{ startTime: '12:00', endTime: '13:00', label: 'Lunch Break' }],
+                bufferMinutes: 5,
+                breaks: [{ startTime: '12:00', endTime: '13:00', label: 'Lunch Break' }],
                 description: 'Standard weekday schedule with lunch break',
             },
             {
@@ -131,17 +143,7 @@ export class AvailabilityTemplateService {
                 slotDuration: 30,
                 bufferMinutes: 5,
                 description: 'Evening clinic hours for working patients',
-            },
-            {
-                name: 'Mon-Wed-Fri',
-                workingDays: [1, 3, 5],
-                startTime: '09:00',
-                endTime: '17:00',
-                slotDuration: 30,
-                bufferMinutes: 5,
-                breaks: [{ startTime: '12:30', endTime: '13:30', label: 'Lunch' }],
-                description: 'Alternate weekday schedule',
-            },
+            }
         ];
 
         const created: AvailabilityTemplate[] = [];

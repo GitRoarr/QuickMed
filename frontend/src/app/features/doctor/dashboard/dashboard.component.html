@@ -1,11 +1,7 @@
 <div class="flex-1 flex flex-col min-w-0">
-  <app-doctor-header
-    [initials]="getDoctorInitials()"
-    [avatarUrl]="currentUser()?.avatar"
-    [unreadNotifications]="unreadNotificationCount()"
-      [themeMode]="themeMode"
-    (themeChange)="setTheme($event)"
-  ></app-doctor-header>
+  <app-doctor-header [initials]="getDoctorInitials()" [avatarUrl]="currentUser()?.avatar"
+    [unreadNotifications]="unreadNotificationCount()" [themeMode]="themeMode"
+    (themeChange)="setTheme($event)"></app-doctor-header>
 
   <main class="flex-1 overflow-y-auto p-6 lg:p-8 space-y-8 custom-scrollbar">
     <section class="hero-card">
@@ -53,7 +49,8 @@
           <div class="p-3 rounded-xl bg-[var(--primary)/0.1] text-[var(--primary)]">
             <i class="bi bi-calendar-check text-xl"></i>
           </div>
-          <span class="text-xs font-bold px-2 py-1 rounded-full bg-[var(--primary)/0.1] text-[var(--primary)]">+12%</span>
+          <span
+            class="text-xs font-bold px-2 py-1 rounded-full bg-[var(--primary)/0.1] text-[var(--primary)]">+12%</span>
         </div>
         <h3 class="text-sm font-medium text-[var(--muted)]">Daily Appointments</h3>
         <ng-container *ngIf="!isLoading(); else loadingApt">
@@ -101,7 +98,8 @@
           <div class="p-3 rounded-xl bg-[var(--primary)/0.1] text-[var(--primary)] icon">
             <i class="bi bi-star text-xl"></i>
           </div>
-          <span class="text-xs font-bold px-2 py-1 rounded-full bg-[var(--primary)/0.1] text-[var(--primary)]">Feedback</span>
+          <span
+            class="text-xs font-bold px-2 py-1 rounded-full bg-[var(--primary)/0.1] text-[var(--primary)]">Feedback</span>
         </div>
         <h3 class="text-sm font-medium text-[var(--muted)] title">Patient Satisfaction</h3>
         <ng-container *ngIf="!isLoading(); else loadingSatisfaction">
@@ -118,7 +116,8 @@
           <div class="p-3 rounded-xl bg-[var(--primary)/0.1] text-[var(--primary)]">
             <i class="bi bi-cash-coin text-xl"></i>
           </div>
-          <span class="text-xs font-bold px-2 py-1 rounded-full bg-[var(--primary)/0.1] text-[var(--primary)]">Today</span>
+          <span
+            class="text-xs font-bold px-2 py-1 rounded-full bg-[var(--primary)/0.1] text-[var(--primary)]">Today</span>
         </div>
         <h3 class="text-sm font-medium text-[var(--muted)]">Revenue</h3>
         <ng-container *ngIf="!isLoading(); else loadingRevenue">
@@ -134,7 +133,8 @@
           <div class="p-3 rounded-xl bg-[var(--primary)/0.1] text-[var(--primary)]">
             <i class="bi bi-chat-dots text-xl"></i>
           </div>
-          <span class="text-xs font-bold px-2 py-1 rounded-full bg-[var(--primary)/0.1] text-[var(--primary)]">Inbox</span>
+          <span
+            class="text-xs font-bold px-2 py-1 rounded-full bg-[var(--primary)/0.1] text-[var(--primary)]">Inbox</span>
         </div>
         <h3 class="text-sm font-medium text-[var(--muted)]">Unread Messages</h3>
         <ng-container *ngIf="!isLoading(); else loadingMessages">
@@ -147,10 +147,12 @@
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <div class="lg:col-span-2 bg-[var(--surface)] rounded-2xl border border-[var(--border)] shadow-xl overflow-hidden">
-        <div class="p-6 border-b border-[var(--border)] flex justify-between items-center">
-          <h2 class="text-lg font-bold flex items-center gap-2"><i class="bi bi-heart-pulse-fill text-[var(--primary)]"></i> Next Patients</h2>
-          <a routerLink="/doctor/appointments" class="text-sm font-semibold text-[var(--primary)] hover:underline">View All →</a>
+      <div class="lg:col-span-2 bg-[var(--surface)] rounded-2xl shadow-xl overflow-hidden">
+        <div class="p-6 flex justify-between items-center">
+          <h2 class="text-lg font-bold flex items-center gap-2"><i
+              class="bi bi-heart-pulse-fill text-[var(--primary)]"></i> Next Patients</h2>
+          <a routerLink="/doctor/appointments" class="text-sm font-semibold text-[var(--primary)] hover:underline">View
+            All →</a>
         </div>
         <div class="overflow-x-auto">
           <table class="w-full">
@@ -162,40 +164,51 @@
                 <th class="px-6 py-4 text-left">Action</th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-[var(--border)]">
+            <tbody class="divide-y-0">
               <ng-container *ngIf="!isLoading(); else loadingAppointments">
-                <tr *ngFor="let apt of dashboardData()?.todayAppointments || []" class="hover:bg-[var(--primary)/0.1] transition-colors">
-                <td class="px-6 py-4">
-                  <div class="flex items-center gap-3">
-                    <div class="w-9 h-9 rounded-full bg-[var(--primary)/0.1] flex items-center justify-center text-sm font-bold">
-                      {{ getInitials(apt.patient) }}
+                <tr *ngFor="let apt of dashboardData()?.todayAppointments || []"
+                  class="hover:bg-[var(--primary)/0.1] transition-colors">
+                  <td class="px-6 py-4">
+                    <div class="flex items-center gap-3">
+                      <div
+                        class="w-9 h-9 rounded-full bg-[var(--primary)/0.1] flex items-center justify-center text-sm font-bold">
+                        {{ getInitials(apt.patient) }}
+                      </div>
+                      <span class="font-medium">{{ apt.patient }}</span>
                     </div>
-                    <span class="font-medium">{{ apt.patient }}</span>
-                  </div>
-                </td>
-                <td class="px-6 py-4 text-sm">{{ apt.time }}</td>
-                <td class="px-6 py-4">
-                  <span [class]="apt.status === 'Confirmed' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'"
-                        class="inline-flex px-3 py-1 rounded-full text-xs font-medium">
-                    {{ apt.status }}
-                  </span>
-                </td>
-                <td class="px-6 py-4">
-                  <button class="text-[var(--primary)] hover:text-[var(--primary-dark)]">
-                    <i class="bi bi-arrow-right-circle text-lg"></i>
-                  </button>
-                </td>
-              </tr>
+                  </td>
+                  <td class="px-6 py-4 text-sm">{{ apt.time }}</td>
+                  <td class="px-6 py-4">
+                    <span
+                      [class]="apt.status === 'Confirmed' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'"
+                      class="inline-flex px-3 py-1 rounded-full text-xs font-medium">
+                      {{ apt.status }}
+                    </span>
+                  </td>
+                  <td class="px-6 py-4">
+                    <button class="text-[var(--primary)] hover:text-[var(--primary-dark)]">
+                      <i class="bi bi-arrow-right-circle text-lg"></i>
+                    </button>
+                  </td>
+                </tr>
                 <tr *ngIf="!(dashboardData()?.todayAppointments?.length)">
                   <td colspan="4" class="px-6 py-8 text-center text-[var(--muted)]">No upcoming appointments today</td>
                 </tr>
               </ng-container>
               <ng-template #loadingAppointments>
                 <tr *ngFor="let i of [1,2,3,4]">
-                  <td class="px-6 py-4"><div class="h-6 w-32 bg-gray-200 dark:bg-gray-700 animate-pulse rounded"></div></td>
-                  <td class="px-6 py-4"><div class="h-6 w-16 bg-gray-200 dark:bg-gray-700 animate-pulse rounded"></div></td>
-                  <td class="px-6 py-4"><div class="h-6 w-20 bg-gray-200 dark:bg-gray-700 animate-pulse rounded"></div></td>
-                  <td class="px-6 py-4"><div class="h-6 w-8 bg-gray-200 dark:bg-gray-700 animate-pulse rounded"></div></td>
+                  <td class="px-6 py-4">
+                    <div class="h-6 w-32 bg-gray-200 dark:bg-gray-700 animate-pulse rounded"></div>
+                  </td>
+                  <td class="px-6 py-4">
+                    <div class="h-6 w-16 bg-gray-200 dark:bg-gray-700 animate-pulse rounded"></div>
+                  </td>
+                  <td class="px-6 py-4">
+                    <div class="h-6 w-20 bg-gray-200 dark:bg-gray-700 animate-pulse rounded"></div>
+                  </td>
+                  <td class="px-6 py-4">
+                    <div class="h-6 w-8 bg-gray-200 dark:bg-gray-700 animate-pulse rounded"></div>
+                  </td>
                 </tr>
               </ng-template>
             </tbody>
@@ -203,21 +216,25 @@
         </div>
       </div>
 
-      <div class="bg-[var(--surface)] rounded-2xl border border-[var(--border)] shadow-xl p-6">
-        <h2 class="text-lg font-bold mb-5 flex items-center gap-2"><i class="bi bi-broadcast-pin text-red-600"></i> Urgent Alerts</h2>
+      <div class="bg-[var(--surface)] rounded-2xl shadow-xl p-6">
+        <h2 class="text-lg font-bold mb-5 flex items-center gap-2"><i class="bi bi-broadcast-pin text-red-600"></i>
+          Urgent Alerts</h2>
         <div class="space-y-4">
           <ng-container *ngIf="!isLoading() && dashboardData()?.urgentAlerts?.length; else loadingAlerts">
-            <div *ngFor="let alert of dashboardData()?.urgentAlerts" class="flex gap-4 p-4 rounded-xl border-l-4 border-red-500 bg-red-50 dark:bg-red-900/20">
+            <div *ngFor="let alert of dashboardData()?.urgentAlerts"
+              class="flex gap-4 p-4 rounded-xl border-l-4 border-red-500 bg-red-50 dark:bg-red-900/20">
               <i class="bi bi-exclamation-triangle text-red-600 text-xl mt-1"></i>
               <div>
                 <p class="font-semibold text-sm">{{ alert.title }}</p>
                 <p class="text-xs text-[var(--muted)] mt-1">{{ alert.description }}</p>
               </div>
             </div>
-            <div *ngIf="!dashboardData()?.urgentAlerts?.length" class="text-[var(--muted)] text-center py-4">No urgent alerts</div>
+            <div *ngIf="!dashboardData()?.urgentAlerts?.length" class="text-[var(--muted)] text-center py-4">No urgent
+              alerts</div>
           </ng-container>
           <ng-template #loadingAlerts>
-            <div *ngFor="let i of [1,2]" class="flex gap-4 p-4 rounded-xl border-l-4 border-red-500 bg-gray-200 dark:bg-gray-700 animate-pulse">
+            <div *ngFor="let i of [1,2]"
+              class="flex gap-4 p-4 rounded-xl border-l-4 border-red-500 bg-gray-200 dark:bg-gray-700 animate-pulse">
               <div class="h-8 w-8 rounded bg-red-300 dark:bg-red-700"></div>
               <div class="flex-1">
                 <div class="h-4 w-32 bg-gray-300 dark:bg-gray-800 rounded mb-2"></div>

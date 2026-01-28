@@ -1,85 +1,86 @@
 <div class="flex h-screen bg-[var(--background)] text-[var(--text-primary)] overflow-hidden">
   <div class="flex-1 flex flex-col min-w-0">
-    <app-doctor-header
-      [initials]="getDoctorInitials()"
-      [avatarUrl]="currentUser()?.avatar"
+    <app-doctor-header [initials]="getDoctorInitials()" [avatarUrl]="currentUser()?.avatar"
       [unreadNotifications]="unreadNotificationCount()"
-      (themeChange)="themeService.setTheme($event)"
-    ></app-doctor-header>
+      (themeChange)="themeService.setTheme($event)"></app-doctor-header>
 
     <main class="flex-1 overflow-y-auto p-6 lg:p-10">
       <div class="max-w-5xl mx-auto">
         <div class="mb-10">
           <h1 class="text-3xl lg:text-4xl font-bold">Settings</h1>
-          <p class="text-lg text-[var(--text-secondary)] mt-3">Manage your profile, availability, billing, and privacy preferences</p>
+          <p class="text-lg text-[var(--text-secondary)] mt-3">Manage your profile, availability, billing, and privacy
+            preferences</p>
         </div>
-        <div class="flex flex-wrap gap-3 border-b border-[var(--border-light)] mb-10 pb-4">
-          <button
-            *ngFor="let tab of tabs"
-            (click)="activeTab.set(tab.value)"
-            class="tab-btn px-6 py-4 font-semibold transition"
-            [class.active]="activeTab() === tab.value"
-          >
+        <div class="flex flex-wrap gap-3 mb-10 pb-4">
+          <button *ngFor="let tab of tabs" (click)="activeTab.set(tab.value)"
+            class="tab-btn px-6 py-4 font-semibold transition" [class.active]="activeTab() === tab.value">
             {{ tab.label }}
           </button>
         </div>
 
         <div *ngIf="isLoading()" class="flex flex-col items-center justify-center py-20">
-          <div class="w-16 h-16 border-4 border-[var(--primary)] border-t-transparent rounded-full animate-spin mb-6"></div>
+          <div class="w-16 h-16 border-4 border-[var(--primary)] border-t-transparent rounded-full animate-spin mb-6">
+          </div>
           <p class="text-xl text-[var(--text-secondary)]">Loading settings...</p>
         </div>
 
         <div *ngIf="!isLoading()" class="space-y-10">
-          <div *ngIf="activeTab() === 'profile'" class="bg-[var(--surface)] rounded-3xl border border-[var(--border-light)] p-8 shadow-lg">
+          <div *ngIf="activeTab() === 'profile'" class="bg-[var(--surface)] rounded-3xl p-8 shadow-lg transition-all">
             <h2 class="text-2xl font-bold mb-6">Profile Information</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label class="block text-sm font-medium text-[var(--text-secondary)] mb-2">First Name</label>
-                <input type="text" [(ngModel)]="profileForm.firstName" class="w-full px-5 py-4 bg-[var(--surface-secondary)] border border-[var(--border-light)] rounded-xl focus:outline-none focus:ring-4 focus:ring-[var(--primary-light)] transition" />
+                <input type="text" [(ngModel)]="profileForm.firstName"
+                  class="w-full px-5 py-4 bg-[var(--surface-secondary)] rounded-xl focus:outline-none focus:ring-4 focus:ring-[var(--primary-light)] transition shadow-sm" />
               </div>
               <div>
                 <label class="block text-sm font-medium text-[var(--text-secondary)] mb-2">Last Name</label>
-                <input type="text" [(ngModel)]="profileForm.lastName" class="w-full px-5 py-4 bg-[var(--surface-secondary)] border border-[var(--border-light)] rounded-xl focus:outline-none focus:ring-4 focus:ring-[var(--primary-light)] transition" />
+                <input type="text" [(ngModel)]="profileForm.lastName"
+                  class="w-full px-5 py-4 bg-[var(--surface-secondary)] rounded-xl focus:outline-none focus:ring-4 focus:ring-[var(--primary-light)] transition shadow-sm" />
               </div>
               <div>
                 <label class="block text-sm font-medium text-[var(--text-secondary)] mb-2">Email</label>
-                <input type="email" [(ngModel)]="profileForm.email" class="w-full px-5 py-4 bg-[var(--surface-secondary)] border border-[var(--border-light)] rounded-xl focus:outline-none focus:ring-4 focus:ring-[var(--primary-light)] transition" />
+                <input type="email" [(ngModel)]="profileForm.email"
+                  class="w-full px-5 py-4 bg-[var(--surface-secondary)] rounded-xl focus:outline-none focus:ring-4 focus:ring-[var(--primary-light)] transition shadow-sm" />
               </div>
               <div>
                 <label class="block text-sm font-medium text-[var(--text-secondary)] mb-2">Phone</label>
-                <input type="tel" [(ngModel)]="profileForm.phone" class="w-full px-5 py-4 bg-[var(--surface-secondary)] border border-[var(--border-light)] rounded-xl focus:outline-none focus:ring-4 focus:ring-[var(--primary-light)] transition" />
+                <input type="tel" [(ngModel)]="profileForm.phone"
+                  class="w-full px-5 py-4 bg-[var(--surface-secondary)] rounded-xl focus:outline-none focus:ring-4 focus:ring-[var(--primary-light)] transition shadow-sm" />
               </div>
               <div>
                 <label class="block text-sm font-medium text-[var(--text-secondary)] mb-2">Specialty</label>
-                <input type="text" [(ngModel)]="profileForm.specialty" class="w-full px-5 py-4 bg-[var(--surface-secondary)] border border-[var(--border-light)] rounded-xl focus:outline-none focus:ring-4 focus:ring-[var(--primary-light)] transition" />
+                <input type="text" [(ngModel)]="profileForm.specialty"
+                  class="w-full px-5 py-4 bg-[var(--surface-secondary)] rounded-xl focus:outline-none focus:ring-4 focus:ring-[var(--primary-light)] transition shadow-sm" />
               </div>
               <div>
                 <label class="block text-sm font-medium text-[var(--text-secondary)] mb-2">License Number</label>
-                <input type="text" [(ngModel)]="profileForm.licenseNumber" class="w-full px-5 py-4 bg-[var(--surface-secondary)] border border-[var(--border-light)] rounded-xl focus:outline-none focus:ring-4 focus:ring-[var(--primary-light)] transition" />
+                <input type="text" [(ngModel)]="profileForm.licenseNumber"
+                  class="w-full px-5 py-4 bg-[var(--surface-secondary)] rounded-xl focus:outline-none focus:ring-4 focus:ring-[var(--primary-light)] transition shadow-sm" />
               </div>
             </div>
             <div class="mt-8 flex justify-end">
-              <button (click)="saveProfile()" [disabled]="isSaving()" class="px-8 py-4 bg-[var(--primary)] text-white rounded-xl font-semibold hover:bg-[var(--primary-hover)] disabled:opacity-70 transition shadow-lg flex items-center gap-3">
-                <span *ngIf="isSaving()" class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+              <button (click)="saveProfile()" [disabled]="isSaving()"
+                class="px-8 py-4 bg-[var(--primary)] text-white rounded-xl font-semibold hover:bg-[var(--primary-hover)] disabled:opacity-70 transition shadow-lg flex items-center gap-3">
+                <span *ngIf="isSaving()"
+                  class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
                 Save Profile
               </button>
             </div>
           </div>
-          <div *ngIf="activeTab() === 'availability'" class="bg-[var(--surface)] rounded-3xl border border-[var(--border-light)] p-8 shadow-lg">
+          <div *ngIf="activeTab() === 'availability'"
+            class="bg-[var(--surface)] rounded-3xl p-8 shadow-lg transition-all">
             <h2 class="text-2xl font-bold mb-6">Clinic Availability</h2>
             <div class="space-y-8">
               <div>
                 <p class="text-sm font-medium text-[var(--text-secondary)] mb-4">Available Days</p>
                 <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-4">
-                  <button
-                    *ngFor="let day of daysOfWeek"
-                    (click)="toggleDay(day)"
+                  <button *ngFor="let day of daysOfWeek" (click)="toggleDay(day)"
                     class="py-4 rounded-xl font-medium transition"
                     [class.bg-[var(--primary)]]="availabilitySettings.availableDays.includes(day)"
                     [class.text-white]="availabilitySettings.availableDays.includes(day)"
                     [class.bg-[var(--surface-secondary)]]="!availabilitySettings.availableDays.includes(day)"
-                    [class.text-[var(--text-primary)]]="!availabilitySettings.availableDays.includes(day)"
-                  >
+                    [class.text-[var(--text-primary)]]="!availabilitySettings.availableDays.includes(day)">
                     {{ day }}
                   </button>
                 </div>
@@ -88,32 +89,40 @@
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label class="block text-sm font-medium text-[var(--text-secondary)] mb-2">Start Time</label>
-                  <input type="time" [(ngModel)]="availabilitySettings.startTime" class="w-full px-5 py-4 bg-[var(--surface-secondary)] border border-[var(--border-light)] rounded-xl focus:outline-none focus:ring-4 focus:ring-[var(--primary-light)] transition" />
+                  <input type="time" [(ngModel)]="availabilitySettings.startTime"
+                    class="w-full px-5 py-4 bg-[var(--surface-secondary)] rounded-xl focus:outline-none focus:ring-4 focus:ring-[var(--primary-light)] transition shadow-sm" />
                 </div>
                 <div>
                   <label class="block text-sm font-medium text-[var(--text-secondary)] mb-2">End Time</label>
-                  <input type="time" [(ngModel)]="availabilitySettings.endTime" class="w-full px-5 py-4 bg-[var(--surface-secondary)] border border-[var(--border-light)] rounded-xl focus:outline-none focus:ring-4 focus:ring-[var(--primary-light)] transition" />
+                  <input type="time" [(ngModel)]="availabilitySettings.endTime"
+                    class="w-full px-5 py-4 bg-[var(--surface-secondary)] rounded-xl focus:outline-none focus:ring-4 focus:ring-[var(--primary-light)] transition shadow-sm" />
                 </div>
               </div>
             </div>
             <div class="mt-8 flex justify-end">
-              <button (click)="saveSettings()" [disabled]="isSaving()" class="px-8 py-4 bg-[var(--primary)] text-white rounded-xl font-semibold hover:bg-[var(--primary-hover)] disabled:opacity-70 transition shadow-lg flex items-center gap-3">
-                <span *ngIf="isSaving()" class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+              <button (click)="saveSettings()" [disabled]="isSaving()"
+                class="px-8 py-4 bg-[var(--primary)] text-white rounded-xl font-semibold hover:bg-[var(--primary-hover)] disabled:opacity-70 transition shadow-lg flex items-center gap-3">
+                <span *ngIf="isSaving()"
+                  class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
                 Save Availability
               </button>
             </div>
           </div>
 
-          <div *ngIf="activeTab() === 'billing'" class="bg-[var(--surface)] rounded-3xl border border-[var(--border-light)] p-8 shadow-lg">
+          <div *ngIf="activeTab() === 'billing'" class="bg-[var(--surface)] rounded-3xl p-8 shadow-lg transition-all">
             <h2 class="text-2xl font-bold mb-6">Billing & Payments</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label class="block text-sm font-medium text-[var(--text-secondary)] mb-2">Consultation Fee (USD)</label>
-                <input type="number" [(ngModel)]="billingSettings.consultationFee" placeholder="e.g. 150" class="w-full px-5 py-4 bg-[var(--surface-secondary)] border border-[var(--border-light)] rounded-xl focus:outline-none focus:ring-4 focus:ring-[var(--primary-light)] transition" />
+                <label class="block text-sm font-medium text-[var(--text-secondary)] mb-2">Consultation Fee
+                  (USD)</label>
+                <input type="number" [(ngModel)]="billingSettings.consultationFee" placeholder="e.g. 150"
+                  class="w-full px-5 py-4 bg-[var(--surface-secondary)] rounded-xl focus:outline-none focus:ring-4 focus:ring-[var(--primary-light)] transition shadow-sm" />
               </div>
               <div>
-                <label class="block text-sm font-medium text-[var(--text-secondary)] mb-2">Preferred Payment Method</label>
-                <select [(ngModel)]="billingSettings.paymentMethod" class="w-full px-5 py-4 bg-[var(--surface-secondary)] border border-[var(--border-light)] rounded-xl focus:outline-none focus:ring-4 focus:ring-[var(--primary-light)] transition">
+                <label class="block text-sm font-medium text-[var(--text-secondary)] mb-2">Preferred Payment
+                  Method</label>
+                <select [(ngModel)]="billingSettings.paymentMethod"
+                  class="w-full px-5 py-4 bg-[var(--surface-secondary)] rounded-xl focus:outline-none focus:ring-4 focus:ring-[var(--primary-light)] transition shadow-sm">
                   <option value="bank">Bank Transfer</option>
                   <option value="card">Credit Card</option>
                   <option value="insurance">Insurance Billing</option>
@@ -121,21 +130,24 @@
               </div>
             </div>
             <div class="mt-8 flex justify-end">
-              <button (click)="saveSettings()" [disabled]="isSaving()" class="px-8 py-4 bg-[var(--primary)] text-white rounded-xl font-semibold hover:bg-[var(--primary-hover)] disabled:opacity-70 transition shadow-lg">
+              <button (click)="saveSettings()" [disabled]="isSaving()"
+                class="px-8 py-4 bg-[var(--primary)] text-white rounded-xl font-semibold hover:bg-[var(--primary-hover)] disabled:opacity-70 transition shadow-lg">
                 Save Billing Settings
               </button>
             </div>
           </div>
 
-          <div *ngIf="activeTab() === 'privacy'" class="bg-[var(--surface)] rounded-3xl border border-[var(--border-light)] p-8 shadow-lg">
+          <div *ngIf="activeTab() === 'privacy'" class="bg-[var(--surface)] rounded-3xl p-8 shadow-lg transition-all">
             <h2 class="text-2xl font-bold mb-6">Privacy & Security</h2>
             <div class="space-y-6">
               <label class="flex items-center justify-between py-4 px-6 bg-[var(--surface-secondary)] rounded-xl">
                 <div>
                   <p class="font-medium">Two-Factor Authentication</p>
-                  <p class="text-sm text-[var(--text-secondary)] mt-1">Add an extra layer of security to your account</p>
+                  <p class="text-sm text-[var(--text-secondary)] mt-1">Add an extra layer of security to your account
+                  </p>
                 </div>
-                <input type="checkbox" [(ngModel)]="privacySettings.twoFactorAuth" class="w-6 h-6 text-[var(--primary)] rounded focus:ring-[var(--primary-light)]" />
+                <input type="checkbox" [(ngModel)]="privacySettings.twoFactorAuth"
+                  class="w-6 h-6 text-[var(--primary)] rounded focus:ring-[var(--primary-light)]" />
               </label>
 
               <label class="flex items-center justify-between py-4 px-6 bg-[var(--surface-secondary)] rounded-xl">
@@ -143,11 +155,13 @@
                   <p class="font-medium">Allow Patients to View Records</p>
                   <p class="text-sm text-[var(--text-secondary)] mt-1">Share medical records directly with patients</p>
                 </div>
-                <input type="checkbox" [(ngModel)]="privacySettings.shareDataWithPatients" class="w-6 h-6 text-[var(--primary)] rounded focus:ring-[var(--primary-light)]" />
+                <input type="checkbox" [(ngModel)]="privacySettings.shareDataWithPatients"
+                  class="w-6 h-6 text-[var(--primary)] rounded focus:ring-[var(--primary-light)]" />
               </label>
             </div>
             <div class="mt-8 flex justify-end">
-              <button (click)="saveSettings()" [disabled]="isSaving()" class="px-8 py-4 bg-[var(--primary)] text-white rounded-xl font-semibold hover:bg-[var(--primary-hover)] disabled:opacity-70 transition shadow-lg">
+              <button (click)="saveSettings()" [disabled]="isSaving()"
+                class="px-8 py-4 bg-[var(--primary)] text-white rounded-xl font-semibold hover:bg-[var(--primary-hover)] disabled:opacity-70 transition shadow-lg">
                 Save Privacy Settings
               </button>
             </div>
