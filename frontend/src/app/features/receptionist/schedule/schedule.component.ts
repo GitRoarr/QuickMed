@@ -75,8 +75,8 @@ export class ReceptionistScheduleComponent implements OnInit {
     if (!doctorId || !this.selectedDate()) return;
     this.isLoading.set(true);
     this.schedulingService.getDaySchedule(this.selectedDate(), doctorId).subscribe({
-      next: (slots) => {
-        this.slots.set(slots || []);
+      next: (response) => {
+        this.slots.set(response?.slots || []);
         this.isLoading.set(false);
       },
       error: () => {
@@ -196,14 +196,14 @@ export class ReceptionistScheduleComponent implements OnInit {
 
   // ===== Time formatting (12-hour) =====
   formatTime12(time: string | null | undefined): string {
-    const t = (time || '').slice(0,5);
+    const t = (time || '').slice(0, 5);
     const [hStr, mStr] = t.split(':');
     const h = Number(hStr || 0);
     const m = Number(mStr || 0);
     if (Number.isNaN(h) || Number.isNaN(m)) return t || '';
     const period = h >= 12 ? 'PM' : 'AM';
     const hr = h % 12 || 12;
-    return `${hr}:${String(m).padStart(2,'0')} ${period}`;
+    return `${hr}:${String(m).padStart(2, '0')} ${period}`;
   }
 
   formatRange12(start?: string | null, end?: string | null): string {
@@ -212,5 +212,5 @@ export class ReceptionistScheduleComponent implements OnInit {
     return `${s} – ${e}`;
   }
 
-  
+
 }

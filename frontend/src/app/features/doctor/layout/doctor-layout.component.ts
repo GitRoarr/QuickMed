@@ -16,4 +16,4 @@ import { DoctorSidebarComponent } from '../shared/doctor-sidebar/doctor-sidebar.
     </div>
   `,
 })
-export class DoctorLayoutComponent {}
+export class DoctorLayoutComponent { }

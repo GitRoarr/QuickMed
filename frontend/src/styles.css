@@ -1,5 +1,5 @@
 .patient-satisfaction-card {
-  box-shadow: 0 6px 32px 0 rgba(0,0,0,0.18), 0 1.5px 4px 0 rgba(0,0,0,0.12);
+  box-shadow: 0 6px 32px 0 rgba(0, 0, 0, 0.18), 0 1.5px 4px 0 rgba(0, 0, 0, 0.12);
   border: 1.5px solid var(--border);
   border-radius: 1.25rem;
   background: linear-gradient(135deg, var(--surface) 80%, var(--primary)/0.08 100%);
@@ -7,54 +7,77 @@
   overflow: hidden;
   transition: box-shadow 0.3s, border-color 0.3s, transform 0.2s;
 }
+
 .patient-satisfaction-card:hover {
-  box-shadow: 0 12px 48px 0 rgba(0,0,0,0.28), 0 3px 12px 0 rgba(0,0,0,0.18);
+  box-shadow: 0 12px 48px 0 rgba(0, 0, 0, 0.28), 0 3px 12px 0 rgba(0, 0, 0, 0.18);
   border-color: var(--primary);
   transform: translateY(-4px) scale(1.02);
 }
+
 .patient-satisfaction-card .icon {
   background: var(--primary);
   color: #fff;
   border-radius: 1rem;
-  box-shadow: 0 2px 8px 0 rgba(22,163,74,0.10);
+  box-shadow: 0 2px 8px 0 rgba(22, 163, 74, 0.10);
 }
+
 .patient-satisfaction-card .title {
   font-size: 1.1rem;
   font-weight: 500;
   color: var(--muted);
   margin-bottom: 0.5rem;
 }
+
 .patient-satisfaction-card .score {
   font-size: 2.5rem;
   font-weight: 700;
   color: var(--primary);
   letter-spacing: 1px;
 }
+
 .patient-satisfaction-card .max-score {
   font-size: 1.2rem;
   color: var(--muted);
   font-weight: 400;
 }
-html, body {
+
+html,
+body {
   height: 100%;
   width: 100%;
   overflow: auto;
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE 10+ */
+  scrollbar-width: none;
+  /* Firefox */
+  -ms-overflow-style: none;
+  /* IE 10+ */
 }
 
-body::-webkit-scrollbar, html::-webkit-scrollbar {
-  display: none; /* Chrome, Safari, Opera */
+body::-webkit-scrollbar,
+html::-webkit-scrollbar {
+  display: none;
+  /* Chrome, Safari, Opera */
 }
 
 /* Hide scrollbars for main content containers */
-.main, .app-root, main, .flex-1, .overflow-y-auto, .overflow-auto {
+.main,
+.app-root,
+main,
+.flex-1,
+.overflow-y-auto,
+.overflow-auto {
   overflow-y: auto !important;
   scrollbar-width: none;
 }
-.main::-webkit-scrollbar, .app-root::-webkit-scrollbar, main::-webkit-scrollbar, .flex-1::-webkit-scrollbar, .overflow-y-auto::-webkit-scrollbar, .overflow-auto::-webkit-scrollbar {
+
+.main::-webkit-scrollbar,
+.app-root::-webkit-scrollbar,
+main::-webkit-scrollbar,
+.flex-1::-webkit-scrollbar,
+.overflow-y-auto::-webkit-scrollbar,
+.overflow-auto::-webkit-scrollbar {
   display: none;
 }
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -62,7 +85,8 @@ body::-webkit-scrollbar, html::-webkit-scrollbar {
 :root {
   --bg: #ffffff;
   --fg: #111111;
-  --surface: #ffffff; /* light card background */
+  --surface: #ffffff;
+  /* light card background */
   --border: #e5e7eb;
   --muted: #6b7280;
   --primary: #16a34a;
@@ -70,11 +94,16 @@ body::-webkit-scrollbar, html::-webkit-scrollbar {
 }
 
 .dark {
-  --bg: #0b0d17; /* dark background */
-  --fg: #ffffff; /* text */
-  --surface: #1e1e1e; /* dark card */
-  --border: #2c2f3d; /* card border */
-  --muted: #9ca3af; /* muted text */
+  --bg: #0b0d17;
+  /* dark background */
+  --fg: #ffffff;
+  /* text */
+  --surface: #1e1e1e;
+  /* dark card */
+  --border: #2c2f3d;
+  /* card border */
+  --muted: #9ca3af;
+  /* muted text */
   --primary: #16a34a;
   --primary-hover: #15803d;
 }
@@ -103,37 +132,45 @@ body {
   transition: background-color 0.25s ease, box-shadow 0.25s ease, transform 0.2s ease;
   background-color: var(--surface);
   border-color: var(--border);
-  box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
   animation: cardIn 240ms ease both;
 }
 
 .card:hover {
   transform: translateY(-3px);
-  box-shadow: 0 10px 30px rgba(0,0,0,0.18);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
 }
 
 @keyframes cardIn {
-  from { opacity: 0; transform: translateY(6px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Elevate common admin cards globally for consistency */
 :where(.stat-card, .metric-card, .settings-section, .appointments-container, .appointment-card, .patient-card, .table-card, .chart-card, .modal-card) {
   background: var(--surface);
   border-color: var(--border);
-  box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
   transition: background-color 0.25s ease, box-shadow 0.25s ease, transform 0.2s ease, border-color 0.25s ease;
   animation: cardIn 240ms ease both;
 }
 
 :where(.stat-card, .metric-card, .settings-section, .appointments-container, .appointment-card, .patient-card, .table-card, .chart-card, .modal-card):hover {
   transform: translateY(-3px);
-  box-shadow: 0 12px 32px rgba(0,0,0,0.2);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
 }
 
 /* Ensure dark theme exact surface color on admin cards */
 .dark :where(.stat-card, .metric-card, .settings-section, .appointments-container, .appointment-card, .patient-card, .table-card, .chart-card, .modal-card) {
-  background: #0b0b0b; /* pure black surface in dark theme */
+  background: #0b0b0b;
+  /* pure black surface in dark theme */
   border-color: transparent;
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55), 0 0 24px rgba(22, 163, 74, 0.06);
 }
@@ -207,10 +244,12 @@ body {
   transition: all 0.2s;
   color: var(--muted);
 }
+
 .nav-item:hover {
   background-color: rgba(22, 163, 74, 0.08);
   color: var(--primary);
 }
+
 .nav-item.active {
   background-color: rgba(22, 163, 74, 0.15);
   color: var(--primary);
@@ -228,16 +267,20 @@ body {
   background-color: var(--primary);
   color: #fff;
 }
+
 .btn:hover {
   background-color: var(--primary-hover);
 }
+
 .btn-ghost {
   background: transparent;
   color: var(--fg);
 }
+
 .btn-ghost:hover {
   background-color: rgba(0, 0, 0, 0.05);
 }
+
 .dark .btn-ghost:hover {
   background-color: rgba(255, 255, 255, 0.06);
 }
@@ -253,6 +296,7 @@ body {
   border: 1px solid var(--border);
   color: var(--fg);
 }
+
 .input:focus {
   border-color: var(--primary);
 }
@@ -289,6 +333,7 @@ body {
   border-color: var(--border);
   color: var(--fg);
 }
+
 .theme-toggle:hover {
   border-color: var(--primary);
   color: var(--primary);
@@ -305,12 +350,14 @@ body {
     @apply ml-0;
   }
 }
+
 @layer utilities {
   .animate-fade-in {
     @apply opacity-0 translate-y-2;
     animation: fadeInDropdown 0.2s ease-out forwards;
   }
 }
+
 @keyframes fadeInDropdown {
   to {
     opacity: 1;

@@ -31,11 +31,11 @@ export class AppointmentsComponent implements OnInit {
   appointments = signal<Appointment[]>([]);
   filteredAppointments = signal<Appointment[]>([]);
   isLoading = signal(true);
-  
+
   // Filters
   searchQuery = signal('');
   selectedStatus = signal<string>('all');
-  
+
   // Layout & Theme
   currentUser = signal<any>(null);
   menuItems = signal<MenuItem[]>([]);
@@ -121,7 +121,7 @@ export class AppointmentsComponent implements OnInit {
 
     // 2. Filter by Search (Name or Notes)
     if (query) {
-      result = result.filter(a => 
+      result = result.filter(a =>
         (a.patient?.firstName?.toLowerCase() || '').includes(query) ||
         (a.patient?.lastName?.toLowerCase() || '').includes(query) ||
         (a.notes?.toLowerCase() || '').includes(query)

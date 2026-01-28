@@ -64,10 +64,10 @@ export class ScheduleComponent implements OnInit {
   themeMode = signal<'light' | 'dark'>('light');
   showTemplateDropdown = signal(false);
   draggedSlot = signal<DoctorSlot | null>(null);
-  sessions = signal<{ morning: boolean; break: boolean; evening: boolean }>({ morning: false, break: false, evening: false });
+  sessions = signal<Record<string, boolean>>({ morning: false, break: false, evening: false });
   expandedSessions = signal<Record<string, boolean>>({ morning: false, break: false, evening: false });
 
-  readonly SESSION_CONFIG = {
+  readonly SESSION_CONFIG: Record<string, { label: string, icon: string, time: string, start: string, end: string }> = {
     morning: { label: 'Morning', icon: '🌅', time: '09:00 AM – 12:00 PM', start: '09:00', end: '12:00' },
     break: { label: 'Break', icon: '☕', time: '12:00 PM – 02:00 PM', start: '12:00', end: '14:00' },
     evening: { label: 'Evening', icon: '🌆', time: '02:00 PM – 08:00 PM', start: '14:00', end: '20:00' },
