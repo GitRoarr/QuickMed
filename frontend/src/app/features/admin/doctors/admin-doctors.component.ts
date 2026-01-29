@@ -9,6 +9,7 @@ import {
   DoctorOverviewCard,
   DoctorOverviewResponse,
 } from "@app/core/services/admin.service"
+import { ToastService } from "@app/core/services/toast.service"
 
 @Component({
   selector: "app-admin-doctors",
@@ -27,13 +28,13 @@ export class AdminDoctorsComponent implements OnInit {
   })
   specialties = signal<string[]>([])
   filterForm!: FormGroup
-  message = signal<{ type: "success" | "error"; text: string } | null>(null)
 
   constructor(
     private adminService: AdminService,
     private router: Router,
     private fb: FormBuilder,
-  ) {}
+    private toastService: ToastService
+  ) { }
 
   ngOnInit(): void {
     this.filterForm = this.fb.group({
@@ -64,10 +65,7 @@ export class AdminDoctorsComponent implements OnInit {
         },
         error: (err) => {
           console.error("Failed to load doctors:", err)
-          this.message.set({
-            type: "error",
-            text: err.error?.message || "Failed to load doctors overview",
-          })
+          this.toastService.error(err.error?.message || "Failed to load doctors overview")
           this.loading.set(false)
         },
       })
@@ -77,40 +75,16 @@ export class AdminDoctorsComponent implements OnInit {
     this.router.navigate(["/admin/doctors/add-doctor"])
   }
 
-  onVerify(id: string) {
-    this.router.navigate(["/admin/doctors", id, "verify"])
-  }
 
-  onDelete(id: string) {
-    if (!confirm("Delete this doctor? This action cannot be undone.")) return
-    this.loading.set(true)
-    this.adminService.deleteDoctor(id).subscribe({
-      next: () => {
-        this.message.set({ type: "success", text: "Doctor removed successfully." })
-        this.loadDoctors()
-      },
-      error: (err) => {
-        console.error("Failed to delete doctor", err)
-        this.message.set({
-          type: "error",
-          text: err.error?.message || "Failed to delete doctor",
-        })
-        this.loading.set(false)
-      },
-    })
-  }
 
   validateLicense(id: string) {
     this.adminService.validateDoctorLicense(id).subscribe({
       next: () => {
-        this.message.set({ type: "success", text: "License validated." })
+        this.toastService.success("License validated")
         this.loadDoctors()
       },
       error: (err) => {
-        this.message.set({
-          type: "error",
-          text: err.error?.message || "Failed to validate license",
-        })
+        this.toastService.error(err.error?.message || "Failed to validate license")
       },
     })
   }
@@ -118,14 +92,11 @@ export class AdminDoctorsComponent implements OnInit {
   confirmEmployment(id: string) {
     this.adminService.confirmDoctorEmployment(id).subscribe({
       next: () => {
-        this.message.set({ type: "success", text: "Employment confirmed." })
+        this.toastService.success("Employment confirmed")
         this.loadDoctors()
       },
       error: (err) => {
-        this.message.set({
-          type: "error",
-          text: err.error?.message || "Failed to confirm employment",
-        })
+        this.toastService.error(err.error?.message || "Failed to confirm employment")
       },
     })
   }
@@ -133,14 +104,11 @@ export class AdminDoctorsComponent implements OnInit {
   activateDoctor(id: string) {
     this.adminService.activateDoctor(id).subscribe({
       next: () => {
-        this.message.set({ type: "success", text: "Doctor activated." })
+        this.toastService.success("Doctor activated")
         this.loadDoctors()
       },
       error: (err) => {
-        this.message.set({
-          type: "error",
-          text: err.error?.message || "Failed to activate doctor",
-        })
+        this.toastService.error(err.error?.message || "Failed to activate doctor")
       },
     })
   }
@@ -151,5 +119,25 @@ export class AdminDoctorsComponent implements OnInit {
 
   getInitials(doc: DoctorOverviewCard) {
     return `${(doc.firstName[0] || "")}${(doc.lastName[0] || "")}`.toUpperCase()
+  }
+
+  onVerify(id: string) {
+    this.router.navigate(["/admin/doctors", id])
+  }
+
+  onDelete(id: string) {
+    if (confirm("Are you sure you want to delete this doctor?")) {
+      this.adminService.deleteDoctor(id).subscribe({
+        next: () => {
+          this.toastService.success("Doctor deleted successfully")
+          this.loadDoctors()
+        },
+        error: (err) => {
+          this.toastService.error(
+            err.error?.message || "Failed to delete doctor"
+          )
+        },
+      })
+    }
   }
 }

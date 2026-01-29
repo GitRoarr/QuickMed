@@ -45,9 +45,7 @@
       </form>
     </section>
 
-    <div class="alert" *ngIf="message() as alert" [class.error]="alert.type === 'error'">
-      {{ alert.text }}
-    </div>
+
 
     <section class="doctor-grid">
       <div class="loader" *ngIf="loading()">Loading doctors...</div>
@@ -58,7 +56,10 @@
 
       <article class="doctor-card" *ngFor="let doctor of doctors(); trackBy: trackByDoctor">
         <div class="card-head">
-          <div class="avatar">{{ getInitials(doctor) }}</div>
+          <div class="avatar">
+            <img *ngIf="doctor.avatar" [src]="doctor.avatar" [alt]="doctor.firstName" />
+            <span *ngIf="!doctor.avatar">{{ getInitials(doctor) }}</span>
+          </div>
           <div>
             <div class="name">
               Dr. {{ doctor.firstName }} {{ doctor.lastName }}
@@ -88,24 +89,36 @@
           </div>
         </div>
 
-        <div class="verification">
-          <button class="verify-btn" [disabled]="doctor.verification.licenseValidated"
+        <div class="card-actions">
+          <button class="verify-btn validate-license" *ngIf="!doctor.verification.licenseValidated"
             (click)="validateLicense(doctor.id)">
-            {{ doctor.verification.licenseValidated ? "License validated" : "Validate license" }}
+            Validate license
           </button>
-          <button class="verify-btn" [disabled]="doctor.verification.employmentConfirmed"
+          <button class="verify-btn confirm-employment" *ngIf="!doctor.verification.employmentConfirmed"
             (click)="confirmEmployment(doctor.id)">
-            {{ doctor.verification.employmentConfirmed ? "Employment confirmed" : "Confirm employment" }}
+            Confirm employment
           </button>
-          <button class="verify-btn"
-            [disabled]="doctor.status === 'active' || !doctor.verification.licenseValidated || !doctor.verification.employmentConfirmed"
+          <button class="verify-btn activate-doctor" *ngIf="doctor.status !== 'active'"
+            [disabled]="!doctor.verification.licenseValidated || !doctor.verification.employmentConfirmed"
             (click)="activateDoctor(doctor.id)">
             Activate
           </button>
-          <button class="ghost-btn" (click)="onVerify(doctor.id)">Open profile</button>
-          <button class="ghost-btn danger" (click)="onDelete(doctor.id)">
-            <i class="bi bi-trash"></i>
-          </button>
+        </div>
+
+        <div class="card-footer">
+          <div class="license-badge">
+            <i class="bi bi-card-heading"></i>
+            <span>{{ doctor.licenseNumber }}</span>
+          </div>
+
+          <div class="footer-actions">
+            <button class="text-btn" (click)="onVerify(doctor.id)">
+              Open profile
+            </button>
+            <button class="icon-btn delete" (click)="onDelete(doctor.id)">
+              <i class="bi bi-trash3-fill"></i>
+            </button>
+          </div>
         </div>
       </article>
     </section>
