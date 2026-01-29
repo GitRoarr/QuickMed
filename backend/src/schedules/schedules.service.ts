@@ -9,6 +9,7 @@ import { AvailabilityTemplateService } from './availability-template.service';
 import { GenerateSlotsDto } from './dto/generate-slots.dto';
 import { ApplyTemplateDto } from './dto/apply-template.dto';
 import { BulkSlotUpdateDto } from './dto/bulk-slot-update.dto';
+import { AutoScheduleInitializerService } from './auto-schedule-initializer.service';
 
 const SESSIONS = {
   morning: { start: '09:00', end: '12:00', allowSlots: true },
@@ -25,6 +26,7 @@ export class SchedulesService {
     private readonly appointmentsRepo: Repository<Appointment>,
     private readonly settingsService: SettingsService,
     private readonly templateService: AvailabilityTemplateService,
+    private readonly autoInitializer: AutoScheduleInitializerService,
   ) { }
 
   private toMinutes(time: string): number {
@@ -99,6 +101,10 @@ export class SchedulesService {
 
   async getDaySchedule(doctorId: string, date: string | Date) {
     const dateObj = this.normalizeToDate(date);
+
+    // Auto-initialize schedule from settings if it doesn't exist
+    await this.autoInitializer.autoInitializeScheduleIfNeeded(doctorId, dateObj);
+
     let sched = await this.repo.findOne({ where: { doctorId, date: dateObj } });
     const dateStr = dateObj instanceof Date ? dateObj.toISOString().split('T')[0] : String(dateObj);
 

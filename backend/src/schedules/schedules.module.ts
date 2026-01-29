@@ -13,6 +13,8 @@ import { DoctorAnalyticsService } from './doctor-analytics.service';
 import { ConflictDetectionService } from './conflict-detection.service';
 import { AvailabilityTemplateController } from './availability-template.controller';
 import { DoctorAnalyticsController } from './doctor-analytics.controller';
+import { AutoScheduleInitializerService } from './auto-schedule-initializer.service';
+import { DoctorSettings } from '../settings/entities/doctor-settings.entity';
 
 @Module({
   imports: [
@@ -22,6 +24,7 @@ import { DoctorAnalyticsController } from './doctor-analytics.controller';
       AvailabilityTemplate,
       BreakConfig,
       DoctorAnalytics,
+      DoctorSettings,
     ]),
     SettingsModule,
   ],
@@ -30,6 +33,7 @@ import { DoctorAnalyticsController } from './doctor-analytics.controller';
     AvailabilityTemplateService,
     DoctorAnalyticsService,
     ConflictDetectionService,
+    AutoScheduleInitializerService,
   ],
   controllers: [
     SchedulesController,
@@ -41,6 +45,7 @@ import { DoctorAnalyticsController } from './doctor-analytics.controller';
     AvailabilityTemplateService,
     DoctorAnalyticsService,
     ConflictDetectionService,
+    AutoScheduleInitializerService,
   ],
 })
 export class SchedulesModule { }
