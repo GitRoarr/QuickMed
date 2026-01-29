@@ -3,6 +3,7 @@ import { Router } from "@angular/router"
 import { CommonModule } from "@angular/common"
 import { FormBuilder, FormGroup, ReactiveFormsModule } from "@angular/forms"
 import { AdminShellComponent } from "../shared/admin-shell"
+import { DoctorDetailModalComponent } from "./doctor-detail-modal/doctor-detail-modal.component"
 
 import {
   AdminService,
@@ -14,7 +15,7 @@ import { ToastService } from "@app/core/services/toast.service"
 @Component({
   selector: "app-admin-doctors",
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, AdminShellComponent],
+  imports: [CommonModule, ReactiveFormsModule, AdminShellComponent, DoctorDetailModalComponent],
   templateUrl: "./admin-doctors.component.html",
   styleUrls: ["./admin-doctors.component.scss"],
 })
@@ -28,6 +29,10 @@ export class AdminDoctorsComponent implements OnInit {
   })
   specialties = signal<string[]>([])
   filterForm!: FormGroup
+
+  // Modal State
+  showModal = signal(false)
+  selectedDoctor = signal<DoctorOverviewCard | null>(null)
 
   constructor(
     private adminService: AdminService,
@@ -122,7 +127,16 @@ export class AdminDoctorsComponent implements OnInit {
   }
 
   onVerify(id: string) {
-    this.router.navigate(["/admin/doctors", id])
+    const doctor = this.doctors().find((d) => d.id === id)
+    if (doctor) {
+      this.selectedDoctor.set(doctor)
+      this.showModal.set(true)
+    }
+  }
+
+  closeModal() {
+    this.showModal.set(false)
+    this.selectedDoctor.set(null)
   }
 
   onDelete(id: string) {

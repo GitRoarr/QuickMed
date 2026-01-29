@@ -1,0 +1,107 @@
+<div class="modal-backdrop" (click)="onClose()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+        <!-- Header with Avatar -->
+        <header class="modal-header">
+            <div class="hero-profile">
+                <div class="avatar-large">
+                    <img *ngIf="doctor.avatar" [src]="doctor.avatar" [alt]="doctor.firstName" />
+                    <span *ngIf="!doctor.avatar">{{ getInitials(doctor) }}</span>
+                </div>
+                <div class="hero-info">
+                    <h2>Dr. {{ doctor.firstName }} {{ doctor.lastName }}</h2>
+                    <div class="badges">
+                        <span class="badge specialty">{{ doctor.specialty || 'General Practitioner' }}</span>
+                        <span class="badge status" [ngClass]="doctor.status">{{ doctor.status }}</span>
+                    </div>
+                </div>
+            </div>
+            <button class="close-btn" (click)="onClose()">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </header>
+
+        <!-- Scrollable Body -->
+        <div class="modal-body">
+            <!-- Section: Professional Info -->
+            <section class="info-group">
+                <h3><i class="bi bi-person-badge"></i> Professional Details</h3>
+                <div class="grid">
+                    <div class="field">
+                        <label>License Number</label>
+                        <p class="mono">{{ doctor.licenseNumber || 'N/A' }}</p>
+                    </div>
+                    <div class="field">
+                        <label>Experience </label>
+                        <p>12 Years</p> <!-- Mock data if not in model yet, or add to model -->
+                    </div>
+                    <div class="field full-width">
+                        <label>Bio</label>
+                        <p class="text-body">
+                            Dr. {{ doctor.lastName }} is a dedicated specialist committed to providing top-tier patient
+                            care.
+                            Currently managing {{ doctor.stats.patients }} patients with a {{ doctor.rating }} star
+                            rating.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section: Contact & Verification -->
+            <section class="info-group">
+                <h3><i class="bi bi-shield-check"></i> Verification & Contact</h3>
+                <div class="grid">
+                    <div class="field">
+                        <label>Email Address</label>
+                        <p>{{ doctor.email }}</p>
+                    </div>
+                    <div class="field">
+                        <label>Phone</label>
+                        <p>{{ doctor.phoneNumber || 'Not provided' }}</p>
+                    </div>
+                    <div class="field">
+                        <label>License Status</label>
+                        <div class="status-indicator">
+                            <i class="bi"
+                                [ngClass]="doctor.verification.licenseValidated ? 'bi-check-circle-fill success' : 'bi-dash-circle warning'"></i>
+                            <span>{{ doctor.verification.licenseValidated ? 'Validated' : 'Pending Validation' }}</span>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label>Employment</label>
+                        <div class="status-indicator">
+                            <i class="bi"
+                                [ngClass]="doctor.verification.employmentConfirmed ? 'bi-check-circle-fill success' : 'bi-dash-circle warning'"></i>
+                            <span>{{ doctor.verification.employmentConfirmed ? 'Confirmed' : 'Unconfirmed' }}</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section: Stats Overview -->
+            <section class="info-group">
+                <h3><i class="bi bi-bar-chart"></i> Performance</h3>
+                <div class="stats-row">
+                    <div class="mini-stat">
+                        <strong>{{ doctor.stats.patients }}</strong>
+                        <span>Patients</span>
+                    </div>
+                    <div class="mini-stat">
+                        <strong>{{ doctor.stats.appointments }}</strong>
+                        <span>Appointments</span>
+                    </div>
+                    <div class="mini-stat">
+                        <strong>{{ doctor.stats.videoVisits }}</strong>
+                        <span>Video Calls</span>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Footer -->
+        <footer class="modal-footer">
+            <button class="secondary-btn" (click)="onClose()">Close</button>
+            <!-- Future: Edit button -->
+            <!-- <button class="primary-btn">Edit Profile</button> -->
+        </footer>
+    </div>
+</div>

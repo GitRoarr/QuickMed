@@ -123,4 +123,8 @@
       </article>
     </section>
   </div>
+
+  <!-- Profile Modal -->
+  <app-doctor-detail-modal *ngIf="showModal() && selectedDoctor()" [doctor]="selectedDoctor()!" (close)="closeModal()">
+  </app-doctor-detail-modal>
 </app-admin-shell>
