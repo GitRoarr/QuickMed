@@ -1,0 +1,88 @@
+<div class="modal-backdrop" (click)="onClose()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+
+        <!-- Mode Switcher Header -->
+        <header class="modal-header">
+            <div class="mode-toggles">
+                <button class="toggle-btn" [class.active]="mode() === 'create'" (click)="setMode('create')">
+                    <i class="bi bi-person-plus-fill"></i> Create Profile
+                </button>
+                <button class="toggle-btn" [class.active]="mode() === 'invite'" (click)="setMode('invite')">
+                    <i class="bi bi-envelope-paper-fill"></i> Invite by Email
+                </button>
+            </div>
+            <button class="close-btn" (click)="onClose()">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </header>
+
+        <!-- Body -->
+        <div class="modal-body">
+
+            <!-- Create Profile Mode -->
+            <div *ngIf="mode() === 'create'" class="form-grid slide-in">
+                <div class="intro-text">
+                    <h3>New Patient Profile</h3>
+                    <p>Manually add a patient to the system.</p>
+                </div>
+
+                <div class="form-group half">
+                    <label>First Name <span class="req">*</span></label>
+                    <input type="text" [ngModel]="firstName()" (ngModelChange)="firstName.set($event)"
+                        class="form-control" placeholder="John">
+                </div>
+                <div class="form-group half">
+                    <label>Last Name <span class="req">*</span></label>
+                    <input type="text" [ngModel]="lastName()" (ngModelChange)="lastName.set($event)"
+                        class="form-control" placeholder="Doe">
+                </div>
+
+                <div class="form-group full">
+                    <label>Email Address <span class="req">*</span></label>
+                    <input type="email" [ngModel]="email()" (ngModelChange)="email.set($event)" class="form-control"
+                        placeholder="john.doe@example.com">
+                </div>
+
+                <div class="form-group half">
+                    <label>Phone Number</label>
+                    <input type="tel" [ngModel]="phone()" (ngModelChange)="phone.set($event)" class="form-control"
+                        placeholder="+1 (555) ...">
+                </div>
+                <div class="form-group half">
+                    <label>Date of Birth</label>
+                    <input type="date" [ngModel]="dob()" (ngModelChange)="dob.set($event)" class="form-control">
+                </div>
+            </div>
+
+            <!-- Invite Mode -->
+            <div *ngIf="mode() === 'invite'" class="invite-section slide-in">
+                <div class="invite-icon">
+                    <i class="bi bi-send"></i>
+                </div>
+                <h3>Send Invitation</h3>
+                <p>Enter the patient's email address. They will receive a link to set up their own profile.</p>
+
+                <div class="form-group full">
+                    <input type="email" [ngModel]="inviteEmail()" (ngModelChange)="inviteEmail.set($event)"
+                        class="form-control big-input" placeholder="patient@email.com">
+                </div>
+            </div>
+
+            <div *ngIf="errorMessage()" class="error-banner">
+                <i class="bi bi-exclamation-circle-fill"></i> {{ errorMessage() }}
+            </div>
+
+        </div>
+
+        <!-- Footer -->
+        <footer class="modal-footer">
+            <button class="ghost-btn" (click)="onClose()">Cancel</button>
+            <button class="primary-btn" (click)="submit()" [disabled]="isLoading()">
+                <span *ngIf="!isLoading()">
+                    {{ mode() === 'create' ? 'Create Patient' : 'Send Invitation' }}
+                </span>
+                <span *ngIf="isLoading()">Processing...</span>
+            </button>
+        </footer>
+    </div>
+</div>

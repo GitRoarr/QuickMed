@@ -1,0 +1,343 @@
+.modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(8px);
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    animation: fadeIn 0.2s ease-out;
+}
+
+.modal-content {
+    background: #ffffff;
+    width: 95%;
+    max-width: 800px;
+    /* Wide modal for wizard feel */
+    max-height: 90vh;
+    border-radius: 24px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.96);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Header */
+.modal-header {
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid #f1f5f9;
+    background: linear-gradient(to bottom, #f8fafc, #ffffff);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    h2 {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin: 0;
+    }
+
+    .close-btn {
+        background: none;
+        border: none;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        color: #94a3b8;
+        cursor: pointer;
+        transition: all 0.2s;
+
+        &:hover {
+            background: #f1f5f9;
+            color: #0f172a;
+        }
+    }
+}
+
+/* Body */
+.modal-body {
+    padding: 2rem;
+    overflow-y: auto;
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group {
+        position: relative;
+
+        label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #475569;
+            margin-bottom: 0.5rem;
+
+            .required {
+                color: #ef4444;
+                margin-left: 2px;
+            }
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .icon-box {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            background: #f1f5f9;
+            color: #94a3b8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.9rem;
+            margin-right: 0.75rem;
+            flex-shrink: 0;
+            text-transform: uppercase;
+
+            &.has-data {
+                background: #dcfce7;
+                color: #16a34a;
+            }
+
+            &.doctor-icon.has-data {
+                background: #e0e7ff;
+                color: #4f46e5;
+            }
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+            background: white;
+
+            &:focus {
+                outline: none;
+                border-color: #16a34a;
+                box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.1);
+            }
+
+            /* Adjust for icon presence if needed, but flex handles it well usually */
+            /* If inside wrapper with icon, standard padding is fine */
+        }
+
+        textarea.form-control {
+            resize: none;
+        }
+    }
+
+    .full-width {
+        grid-column: 1 / -1;
+    }
+
+    /* Dropdown Results */
+    .search-dropdown {
+        position: absolute;
+        top: 100%;
+        left: 56px;
+        /* Offset for icon */
+        right: 0;
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        margin-top: 4px;
+        z-index: 50;
+        max-height: 200px;
+        overflow-y: auto;
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            transition: background 0.2s;
+            gap: 0.75rem;
+
+            &:hover {
+                background: #f8fafc;
+            }
+
+            .d-avatar {
+                width: 32px;
+                height: 32px;
+                border-radius: 50%;
+                background: #f1f5f9;
+                color: #64748b;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-weight: 600;
+                font-size: 0.8rem;
+
+                &.doc {
+                    background: #e0e7ff;
+                    color: #4f46e5;
+                }
+            }
+
+            .d-info {
+                .d-name {
+                    font-weight: 600;
+                    color: #0f172a;
+                    font-size: 0.9rem;
+                }
+
+                .d-meta {
+                    font-size: 0.75rem;
+                    color: #64748b;
+                }
+            }
+        }
+    }
+
+    /* Slots */
+    .slots-section {
+        margin-bottom: 1.5rem;
+
+        .sub-label {
+            display: block;
+            font-size: 0.8rem;
+            color: #64748b;
+            margin-bottom: 0.75rem;
+            font-weight: 600;
+        }
+
+        .slots-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+
+            .slot-chip {
+                background: white;
+                border: 1px solid #e2e8f0;
+                color: #475569;
+                padding: 0.5rem 1rem;
+                border-radius: 8px;
+                font-size: 0.9rem;
+                font-weight: 500;
+                cursor: pointer;
+                transition: all 0.2s;
+
+                &:hover {
+                    border-color: #cbd5e1;
+                    background: #f8fafc;
+                }
+
+                &.selected {
+                    background: #16a34a;
+                    color: white;
+                    border-color: #16a34a;
+                    box-shadow: 0 4px 6px -1px rgba(22, 163, 74, 0.2);
+                }
+            }
+
+            .slots-loading {
+                font-size: 0.85rem;
+                color: #94a3b8;
+                font-style: italic;
+            }
+        }
+    }
+}
+
+/* Footer */
+.modal-footer {
+    padding: 1.5rem 2rem;
+    border-top: 1px solid #f1f5f9;
+    background: #f8fafc;
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+
+    .secondary-btn {
+        background: white;
+        border: 1px solid #e2e8f0;
+        color: #64748b;
+        padding: 0.75rem 1.5rem;
+        border-radius: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+
+        &:hover:not(:disabled) {
+            background: #f1f5f9;
+            color: #0f172a;
+        }
+
+        &:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    }
+
+    .primary-btn {
+        background: #16a34a;
+        color: white;
+        border: none;
+        padding: 0.75rem 2rem;
+        border-radius: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3);
+        transition: all 0.2s;
+
+        &:hover:not(:disabled) {
+            background: #15803d;
+            transform: translateY(-1px);
+        }
+
+        &:disabled {
+            background: #cbd5e1;
+            box-shadow: none;
+            cursor: not-allowed;
+            transform: none;
+        }
+    }
+}
+
+@media (max-width: 640px) {
+    .modal-body .form-row {
+        grid-template-columns: 1fr;
+    }
+}

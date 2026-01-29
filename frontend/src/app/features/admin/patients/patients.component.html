@@ -3,118 +3,56 @@
     <div class="patients-header">
       <div class="filter-pills">
         <button class="pill-btn" (click)="changeFilter('all')" [class.active]="statusFilter === 'all'">All</button>
-        <button class="pill-btn" (click)="changeFilter('active')" [class.active]="statusFilter === 'active'">Active</button>
-        <button class="pill-btn" (click)="changeFilter('pending')" [class.active]="statusFilter === 'pending'">Pending</button>
+        <button class="pill-btn" (click)="changeFilter('active')"
+          [class.active]="statusFilter === 'active'">Active</button>
+        <button class="pill-btn" (click)="changeFilter('pending')"
+          [class.active]="statusFilter === 'pending'">Pending</button>
       </div>
       <div class="header-actions">
         <button class="secondary-btn" type="button" (click)="refresh()">
           <i class="bi bi-arrow-clockwise"></i>
           Refresh
         </button>
-        <button class="primary-btn" type="button" (click)="toggleAddPatientForm()">
+        <button class="primary-btn" type="button" (click)="openCreateModal()">
           <i class="bi bi-person-plus-fill"></i>
-          {{ showAddPatientForm() ? "Close" : "Add New Patient" }}
+          Add New Patient
         </button>
       </div>
     </div>
 
     <div class="patients-content">
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-      <div *ngFor="let card of summaryCards()" class="metric-card" [ngClass]="card.tone">
-        <div class="text-sm text-gray-500">{{ card.label }}</div>
-        <div class="text-3xl font-bold text-gray-900 mt-2">{{ card.value }}</div>
-      </div>
-    </div>
-
-    <div *ngIf="showAddPatientForm()" class="bg-white border border-gray-200 rounded-xl p-6 mb-8 shadow-sm">
-      <div class="flex items-center justify-between mb-4">
-        <div>
-          <h3 class="text-lg font-bold text-gray-900">Add New Patient</h3>
-          <p class="text-sm text-gray-500">Capture essential patient details to get them onboard quickly.</p>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+        <div *ngFor="let card of summaryCards()" class="metric-card" [ngClass]="card.tone">
+          <div class="text-sm text-gray-500">{{ card.label }}</div>
+          <div class="text-3xl font-bold text-gray-900 mt-2">{{ card.value }}</div>
         </div>
-        <button class="ghost-btn" type="button" (click)="toggleAddPatientForm()">Close</button>
       </div>
 
-      <div *ngIf="patientFormMessage()" class="mb-4">
-        <app-alert-message
-          [message]="patientFormMessage()?.text || ''"
-          [type]="patientFormMessage()?.type || 'success'"
-          [visible]="!!patientFormMessage()"
-          [autoDismiss]="true"
-          [duration]="5000"
-        ></app-alert-message>
-      </div>
+      <!-- Inline form removed -->
 
-      <form #patientForm="ngForm" class="grid grid-cols-1 md:grid-cols-2 gap-4" (ngSubmit)="createPatient()">
-        <div>
-          <label class="form-label">First Name</label>
-          <input type="text" class="form-control" [(ngModel)]="newPatient.firstName" name="firstName" required #firstName="ngModel" />
-          <div class="text-sm text-red-600 mt-1" *ngIf="firstName.invalid && firstName.touched">First name is required.</div>
+      <ng-container *ngIf="errorMessage(); else patientBoard">
+        <app-alert-message [message]="errorMessage()" type="error" [visible]="true"
+          [autoDismiss]="false"></app-alert-message>
+        <div class="mt-3">
+          <button class="px-4 py-2 bg-red-600 text-white rounded-md text-sm" (click)="refresh()">Retry</button>
         </div>
-        <div>
-          <label class="form-label">Last Name</label>
-          <input type="text" class="form-control" [(ngModel)]="newPatient.lastName" name="lastName" required #lastName="ngModel" />
-          <div class="text-sm text-red-600 mt-1" *ngIf="lastName.invalid && lastName.touched">Last name is required.</div>
-        </div>
-        <div>
-          <label class="form-label">Email</label>
-          <input type="email" class="form-control" [(ngModel)]="newPatient.email" name="email" required #emailModel="ngModel" />
-          <div class="text-sm text-red-600 mt-1" *ngIf="emailModel.invalid && emailModel.touched">
-            <span *ngIf="emailModel.errors?.['required']">Email is required.</span>
-            <span *ngIf="emailModel.errors?.['email']">Please enter a valid email.</span>
-          </div>
-        </div>
-        <div>
-          <label class="form-label">Phone Number</label>
-          <input type="tel" class="form-control" [(ngModel)]="newPatient.phoneNumber" name="phoneNumber" required #phone="ngModel" />
-          <div class="text-sm text-red-600 mt-1" *ngIf="phone.invalid && phone.touched">Phone number is required.</div>
-        </div>
-        <div>
-          <label class="form-label">Date of Birth</label>
-          <input type="date" class="form-control" [(ngModel)]="newPatient.dateOfBirth" name="dateOfBirth" />
-        </div>
-        <div>
-          <label class="form-label">Blood Type</label>
-          <input type="text" class="form-control" [(ngModel)]="newPatient.bloodType" name="bloodType" placeholder="A+, O-, etc." />
-        </div>
-        <div class="md:col-span-2">
-          <label class="form-label">Medical History Notes</label>
-          <textarea class="form-control" rows="2" [(ngModel)]="newPatient.medicalHistory" name="medicalHistory"></textarea>
-        </div>
-        <div class="md:col-span-2 flex justify-end gap-3 mt-2">
-          <button class="ghost-btn" type="button" (click)="resetPatientForm()">Clear</button>
-          <button class="spotify-btn" type="submit" [disabled]="isSavingPatient() || patientForm.invalid">
-            {{ isSavingPatient() ? "Saving..." : "Save Patient" }}
-          </button>
-        </div>
-      </form>
-    </div>
+      </ng-container>
 
-    <ng-container *ngIf="errorMessage(); else patientBoard">
-      <app-alert-message [message]="errorMessage()" type="error" [visible]="true" [autoDismiss]="false"></app-alert-message>
-      <div class="mt-3">
-        <button class="px-4 py-2 bg-red-600 text-white rounded-md text-sm" (click)="refresh()">Retry</button>
-      </div>
-    </ng-container>
-
-    <ng-template #patientBoard>
-      <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        <div class="xl:col-span-2 space-y-4">
+      <ng-template #patientBoard>
+        <!-- Single Column grid (full width now) -->
+        <div class="space-y-4">
           <div *ngIf="isLoading()" class="bg-white border border-gray-200 rounded-lg p-8 text-center text-gray-500">
             Loading patient records…
           </div>
 
-          <div
-            class="patient-card"
-            *ngFor="let patient of visiblePatients()"
-            (click)="selectPatient(patient)"
-          >
+          <div class="patient-card" *ngFor="let patient of visiblePatients()" (click)="selectPatient(patient)">
             <div class="flex items-center gap-4 flex-1">
               <div class="avatar">{{ patient.initials }}</div>
               <div>
                 <div class="text-lg font-semibold text-gray-900 flex items-center gap-3">
                   {{ patient.fullName }}
-                  <span class="status-pill" [class.active]="patient.status === 'active'" [class.pending]="patient.status === 'pending'">
+                  <span class="status-pill" [class.active]="patient.status === 'active'"
+                    [class.pending]="patient.status === 'pending'">
                     {{ patient.status }}
                   </span>
                 </div>
@@ -145,12 +83,15 @@
               </div>
             </div>
             <div class="flex items-center gap-2">
-              <button class="outline-btn">View Details</button>
-              <button class="spotify-btn">Schedule</button>
+              <button class="outline-btn" (click)="$event.stopPropagation(); selectPatient(patient)">View
+                Details</button>
+              <button class="spotify-btn"
+                (click)="$event.stopPropagation(); selectPatient(patient); openMessageModal()">Schedule</button>
             </div>
           </div>
 
-          <div *ngIf="!visiblePatients().length && !isLoading()" class="bg-white border border-dashed border-gray-300 rounded-lg p-8 text-center text-gray-500">
+          <div *ngIf="!visiblePatients().length && !isLoading()"
+            class="bg-white border border-dashed border-gray-300 rounded-lg p-8 text-center text-gray-500">
             No patients match the selected filters.
           </div>
 
@@ -160,55 +101,26 @@
             <button class="ghost-btn" (click)="goToPage('next')" [disabled]="page() === totalPages()">Next</button>
           </div>
         </div>
-
-        <div class="bg-white border border-gray-200 rounded-lg p-6" *ngIf="highlightedPatient() as detail; else noSelection">
-          <div class="flex items-center gap-4 mb-6">
-            <div class="avatar avatar-lg">{{ detail.initials }}</div>
-            <div>
-              <div class="text-2xl font-bold text-gray-900">{{ detail.fullName }}</div>
-              <div class="text-sm text-gray-500">{{ detail.email }}</div>
-            </div>
-          </div>
-
-          <div class="detail-grid">
-            <div>
-              <span class="label">Patient ID</span>
-              <span class="value">{{ detail.patientId }}</span>
-            </div>
-            <div>
-              <span class="label">Status</span>
-              <span class="value capitalize">{{ detail.status }}</span>
-            </div>
-            <div>
-              <span class="label">Primary Condition</span>
-              <span class="value">{{ detail.condition }}</span>
-            </div>
-            <div>
-              <span class="label">Last Visit</span>
-              <span class="value">{{ detail.lastVisit }}</span>
-            </div>
-            <div>
-              <span class="label">Phone</span>
-              <span class="value">{{ detail.phone || "Not provided" }}</span>
-            </div>
-            <div>
-              <span class="label">Next Appointment</span>
-              <span class="value">{{ detail.nextAppointment }}</span>
-            </div>
-          </div>
-
-          <div class="mt-6 flex flex-wrap gap-3">
-            <button class="spotify-btn flex-1">Message Patient</button>
-            <button class="outline-btn flex-1">Open Timeline</button>
-          </div>
-        </div>
-        <ng-template #noSelection>
-          <div class="bg-white border border-dashed border-gray-300 rounded-lg p-6 text-gray-500 text-center">
-            Select a patient card to view full profile.
-          </div>
-        </ng-template>
-      </div>
-    </ng-template>
+      </ng-template>
     </div>
   </div>
+
+  <!-- Modals -->
+  <app-patient-detail-modal *ngIf="showDetailModal() && highlightedPatient()" [patient]="highlightedPatient()!"
+    (close)="closeDetailModal()" (message)="openMessageModal()" (schedule)="handleSchedule()">
+  </app-patient-detail-modal>
+
+  <app-message-patient-modal *ngIf="showMessageModal() && highlightedPatient()"
+    [patientName]="highlightedPatient()!.fullName" (close)="closeMessageModal()" (send)="handleSendMessage($event)">
+  </app-message-patient-modal>
+
+  <app-appointment-create-modal *ngIf="showAppointmentModal() && highlightedPatient()"
+    [preselectedPatientId]="highlightedPatient()!.id" (close)="closeAppointmentModal()"
+    (appointmentCreated)="onAppointmentCreated()">
+  </app-appointment-create-modal>
+
+  <app-patient-create-modal *ngIf="showCreateModal()" (close)="closeCreateModal()"
+    (patientCreated)="onPatientCreated()">
+  </app-patient-create-modal>
+
 </app-admin-shell>

@@ -1,0 +1,131 @@
+<div class="modal-backdrop" (click)="onClose()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+
+        <!-- Header -->
+        <header class="modal-header">
+            <h2>New Appointment</h2>
+            <button class="close-btn" (click)="onClose()">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </header>
+
+        <!-- Body -->
+        <div class="modal-body">
+
+            <!-- Row 1: Search -->
+            <div class="form-row">
+                <div class="form-group search-group">
+                    <label>Patient <span class="required">*</span></label>
+                    <div class="input-wrapper">
+                        <div class="icon-box patient-icon" [ngClass]="{'has-data': selectedPatient()}">
+                            {{ selectedPatient() ? (selectedPatient()?.firstName?.charAt(0) ?? '') +
+                            (selectedPatient()?.lastName?.charAt(0) ?? '') : '??' }}
+                        </div>
+                        <input type="text" [value]="patientSearchTerm()" (input)="onPatientSearch($event)"
+                            placeholder="Search by name, email, or patient ID" class="form-control nearby-icon">
+
+                        <!-- Dropdown -->
+                        <div class="search-dropdown" *ngIf="showPatientDropdown() && patientSearchResults().length">
+                            <div class="dropdown-item" *ngFor="let p of patientSearchResults()"
+                                (click)="selectPatient(p)">
+                                <div class="d-avatar">{{ p.firstName.charAt(0) }}</div>
+                                <div class="d-info">
+                                    <div class="d-name">{{ p.firstName }} {{ p.lastName }}</div>
+                                    <div class="d-meta">{{ p.email }} • ID: {{ p.patientId || 'N/A' }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group search-group">
+                    <label>Doctor <span class="required">*</span></label>
+                    <div class="input-wrapper">
+                        <div class="icon-box doctor-icon" [ngClass]="{'has-data': selectedDoctor()}">
+                            {{ selectedDoctor() ? (selectedDoctor()?.firstName?.charAt(0) ?? '') +
+                            (selectedDoctor()?.lastName?.charAt(0) ?? '') : 'DR' }}
+                        </div>
+                        <input type="text" [value]="doctorSearchTerm()" (input)="onDoctorSearch($event)"
+                            placeholder="Search doctors by name, specialty..." class="form-control nearby-icon">
+
+                        <!-- Dropdown -->
+                        <div class="search-dropdown" *ngIf="showDoctorDropdown() && doctorSearchResults().length">
+                            <div class="dropdown-item" *ngFor="let d of doctorSearchResults()"
+                                (click)="selectDoctor(d)">
+                                <div class="d-avatar doc">{{ d.firstName.charAt(0) }}</div>
+                                <div class="d-info">
+                                    <div class="d-name">Dr. {{ d.firstName }} {{ d.lastName }}</div>
+                                    <div class="d-meta">{{ d.specialty || 'General' }} • {{ d.email }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Row 2: Date & Time -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Date <span class="required">*</span></label>
+                    <input type="date" [ngModel]="date()" (ngModelChange)="date.set($event); updateSlots()"
+                        class="form-control">
+                </div>
+
+                <div class="form-group">
+                    <label>Time <span class="required">*</span></label>
+                    <input type="text" [ngModel]="time()" (ngModelChange)="time.set($event)" placeholder="--:-- --"
+                        class="form-control">
+                </div>
+            </div>
+
+            <!-- Slots -->
+            <div class="slots-section">
+                <label class="sub-label">Suggested time slots</label>
+                <div class="slots-grid">
+                    <button *ngFor="let slot of suggestedSlots()" class="slot-chip" [class.selected]="time() === slot"
+                        (click)="selectSlot(slot)">
+                        {{ slot }}
+                    </button>
+                    <div *ngIf="isLoadingSlots()" class="slots-loading">Loading available slots...</div>
+                </div>
+            </div>
+
+            <!-- Row 3: Meta -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Appointment Type</label>
+                    <select [ngModel]="type()" (ngModelChange)="type.set($event)" class="form-control">
+                        <option value="Consultation">Consultation</option>
+                        <option value="Follow-up">Follow-up</option>
+                        <option value="Checkup">Checkup</option>
+                        <option value="Emergency">Emergency</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Status</label>
+                    <select [ngModel]="status()" (ngModelChange)="status.set($event)" class="form-control">
+                        <option value="pending">Pending</option>
+                        <option value="confirmed">Confirmed</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group full-width">
+                <label>Reason / Notes</label>
+                <textarea [ngModel]="reason()" (ngModelChange)="reason.set($event)" rows="2" class="form-control"
+                    placeholder="Optional notes..."></textarea>
+            </div>
+
+        </div>
+
+        <!-- Footer -->
+        <footer class="modal-footer">
+            <button class="secondary-btn" (click)="onClose()" [disabled]="isSubmitting()">Cancel</button>
+            <button class="primary-btn" (click)="onSubmit()"
+                [disabled]="isSubmitting() || !selectedPatient() || !selectedDoctor() || !time()">
+                {{ isSubmitting() ? 'Booking...' : 'Book Appointment' }}
+            </button>
+        </footer>
+    </div>
+</div>

@@ -5,7 +5,10 @@ import { Subject, debounceTime, distinctUntilChanged } from "rxjs"
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop"
 
 import { AdminShellComponent } from "../shared/admin-shell"
+import { AppointmentCreateModalComponent } from '../appointments/appointment-create-modal/appointment-create-modal.component';
 import { AlertMessageComponent } from '@app/shared/components/alert-message/alert-message.component';
+import { PatientDetailModalComponent } from './patient-detail-modal/patient-detail-modal.component';
+import { MessagePatientModalComponent } from './message-patient-modal/message-patient-modal.component';
 import { AdminService, type User } from "@app/core/services/admin.service"
 
 interface PatientRow {
@@ -27,7 +30,7 @@ interface PatientRow {
 @Component({
   selector: "app-patients",
   standalone: true,
-  imports: [CommonModule, AdminShellComponent, FormsModule, AlertMessageComponent],
+  imports: [CommonModule, AdminShellComponent, FormsModule, AlertMessageComponent, PatientDetailModalComponent, MessagePatientModalComponent, AppointmentCreateModalComponent],
   templateUrl: "./patients.component.html",
   styleUrls: ["./patients.component.css"],
 })
@@ -51,6 +54,10 @@ export class PatientsComponent implements OnInit {
   showAddPatientForm = signal<boolean>(false)
 
   highlightedPatient = signal<PatientRow | null>(null)
+  showDetailModal = signal<boolean>(false)
+  showMessageModal = signal<boolean>(false)
+  showAppointmentModal = signal<boolean>(false)
+
   totalPatients = signal<number>(0)
   activePatients = signal<number>(0)
   pendingPatients = signal<number>(0)
@@ -134,6 +141,45 @@ export class PatientsComponent implements OnInit {
 
   selectPatient(patient: PatientRow): void {
     this.highlightedPatient.set(patient)
+    this.showDetailModal.set(true)
+  }
+
+  closeDetailModal() {
+    this.showDetailModal.set(false)
+    this.highlightedPatient.set(null)
+  }
+
+  openMessageModal() {
+    this.showDetailModal.set(false) // Close details if open
+    this.showMessageModal.set(true)
+  }
+
+  closeMessageModal() {
+    this.showMessageModal.set(false)
+  }
+
+  handleSendMessage(data: { subject: string; message: string }) {
+    console.log('Sending message to:', this.highlightedPatient()?.fullName, data);
+    // Mimic API call
+    setTimeout(() => {
+      this.closeMessageModal();
+      alert(`Message sent to ${this.highlightedPatient()?.fullName}`);
+    }, 1000);
+  }
+
+  handleSchedule() {
+    this.showDetailModal.set(false);
+    this.showAppointmentModal.set(true);
+  }
+
+  closeAppointmentModal() {
+    this.showAppointmentModal.set(false);
+  }
+
+  onAppointmentCreated() {
+    this.closeAppointmentModal();
+    // Maybe verify or refresh patient data to update 'next appointment'
+    this.loadPatients();
   }
 
   toggleAddPatientForm(): void {
