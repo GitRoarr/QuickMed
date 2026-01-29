@@ -79,7 +79,7 @@ export class PatientShellComponent implements OnInit {
     });
   }
 
-  @HostListener('window:resize', ['$event'])
+  @HostListener('window:resize')
   onResize(): void {
     this.mobile = typeof window !== 'undefined' && window.innerWidth <= 1024;
   }

@@ -4,14 +4,14 @@ import { FormsModule } from '@angular/forms';
 import { AdminShellComponent } from '../shared/admin-shell';
 import { AdminService, User } from '@app/core/services/admin.service';
 import { AlertMessageComponent } from '@app/shared/components/alert-message/alert-message.component';
-import { NgbModal, NgbModalModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbModal, NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
 import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-user-management',
   standalone: true,
-  imports: [CommonModule, FormsModule, AdminShellComponent, AlertMessageComponent, NgbModalModule],
+  imports: [CommonModule, FormsModule, AdminShellComponent, AlertMessageComponent, NgbModule],
   templateUrl: './user-management.component.html',
   styleUrls: ['./user-management.component.css']
 })

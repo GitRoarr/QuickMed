@@ -51,7 +51,7 @@ export class AdminShellComponent implements OnInit {
     this.setupNotificationPolling();
   }
 
-  @HostListener('window:resize', ['$event'])
+  @HostListener('window:resize')
   onResize() {
     this.checkMobile();
   }

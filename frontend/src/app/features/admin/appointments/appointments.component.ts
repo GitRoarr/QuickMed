@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AdminShellComponent } from '../shared/admin-shell';
 import { SidebarComponent } from '../shared/sidebar/sidebar.component';
-import { NgbModal, NgbModalModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbModal, NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { AdminService, Appointment, User } from '../../../core/services/admin.service';
 import { AppointmentStatus } from '../../../core/models/appointment.model';
 import { NotificationService } from '../../../core/services/notification.service';
@@ -13,7 +13,7 @@ import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
 @Component({
   selector: 'app-appointments',
   standalone: true,
-  imports: [CommonModule, FormsModule, AdminShellComponent, SidebarComponent, NgbModalModule],
+  imports: [CommonModule, FormsModule, AdminShellComponent, SidebarComponent, NgbModule],
   templateUrl: './appointments.component.html',
   styleUrls: ['./appointments.component.css']
 })
