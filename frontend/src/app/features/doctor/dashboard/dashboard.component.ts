@@ -34,10 +34,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
   error = signal<string | null>(null);
   currentUser = signal<any>(null);
   unreadNotificationCount = signal(0);
-  
-  get themeMode(): 'light' | 'dark' {
-    return this.themeService.isDarkMode() ? 'dark' : 'light';
-  }
 
   private notificationIntervalId: any;
 

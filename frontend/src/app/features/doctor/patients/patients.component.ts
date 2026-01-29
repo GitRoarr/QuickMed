@@ -37,7 +37,7 @@ export class PatientsComponent implements OnInit {
   // Data Signals
   patients = signal<DoctorPatientSummary[]>([]);
   isLoading = signal(true);
-  
+
   // Filter Signals
   searchTerm = signal('');
   statusFilter = signal<'all' | 'active' | 'inactive'>('all');
@@ -47,7 +47,6 @@ export class PatientsComponent implements OnInit {
   readonly statuses = ['all', 'active', 'inactive'] as const;
 
   // UI/Theme Signals
-  themeMode = signal<'light' | 'dark'>('light');
   currentUser = signal<any>(null);
   menuItems = signal<MenuItem[]>([]);
   unreadNotifications = signal(0); // For topbar
@@ -81,7 +80,7 @@ export class PatientsComponent implements OnInit {
     list.sort((a, b) => {
       if (sort === 'visits') return (b.totalAppointments || 0) - (a.totalAppointments || 0);
       if (sort === 'alpha') return this.getFullName(a).localeCompare(this.getFullName(b));
-      
+
       // Default: Recent
       const aDate = this.getLastAppointmentDate(a)?.getTime() || 0;
       const bDate = this.getLastAppointmentDate(b)?.getTime() || 0;
@@ -110,19 +109,9 @@ export class PatientsComponent implements OnInit {
     }).length;
   });
 
-  Math = Math; 
+  Math = Math;
 
   constructor() {
-    effect(() => {
-      const mode = this.themeMode();
-      if (mode === 'dark') {
-        document.body.classList.add('dark');
-        document.body.classList.remove('light');
-      } else {
-        document.body.classList.add('light');
-        document.body.classList.remove('dark');
-      }
-    });
   }
 
   ngOnInit(): void {
@@ -234,10 +223,6 @@ export class PatientsComponent implements OnInit {
     const name = this.getDoctorName();
     const parts = name.split(' ');
     return parts.length >= 2 ? (parts[0][0] + parts[1][0]).toUpperCase() : name.substring(0, 2).toUpperCase();
-  }
-
-  setTheme(mode: 'light' | 'dark'): void {
-    this.themeMode.set(mode);
   }
 
   logout(): void {
