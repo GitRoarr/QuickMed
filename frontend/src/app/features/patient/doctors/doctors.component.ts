@@ -31,6 +31,9 @@ export class DoctorsComponent implements OnInit {
   selectedSpecialty = signal('all');
   availableSlots = signal<DoctorSlot[]>([]);
 
+  // Manual time picker input
+  manualTimeInput: string = '';
+
   morningSlots = computed(() =>
     this.availableSlots().filter(s => {
       const time = s.startTime || s.time || '';
@@ -298,10 +301,76 @@ export class DoctorsComponent implements OnInit {
   selectTimeSlot(slot: DoctorSlot): void {
     const time = slot.startTime || slot.time || '';
     this.appointmentForm.patchValue({ appointmentTime: time });
+    // Clear manual input when slot is clicked
+    this.manualTimeInput = '';
   }
 
   isTimeSlotSelected(slot: DoctorSlot): boolean {
     return this.appointmentForm.value.appointmentTime === (slot.startTime || slot.time || '');
+  }
+
+  /**
+   * Validates and sets manually entered time
+   * Checks if the time falls within any available slot
+   */
+  onManualTimeChange(): void {
+    if (!this.manualTimeInput) {
+      return;
+    }
+
+    const enteredTime = this.manualTimeInput; // Format: HH:MM (24-hour)
+    const slots = this.availableSlots();
+
+    if (slots.length === 0) {
+      this.toast.error('No available slots for this date', { title: 'Invalid Time' });
+      this.manualTimeInput = '';
+      return;
+    }
+
+    // Convert time to minutes for easier comparison
+    const toMinutes = (time: string): number => {
+      const [h, m] = time.split(':').map(Number);
+      return h * 60 + m;
+    };
+
+    const enteredMinutes = toMinutes(enteredTime);
+
+    // Check if entered time falls within any available slot
+    const matchingSlot = slots.find(slot => {
+      const startMinutes = toMinutes(slot.startTime || '00:00');
+      const endMinutes = toMinutes(slot.endTime || '23:59');
+
+      // Time must be >= start and < end
+      return enteredMinutes >= startMinutes && enteredMinutes < endMinutes;
+    });
+
+    if (matchingSlot) {
+      // Valid time within an available slot
+      this.appointmentForm.patchValue({ appointmentTime: enteredTime });
+      this.toast.success(`Time ${this.formatTime12Hour(enteredTime)} is available`, {
+        title: 'Valid Selection'
+      });
+    } else {
+      // Invalid time - not within any available slot
+      this.toast.error(
+        `Time ${this.formatTime12Hour(enteredTime)} is not within doctor's available slots. Please choose from the available time slots above.`,
+        { title: 'Invalid Time' }
+      );
+      this.manualTimeInput = '';
+      this.appointmentForm.patchValue({ appointmentTime: '' });
+    }
+  }
+
+  /**
+   * Format 24-hour time to 12-hour format with AM/PM
+   */
+  private formatTime12Hour(time: string): string {
+    const [hStr, mStr] = time.split(':');
+    const h = Number(hStr);
+    const m = Number(mStr) || 0;
+    const period = h >= 12 ? 'PM' : 'AM';
+    const hr = h % 12 || 12;
+    return `${hr}:${String(m).padStart(2, '0')} ${period}`;
   }
 
   formatSlotTime(slot: DoctorSlot): string {

@@ -138,6 +138,21 @@
                 </div>
               </div>
 
+              <!-- OR Divider -->
+              <div class="or-divider">
+                <span>OR</span>
+              </div>
+
+              <!-- Manual Time Picker -->
+              <div class="manual-time-picker">
+                <label class="time-picker-label">
+                  <span>Enter Custom Time</span>
+                  <input type="time" class="time-input" [(ngModel)]="manualTimeInput"
+                    [ngModelOptions]="{standalone: true}" (change)="onManualTimeChange()" placeholder="HH:MM" />
+                </label>
+                <p class="time-helper-text">Select a time within available slots</p>
+              </div>
+
               <input type="hidden" formControlName="appointmentTime" />
             </div>
             <ng-template #noSlots>
