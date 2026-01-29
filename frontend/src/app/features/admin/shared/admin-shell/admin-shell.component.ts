@@ -38,7 +38,6 @@ export class AdminShellComponent implements OnInit {
     { label: "Patients", icon: "bi-people", route: "/admin/patients" },
     { label: "Doctors", route: "/admin/doctors", iconImgLight: this.doctorIconLightUrl, iconImgDark: this.doctorIconDarkUrl },
     { label: "Receptionists", icon: "bi-headset", route: "/admin/receptionists" },
-    // Use a widely supported Bootstrap icon to ensure visibility
     { label: "User Management", icon: "bi-people", route: "/admin/users" },
     { label: "Analytics", icon: "bi-bar-chart", route: "/admin/analytics" },
     { label: "Settings", icon: "bi-gear", route: "/admin/settings" },
