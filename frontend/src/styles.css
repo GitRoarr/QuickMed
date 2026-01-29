@@ -90,6 +90,7 @@ main::-webkit-scrollbar,
   --border: #e5e7eb;
   --muted: #6b7280;
   --primary: #16a34a;
+  --primary-rgb: 22, 163, 74;
   --primary-hover: #15803d;
 }
 
@@ -105,6 +106,7 @@ main::-webkit-scrollbar,
   --muted: #9ca3af;
   /* muted text */
   --primary: #16a34a;
+  --primary-rgb: 22, 163, 74;
   --primary-hover: #15803d;
 }
 

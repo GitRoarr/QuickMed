@@ -61,7 +61,6 @@ export class ScheduleComponent implements OnInit {
   workingStart = signal('02:00');
   workingEnd = signal('18:00');
   workingDays = signal<number[]>([]);
-  themeMode = signal<'light' | 'dark'>('light');
   newSlotStart = signal('09:00');
   newSlotEnd = signal('09:30');
   newSlotSaving = signal(false);
@@ -113,9 +112,7 @@ export class ScheduleComponent implements OnInit {
     return parts.length >= 2 ? (parts[0][0] + parts[1][0]).toUpperCase() : parts[0].substring(0, 2).toUpperCase();
   }
 
-  setTheme(mode: 'light' | 'dark'): void {
-    this.themeMode.set(mode);
-  }
+
 
   setViewMode(mode: 'day' | 'week' | 'month'): void {
     this.viewMode.set(mode);

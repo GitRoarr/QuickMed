@@ -75,9 +75,5 @@ export class PrescriptionsComponent implements OnInit {
     this.router.navigate(['/doctor/prescriptions/create']);
   }
 
-  onThemeChange(mode: 'light' | 'dark'): void {
-    const dark = this.themeService.isDarkMode();
-    if (mode === 'dark' && !dark) this.themeService.toggleTheme();
-    if (mode === 'light' && dark) this.themeService.toggleTheme();
-  }
+
 }

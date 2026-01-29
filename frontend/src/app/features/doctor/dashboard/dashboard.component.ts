@@ -89,9 +89,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       : name.substring(0, 2).toUpperCase();
   }
 
-  setTheme(mode: 'light' | 'dark'): void {
-    this.themeService.setTheme(mode);
-  }
+
 
   getInitials(name?: string): string {
     const n = (name || '').trim();

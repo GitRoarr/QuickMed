@@ -42,7 +42,6 @@ export class AppointmentsComponent implements OnInit {
   menuItems = signal<MenuItem[]>([]);
   unreadMessages = signal(0);
   unreadNotifications = signal(0);
-  themeMode = signal<'light' | 'dark'>('light');
 
   // Enums for HTML
   AppointmentStatus = AppointmentStatus;
@@ -66,17 +65,7 @@ export class AppointmentsComponent implements OnInit {
   });
 
   constructor() {
-    // Sync theme with <html> element (required for Tailwind dark mode)
-    effect(() => {
-      const mode = this.themeMode();
-      if (mode === 'dark') {
-        document.documentElement.classList.add('dark');
-        document.documentElement.classList.remove('light');
-      } else {
-        document.documentElement.classList.add('light');
-        document.documentElement.classList.remove('dark');
-      }
-    });
+
 
     // React to filter changes
     effect(() => {
@@ -184,9 +173,7 @@ export class AppointmentsComponent implements OnInit {
     ]);
   }
 
-  setTheme(mode: 'light' | 'dark'): void {
-    this.themeMode.set(mode);
-  }
+
 
   logout(): void {
     this.authService.logout();

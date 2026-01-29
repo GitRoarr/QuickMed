@@ -6,7 +6,6 @@ import { DoctorHeaderComponent } from '../shared/doctor-header/doctor-header.com
 import { AuthService } from '@core/services/auth.service';
 import { MedicalRecordService, MedicalRecord } from '@core/services/medical-record.service';
 import { NotificationService } from '@core/services/notification.service';
-import { ThemeService } from '@core/services/theme.service';
 
 @Component({
   selector: 'app-doctor-records',
@@ -26,7 +25,6 @@ export class RecordsComponent implements OnInit {
   private medicalRecordService = inject(MedicalRecordService);
   private notificationService = inject(NotificationService);
   private router = inject(Router);
-  themeService = inject(ThemeService);
 
   records = signal<MedicalRecord[]>([]);
   isLoading = signal(true);
@@ -129,12 +127,4 @@ export class RecordsComponent implements OnInit {
       : name.substring(0, 2).toUpperCase();
   }
 
-  onThemeChange(mode: 'light' | 'dark'): void {
-    const isDark = this.themeService.isDarkMode();
-    if (mode === 'dark' && !isDark) {
-      this.themeService.toggleTheme();
-    } else if (mode === 'light' && isDark) {
-      this.themeService.toggleTheme();
-    }
-  }
 }

@@ -39,7 +39,6 @@ export class AnalyticsComponent implements OnInit {
   selectedPeriod = signal('6months');
   currentUser = signal<any>(null);
   unreadNotificationCount = signal(0);
-  themeMode = signal<'light' | 'dark'>(document.documentElement.classList.contains('dark') ? 'dark' : 'light');
 
   periodOptions = [
     { value: '7days', label: '7 Days' },
@@ -58,18 +57,7 @@ export class AnalyticsComponent implements OnInit {
     this.currentUser.set(this.authService.currentUser());
   }
 
-  setTheme(mode: 'light' | 'dark'): void {
-    this.themeMode.set(mode);
-    document.documentElement.classList.toggle('dark', mode === 'dark');
-    if (mode === 'dark') {
-      document.documentElement.classList.remove('light');
-    } else {
-      document.documentElement.classList.add('light');
-    }
-    try {
-      localStorage.setItem('theme', mode);
-    } catch {}
-  }
+
 
   loadAnalytics(): void {
     this.isLoading.set(true);
@@ -140,5 +128,5 @@ export class AnalyticsComponent implements OnInit {
   getNoShowValue(index: number): number {
     return this.getAppointmentTrendData().noShow[index] || 0;
   }
-  
+
 }

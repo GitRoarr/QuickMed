@@ -1,9 +1,6 @@
-<div class="min-h-screen transition-colors duration-700 ease-in-out" [class.bg-white]="!themeService.isDarkMode()"
-  [class.bg-black]="themeService.isDarkMode()">
-
+<div class="min-h-screen">
   <app-doctor-header [initials]="getDoctorInitials()" [avatarUrl]="currentUser()?.avatar"
-    [unreadNotifications]="unreadNotificationCount()" [themeMode]="themeService.isDarkMode() ? 'dark' : 'light'"
-    (themeChange)="onThemeChange($event)"></app-doctor-header>
+    [unreadNotifications]="unreadNotificationCount()"></app-doctor-header>
 
   <main class="max-w-7xl mx-auto px-6 py-10">
 

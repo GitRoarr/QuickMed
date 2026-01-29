@@ -174,14 +174,7 @@ export class MessagesComponent implements OnInit, AfterViewChecked {
     this.router.navigate([route]);
   }
 
-  onThemeChange(mode: 'light' | 'dark'): void {
-    const isDark = this.themeService.isDarkMode();
-    if (mode === 'dark' && !isDark) {
-      this.themeService.toggleTheme();
-    } else if (mode === 'light' && isDark) {
-      this.themeService.toggleTheme();
-    }
-  }
+
 
   private scrollToBottom(): void {
     if (this.messagesContainer) {
