@@ -27,14 +27,18 @@
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="firstName" class="form-label">First Name</label>
-                            <input type="text" class="form-control" id="firstName" formControlName="firstName" placeholder="John" [class.is-invalid]="registerForm.get('firstName')?.invalid && registerForm.get('firstName')?.touched" />
+                            <input type="text" class="form-control" id="firstName" formControlName="firstName"
+                                placeholder="Enter your first name"
+                                [class.is-invalid]="registerForm.get('firstName')?.invalid && registerForm.get('firstName')?.touched" />
                             <div class="invalid-feedback">First name is required</div>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="lastName" class="form-label">Last Name</label>
-                            <input type="text" class="form-control" id="lastName" formControlName="lastName" placeholder="Doe" [class.is-invalid]="registerForm.get('lastName')?.invalid && registerForm.get('lastName')?.touched" />
+                            <input type="text" class="form-control" id="lastName" formControlName="lastName"
+                                placeholder="Enter your last name"
+                                [class.is-invalid]="registerForm.get('lastName')?.invalid && registerForm.get('lastName')?.touched" />
                             <div class="invalid-feedback">Last name is required</div>
                         </div>
                     </div>
@@ -42,33 +46,26 @@
 
                 <div class="form-group">
                     <label for="email" class="form-label">
-            <i class="bi bi-envelope me-2"></i>
-            Email Address
-          </label>
-                    <input type="email" class="form-control" id="email" formControlName="email" placeholder="your.email@example.com" [class.is-invalid]="registerForm.get('email')?.invalid && registerForm.get('email')?.touched" />
+                        <i class="bi bi-envelope me-2"></i>
+                        Email Address
+                    </label>
+                    <input type="email" class="form-control" id="email" formControlName="email"
+                        placeholder="your.email@example.com"
+                        [class.is-invalid]="registerForm.get('email')?.invalid && registerForm.get('email')?.touched" />
                     <div class="invalid-feedback">Please enter a valid email</div>
                 </div>
 
                 <div class="form-group">
                     <label for="password" class="form-label">
-            <i class="bi bi-lock me-2"></i>
-            Password
-          </label>
+                        <i class="bi bi-lock me-2"></i>
+                        Password
+                    </label>
                     <div class="password-input-wrapper">
-                        <input 
-                            [type]="showPassword ? 'text' : 'password'" 
-                            class="form-control" 
-                            id="password" 
-                            formControlName="password" 
-                            placeholder="••••••••" 
-                            [class.is-invalid]="registerForm.get('password')?.invalid && registerForm.get('password')?.touched" 
-                        />
-                        <button
-                            type="button"
-                            class="password-toggle-btn"
-                            (click)="togglePasswordVisibility()"
-                            tabindex="-1"
-                        >
+                        <input [type]="showPassword ? 'text' : 'password'" class="form-control" id="password"
+                            formControlName="password" placeholder="••••••••"
+                            [class.is-invalid]="registerForm.get('password')?.invalid && registerForm.get('password')?.touched" />
+                        <button type="button" class="password-toggle-btn" (click)="togglePasswordVisibility()"
+                            tabindex="-1">
                             <i [class]="showPassword ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
                         </button>
                     </div>
@@ -77,10 +74,12 @@
 
                 <div class="form-group">
                     <label for="phoneNumber" class="form-label">
-            <i class="bi bi-telephone me-2"></i>
-            Phone Number
-          </label>
-                    <input type="tel" class="form-control" id="phoneNumber" formControlName="phoneNumber" placeholder="+1 (555) 000-0000" [class.is-invalid]="registerForm.get('phoneNumber')?.invalid && registerForm.get('phoneNumber')?.touched" />
+                        <i class="bi bi-telephone me-2"></i>
+                        Phone Number
+                    </label>
+                    <input type="tel" class="form-control" id="phoneNumber" formControlName="phoneNumber"
+                        placeholder="+1 (555) 000-0000"
+                        [class.is-invalid]="registerForm.get('phoneNumber')?.invalid && registerForm.get('phoneNumber')?.touched" />
                     <div class="invalid-feedback">Phone number is required</div>
                 </div>
 
@@ -91,10 +90,10 @@
                 </div>
 
                 <button type="submit" class="btn btn-primary btn-submit" [disabled]="isLoading">
-          <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2"></span>
-          {{ isLoading ? "Creating account..." : "Create Account" }}
-          <i *ngIf="!isLoading" class="bi bi-arrow-right ms-2"></i>
-        </button>
+                    <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2"></span>
+                    {{ isLoading ? "Creating account..." : "Create Account" }}
+                    <i *ngIf="!isLoading" class="bi bi-arrow-right ms-2"></i>
+                </button>
 
                 <div class="text-center mt-4">
                     <p class="switch-auth">

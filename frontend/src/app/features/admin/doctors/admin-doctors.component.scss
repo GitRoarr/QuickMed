@@ -278,12 +278,12 @@
     font-size: 0.8rem;
     text-transform: capitalize;
     font-weight: 600;
-    
+
     &.active {
       background: var(--admin-primary-light);
       color: var(--admin-primary-dark);
     }
-    
+
     &.pending,
     &.ready {
       background: rgba(249, 115, 22, 0.1);

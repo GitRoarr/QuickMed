@@ -1,232 +1,124 @@
-<div class="add-doctor-page">
-  <div class="add-doctor-container">
-    <!-- Back Button with Animation -->
-    <button 
-      (click)="back()" 
-      class="back-btn"
-    >
-      <i class="bi bi-arrow-left"></i>
-      <span>Back to Doctors</span>
-    </button>
-
-    <!-- Alert Message -->
-    <div *ngIf="message" class="mb-6 animate-fade-in">
-      <app-alert-message 
-        [message]="message" 
-        [type]="type || 'success'" 
-        [visible]="true" 
-        [autoDismiss]="true" 
-        [duration]="5000"
-      ></app-alert-message>
+<div class="md-admin-page">
+  <div class="md-admin-container">
+    <!-- Header Section -->
+    <div class="md-header">
+      <h1 class="md-title">Add New Doctor</h1>
+      <p class="md-subtitle">Create and manage doctor profiles and credentials</p>
     </div>
 
-    <!-- Main Card with Glassmorphism Effect -->
-    <div class="main-card animate-slide-up">
-      <!-- Header Section with Gradient -->
-      <div class="card-header">
-        <div class="header-pattern"></div>
-        <div class="header-content">
-          <div class="header-icon-container">
-            <i class="bi bi-person-plus-fill"></i>
-          </div>
-          <div>
-            <h1 class="card-title animate-fade-in">Add New Doctor</h1>
-            <p class="card-subtitle">Invite a medical professional to join QuickMed</p>
-          </div>
-        </div>
-      </div>
+    <!-- Centered Card -->
+    <div class="md-card">
+      <form [formGroup]="form" (ngSubmit)="submit()" class="md-form">
 
-      <!-- Form Section -->
-      <form [formGroup]="form" (ngSubmit)="submit()" class="form-container">
-        <!-- Name Fields - Side by Side -->
-        <div class="form-row">
-          <div class="form-group animate-fade-in-delay-1">
-            <label class="form-label">
-              <i class="bi bi-person-fill"></i>First Name
-            </label>
-            <div class="input-wrapper">
-              <input 
-                formControlName="firstName" 
-                type="text"
-                placeholder="Enter first name"
-                class="form-input"
-                [class.input-error]="form.get('firstName')?.invalid && form.get('firstName')?.touched"
-              />
-              <i class="bi bi-person input-icon"></i>
+        <!-- Grid Layout -->
+        <div class="md-grid">
+
+          <!-- Left Column: Personal & Basic Info -->
+          <div class="md-col">
+            <div class="md-section">
+              <div class="md-section-header">
+                <i class="bi bi-person-circle"></i>
+                <span>Personal Information</span>
+              </div>
+
+              <div class="md-field">
+                <label for="firstName">First Name</label>
+                <div class="md-input-group">
+                  <i class="bi bi-person"></i>
+                  <input type="text" id="firstName" formControlName="firstName" placeholder="Enter first name"
+                    [class.error]="form.get('firstName')?.invalid && form.get('firstName')?.touched">
+                </div>
+              </div>
+
+              <div class="md-field">
+                <label for="email">Email Address</label>
+                <div class="md-input-group">
+                  <i class="bi bi-envelope"></i>
+                  <input type="email" id="email" formControlName="email" placeholder="doctor@example.com"
+                    [class.error]="form.get('email')?.invalid && form.get('email')?.touched">
+                </div>
+              </div>
+
+              <div class="md-field">
+                <label for="specialty">Specialty</label>
+                <div class="md-input-group">
+                  <i class="bi bi-briefcase"></i>
+                  <input type="text" id="specialty" formControlName="specialty" placeholder="e.g. Cardiology"
+                    [class.error]="form.get('specialty')?.invalid && form.get('specialty')?.touched">
+                </div>
+              </div>
+
+              <div class="md-field">
+                <label for="phoneNumber">Phone Number</label>
+                <div class="md-input-group">
+                  <i class="bi bi-telephone"></i>
+                  <input type="tel" id="phoneNumber" formControlName="phoneNumber" placeholder="+1 (555) 000-0000"
+                    [class.error]="form.get('phoneNumber')?.invalid && form.get('phoneNumber')?.touched">
+                </div>
+              </div>
             </div>
-            <p *ngIf="form.get('firstName')?.invalid && form.get('firstName')?.touched" 
-               class="error-message animate-shake">First name is required</p>
           </div>
 
-          <div class="form-group animate-fade-in-delay-2">
-            <label class="form-label">
-              <i class="bi bi-person-fill"></i>Last Name
-            </label>
-            <div class="input-wrapper">
-              <input 
-                formControlName="lastName" 
-                type="text"
-                placeholder="Enter last name"
-                class="form-input"
-                [class.input-error]="form.get('lastName')?.invalid && form.get('lastName')?.touched"
-              />
-              <i class="bi bi-person input-icon"></i>
+          <!-- Right Column: Professional Info & Bio -->
+          <div class="md-col">
+            <div class="md-section">
+              <div class="md-section-header">
+                <i class="bi bi-shield-check"></i>
+                <span>Professional Details</span>
+              </div>
+
+              <div class="md-field">
+                <label for="lastName">Last Name</label>
+                <div class="md-input-group">
+                  <i class="bi bi-person"></i>
+                  <input type="text" id="lastName" formControlName="lastName" placeholder="Enter last name"
+                    [class.error]="form.get('lastName')?.invalid && form.get('lastName')?.touched">
+                </div>
+              </div>
+
+              <div class="md-field">
+                <label for="licenseNumber">License Number</label>
+                <div class="md-input-group">
+                  <i class="bi bi-card-text"></i>
+                  <input type="text" id="licenseNumber" formControlName="licenseNumber" placeholder="MD-XXXXXXX"
+                    [class.error]="form.get('licenseNumber')?.invalid && form.get('licenseNumber')?.touched">
+                </div>
+              </div>
+
+              <div class="md-field">
+                <label for="bio">Bio / Description</label>
+                <div class="md-input-group textarea-group">
+                  <i class="bi bi-chat-left-text"></i>
+                  <textarea id="bio" formControlName="bio" rows="6" placeholder="Describe the doctor's experience..."
+                    [class.error]="form.get('bio')?.invalid && form.get('bio')?.touched"></textarea>
+                </div>
+              </div>
             </div>
-            <p *ngIf="form.get('lastName')?.invalid && form.get('lastName')?.touched" 
-               class="error-message animate-shake">Last name is required</p>
           </div>
         </div>
 
-        <!-- Email Field -->
-        <div class="form-group animate-fade-in-delay-3">
-          <label class="form-label">
-            <i class="bi bi-envelope-fill"></i>Email Address
-          </label>
-          <div class="input-wrapper">
-            <input 
-              formControlName="email" 
-              type="email"
-              placeholder="doctor@example.com"
-              class="form-input"
-              [class.input-error]="form.get('email')?.invalid && form.get('email')?.touched"
-            />
-            <i class="bi bi-envelope input-icon"></i>
-          </div>
-          <p *ngIf="form.get('email')?.invalid && form.get('email')?.touched" 
-             class="error-message animate-shake">
-            {{ form.get('email')?.errors?.['email'] ? 'Invalid email format' : 'Email is required' }}
-          </p>
-        </div>
-
-        <!-- Specialty and License - Side by Side -->
-        <div class="form-row">
-          <div class="form-group animate-fade-in-delay-4">
-            <label class="form-label">
-              <i class="bi bi-briefcase-fill"></i>Specialty
-            </label>
-            <div class="input-wrapper">
-              <input 
-                formControlName="specialty" 
-                type="text"
-                placeholder="e.g., Cardiology, Pediatrics"
-                class="form-input"
-                [class.input-error]="form.get('specialty')?.invalid && form.get('specialty')?.touched"
-              />
-              <i class="bi bi-briefcase input-icon"></i>
-            </div>
-            <p *ngIf="form.get('specialty')?.invalid && form.get('specialty')?.touched" 
-               class="error-message animate-shake">Specialty is required</p>
-          </div>
-
-          <div class="form-group animate-fade-in-delay-5">
-            <label class="form-label">
-              <i class="bi bi-shield-check"></i>License Number
-            </label>
-            <div class="input-wrapper">
-              <input 
-                formControlName="licenseNumber" 
-                type="text"
-                placeholder="MD-12345"
-                class="form-input"
-                [class.input-error]="form.get('licenseNumber')?.invalid && form.get('licenseNumber')?.touched"
-              />
-              <i class="bi bi-shield-check input-icon"></i>
-            </div>
-            <p *ngIf="form.get('licenseNumber')?.invalid && form.get('licenseNumber')?.touched" 
-               class="error-message animate-shake">License number is required</p>
-          </div>
-        </div>
-
-        <!-- Phone Number -->
-        <div class="form-group animate-fade-in-delay-6">
-          <label class="form-label">
-            <i class="bi bi-telephone-fill"></i>Phone Number
-          </label>
-          <div class="input-wrapper">
-            <input 
-              formControlName="phoneNumber" 
-              type="tel"
-              placeholder="+1 (555) 123-4567"
-              class="form-input"
-              [class.input-error]="form.get('phoneNumber')?.invalid && form.get('phoneNumber')?.touched"
-            />
-            <i class="bi bi-telephone input-icon"></i>
-          </div>
-          <p *ngIf="form.get('phoneNumber')?.invalid && form.get('phoneNumber')?.touched" 
-             class="error-message animate-shake">Phone number is required</p>
-        </div>
-
-        <!-- Bio/Description -->
-        <div class="form-group animate-fade-in-delay-7">
-          <label class="form-label">
-            <i class="bi bi-file-text-fill"></i>Bio / Description
-          </label>
-          <div class="textarea-wrapper">
-            <textarea 
-              formControlName="bio" 
-              rows="4"
-              placeholder="Tell us about the doctor's experience, education, and expertise..."
-              class="form-textarea"
-              [class.input-error]="form.get('bio')?.invalid && form.get('bio')?.touched"
-            ></textarea>
-            <i class="bi bi-file-text textarea-icon"></i>
-          </div>
-          <p *ngIf="form.get('bio')?.invalid && form.get('bio')?.touched" 
-             class="error-message animate-shake">Bio is required</p>
-        </div>
-
-        <!-- Submit Button -->
-        <div class="submit-section animate-fade-in-delay-8">
-          <button
-            type="submit"
-            [disabled]="form.invalid || loading"
-            class="submit-btn"
-          >
-            <span class="btn-content">
-              <i *ngIf="!loading" class="bi bi-send-fill"></i>
-              <span *ngIf="!loading">Send Invitation</span>
-              <span *ngIf="loading" class="loading-content">
-                <svg class="spinner" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                Sending Invitation...
-              </span>
-            </span>
+        <!-- Action Buttons -->
+        <div class="md-actions">
+          <button type="button" class="md-btn md-btn-secondary" (click)="back()">Cancel</button>
+          <button type="submit" class="md-btn md-btn-primary" [disabled]="form.invalid || loading">
+            <span *ngIf="!loading">Save Doctor</span>
+            <span *ngIf="loading" class="spinner-inline"></span>
           </button>
         </div>
       </form>
     </div>
 
-    <!-- Invite Link Section -->
-    <div *ngIf="inviteLink" class="invite-link-card animate-slide-up">
-      <div class="invite-link-content">
-        <div class="success-icon">
-          <i class="bi bi-check-circle-fill"></i>
+    <!-- Invite Link (if applicable) -->
+    <div *ngIf="inviteLink" class="md-status-card">
+      <div class="md-status-content">
+        <i class="bi bi-link-45deg"></i>
+        <div class="md-status-text">
+          <p class="md-status-title">Invitation Link Generated</p>
+          <p class="md-status-desc">Click copy and share the link below manually.</p>
         </div>
-        <div class="invite-link-body">
-          <h3 class="invite-link-title">
-            <i class="bi bi-link-45deg"></i>
-            Invitation Link Generated
-          </h3>
-          <p class="invite-link-description">
-            Copy this link and share it with the doctor to complete their onboarding. The link will expire in 7 days.
-          </p>
-          <div class="invite-link-actions">
-            <input 
-              type="text" 
-              [value]="inviteLink" 
-              readonly 
-              class="invite-link-input"
-            />
-            <button 
-              (click)="copyInviteLink()" 
-              class="copy-btn"
-            >
-              <i class="bi bi-clipboard-check"></i>
-              Copy Link
-            </button>
-          </div>
+        <div class="md-copy-box">
+          <input type="text" [value]="inviteLink" readonly>
+          <button (click)="copyInviteLink()">Copy</button>
         </div>
       </div>
     </div>

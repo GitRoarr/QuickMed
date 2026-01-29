@@ -1,4 +1,4 @@
-<app-admin-shell searchPlaceholder="Search doctors by name, specialty, or email">
+<app-admin-shell>
   <div class="page-shell">
     <section class="page-header">
       <div>
@@ -89,25 +89,17 @@
         </div>
 
         <div class="verification">
-          <button
-            class="verify-btn"
-            [disabled]="doctor.verification.licenseValidated"
-            (click)="validateLicense(doctor.id)"
-          >
+          <button class="verify-btn" [disabled]="doctor.verification.licenseValidated"
+            (click)="validateLicense(doctor.id)">
             {{ doctor.verification.licenseValidated ? "License validated" : "Validate license" }}
           </button>
-          <button
-            class="verify-btn"
-            [disabled]="doctor.verification.employmentConfirmed"
-            (click)="confirmEmployment(doctor.id)"
-          >
+          <button class="verify-btn" [disabled]="doctor.verification.employmentConfirmed"
+            (click)="confirmEmployment(doctor.id)">
             {{ doctor.verification.employmentConfirmed ? "Employment confirmed" : "Confirm employment" }}
           </button>
-          <button
-            class="verify-btn"
+          <button class="verify-btn"
             [disabled]="doctor.status === 'active' || !doctor.verification.licenseValidated || !doctor.verification.employmentConfirmed"
-            (click)="activateDoctor(doctor.id)"
-          >
+            (click)="activateDoctor(doctor.id)">
             Activate
           </button>
           <button class="ghost-btn" (click)="onVerify(doctor.id)">Open profile</button>
