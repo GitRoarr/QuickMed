@@ -1,0 +1,84 @@
+<div class="modal-backdrop" (click)="onClose()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+        <!-- Header -->
+        <header class="modal-header">
+            <div class="hero-profile">
+                <div class="avatar-large">
+                    {{ patient.initials }}
+                </div>
+                <div class="hero-info">
+                    <h2>{{ patient.fullName }}</h2>
+                    <div class="badges">
+                        <span class="badge id-badge">ID: {{ patient.patientId }}</span>
+                        <span class="badge status" [ngClass]="patient.status">{{ patient.status }}</span>
+                    </div>
+                </div>
+            </div>
+            <button class="close-btn" (click)="onClose()">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </header>
+
+        <!-- Body -->
+        <div class="modal-body">
+            <!-- Vitals / Key Info -->
+            <section class="info-group">
+                <h3><i class="bi bi-person-vcard"></i> Patient Overview</h3>
+                <div class="grid">
+                    <div class="field">
+                        <label>Age & Gender</label>
+                        <p>{{ patient.ageLabel }} • {{ patient.genderLabel }}</p>
+                    </div>
+                    <div class="field">
+                        <label>Primary Condition</label>
+                        <p>{{ patient.condition }}</p>
+                    </div>
+                    <div class="field">
+                        <label>Blood Type</label>
+                        <p class="mono">{{ patient.raw?.bloodType || 'N/A' }}</p>
+                    </div>
+                    <div class="field">
+                        <label>Last Visit</label>
+                        <p>{{ patient.lastVisit }}</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Contact Info -->
+            <section class="info-group">
+                <h3><i class="bi bi-telephone"></i> Contact Details</h3>
+                <div class="grid">
+                    <div class="field">
+                        <label>Email</label>
+                        <p>{{ patient.email }}</p>
+                    </div>
+                    <div class="field">
+                        <label>Phone</label>
+                        <p>{{ patient.phone || 'Not provided' }}</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- History -->
+            <section class="info-group">
+                <h3><i class="bi bi-journal-medical"></i> Medical History</h3>
+                <div class="field full-width">
+                    <p class="text-body">{{ patient.raw?.medicalHistory || 'No medical history recorded.' }}</p>
+                </div>
+            </section>
+        </div>
+
+        <!-- Footer Actions -->
+        <footer class="modal-footer">
+            <button class="secondary-btn" (click)="onClose()">Close</button>
+            <div class="action-group">
+                <button class="primary-btn message" (click)="onMessage()">
+                    <i class="bi bi-chat-dots-fill"></i> Message
+                </button>
+                <button class="primary-btn schedule" (click)="onSchedule()">
+                    <i class="bi bi-calendar-plus-fill"></i> Schedule
+                </button>
+            </div>
+        </footer>
+    </div>
+</div>
