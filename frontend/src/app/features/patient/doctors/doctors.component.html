@@ -116,7 +116,6 @@
               Slots</span>
             <div class="slot-selector" *ngIf="availableSlots().length > 0; else noSlots">
 
-              <!-- Morning Sessions -->
               <div *ngIf="morningSlots().length > 0" class="session-group mb-6">
                 <p class="session-label">🌅 MORNING (09:00 AM – 12:00 PM)</p>
                 <div class="slots-grid">
@@ -127,7 +126,6 @@
                 </div>
               </div>
 
-              <!-- Evening Sessions -->
               <div *ngIf="eveningSlots().length > 0" class="session-group">
                 <p class="session-label">🌆 EVENING (02:00 PM – 08:00 PM)</p>
                 <div class="slots-grid">
@@ -138,12 +136,10 @@
                 </div>
               </div>
 
-              <!-- OR Divider -->
               <div class="or-divider">
                 <span>OR</span>
               </div>
 
-              <!-- Manual Time Picker -->
               <div class="manual-time-picker">
                 <label class="time-picker-label">
                   <span>Enter Custom Time</span>
@@ -182,7 +178,6 @@
     </div>
   </div>
 
-  <!-- Rating modal -->
   <div class="modal-overlay" *ngIf="ratingDoctor()" (click)="closeRating()">
     <div class="modal-content" (click)="$event.stopPropagation()">
       <div class="modal-header">

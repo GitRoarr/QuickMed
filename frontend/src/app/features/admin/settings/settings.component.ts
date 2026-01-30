@@ -60,7 +60,7 @@ export class SettingsComponent implements OnInit {
 
   checkDarkMode() {
     const isDark = document.documentElement.classList.contains('dark') ||
-                   localStorage.getItem('darkMode') === 'true';
+      localStorage.getItem('darkMode') === 'true';
     this.isDarkMode.set(isDark);
   }
 
@@ -114,18 +114,21 @@ export class SettingsComponent implements OnInit {
 
     this.saving.set(true);
     const formValue = this.themeForm.value;
+    const primaryLight = this.lightenHex(formValue.primaryColor, 0.82);
+    const textMuted = this.lightenHex(formValue.textColor, 0.35);
+
     const themeData: Partial<Theme> = {
       name: formValue.name,
       mode: this.isDarkMode() ? 'dark' : 'light',
       primaryColor: formValue.primaryColor,
       primaryHover: formValue.primaryHover,
-      primaryLight: formValue.primaryColor + '20',
+      primaryLight,
       backgroundLight: formValue.backgroundColor,
       sidebarBg: formValue.backgroundColor,
       backgroundGray: formValue.backgroundColor,
       textDark: formValue.textColor,
       textGray: formValue.textColor,
-      textMuted: formValue.textColor + '80',
+      textMuted,
       borderColor: formValue.borderColor,
       cardShadow: '0 2px 5px rgba(0, 0, 0, 0.08)',
       statusConfirmed: formValue.accentColor,
@@ -195,19 +198,21 @@ export class SettingsComponent implements OnInit {
 
   previewTheme() {
     const formValue = this.themeForm.value;
+    const primaryLight = this.lightenHex(formValue.primaryColor, 0.82);
+    const textMuted = this.lightenHex(formValue.textColor, 0.35);
     const previewTheme: Theme = {
       id: this.currentTheme()?.id || '',
       name: formValue.name,
       mode: this.isDarkMode() ? 'dark' : 'light',
       primaryColor: formValue.primaryColor,
       primaryHover: formValue.primaryHover,
-      primaryLight: formValue.primaryColor + '20',
+      primaryLight,
       backgroundLight: formValue.backgroundColor,
       sidebarBg: formValue.backgroundColor,
       backgroundGray: formValue.backgroundColor,
       textDark: formValue.textColor,
       textGray: formValue.textColor,
-      textMuted: formValue.textColor + '80',
+      textMuted,
       borderColor: formValue.borderColor,
       cardShadow: '0 2px 5px rgba(0, 0, 0, 0.08)',
       statusConfirmed: formValue.accentColor,
@@ -219,6 +224,21 @@ export class SettingsComponent implements OnInit {
       updatedAt: new Date()
     };
     this.themeService.applyTheme(previewTheme);
+  }
+
+  previewThemeFromList(theme: Theme) {
+    this.currentTheme.set(theme);
+    this.themeForm.patchValue({
+      name: theme.name || '',
+      primaryColor: theme.primaryColor,
+      secondaryColor: theme.primaryHover,
+      accentColor: theme.statusConfirmed,
+      backgroundColor: theme.backgroundLight,
+      textColor: theme.textDark,
+      borderColor: theme.borderColor,
+      primaryHover: theme.primaryHover
+    });
+    this.themeService.applyTheme(theme);
   }
 
   resetTheme() {
@@ -271,6 +291,36 @@ export class SettingsComponent implements OnInit {
       { time: new Date(Date.now() - 120000), level: 'warning', message: 'High appointment volume detected' },
       { time: new Date(Date.now() - 300000), level: 'info', message: 'User authentication successful' }
     ];
+  }
+
+  private lightenHex(hex: string, amount: number): string {
+    const normalized = this.normalizeHex(hex);
+    if (!normalized) return '#ffffff';
+
+    const r = parseInt(normalized.slice(1, 3), 16);
+    const g = parseInt(normalized.slice(3, 5), 16);
+    const b = parseInt(normalized.slice(5, 7), 16);
+
+    const mix = (channel: number) => Math.round(channel + (255 - channel) * amount);
+    const toHex = (value: number) => value.toString(16).padStart(2, '0');
+
+    return `#${toHex(mix(r))}${toHex(mix(g))}${toHex(mix(b))}`;
+  }
+
+  private normalizeHex(hex: string): string | null {
+    if (!hex) return null;
+    const trimmed = hex.trim();
+    if (!trimmed.startsWith('#')) return null;
+
+    if (trimmed.length === 4) {
+      const r = trimmed[1];
+      const g = trimmed[2];
+      const b = trimmed[3];
+      return `#${r}${r}${g}${g}${b}${b}`;
+    }
+
+    if (trimmed.length === 7) return trimmed;
+    return null;
   }
 
 }

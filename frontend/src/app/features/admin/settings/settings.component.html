@@ -10,15 +10,14 @@
 
     <div class="message-alert" *ngIf="message()">
       <div [class]="'alert alert-' + message()?.type">
-        <i class="bi" [class.bi-check-circle]="message()?.type === 'success'" [class.bi-exclamation-circle]="message()?.type === 'error'"></i>
+        <i class="bi" [class.bi-check-circle]="message()?.type === 'success'"
+          [class.bi-exclamation-circle]="message()?.type === 'error'"></i>
         <span>{{ message()?.text }}</span>
       </div>
     </div>
 
     <div class="settings-tabs">
-      <button 
-        *ngFor="let tab of getTabs()"
-        [class]="'tab-btn' + (activeTab() === tab ? ' active' : '')"
+      <button *ngFor="let tab of getTabs()" class="tab-btn" [class.active]="activeTab() === tab"
         (click)="setActiveTab(tab)">
         <i class="bi" [class]="getTabIcon(tab)"></i>
         {{ getTabLabel(tab) }}
@@ -29,7 +28,7 @@
     <div class="settings-content" *ngIf="activeTab() === 'theme'">
       <div class="settings-grid">
         <div class="settings-card theme-editor">
-          <h3>Theme Editor</h3>
+          <h3><i class="bi bi-palette"></i> Theme Editor</h3>
           <form [formGroup]="themeForm" (ngSubmit)="saveTheme()">
             <div class="form-group">
               <label>Theme Name</label>
@@ -89,37 +88,43 @@
                 <i class="bi bi-arrow-counterclockwise"></i> Reset
               </button>
               <button type="submit" class="btn-primary" [disabled]="saving()">
-                <i class="bi bi-save"></i> {{ saving() ? 'Saving...' : 'Save Theme' }}
+                <i class="bi" [class.bi-save]="!saving()" [class.bi-hourglass-split]="saving()"></i>
+                {{ saving() ? 'Saving...' : 'Save Theme' }}
               </button>
             </div>
           </form>
         </div>
 
         <div class="settings-card themes-list">
-          <h3>Available Themes</h3>
+          <h3><i class="bi bi-list-ul"></i> Available Themes</h3>
           <div class="themes-grid" *ngIf="!loading()">
-            <div 
-              *ngFor="let theme of themes()" 
-              class="theme-card"
-              [class.active]="theme.isActive">
+            <div *ngFor="let theme of themes()" class="theme-card" [class.active]="theme.isActive"
+              (click)="previewThemeFromList(theme)">
               <div class="theme-preview" [style.background]="theme.primaryColor || '#10b981'"></div>
-              <div class="theme-accent" [style.background]="theme.primaryHover || '#059669'"></div>
 
               <div class="theme-info">
                 <h4>{{ theme.name }}</h4>
                 <p *ngIf="theme.isActive" class="active-badge">Active</p>
 
                 <div class="theme-actions">
-                  <button *ngIf="!theme.isActive" (click)="activateTheme(theme)">Activate</button>
-                  <button *ngIf="!theme.isActive && theme.id" (click)="deleteTheme(theme.id)">Delete</button>
+                  <button class="btn-primary" *ngIf="!theme.isActive"
+                    (click)="activateTheme(theme); $event.stopPropagation()">
+                    <i class="bi bi-check-circle"></i> Activate
+                  </button>
+                  <button class="btn-secondary" *ngIf="!theme.isActive && theme.id"
+                    (click)="deleteTheme(theme.id); $event.stopPropagation()">
+                    <i class="bi bi-trash"></i> Delete
+                  </button>
                 </div>
               </div>
             </div>
             <div *ngIf="themes()?.length === 0" class="empty-state">
-              No themes
+              <i class="bi bi-palette-fill"></i>
+              <p>No themes available</p>
             </div>
           </div>
           <div *ngIf="loading()" class="loading-state">
+            <div class="spinner"></div>
             <p>Loading themes...</p>
           </div>
         </div>
@@ -231,7 +236,7 @@
         </div>
       </div>
     </div>
-    
+
 
     <!-- Logs Tab -->
     <div class="settings-content" *ngIf="activeTab() === 'logs'">

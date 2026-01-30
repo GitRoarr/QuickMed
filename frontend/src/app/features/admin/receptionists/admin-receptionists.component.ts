@@ -1,8 +1,9 @@
-import { Component, OnInit, signal } from "@angular/core"
+import { Component, OnInit, signal, inject } from "@angular/core"
 import { CommonModule } from "@angular/common"
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from "@angular/forms"
 import { AdminShellComponent } from "../shared/admin-shell"
 import { AdminService, User } from "@app/core/services/admin.service"
+import { ToastService } from "@app/core/services/toast.service"
 
 @Component({
   selector: "app-admin-receptionists",
@@ -12,13 +13,14 @@ import { AdminService, User } from "@app/core/services/admin.service"
   styleUrls: ["./admin-receptionists.component.scss"],
 })
 export class AdminReceptionistsComponent implements OnInit {
+  private adminService = inject(AdminService)
+  private fb = inject(FormBuilder)
+  private toast = inject(ToastService)
+
   receptionists = signal<User[]>([])
   loading = signal(false)
   filterForm!: FormGroup
   inviteForm!: FormGroup
-  message = signal<{ type: "success" | "error"; text: string } | null>(null)
-
-  constructor(private adminService: AdminService, private fb: FormBuilder) {}
 
   ngOnInit(): void {
     this.filterForm = this.fb.group({
@@ -52,7 +54,7 @@ export class AdminReceptionistsComponent implements OnInit {
         },
         error: (err) => {
           console.error("Failed to load receptionists", err)
-          this.message.set({ type: "error", text: err.error?.message || "Failed to load receptionists" })
+          this.toast.error(err.error?.message || "Failed to load team members")
           this.loading.set(false)
         },
       })
@@ -61,6 +63,7 @@ export class AdminReceptionistsComponent implements OnInit {
   inviteReceptionist() {
     if (this.inviteForm.invalid) {
       this.inviteForm.markAllAsTouched()
+      this.toast.warning("Please fill in all required fields.")
       return
     }
 
@@ -74,39 +77,53 @@ export class AdminReceptionistsComponent implements OnInit {
 
     this.adminService.inviteReceptionist(payload).subscribe({
       next: (res) => {
-        this.message.set({ 
-          type: "success", 
-          text: res.emailSent 
-            ? `Invitation sent to ${payload.email}. They will receive an email to set their password.`
-            : `Invitation created. Share this link: ${res.inviteLink || 'N/A'}`
-        })
+        const msg = res.emailSent
+          ? `Invitation sent to ${payload.email}.`
+          : `Invitation created. Please share the link manually.`
+        this.toast.success(msg)
         this.inviteForm.reset()
         this.loadReceptionists()
-        this.loading.set(false)
       },
       error: (err) => {
-        this.message.set({ type: "error", text: err.error?.message || "Unable to send invitation" })
+        this.toast.error(err.error?.message || "Unable to send invitation")
         this.loading.set(false)
       },
     })
   }
 
   toggleActive(user: User) {
-    this.adminService.updateUser(user.id, { isActive: !user.isActive }).subscribe({
-      next: () => this.loadReceptionists(),
-      error: (err) => (this.message.set({ type: "error", text: err.error?.message || "Failed to update status" })),
+    const newStatus = !user.isActive
+    this.loading.set(true)
+    this.adminService.updateUser(user.id, { isActive: newStatus }).subscribe({
+      next: () => {
+        this.toast.success(`Receptionist ${newStatus ? 'activated' : 'deactivated'} successfully.`)
+        this.loadReceptionists()
+      },
+      error: (err) => {
+        this.toast.error(err.error?.message || "Failed to update status")
+        this.loading.set(false)
+      }
     })
   }
 
   removeReceptionist(id: string) {
-    if (!confirm("Remove this receptionist?")) return
+    if (!confirm("Are you sure you want to remove this receptionist? This action cannot be undone.")) return
+
+    this.loading.set(true)
     this.adminService.deleteUser(id).subscribe({
-      next: () => this.loadReceptionists(),
-      error: (err) => (this.message.set({ type: "error", text: err.error?.message || "Failed to delete" })),
+      next: () => {
+        this.toast.success("Receptionist removed successfully.")
+        this.loadReceptionists()
+      },
+      error: (err) => {
+        this.toast.error(err.error?.message || "Failed to delete teammate")
+        this.loading.set(false)
+      }
     })
   }
 
   getInitials(user: User) {
+    if (!user.firstName || !user.lastName) return "?"
     return `${(user.firstName[0] || "")}${(user.lastName[0] || "")}`.toUpperCase()
   }
 }

@@ -1,68 +1,89 @@
 <app-admin-shell searchPlaceholder="Search receptionists...">
-  <div class="admin-page-content receptionist-page">
-    <div class="page-head">
+  <div class="receptionist-page">
+    <header class="page-head">
       <div>
-        <p class="eyebrow">Front desk squad</p>
+        <p class="eyebrow">Front Desk Squad</p>
         <h1>Receptionist Management</h1>
         <p class="subtitle">Hire, onboard, and empower receptionists who keep the clinic running smoothly.</p>
       </div>
-      <button class="primary-btn" (click)="inviteReceptionist()" [disabled]="inviteForm.invalid">
-        Invite Receptionist
+      <button class="primary-btn" (click)="inviteForm.reset()">
+        <i class="bi bi-person-plus-fill"></i> Invite Receptionist
       </button>
-    </div>
+    </header>
 
     <div class="dual-grid">
+      <!-- Quick Invite form -->
       <section class="invite-card">
-        <h3>Quick invite</h3>
-        <form [formGroup]="inviteForm">
+        <h3><i class="bi bi-lightning-charge-fill"></i> Quick Invite</h3>
+        <form [formGroup]="inviteForm" (ngSubmit)="inviteReceptionist()">
           <div class="form-row">
-            <input placeholder="First Name" formControlName="firstName" />
-            <input placeholder="Last Name" formControlName="lastName" />
+            <input type="text" formControlName="firstName" placeholder="First Name">
+            <input type="text" formControlName="lastName" placeholder="Last Name">
           </div>
-          <input placeholder="Email" formControlName="email" />
-          <input placeholder="Phone (optional)" formControlName="phoneNumber" />
-          <button type="button" (click)="inviteReceptionist()">Send Invite</button>
+          <input type="email" formControlName="email" placeholder="Email Address">
+          <input type="tel" formControlName="phoneNumber" placeholder="Phone (optional)">
+          <button type="submit" [disabled]="loading() || inviteForm.invalid">
+            {{ loading() ? 'Processing...' : 'Send Invite' }}
+          </button>
         </form>
       </section>
 
+      <!-- Filter Panel -->
       <section class="filter-card">
+        <h3><i class="bi bi-funnel-fill"></i> Filters</h3>
         <form [formGroup]="filterForm">
-          <input class="search" placeholder="Search receptionists" formControlName="search" />
-          <select formControlName="status">
-            <option value="all">All statuses</option>
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
-          </select>
+          <div class="form-group">
+            <input type="text" formControlName="search" placeholder="Search by name or email...">
+          </div>
+          <div class="form-group mt-3">
+            <select formControlName="status">
+              <option value="all">All statuses</option>
+              <option value="active">Active only</option>
+              <option value="inactive">Inactive only</option>
+            </select>
+          </div>
         </form>
       </section>
     </div>
 
-    <div class="alert" *ngIf="message() as alert" [class.error]="alert.type === 'error'">
-      {{ alert.text }}
-    </div>
-
-    <section class="receptionist-grid">
-      <div class="loader" *ngIf="loading()">Loading team...</div>
-      <div class="empty" *ngIf="!loading() && receptionists().length === 0">
-        No receptionists yet. Use the invite panel to add your first teammate.
-      </div>
-
-      <article class="receptionist-card" *ngFor="let user of receptionists()">
+    <!-- Grid for Receptionists -->
+    <div class="receptionist-grid">
+      <div *ngFor="let user of receptionists()" class="receptionist-card">
         <div class="card-head">
           <div class="avatar">{{ getInitials(user) }}</div>
-          <div>
+          <div class="info">
             <h3>{{ user.firstName }} {{ user.lastName }}</h3>
             <p>{{ user.email }}</p>
           </div>
-          <span class="status" [class.active]="user.isActive">{{ user.isActive ? 'Active' : 'Inactive' }}</span>
+          <span class="status-badge" [class.active]="user.isActive" [class.inactive]="!user.isActive">
+            {{ user.isActive ? 'Active' : 'Inactive' }}
+          </span>
         </div>
+
         <div class="card-actions">
-          <button (click)="toggleActive(user)">
-            {{ user.isActive ? 'Deactivate' : 'Activate' }}
+          <button *ngIf="!user.isActive" class="action-btn activate" (click)="toggleActive(user)">
+            <i class="bi bi-check-lg"></i> Activate
           </button>
-          <button class="ghost" (click)="removeReceptionist(user.id)">Remove</button>
+          <button *ngIf="user.isActive" class="action-btn deactivate" (click)="toggleActive(user)">
+            <i class="bi bi-slash-circle"></i> Deactivate
+          </button>
+          <button class="action-btn remove" (click)="removeReceptionist(user.id)">
+            <i class="bi bi-trash"></i> Remove
+          </button>
         </div>
-      </article>
-    </section>
+      </div>
+
+      <!-- Empty State -->
+      <div *ngIf="receptionists().length === 0 && !loading()" class="empty-state">
+        <i class="bi bi-people"></i>
+        <p>No receptionists found matching your criteria.</p>
+      </div>
+
+      <!-- Loader -->
+      <div *ngIf="loading()" class="loader">
+        <i class="bi bi-arrow-repeat spin"></i>
+        <p>Updating receptionist list...</p>
+      </div>
+    </div>
   </div>
 </app-admin-shell>
