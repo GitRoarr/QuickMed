@@ -1,11 +1,22 @@
 import { Injectable, NotFoundException, BadRequestException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Repository, Between } from "typeorm";
+import { Repository, Between, In } from "typeorm";
 import { User } from "../users/entities/user.entity";
 import { Appointment } from "../appointments/entities/appointment.entity";
 import { CreateDoctorDto } from "./dto/create-doctor.dto";
 import { UpdateDoctorDto } from "./dto/update-doctor.dto";
 import { UpdateDoctorSettingsDto } from "./dto/update-doctor-settings.dto";
+import { Conversation } from "../messages/entities/conversation.entity";
+import { Message } from "../messages/entities/message.entity";
+import { DoctorSettings } from "../settings/entities/doctor-settings.entity";
+import { Prescription } from "../prescriptions/entities/prescription.entity";
+import { MedicalRecord } from "../medical-records/entities/medical-record.entity";
+import { Consultation } from "../consultations/entities/consultation.entity";
+import { AvailabilityTemplate } from "../schedules/entities/availability-template.entity";
+import { BreakConfig } from "../schedules/entities/break-config.entity";
+import { DoctorAnalytics } from "../schedules/entities/doctor-analytics.entity";
+import { DoctorSchedule } from "../schedules/schedule.entity";
+import { Review } from "../reviews/entities/review.entity";
 import * as bcrypt from "bcrypt";
 import { v4 as uuidv4 } from "uuid";
 import { UserRole, AppointmentStatus, PaymentStatus } from "../common/index";
@@ -23,6 +34,28 @@ export class DoctorsService {
     private readonly appointmentsRepository: Repository<Appointment>,
     @InjectRepository(Payment)
     private readonly paymentRepository: Repository<Payment>,
+    @InjectRepository(Conversation)
+    private readonly conversationRepository: Repository<Conversation>,
+    @InjectRepository(Message)
+    private readonly messageRepository: Repository<Message>,
+    @InjectRepository(DoctorSettings)
+    private readonly doctorSettingsRepository: Repository<DoctorSettings>,
+    @InjectRepository(Prescription)
+    private readonly prescriptionRepository: Repository<Prescription>,
+    @InjectRepository(MedicalRecord)
+    private readonly medicalRecordRepository: Repository<MedicalRecord>,
+    @InjectRepository(Consultation)
+    private readonly consultationRepository: Repository<Consultation>,
+    @InjectRepository(AvailabilityTemplate)
+    private readonly availabilityTemplateRepository: Repository<AvailabilityTemplate>,
+    @InjectRepository(BreakConfig)
+    private readonly breakConfigRepository: Repository<BreakConfig>,
+    @InjectRepository(DoctorAnalytics)
+    private readonly doctorAnalyticsRepository: Repository<DoctorAnalytics>,
+    @InjectRepository(DoctorSchedule)
+    private readonly doctorScheduleRepository: Repository<DoctorSchedule>,
+    @InjectRepository(Review)
+    private readonly reviewRepository: Repository<Review>,
     private readonly emailService: EmailService,
     private readonly reviewsService: ReviewsService,
     private readonly messagesService: MessagesService
@@ -275,6 +308,42 @@ export class DoctorsService {
 
   async remove(id: string): Promise<void> {
     const doctor = await this.findOne(id);
+    const appointmentIds = await this.appointmentsRepository.find({
+      where: { doctorId: id },
+      select: ["id"],
+    });
+
+    if (appointmentIds.length) {
+      const ids = appointmentIds.map((appt) => appt.id);
+      await this.paymentRepository.delete({ appointmentId: In(ids) });
+    }
+
+    await this.messageRepository
+      .createQueryBuilder()
+      .delete()
+      .where("senderId = :id OR receiverId = :id", { id })
+      .execute();
+
+    const conversations = await this.conversationRepository.find({
+      where: { doctorId: id },
+      select: ["id"],
+    });
+
+    if (conversations.length) {
+      const conversationIds = conversations.map((conv) => conv.id);
+      await this.messageRepository.delete({ conversationId: In(conversationIds) });
+      await this.conversationRepository.delete({ id: In(conversationIds) });
+    }
+
+    await this.reviewRepository.delete({ doctorId: id });
+    await this.prescriptionRepository.delete({ doctorId: id });
+    await this.medicalRecordRepository.delete({ doctorId: id });
+    await this.consultationRepository.delete({ doctorId: id });
+    await this.doctorSettingsRepository.delete({ doctorId: id });
+    await this.availabilityTemplateRepository.delete({ doctorId: id });
+    await this.breakConfigRepository.delete({ doctorId: id });
+    await this.doctorAnalyticsRepository.delete({ doctorId: id });
+    await this.doctorScheduleRepository.delete({ doctorId: id });
     await this.appointmentsRepository.delete({ doctorId: id });
     await this.usersRepository.remove(doctor);
   }

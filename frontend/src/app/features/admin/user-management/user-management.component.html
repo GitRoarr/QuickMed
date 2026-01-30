@@ -166,8 +166,20 @@
               </span>
             </div>
             <div class="text-sm text-gray-600 space-y-1">
-              <div>📧 {{ user.email }}</div>
-              <div *ngIf="user.phoneNumber">📱 {{ user.phoneNumber }}</div>
+              <div>
+                <img
+                  src="https://img.icons8.com/ios-filled/50/circled-envelope.png"
+                  alt="email"
+                  class="inline-block w-4 h-4 mr-2 align-middle">
+                <span class="align-middle">{{ user.email }}</span>
+              </div>
+              <div *ngIf="user.phoneNumber">
+                <img
+                  src="https://img.icons8.com/?size=100&id=jShwZ2RCyPSO&format=png&color=000000"
+                  alt="phone"
+                  class="inline-block w-4 h-4 mr-2 align-middle">
+                <span class="align-middle">{{ user.phoneNumber }}</span>
+              </div>
               <div *ngIf="user.role === 'doctor' && user.specialty">
                 Specialization: <span class="font-medium">{{ user.specialty }}</span>
               </div>
