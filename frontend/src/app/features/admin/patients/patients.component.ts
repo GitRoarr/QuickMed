@@ -6,6 +6,7 @@ import { takeUntilDestroyed } from "@angular/core/rxjs-interop"
 
 import { AdminShellComponent } from "../shared/admin-shell"
 import { AppointmentCreateModalComponent } from '../appointments/appointment-create-modal/appointment-create-modal.component';
+import { PatientCreateModalComponent } from './patient-create-modal/patient-create-modal.component';
 import { AlertMessageComponent } from '@app/shared/components/alert-message/alert-message.component';
 import { PatientDetailModalComponent } from './patient-detail-modal/patient-detail-modal.component';
 import { MessagePatientModalComponent } from './message-patient-modal/message-patient-modal.component';
@@ -30,7 +31,7 @@ interface PatientRow {
 @Component({
   selector: "app-patients",
   standalone: true,
-  imports: [CommonModule, AdminShellComponent, FormsModule, AlertMessageComponent, PatientDetailModalComponent, MessagePatientModalComponent, AppointmentCreateModalComponent],
+  imports: [CommonModule, AdminShellComponent, FormsModule, AlertMessageComponent, PatientDetailModalComponent, MessagePatientModalComponent, AppointmentCreateModalComponent, PatientCreateModalComponent],
   templateUrl: "./patients.component.html",
   styleUrls: ["./patients.component.css"],
 })
@@ -41,8 +42,8 @@ export class PatientsComponent implements OnInit {
   patients = signal<PatientRow[]>([])
   isLoading = signal<boolean>(false)
   errorMessage = signal<string>("")
-  isSavingPatient = signal<boolean>(false)
-  patientFormMessage = signal<{ type: "success" | "error"; text: string } | null>(null)
+
+  // Removed old form state signals
 
   page = signal<number>(1)
   totalPages = signal<number>(1)
@@ -51,8 +52,9 @@ export class PatientsComponent implements OnInit {
   private readonly search$ = new Subject<string>()
   private searchTerm = ""
   statusFilter: "all" | "active" | "pending" = "all"
-  showAddPatientForm = signal<boolean>(false)
 
+  // Modals
+  showCreateModal = signal<boolean>(false)
   highlightedPatient = signal<PatientRow | null>(null)
   showDetailModal = signal<boolean>(false)
   showMessageModal = signal<boolean>(false)
@@ -96,16 +98,6 @@ export class PatientsComponent implements OnInit {
       return patient.status === this.statusFilter
     })
   })
-
-  newPatient = {
-    firstName: "",
-    lastName: "",
-    email: "",
-    phoneNumber: "",
-    dateOfBirth: "",
-    bloodType: "",
-    medicalHistory: "",
-  }
 
   ngOnInit(): void {
     this.search$
@@ -182,51 +174,16 @@ export class PatientsComponent implements OnInit {
     this.loadPatients();
   }
 
-  toggleAddPatientForm(): void {
-    this.showAddPatientForm.update((value) => !value)
-    this.patientFormMessage.set(null)
+  openCreateModal(): void {
+    this.showCreateModal.set(true);
   }
 
-  createPatient(): void {
-    const payload = this.newPatient
-    if (!payload.firstName || !payload.lastName || !payload.email) {
-      this.patientFormMessage.set({ type: "error", text: "First name, last name, and email are required." })
-      return
-    }
+  closeCreateModal(): void {
+    this.showCreateModal.set(false);
+  }
 
-    this.isSavingPatient.set(true)
-    this.patientFormMessage.set(null)
-
-    const requestBody: Partial<User> & { password: string } = {
-      ...payload,
-      role: "patient",
-      password: this.generateTempPassword(),
-      patientId: this.generatePatientId(),
-      dateOfBirth: payload.dateOfBirth || undefined,
-      medicalHistory: payload.medicalHistory || undefined,
-      bloodType: payload.bloodType || undefined,
-      allergies: [],
-    }
-
-    this.adminService
-      .createPatient(requestBody)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: () => {
-          this.patientFormMessage.set({
-            type: "success",
-            text: `${payload.firstName} ${payload.lastName} has been added.`,
-          })
-          this.isSavingPatient.set(false)
-          this.resetPatientForm()
-          this.loadPatients()
-        },
-        error: (err) => {
-          console.error("Failed to create patient", err)
-          this.patientFormMessage.set({ type: "error", text: err.error?.message || "Failed to add patient." })
-          this.isSavingPatient.set(false)
-        },
-      })
+  onPatientCreated(): void {
+    this.loadPatients();
   }
 
   private loadPatients(): void {
@@ -303,24 +260,4 @@ export class PatientsComponent implements OnInit {
     return "—"
   }
 
-  resetPatientForm(): void {
-    this.newPatient = {
-      firstName: "",
-      lastName: "",
-      email: "",
-      phoneNumber: "",
-      dateOfBirth: "",
-      bloodType: "",
-      medicalHistory: "",
-    }
-  }
-
-  private generateTempPassword(): string {
-    return `Patient@${Math.floor(1000 + Math.random() * 9000)}`
-  }
-
-  private generatePatientId(): string {
-    const random = Math.floor(1000 + Math.random() * 9000)
-    return `PAT-${random}`
-  }
 }

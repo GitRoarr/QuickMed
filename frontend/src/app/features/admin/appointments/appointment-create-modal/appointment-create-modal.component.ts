@@ -120,17 +120,32 @@ export class AppointmentCreateModalComponent {
 
     // Slot Logic
     updateSlots() {
-        // In a real app, fetch from backend based on doctor + date
-        this.isLoadingSlots.set(true);
+        if (!this.selectedDoctor() || !this.date()) return;
 
-        // Simulating API delay
-        setTimeout(() => {
-            this.suggestedSlots.set([
-                '09:00 AM', '09:30 AM', '10:00 AM', '11:15 AM',
-                '02:00 PM', '03:30 PM', '04:15 PM'
-            ]);
-            this.isLoadingSlots.set(false);
-        }, 600);
+        this.isLoadingSlots.set(true);
+        this.suggestedSlots.set([]);
+
+        this.adminService.getDoctorSchedule(this.selectedDoctor()!.id, this.date()).subscribe({
+            next: (res) => {
+                const availableTimes = (res.slots || [])
+                    .filter(s => s.status === 'available')
+                    .map(s => this.formatTime(s.startTime));
+
+                this.suggestedSlots.set(availableTimes);
+                this.isLoadingSlots.set(false);
+            },
+            error: (err) => {
+                console.error('Failed to load slots', err);
+                this.isLoadingSlots.set(false);
+            }
+        });
+    }
+
+    private formatTime(time: string): string {
+        const [h, m] = time.split(':').map(Number);
+        const ampm = h >= 12 ? 'PM' : 'AM';
+        const hour = h % 12 || 12;
+        return `${String(hour).padStart(2, '0')}:${String(m).padStart(2, '0')} ${ampm}`;
     }
 
     selectSlot(slot: string) {

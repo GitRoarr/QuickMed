@@ -6,16 +6,6 @@
         <h1>Settings</h1>
         <p class="subtitle">Manage your system preferences, themes, and configurations.</p>
       </div>
-      <div class="dark-mode-toggle">
-        <label class="toggle-switch">
-          <input type="checkbox" [checked]="isDarkMode()" (change)="toggleDarkMode()">
-          <span class="slider"></span>
-        </label>
-        <span class="toggle-label">
-          <i class="bi" [class.bi-moon-fill]="isDarkMode()" [class.bi-sun-fill]="!isDarkMode()"></i>
-          {{ isDarkMode() ? 'Dark Mode' : 'Light Mode' }}
-        </span>
-      </div>
     </section>
 
     <div class="message-alert" *ngIf="message()">

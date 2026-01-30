@@ -24,7 +24,7 @@ export interface User {
   createdAt: Date
   updatedAt: Date
   password?: string
-  
+
 }
 
 export interface Appointment {
@@ -141,7 +141,7 @@ export interface AdminDashboardResponse {
 export class AdminService {
   private apiUrl = `${environment.apiUrl}/admin`
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   getAllUsers(page = 1, limit = 10, role?: string, search?: string): Observable<PaginatedResponse<User>> {
     let params = new HttpParams().set("page", page.toString()).set("limit", limit.toString())
@@ -306,6 +306,12 @@ export class AdminService {
 
   getPatients(page = 1, limit = 12, search?: string): Observable<PaginatedResponse<User>> {
     return this.getAllUsers(page, limit, "patient", search)
+  }
+
+  getDoctorSchedule(doctorId: string, date: string): Observable<{ slots: { startTime: string; status: string }[] }> {
+    // Note: The schedule endpoint is not under /admin, so we reconstruct the URL
+    const baseUrl = this.apiUrl.replace('/admin', '');
+    return this.http.get<{ slots: { startTime: string; status: string }[] }>(`${baseUrl}/doctors/schedule/public/${doctorId}/${date}`);
   }
 
   private generateTempPassword(length = 10): string {
