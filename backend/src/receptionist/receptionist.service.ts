@@ -15,13 +15,13 @@ export class ReceptionistService {
     @InjectRepository(Appointment) private readonly appointmentRepo: Repository<Appointment>,
     @InjectRepository(User) private readonly userRepo: Repository<User>,
     private readonly emailService: EmailService,
-  ) {}
+  ) { }
 
   async getTodayAppointments(filter?: { doctorId?: string; status?: string }) {
     const today = new Date();
-    today.setHours(0,0,0,0);
+    today.setHours(0, 0, 0, 0);
     const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate()+1);
+    tomorrow.setDate(tomorrow.getDate() + 1);
 
     const qb = this.appointmentRepo.createQueryBuilder('a')
       .leftJoinAndSelect('a.patient', 'patient')
@@ -36,11 +36,11 @@ export class ReceptionistService {
   }
 
   async getPendingPayments() {
-    return this.appointmentRepo.find({ where: { paymentStatus: PaymentStatus.NOT_PAID }, relations: ['patient','doctor'] });
+    return this.appointmentRepo.find({ where: { paymentStatus: PaymentStatus.NOT_PAID }, relations: ['patient', 'doctor'] });
   }
 
   async getWaitingPatients() {
-    return this.appointmentRepo.find({ where: { status: AppointmentStatus.WAITING }, relations: ['patient','doctor'] });
+    return this.appointmentRepo.find({ where: { status: AppointmentStatus.WAITING }, relations: ['patient', 'doctor'] });
   }
 
   async getDashboardInsights(filter?: { doctorId?: string; status?: string }) {
@@ -98,7 +98,7 @@ export class ReceptionistService {
 
     try {
       console.log('[ReceptionistService] Creating receptionist invite for', dto.email);
-      
+
       // Normalize and validate email
       const normalizedEmail = dto.email.toLowerCase().trim();
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
@@ -107,8 +107,8 @@ export class ReceptionistService {
       }
 
       // Check if email already exists (with transaction isolation)
-      const existingUser = await queryRunner.manager.findOne(User, { 
-        where: { email: normalizedEmail } 
+      const existingUser = await queryRunner.manager.findOne(User, {
+        where: { email: normalizedEmail }
       });
       if (existingUser) {
         console.log('[ReceptionistService] Email already exists:', dto.email);
@@ -156,17 +156,21 @@ export class ReceptionistService {
       });
 
       const savedReceptionist = await queryRunner.manager.save(receptionist);
-      
+
       // Commit transaction before sending email (non-critical operation)
       await queryRunner.commitTransaction();
 
       // Generate invite link
       const inviteLink = `${process.env.FRONTEND_URL || 'http://localhost:4200'}/set-password?token=${inviteToken}&uid=${savedReceptionist.id}`;
-      
+
       // Send invitation email (non-blocking)
       let emailResult: { sent: boolean; fallbackLink?: string } = { sent: false, fallbackLink: inviteLink };
       try {
-        const result = await this.emailService.sendReceptionistInvite(savedReceptionist.email, inviteLink);
+        const result = await this.emailService.sendReceptionistInvite(
+          savedReceptionist.email,
+          inviteLink,
+          savedReceptionist.firstName
+        );
         emailResult = { sent: result.sent, fallbackLink: result.fallbackLink || inviteLink };
       } catch (emailError) {
         console.error('[ReceptionistService] Failed to send email, but invitation created:', emailError);
@@ -174,10 +178,10 @@ export class ReceptionistService {
         emailResult = { sent: false, fallbackLink: inviteLink };
       }
 
-      console.log('[ReceptionistService] Receptionist invite created', { 
-        id: savedReceptionist.id, 
+      console.log('[ReceptionistService] Receptionist invite created', {
+        id: savedReceptionist.id,
         email: savedReceptionist.email,
-        emailSent: emailResult.sent 
+        emailSent: emailResult.sent
       });
 
       // Return without sensitive data
@@ -210,7 +214,7 @@ export class ReceptionistService {
 
     try {
       // Find receptionist with proper locking to prevent race conditions
-      const receptionist = await queryRunner.manager.findOne(User, { 
+      const receptionist = await queryRunner.manager.findOne(User, {
         where: { id: uid, role: UserRole.RECEPTIONIST },
         lock: { mode: 'pessimistic_write' }
       });
@@ -254,7 +258,7 @@ export class ReceptionistService {
       await queryRunner.commitTransaction();
 
       console.log(`[ReceptionistService] Password set successfully for receptionist: ${receptionist.email}`);
-      
+
       // Return without sensitive data
       const { password: _, inviteToken: __, inviteExpiresAt: ___, ...safeReceptionist } = savedReceptionist;
       return safeReceptionist as User;

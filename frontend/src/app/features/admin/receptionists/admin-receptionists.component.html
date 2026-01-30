@@ -17,29 +17,37 @@
         <h3><i class="bi bi-lightning-charge-fill"></i> Quick Invite</h3>
         <form [formGroup]="inviteForm" (ngSubmit)="inviteReceptionist()">
           <div class="form-row">
-            <input type="text" formControlName="firstName" placeholder="First Name">
-            <input type="text" formControlName="lastName" placeholder="Last Name">
+            <div class="form-group">
+              <input type="text" formControlName="firstName" placeholder="First Name">
+            </div>
+            <div class="form-group">
+              <input type="text" formControlName="lastName" placeholder="Last Name">
+            </div>
           </div>
-          <input type="email" formControlName="email" placeholder="Email Address">
-          <input type="tel" formControlName="phoneNumber" placeholder="Phone (optional)">
-          <button type="submit" [disabled]="loading() || inviteForm.invalid">
-            {{ loading() ? 'Processing...' : 'Send Invite' }}
+          <div class="form-group">
+            <input type="email" formControlName="email" placeholder="Email Address">
+          </div>
+          <div class="form-group">
+            <input type="tel" formControlName="phoneNumber" placeholder="Phone (optional)">
+          </div>
+          <button type="submit" class="submit-btn" [disabled]="loading() || inviteForm.invalid">
+            {{ loading() ? 'Creating Account...' : 'Send Invite' }}
           </button>
         </form>
       </section>
 
       <!-- Filter Panel -->
       <section class="filter-card">
-        <h3><i class="bi bi-funnel-fill"></i> Filters</h3>
+        <h3><i class="bi bi-funnel-fill"></i> Advanced Filters</h3>
         <form [formGroup]="filterForm">
           <div class="form-group">
-            <input type="text" formControlName="search" placeholder="Search by name or email...">
+            <input type="text" formControlName="search" placeholder="Search by name, email or ID...">
           </div>
           <div class="form-group mt-3">
             <select formControlName="status">
-              <option value="all">All statuses</option>
-              <option value="active">Active only</option>
-              <option value="inactive">Inactive only</option>
+              <option value="all">View All Statuses</option>
+              <option value="active">Active Members</option>
+              <option value="inactive">Inactive Members</option>
             </select>
           </div>
         </form>
@@ -49,26 +57,29 @@
     <!-- Grid for Receptionists -->
     <div class="receptionist-grid">
       <div *ngFor="let user of receptionists()" class="receptionist-card">
+        <span class="status-badge" [class.active]="user.isActive" [class.inactive]="!user.isActive">
+          {{ user.isActive ? 'Active Member' : 'Inactive' }}
+        </span>
+
         <div class="card-head">
-          <div class="avatar">{{ getInitials(user) }}</div>
+          <div class="avatar-wrapper">
+            <div class="avatar">{{ getInitials(user) }}</div>
+          </div>
           <div class="info">
             <h3>{{ user.firstName }} {{ user.lastName }}</h3>
             <p>{{ user.email }}</p>
           </div>
-          <span class="status-badge" [class.active]="user.isActive" [class.inactive]="!user.isActive">
-            {{ user.isActive ? 'Active' : 'Inactive' }}
-          </span>
         </div>
 
         <div class="card-actions">
           <button *ngIf="!user.isActive" class="action-btn activate" (click)="toggleActive(user)">
-            <i class="bi bi-check-lg"></i> Activate
+            <i class="bi bi-check-circle-fill"></i> Activate
           </button>
           <button *ngIf="user.isActive" class="action-btn deactivate" (click)="toggleActive(user)">
-            <i class="bi bi-slash-circle"></i> Deactivate
+            <i class="bi bi-pause-circle-fill"></i> Deactivate
           </button>
           <button class="action-btn remove" (click)="removeReceptionist(user.id)">
-            <i class="bi bi-trash"></i> Remove
+            <i class="bi bi-trash3-fill"></i> Remove
           </button>
         </div>
       </div>

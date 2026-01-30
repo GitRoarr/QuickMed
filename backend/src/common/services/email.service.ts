@@ -28,7 +28,7 @@ export class EmailService {
           console.log('[EmailService] SMTP_HOST:', process.env.SMTP_HOST);
           console.log('[EmailService] SMTP_PORT:', process.env.SMTP_PORT || 587);
           console.log('[EmailService] SMTP_USER:', process.env.SMTP_USER);
-          
+
           this.transporter = nodemailer.createTransport({
             host: process.env.SMTP_HOST,
             port: +(process.env.SMTP_PORT || 587),
@@ -46,7 +46,7 @@ export class EmailService {
               rejectUnauthorized: false, // For development only
             },
           });
-          
+
           // Verify connection
           console.log('[EmailService] Verifying SMTP connection...');
           await this.transporter.verify();
@@ -105,7 +105,7 @@ export class EmailService {
     try {
       console.log(`[EmailService] 📧 Attempting to send email to: ${to}`);
       const info = await this.transporter.sendMail({
-        from: `"QuickMed Admin" <${process.env.SMTP_USER || 'no-reply@example.com'}>` ,
+        from: `"QuickMed Admin" <${process.env.SMTP_USER || 'no-reply@example.com'}>`,
         to,
         subject,
         html,
@@ -122,13 +122,13 @@ export class EmailService {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : String(err);
       const errorStack = err instanceof Error ? err.stack : undefined;
-      
+
       console.error('[EmailService] ❌ Email sending failed!');
       console.error('[EmailService] Error message:', errorMessage);
       if (errorStack) {
         console.error('[EmailService] Error stack:', errorStack);
       }
-      
+
       // Check for common Gmail errors
       if (errorMessage.includes('Invalid login') || errorMessage.includes('535')) {
         console.error('[EmailService] 🔐 Authentication failed!');
@@ -144,10 +144,10 @@ export class EmailService {
         console.error('[EmailService] 🔐 Authentication error!');
         console.error('[EmailService] 💡 Verify SMTP_USER and SMTP_PASS are correct');
       }
-      
+
       // Extract link for fallback
       const fallback = extractLink();
-      
+
       console.warn(`[EmailService] 📋 Returning fallback invite link: ${fallback || 'N/A'}`);
       return { sent: false, fallbackLink: fallback };
     }
@@ -170,18 +170,44 @@ export class EmailService {
     return this.sendMail(to, subject, html);
   }
 
-  async sendReceptionistInvite(to: string, inviteLink: string): Promise<EmailResult> {
-    const subject = 'Your Receptionist Account Invitation - QuickMed';
+  async sendReceptionistInvite(to: string, inviteLink: string, firstName: string = 'Team Member'): Promise<EmailResult> {
+    const subject = `Welcome to the Team, ${firstName}! - QuickMed Admin Portal`;
     const html = `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-        <h2 style="color: #16a34a;">Welcome to QuickMed!</h2>
-        <p>You have been invited to join QuickMed as a <strong>Receptionist</strong>.</p>
-        <p>Click the button below to set your password and activate your account:</p>
-        <div style="text-align: center; margin: 30px 0;">
-          <a href="${inviteLink}" style="background-color: #16a34a; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: bold;">Set Your Password</a>
+      <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; padding: 0; background-color: #f9fafb; border-radius: 16px; overflow: hidden; border: 1px solid #e5e7eb; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+        <!-- Header / Logo -->
+        <div style="background-color: #ffffff; padding: 32px 20px; text-align: center; border-bottom: 1px solid #f3f4f6;">
+          <h1 style="color: #16a34a; margin: 0; font-size: 28px; font-weight: 800; letter-spacing: -0.5px;">QuickMed</h1>
+          <p style="color: #6b7280; margin: 4px 0 0 0; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">Admin Portal Invitation</p>
         </div>
-        <p style="color: #6b7280; font-size: 14px;">This invitation link will expire in 7 days.</p>
-        <p style="color: #6b7280; font-size: 14px;">If you did not expect this invitation, please ignore this email.</p>
+
+        <!-- Body Content -->
+        <div style="padding: 40px 32px; background-color: #ffffff;">
+          <h2 style="color: #111827; margin: 0 0 16px 0; font-size: 22px; font-weight: 700;">Hello ${firstName},</h2>
+          <p style="color: #4b5563; line-height: 1.6; margin-bottom: 24px; font-size: 16px;">
+            We're thrilled to have you join our front desk squad. Your role as a <strong>Receptionist</strong> is vital to making QuickMed a success, and we can't wait to see the impact you'll make.
+          </p>
+
+          <div style="text-align: center; margin: 40px 0;">
+            <a href="${inviteLink}" style="background: linear-gradient(135deg, #16a34a, #15803d); color: #ffffff; padding: 16px 36px; text-decoration: none; border-radius: 12px; display: inline-block; font-weight: 700; font-size: 16px; box-shadow: 0 10px 15px -3px rgba(22, 163, 74, 0.3);">Set Your Password & Login</a>
+          </div>
+
+          <!-- Feature Highlights -->
+          <div style="background-color: #f3f4f6; padding: 24px; border-radius: 12px; margin-top: 32px;">
+            <h3 style="color: #111827; margin: 0 0 12px 0; font-size: 14px; text-transform: uppercase;">Quick Tips for Getting Started:</h3>
+            <ul style="color: #4b5563; margin: 0; padding-left: 20px; font-size: 14px; line-height: 1.8;">
+              <li><strong>Dashboard:</strong> Get a bird's-eye view of today's appointments and clinic status.</li>
+              <li><strong>Patient Management:</strong> Easily register new patients and update existing records.</li>
+              <li><strong>Scheduling:</strong> Coordinate with doctors and manage multi-specialty bookings.</li>
+              <li><strong>Status Tracking:</strong> Keep everyone informed by updating appointment statuses in real-time.</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div style="padding: 32px; text-align: center; background-color: #f9fafb;">
+          <p style="color: #6b7280; font-size: 13px; margin: 0;">This invitation link will expire in 7 days.</p>
+          <p style="color: #9ca3af; font-size: 12px; margin: 12px 0 0 0;">&copy; ${new Date().getFullYear()} QuickMed Healthcare Systems. All rights reserved.</p>
+        </div>
       </div>
     `;
     return this.sendMail(to, subject, html);
