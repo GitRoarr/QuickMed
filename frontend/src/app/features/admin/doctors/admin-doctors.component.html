@@ -67,9 +67,14 @@
                 <i class="bi bi-star-fill"></i> {{ doctor.rating | number : "1.1-1" }}
               </span>
             </div>
-            <p class="meta">
-              {{ doctor.specialty || "General Medicine" }} • License {{ doctor.licenseNumber || "N/A" }}
-            </p>
+            <div class="meta-flex">
+              <span class="meta truncate-tooltip" [title]="doctor.specialty || 'General Medicine'">
+                {{ doctor.specialty || 'General Medicine' }}
+              </span>
+              <span class="meta truncate-tooltip" [title]="doctor.licenseNumber || 'N/A'">
+                License {{ doctor.licenseNumber || 'N/A' }}
+              </span>
+            </div>
           </div>
           <span class="status-pill" [ngClass]="doctor.status">{{ doctor.status }}</span>
         </div>

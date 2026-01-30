@@ -5,6 +5,7 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { UpdateUserDto } from '../users/dto/update-user.dto';
+import { UpdateUserActiveDto } from '../users/dto/update-user-active.dto';
 import { CreateAppointmentDto } from '../appointments/dto/create-appointment.dto';
 import { UpdateAppointmentDto } from '../appointments/dto/update-appointment.dto';
 import { UserRole } from '../common/index';
@@ -74,6 +75,12 @@ export class AdminController {
   @Roles(UserRole.ADMIN)
   async updateUser(@Param('id') id: string, @Body() dto: UpdateUserDto) {
     return this.adminService.updateUser(id, dto);
+  }
+
+  @Patch('users/:id/active')
+  @Roles(UserRole.ADMIN)
+  async updateUserActive(@Param('id') id: string, @Body() dto: UpdateUserActiveDto) {
+    return this.adminService.updateUser(id, { isActive: dto.isActive } as any);
   }
 
   @Delete('users/:id')

@@ -222,7 +222,7 @@ export class PatientsComponent implements OnInit {
     const fullName = `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() || user.email
     const ageLabel = user.dateOfBirth ? `${this.calculateAgeFromDate(user.dateOfBirth)} yrs` : "—"
     const genderLabel = this.deriveGender(user)
-    const patientId = user.patientId || "—"
+    const patientId = user.id || user.patientId || "—"
     const status: "active" | "pending" = user.isActive ? "active" : "pending"
 
     return {

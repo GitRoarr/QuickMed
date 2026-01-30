@@ -188,6 +188,10 @@ export class AdminService {
     return this.http.put<User>(`${this.apiUrl}/users/${id}`, userData)
   }
 
+  setUserActive(id: string, isActive: boolean): Observable<User> {
+    return this.http.patch<User>(`${this.apiUrl}/users/${id}/active`, { isActive })
+  }
+
   deleteUser(id: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/users/${id}`)
   }

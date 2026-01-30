@@ -1,7 +1,7 @@
 import { Injectable, signal } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { Router } from "@angular/router";
-import { Observable, tap } from "rxjs";
+import { Observable, of, tap } from "rxjs";
 import { environment } from "@environments/environment";
 import { User, AuthResponse, LoginRequest, RegisterRequest } from "../models/user.model";
 
@@ -10,6 +10,7 @@ import { User, AuthResponse, LoginRequest, RegisterRequest } from "../models/use
 })
 export class AuthService {
   private readonly API_URL = `${environment.apiUrl}/auth`;
+  private readonly USERS_URL = `${environment.apiUrl}/users`;
   private readonly TOKEN_KEY = "carehub_token";
   private readonly USER_KEY = "carehub_user";
 
@@ -38,6 +39,15 @@ export class AuthService {
 
   forgotPassword(email: string): Observable<{ message: string }> {
     return this.http.post<{ message: string }>(`${this.API_URL}/forgot-password`, { email });
+  }
+
+  refreshProfile(): Observable<User | null> {
+    const user = this.currentUser();
+    if (!user?.id) return of(null);
+
+    return this.http.get<User>(`${this.USERS_URL}/${user.id}`).pipe(
+      tap((fresh) => this.setUser(fresh))
+    );
   }
 
   /** Replace stored user (and keep token untouched). Useful after profile updates. */

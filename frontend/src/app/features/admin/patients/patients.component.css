@@ -185,6 +185,14 @@
   justify-content: center;
   flex-shrink: 0;
   font-size: 1rem;
+  overflow: hidden;
+}
+
+.avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 .avatar-lg {
@@ -231,6 +239,47 @@
 .status-pill.pending {
   color: #92400e;
   background: #fef3c7;
+}
+
+.patient-rotating-meta {
+  position: relative;
+  height: 1.25rem;
+  overflow: hidden;
+}
+
+.patient-rotating-meta .meta-item {
+  position: absolute;
+  left: 0;
+  top: 0;
+  opacity: 0;
+  animation: patientMetaSwap 6s ease-in-out infinite;
+}
+
+.patient-rotating-meta .meta-age {
+  animation-delay: 3s;
+}
+
+@keyframes patientMetaSwap {
+  0% {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  10% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  40% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  50% {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
 }
 
 .dark .status-pill.pending {

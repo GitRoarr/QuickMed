@@ -96,7 +96,7 @@ export class AdminReceptionistsComponent implements OnInit {
     const newStatus = !user.isActive
     this.togglingId.set(user.id)
 
-    this.adminService.updateUser(user.id, { isActive: newStatus }).subscribe({
+    this.adminService.setUserActive(user.id, newStatus).subscribe({
       next: () => {
         this.toast.success(`✨ Receptionist ${newStatus ? 'Activated' : 'Deactivated'} Successfully! ✨`)
         this.loadReceptionists()

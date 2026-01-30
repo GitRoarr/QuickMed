@@ -102,7 +102,8 @@ export class UserManagementComponent implements OnInit, OnDestroy {
       debounceTime(300),
       distinctUntilChanged()
     ).subscribe(() => {
-      this.applyFilters();
+      this.currentPage.set(1);
+      this.loadUsers();
     });
   }
 

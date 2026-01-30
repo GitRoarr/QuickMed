@@ -195,6 +195,11 @@
 :host-context(.admin-shell.dark) .text-gray-500 { color: var(--admin-muted) !important; }
 :host-context(.admin-shell.dark) .hover\:bg-gray-50:hover { background: #0f1623 !important; }
 
+/* Contact icons in dark theme */
+:host-context(.admin-shell.dark) .contact-icon {
+  filter: brightness(0) invert(1);
+}
+
 /* Dark polish: black surfaces, subtle borders */
 :host-context(.admin-shell.dark) :where(.um-card, .um-stat-card, .user-item, .stat-card, .card, .user-row) {
   background: #0b0b0b !important;

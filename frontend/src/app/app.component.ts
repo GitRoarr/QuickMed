@@ -1,6 +1,7 @@
 
 import { Component, OnInit, inject } from "@angular/core";
 import { ThemeService } from '@core/services/theme.service';
+import { AuthService } from '@core/services/auth.service';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet } from "@angular/router";
 import { ToastContainerComponent } from "@shared/components/toast/toast-container.component";
@@ -16,6 +17,7 @@ import { ToastContainerComponent } from "@shared/components/toast/toast-containe
 })
 export class AppComponent implements OnInit {
   themeService = inject(ThemeService);
+  authService = inject(AuthService);
 
   ngOnInit() {
     // ThemeService constructor already applies the saved theme
@@ -27,6 +29,14 @@ export class AppComponent implements OnInit {
       this.themeService.setTheme('dark');
     } else {
       this.themeService.setTheme('light');
+    }
+
+    if (this.authService.isAuthenticated()) {
+      this.authService.refreshProfile().subscribe({
+        error: () => {
+          // Ignore refresh errors to avoid breaking app init
+        }
+      });
     }
   }
 }

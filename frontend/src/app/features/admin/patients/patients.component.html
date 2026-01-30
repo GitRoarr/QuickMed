@@ -47,7 +47,10 @@
 
           <div class="patient-card" *ngFor="let patient of visiblePatients()" (click)="selectPatient(patient)">
             <div class="flex items-center gap-4 flex-1">
-              <div class="avatar">{{ patient.initials }}</div>
+              <div class="avatar">
+                <img *ngIf="patient.raw?.avatar" [src]="patient.raw.avatar" [alt]="patient.fullName" class="avatar-img" />
+                <span *ngIf="!patient.raw?.avatar">{{ patient.initials }}</span>
+              </div>
               <div>
                 <div class="text-lg font-semibold text-gray-900 flex items-center gap-3">
                   {{ patient.fullName }}
@@ -56,8 +59,10 @@
                     {{ patient.status }}
                   </span>
                 </div>
-                <div class="text-sm text-gray-500">ID: {{ patient.patientId }}</div>
-                <div class="text-sm text-gray-500">Age: {{ patient.ageLabel }} • {{ patient.genderLabel }}</div>
+                <div class="text-sm text-gray-500 patient-rotating-meta">
+                  <span class="meta-item meta-id">ID: {{ patient.patientId }}</span>
+                  <span class="meta-item meta-age" *ngIf="patient.ageLabel !== '—'">Age: {{ patient.ageLabel }} • {{ patient.genderLabel }}</span>
+                </div>
               </div>
             </div>
             <div class="patient-meta">

@@ -1,3 +1,27 @@
+// Flex container for specialty and license
+.meta-flex {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+  margin-top: 0.1rem;
+}
+
+// Truncate and tooltip for specialty/license
+.truncate-tooltip {
+  max-width: 140px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+  position: relative;
+  vertical-align: bottom;
+  transition: color 0.2s;
+}
+
+.truncate-tooltip:hover {
+  color: var(--admin-primary);
+  z-index: 2;
+}
 /* Doctors Management Page - Amazing Theming with CSS Variables */
 :root {
   --admin-bg: #ffffff;
