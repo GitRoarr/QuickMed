@@ -11,16 +11,17 @@
   --admin-shadow: rgba(0, 0, 0, 0.1);
 }
 
-.dark {
+:host-context(.dark) {
   --admin-bg: #0b0d17;
   --admin-fg: #ffffff;
-  --admin-surface: #1e1e1e;
-  --admin-border: #2c2f3d;
-  --admin-muted: #9ca3af;
+  --admin-surface: #121420;
+  --admin-border: transparent;
+  --admin-muted: #e4e4e7;
   --admin-primary: #16a34a;
-  --admin-primary-light: #1f2937;
+  --admin-primary-light: rgba(22, 163, 74, 0.1);
   --admin-primary-dark: #15803d;
-  --admin-shadow: rgba(0, 0, 0, 0.5);
+  --admin-shadow: rgba(0, 0, 0, 0.6);
+  --admin-glow: rgba(22, 163, 74, 0.08);
 }
 
 .overview-container,
@@ -47,9 +48,9 @@
 }
 
 .stat-card:hover {
-  border-color: var(--admin-primary);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(22, 163, 74, 0.2);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px var(--admin-shadow), 0 0 20px var(--admin-glow);
+  background: linear-gradient(135deg, var(--admin-surface), var(--admin-primary-light));
 }
 
 .stat-icon {
@@ -63,6 +64,13 @@
   flex-shrink: 0;
   background: var(--admin-primary-light);
   color: var(--admin-primary);
+}
+
+.stat-icon-img {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  display: inline-block;
 }
 
 .stat-content {
@@ -107,6 +115,11 @@
   padding: 1.5rem;
   border: 1px solid var(--admin-border);
   box-shadow: 0 4px 15px var(--admin-shadow);
+  transition: all 0.3s ease;
+}
+
+:host-context(.dark) :is(.chart-section, .schedule-section):hover {
+  box-shadow: 0 8px 24px var(--admin-shadow), 0 0 16px var(--admin-glow);
 }
 
 .section-header {
@@ -150,6 +163,10 @@
   border-radius: 0.75rem;
   border: 1px solid var(--admin-border);
   transition: all 0.2s ease;
+}
+
+:host-context(.dark) .doctor-item {
+  background: rgba(255, 255, 255, 0.03);
 }
 
 .doctor-item:hover {
@@ -216,6 +233,20 @@
   font-size: 0.8125rem;
   font-weight: 600;
   color: var(--admin-fg);
+}
+
+/* Specific White-Text Overrides for Dark Mode */
+:host-context(.dark) :is(.text-gray-900, .text-gray-700, .stat-value, .section-header h3) {
+  color: #ffffff !important;
+}
+
+:host-context(.dark) :is(.text-gray-600, .text-gray-500, .stat-label, .section-header p) {
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+
+:host-context(.dark) .momentum-card {
+  background: rgba(255, 255, 255, 0.04) !important;
+  border-color: rgba(255, 255, 255, 0.05) !important;
 }
 
 @media (max-width: 1024px) {

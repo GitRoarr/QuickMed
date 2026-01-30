@@ -1,8 +1,17 @@
-import { IsString, IsEmail, IsEnum, IsOptional, IsDate, IsInt, IsArray, MinLength, IsBoolean } from 'class-validator';
+import { IsString, IsEmail, IsEnum, IsOptional, IsDate, IsInt, IsArray, MinLength, IsBoolean, Allow } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { UserRole } from '@/common/index';
+import { Type, Expose } from 'class-transformer';
 
 export class UpdateUserDto {
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsBoolean()
+  @Allow()
+  @Expose()
+  @Type(() => Boolean)
+  isActive?: boolean;
+
   @ApiProperty({ required: false })
   @IsOptional()
   @IsString()
@@ -52,6 +61,7 @@ export class UpdateUserDto {
   @ApiProperty({ required: false })
   @IsOptional()
   @IsDate()
+  @Type(() => Date)
   dateOfBirth?: Date;
 
   @ApiProperty({ required: false })
@@ -68,16 +78,19 @@ export class UpdateUserDto {
   @ApiProperty({ required: false })
   @IsOptional()
   @IsInt()
+  @Type(() => Number)
   activeMedicationsCount?: number;
 
   @ApiProperty({ required: false })
   @IsOptional()
   @IsInt()
+  @Type(() => Number)
   medicalRecordsCount?: number;
 
   @ApiProperty({ required: false })
   @IsOptional()
   @IsInt()
+  @Type(() => Number)
   testResultsCount?: number;
 
   @ApiProperty({ required: false, description: 'Relevant only for doctors' })
@@ -115,9 +128,4 @@ export class UpdateUserDto {
   @IsOptional()
   @IsString()
   department?: string;
-
-  @ApiProperty({ required: false })
-  @IsOptional()
-  @IsBoolean()
-  isActive?: boolean;
 }

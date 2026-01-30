@@ -96,18 +96,21 @@ main::-webkit-scrollbar,
 
 .dark {
   --bg: #0b0d17;
-  /* dark background */
   --fg: #ffffff;
-  /* text */
-  --surface: #1e1e1e;
-  /* dark card */
+  --surface: #121420;
   --border: transparent;
-  /* card border */
+  /* Remove borders by default in dark mode */
   --muted: #9ca3af;
-  /* muted text */
   --primary: #16a34a;
   --primary-rgb: 22, 163, 74;
   --primary-hover: #15803d;
+  --shadow: rgba(0, 0, 0, 0.6);
+  --glow: rgba(22, 163, 74, 0.08);
+}
+
+/* Global Border Removal for Dark Mode */
+.dark :is(.border, .border-gray-100, .border-gray-200, .border-slate-100, .border-zinc-100) {
+  border-color: transparent !important;
 }
 
 
@@ -195,7 +198,7 @@ body {
   box-shadow: 0 14px 36px rgba(0, 0, 0, 0.6), 0 0 24px rgba(22, 163, 74, 0.06) !important;
 }
 
-/* Override Tailwind/utility light backgrounds within admin dark theme */
+/* Force black backgrounds for common utility classes inside admin dark theme */
 .admin-shell.dark :where(.bg-white,
   .bg-gray-50, .bg-gray-100,
   .bg-slate-50, .bg-slate-100,
@@ -204,6 +207,15 @@ body {
   .bg-stone-50, .bg-stone-100,
   .bg-emerald-50) {
   background-color: #0b0b0b !important;
+}
+
+/* Override Tailwind/utility light text colors within dark theme */
+.dark :where(.text-gray-900, .text-gray-800, .text-gray-700, .text-slate-900, .text-zinc-900) {
+  color: #ffffff !important;
+}
+
+.dark :where(.text-gray-600, .text-gray-500, .text-slate-600, .text-zinc-600) {
+  color: rgba(255, 255, 255, 0.7) !important;
 }
 
 /* Also support global dark class on root/body (outside admin-shell) */

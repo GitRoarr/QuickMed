@@ -3,6 +3,7 @@ import { CommonModule, DatePipe } from "@angular/common"
 import { AlertMessageComponent } from '@app/shared/components/alert-message/alert-message.component';
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop"
 import { AdminShellComponent } from "../shared/admin-shell"
+import { ThemeService } from "@core/services/theme.service"
 import {
   AdminService,
   AdminStats,
@@ -15,7 +16,9 @@ interface StatCard {
   label: string
   value: string
   change: string
-  icon: string
+  icon?: string
+  iconLight?: string
+  iconDark?: string
   trend?: "up" | "down" | "neutral"
 }
 
@@ -48,6 +51,7 @@ interface AppointmentCard {
 export class OverviewComponent implements OnInit {
   private readonly adminService = inject(AdminService)
   private readonly destroyRef = inject(DestroyRef)
+  private readonly themeService = inject(ThemeService)
 
   stats = signal<StatCard[]>([])
   doctorSchedules = signal<DoctorSchedule[]>([])
@@ -61,6 +65,10 @@ export class OverviewComponent implements OnInit {
 
   ngOnInit(): void {
     this.fetchDashboard()
+  }
+
+  get isDarkMode(): boolean {
+    return this.themeService.isDarkMode()
   }
 
   retry(): void {
@@ -93,19 +101,30 @@ export class OverviewComponent implements OnInit {
   }
 
   private buildStatCards(stats: AdminStats): StatCard[] {
+    const totalAppointmentsIconLight = "https://img.icons8.com/?size=100&id=58848&format=png&color=000000"
+    const totalAppointmentsIconDark = "https://img.icons8.com/?size=100&id=58848&format=png&color=FFFFFF"
+    const totalPatientsIconLight = "https://img.icons8.com/?size=100&id=10849&format=png&color=000000"
+    const totalPatientsIconDark = "https://img.icons8.com/?size=100&id=10849&format=png&color=FFFFFF"
+    const pendingIconLight = "https://img.icons8.com/?size=100&id=33945&format=png&color=000000"
+    const pendingIconDark = "https://img.icons8.com/?size=100&id=33945&format=png&color=FFFFFF"
+    const avgWaitIconLight = "https://img.icons8.com/?size=100&id=58173&format=png&color=000000"
+    const avgWaitIconDark = "https://img.icons8.com/?size=100&id=58173&format=png&color=FFFFFF"
+
     return [
       {
         label: "Total Appointments",
         value: stats.totalAppointments.toLocaleString(),
         change: `${stats.todayAppointments} today • ${stats.thisWeekAppointments} this week`,
-        icon: "📅",
+        iconLight: totalAppointmentsIconLight,
+        iconDark: totalAppointmentsIconDark,
         trend: "up",
       },
       {
         label: "Total Patients",
         value: stats.totalPatients.toLocaleString(),
         change: `${stats.totalUsers.toLocaleString()} users total`,
-        icon: "👥",
+        iconLight: totalPatientsIconLight,
+        iconDark: totalPatientsIconDark,
         trend: "up",
       },
       {
@@ -119,7 +138,8 @@ export class OverviewComponent implements OnInit {
         label: "Pending Appointments",
         value: stats.pendingAppointments.toString(),
         change: `${stats.confirmedAppointments} confirmed`,
-        icon: "⏱️",
+        iconLight: pendingIconLight,
+        iconDark: pendingIconDark,
         trend: stats.pendingAppointments > 20 ? "up" : "down",
       },
       {
@@ -133,7 +153,8 @@ export class OverviewComponent implements OnInit {
         label: "Avg. Wait Time",
         value: `${stats.averageAppointmentDuration} min`,
         change: `Satisfaction ${stats.patientSatisfactionScore}/5`,
-        icon: "📈",
+        iconLight: avgWaitIconLight,
+        iconDark: avgWaitIconDark,
         trend: "neutral",
       },
     ]
