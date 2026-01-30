@@ -72,13 +72,19 @@
         </div>
 
         <div class="card-actions">
-          <button *ngIf="!user.isActive" class="action-btn activate" (click)="toggleActive(user)">
-            <i class="bi bi-check-circle-fill"></i> Activate
+          <button *ngIf="!user.isActive" class="action-btn activate" [disabled]="togglingId() === user.id"
+            (click)="toggleActive(user)">
+            <i class="bi" [class.bi-check-circle-fill]="togglingId() !== user.id"
+              [class.bi-arrow-repeat]="togglingId() === user.id" [class.spin]="togglingId() === user.id"></i>
+            {{ togglingId() === user.id ? 'Activating...' : 'Activate' }}
           </button>
-          <button *ngIf="user.isActive" class="action-btn deactivate" (click)="toggleActive(user)">
-            <i class="bi bi-pause-circle-fill"></i> Deactivate
+          <button *ngIf="user.isActive" class="action-btn deactivate" [disabled]="togglingId() === user.id"
+            (click)="toggleActive(user)">
+            <i class="bi" [class.bi-pause-circle-fill]="togglingId() !== user.id"
+              [class.bi-arrow-repeat]="togglingId() === user.id" [class.spin]="togglingId() === user.id"></i>
+            {{ togglingId() === user.id ? 'Deactivating...' : 'Deactivate' }}
           </button>
-          <button class="action-btn remove" (click)="removeReceptionist(user.id)">
+          <button class="action-btn remove" [disabled]="togglingId() === user.id" (click)="removeReceptionist(user.id)">
             <i class="bi bi-trash3-fill"></i> Remove
           </button>
         </div>

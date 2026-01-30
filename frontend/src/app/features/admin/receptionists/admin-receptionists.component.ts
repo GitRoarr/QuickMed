@@ -19,6 +19,7 @@ export class AdminReceptionistsComponent implements OnInit {
 
   receptionists = signal<User[]>([])
   loading = signal(false)
+  togglingId = signal<string | null>(null)
   filterForm!: FormGroup
   inviteForm!: FormGroup
 
@@ -93,15 +94,17 @@ export class AdminReceptionistsComponent implements OnInit {
 
   toggleActive(user: User) {
     const newStatus = !user.isActive
-    this.loading.set(true)
+    this.togglingId.set(user.id)
+
     this.adminService.updateUser(user.id, { isActive: newStatus }).subscribe({
       next: () => {
-        this.toast.success(`Receptionist ${newStatus ? 'activated' : 'deactivated'} successfully.`)
+        this.toast.success(`✨ Receptionist ${newStatus ? 'Activated' : 'Deactivated'} Successfully! ✨`)
         this.loadReceptionists()
+        this.togglingId.set(null)
       },
       error: (err) => {
         this.toast.error(err.error?.message || "Failed to update status")
-        this.loading.set(false)
+        this.togglingId.set(null)
       }
     })
   }
