@@ -41,7 +41,8 @@
   border-radius: 1rem;
   padding: 1.25rem;
   display: flex;
-  gap: 1rem;
+  flex-direction: column;
+  gap: 0.75rem;
   border: 1px solid var(--admin-border);
   box-shadow: 0 4px 15px var(--admin-shadow);
   transition: all 0.2s ease;

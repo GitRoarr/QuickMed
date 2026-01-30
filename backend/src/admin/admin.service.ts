@@ -14,6 +14,7 @@ import { UserRole, AppointmentStatus, AppointmentType } from '../common/index';
 import { AdminStatsService, AdminStats } from './admin.stats.service';
 import { DoctorsService } from '../doctors/doctors.service';
 import { ReviewsService } from '../reviews/reviews.service';
+import { ConsultationsService } from '../consultations/consultations.service';
 
 export interface AdminDashboardData {
   stats: AdminStats;
@@ -39,10 +40,11 @@ export class AdminService {
     private readonly statsService: AdminStatsService,
     private readonly doctorsService: DoctorsService
     ,
+    private readonly consultationsService: ConsultationsService,
     private readonly emailService?: EmailService,
     private readonly smsService?: SmsService,
     private readonly reviewsService?: ReviewsService,
-  ) {}
+  ) { }
 
   // -------------------- Dashboard --------------------
   async getDashboardData(): Promise<AdminDashboardData> {
@@ -54,7 +56,7 @@ export class AdminService {
     const notifications = await this.getSystemNotifications();
 
     return { stats, recentAppointments, recentUsers, upcomingAppointments, systemHealth, notifications };
-    
+
   }
 
   async getAdminStats(): Promise<AdminStats> {
@@ -265,25 +267,25 @@ export class AdminService {
       .createQueryBuilder('appointment')
       .leftJoinAndSelect('appointment.patient', 'patient')
       .leftJoinAndSelect('appointment.doctor', 'doctor');
-    
+
     const conditions: string[] = [];
     const params: any = {};
-    
+
     if (status) {
       conditions.push('appointment.status = :status');
       params.status = status;
     }
-    
+
     if (search) {
       const likeTerm = `%${search.toLowerCase()}%`;
       conditions.push('(LOWER(patient.firstName) LIKE :likeTerm OR LOWER(patient.lastName) LIKE :likeTerm OR LOWER(patient.email) LIKE :likeTerm OR LOWER(doctor.firstName) LIKE :likeTerm OR LOWER(doctor.lastName) LIKE :likeTerm OR LOWER(appointment.reason) LIKE :likeTerm OR LOWER(appointment.notes) LIKE :likeTerm)');
       params.likeTerm = likeTerm;
     }
-    
+
     if (conditions.length > 0) {
       query.where(conditions.join(' AND '), params);
     }
-    
+
     const [appointments, total] = await query
       .orderBy('appointment.appointmentDate', 'DESC')
       .addOrderBy('appointment.appointmentTime', 'ASC')
@@ -310,10 +312,10 @@ export class AdminService {
     if (!patient) throw new BadRequestException("Invalid patient ID")
 
     // Check for conflicting appointments
-    const appointmentDate = typeof dto.appointmentDate === 'string' 
-      ? new Date(dto.appointmentDate) 
+    const appointmentDate = typeof dto.appointmentDate === 'string'
+      ? new Date(dto.appointmentDate)
       : dto.appointmentDate;
-    
+
     const existingAppointment = await this.appointmentRepository.findOne({
       where: {
         doctorId: dto.doctorId,
@@ -335,7 +337,7 @@ export class AdminService {
     })
 
     const saved = await this.appointmentRepository.save(appointment);
-    
+
     // Load relations for response
     return this.appointmentRepository.findOne({
       where: { id: saved.id },
@@ -353,34 +355,34 @@ export class AdminService {
     const appointment = await this.getAppointmentById(id);
     await this.appointmentRepository.remove(appointment);
   }
-async getSystemHealth(): Promise<{
-  database: 'healthy' | 'warning' | 'error';
-  api: 'healthy' | 'warning' | 'error';
-  storage: 'healthy' | 'warning' | 'error';
-  notifications: 'healthy' | 'warning' | 'error';
-}> {
-  try {
-    await this.userRepository.count();
-    const database: 'healthy' | 'warning' | 'error' = 'healthy';
+  async getSystemHealth(): Promise<{
+    database: 'healthy' | 'warning' | 'error';
+    api: 'healthy' | 'warning' | 'error';
+    storage: 'healthy' | 'warning' | 'error';
+    notifications: 'healthy' | 'warning' | 'error';
+  }> {
+    try {
+      await this.userRepository.count();
+      const database: 'healthy' | 'warning' | 'error' = 'healthy';
 
-    const apiStart = Date.now();
-    await this.appointmentRepository.count();
-    const apiResponseTime = Date.now() - apiStart;
-    const api: 'healthy' | 'warning' | 'error' = apiResponseTime < 1000 ? 'healthy' : 'warning';
+      const apiStart = Date.now();
+      await this.appointmentRepository.count();
+      const apiResponseTime = Date.now() - apiStart;
+      const api: 'healthy' | 'warning' | 'error' = apiResponseTime < 1000 ? 'healthy' : 'warning';
 
-    const storage: 'healthy' | 'warning' | 'error' = 'healthy';
-    const notifications: 'healthy' | 'warning' | 'error' = 'healthy';
+      const storage: 'healthy' | 'warning' | 'error' = 'healthy';
+      const notifications: 'healthy' | 'warning' | 'error' = 'healthy';
 
-    return { database, api, storage, notifications };
-  } catch (error) {
-    return {
-      database: 'error' as 'error',
-      api: 'error' as 'error',
-      storage: 'error' as 'error',
-      notifications: 'error' as 'error',
-    };
+      return { database, api, storage, notifications };
+    } catch (error) {
+      return {
+        database: 'error' as 'error',
+        api: 'error' as 'error',
+        storage: 'error' as 'error',
+        notifications: 'error' as 'error',
+      };
+    }
   }
-}
 
 
   async getSystemNotifications() {
@@ -481,8 +483,8 @@ async getSystemHealth(): Promise<{
       const statusLabel = doctor.isActive
         ? 'active'
         : doctor.licenseValidated && doctor.employmentConfirmed
-        ? 'ready'
-        : 'pending';
+          ? 'ready'
+          : 'pending';
 
       return {
         id: doctor.id,
@@ -538,75 +540,80 @@ async getSystemHealth(): Promise<{
         relations: ['patient', 'doctor'],
       });
 
-    // Group by date
-    const appointmentsByDate: { [key: string]: number } = {};
-    appointments.forEach(apt => {
-      const dateKey = new Date(apt.appointmentDate).toISOString().split('T')[0];
-      appointmentsByDate[dateKey] = (appointmentsByDate[dateKey] || 0) + 1;
-    });
-
-    // Status distribution
-    const statusDistribution = {
-      pending: appointments.filter(a => a.status === AppointmentStatus.PENDING).length,
-      confirmed: appointments.filter(a => a.status === AppointmentStatus.CONFIRMED).length,
-      completed: appointments.filter(a => a.status === AppointmentStatus.COMPLETED).length,
-      cancelled: appointments.filter(a => a.status === AppointmentStatus.CANCELLED).length,
-    };
-
-    // Doctor performance
-    const doctorStats = await this.appointmentRepository
-      .createQueryBuilder('appointment')
-      .select('doctor.id', 'doctorId')
-      .addSelect('doctor.firstName', 'firstName')
-      .addSelect('doctor.lastName', 'lastName')
-      .addSelect('COUNT(appointment.id)', 'totalAppointments')
-      .addSelect('COUNT(CASE WHEN appointment.status = :completed THEN 1 END)', 'completedCount')
-      .leftJoin('appointment.doctor', 'doctor')
-      .where('appointment.appointmentDate BETWEEN :start AND :end', { start, end })
-      .setParameter('completed', AppointmentStatus.COMPLETED)
-      .groupBy('doctor.id')
-      .addGroupBy('doctor.firstName')
-      .addGroupBy('doctor.lastName')
-      .orderBy('totalAppointments', 'DESC')
-      .limit(10)
-      .getRawMany();
-
-    // Patient growth - use safer date extraction
-    let patientsByDate: Array<{ date: string; count: number }> = [];
-    try {
-      const patients = await this.userRepository.find({
-        where: {
-          role: UserRole.PATIENT,
-          createdAt: Between(start, end),
-        },
-        select: ['createdAt'],
-      });
-      
-      // Group by date manually
-      const patientsByDateMap: { [key: string]: number } = {};
-      patients.forEach(patient => {
-        if (patient.createdAt) {
-          const dateKey = new Date(patient.createdAt).toISOString().split('T')[0];
-          patientsByDateMap[dateKey] = (patientsByDateMap[dateKey] || 0) + 1;
-        }
-      });
-      
-      patientsByDate = Object.entries(patientsByDateMap)
-        .map(([date, count]) => ({ date, count }))
-        .sort((a, b) => a.date.localeCompare(b.date));
-    } catch (error) {
-      console.error('[AdminService] Error fetching patient growth:', error);
-      patientsByDate = [];
-    }
-
-    // Revenue trends
-    const revenueByDate: { [key: string]: number } = {};
-    appointments
-      .filter(a => a.status === AppointmentStatus.COMPLETED)
-      .forEach(apt => {
+      // Group by date
+      const appointmentsByDate: { [key: string]: number } = {};
+      appointments.forEach(apt => {
         const dateKey = new Date(apt.appointmentDate).toISOString().split('T')[0];
-        revenueByDate[dateKey] = (revenueByDate[dateKey] || 0) + 150; // example price
+        appointmentsByDate[dateKey] = (appointmentsByDate[dateKey] || 0) + 1;
       });
+
+      // Status distribution
+      const statusDistribution = {
+        pending: appointments.filter(a => a.status === AppointmentStatus.PENDING).length,
+        confirmed: appointments.filter(a => a.status === AppointmentStatus.CONFIRMED).length,
+        completed: appointments.filter(a => a.status === AppointmentStatus.COMPLETED).length,
+        cancelled: appointments.filter(a => a.status === AppointmentStatus.CANCELLED).length,
+      };
+
+      // Doctor performance
+      const doctorStats = await this.appointmentRepository
+        .createQueryBuilder('appointment')
+        .select('doctor.id', 'doctorId')
+        .addSelect('doctor.firstName', 'firstName')
+        .addSelect('doctor.lastName', 'lastName')
+        .addSelect('COUNT(appointment.id)', 'totalAppointments')
+        .addSelect('COUNT(CASE WHEN appointment.status = :completed THEN 1 END)', 'completedCount')
+        .leftJoin('appointment.doctor', 'doctor')
+        .where('appointment.appointmentDate BETWEEN :start AND :end', { start, end })
+        .setParameter('completed', AppointmentStatus.COMPLETED)
+        .groupBy('doctor.id')
+        .addGroupBy('doctor.firstName')
+        .addGroupBy('doctor.lastName')
+        .orderBy('totalAppointments', 'DESC')
+        .limit(10)
+        .getRawMany();
+
+      // Patient growth - use safer date extraction
+      let patientsByDate: Array<{ date: string; count: number }> = [];
+      try {
+        const patients = await this.userRepository.find({
+          where: {
+            role: UserRole.PATIENT,
+            createdAt: Between(start, end),
+          },
+          select: ['createdAt'],
+        });
+
+        // Group by date manually
+        const patientsByDateMap: { [key: string]: number } = {};
+        patients.forEach(patient => {
+          if (patient.createdAt) {
+            const dateKey = new Date(patient.createdAt).toISOString().split('T')[0];
+            patientsByDateMap[dateKey] = (patientsByDateMap[dateKey] || 0) + 1;
+          }
+        });
+
+        patientsByDate = Object.entries(patientsByDateMap)
+          .map(([date, count]) => ({ date, count }))
+          .sort((a, b) => a.date.localeCompare(b.date));
+      } catch (error) {
+        console.error('[AdminService] Error fetching patient growth:', error);
+        patientsByDate = [];
+      }
+
+      // Revenue trends
+      const revenueByDate: { [key: string]: number } = {};
+      appointments
+        .filter(a => a.status === AppointmentStatus.COMPLETED)
+        .forEach(apt => {
+          const dateKey = new Date(apt.appointmentDate).toISOString().split('T')[0];
+          revenueByDate[dateKey] = (revenueByDate[dateKey] || 0) + 150; // example price
+        });
+
+      const consultationStats = await this.consultationsService.stats(
+        start.toISOString(),
+        end.toISOString()
+      );
 
       return {
         appointmentsByDate,
@@ -623,6 +630,9 @@ async getSystemHealth(): Promise<{
         patientsByDate: patientsByDate || [],
         revenueByDate,
         totalRevenue: Object.values(revenueByDate).reduce((sum, val) => sum + val, 0),
+        satisfactionRate: consultationStats.satisfactionRate,
+        reviewsCount: consultationStats.reviewsCount,
+        averageConsultationMinutes: consultationStats.averageConsultationMinutes,
         period: { start, end },
       };
     } catch (error) {
@@ -634,9 +644,9 @@ async getSystemHealth(): Promise<{
         patientsByDate: [],
         revenueByDate: {},
         totalRevenue: 0,
-        period: { 
-          start: (startDate || new Date()).toISOString().split('T')[0], 
-          end: (endDate || new Date()).toISOString().split('T')[0] 
+        period: {
+          start: (startDate || new Date()).toISOString().split('T')[0],
+          end: (endDate || new Date()).toISOString().split('T')[0]
         },
         error: 'Failed to generate analytics data',
       };

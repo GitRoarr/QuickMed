@@ -101,7 +101,7 @@ export class OverviewComponent implements OnInit {
   }
 
   private buildStatCards(stats: AdminStats): StatCard[] {
-    const totalAppointmentsIconLight = "https://img.icons8.com/?size=100&id=58848&format=png&color=000000"
+    const totalAppointmentsIconLight = "https://img.icons8.com/?size=100&id=87821&format=png&color=000000"
     const totalAppointmentsIconDark = "https://img.icons8.com/?size=100&id=58848&format=png&color=FFFFFF"
     const totalPatientsIconLight = "https://img.icons8.com/?size=100&id=10849&format=png&color=000000"
     const totalPatientsIconDark = "https://img.icons8.com/?size=100&id=10849&format=png&color=FFFFFF"
@@ -109,6 +109,8 @@ export class OverviewComponent implements OnInit {
     const pendingIconDark = "https://img.icons8.com/?size=100&id=33945&format=png&color=FFFFFF"
     const avgWaitIconLight = "https://img.icons8.com/?size=100&id=58173&format=png&color=000000"
     const avgWaitIconDark = "https://img.icons8.com/?size=100&id=58173&format=png&color=FFFFFF"
+    const completedIconLight = "https://img.icons8.com/?size=100&id=39050&format=png&color=000000"
+    const completedIconDark = "https://img.icons8.com/?size=100&id=39050&format=png&color=000000"
 
     return [
       {
@@ -146,7 +148,8 @@ export class OverviewComponent implements OnInit {
         label: "Completed",
         value: stats.completedAppointments.toString(),
         change: `${stats.cancelledAppointments} cancelled`,
-        icon: "✅",
+        iconLight: completedIconLight,
+        iconDark: completedIconDark,
         trend: "up",
       },
       {

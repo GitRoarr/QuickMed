@@ -12,6 +12,7 @@ import { SmsModule } from '../common/services/sms.module';
 import { ReviewsModule } from '../reviews/reviews.module';
 import { forwardRef } from '@nestjs/common';
 import { ReceptionistModule } from '../receptionist/receptionist.module';
+import { ConsultationsModule } from '../consultations/consultations.module';
 import { AdminStatsService } from './admin.stats.service';
 import { DoctorsService } from '../doctors/doctors.service';
 import { ThemeService } from './theme.service';
@@ -25,13 +26,14 @@ import { MessagesModule } from '@/messages/messages.module';
     SmsModule,
     ReviewsModule,
     MessagesModule,
-    
+    ConsultationsModule,
+
     forwardRef(() => ReceptionistModule),
   ],
   controllers: [AdminController],
   providers: [AdminService, AdminStatsService, DoctorsService, ThemeService],
   exports: [AdminService, ThemeService],
 })
-export class AdminModule {}
+export class AdminModule { }
 
 

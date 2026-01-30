@@ -24,6 +24,9 @@ interface AnalyticsData {
   patientsByDate: Array<{ date: string; count: number }>;
   revenueByDate: { [key: string]: number };
   totalRevenue: number;
+  satisfactionRate: number;
+  reviewsCount: number;
+  averageConsultationMinutes: number;
   period: { start: string; end: string };
 }
 
@@ -42,7 +45,7 @@ export class AnalyticsComponent implements OnInit {
   startDate = signal(new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]);
   endDate = signal(new Date().toISOString().split('T')[0]);
 
-  constructor(private adminService: AdminService, private consultationsService: ConsultationsService) {}
+  constructor(private adminService: AdminService, private consultationsService: ConsultationsService) { }
 
   ngOnInit() {
     this.loadAnalytics();
@@ -52,7 +55,7 @@ export class AnalyticsComponent implements OnInit {
     this.isLoading.set(true);
     const start = this.startDate();
     const end = this.endDate();
-    
+
     this.adminService.getAnalytics(start, end).subscribe({
       next: (data) => {
         // Handle error response from backend
@@ -66,6 +69,9 @@ export class AnalyticsComponent implements OnInit {
             patientsByDate: [],
             revenueByDate: {},
             totalRevenue: 0,
+            satisfactionRate: 0,
+            reviewsCount: 0,
+            averageConsultationMinutes: 0,
             period: { start, end },
           });
         } else {
@@ -83,6 +89,9 @@ export class AnalyticsComponent implements OnInit {
           patientsByDate: [],
           revenueByDate: {},
           totalRevenue: 0,
+          satisfactionRate: 0,
+          reviewsCount: 0,
+          averageConsultationMinutes: 0,
           period: { start, end },
         });
         this.isLoading.set(false);
@@ -112,7 +121,7 @@ export class AnalyticsComponent implements OnInit {
   getChartData() {
     const data = this.analytics();
     if (!data) return { labels: [], values: [] };
-    
+
     const sorted = Object.entries(data.appointmentsByDate).sort((a, b) => a[0].localeCompare(b[0]));
     return {
       labels: sorted.map(([date]) => new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })),
@@ -123,7 +132,7 @@ export class AnalyticsComponent implements OnInit {
   getRevenueChartData() {
     const data = this.analytics();
     if (!data) return { labels: [], values: [] };
-    
+
     const sorted = Object.entries(data.revenueByDate).sort((a, b) => a[0].localeCompare(b[0]));
     return {
       labels: sorted.map(([date]) => new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })),

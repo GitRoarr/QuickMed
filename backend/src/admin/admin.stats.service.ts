@@ -4,6 +4,7 @@ import { Repository, Between } from 'typeorm';
 import { User } from '../users/entities/user.entity';
 import { Appointment } from '../appointments/entities/appointment.entity';
 import { UserRole, AppointmentStatus } from '../common/index';
+import { ConsultationsService } from '../consultations/consultations.service';
 
 export interface AdminStats {
   totalUsers: number;
@@ -30,7 +31,8 @@ export class AdminStatsService {
     private userRepository: Repository<User>,
     @InjectRepository(Appointment)
     private appointmentRepository: Repository<Appointment>,
-  ) {}
+    private readonly consultationsService: ConsultationsService,
+  ) { }
 
   async getAdminStats(): Promise<AdminStats> {
     const [
@@ -117,10 +119,12 @@ export class AdminStatsService {
   }
 
   private async getAverageAppointmentDuration(): Promise<number> {
-    return 30; // dummy value
+    const stats = await this.consultationsService.stats();
+    return stats.averageConsultationMinutes;
   }
 
   private async getPatientSatisfactionScore(): Promise<number> {
-    return 4.5; // dummy value
+    const stats = await this.consultationsService.stats();
+    return stats.satisfactionRate;
   }
 }
