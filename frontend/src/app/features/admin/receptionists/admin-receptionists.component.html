@@ -12,7 +12,6 @@
     </header>
 
     <div class="dual-grid">
-      <!-- Quick Invite form -->
       <section class="invite-card">
         <h3><i class="bi bi-lightning-charge-fill"></i> Quick Invite</h3>
         <form [formGroup]="inviteForm" (ngSubmit)="inviteReceptionist()">
@@ -34,6 +33,32 @@
             {{ loading() ? 'Creating Account...' : 'Send Invite' }}
           </button>
         </form>
+
+        <div class="invite-link" *ngIf="inviteLink()">
+          <div class="invite-link__header">
+            <div>
+              <h4>Share invitation link</h4>
+              <p>Send this link to {{ inviteEmail() || 'the receptionist' }} to set a password.</p>
+            </div>
+            <button type="button" class="copy-btn" (click)="copyInviteLink()">
+              <i class="bi bi-clipboard"></i> Copy
+            </button>
+          </div>
+          <div class="invite-link__value">{{ inviteLink() }}</div>
+        </div>
+
+        <div class="invite-link" *ngIf="invitePreviewUrl()">
+          <div class="invite-link__header">
+            <div>
+              <h4>Email preview link</h4>
+              <p>Open the sent invite email preview.</p>
+            </div>
+            <a class="copy-btn" [href]="invitePreviewUrl()" target="_blank" rel="noopener">
+              <i class="bi bi-box-arrow-up-right"></i> Open
+            </a>
+          </div>
+          <div class="invite-link__value">{{ invitePreviewUrl() }}</div>
+        </div>
       </section>
 
       <!-- Filter Panel -->

@@ -19,6 +19,8 @@ import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
 })
 export class AppointmentsComponent implements OnInit {
 
+  AppointmentStatus = AppointmentStatus;
+
   appointments = signal<Appointment[]>([]);
   filteredAppointments = signal<Appointment[]>([]);
   isLoading = signal(false);
@@ -53,6 +55,9 @@ export class AppointmentsComponent implements OnInit {
   
   calendarDate = signal(new Date());
   calendarAppointments = signal<{ [key: string]: Appointment[] }>({});
+
+  // Row action menu state
+  activeMenuId = signal<string | null>(null);
   
   // Search debounce
   private searchSubject = new Subject<string>();
@@ -351,6 +356,9 @@ export class AppointmentsComponent implements OnInit {
     if (!target.closest('.doctor-search')) {
       this.doctorDropdownOpen.set(false);
     }
+    if (!target.closest('.appointment-actions')) {
+      this.activeMenuId.set(null);
+    }
   }
 
   markAsRead(notificationId: string) {
@@ -527,6 +535,51 @@ export class AppointmentsComponent implements OnInit {
         target.style.transform = 'translateY(0)';
       }
     }
+  }
+
+  toggleActionMenu(event: MouseEvent, appointmentId: string) {
+    event.stopPropagation();
+    this.activeMenuId.update((current) => (current === appointmentId ? null : appointmentId));
+  }
+
+  closeActionMenu() {
+    this.activeMenuId.set(null);
+  }
+
+  updateAppointmentStatus(appointment: Appointment, status: AppointmentStatus) {
+    if (appointment.status === status) {
+      this.closeActionMenu();
+      return;
+    }
+    this.adminService.updateAppointment(appointment.id, { status }).subscribe({
+      next: () => {
+        this.showAlert('success', `Appointment marked as ${status}.`);
+        this.closeActionMenu();
+        this.fetchAppointments();
+      },
+      error: (error) => {
+        console.error('Error updating appointment status:', error);
+        this.showAlert('error', error.error?.message || 'Failed to update appointment status');
+      },
+    });
+  }
+
+  deleteAppointment(appointment: Appointment) {
+    const name = this.getPatientName(appointment);
+    if (!confirm(`Delete appointment for ${name}? This cannot be undone.`)) {
+      return;
+    }
+    this.adminService.deleteAppointment(appointment.id).subscribe({
+      next: () => {
+        this.showAlert('success', 'Appointment deleted.');
+        this.closeActionMenu();
+        this.fetchAppointments();
+      },
+      error: (error) => {
+        console.error('Error deleting appointment:', error);
+        this.showAlert('error', error.error?.message || 'Failed to delete appointment');
+      },
+    });
   }
 
   clearFilters() {

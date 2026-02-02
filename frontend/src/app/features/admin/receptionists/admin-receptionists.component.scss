@@ -13,7 +13,6 @@
   display: inline-block;
 }
 
-/* Receptionists Page - Amazing Premium UI */
 .receptionist-page {
   padding: 1.5rem;
   max-width: 1400px;
@@ -206,6 +205,66 @@
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+  }
+}
+
+.invite-link {
+  margin-top: 1.5rem;
+  padding: 1.25rem;
+  border-radius: 1.25rem;
+  border: 1px dashed var(--admin-border);
+  background: var(--admin-bg);
+  display: grid;
+  gap: 0.75rem;
+}
+
+.invite-link__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+
+  h4 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--admin-fg);
+  }
+
+  p {
+    margin: 0.25rem 0 0 0;
+    color: var(--admin-muted);
+    font-size: 0.85rem;
+  }
+}
+
+.invite-link__value {
+  font-size: 0.85rem;
+  color: var(--admin-fg);
+  padding: 0.75rem 0.9rem;
+  border-radius: 0.85rem;
+  background: var(--admin-surface);
+  border: 1px solid var(--admin-border);
+  word-break: break-all;
+}
+
+.copy-btn {
+  border: none;
+  background: var(--admin-primary);
+  color: #fff;
+  border-radius: 999px;
+  padding: 0.5rem 1rem;
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+
+  &:hover {
+    background: var(--admin-primary-dark);
+    transform: translateY(-1px);
   }
 }
 

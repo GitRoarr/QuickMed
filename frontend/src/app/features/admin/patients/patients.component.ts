@@ -186,6 +186,29 @@ export class PatientsComponent implements OnInit {
     this.loadPatients();
   }
 
+  deletePatient(patient: PatientRow): void {
+    const confirmed = window.confirm(`Delete ${patient.fullName}? This cannot be undone.`)
+    if (!confirmed) return
+
+    this.adminService
+      .deleteUser(patient.id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.patients.update((list) => list.filter((item) => item.id !== patient.id))
+          this.totalPatients.update((count) => Math.max(0, count - 1))
+          if (this.highlightedPatient()?.id === patient.id) {
+            this.highlightedPatient.set(null)
+            this.showDetailModal.set(false)
+          }
+        },
+        error: (err) => {
+          console.error("Failed to delete patient", err)
+          this.errorMessage.set(err.error?.message || "Unable to delete patient.")
+        },
+      })
+  }
+
   private loadPatients(): void {
     this.isLoading.set(true)
     this.errorMessage.set("")

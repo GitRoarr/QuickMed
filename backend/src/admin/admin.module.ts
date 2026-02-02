@@ -14,7 +14,7 @@ import { forwardRef } from '@nestjs/common';
 import { ReceptionistModule } from '../receptionist/receptionist.module';
 import { ConsultationsModule } from '../consultations/consultations.module';
 import { AdminStatsService } from './admin.stats.service';
-import { DoctorsService } from '../doctors/doctors.service';
+import { DoctorsModule } from '../doctors/doctors.module';
 import { ThemeService } from './theme.service';
 import { MessagesModule } from '@/messages/messages.module';
 
@@ -27,11 +27,12 @@ import { MessagesModule } from '@/messages/messages.module';
     ReviewsModule,
     MessagesModule,
     ConsultationsModule,
+    DoctorsModule,
 
     forwardRef(() => ReceptionistModule),
   ],
   controllers: [AdminController],
-  providers: [AdminService, AdminStatsService, DoctorsService, ThemeService],
+  providers: [AdminService, AdminStatsService, ThemeService],
   exports: [AdminService, ThemeService],
 })
 export class AdminModule { }

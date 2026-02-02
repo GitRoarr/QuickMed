@@ -184,6 +184,71 @@
   transform: translateY(-2px);
 }
 
+.appointment-actions {
+  position: relative;
+}
+
+.action-trigger {
+  border: 1px solid var(--admin-border);
+  background: var(--admin-surface);
+  color: var(--admin-fg);
+  border-radius: 0.5rem;
+  padding: 0.25rem 0.5rem;
+  line-height: 1;
+  font-size: 1.25rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.action-trigger:hover {
+  border-color: var(--admin-primary);
+  color: var(--admin-primary);
+}
+
+.action-menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 0.5rem);
+  min-width: 180px;
+  background: var(--admin-surface);
+  border: 1px solid var(--admin-border);
+  border-radius: 0.75rem;
+  box-shadow: 0 12px 30px var(--admin-shadow);
+  display: flex;
+  flex-direction: column;
+  padding: 0.35rem;
+  z-index: 40;
+}
+
+.action-menu button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.5rem 0.6rem;
+  border: none;
+  background: transparent;
+  color: var(--admin-fg);
+  font-size: 0.85rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  text-align: left;
+}
+
+.action-menu button:hover {
+  background: var(--admin-primary-light);
+  color: var(--admin-primary);
+}
+
+.action-menu button.danger {
+  color: var(--status-cancelled);
+}
+
+.action-menu button.danger:hover {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--status-cancelled);
+}
+
 .status-badge {
   display: inline-flex;
   align-items: center;

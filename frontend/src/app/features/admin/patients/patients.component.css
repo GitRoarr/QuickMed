@@ -333,6 +333,23 @@
   background: var(--admin-primary-light);
 }
 
+.danger-btn {
+  padding: 0.625rem 1.5rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  font-weight: 600;
+  color: #b91c1c;
+  background: rgba(254, 226, 226, 0.7);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.danger-btn:hover {
+  background: rgba(254, 202, 202, 0.9);
+  border-color: rgba(239, 68, 68, 0.6);
+  color: #991b1b;
+}
+
 .detail-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

@@ -10,89 +10,100 @@ interface EmailResult {
 @Injectable()
 export class EmailService {
   private transporter: nodemailer.Transporter | null = null;
+  private initPromise: Promise<void> | null = null;
 
   constructor() {
-    (async () => {
-      const emailMode = (process.env.EMAIL_MODE || 'auto').toLowerCase();
+    this.initPromise = this.initializeTransporter();
+  }
 
-      if (['log', 'disable', 'off'].includes(emailMode)) {
-        console.info('[EmailService] Email mode set to log-only; skipping SMTP setup.');
-        this.transporter = null;
-        return;
-      }
+  private async initializeTransporter(): Promise<void> {
+    const emailMode = (process.env.EMAIL_MODE || 'auto').toLowerCase();
 
-      // If SMTP is configured, use it
-      if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
-        try {
-          console.log('[EmailService] Initializing SMTP connection...');
-          console.log('[EmailService] SMTP_HOST:', process.env.SMTP_HOST);
-          console.log('[EmailService] SMTP_PORT:', process.env.SMTP_PORT || 587);
-          console.log('[EmailService] SMTP_USER:', process.env.SMTP_USER);
-
-          this.transporter = nodemailer.createTransport({
-            host: process.env.SMTP_HOST,
-            port: +(process.env.SMTP_PORT || 587),
-            secure: process.env.SMTP_PORT === '465',
-            auth: {
-              user: process.env.SMTP_USER,
-              pass: process.env.SMTP_PASS,
-            },
-            // Add connection timeout and retry options
-            connectionTimeout: 10000,
-            greetingTimeout: 10000,
-            socketTimeout: 10000,
-            // Gmail specific settings
-            tls: {
-              rejectUnauthorized: false, // For development only
-            },
-          });
-
-          // Verify connection
-          console.log('[EmailService] Verifying SMTP connection...');
-          await this.transporter.verify();
-          console.info('[EmailService] ✅ SMTP connection verified successfully');
-          return;
-        } catch (error) {
-          const errorMessage = error instanceof Error ? error.message : String(error);
-          console.error('[EmailService] ❌ Failed to initialize SMTP:', errorMessage);
-          console.error('[EmailService] Error details:', error);
-          console.warn('[EmailService] ⚠️  Email sending will be disabled. Check SMTP credentials.');
-          console.warn('[EmailService] 💡 For Gmail: Use App Password, not regular password');
-          console.warn('[EmailService] 💡 Generate App Password: https://myaccount.google.com/apppasswords');
-          this.transporter = null;
-        }
-      } else {
-        console.warn('[EmailService] ⚠️  SMTP not configured in .env file');
-        console.warn('[EmailService] Required: SMTP_HOST, SMTP_USER, SMTP_PASS');
-      }
-
-      // In non-production, create a test account (Ethereal) to preview emails
-      if (process.env.NODE_ENV !== 'production' && emailMode === 'auto') {
-        try {
-          const testAccount = await nodemailer.createTestAccount();
-          this.transporter = nodemailer.createTransport({
-            host: testAccount.smtp.host,
-            port: testAccount.smtp.port,
-            secure: testAccount.smtp.secure,
-            auth: {
-              user: testAccount.user,
-              pass: testAccount.pass,
-            },
-          });
-          console.info('[EmailService] Using Ethereal test account for email preview');
-          return;
-        } catch (err) {
-          console.warn('[EmailService] Failed to create test account for emails', err);
-        }
-      }
-
-      // No transporter available
-      console.warn('[EmailService] SMTP not configured. Email sending will be disabled.');
+    if (['log', 'disable', 'off'].includes(emailMode)) {
+      console.info('[EmailService] Email mode set to log-only; skipping SMTP setup.');
       this.transporter = null;
-    })();
+      return;
+    }
+
+    // If SMTP is configured, use it
+    if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
+      try {
+        console.log('[EmailService] Initializing SMTP connection...');
+        console.log('[EmailService] SMTP_HOST:', process.env.SMTP_HOST);
+        console.log('[EmailService] SMTP_PORT:', process.env.SMTP_PORT || 587);
+        console.log('[EmailService] SMTP_USER:', process.env.SMTP_USER);
+
+        this.transporter = nodemailer.createTransport({
+          host: process.env.SMTP_HOST,
+          port: +(process.env.SMTP_PORT || 587),
+          secure: process.env.SMTP_PORT === '465',
+          auth: {
+            user: process.env.SMTP_USER,
+            pass: process.env.SMTP_PASS,
+          },
+          // Add connection timeout and retry options
+          connectionTimeout: 10000,
+          greetingTimeout: 10000,
+          socketTimeout: 10000,
+          // Gmail specific settings
+          tls: {
+            rejectUnauthorized: false, // For development only
+          },
+        });
+
+        // Verify connection
+        console.log('[EmailService] Verifying SMTP connection...');
+        await this.transporter.verify();
+        console.info('[EmailService] ✅ SMTP connection verified successfully');
+        return;
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        console.error('[EmailService] ❌ Failed to initialize SMTP:', errorMessage);
+        console.error('[EmailService] Error details:', error);
+        console.warn('[EmailService] ⚠️  Email sending will be disabled. Check SMTP credentials.');
+        console.warn('[EmailService] 💡 For Gmail: Use App Password, not regular password');
+        console.warn('[EmailService] 💡 Generate App Password: https://myaccount.google.com/apppasswords');
+        this.transporter = null;
+      }
+    } else {
+      console.warn('[EmailService] ⚠️  SMTP not configured in .env file');
+      console.warn('[EmailService] Required: SMTP_HOST, SMTP_USER, SMTP_PASS');
+    }
+
+    // In non-production, create a test account (Ethereal) to preview emails
+    if (process.env.NODE_ENV !== 'production' && emailMode === 'auto') {
+      try {
+        const testAccount = await nodemailer.createTestAccount();
+        this.transporter = nodemailer.createTransport({
+          host: testAccount.smtp.host,
+          port: testAccount.smtp.port,
+          secure: testAccount.smtp.secure,
+          auth: {
+            user: testAccount.user,
+            pass: testAccount.pass,
+          },
+        });
+        console.info('[EmailService] Using Ethereal test account for email preview');
+        return;
+      } catch (err) {
+        console.warn('[EmailService] Failed to create test account for emails', err);
+      }
+    }
+
+    // No transporter available
+    console.warn('[EmailService] SMTP not configured. Email sending will be disabled.');
+    this.transporter = null;
+  }
+
+  private async ensureInitialized(): Promise<void> {
+    if (this.initPromise) {
+      await this.initPromise;
+      this.initPromise = null;
+    }
   }
 
   async sendMail(to: string, subject: string, html: string): Promise<EmailResult> {
+    await this.ensureInitialized();
     const extractLink = () => html.match(/href="([^"]+)"/)?.[1];
 
     if (!this.transporter) {
@@ -170,7 +181,12 @@ export class EmailService {
     return this.sendMail(to, subject, html);
   }
 
-  async sendReceptionistInvite(to: string, inviteLink: string, firstName: string = 'Team Member'): Promise<EmailResult> {
+  async sendReceptionistInvite(
+    to: string,
+    inviteLink: string,
+    firstName: string = 'Team Member',
+    tempPassword?: string
+  ): Promise<EmailResult> {
     const subject = `Welcome to the Team, ${firstName}! - QuickMed Admin Portal`;
     const html = `
       <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; padding: 0; background-color: #f9fafb; border-radius: 16px; overflow: hidden; border: 1px solid #e5e7eb; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
@@ -186,6 +202,14 @@ export class EmailService {
           <p style="color: #4b5563; line-height: 1.6; margin-bottom: 24px; font-size: 16px;">
             We're thrilled to have you join our front desk squad. Your role as a <strong>Receptionist</strong> is vital to making QuickMed a success, and we can't wait to see the impact you'll make.
           </p>
+
+          ${tempPassword ? `
+          <div style="background-color: #ecfdf5; border: 1px solid #bbf7d0; padding: 16px; border-radius: 12px; margin-bottom: 20px;">
+            <p style="color: #065f46; margin: 0 0 8px 0; font-size: 14px; font-weight: 700;">Temporary Password</p>
+            <p style="color: #065f46; margin: 0; font-size: 16px; font-weight: 800; letter-spacing: 0.5px;">${tempPassword}</p>
+            <p style="color: #047857; margin: 8px 0 0 0; font-size: 12px;">Use this to sign in, then set a new password using the link below.</p>
+          </div>
+          ` : ''}
 
           <div style="text-align: center; margin: 40px 0;">
             <a href="${inviteLink}" style="background: linear-gradient(135deg, #16a34a, #15803d); color: #ffffff; padding: 16px 36px; text-decoration: none; border-radius: 12px; display: inline-block; font-weight: 700; font-size: 16px; box-shadow: 0 10px 15px -3px rgba(22, 163, 74, 0.3);">Set Your Password & Login</a>

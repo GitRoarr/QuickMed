@@ -20,6 +20,9 @@ export class AdminReceptionistsComponent implements OnInit {
   receptionists = signal<User[]>([])
   loading = signal(false)
   togglingId = signal<string | null>(null)
+  inviteLink = signal<string | null>(null)
+  inviteEmail = signal<string | null>(null)
+  invitePreviewUrl = signal<string | null>(null)
   filterForm!: FormGroup
   inviteForm!: FormGroup
 
@@ -82,6 +85,15 @@ export class AdminReceptionistsComponent implements OnInit {
           ? `Invitation sent to ${payload.email}.`
           : `Invitation created. Please share the link manually.`
         this.toast.success(msg)
+        if (!res.emailSent && res.inviteLink) {
+          this.inviteLink.set(res.inviteLink)
+          this.inviteEmail.set(payload.email)
+          this.invitePreviewUrl.set(res.previewUrl || null)
+        } else {
+          this.inviteLink.set(null)
+          this.inviteEmail.set(null)
+          this.invitePreviewUrl.set(res.previewUrl || null)
+        }
         this.inviteForm.reset()
         this.loadReceptionists()
       },
@@ -128,5 +140,33 @@ export class AdminReceptionistsComponent implements OnInit {
   getInitials(user: User) {
     if (!user.firstName || !user.lastName) return "?"
     return `${(user.firstName[0] || "")}${(user.lastName[0] || "")}`.toUpperCase()
+  }
+
+  copyInviteLink() {
+    const link = this.inviteLink()
+    if (!link) return
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(link).then(
+        () => this.toast.success('Invite link copied to clipboard.'),
+        () => this.toast.error('Failed to copy invite link.')
+      )
+      return
+    }
+
+    const textarea = document.createElement('textarea')
+    textarea.value = link
+    textarea.style.position = 'fixed'
+    textarea.style.opacity = '0'
+    document.body.appendChild(textarea)
+    textarea.focus()
+    textarea.select()
+    try {
+      document.execCommand('copy')
+      this.toast.success('Invite link copied to clipboard.')
+    } catch {
+      this.toast.error('Failed to copy invite link.')
+    } finally {
+      document.body.removeChild(textarea)
+    }
   }
 }

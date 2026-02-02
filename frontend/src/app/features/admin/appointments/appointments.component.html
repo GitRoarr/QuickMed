@@ -126,7 +126,29 @@
             <div class="font-semibold">{{ formatTime(appointment.appointmentTime) }}</div>
             <div class="text-xs">{{ formatDate(appointment.appointmentDate) }}</div>
           </div>
-          <button class="ml-4">⋮</button>
+          <div class="appointment-actions ml-4">
+            <button class="action-trigger" (click)="toggleActionMenu($event, appointment.id)">⋮</button>
+            <div class="action-menu" *ngIf="activeMenuId() === appointment.id">
+              <button
+                *ngIf="appointment.status !== 'confirmed'"
+                (click)="updateAppointmentStatus(appointment, AppointmentStatus.CONFIRMED)">
+                <i class="bi bi-check-lg"></i> Mark confirmed
+              </button>
+              <button
+                *ngIf="appointment.status !== 'completed'"
+                (click)="updateAppointmentStatus(appointment, AppointmentStatus.COMPLETED)">
+                <i class="bi bi-check2-circle"></i> Mark completed
+              </button>
+              <button
+                *ngIf="appointment.status !== 'cancelled'"
+                (click)="updateAppointmentStatus(appointment, AppointmentStatus.CANCELLED)">
+                <i class="bi bi-x-circle"></i> Cancel
+              </button>
+              <button class="danger" (click)="deleteAppointment(appointment)">
+                <i class="bi bi-trash"></i> Delete
+              </button>
+            </div>
+          </div>
         </div>
 
         <!-- Empty State -->

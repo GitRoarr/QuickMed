@@ -90,6 +90,7 @@ export class ReceptionistService {
     receptionist: Partial<User>;
     emailSent: boolean;
     inviteLink?: string;
+    previewUrl?: string;
   }> {
     // Use transaction to ensure data integrity
     const queryRunner = this.userRepo.manager.connection.createQueryRunner();
@@ -142,6 +143,9 @@ export class ReceptionistService {
       const inviteExpiresAt = new Date();
       inviteExpiresAt.setDate(inviteExpiresAt.getDate() + 7); // 7 days expiry
 
+      const tempPassword = this.generateTempPassword();
+      const hashedTempPassword = await bcrypt.hash(tempPassword, 10);
+
       // Create receptionist user with invitation data
       const receptionist = queryRunner.manager.create(User, {
         firstName: dto.firstName.trim(),
@@ -149,10 +153,11 @@ export class ReceptionistService {
         email: normalizedEmail,
         phoneNumber: dto.phoneNumber?.trim() || null,
         role: UserRole.RECEPTIONIST,
-        isActive: false, // Inactive until password is set
+        isActive: true, // Allow login with temporary password
         inviteToken,
         inviteExpiresAt,
-        password: null, // No password until invitation is accepted
+        password: hashedTempPassword,
+        mustChangePassword: true,
       });
 
       const savedReceptionist = await queryRunner.manager.save(receptionist);
@@ -164,14 +169,19 @@ export class ReceptionistService {
       const inviteLink = `${process.env.FRONTEND_URL || 'http://localhost:4200'}/set-password?token=${inviteToken}&uid=${savedReceptionist.id}`;
 
       // Send invitation email (non-blocking)
-      let emailResult: { sent: boolean; fallbackLink?: string } = { sent: false, fallbackLink: inviteLink };
+      let emailResult: { sent: boolean; fallbackLink?: string; previewUrl?: string } = { sent: false, fallbackLink: inviteLink };
       try {
         const result = await this.emailService.sendReceptionistInvite(
           savedReceptionist.email,
           inviteLink,
-          savedReceptionist.firstName
+          savedReceptionist.firstName,
+          tempPassword
         );
-        emailResult = { sent: result.sent, fallbackLink: result.fallbackLink || inviteLink };
+        emailResult = {
+          sent: result.sent,
+          fallbackLink: result.fallbackLink || inviteLink,
+          previewUrl: result.previewUrl,
+        };
       } catch (emailError) {
         console.error('[ReceptionistService] Failed to send email, but invitation created:', emailError);
         // Don't fail the whole operation if email fails
@@ -191,6 +201,7 @@ export class ReceptionistService {
         receptionist: safeReceptionist,
         emailSent: emailResult.sent,
         inviteLink: emailResult.sent ? undefined : emailResult.fallbackLink || inviteLink,
+        previewUrl: emailResult.previewUrl,
       };
     } catch (error) {
       await queryRunner.rollbackTransaction();
@@ -224,7 +235,7 @@ export class ReceptionistService {
         throw new NotFoundException('Receptionist not found');
       }
 
-      if (receptionist.isActive && receptionist.password) {
+      if (receptionist.isActive && receptionist.password && !receptionist.mustChangePassword) {
         await queryRunner.rollbackTransaction();
         throw new BadRequestException('Receptionist already has a password set. Please use password reset instead.');
       }
@@ -316,5 +327,14 @@ export class ReceptionistService {
     }
 
     return qb.getMany();
+  }
+
+  private generateTempPassword(length = 10): string {
+    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@$";
+    let pwd = "";
+    for (let i = 0; i < length; i++) {
+      pwd += chars[Math.floor(Math.random() * chars.length)];
+    }
+    return pwd;
   }
 }

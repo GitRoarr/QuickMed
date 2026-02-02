@@ -90,8 +90,9 @@
             <div class="flex items-center gap-2">
               <button class="outline-btn" (click)="$event.stopPropagation(); selectPatient(patient)">View
                 Details</button>
-              <button class="spotify-btn"
-                (click)="$event.stopPropagation(); selectPatient(patient); openMessageModal()">Schedule</button>
+              <button class="danger-btn" (click)="$event.stopPropagation(); deletePatient(patient)">
+                Delete
+              </button>
             </div>
           </div>
 

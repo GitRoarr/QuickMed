@@ -82,9 +82,12 @@ export class SetPasswordComponent implements OnInit {
         }, 2000);
       },
       error: (doctorErr) => {
-        // Check if it's a 400/404 error (user not found or invalid) vs network error
-        // If it's a clear "not found" error, try receptionist endpoint
-        if (doctorErr.status === 404 || (doctorErr.status === 400 && doctorErr.error?.message?.includes('Doctor not found'))) {
+        // If doctor endpoint fails (not found or server error), try receptionist endpoint
+        if (
+          doctorErr.status === 404 ||
+          doctorErr.status >= 500 ||
+          (doctorErr.status === 400 && doctorErr.error?.message?.includes('Doctor not found'))
+        ) {
           console.log('[SetPassword] Doctor endpoint failed, trying receptionist endpoint...');
           // Try receptionist endpoint
           this.http.post(`${environment.apiUrl}/receptionist/set-password`, payload).subscribe({
