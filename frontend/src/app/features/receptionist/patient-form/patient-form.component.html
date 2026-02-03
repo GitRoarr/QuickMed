@@ -1,22 +1,51 @@
-<div class="patient-form">
-  <app-alert-message *ngIf="message()" [type]="message()!.type" [message]="message()!.text"></app-alert-message>
+<div class="receptionist-layout">
+  <app-header></app-header>
+  <div class="body">
+    <app-sidebar
+      [title]="'QuickMed'"
+      [menuItems]="menuItems"
+      [secondaryItems]="secondaryItems"
+    ></app-sidebar>
+    <main class="panel">
+      <section class="form-card">
+        <header>
+          <h1>Register New Patient</h1>
+          <p class="muted">Create a patient profile for scheduling and messaging.</p>
+        </header>
 
-  <div class="form-row">
-    <input [(ngModel)]="model().firstName" name="firstName" placeholder="First name" />
-    <input [(ngModel)]="model().lastName" name="lastName" placeholder="Last name" />
-  </div>
-  <div class="form-row">
-    <input [(ngModel)]="model().email" name="email" placeholder="Email" />
-    <input [(ngModel)]="model().phoneNumber" name="phoneNumber" placeholder="Phone" />
-  </div>
-  <div class="form-row">
-    <input [(ngModel)]="model().dateOfBirth" name="dateOfBirth" placeholder="Date of birth" type="date" />
-  </div>
-  <div class="form-row">
-    <textarea [(ngModel)]="model().medicalHistory" name="medicalHistory" placeholder="Medical notes"></textarea>
-  </div>
+        <app-alert-message *ngIf="message()" [type]="message()!.type" [message]="message()!.text"></app-alert-message>
 
-  <div class="form-actions">
-    <button (click)="save()" [disabled]="isSaving()">Create patient</button>
+        <div class="form-grid">
+          <label>
+            <span>First name</span>
+            <input [(ngModel)]="model().firstName" name="firstName" />
+          </label>
+          <label>
+            <span>Last name</span>
+            <input [(ngModel)]="model().lastName" name="lastName" />
+          </label>
+          <label>
+            <span>Email</span>
+            <input [(ngModel)]="model().email" name="email" />
+          </label>
+          <label>
+            <span>Phone</span>
+            <input [(ngModel)]="model().phoneNumber" name="phoneNumber" />
+          </label>
+          <label>
+            <span>Date of birth</span>
+            <input [(ngModel)]="model().dateOfBirth" name="dateOfBirth" type="date" />
+          </label>
+          <label class="notes">
+            <span>Medical notes</span>
+            <textarea [(ngModel)]="model().medicalHistory" name="medicalHistory"></textarea>
+          </label>
+        </div>
+
+        <div class="form-actions">
+          <button class="primary" type="button" (click)="save()" [disabled]="isSaving()">Create patient</button>
+        </div>
+      </section>
+    </main>
   </div>
 </div>

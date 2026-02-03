@@ -1,24 +1,88 @@
-<aside class="admin-sidebar" [class.dark]="themeService.isDarkMode()">
-  <div class="sidebar-header" (click)="goHome()" title="Back to Home">
-    <img src="assets/images/QuickMed-Logo.png" alt="QuickMed Logo" />
-    <h2>{{ title }}</h2>
+<aside
+  class="receptionist-sidebar"
+  [class.dark]="themeService.isDarkMode()"
+  [class.collapsed]="collapsed"
+>
+  <div class="sidebar-header">
+    <button
+      class="collapse-toggle"
+      type="button"
+      (click)="toggleCollapse()"
+      [attr.aria-pressed]="collapsed"
+      [attr.title]="collapsed ? 'Expand sidebar' : 'Collapse sidebar'"
+    >
+      <i class="bi" [ngClass]="collapsed ? 'bi-layout-sidebar-inset' : 'bi-layout-sidebar'">
+      </i>
+    </button>
+
+    <div class="brand" (click)="goHome()" title="Back to Home">
+      <img src="assets/images/QuickMed-Logo.png" alt="QuickMed Logo" />
+      <div class="brand-text" *ngIf="!collapsed">
+        <p class="brand-title">{{ title }}</p>
+        <p class="brand-subtitle">Receptionist</p>
+      </div>
+    </div>
   </div>
 
   <nav class="sidebar-nav">
-    <a
-      *ngFor="let item of menuItems"
-      [routerLink]="item.route"
-      routerLinkActive="active"
-      [routerLinkActiveOptions]="{ exact: false }"
-      class="nav-link"
-    >
-      <ng-container *ngIf="item.icon && item.icon.indexOf('/') > -1; else fontIcon">
-        <img [src]="item.icon" class="icon-img" alt="" />
-      </ng-container>
-      <ng-template #fontIcon>
+    <ng-container *ngFor="let item of menuItems">
+      <a
+        *ngIf="item.route; else actionItem"
+        [routerLink]="item.route"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: item.exact ?? false }"
+        class="nav-link"
+        [attr.aria-label]="item.label"
+        [attr.title]="collapsed ? item.label : null"
+        (click)="handleItemClick(item, $event)"
+      >
         <i class="bi" [ngClass]="item.icon"></i>
+        <span class="nav-text">{{ item.label }}</span>
+      </a>
+      <ng-template #actionItem>
+        <button
+          class="nav-link action"
+          type="button"
+          [attr.aria-label]="item.label"
+          [attr.title]="collapsed ? item.label : null"
+          (click)="handleItemClick(item)"
+        >
+          <i class="bi" [ngClass]="item.icon"></i>
+          <span class="nav-text">{{ item.label }}</span>
+        </button>
       </ng-template>
-      <span>{{ item.label }}</span>
-    </a>
+    </ng-container>
+  </nav>
+
+  <div class="sidebar-divider" *ngIf="secondaryItems.length"></div>
+
+  <nav class="sidebar-nav secondary" *ngIf="secondaryItems.length">
+    <ng-container *ngFor="let item of secondaryItems">
+      <a
+        *ngIf="item.route; else secondaryAction"
+        [routerLink]="item.route"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: item.exact ?? false }"
+        class="nav-link"
+        [attr.aria-label]="item.label"
+        [attr.title]="collapsed ? item.label : null"
+        (click)="handleItemClick(item, $event)"
+      >
+        <i class="bi" [ngClass]="item.icon"></i>
+        <span class="nav-text">{{ item.label }}</span>
+      </a>
+      <ng-template #secondaryAction>
+        <button
+          class="nav-link action"
+          type="button"
+          [attr.aria-label]="item.label"
+          [attr.title]="collapsed ? item.label : null"
+          (click)="handleItemClick(item)"
+        >
+          <i class="bi" [ngClass]="item.icon"></i>
+          <span class="nav-text">{{ item.label }}</span>
+        </button>
+      </ng-template>
+    </ng-container>
   </nav>
 </aside>

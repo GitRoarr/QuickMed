@@ -7,6 +7,7 @@ import { ThemeService } from '@core/services/theme.service';
 import { HeaderComponent } from '@app/features/admin/shared/header';
 import { SidebarComponent } from '@app/features/admin/shared/sidebar';
 import { ToastService } from '@core/services/toast.service';
+import { AuthService } from '@core/services/auth.service';
 
 @Component({
   selector: 'app-receptionist-schedule',
@@ -19,6 +20,7 @@ export class ReceptionistScheduleComponent implements OnInit {
   private readonly schedulingService = inject(SchedulingService);
   private readonly doctorService = inject(DoctorService);
   private readonly toast = inject(ToastService);
+  private readonly authService = inject(AuthService);
   themeService = inject(ThemeService);
 
   doctors = signal<DoctorListItem[]>([]);
@@ -31,10 +33,18 @@ export class ReceptionistScheduleComponent implements OnInit {
   statusMessage = signal('');
 
   menuItems = [
-    { label: 'Dashboard', icon: 'grid', route: '/receptionist/dashboard' },
-    { label: 'Appointments', icon: 'calendar', route: '/receptionist/appointments' },
-    { label: 'Patients', icon: 'people', route: '/receptionist/patients' },
-    { label: 'Schedule', icon: 'clock', route: '/receptionist/schedule' },
+    { label: 'Dashboard', icon: 'bi-speedometer2', route: '/receptionist/dashboard', exact: true },
+    { label: 'Appointments', icon: 'bi-calendar-check', route: '/receptionist/appointments' },
+    { label: 'Patients', icon: 'bi-people', route: '/receptionist/patients' },
+    { label: 'Messages', icon: 'bi-chat-dots', route: '/receptionist/messages' },
+    { label: 'Payments', icon: 'bi-cash-stack', route: '/receptionist/payments' },
+    { label: 'Doctors', icon: 'bi-stethoscope', route: '/receptionist/doctors' },
+    { label: 'Reports', icon: 'bi-bar-chart', route: '/receptionist/reports' },
+  ];
+
+  secondaryItems = [
+    { label: 'Settings', icon: 'bi-gear', route: '/receptionist/settings' },
+    { label: 'Logout', icon: 'bi-box-arrow-right', action: () => this.authService.logout() },
   ];
 
   ngOnInit(): void {

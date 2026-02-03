@@ -1,19 +1,37 @@
-import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ReceptionistService } from '@app/core/services/receptionist.service';
 import { AlertMessageComponent } from '@app/shared/components/alert-message/alert-message.component';
+import { HeaderComponent } from '@app/features/admin/shared/header';
+import { SidebarComponent } from '@app/features/admin/shared/sidebar';
+import { AuthService } from '@core/services/auth.service';
 
 @Component({
   selector: 'app-receptionist-patient-form',
   standalone: true,
-  imports: [CommonModule, FormsModule, AlertMessageComponent],
+  imports: [CommonModule, FormsModule, AlertMessageComponent, HeaderComponent, SidebarComponent],
   templateUrl: './patient-form.component.html',
   styleUrls: ['./patient-form.component.css'],
 })
 export class PatientFormComponent implements OnInit {
   private readonly receptionistService = inject(ReceptionistService);
-  private readonly destroyRef = inject(DestroyRef);
+  private readonly authService = inject(AuthService);
+
+  menuItems = [
+    { label: 'Dashboard', icon: 'bi-speedometer2', route: '/receptionist/dashboard', exact: true },
+    { label: 'Appointments', icon: 'bi-calendar-check', route: '/receptionist/appointments' },
+    { label: 'Patients', icon: 'bi-people', route: '/receptionist/patients' },
+    { label: 'Messages', icon: 'bi-chat-dots', route: '/receptionist/messages' },
+    { label: 'Payments', icon: 'bi-cash-stack', route: '/receptionist/payments' },
+    { label: 'Doctors', icon: 'bi-stethoscope', route: '/receptionist/doctors' },
+    { label: 'Reports', icon: 'bi-bar-chart', route: '/receptionist/reports' },
+  ];
+
+  secondaryItems = [
+    { label: 'Settings', icon: 'bi-gear', route: '/receptionist/settings' },
+    { label: 'Logout', icon: 'bi-box-arrow-right', action: () => this.authService.logout() },
+  ];
 
   model = signal<any>({ firstName: '', lastName: '', email: '', phoneNumber: '', dateOfBirth: '', medicalHistory: '' });
   isSaving = signal(false);

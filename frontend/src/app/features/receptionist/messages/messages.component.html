@@ -1,0 +1,110 @@
+<div class="receptionist-layout">
+  <app-header></app-header>
+  <div class="body">
+    <app-sidebar
+      [title]="'QuickMed'"
+      [menuItems]="menuItems"
+      [secondaryItems]="secondaryItems"
+    ></app-sidebar>
+
+    <main class="panel">
+      <section class="hero">
+        <div>
+          <p class="eyebrow">Messages</p>
+          <h1>Receptionist Inbox</h1>
+          <p class="muted">Send appointment reminders and coordinate care instantly.</p>
+        </div>
+        <div class="hero-actions">
+          <button class="ghost" type="button" (click)="loadThreads()">
+            <i class="bi bi-arrow-clockwise"></i>
+            Refresh
+          </button>
+        </div>
+      </section>
+
+      <section class="messaging">
+        <aside class="thread-panel">
+          <div class="panel-head">
+            <h3>Conversations</h3>
+            <input type="text" placeholder="Search" [(ngModel)]="search()" />
+          </div>
+
+          <div class="new-message">
+            <p class="muted">Start a new message</p>
+            <div class="selector">
+              <label>
+                <span>Patient</span>
+                <select (change)="startNewMessage('patient', $any($event.target).value)">
+                  <option value="">Select patient</option>
+                  <option *ngFor="let p of patients()" [value]="p.id">
+                    {{ p.firstName }} {{ p.lastName }}
+                  </option>
+                </select>
+              </label>
+              <label>
+                <span>Doctor</span>
+                <select (change)="startNewMessage('doctor', $any($event.target).value)">
+                  <option value="">Select doctor</option>
+                  <option *ngFor="let d of doctors()" [value]="d.id">
+                    Dr. {{ d.firstName }} {{ d.lastName }}
+                  </option>
+                </select>
+              </label>
+            </div>
+          </div>
+
+          <div class="thread-list" *ngIf="filteredThreads().length; else emptyThreads">
+            <button
+              class="thread"
+              *ngFor="let thread of filteredThreads()"
+              [class.active]="thread.receiverId === selectedReceiverId()"
+              (click)="selectThread(thread)"
+            >
+              <div class="avatar">
+                <img *ngIf="thread.receiverAvatar" [src]="thread.receiverAvatar" alt="" />
+                <span *ngIf="!thread.receiverAvatar">{{ thread.receiverName?.charAt(0) || 'U' }}</span>
+              </div>
+              <div class="details">
+                <p class="name">{{ thread.receiverName }}</p>
+                <p class="preview">{{ thread.lastMessage || 'No message yet' }}</p>
+              </div>
+              <div class="meta">{{ thread.receiverRole | titlecase }}</div>
+            </button>
+          </div>
+          <ng-template #emptyThreads>
+            <p class="muted empty">No conversations yet.</p>
+          </ng-template>
+        </aside>
+
+        <section class="chat-panel">
+          <div class="chat-head" *ngIf="selectedReceiverId(); else emptyChat">
+            <div>
+              <p class="eyebrow">Active chat</p>
+              <h3>{{ filteredThreads().find(t => t.receiverId === selectedReceiverId())?.receiverName || 'New message' }}</h3>
+            </div>
+            <span class="chip">{{ selectedReceiverRole() | titlecase }}</span>
+          </div>
+
+          <div class="messages" *ngIf="selectedReceiverId()">
+            <div class="message outgoing" *ngFor="let msg of messages()">
+              <p>{{ msg.content }}</p>
+              <span>{{ msg.createdAt | date:'shortTime' }}</span>
+            </div>
+          </div>
+
+          <div class="composer" *ngIf="selectedReceiverId()">
+            <textarea [(ngModel)]="draft()" placeholder="Write a quick update..."></textarea>
+            <button class="primary" type="button" (click)="send()">Send</button>
+          </div>
+
+          <ng-template #emptyChat>
+            <div class="empty-state">
+              <i class="bi bi-chat-dots"></i>
+              <p>Select a contact to start messaging.</p>
+            </div>
+          </ng-template>
+        </section>
+      </section>
+    </main>
+  </div>
+</div>

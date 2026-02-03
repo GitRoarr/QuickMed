@@ -1,7 +1,11 @@
 <div class="receptionist-layout">
   <app-header></app-header>
   <div class="body">
-    <app-sidebar [title]="'Receptionist'" [menuItems]="menuItems"></app-sidebar>
+    <app-sidebar
+      [title]="'QuickMed'"
+      [menuItems]="menuItems"
+      [secondaryItems]="secondaryItems"
+    ></app-sidebar>
     <main class="panel">
       <section class="head">
         <div>

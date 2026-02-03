@@ -1,91 +1,116 @@
 <div class="receptionist-layout">
   <app-header></app-header>
   <div class="body">
-    <app-sidebar></app-sidebar>
+    <app-sidebar
+      [title]="'QuickMed'"
+      [menuItems]="menuItems"
+      [secondaryItems]="secondaryItems"
+    ></app-sidebar>
     <main class="panel">
-      <section class="dramatic-head">
-        <div>
-          <h1>Daily Command Center</h1>
-          <p>Monitor arrivals, payments, and frontline tasks all in one spotlight.</p>
+      <section class="dashboard-header">
+        <div class="title-group">
+          <div class="brand-chip">
+            <img src="assets/images/QuickMed-Logo.png" alt="QuickMed Logo" />
+            <div>
+              <p class="eyebrow">QuickMed</p>
+              <h1>Receptionist Dashboard</h1>
+            </div>
+          </div>
+          <p class="subtitle">Manage check-ins, payments, and appointments with precision.</p>
         </div>
-        <button class="refresh" (click)="loadDashboard()" [disabled]="isLoading()">
-          <i class="bi bi-arrow-clockwise" *ngIf="!isLoading(); else loading"></i>
-          <ng-template #loading><span class="spinner"></span></ng-template>
-          Refresh
+        <div class="header-actions">
+          <button class="ghost" type="button" title="Notifications">
+            <i class="bi bi-bell"></i>
+          </button>
+          <div class="avatar">
+            <span>{{ (authService.currentUser()?.firstName?.charAt(0) || 'R') + (authService.currentUser()?.lastName?.charAt(0) || 'C') }}</span>
+          </div>
+          <button class="refresh" (click)="loadDashboard()" [disabled]="isLoading()">
+            <i class="bi bi-arrow-clockwise" *ngIf="!isLoading(); else loading"></i>
+            <ng-template #loading><span class="spinner"></span></ng-template>
+            Refresh
+          </button>
+        </div>
+      </section>
+
+      <section class="summary" *ngIf="stats() as metric">
+        <div class="summary-card">
+          <p>Today’s Appointments</p>
+          <h2>{{ metric.totalToday }}</h2>
+        </div>
+        <div class="summary-card">
+          <p>Checked-in Patients</p>
+          <h2>{{ metric.checkedIn || 0 }}</h2>
+        </div>
+        <div class="summary-card">
+          <p>Pending Payments</p>
+          <h2>{{ metric.paymentsDue }}</h2>
+        </div>
+        <div class="summary-card">
+          <p>Messages</p>
+          <h2>{{ metric.messages || 0 }}</h2>
+        </div>
+      </section>
+
+      <section class="quick-actions">
+        <button class="primary" type="button" (click)="goToRegisterPatient()">
+          <i class="bi bi-person-plus"></i>
+          Register New Patient
+        </button>
+        <button class="ghost" type="button" (click)="goToBookAppointment()">
+          <i class="bi bi-calendar-plus"></i>
+          Book Appointment
+        </button>
+        <button class="ghost" type="button" (click)="goToMessages()">
+          <i class="bi bi-chat-dots"></i>
+          Send Message
         </button>
       </section>
 
-      <section class="kpis" *ngIf="stats() as metric">
-        <div class="kpi-card">
-          <p>Appointments today</p>
-          <h2>{{ metric.totalToday }}</h2>
-        </div>
-        <div class="kpi-card">
-          <p>Waiting room</p>
-          <h2>{{ metric.waitingRoom }}</h2>
-        </div>
-        <div class="kpi-card">
-          <p>Payments due</p>
-          <h2>{{ metric.paymentsDue }}</h2>
-        </div>
-        <div class="kpi-card">
-          <p>Virtual visits</p>
-          <h2>{{ metric.videoVisits }}</h2>
-        </div>
-      </section>
-
-      <section class="grid">
-        <div class="card wide">
-          <header>
-            <h3>Today’s timeline</h3>
-          </header>
-          <div class="timeline" *ngIf="timeline().length; else noTimeline">
-            <div class="slot" *ngFor="let item of timeline()">
-              <div class="time">{{ item.time }}</div>
-              <div>
-                <p>{{ item.patient }}</p>
-                <small>{{ item.doctor }}</small>
-              </div>
-              <span class="pill" [class.video]="item.type === 'Video'">{{ item.type }}</span>
-            </div>
+      <section class="table-card">
+        <header class="table-header">
+          <div>
+            <h3>Appointment list</h3>
+            <p class="muted">Track today’s arrivals and update statuses instantly.</p>
           </div>
-          <ng-template #noTimeline>
-            <p class="muted">No appointments scheduled.</p>
-          </ng-template>
+        </header>
+
+        <div class="table-wrap" *ngIf="appointmentsTable().length; else emptyTable">
+          <table>
+            <thead>
+              <tr>
+                <th>Patient Name</th>
+                <th>Doctor</th>
+                <th>Time</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let row of appointmentsTable()">
+                <td>{{ row.patientName || (row.patient?.firstName + ' ' + row.patient?.lastName) }}</td>
+                <td>{{ row.doctorName || (row.doctor?.firstName + ' ' + row.doctor?.lastName) }}</td>
+                <td>{{ row.time || row.appointmentTime }}</td>
+                <td><span [class]="getStatusClass(row)">{{ getStatusLabel(row) }}</span></td>
+                <td class="actions">
+                  <button class="ghost" type="button" (click)="markCheckedIn(row.id)" [disabled]="row.arrived">
+                    Check-in
+                  </button>
+                  <button class="ghost" type="button" (click)="updateStatus(row.id, 'completed')">
+                    Complete
+                  </button>
+                  <button class="ghost danger" type="button" (click)="updateStatus(row.id, 'cancelled')">
+                    Cancel
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
 
-        <div class="card">
-          <h3>Waiting room</h3>
-          <ul>
-            <li *ngFor="let w of waiting()">
-              <strong>{{ w.patient?.firstName }} {{ w.patient?.lastName }}</strong>
-              <span>{{ w.appointmentTime }}</span>
-            </li>
-          </ul>
-        </div>
-
-        <div class="card">
-          <h3>Pending payments</h3>
-          <ul>
-            <li *ngFor="let p of pendingPayments()">
-              <div>
-                <strong>{{ p.patient?.firstName }} {{ p.patient?.lastName }}</strong>
-                <span>{{ p.appointmentDate | date }}</span>
-              </div>
-              <span class="pill warning">{{ p.paymentStatus }}</span>
-            </li>
-          </ul>
-        </div>
-
-        <div class="card">
-          <h3>Action list</h3>
-          <ul class="tasks">
-            <li *ngFor="let task of tasks()" [class.completed]="task.status === 'completed'">
-              <input type="checkbox" [checked]="task.status === 'completed'" />
-              <span>{{ task.title }}</span>
-            </li>
-          </ul>
-        </div>
+        <ng-template #emptyTable>
+          <p class="muted">No appointments available for today.</p>
+        </ng-template>
       </section>
     </main>
   </div>

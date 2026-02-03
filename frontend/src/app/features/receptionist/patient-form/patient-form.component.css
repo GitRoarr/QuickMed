@@ -1,5 +1,89 @@
-.patient-form { background:#fff; padding:16px; border-radius:8px; border:1px solid #e5e7eb; max-width:800px }
-.form-row { display:flex; gap:8px; margin-bottom:8px }
-.form-row input, .form-row textarea { flex:1; padding:8px; border:1px solid #e6eef6; border-radius:6px }
-.form-actions { margin-top:12px }
-.form-actions button { padding:8px 12px; border-radius:6px; background:#0ea5a4; color:#fff; border:none }
+.receptionist-layout {
+	background: var(--bg);
+	min-height: 100vh;
+}
+
+.body {
+	display: flex;
+}
+
+.panel {
+	flex: 1;
+	padding: 2.5rem 3rem;
+	margin-left: 260px;
+}
+
+.form-card {
+	background: var(--surface);
+	border: 1px solid var(--border);
+	border-radius: 20px;
+	padding: 2rem;
+	max-width: 860px;
+	box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+}
+
+.form-card header h1 {
+	margin: 0 0 0.35rem;
+	font-size: 1.8rem;
+}
+
+.muted {
+	color: var(--muted);
+}
+
+.form-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+	gap: 1rem;
+	margin-top: 1.5rem;
+}
+
+label {
+	display: flex;
+	flex-direction: column;
+	gap: 0.4rem;
+	font-size: 0.85rem;
+	color: var(--muted);
+}
+
+input,
+textarea {
+	padding: 0.75rem 0.9rem;
+	border-radius: 12px;
+	border: 1px solid var(--border);
+	background: var(--bg);
+	color: var(--fg);
+	font-size: 0.95rem;
+}
+
+.notes {
+	grid-column: 1 / -1;
+}
+
+textarea {
+	min-height: 120px;
+	resize: vertical;
+}
+
+.form-actions {
+	margin-top: 1.5rem;
+	display: flex;
+	justify-content: flex-end;
+}
+
+.primary {
+	border: none;
+	background: var(--primary);
+	color: #fff;
+	border-radius: 12px;
+	padding: 0.7rem 1.2rem;
+	box-shadow: 0 12px 28px rgba(var(--primary-rgb), 0.2);
+	cursor: pointer;
+}
+
+@media (max-width: 1024px) {
+	.panel {
+		padding: 2rem 1.5rem;
+		margin-left: 0;
+	}
+}

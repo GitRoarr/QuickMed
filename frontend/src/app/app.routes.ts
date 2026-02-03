@@ -316,6 +316,10 @@ export const routes: Routes = [
         loadComponent: () => import('./features/receptionist/appointment-form/appointment-form.component').then(m => m.AppointmentFormComponent)
       },
       {
+        path: 'messages',
+        loadComponent: () => import('./features/receptionist/messages/messages.component').then(m => m.ReceptionistMessagesComponent)
+      },
+      {
         path: 'schedule',
         loadComponent: () => import('./features/receptionist/schedule/schedule.component').then(m => m.ReceptionistScheduleComponent)
       },

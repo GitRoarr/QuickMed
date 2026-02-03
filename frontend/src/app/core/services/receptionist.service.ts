@@ -67,4 +67,16 @@ export class ReceptionistService {
   getAppointment(id: string): Observable<any> {
     return this.http.get<any>(`${this.API_URL}/appointments/${id}`);
   }
+
+  listMessageThreads(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.API_URL}/messages/threads`);
+  }
+
+  getMessageThread(receiverId: string): Observable<any[]> {
+    return this.http.get<any[]>(`${this.API_URL}/messages/thread/${receiverId}`);
+  }
+
+  sendMessage(payload: { receiverId: string; receiverRole: 'patient' | 'doctor'; content: string }): Observable<any> {
+    return this.http.post<any>(`${this.API_URL}/messages`, payload);
+  }
 }

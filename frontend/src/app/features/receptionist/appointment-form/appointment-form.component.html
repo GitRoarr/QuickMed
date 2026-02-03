@@ -1,16 +1,83 @@
-<div class="appointment-form">
-  <div class="form-row">
-    <input [(ngModel)]="model().patientId" name="patientId" placeholder="Patient ID" />
-    <input [(ngModel)]="model().doctorId" name="doctorId" placeholder="Doctor ID" />
-  </div>
-  <div class="form-row">
-    <input [(ngModel)]="model().appointmentDate" name="appointmentDate" type="date" />
-    <input [(ngModel)]="model().appointmentTime" name="appointmentTime" type="time" />
-  </div>
-  <div class="form-row">
-    <textarea [(ngModel)]="model().notes" name="notes" placeholder="Notes"></textarea>
-  </div>
-  <div class="form-actions">
-    <button (click)="save()" [disabled]="isSaving()">Create Appointment</button>
+<div class="receptionist-layout">
+  <app-header></app-header>
+  <div class="body">
+    <app-sidebar
+      [title]="'QuickMed'"
+      [menuItems]="menuItems"
+      [secondaryItems]="secondaryItems"
+    ></app-sidebar>
+    <main class="panel">
+      <section class="hero">
+        <div>
+          <p class="eyebrow">Appointments</p>
+          <h1>Book Appointment</h1>
+          <p class="muted">Connect patients with doctors and lock in their visit time.</p>
+        </div>
+        <div class="hero-actions">
+          <button class="ghost" type="button">
+            <i class="bi bi-calendar-week"></i>
+            View schedule
+          </button>
+          <button class="primary" type="button" (click)="save()" [disabled]="isSaving()">
+            <i class="bi bi-check2-circle"></i>
+            Create Appointment
+          </button>
+        </div>
+      </section>
+
+      <section class="form-card">
+        <div class="form-grid">
+          <label class="field">
+            <span>Patient</span>
+            <select [(ngModel)]="model().patientId" name="patientId">
+              <option value="" disabled>Select patient</option>
+              <option *ngFor="let patient of patients()" [value]="patient.id">
+                {{ patient.firstName }} {{ patient.lastName }} ({{ patient.email }})
+              </option>
+            </select>
+          </label>
+
+          <label class="field">
+            <span>Doctor</span>
+            <select [(ngModel)]="model().doctorId" name="doctorId">
+              <option value="" disabled>Select doctor</option>
+              <option *ngFor="let doc of doctors()" [value]="doc.id">
+                Dr. {{ doc.firstName }} {{ doc.lastName }} {{ doc.specialty ? '· ' + doc.specialty : '' }}
+              </option>
+            </select>
+          </label>
+
+          <label class="field">
+            <span>Date</span>
+            <input [(ngModel)]="model().appointmentDate" name="appointmentDate" type="date" />
+          </label>
+
+          <label class="field">
+            <span>Time</span>
+            <input [(ngModel)]="model().appointmentTime" name="appointmentTime" type="time" />
+          </label>
+
+          <label class="field notes">
+            <span>Notes</span>
+            <textarea [(ngModel)]="model().notes" name="notes" placeholder="Reason or internal notes"></textarea>
+          </label>
+        </div>
+      </section>
+
+      <section class="info-grid">
+        <div class="info-card">
+          <h3>Quick tips</h3>
+          <ul>
+            <li>Verify patient contact details before saving.</li>
+            <li>Use status updates to track arrivals.</li>
+            <li>Flag notes for special instructions.</li>
+          </ul>
+        </div>
+        <div class="info-card">
+          <h3>Today’s overview</h3>
+          <p class="muted">Need to check today’s load? Use the dashboard for live queues and pending payments.</p>
+        </div>
+      </section>
+    </main>
   </div>
 </div>

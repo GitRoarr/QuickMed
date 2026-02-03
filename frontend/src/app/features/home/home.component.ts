@@ -301,6 +301,9 @@ export class HomeComponent implements OnInit {
       case "admin":
         this.router.navigate(["/admin/dashboard"])
         break
+      case "receptionist":
+        this.router.navigate(["/receptionist/dashboard"])
+        break
     }
   }
 
@@ -319,6 +322,9 @@ export class HomeComponent implements OnInit {
         break
       case 'admin':
         this.router.navigate(['/admin/dashboard'])
+        break
+      case 'receptionist':
+        this.router.navigate(['/receptionist/dashboard'])
         break
       default:
         this.router.navigate(['/'])

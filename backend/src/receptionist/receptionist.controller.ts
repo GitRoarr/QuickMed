@@ -15,6 +15,7 @@ import { User } from '../users/entities/user.entity';
 import { CreateReceptionistInviteDto } from './dto/create-receptionist-invite.dto';
 import { Public } from '../auth/decorators/public.decorator';
 import { SetReceptionistPasswordDto } from './dto/set-receptionist-password.dto';
+import { SendReceptionistMessageDto } from './dto/send-receptionist-message.dto';
 
 @Controller('receptionist')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -76,8 +77,12 @@ export class ReceptionistController {
 
   @Get('dashboard')
   @Roles(UserRole.RECEPTIONIST, UserRole.ADMIN)
-  async dashboard(@Query('doctorId') doctorId?: string, @Query('status') status?: string) {
-    return this.receptionistService.getDashboardInsights({ doctorId, status });
+  async dashboard(
+    @CurrentUser() user: User,
+    @Query('doctorId') doctorId?: string,
+    @Query('status') status?: string,
+  ) {
+    return this.receptionistService.getDashboardInsights({ doctorId, status, userId: user?.id });
   }
 
   @Get('appointments')
@@ -104,6 +109,24 @@ export class ReceptionistController {
   @Roles(UserRole.RECEPTIONIST, UserRole.ADMIN)
   async getAppointment(@Param('id') id: string) {
     return this.appointmentsService.findOne(id);
+  }
+
+  @Get('messages/threads')
+  @Roles(UserRole.RECEPTIONIST)
+  async getMessageThreads(@CurrentUser() user: User) {
+    return this.receptionistService.listReceptionistThreads(user.id);
+  }
+
+  @Get('messages/thread/:receiverId')
+  @Roles(UserRole.RECEPTIONIST)
+  async getMessageThread(@CurrentUser() user: User, @Param('receiverId') receiverId: string) {
+    return this.receptionistService.getReceptionistThread(user.id, receiverId);
+  }
+
+  @Post('messages')
+  @Roles(UserRole.RECEPTIONIST)
+  async sendMessage(@CurrentUser() user: User, @Body() dto: SendReceptionistMessageDto) {
+    return this.receptionistService.sendReceptionistMessage(user.id, dto);
   }
 
   // Invitation endpoints (public - no auth required for setting password)

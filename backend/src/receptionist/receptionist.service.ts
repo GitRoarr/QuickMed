@@ -4,6 +4,9 @@ import { Repository } from 'typeorm';
 import { Appointment } from '../appointments/entities/appointment.entity';
 import { User } from '../users/entities/user.entity';
 import { AppointmentStatus, PaymentStatus, UserRole } from '../common/index';
+import { Message } from '../messages/entities/message.entity';
+import { ReceptionistMessage } from './entities/receptionist-message.entity';
+import { SendReceptionistMessageDto } from './dto/send-receptionist-message.dto';
 import { CreateReceptionistInviteDto } from './dto/create-receptionist-invite.dto';
 import { EmailService } from '../common/services/email.service';
 import * as bcrypt from 'bcrypt';
@@ -14,6 +17,8 @@ export class ReceptionistService {
   constructor(
     @InjectRepository(Appointment) private readonly appointmentRepo: Repository<Appointment>,
     @InjectRepository(User) private readonly userRepo: Repository<User>,
+    @InjectRepository(Message) private readonly messageRepo: Repository<Message>,
+    @InjectRepository(ReceptionistMessage) private readonly receptionistMessageRepo: Repository<ReceptionistMessage>,
     private readonly emailService: EmailService,
   ) { }
 
@@ -39,21 +44,60 @@ export class ReceptionistService {
     return this.appointmentRepo.find({ where: { paymentStatus: PaymentStatus.NOT_PAID }, relations: ['patient', 'doctor'] });
   }
 
+  async getPendingPaymentsCountForToday() {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    return this.appointmentRepo
+      .createQueryBuilder('a')
+      .where('a.appointmentDate >= :today AND a.appointmentDate < :tomorrow', { today, tomorrow })
+      .andWhere('a.paymentStatus IN (:...statuses)', { statuses: [PaymentStatus.NOT_PAID, PaymentStatus.PENDING] })
+      .getCount();
+  }
+
+  async getCheckedInCountForToday(filter?: { doctorId?: string }) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    const qb = this.appointmentRepo
+      .createQueryBuilder('a')
+      .where('a.appointmentDate >= :today AND a.appointmentDate < :tomorrow', { today, tomorrow })
+      .andWhere('a.arrived = :arrived', { arrived: true });
+
+    if (filter?.doctorId) qb.andWhere('a.doctorId = :doctorId', { doctorId: filter.doctorId });
+
+    return qb.getCount();
+  }
+
+  async getUnreadMessagesCount(userId?: string) {
+    if (!userId) return 0;
+    return this.messageRepo.count({ where: { receiverId: userId, isRead: false } });
+  }
+
   async getWaitingPatients() {
     return this.appointmentRepo.find({ where: { status: AppointmentStatus.WAITING }, relations: ['patient', 'doctor'] });
   }
 
-  async getDashboardInsights(filter?: { doctorId?: string; status?: string }) {
-    const [todayAppointments, pendingPayments, waiting] = await Promise.all([
+  async getDashboardInsights(filter?: { doctorId?: string; status?: string; userId?: string }) {
+    const [todayAppointments, pendingPayments, waiting, checkedInCount, pendingPaymentsCount, unreadMessages] = await Promise.all([
       this.getTodayAppointments(filter),
       this.getPendingPayments(),
       this.getWaitingPatients(),
+      this.getCheckedInCountForToday(filter),
+      this.getPendingPaymentsCountForToday(),
+      this.getUnreadMessagesCount(filter?.userId),
     ]);
 
     const stats = {
       totalToday: todayAppointments.length,
+      checkedIn: checkedInCount,
       waitingRoom: waiting.length,
-      paymentsDue: pendingPayments.length,
+      paymentsDue: pendingPaymentsCount,
+      messages: unreadMessages,
       videoVisits: todayAppointments.filter((appt) => appt.isVideoConsultation).length,
     };
 
@@ -83,7 +127,26 @@ export class ReceptionistService {
       { id: 'prepare-lab', title: 'Prepare lab documents for Dr. Chen', status: 'completed' },
     ];
 
-    return { todayAppointments, pendingPayments, waiting, stats, timeline, recentPatients, tasks };
+    const appointmentsTable = todayAppointments.map((appt) => ({
+      id: appt.id,
+      patientName: `${appt.patient?.firstName || ''} ${appt.patient?.lastName || ''}`.trim(),
+      doctorName: `${appt.doctor?.firstName || ''} ${appt.doctor?.lastName || ''}`.trim(),
+      time: appt.appointmentTime,
+      status: appt.status,
+      arrived: appt.arrived,
+      paymentStatus: appt.paymentStatus,
+    }));
+
+    return {
+      todayAppointments,
+      pendingPayments,
+      waiting,
+      stats,
+      timeline,
+      recentPatients,
+      tasks,
+      appointmentsTable,
+    };
   }
 
   async createReceptionistInvite(dto: CreateReceptionistInviteDto): Promise<{
@@ -335,6 +398,59 @@ export class ReceptionistService {
     }
 
     return qb.getMany();
+  }
+
+  async listReceptionistThreads(senderId: string) {
+    const messages = await this.receptionistMessageRepo.find({
+      where: { senderId },
+      relations: ['receiver'],
+      order: { createdAt: 'DESC' },
+      take: 200,
+    });
+
+    const threads = new Map<string, any>();
+    for (const msg of messages) {
+      if (threads.has(msg.receiverId)) continue;
+      threads.set(msg.receiverId, {
+        receiverId: msg.receiverId,
+        receiverRole: msg.receiverRole,
+        receiverName: `${msg.receiver?.firstName || ''} ${msg.receiver?.lastName || ''}`.trim(),
+        receiverAvatar: msg.receiver?.avatar || null,
+        lastMessage: msg.content,
+        lastMessageAt: msg.createdAt,
+      });
+    }
+
+    return Array.from(threads.values());
+  }
+
+  async getReceptionistThread(senderId: string, receiverId: string) {
+    return this.receptionistMessageRepo.find({
+      where: { senderId, receiverId },
+      relations: ['sender', 'receiver'],
+      order: { createdAt: 'ASC' },
+    });
+  }
+
+  async sendReceptionistMessage(senderId: string, dto: SendReceptionistMessageDto) {
+    if (![UserRole.PATIENT, UserRole.DOCTOR].includes(dto.receiverRole)) {
+      throw new BadRequestException('Receiver must be a patient or doctor');
+    }
+
+    const receiver = await this.userRepo.findOne({ where: { id: dto.receiverId, role: dto.receiverRole } });
+    if (!receiver) {
+      throw new NotFoundException('Receiver not found');
+    }
+
+    const message = this.receptionistMessageRepo.create({
+      senderId,
+      receiverId: dto.receiverId,
+      receiverRole: dto.receiverRole,
+      content: dto.content,
+      isRead: false,
+    });
+
+    return this.receptionistMessageRepo.save(message);
   }
 
   private generateTempPassword(length = 10): string {
