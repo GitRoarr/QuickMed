@@ -1,5 +1,5 @@
 import { Injectable, InternalServerErrorException } from "@nestjs/common";
-import * as nodemailer from "nodemailer";
+import * as sgMail from "@sendgrid/mail";
 
 interface EmailResult {
   sent: boolean;
@@ -9,151 +9,50 @@ interface EmailResult {
 
 @Injectable()
 export class EmailService {
-  private transporter: nodemailer.Transporter | null = null;
-  private initPromise: Promise<void> | null = null;
+  private sendGridEnabled = false;
+  private readonly fromEmail: string;
 
   constructor() {
-    this.initPromise = this.initializeTransporter();
-  }
+    this.fromEmail = process.env.EMAIL_FROM || "girmaenkuchille@gmail.com";
+    const apiKey = process.env.SENDGRID_API_KEY;
 
-  private async initializeTransporter(): Promise<void> {
-    const emailMode = (process.env.EMAIL_MODE || 'auto').toLowerCase();
-
-    if (['log', 'disable', 'off'].includes(emailMode)) {
-      console.info('[EmailService] Email mode set to log-only; skipping SMTP setup.');
-      this.transporter = null;
+    if (!apiKey) {
+      console.warn("[EmailService] ⚠️  SENDGRID_API_KEY not configured. Email sending will be disabled.");
+      this.sendGridEnabled = false;
       return;
     }
 
-    // If SMTP is configured, use it
-    if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
-      try {
-        console.log('[EmailService] Initializing SMTP connection...');
-        console.log('[EmailService] SMTP_HOST:', process.env.SMTP_HOST);
-        console.log('[EmailService] SMTP_PORT:', process.env.SMTP_PORT || 587);
-        console.log('[EmailService] SMTP_USER:', process.env.SMTP_USER);
-
-        this.transporter = nodemailer.createTransport({
-          host: process.env.SMTP_HOST,
-          port: +(process.env.SMTP_PORT || 587),
-          secure: process.env.SMTP_PORT === '465',
-          auth: {
-            user: process.env.SMTP_USER,
-            pass: process.env.SMTP_PASS,
-          },
-          // Add connection timeout and retry options
-          connectionTimeout: 10000,
-          greetingTimeout: 10000,
-          socketTimeout: 10000,
-          // Gmail specific settings
-          tls: {
-            rejectUnauthorized: false, // For development only
-          },
-        });
-
-        // Verify connection
-        console.log('[EmailService] Verifying SMTP connection...');
-        await this.transporter.verify();
-        console.info('[EmailService] ✅ SMTP connection verified successfully');
-        return;
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        console.error('[EmailService] ❌ Failed to initialize SMTP:', errorMessage);
-        console.error('[EmailService] Error details:', error);
-        console.warn('[EmailService] ⚠️  Email sending will be disabled. Check SMTP credentials.');
-        console.warn('[EmailService] 💡 For Gmail: Use App Password, not regular password');
-        console.warn('[EmailService] 💡 Generate App Password: https://myaccount.google.com/apppasswords');
-        this.transporter = null;
-      }
-    } else {
-      console.warn('[EmailService] ⚠️  SMTP not configured in .env file');
-      console.warn('[EmailService] Required: SMTP_HOST, SMTP_USER, SMTP_PASS');
-    }
-
-    // In non-production, create a test account (Ethereal) to preview emails
-    if (process.env.NODE_ENV !== 'production' && emailMode === 'auto') {
-      try {
-        const testAccount = await nodemailer.createTestAccount();
-        this.transporter = nodemailer.createTransport({
-          host: testAccount.smtp.host,
-          port: testAccount.smtp.port,
-          secure: testAccount.smtp.secure,
-          auth: {
-            user: testAccount.user,
-            pass: testAccount.pass,
-          },
-        });
-        console.info('[EmailService] Using Ethereal test account for email preview');
-        return;
-      } catch (err) {
-        console.warn('[EmailService] Failed to create test account for emails', err);
-      }
-    }
-
-    // No transporter available
-    console.warn('[EmailService] SMTP not configured. Email sending will be disabled.');
-    this.transporter = null;
+    sgMail.setApiKey(apiKey);
+    this.sendGridEnabled = true;
+    console.info("[EmailService] ✅ SendGrid initialized successfully");
   }
 
-  private async ensureInitialized(): Promise<void> {
-    if (this.initPromise) {
-      await this.initPromise;
-      this.initPromise = null;
-    }
-  }
-
-  async sendMail(to: string, subject: string, html: string): Promise<EmailResult> {
-    await this.ensureInitialized();
+  async sendEmail(to: string, subject: string, html: string): Promise<EmailResult> {
     const extractLink = () => html.match(/href="([^"]+)"/)?.[1];
 
-    if (!this.transporter) {
-      console.warn(`[EmailService] ⚠️  No transporter available. Email would be sent to ${to}: ${subject}`);
+    if (!this.sendGridEnabled) {
+      console.warn(`[EmailService] ⚠️  SendGrid not configured. Email would be sent to ${to}: ${subject}`);
       const fallback = extractLink();
       console.log(`[EmailService] 📋 Fallback invite link: ${fallback || 'N/A'}`);
       return { sent: false, fallbackLink: fallback };
     }
 
     try {
-      console.log(`[EmailService] 📧 Attempting to send email to: ${to}`);
-      const info = await this.transporter.sendMail({
-        from: `"QuickMed Admin" <${process.env.SMTP_USER || 'no-reply@example.com'}>`,
+      console.log(`[EmailService] 📧 Sending email to: ${to}`);
+      await sgMail.send({
         to,
+        from: this.fromEmail,
         subject,
         html,
       });
-
-      const previewUrl = nodemailer.getTestMessageUrl(info) || undefined;
-      if (previewUrl) {
-        console.log(`[EmailService] ✅ Email sent successfully to ${to}`);
-        console.log(`[EmailService] 👀 Preview URL: ${previewUrl}`);
-      } else {
-        console.log(`[EmailService] ✅ Email sent successfully to ${to} (Message ID: ${info.messageId})`);
-      }
-      return { sent: true, previewUrl };
+      console.log(`[EmailService] ✅ Email sent successfully to ${to}`);
+      return { sent: true };
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : String(err);
-      const errorStack = err instanceof Error ? err.stack : undefined;
-
       console.error('[EmailService] ❌ Email sending failed!');
       console.error('[EmailService] Error message:', errorMessage);
-      if (errorStack) {
-        console.error('[EmailService] Error stack:', errorStack);
-      }
-
-      // Check for common Gmail errors
-      if (errorMessage.includes('Invalid login') || errorMessage.includes('535')) {
-        console.error('[EmailService] 🔐 Authentication failed!');
-        console.error('[EmailService] 💡 For Gmail: You must use an App Password, not your regular password');
-        console.error('[EmailService] 💡 Steps:');
-        console.error('[EmailService]    1. Go to: https://myaccount.google.com/apppasswords');
-        console.error('[EmailService]    2. Generate a new App Password for "Mail"');
-        console.error('[EmailService]    3. Replace SMTP_PASS in .env with the 16-character App Password');
-      } else if (errorMessage.includes('ECONNECTION') || errorMessage.includes('ETIMEDOUT')) {
-        console.error('[EmailService] 🌐 Connection error!');
-        console.error('[EmailService] 💡 Check your internet connection and SMTP_HOST');
-      } else if (errorMessage.includes('EAUTH')) {
-        console.error('[EmailService] 🔐 Authentication error!');
-        console.error('[EmailService] 💡 Verify SMTP_USER and SMTP_PASS are correct');
+      if (err && typeof err === "object") {
+        console.error('[EmailService] Error details:', err);
       }
 
       // Extract link for fallback
@@ -178,7 +77,7 @@ export class EmailService {
         <p style="color: #6b7280; font-size: 14px;">If you did not expect this invitation, please ignore this email.</p>
       </div>
     `;
-    return this.sendMail(to, subject, html);
+    return this.sendEmail(to, subject, html);
   }
 
   async sendReceptionistInvite(
@@ -234,7 +133,7 @@ export class EmailService {
         </div>
       </div>
     `;
-    return this.sendMail(to, subject, html);
+    return this.sendEmail(to, subject, html);
   }
 
   async sendPasswordResetEmail(to: string, resetLink: string, firstName?: string): Promise<EmailResult> {
@@ -253,6 +152,6 @@ export class EmailService {
         <p style="color: #6b7280; font-size: 14px;">For security reasons, if you continue to receive these emails, please contact support.</p>
       </div>
     `;
-    return this.sendMail(to, subject, html);
+    return this.sendEmail(to, subject, html);
   }
 }

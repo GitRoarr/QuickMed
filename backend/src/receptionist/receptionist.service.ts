@@ -95,9 +95,9 @@ export class ReceptionistService {
     // Use transaction to ensure data integrity
     const queryRunner = this.userRepo.manager.connection.createQueryRunner();
     await queryRunner.connect();
-    await queryRunner.startTransaction();
 
     try {
+      await queryRunner.startTransaction();
       console.log('[ReceptionistService] Creating receptionist invite for', dto.email);
 
       // Normalize and validate email
@@ -218,6 +218,12 @@ export class ReceptionistService {
       throw new BadRequestException('Password must be at least 8 characters long');
     }
 
+    console.log('[ReceptionistService] setReceptionistPassword attempt', {
+      uid,
+      tokenProvided: !!token,
+      tokenLength: token ? token.length : 0,
+    });
+
     // Use transaction for data integrity
     const queryRunner = this.userRepo.manager.connection.createQueryRunner();
     await queryRunner.connect();
@@ -274,7 +280,9 @@ export class ReceptionistService {
       const { password: _, inviteToken: __, inviteExpiresAt: ___, ...safeReceptionist } = savedReceptionist;
       return safeReceptionist as User;
     } catch (error) {
-      await queryRunner.rollbackTransaction();
+      if (queryRunner.isTransactionActive) {
+        await queryRunner.rollbackTransaction();
+      }
       console.error('[ReceptionistService] Failed to set receptionist password:', error);
       throw error;
     } finally {

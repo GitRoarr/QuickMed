@@ -13,6 +13,7 @@ import { UpdateUserDto } from '../users/dto/update-user.dto';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { User } from '../users/entities/user.entity';
 import { CreateReceptionistInviteDto } from './dto/create-receptionist-invite.dto';
+import { Public } from '../auth/decorators/public.decorator';
 import { SetReceptionistPasswordDto } from './dto/set-receptionist-password.dto';
 
 @Controller('receptionist')
@@ -115,6 +116,7 @@ export class ReceptionistController {
   }
 
   @Post('set-password')
+  @Public()
   @HttpCode(HttpStatus.OK)
   async setReceptionistPassword(@Body() dto: SetReceptionistPasswordDto) {
     return this.receptionistService.setReceptionistPassword(dto.uid, dto.token, dto.password);

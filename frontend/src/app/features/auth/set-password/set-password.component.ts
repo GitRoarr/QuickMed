@@ -40,6 +40,10 @@ export class SetPasswordComponent implements OnInit {
       if (!this.token || !this.uid) {
         this.message = 'Invalid invitation link. Please contact the administrator.';
         this.type = 'error';
+        console.warn('[SetPassword] Missing token or uid in query params', {
+          tokenPresent: !!this.token,
+          uidPresent: !!this.uid,
+        });
       }
     });
   }

@@ -74,9 +74,9 @@ export class DoctorsService {
     // Use transaction to ensure data integrity
     const queryRunner = this.usersRepository.manager.connection.createQueryRunner();
     await queryRunner.connect();
-    await queryRunner.startTransaction();
 
     try {
+      await queryRunner.startTransaction();
       console.log("[DoctorsService] Creating doctor invite for", createDoctorDto.email);
       
       const normalizedEmail = createDoctorDto.email.toLowerCase().trim();
@@ -180,6 +180,12 @@ export class DoctorsService {
       throw new BadRequestException('Password must be at least 8 characters long');
     }
 
+    console.log('[DoctorsService] setDoctorPassword attempt', {
+      uid,
+      tokenProvided: !!token,
+      tokenLength: token ? token.length : 0,
+    });
+
     // Use transaction for data integrity
     const queryRunner = this.usersRepository.manager.connection.createQueryRunner();
     await queryRunner.connect();
@@ -232,7 +238,9 @@ export class DoctorsService {
       console.log(`[DoctorsService] Password set successfully for doctor: ${doctor.email}`);
       return this.sanitizeDoctor(savedDoctor) as User;
     } catch (error) {
-      await queryRunner.rollbackTransaction();
+      if (queryRunner.isTransactionActive) {
+        await queryRunner.rollbackTransaction();
+      }
       console.error('[DoctorsService] Failed to set doctor password:', error);
       throw error;
     } finally {

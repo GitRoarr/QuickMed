@@ -174,7 +174,7 @@ export class AdminService {
             <p>If you did not expect this, please contact support.</p>
           `;
           if (this.emailService) {
-            await this.emailService.sendMail(saved.email, subject, html);
+            await this.emailService.sendEmail(saved.email, subject, html);
           } else {
             console.log('[AdminService] EmailService not available; temp password:', tempPassword);
           }
