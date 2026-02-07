@@ -43,7 +43,7 @@ export class CashService {
 
     await this.paymentsRepo.save(payment);
 
-    await this.appointmentsRepo.update(appointmentId, { paymentStatus: 'paid' });
+    await this.appointmentsRepo.update(appointmentId, { paymentStatus: 'paid', status: 'confirmed' } as any);
 
     return payment;
   }

@@ -51,6 +51,9 @@ export class Appointment extends BaseEntity {
   })
   paymentStatus: string;
 
+  @Column({ type: 'timestamptz', nullable: true })
+  paymentDueAt: Date;
+
   @ManyToOne(() => User, (user) => user.patientAppointments)
   @JoinColumn({ name: 'receptionistId' })
   receptionist: User;

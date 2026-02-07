@@ -22,7 +22,11 @@ export class AppointmentsService {
     private readonly notificationIntegrationService: NotificationIntegrationService,
   ) { }
 
-  async create(createAppointmentDto: CreateAppointmentDto, patientId: string): Promise<Appointment> {
+  async create(
+    createAppointmentDto: CreateAppointmentDto,
+    patientId: string,
+    createdByRole?: UserRole,
+  ): Promise<Appointment> {
     const { doctorId, appointmentDate, appointmentTime, notes, receptionistId } = createAppointmentDto;
 
     // Auto-assign a free doctor if none was provided
@@ -148,16 +152,31 @@ export class AppointmentsService {
       console.warn('Schedule lookup failed during appointment creation', err);
     }
 
+    const defaultStatus = createAppointmentDto.status
+      ? createAppointmentDto.status
+      : createdByRole === UserRole.PATIENT
+        ? AppointmentStatus.PENDING_PAYMENT
+        : AppointmentStatus.PENDING;
+
+    const paymentStatus = createdByRole === UserRole.PATIENT
+      ? PaymentStatus.PENDING
+      : PaymentStatus.NOT_PAID;
+
+    const paymentDueAt = createdByRole === UserRole.PATIENT
+      ? new Date(Date.now() + 10 * 60 * 1000)
+      : null;
+
     const appointment = this.appointmentsRepository.create({
       patientId,
       doctorId: assignedDoctorId,
       appointmentDate,
       appointmentTime,
       notes,
-      status: AppointmentStatus.PENDING,
+      status: defaultStatus,
       receptionistId: receptionistId ?? null,
       arrived: false,
-      paymentStatus: PaymentStatus.NOT_PAID,
+      paymentStatus,
+      paymentDueAt: paymentDueAt || null,
     });
 
     const savedAppointment = await this.appointmentsRepository.save(appointment);

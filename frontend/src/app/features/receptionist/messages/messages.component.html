@@ -26,7 +26,7 @@
         <aside class="thread-panel">
           <div class="panel-head">
             <h3>Conversations</h3>
-            <input type="text" placeholder="Search" [(ngModel)]="search()" />
+            <input type="text" placeholder="Search" [ngModel]="searchValue" (ngModelChange)="searchValue = $event" />
           </div>
 
           <div class="new-message">
@@ -62,7 +62,7 @@
             >
               <div class="avatar">
                 <img *ngIf="thread.receiverAvatar" [src]="thread.receiverAvatar" alt="" />
-                <span *ngIf="!thread.receiverAvatar">{{ thread.receiverName?.charAt(0) || 'U' }}</span>
+                <span *ngIf="!thread.receiverAvatar">{{ thread.receiverName.charAt(0) || 'U' }}</span>
               </div>
               <div class="details">
                 <p class="name">{{ thread.receiverName }}</p>
@@ -80,7 +80,7 @@
           <div class="chat-head" *ngIf="selectedReceiverId(); else emptyChat">
             <div>
               <p class="eyebrow">Active chat</p>
-              <h3>{{ filteredThreads().find(t => t.receiverId === selectedReceiverId())?.receiverName || 'New message' }}</h3>
+              <h3>{{ selectedThread()?.receiverName || 'New message' }}</h3>
             </div>
             <span class="chip">{{ selectedReceiverRole() | titlecase }}</span>
           </div>
@@ -93,7 +93,7 @@
           </div>
 
           <div class="composer" *ngIf="selectedReceiverId()">
-            <textarea [(ngModel)]="draft()" placeholder="Write a quick update..."></textarea>
+            <textarea [ngModel]="draftValue" (ngModelChange)="draftValue = $event" placeholder="Write a quick update..."></textarea>
             <button class="primary" type="button" (click)="send()">Send</button>
           </div>
 

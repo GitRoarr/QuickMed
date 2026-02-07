@@ -59,6 +59,26 @@ export class ReceptionistMessagesComponent implements OnInit {
     return this.threads().filter((t) => t.receiverName?.toLowerCase().includes(q));
   });
 
+  selectedThread = computed(() =>
+    this.threads().find((t) => t.receiverId === this.selectedReceiverId())
+  );
+
+  get searchValue(): string {
+    return this.search();
+  }
+
+  set searchValue(value: string) {
+    this.search.set(value);
+  }
+
+  get draftValue(): string {
+    return this.draft();
+  }
+
+  set draftValue(value: string) {
+    this.draft.set(value);
+  }
+
   ngOnInit(): void {
     this.loadRecipients();
     this.loadThreads();

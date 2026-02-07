@@ -320,6 +320,18 @@ export const routes: Routes = [
         loadComponent: () => import('./features/receptionist/messages/messages.component').then(m => m.ReceptionistMessagesComponent)
       },
       {
+        path: 'payments',
+        loadComponent: () => import('./features/receptionist/payments/payments.component').then(m => m.ReceptionistPaymentsComponent)
+      },
+      {
+        path: 'doctors',
+        loadComponent: () => import('./features/receptionist/doctors/doctors.component').then(m => m.ReceptionistDoctorsComponent)
+      },
+      {
+        path: 'reports',
+        loadComponent: () => import('./features/receptionist/reports/reports.component').then(m => m.ReceptionistReportsComponent)
+      },
+      {
         path: 'schedule',
         loadComponent: () => import('./features/receptionist/schedule/schedule.component').then(m => m.ReceptionistScheduleComponent)
       },

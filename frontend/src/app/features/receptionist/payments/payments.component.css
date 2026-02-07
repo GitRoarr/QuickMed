@@ -1,0 +1,153 @@
+.receptionist-layout {
+  background: var(--bg);
+  min-height: 100vh;
+}
+
+.body {
+  display: flex;
+}
+
+.panel {
+  flex: 1;
+  padding: 2.5rem 3rem;
+  margin-left: 260px;
+}
+
+.hero {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.eyebrow {
+  margin: 0;
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.hero h1 {
+  margin: 0.4rem 0 0.25rem;
+  font-size: 2rem;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.hero-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.filters {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+}
+
+.filters label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.filters select,
+.filters input {
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  padding: 0.6rem 0.85rem;
+  background: var(--bg);
+  color: var(--fg);
+}
+
+.table-card {
+  background: var(--surface);
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  padding: 1.5rem;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+}
+
+.table-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+thead th {
+  text-align: left;
+  font-size: 0.85rem;
+  color: var(--muted);
+  padding: 0.75rem 0.5rem;
+}
+
+tbody td {
+  padding: 0.85rem 0.5rem;
+  border-top: 1px solid var(--border);
+}
+
+tbody tr:hover {
+  background: rgba(var(--primary-rgb), 0.04);
+}
+
+.status {
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  background: rgba(148, 163, 184, 0.2);
+  color: #64748b;
+}
+
+.status.paid {
+  background: rgba(34, 197, 94, 0.2);
+  color: #16a34a;
+}
+
+.primary {
+  border: none;
+  background: var(--primary);
+  color: #fff;
+  border-radius: 12px;
+  padding: 0.7rem 1.2rem;
+  cursor: pointer;
+}
+
+.ghost {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--fg);
+  border-radius: 12px;
+  padding: 0.65rem 1rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  cursor: pointer;
+}
+
+@media (max-width: 1024px) {
+  .panel {
+    margin-left: 0;
+    padding: 2rem 1.5rem;
+  }
+
+  .hero {
+    flex-direction: column;
+  }
+}

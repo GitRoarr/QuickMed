@@ -19,12 +19,6 @@
           <p class="subtitle">Manage check-ins, payments, and appointments with precision.</p>
         </div>
         <div class="header-actions">
-          <button class="ghost" type="button" title="Notifications">
-            <i class="bi bi-bell"></i>
-          </button>
-          <div class="avatar">
-            <span>{{ (authService.currentUser()?.firstName?.charAt(0) || 'R') + (authService.currentUser()?.lastName?.charAt(0) || 'C') }}</span>
-          </div>
           <button class="refresh" (click)="loadDashboard()" [disabled]="isLoading()">
             <i class="bi bi-arrow-clockwise" *ngIf="!isLoading(); else loading"></i>
             <ng-template #loading><span class="spinner"></span></ng-template>

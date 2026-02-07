@@ -1,0 +1,83 @@
+<div class="receptionist-layout">
+  <app-header></app-header>
+  <div class="body">
+    <app-sidebar
+      [title]="'QuickMed'"
+      [menuItems]="menuItems"
+      [secondaryItems]="secondaryItems"
+    ></app-sidebar>
+
+    <main class="panel">
+      <section class="hero">
+        <div>
+          <p class="eyebrow">Payments</p>
+          <h1>Receptionist Payments</h1>
+          <p class="muted">Track pending payments and record pay-at-desk transactions.</p>
+        </div>
+        <div class="hero-actions">
+          <button class="ghost" type="button" (click)="loadPayments()">
+            <i class="bi bi-arrow-clockwise"></i>
+            Refresh
+          </button>
+        </div>
+      </section>
+
+      <section class="filters">
+        <label>
+          <span>Status</span>
+          <select [ngModel]="statusFilter()" (ngModelChange)="statusFilter.set($event); loadPayments()">
+            <option value="not_paid">Not paid</option>
+            <option value="pending">Pending</option>
+            <option value="paid">Paid</option>
+          </select>
+        </label>
+        <label>
+          <span>Date</span>
+          <input type="date" [ngModel]="dateFilter()" (ngModelChange)="dateFilter.set($event); loadPayments()" />
+        </label>
+      </section>
+
+      <section class="table-card">
+        <header class="table-header">
+          <div>
+            <h3>Payment queue</h3>
+            <p class="muted">Confirm payments quickly and keep appointments on track.</p>
+          </div>
+        </header>
+
+        <div class="table-wrap" *ngIf="filteredPayments().length; else empty">
+          <table>
+            <thead>
+              <tr>
+                <th>Patient</th>
+                <th>Doctor</th>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let row of filteredPayments()">
+                <td>{{ row.patient?.firstName }} {{ row.patient?.lastName }}</td>
+                <td>Dr. {{ row.doctor?.firstName }} {{ row.doctor?.lastName }}</td>
+                <td>{{ row.appointmentDate | date }}</td>
+                <td>{{ row.appointmentTime }}</td>
+                <td><span class="status" [class.paid]="row.paymentStatus === 'paid'">{{ row.paymentStatus }}</span></td>
+                <td>
+                  <button class="ghost" type="button" (click)="markCashPaid(row)" [disabled]="row.paymentStatus === 'paid'">
+                    Mark paid
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <ng-template #empty>
+          <p class="muted">No payments found for the selected filters.</p>
+        </ng-template>
+      </section>
+    </main>
+  </div>
+</div>

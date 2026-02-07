@@ -54,7 +54,7 @@ export class ReceptionistController {
     // ensure receptionistId is set to current user
     dto.receptionistId = user.id;
     // reuse AppointmentsService.create; pass patientId from dto
-    return this.appointmentsService.create(dto, dto.patientId);
+    return this.appointmentsService.create(dto, dto.patientId, UserRole.RECEPTIONIST);
   }
 
   @Patch('appointments/:id')
@@ -109,6 +109,59 @@ export class ReceptionistController {
   @Roles(UserRole.RECEPTIONIST, UserRole.ADMIN)
   async getAppointment(@Param('id') id: string) {
     return this.appointmentsService.findOne(id);
+  }
+
+  @Get('payments')
+  @Roles(UserRole.RECEPTIONIST, UserRole.ADMIN)
+  async listPayments(@Query('status') status?: string, @Query('date') date?: string) {
+    return this.receptionistService.listPayments({ status, date });
+  }
+
+  @Get('doctors/availability')
+  @Roles(UserRole.RECEPTIONIST, UserRole.ADMIN)
+  async listDoctorAvailability(@Query('date') date?: string) {
+    return this.receptionistService.listDoctorAvailability(date);
+  }
+
+  @Get('reports/daily')
+  @Roles(UserRole.RECEPTIONIST, UserRole.ADMIN)
+  async getDailyReport(@Query('date') date?: string) {
+    return this.receptionistService.getDailySummary(date);
+  }
+
+  @Get('reports/appointments')
+  @Roles(UserRole.RECEPTIONIST, UserRole.ADMIN)
+  async getAppointmentReport(
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+    @Query('doctorId') doctorId?: string,
+    @Query('status') status?: string,
+  ) {
+    return this.receptionistService.getAppointmentReport({ startDate, endDate, doctorId, status });
+  }
+
+  @Get('reports/patient-visits')
+  @Roles(UserRole.RECEPTIONIST, UserRole.ADMIN)
+  async getPatientVisitReport(@Query('startDate') startDate?: string, @Query('endDate') endDate?: string) {
+    return this.receptionistService.getPatientVisitReport({ startDate, endDate });
+  }
+
+  @Get('reports/payments')
+  @Roles(UserRole.RECEPTIONIST, UserRole.ADMIN)
+  async getPaymentReport(@Query('startDate') startDate?: string, @Query('endDate') endDate?: string) {
+    return this.receptionistService.getPaymentReport({ startDate, endDate });
+  }
+
+  @Get('reports/doctor-activity')
+  @Roles(UserRole.RECEPTIONIST, UserRole.ADMIN)
+  async getDoctorActivityReport(@Query('startDate') startDate?: string, @Query('endDate') endDate?: string) {
+    return this.receptionistService.getDoctorActivityReport({ startDate, endDate });
+  }
+
+  @Get('reports/no-shows')
+  @Roles(UserRole.RECEPTIONIST, UserRole.ADMIN)
+  async getNoShowReport(@Query('startDate') startDate?: string, @Query('endDate') endDate?: string) {
+    return this.receptionistService.getNoShowReport({ startDate, endDate });
   }
 
   @Get('messages/threads')

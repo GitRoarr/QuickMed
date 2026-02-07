@@ -1,0 +1,191 @@
+<div class="receptionist-layout">
+  <app-header></app-header>
+  <div class="body">
+    <app-sidebar
+      [title]="'QuickMed'"
+      [menuItems]="menuItems"
+      [secondaryItems]="secondaryItems"
+    ></app-sidebar>
+
+    <main class="panel">
+      <section class="hero">
+        <div>
+          <p class="eyebrow">Reports</p>
+          <h1>Receptionist Reports</h1>
+          <p class="muted">Operational insights without medical data.</p>
+        </div>
+        <div class="hero-actions">
+          <button class="ghost" type="button" (click)="loadReports()">
+            <i class="bi bi-arrow-clockwise"></i>
+            Refresh
+          </button>
+        </div>
+      </section>
+
+      <section class="filters">
+        <label>
+          <span>Report</span>
+          <select [ngModel]="reportType()" (ngModelChange)="reportType.set($event); loadReports()">
+            <option value="daily">Daily summary</option>
+            <option value="appointments">Appointments</option>
+            <option value="patients">Patient visits</option>
+            <option value="payments">Payments</option>
+            <option value="doctors">Doctor activity</option>
+            <option value="no-shows">No-shows</option>
+          </select>
+        </label>
+        <label>
+          <span>Start</span>
+          <input type="date" [ngModel]="startDate()" (ngModelChange)="startDate.set($event); loadReports()" />
+        </label>
+        <label>
+          <span>End</span>
+          <input type="date" [ngModel]="endDate()" (ngModelChange)="endDate.set($event); loadReports()" />
+        </label>
+        <label *ngIf="reportType() === 'appointments'">
+          <span>Doctor</span>
+          <select [ngModel]="doctorId()" (ngModelChange)="doctorId.set($event); loadReports()">
+            <option value="">All doctors</option>
+            <option *ngFor="let doc of doctors()" [value]="doc.id">Dr. {{ doc.firstName }} {{ doc.lastName }}</option>
+          </select>
+        </label>
+        <label *ngIf="reportType() === 'appointments'">
+          <span>Status</span>
+          <select [ngModel]="status()" (ngModelChange)="status.set($event); loadReports()">
+            <option value="">All</option>
+            <option value="confirmed">Confirmed</option>
+            <option value="completed">Completed</option>
+            <option value="cancelled">Cancelled</option>
+            <option value="no_show">No-show</option>
+          </select>
+        </label>
+      </section>
+
+      <section *ngIf="reportType() === 'daily'" class="summary-grid">
+        <div class="card">
+          <p>Total appointments</p>
+          <h2>{{ daily()?.totalAppointments || 0 }}</h2>
+        </div>
+        <div class="card">
+          <p>Checked-in</p>
+          <h2>{{ daily()?.checkedIn || 0 }}</h2>
+        </div>
+        <div class="card">
+          <p>Completed</p>
+          <h2>{{ daily()?.completed || 0 }}</h2>
+        </div>
+        <div class="card">
+          <p>Cancelled / No-show</p>
+          <h2>{{ (daily()?.cancelled || 0) + (daily()?.noShow || 0) }}</h2>
+        </div>
+        <div class="card">
+          <p>Total payments</p>
+          <h2>{{ daily()?.totalPayments || 0 | currency:'USD' }}</h2>
+        </div>
+      </section>
+
+      <section *ngIf="reportType() === 'appointments'" class="table-card">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Patient</th>
+              <th>Doctor</th>
+              <th>Time</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let row of appointmentRows()">
+              <td>{{ row.appointmentDate | date }}</td>
+              <td>{{ row.patient?.firstName }} {{ row.patient?.lastName }}</td>
+              <td>Dr. {{ row.doctor?.firstName }} {{ row.doctor?.lastName }}</td>
+              <td>{{ row.appointmentTime }}</td>
+              <td>{{ row.status }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section *ngIf="reportType() === 'patients'" class="summary-grid">
+        <div class="card">
+          <p>Total visits</p>
+          <h2>{{ patientVisit()?.totalVisits || 0 }}</h2>
+        </div>
+        <div class="card">
+          <p>Unique patients</p>
+          <h2>{{ patientVisit()?.uniquePatients || 0 }}</h2>
+        </div>
+        <div class="card">
+          <p>New patients</p>
+          <h2>{{ patientVisit()?.newPatients || 0 }}</h2>
+        </div>
+        <div class="card">
+          <p>Returning patients</p>
+          <h2>{{ patientVisit()?.returningPatients || 0 }}</h2>
+        </div>
+      </section>
+
+      <section *ngIf="reportType() === 'payments'" class="summary-grid">
+        <div class="card">
+          <p>Total collected</p>
+          <h2>{{ paymentReport()?.totalCollected || 0 | currency:'USD' }}</h2>
+        </div>
+        <div class="card">
+          <p>Paid</p>
+          <h2>{{ paymentReport()?.paidCount || 0 }}</h2>
+        </div>
+        <div class="card">
+          <p>Unpaid</p>
+          <h2>{{ paymentReport()?.unpaidCount || 0 }}</h2>
+        </div>
+        <div class="card">
+          <p>Pending</p>
+          <h2>{{ paymentReport()?.pendingCount || 0 }}</h2>
+        </div>
+      </section>
+
+      <section *ngIf="reportType() === 'doctors'" class="table-card">
+        <table>
+          <thead>
+            <tr>
+              <th>Doctor</th>
+              <th>Total</th>
+              <th>Completed</th>
+              <th>Pending</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let row of doctorActivity()">
+              <td>{{ row.name }}</td>
+              <td>{{ row.total }}</td>
+              <td>{{ row.completed }}</td>
+              <td>{{ row.pending }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section *ngIf="reportType() === 'no-shows'" class="table-card">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Patient</th>
+              <th>Doctor</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let row of noShows()">
+              <td>{{ row.appointmentDate | date }}</td>
+              <td>{{ row.patient?.firstName }} {{ row.patient?.lastName }}</td>
+              <td>Dr. {{ row.doctor?.firstName }} {{ row.doctor?.lastName }}</td>
+              <td>{{ row.status }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+    </main>
+  </div>
+</div>

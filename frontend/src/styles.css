@@ -240,6 +240,19 @@ body {
   border-color: var(--border);
 }
 
+/* Receptionist header alignment with fixed sidebar */
+.receptionist-layout .admin-header {
+  margin-left: 260px;
+  width: calc(100% - 260px);
+}
+
+@media (max-width: 1024px) {
+  .receptionist-layout .admin-header {
+    margin-left: 0;
+    width: 100%;
+  }
+}
+
 /* .main */
 .main {
   margin-left: 16rem;

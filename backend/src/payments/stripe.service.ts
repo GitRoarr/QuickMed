@@ -65,6 +65,12 @@ export class StripeService {
       },
     });
 
+    await this.appointmentsRepository.update(appointmentId, {
+      status: 'pending_payment',
+      paymentStatus: 'pending',
+      paymentDueAt: appointment.paymentDueAt || new Date(Date.now() + 10 * 60 * 1000),
+    } as any);
+
     const payment = this.paymentRepository.create({
       transactionId: paymentIntent.id,
       appointmentId,
@@ -106,13 +112,22 @@ export class StripeService {
 
       await this.appointmentsRepository.update(payment.appointmentId, {
         paymentStatus: 'paid',
+        status: 'confirmed',
       });
     } else if (paymentIntent.status === 'canceled') {
       payment.status = PaymentStatus.FAILED;
       payment.failureReason = 'Payment was canceled';
+      await this.appointmentsRepository.update(payment.appointmentId, {
+        paymentStatus: 'not_paid',
+        status: 'pending_payment',
+      } as any);
     } else if (paymentIntent.status === 'requires_payment_method') {
       payment.status = PaymentStatus.FAILED;
       payment.failureReason = 'Payment method required';
+      await this.appointmentsRepository.update(payment.appointmentId, {
+        paymentStatus: 'not_paid',
+        status: 'pending_payment',
+      } as any);
     } else {
       payment.status = PaymentStatus.PENDING;
     }

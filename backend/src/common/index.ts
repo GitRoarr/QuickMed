@@ -7,9 +7,11 @@ export enum UserRole {
 
 export enum AppointmentStatus {
   PENDING = 'pending',
+  PENDING_PAYMENT = 'pending_payment',
   CONFIRMED = 'confirmed',
   CANCELLED = 'cancelled',
   COMPLETED = 'completed',
+  NO_SHOW = 'no_show',
   WAITING = 'waiting',
   IN_PROGRESS = 'in-progress',
   SCHEDULED = 'scheduled',

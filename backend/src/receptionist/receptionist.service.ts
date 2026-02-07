@@ -7,6 +7,8 @@ import { AppointmentStatus, PaymentStatus, UserRole } from '../common/index';
 import { Message } from '../messages/entities/message.entity';
 import { ReceptionistMessage } from './entities/receptionist-message.entity';
 import { SendReceptionistMessageDto } from './dto/send-receptionist-message.dto';
+import { SchedulesService } from '../schedules/schedules.service';
+import { Payment } from '../payments/entities/payment.entity';
 import { CreateReceptionistInviteDto } from './dto/create-receptionist-invite.dto';
 import { EmailService } from '../common/services/email.service';
 import * as bcrypt from 'bcrypt';
@@ -19,7 +21,9 @@ export class ReceptionistService {
     @InjectRepository(User) private readonly userRepo: Repository<User>,
     @InjectRepository(Message) private readonly messageRepo: Repository<Message>,
     @InjectRepository(ReceptionistMessage) private readonly receptionistMessageRepo: Repository<ReceptionistMessage>,
+    @InjectRepository(Payment) private readonly paymentRepo: Repository<Payment>,
     private readonly emailService: EmailService,
+    private readonly schedulesService: SchedulesService,
   ) { }
 
   async getTodayAppointments(filter?: { doctorId?: string; status?: string }) {
@@ -398,6 +402,260 @@ export class ReceptionistService {
     }
 
     return qb.getMany();
+  }
+
+  async listPayments(filters?: { status?: string; date?: string }) {
+    const qb = this.appointmentRepo
+      .createQueryBuilder('a')
+      .leftJoinAndSelect('a.patient', 'patient')
+      .leftJoinAndSelect('a.doctor', 'doctor')
+      .orderBy('a.appointmentDate', 'DESC')
+      .addOrderBy('a.appointmentTime', 'ASC');
+
+    if (filters?.status) {
+      qb.where('a.paymentStatus = :status', { status: filters.status });
+    }
+
+    if (filters?.date) {
+      const date = new Date(filters.date);
+      date.setHours(0, 0, 0, 0);
+      const nextDay = new Date(date);
+      nextDay.setDate(nextDay.getDate() + 1);
+      qb.andWhere('a.appointmentDate >= :date', { date })
+        .andWhere('a.appointmentDate < :nextDay', { nextDay });
+    }
+
+    return qb.getMany();
+  }
+
+  async listDoctorAvailability(date?: string) {
+    const doctors = await this.userRepo.find({
+      where: { role: UserRole.DOCTOR, isActive: true },
+      order: { firstName: 'ASC' },
+    });
+
+    const targetDate = date ? new Date(date) : new Date();
+    const results = [] as any[];
+
+    for (const doc of doctors) {
+      const day = await this.schedulesService.getDaySchedule(doc.id, targetDate);
+      const slots = day?.slots || [];
+      const totalSlots = slots.length;
+      const available = slots.filter((s: any) => s.status === 'available').length;
+      const booked = slots.filter((s: any) => s.status === 'booked').length;
+      const blocked = slots.filter((s: any) => s.status === 'blocked').length;
+
+      results.push({
+        id: doc.id,
+        name: `${doc.firstName} ${doc.lastName}`.trim(),
+        specialty: doc.specialty || null,
+        avatar: doc.avatar || null,
+        availability: {
+          date: day?.date,
+          totalSlots,
+          available,
+          booked,
+          blocked,
+          slots: slots.slice(0, 20),
+        },
+      });
+    }
+
+    return results;
+  }
+
+  private getDateRange(date?: string, startDate?: string, endDate?: string) {
+    if (date) {
+      const d = new Date(date);
+      d.setHours(0, 0, 0, 0);
+      const next = new Date(d);
+      next.setDate(next.getDate() + 1);
+      return { start: d, end: next };
+    }
+    if (startDate && endDate) {
+      const start = new Date(startDate);
+      start.setHours(0, 0, 0, 0);
+      const end = new Date(endDate);
+      end.setHours(23, 59, 59, 999);
+      return { start, end };
+    }
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    return { start: today, end: tomorrow };
+  }
+
+  async getDailySummary(date?: string) {
+    const { start, end } = this.getDateRange(date);
+    const totalAppointments = await this.appointmentRepo
+      .createQueryBuilder('a')
+      .where('a.appointmentDate >= :start AND a.appointmentDate < :end', { start, end })
+      .getCount();
+
+    const checkedIn = await this.appointmentRepo
+      .createQueryBuilder('a')
+      .where('a.appointmentDate >= :start AND a.appointmentDate < :end', { start, end })
+      .andWhere('a.arrived = :arrived', { arrived: true })
+      .getCount();
+
+    const completed = await this.appointmentRepo
+      .createQueryBuilder('a')
+      .where('a.appointmentDate >= :start AND a.appointmentDate < :end', { start, end })
+      .andWhere('a.status = :status', { status: AppointmentStatus.COMPLETED })
+      .getCount();
+
+    const cancelled = await this.appointmentRepo
+      .createQueryBuilder('a')
+      .where('a.appointmentDate >= :start AND a.appointmentDate < :end', { start, end })
+      .andWhere('a.status = :status', { status: AppointmentStatus.CANCELLED })
+      .getCount();
+
+    const noShow = await this.appointmentRepo
+      .createQueryBuilder('a')
+      .where('a.appointmentDate >= :start AND a.appointmentDate < :end', { start, end })
+      .andWhere('a.status = :status', { status: AppointmentStatus.NO_SHOW })
+      .getCount();
+
+    const payments = await this.paymentRepo
+      .createQueryBuilder('p')
+      .where('p.status = :status', { status: PaymentStatus.PAID })
+      .andWhere('p.paidAt >= :start AND p.paidAt <= :end', { start, end })
+      .getMany();
+
+    const totalPayments = payments.reduce((sum, p) => sum + Number(p.amount || 0), 0);
+
+    return {
+      date: start.toISOString().split('T')[0],
+      totalAppointments,
+      checkedIn,
+      completed,
+      cancelled,
+      noShow,
+      totalPayments,
+    };
+  }
+
+  async getAppointmentReport(filters?: { startDate?: string; endDate?: string; doctorId?: string; status?: string }) {
+    const { start, end } = this.getDateRange(undefined, filters?.startDate, filters?.endDate);
+    const qb = this.appointmentRepo
+      .createQueryBuilder('a')
+      .leftJoinAndSelect('a.patient', 'patient')
+      .leftJoinAndSelect('a.doctor', 'doctor')
+      .where('a.appointmentDate >= :start AND a.appointmentDate <= :end', { start, end })
+      .orderBy('a.appointmentDate', 'DESC')
+      .addOrderBy('a.appointmentTime', 'ASC');
+
+    if (filters?.doctorId) qb.andWhere('a.doctorId = :doctorId', { doctorId: filters.doctorId });
+    if (filters?.status) qb.andWhere('a.status = :status', { status: filters.status });
+
+    return qb.getMany();
+  }
+
+  async getPatientVisitReport(filters?: { startDate?: string; endDate?: string }) {
+    const { start, end } = this.getDateRange(undefined, filters?.startDate, filters?.endDate);
+    const visits = await this.appointmentRepo
+      .createQueryBuilder('a')
+      .leftJoinAndSelect('a.patient', 'patient')
+      .where('a.appointmentDate >= :start AND a.appointmentDate <= :end', { start, end })
+      .getMany();
+
+    const uniquePatients = new Map<string, User>();
+    visits.forEach((v) => {
+      if (v.patient) uniquePatients.set(v.patient.id, v.patient);
+    });
+
+    const newPatients = Array.from(uniquePatients.values()).filter((p) =>
+      p.createdAt && p.createdAt >= start && p.createdAt <= end,
+    ).length;
+
+    const returningPatients = uniquePatients.size - newPatients;
+
+    return {
+      totalVisits: visits.length,
+      uniquePatients: uniquePatients.size,
+      newPatients,
+      returningPatients,
+    };
+  }
+
+  async getPaymentReport(filters?: { startDate?: string; endDate?: string; status?: string }) {
+    const { start, end } = this.getDateRange(undefined, filters?.startDate, filters?.endDate);
+
+    const paidPayments = await this.paymentRepo
+      .createQueryBuilder('p')
+      .where('p.status = :status', { status: PaymentStatus.PAID })
+      .andWhere('p.paidAt >= :start AND p.paidAt <= :end', { start, end })
+      .getMany();
+
+    const totalCollected = paidPayments.reduce((sum, p) => sum + Number(p.amount || 0), 0);
+
+    const paidCount = await this.appointmentRepo
+      .createQueryBuilder('a')
+      .where('a.appointmentDate >= :start AND a.appointmentDate <= :end', { start, end })
+      .andWhere('a.paymentStatus = :status', { status: PaymentStatus.PAID })
+      .getCount();
+
+    const unpaidCount = await this.appointmentRepo
+      .createQueryBuilder('a')
+      .where('a.appointmentDate >= :start AND a.appointmentDate <= :end', { start, end })
+      .andWhere('a.paymentStatus = :status', { status: PaymentStatus.NOT_PAID })
+      .getCount();
+
+    const pendingCount = await this.appointmentRepo
+      .createQueryBuilder('a')
+      .where('a.appointmentDate >= :start AND a.appointmentDate <= :end', { start, end })
+      .andWhere('a.paymentStatus = :status', { status: PaymentStatus.PENDING })
+      .getCount();
+
+    return {
+      totalCollected,
+      paidCount,
+      unpaidCount,
+      pendingCount,
+    };
+  }
+
+  async getDoctorActivityReport(filters?: { startDate?: string; endDate?: string }) {
+    const { start, end } = this.getDateRange(undefined, filters?.startDate, filters?.endDate);
+    const appointments = await this.appointmentRepo
+      .createQueryBuilder('a')
+      .leftJoinAndSelect('a.doctor', 'doctor')
+      .where('a.appointmentDate >= :start AND a.appointmentDate <= :end', { start, end })
+      .getMany();
+
+    const map = new Map<string, any>();
+    for (const appt of appointments) {
+      const id = appt.doctorId;
+      if (!map.has(id)) {
+        map.set(id, {
+          doctorId: id,
+          name: `${appt.doctor?.firstName || ''} ${appt.doctor?.lastName || ''}`.trim(),
+          completed: 0,
+          pending: 0,
+          total: 0,
+        });
+      }
+      const entry = map.get(id);
+      entry.total += 1;
+      if (appt.status === AppointmentStatus.COMPLETED) entry.completed += 1;
+      if ([AppointmentStatus.PENDING, AppointmentStatus.CONFIRMED].includes(appt.status)) entry.pending += 1;
+    }
+
+    return Array.from(map.values());
+  }
+
+  async getNoShowReport(filters?: { startDate?: string; endDate?: string }) {
+    const { start, end } = this.getDateRange(undefined, filters?.startDate, filters?.endDate);
+    return this.appointmentRepo
+      .createQueryBuilder('a')
+      .leftJoinAndSelect('a.patient', 'patient')
+      .leftJoinAndSelect('a.doctor', 'doctor')
+      .where('a.appointmentDate >= :start AND a.appointmentDate <= :end', { start, end })
+      .andWhere('a.status IN (:...statuses)', { statuses: [AppointmentStatus.NO_SHOW, AppointmentStatus.CANCELLED] })
+      .orderBy('a.appointmentDate', 'DESC')
+      .addOrderBy('a.appointmentTime', 'ASC')
+      .getMany();
   }
 
   async listReceptionistThreads(senderId: string) {

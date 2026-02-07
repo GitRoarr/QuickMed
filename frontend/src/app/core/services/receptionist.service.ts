@@ -68,6 +68,66 @@ export class ReceptionistService {
     return this.http.get<any>(`${this.API_URL}/appointments/${id}`);
   }
 
+  listPayments(filters?: { status?: string; date?: string }): Observable<any[]> {
+    const params: any = {};
+    if (filters?.status) params.status = filters.status;
+    if (filters?.date) params.date = filters.date;
+    const qs = new URLSearchParams(params).toString();
+    return this.http.get<any[]>(`${this.API_URL}/payments${qs ? `?${qs}` : ''}`);
+  }
+
+  listDoctorAvailability(date?: string): Observable<any[]> {
+    const qs = date ? `?date=${encodeURIComponent(date)}` : '';
+    return this.http.get<any[]>(`${this.API_URL}/doctors/availability${qs}`);
+  }
+
+  getDailyReport(date?: string): Observable<any> {
+    const qs = date ? `?date=${encodeURIComponent(date)}` : '';
+    return this.http.get<any>(`${this.API_URL}/reports/daily${qs}`);
+  }
+
+  getAppointmentReport(filters?: { startDate?: string; endDate?: string; doctorId?: string; status?: string }): Observable<any[]> {
+    const params: any = {};
+    if (filters?.startDate) params.startDate = filters.startDate;
+    if (filters?.endDate) params.endDate = filters.endDate;
+    if (filters?.doctorId) params.doctorId = filters.doctorId;
+    if (filters?.status) params.status = filters.status;
+    const qs = new URLSearchParams(params).toString();
+    return this.http.get<any[]>(`${this.API_URL}/reports/appointments${qs ? `?${qs}` : ''}`);
+  }
+
+  getPatientVisitReport(filters?: { startDate?: string; endDate?: string }): Observable<any> {
+    const params: any = {};
+    if (filters?.startDate) params.startDate = filters.startDate;
+    if (filters?.endDate) params.endDate = filters.endDate;
+    const qs = new URLSearchParams(params).toString();
+    return this.http.get<any>(`${this.API_URL}/reports/patient-visits${qs ? `?${qs}` : ''}`);
+  }
+
+  getPaymentReport(filters?: { startDate?: string; endDate?: string }): Observable<any> {
+    const params: any = {};
+    if (filters?.startDate) params.startDate = filters.startDate;
+    if (filters?.endDate) params.endDate = filters.endDate;
+    const qs = new URLSearchParams(params).toString();
+    return this.http.get<any>(`${this.API_URL}/reports/payments${qs ? `?${qs}` : ''}`);
+  }
+
+  getDoctorActivityReport(filters?: { startDate?: string; endDate?: string }): Observable<any[]> {
+    const params: any = {};
+    if (filters?.startDate) params.startDate = filters.startDate;
+    if (filters?.endDate) params.endDate = filters.endDate;
+    const qs = new URLSearchParams(params).toString();
+    return this.http.get<any[]>(`${this.API_URL}/reports/doctor-activity${qs ? `?${qs}` : ''}`);
+  }
+
+  getNoShowReport(filters?: { startDate?: string; endDate?: string }): Observable<any[]> {
+    const params: any = {};
+    if (filters?.startDate) params.startDate = filters.startDate;
+    if (filters?.endDate) params.endDate = filters.endDate;
+    const qs = new URLSearchParams(params).toString();
+    return this.http.get<any[]>(`${this.API_URL}/reports/no-shows${qs ? `?${qs}` : ''}`);
+  }
+
   listMessageThreads(): Observable<any[]> {
     return this.http.get<any[]>(`${this.API_URL}/messages/threads`);
   }

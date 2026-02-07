@@ -1,0 +1,74 @@
+<div class="receptionist-layout">
+  <app-header></app-header>
+  <div class="body">
+    <app-sidebar
+      [title]="'QuickMed'"
+      [menuItems]="menuItems"
+      [secondaryItems]="secondaryItems"
+    ></app-sidebar>
+
+    <main class="panel">
+      <section class="hero">
+        <div>
+          <p class="eyebrow">Doctor coordination</p>
+          <h1>Doctor Availability</h1>
+          <p class="muted">Match patients to live availability and keep schedules aligned.</p>
+        </div>
+        <div class="hero-actions">
+          <label>
+            <span>Date</span>
+            <input type="date" [ngModel]="dateFilter()" (ngModelChange)="dateFilter.set($event); loadAvailability()" />
+          </label>
+          <button class="ghost" type="button" (click)="loadAvailability()">
+            <i class="bi bi-arrow-clockwise"></i>
+            Refresh
+          </button>
+        </div>
+      </section>
+
+      <section class="cards" *ngIf="doctors().length; else empty">
+        <article class="doc-card" *ngFor="let doc of doctors()">
+          <div class="doc-header">
+            <div class="avatar">
+              <img *ngIf="doc.avatar" [src]="doc.avatar" alt="" />
+              <span *ngIf="!doc.avatar">{{ doc.name.charAt(0) }}</span>
+            </div>
+            <div>
+              <h3>{{ doc.name }}</h3>
+              <p class="muted">{{ doc.specialty || 'General' }}</p>
+            </div>
+          </div>
+          <div class="stats">
+            <div>
+              <p>Available</p>
+              <h4>{{ doc.availability?.available }}</h4>
+            </div>
+            <div>
+              <p>Booked</p>
+              <h4>{{ doc.availability?.booked }}</h4>
+            </div>
+            <div>
+              <p>Blocked</p>
+              <h4>{{ doc.availability?.blocked }}</h4>
+            </div>
+          </div>
+          <div class="slots">
+            <span *ngFor="let slot of doc.availability?.slots">{{ slot.startTime || slot.time }}</span>
+          </div>
+        </article>
+      </section>
+
+      <ng-template #empty>
+        <div class="empty-state">
+          <div class="empty-icon">
+            <i class="bi bi-calendar2-week"></i>
+          </div>
+          <div>
+            <h3>No availability for this date</h3>
+            <p class="muted">Ask a doctor to publish their schedule or choose another day.</p>
+          </div>
+        </div>
+      </ng-template>
+    </main>
+  </div>
+</div>
