@@ -143,7 +143,7 @@ export class AuthService {
   }
 
   private mapSupabaseUser(user: SupabaseUser): User {
-    const fullName = user.user_metadata?.full_name || user.user_metadata?.name || "";
+    const fullName = (user.user_metadata && (user.user_metadata["full_name"] || user.user_metadata["name"])) || "";
     const [firstName, ...rest] = String(fullName).split(" ").filter(Boolean);
     return {
       id: user.id,
@@ -154,7 +154,7 @@ export class AuthService {
       phoneNumber: user.phone || "",
       createdAt: new Date(),
       updatedAt: new Date(),
-      avatar: user.user_metadata?.avatar_url,
+      avatar: user.user_metadata ? user.user_metadata["avatar_url"] : undefined,
     } as User;
   }
 
