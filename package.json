@@ -2,11 +2,13 @@
   "dependencies": {
     "@ng-bootstrap/ng-bootstrap": "^15.0.0",
     "@popperjs/core": "^2.11.8",
-    "@supabase/supabase-js": "^2.95.3"
+    "@supabase/supabase-js": "^2.95.3",
+    "jsonwebtoken": "^9.0.3"
   },
   "devDependencies": {
     "@nestjs/testing": "^11.1.11",
     "@types/jest": "^30.0.0",
+    "@types/jsonwebtoken": "^9.0.10",
     "jest": "^30.2.0",
     "ts-jest": "^29.4.6"
   }

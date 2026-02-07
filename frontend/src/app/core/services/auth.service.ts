@@ -135,6 +135,11 @@ export class AuthService {
     localStorage.setItem(this.TOKEN_KEY, session.access_token);
     localStorage.setItem(this.USER_KEY, JSON.stringify(mapped));
     this.currentUser.set(mapped);
+
+    const path = window.location.pathname || "";
+    if (path.startsWith("/auth/callback") || path.startsWith("/login") || path.startsWith("/register")) {
+      this.router.navigate(["/patient/dashboard"]);
+    }
   }
 
   private mapSupabaseUser(user: SupabaseUser): User {
