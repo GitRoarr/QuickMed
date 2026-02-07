@@ -61,4 +61,13 @@ export class RegisterComponent {
   togglePasswordVisibility(): void {
     this.showPassword = !this.showPassword;
   }
+
+  async signInWithGoogle(): Promise<void> {
+    try {
+      await this.authService.signInWithGoogle();
+    } catch (error: any) {
+      const msg = error?.message || "Google sign-in failed";
+      this.toast.error(msg, { title: "Google Sign-In" });
+    }
+  }
 }

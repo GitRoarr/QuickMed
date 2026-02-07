@@ -95,6 +95,11 @@
                     <i *ngIf="!isLoading" class="bi bi-arrow-right ms-2"></i>
                 </button>
 
+                <button type="button" class="btn google-btn" (click)="signInWithGoogle()">
+                    <img src="assets/icons/google.svg" alt="Google" />
+                    Continue with Google
+                </button>
+
                 <div class="text-center mt-4">
                     <p class="switch-auth">
                         Already have an account?

@@ -3,7 +3,8 @@ import { HttpClient } from "@angular/common/http";
 import { Router } from "@angular/router";
 import { Observable, of, tap } from "rxjs";
 import { environment } from "@environments/environment";
-import { User, AuthResponse, LoginRequest, RegisterRequest } from "../models/user.model";
+import { User, AuthResponse, LoginRequest, RegisterRequest, UserRole } from "../models/user.model";
+import { createClient, SupabaseClient, User as SupabaseUser, Session } from "@supabase/supabase-js";
 
 @Injectable({
   providedIn: "root",
@@ -13,10 +14,22 @@ export class AuthService {
   private readonly USERS_URL = `${environment.apiUrl}/users`;
   private readonly TOKEN_KEY = "carehub_token";
   private readonly USER_KEY = "carehub_user";
+  private readonly SUPABASE_TOKEN_KEY = "carehub_supabase_token";
+  private supabase: SupabaseClient | null = null;
 
   currentUser = signal<User | null>(this.getUserFromStorage());
 
-  constructor(private http: HttpClient, private router: Router) {}
+  constructor(private http: HttpClient, private router: Router) {
+    this.getSupabase();
+  }
+
+  private getSupabase(): SupabaseClient | null {
+    if (this.supabase) return this.supabase;
+    if (!environment.supabaseUrl || !environment.supabaseAnonKey) return null;
+    this.supabase = createClient(environment.supabaseUrl, environment.supabaseAnonKey);
+    this.bootstrapSupabaseSession();
+    return this.supabase;
+  }
 
   register(data: RegisterRequest): Observable<AuthResponse> {
     return this.http
@@ -33,6 +46,8 @@ export class AuthService {
   logout(): void {
     localStorage.removeItem(this.TOKEN_KEY);
     localStorage.removeItem(this.USER_KEY);
+    localStorage.removeItem(this.SUPABASE_TOKEN_KEY);
+    this.supabase?.auth.signOut();
     this.currentUser.set(null);
     this.router.navigate(["/login"]);
   }
@@ -77,6 +92,65 @@ export class AuthService {
     localStorage.setItem(this.TOKEN_KEY, token);
     localStorage.setItem(this.USER_KEY, JSON.stringify(user));
     this.currentUser.set(user);
+  }
+
+  async signInWithGoogle(): Promise<void> {
+    const client = this.getSupabase();
+    if (!client) {
+      throw new Error("Supabase is not configured.");
+    }
+
+    const { error } = await client.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: environment.googleRedirectUri || window.location.origin,
+      },
+    });
+
+    if (error) {
+      throw error;
+    }
+  }
+
+  private async bootstrapSupabaseSession(): Promise<void> {
+    const client = this.supabase;
+    if (!client) return;
+
+    const { data } = await client.auth.getSession();
+    if (data?.session) {
+      this.applySupabaseSession(data.session);
+    }
+
+    client.auth.onAuthStateChange((_event, session) => {
+      if (session) {
+        this.applySupabaseSession(session);
+      }
+    });
+  }
+
+  private applySupabaseSession(session: Session): void {
+    const supaUser = session.user;
+    const mapped = this.mapSupabaseUser(supaUser);
+    localStorage.setItem(this.SUPABASE_TOKEN_KEY, session.access_token);
+    localStorage.setItem(this.TOKEN_KEY, session.access_token);
+    localStorage.setItem(this.USER_KEY, JSON.stringify(mapped));
+    this.currentUser.set(mapped);
+  }
+
+  private mapSupabaseUser(user: SupabaseUser): User {
+    const fullName = user.user_metadata?.full_name || user.user_metadata?.name || "";
+    const [firstName, ...rest] = String(fullName).split(" ").filter(Boolean);
+    return {
+      id: user.id,
+      firstName: firstName || "Patient",
+      lastName: rest.join(" ") || "User",
+      email: user.email || "",
+      role: UserRole.PATIENT,
+      phoneNumber: user.phone || "",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      avatar: user.user_metadata?.avatar_url,
+    } as User;
   }
 
   private getUserFromStorage(): User | null {

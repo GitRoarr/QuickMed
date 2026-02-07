@@ -1,7 +1,8 @@
 {
   "dependencies": {
     "@ng-bootstrap/ng-bootstrap": "^15.0.0",
-    "@popperjs/core": "^2.11.8"
+    "@popperjs/core": "^2.11.8",
+    "@supabase/supabase-js": "^2.95.3"
   },
   "devDependencies": {
     "@nestjs/testing": "^11.1.11",
