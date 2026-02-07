@@ -9,35 +9,55 @@
 
     <div class="stats-row" *ngIf="!isLoading()">
       <div class="stat-card">
-        <p>Total Records</p>
-        <h2>{{ totalRecords() }}</h2>
+        <div class="stat-icon"><i class="bi bi-folder2-open"></i></div>
+        <div>
+          <p>Total Records</p>
+          <h2>{{ totalRecords() }}</h2>
+        </div>
       </div>
       <div class="stat-card">
-        <p>Lab Results</p>
-        <h2>{{ labCount() }}</h2>
+        <div class="stat-icon accent"><i class="bi bi-clipboard-data"></i></div>
+        <div>
+          <p>Lab Results</p>
+          <h2>{{ labCount() }}</h2>
+        </div>
       </div>
       <div class="stat-card">
-        <p>Prescriptions</p>
-        <h2>{{ prescriptionCount() }}</h2>
+        <div class="stat-icon"><i class="bi bi-prescription"></i></div>
+        <div>
+          <p>Prescriptions</p>
+          <h2>{{ prescriptionCount() }}</h2>
+        </div>
       </div>
       <div class="stat-card">
-        <p>Imaging</p>
-        <h2>{{ imagingCount() }}</h2>
+        <div class="stat-icon accent"><i class="bi bi-image"></i></div>
+        <div>
+          <p>Imaging</p>
+          <h2>{{ imagingCount() }}</h2>
+        </div>
       </div>
       <div class="stat-card">
-        <p>Diagnoses</p>
-        <h2>{{ diagnosisCount() }}</h2>
+        <div class="stat-icon"><i class="bi bi-file-medical"></i></div>
+        <div>
+          <p>Diagnoses</p>
+          <h2>{{ diagnosisCount() }}</h2>
+        </div>
       </div>
     </div>
 
     <div class="filter-bar" *ngIf="!isLoading()">
-      <div class="filter-label">
-        <img
-          class="filter-icon"
-          src="https://img.icons8.com/?size=100&id=3720&format=png&color=000000"
-          alt="Filter records"
-        />
-        <span>Filter records</span>
+      <div class="search-field">
+        <i class="bi bi-search"></i>
+        <input type="text" placeholder="Search medical records..." />
+      </div>
+      <div class="filter-select">
+        <i class="bi bi-funnel"></i>
+        <select>
+          <option selected>Filter records</option>
+          <option>Recent</option>
+          <option>Last 30 days</option>
+          <option>Last year</option>
+        </select>
       </div>
       <div class="filter-chips">
         <button
@@ -53,20 +73,43 @@
     </div>
 
     <div class="records-list" *ngIf="!isLoading(); else loadingState">
-      <div class="record-card" *ngFor="let record of filteredRecords()">
-        <div>
-          <p class="record-title">{{ record.title }}</p>
-          <p class="muted">{{ record.recordDate | date:'MMM d, y' }}</p>
-          <span class="tag">{{ record.type }}</span>
+      <div class="records-table">
+        <div class="records-header">
+          <span>Record Type</span>
+          <span>Title</span>
+          <span>Doctor</span>
+          <span>Date</span>
+          <span>Status</span>
+          <span>Action</span>
         </div>
-        <div class="record-actions">
-          <button class="text-btn" (click)="viewRecord(record)">View</button>
-          <button class="primary-btn subtle" (click)="downloadRecord(record)">Download</button>
+        <div class="record-row" *ngFor="let record of filteredRecords()">
+          <div class="cell">
+            <span class="tag">{{ record.type }}</span>
+          </div>
+          <div class="cell">
+            <p class="record-title">{{ record.title }}</p>
+          </div>
+          <div class="cell muted">
+            {{ record.doctor ? ('Dr. ' + record.doctor.firstName + ' ' + record.doctor.lastName) : '—' }}
+          </div>
+          <div class="cell muted">{{ record.recordDate | date:'MMM d, y' }}</div>
+          <div class="cell">
+            <span class="status-pill">Available</span>
+          </div>
+          <div class="cell actions">
+            <button class="text-btn" (click)="viewRecord(record)">View</button>
+            <button class="primary-btn subtle" (click)="downloadRecord(record)">Download</button>
+          </div>
         </div>
       </div>
 
       <div class="empty-state" *ngIf="filteredRecords().length === 0">
-        <p>No records match this filter.</p>
+        <div class="empty-illustration">
+          <i class="bi bi-journal-medical"></i>
+        </div>
+        <h3>No records match this filter.</h3>
+        <p>Your medical records will appear here once available.</p>
+        <button class="primary-btn">Request Records</button>
       </div>
     </div>
   </div>

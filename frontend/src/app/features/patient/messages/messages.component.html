@@ -56,12 +56,17 @@
         <!-- Chat View -->
         <section class="chat-view" *ngIf="selectedConversation(); else emptyState">
           <header class="chat-header">
-            <div>
-              <p class="chat-title">{{ getRecipientName(selectedConversation()!) }}</p>
-              <!-- Remove recipient property, fallback to 'Online'/'Offline' logic or remove if not available -->
-              <!-- <p class="status">
-                {{ selectedConversation()?.recipient?.online ? 'Online now' : 'Offline' }}
-              </p> -->
+            <div class="chat-header__left">
+              <div class="chat-avatar">
+                {{ selectedConversation()?.doctor?.firstName?.charAt(0) || selectedConversation()?.doctor?.lastName?.charAt(0) || 'D' }}
+              </div>
+              <div>
+                <p class="chat-title">{{ getRecipientName(selectedConversation()!) }}</p>
+                <p class="chat-subtitle">
+                  Doctor
+                  <span class="status-pill"><span class="status-dot"></span> Online</span>
+                </p>
+              </div>
             </div>
             <div class="header-actions">
               <button class="icon-btn" aria-label="Call doctor">
@@ -90,17 +95,23 @@
           </div>
 
           <footer class="chat-input">
+            <button class="ghost-icon" type="button" aria-label="Attach file">
+              <i class="bi bi-paperclip"></i>
+            </button>
+            <button class="ghost-icon" type="button" aria-label="Emoji">
+              <i class="bi bi-emoji-smile"></i>
+            </button>
             <textarea
               rows="2"
               placeholder="Type your message..."
               [(ngModel)]="messageContent"
               (keydown.enter)="sendMessage(); $event.preventDefault()"></textarea>
-            
             <button
-              class="primary-btn"
+              class="send-btn"
               (click)="sendMessage()"
               [disabled]="!messageContent().trim()"
               [attr.aria-disabled]="!messageContent().trim()">
+              <i class="bi bi-send"></i>
               Send
             </button>
           </footer>
@@ -118,6 +129,10 @@
 
 <ng-template #emptyState>
   <div class="chat-empty">
-    <p>Select a conversation to get started</p>
+    <div class="empty-illustration">
+      <i class="bi bi-chat-heart"></i>
+    </div>
+    <h3>Select a conversation to get started</h3>
+    <p>Start messaging your doctor or care team securely and easily.</p>
   </div>
 </ng-template>

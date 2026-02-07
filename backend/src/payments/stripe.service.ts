@@ -5,6 +5,7 @@ import Stripe from 'stripe';
 import { Payment, PaymentStatus, PaymentMethod } from './entities/payment.entity';
 import { AppointmentsService } from '../appointments/appointments.service';
 import { Appointment } from '../appointments/entities/appointment.entity';
+import { AppointmentStatus } from '../common';
 
 @Injectable()
 export class StripeService {
@@ -112,22 +113,22 @@ export class StripeService {
 
       await this.appointmentsRepository.update(payment.appointmentId, {
         paymentStatus: 'paid',
-        status: 'confirmed',
+        status: AppointmentStatus.CONFIRMED,
       });
     } else if (paymentIntent.status === 'canceled') {
       payment.status = PaymentStatus.FAILED;
       payment.failureReason = 'Payment was canceled';
       await this.appointmentsRepository.update(payment.appointmentId, {
         paymentStatus: 'not_paid',
-        status: 'pending_payment',
-      } as any);
+        status: AppointmentStatus.PENDING_PAYMENT,
+      });
     } else if (paymentIntent.status === 'requires_payment_method') {
       payment.status = PaymentStatus.FAILED;
       payment.failureReason = 'Payment method required';
       await this.appointmentsRepository.update(payment.appointmentId, {
         paymentStatus: 'not_paid',
-        status: 'pending_payment',
-      } as any);
+        status: AppointmentStatus.PENDING_PAYMENT,
+      });
     } else {
       payment.status = PaymentStatus.PENDING;
     }

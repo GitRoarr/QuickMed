@@ -51,10 +51,86 @@
         <i class="bi bi-chat-dots"></i>
         <span class="patient-shell__badge" *ngIf="unreadMessages() > 0">{{ unreadMessages() }}</span>
       </button>
-      <button class="patient-shell__icon-btn" type="button" [routerLink]="'/patient/settings'" title="Notifications">
+      <button class="patient-shell__icon-btn" type="button" title="Notifications" (click)="toggleNotifications($event)">
         <i class="bi bi-bell"></i>
         <span class="patient-shell__badge" *ngIf="unreadNotifications() > 0">{{ unreadNotifications() }}</span>
       </button>
+      <div
+        class="patient-shell__notifications"
+        *ngIf="notificationsOpen()"
+        (click)="$event.stopPropagation()"
+      >
+        <div class="notifications-header">
+          <div>
+            <p class="notifications-title">Notifications</p>
+            <p class="notifications-subtitle" *ngIf="unreadNotifications() > 0">
+              {{ unreadNotifications() }} unread
+            </p>
+          </div>
+          <button
+            class="notifications-action"
+            type="button"
+            (click)="markAllNotificationsRead($event)"
+            [disabled]="unreadNotifications() === 0"
+          >
+            Mark all read
+          </button>
+        </div>
+
+        <div class="notifications-body" *ngIf="!isLoadingNotifications(); else notificationsLoading">
+          <button
+            class="notification-item"
+            *ngFor="let item of notifications()"
+            type="button"
+            [class.unread]="!item.read"
+            (click)="openNotification(item, $event)"
+          >
+            <div class="notification-icon" [class.unread-dot]="!item.read">
+              <i class="bi" [ngClass]="notificationService.getNotificationIcon(item.type)"></i>
+            </div>
+            <div class="notification-content">
+              <div class="notification-row">
+                <p class="notification-title">{{ item.title }}</p>
+                <span class="notification-time">{{ formatNotificationTime(item.createdAt) }}</span>
+              </div>
+              <p class="notification-message">{{ item.message }}</p>
+              <div class="notification-actions">
+                <span
+                  class="notification-type"
+                  [ngClass]="notificationService.getPriorityColorClass(item.priority)"
+                >
+                  {{ item.type.replace('_', ' ') }} • {{ item.priority }}
+                </span>
+                <button
+                  class="notification-mark"
+                  type="button"
+                  (click)="markNotificationRead(item, $event)"
+                  *ngIf="!item.read"
+                >
+                  Mark read
+                </button>
+              </div>
+            </div>
+          </button>
+
+          <div class="notifications-empty" *ngIf="notifications().length === 0">
+            <p>No notifications yet.</p>
+          </div>
+        </div>
+
+        <ng-template #notificationsLoading>
+          <div class="notifications-loading">
+            <div class="loader"></div>
+            <p>Loading notifications...</p>
+          </div>
+        </ng-template>
+
+        <div class="notifications-footer">
+          <button class="notifications-link" type="button" (click)="navigate('/patient/settings')">
+            Notification settings
+          </button>
+        </div>
+      </div>
       <button class="patient-shell__icon-btn" type="button" (click)="toggleTheme()" title="Toggle theme">
         <i class="bi" [ngClass]="themeService.isDarkMode() ? 'bi-moon' : 'bi-brightness-high'"></i>
       </button>

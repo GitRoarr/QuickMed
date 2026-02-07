@@ -18,7 +18,7 @@
       </button>
       <button class="icon relative" title="Notifications">
         <i class="bi bi-bell"></i>
-        <span *ngIf="unreadNotifications > 0" class="dot"></span>
+        <span *ngIf="notificationCount() > 0" class="badge">{{ notificationCount() }}</span>
       </button>
       <button class="icon" title="Toggle Theme" (click)="toggleDarkMode()">
         <i class="bi" [class.bi-brightness-high-fill]="!isDarkMode" [class.bi-moon-stars-fill]="isDarkMode"></i>

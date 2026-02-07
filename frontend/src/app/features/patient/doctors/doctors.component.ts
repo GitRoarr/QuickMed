@@ -30,6 +30,7 @@ export class DoctorsComponent implements OnInit {
   searchQuery = signal('');
   selectedSpecialty = signal('all');
   availableSlots = signal<DoctorSlot[]>([]);
+  nextAvailableDate = signal<string | null>(null);
 
   // Manual time picker input
   manualTimeInput: string = '';
@@ -170,6 +171,7 @@ export class DoctorsComponent implements OnInit {
     this.selectedDoctor.set(null);
     this.appointmentForm.reset();
     this.availableSlots.set([]);
+    this.nextAvailableDate.set(null);
   }
 
   bookAppointment(): void {
@@ -258,12 +260,13 @@ export class DoctorsComponent implements OnInit {
     return `${hr}:${String(m).padStart(2, '0')} ${period}`;
   }
 
-  loadAvailableSlots(dateStr?: string): void {
+  loadAvailableSlots(dateStr?: string, allowFallback = true): void {
     const doctor = this.selectedDoctor();
     if (!doctor) return;
     const date = dateStr || this.appointmentForm.value.appointmentDate;
     if (!date) {
       this.availableSlots.set([]);
+      this.nextAvailableDate.set(null);
       return;
     }
     this.schedulingService.getDaySchedulePublic(doctor.id, date).subscribe({
@@ -278,14 +281,20 @@ export class DoctorsComponent implements OnInit {
 
         // Normalize time values to HH:mm and include end time
         const normalized = available.map(s => ({
-          startTime: (s.startTime || s.time || '').slice(0, 5),
-          endTime: (s.endTime || s.startTime || s.time || '').slice(0, 5),
+          startTime: this.normalizeTime(s.startTime || s.time || ''),
+          endTime: this.normalizeTime(s.endTime || s.startTime || s.time || ''),
           status: s.status
         } as DoctorSlot));
         // Remove duplicates and sort
         const unique = Array.from(new Map(normalized.map(s => [s.startTime, s])).values())
           .sort((a, b) => (a.startTime || '').localeCompare(b.startTime || ''));
         this.availableSlots.set(unique);
+        this.nextAvailableDate.set(null);
+
+        if (unique.length === 0 && allowFallback) {
+          this.loadNextAvailableDate(date);
+          return;
+        }
         // If current selected time not in list, clear it
         const current = this.appointmentForm.value.appointmentTime;
         if (current && !unique.some(s => s.startTime === current)) {
@@ -294,7 +303,24 @@ export class DoctorsComponent implements OnInit {
       },
       error: () => {
         this.availableSlots.set([]);
+        this.nextAvailableDate.set(null);
       }
+    });
+  }
+
+  private loadNextAvailableDate(currentDate: string): void {
+    const doctor = this.selectedDoctor();
+    if (!doctor) return;
+    this.schedulingService.getAvailableDates(doctor.id, currentDate, 30).subscribe({
+      next: (dates) => {
+        const nextDate = (dates || []).find(d => d >= currentDate && d !== currentDate) || null;
+        this.nextAvailableDate.set(nextDate);
+        if (nextDate) {
+          this.appointmentForm.patchValue({ appointmentDate: nextDate, appointmentTime: '' });
+          this.loadAvailableSlots(nextDate, false);
+        }
+      },
+      error: () => this.nextAvailableDate.set(null),
     });
   }
 
@@ -389,6 +415,14 @@ export class DoctorsComponent implements OnInit {
   onDateChange(): void {
     const date = this.appointmentForm.value.appointmentDate;
     this.loadAvailableSlots(date);
+  }
+
+  private normalizeTime(time: string): string {
+    if (!time) return '';
+    const [hRaw, mRaw] = time.split(':');
+    const h = String(hRaw || '').padStart(2, '0');
+    const m = String(mRaw || '00').padStart(2, '0');
+    return `${h}:${m}`;
   }
 
   toggleSidebar(): void {

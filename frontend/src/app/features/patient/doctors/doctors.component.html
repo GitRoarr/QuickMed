@@ -155,6 +155,7 @@
               <div class="no-slots-message">
                 <p *ngIf="appointmentForm.value.appointmentDate">No available slots for this date. Please select another
                   date.</p>
+                <p *ngIf="nextAvailableDate()">Next available date: {{ nextAvailableDate() }}</p>
                 <p *ngIf="!appointmentForm.value.appointmentDate">Please select a date to see available time slots.</p>
               </div>
             </ng-template>
