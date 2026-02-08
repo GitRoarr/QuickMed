@@ -1,40 +1,69 @@
-import { Column, CreateDateColumn, Entity, Index, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { Appointment } from '../../appointments/entities/appointment.entity';
+import { User } from '../../users/entities/user.entity';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
+import { Treatment } from './treatment.entity';
 
-@Entity({ name: 'consultations' })
+@Entity()
 export class Consultation {
   @PrimaryGeneratedColumn('uuid')
-  id!: string;
+  id: string;
 
-  @Index()
-  @Column({ type: 'varchar', length: 64, nullable: true })
-  appointmentId!: string | null;
+  @Column({ nullable: true })
+  appointmentId: string;
 
-  @Index()
-  @Column({ type: 'varchar', length: 64 })
-  doctorId!: string;
+  @ManyToOne(() => Appointment, { onDelete: 'SET NULL', nullable: true })
+  @JoinColumn({ name: 'appointmentId' })
+  appointment: Appointment;
 
-  @Index()
-  @Column({ type: 'varchar', length: 64 })
-  patientId!: string;
+  @Column()
+  doctorId: string;
 
-  @Column({ type: 'timestamptz' })
-  startTime!: Date;
+  @ManyToOne(() => User, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'doctorId' })
+  doctor: User;
 
-  @Column({ type: 'timestamptz', nullable: true })
-  endTime!: Date | null;
+  @Column()
+  patientId: string;
 
-  @Column({ type: 'integer', nullable: true })
-  durationMin!: number | null;
+  @ManyToOne(() => User, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'patientId' })
+  patient: User;
 
-  @Column({ type: 'numeric', precision: 3, scale: 2, nullable: true })
-  rating!: number | null; // 1.00 - 5.00
+  @Column('text', { nullable: true })
+  notes: string; // Diagnosis, advice, etc.
+
+  @OneToMany(() => Treatment, (treatment) => treatment.consultation, {
+    cascade: true,
+  })
+  treatments: Treatment[];
+
+  @Column({ type: 'timestamp' })
+  startTime: Date;
+
+  @Column({ type: 'timestamp', nullable: true })
+  endTime: Date;
+
+  @Column({ type: 'int', nullable: true })
+  durationMin: number;
+
+  @Column({ type: 'int', nullable: true })
+  rating: number; // e.g., 1-5 stars
 
   @Column({ type: 'text', nullable: true })
-  comment!: string | null;
+  comment: string;
 
-  @CreateDateColumn({ type: 'timestamptz' })
-  createdAt!: Date;
+  @CreateDateColumn()
+  createdAt: Date;
 
-  @UpdateDateColumn({ type: 'timestamptz' })
-  updatedAt!: Date;
+  @UpdateDateColumn()
+  updatedAt: Date;
 }

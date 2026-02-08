@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Between, Repository } from 'typeorm';
+import { In, Repository, Between } from 'typeorm';
 import { Consultation } from './entities/consultation.entity';
 import { StartConsultationDto } from './dto/start-consultation.dto';
 import { RateConsultationDto } from './dto/rate-consultation.dto';

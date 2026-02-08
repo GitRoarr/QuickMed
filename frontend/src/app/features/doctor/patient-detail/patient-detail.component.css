@@ -253,11 +253,13 @@
 }
 
 .modal header {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	position: relative;
-	z-index: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--border-default);
+  background: var(--surface);
+  border-radius: 24px 24px 0 0;
 }
 
 .modal header h3 {
@@ -277,14 +279,18 @@
 }
 
 .modal-footer {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid var(--border-default);
+  background: var(--surface-secondary);
+  border-radius: 0 0 24px 24px;
+  margin: 0 -1.5rem -1.5rem;
+}
+
+.modal-footer > div {
   display: flex;
   justify-content: flex-end;
   gap: 0.75rem;
-  padding: 1.5rem;
-  border-top: 1px solid var(--border-soft);
-  background-color: var(--surface-soft);
-  border-radius: 0 0 16px 16px;
-  margin: 0 -1.5rem -1.5rem;
+  width: 100%;
 }
 
 .modal-footer .primary {

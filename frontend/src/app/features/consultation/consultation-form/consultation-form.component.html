@@ -1,0 +1,40 @@
+
+<div class="container mx-auto p-4">
+  <h2 class="text-2xl font-bold mb-4">Add Consultation</h2>
+  <form [formGroup]="consultationForm" (ngSubmit)="onSubmit()">
+    <div class="mb-4">
+      <label for="notes" class="block text-sm font-medium text-gray-700">Consultation Notes</label>
+      <textarea id="notes" formControlName="notes" rows="4" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"></textarea>
+    </div>
+
+    <div formArrayName="treatments">
+      <h3 class="text-lg font-medium mb-2">Treatments</h3>
+      <div *ngFor="let treatment of treatments.controls; let i=index" [formGroupName]="i" class="p-4 mb-4 border rounded-md">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label for="type-{{i}}" class="block text-sm font-medium text-gray-700">Type</label>
+            <select id="type-{{i}}" formControlName="type" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+              <option *ngFor="let type of treatmentTypes" [value]="type">{{type}}</option>
+            </select>
+          </div>
+          <div>
+            <label for="details-{{i}}" class="block text-sm font-medium text-gray-700">Details</label>
+            <input type="text" id="details-{{i}}" formControlName="details" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+          </div>
+          <div>
+            <label for="instructions-{{i}}" class="block text-sm font-medium text-gray-700">Instructions</label>
+            <input type="text" id="instructions-{{i}}" formControlName="instructions" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+          </div>
+        </div>
+        <button type="button" (click)="removeTreatment(i)" class="mt-2 text-red-600 hover:text-red-900">Remove Treatment</button>
+      </div>
+      <button type="button" (click)="addTreatment()" class="text-indigo-600 hover:text-indigo-900">Add Treatment</button>
+    </div>
+
+    <div class="mt-6">
+      <button type="submit" [disabled]="!consultationForm.valid" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+        Save Consultation
+      </button>
+    </div>
+  </form>
+</div>

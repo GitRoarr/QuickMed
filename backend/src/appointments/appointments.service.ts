@@ -344,6 +344,10 @@ export class AppointmentsService {
       // Receptionist can cancel appointments
     }
 
+    if (status === AppointmentStatus.COMPLETED) {
+      // TODO: Add logic to destroy video call/chat room
+    }
+
     appointment.status = AppointmentStatus.CANCELLED;
 
     const canceledAppointment = await this.appointmentsRepository.save(appointment);

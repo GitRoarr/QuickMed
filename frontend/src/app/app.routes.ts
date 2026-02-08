@@ -46,6 +46,14 @@ export const routes: Routes = [
       ),
   },
   {
+    path: "consultation",
+    canActivate: [authGuard],
+    loadChildren: () =>
+      import("./features/consultation/consultation-routing.module").then(
+        (m) => m.ConsultationRoutingModule
+      ),
+  },
+  {
     path: "payment/success",
     loadComponent: () =>
       import("./features/patient/payment-success/payment-success.component").then(

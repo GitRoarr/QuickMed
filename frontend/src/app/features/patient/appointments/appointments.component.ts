@@ -1,7 +1,7 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { AppointmentService } from '../../../core/services/appointment.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { DoctorService } from '../../../core/services/doctor.service';
@@ -24,7 +24,7 @@ interface Appointment {
 @Component({
   selector: 'app-patient-appointments',
   standalone: true,
-  imports: [CommonModule, FormsModule, PayButtonComponent, PatientShellComponent],
+  imports: [CommonModule, FormsModule, PayButtonComponent, PatientShellComponent, RouterModule],
   templateUrl: './appointments.component.html',
   styleUrls: ['./appointments.component.css'],
 })

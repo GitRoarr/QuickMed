@@ -83,6 +83,9 @@
             <button class="primary-btn subtle" *ngIf="apt.isVideoConsultation && apt.status === 'confirmed'" (click)="joinVideoCall(apt.id)">
               Join
             </button>
+            <button class="primary-btn" *ngIf="apt.status === 'completed'" [routerLink]="['/consultation/view', apt.id]">
+              View Consultation
+            </button>
           </div>
         </div>
       </div>

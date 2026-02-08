@@ -158,10 +158,12 @@
         </div>
       </div>
       <footer class="modal-footer">
-        <button class="ghost" (click)="closeProfileModal()">Close</button>
-        <button class="primary" (click)="navigate('/doctor/messages?patientId=' + patient()?.id)">
-          <i class="bi bi-chat-dots-fill"></i> Message Patient
-        </button>
+        <div class="footer-actions">
+          <button type="button" class="secondary" (click)="closeProfileModal()">Close</button>
+          <button class="primary" (click)="navigate('/doctor/messages?patientId=' + patient()?.id)">
+            <i class="bi bi-chat-dots-fill"></i> Message Patient
+          </button>
+        </div>
       </footer>
     </div>
   </div>
