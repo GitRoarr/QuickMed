@@ -7,6 +7,7 @@ import { CloudinaryModule } from "@/profile/cloudinary.module";
 import { ReviewsModule } from "../reviews/reviews.module";
 import { SettingsModule } from "../settings/settings.module";
 import { DoctorSchedule } from "@/schedules/schedule.entity";
+import { DoctorsModule } from "../doctors/doctors.module";
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { DoctorSchedule } from "@/schedules/schedule.entity";
     CloudinaryModule,
     forwardRef(() => ReviewsModule),
     forwardRef(() => SettingsModule),
+    forwardRef(() => DoctorsModule),
   ],
   controllers: [UsersController],
   providers: [UsersService],

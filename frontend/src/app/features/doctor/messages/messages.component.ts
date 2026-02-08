@@ -24,6 +24,7 @@ import { ToastService } from '@core/services/toast.service';
     DoctorHeaderComponent
   ],
   templateUrl: './messages.component.html',
+  styleUrls: ['./messages.component.css'],
   animations: [
     trigger('fadeIn', [
       transition(':enter', [
@@ -59,6 +60,7 @@ export class MessagesComponent implements OnInit, AfterViewChecked {
   messageContent = signal('');
   unreadCount = signal(0);
   currentUser = signal<any>(null);
+  actionsMenuOpen = signal(false);
 
   ngOnInit(): void {
     this.loadUserData();
@@ -111,6 +113,7 @@ export class MessagesComponent implements OnInit, AfterViewChecked {
 
   selectConversation(conversation: Conversation): void {
     this.selectedConversation.set(conversation);
+    this.actionsMenuOpen.set(false);
     this.loadMessages(conversation.id);
   }
 
@@ -191,6 +194,42 @@ export class MessagesComponent implements OnInit, AfterViewChecked {
 
   navigate(route: string): void {
     this.router.navigate([route]);
+  }
+
+  toggleActionsMenu(): void {
+    this.actionsMenuOpen.set(!this.actionsMenuOpen());
+  }
+
+  startCall(type: 'audio' | 'video'): void {
+    const conversation = this.selectedConversation();
+    if (!conversation) {
+      this.toast.warning('Select a conversation first');
+      return;
+    }
+    this.actionsMenuOpen.set(false);
+    this.router.navigate(['/call', conversation.id], { queryParams: { mode: type } });
+  }
+
+  openPatientRecords(): void {
+    const conversation = this.selectedConversation();
+    if (!conversation) return;
+    this.actionsMenuOpen.set(false);
+    this.router.navigate(['/doctor/patients', conversation.patientId]);
+  }
+
+  openPatientProfile(): void {
+    const conversation = this.selectedConversation();
+    if (!conversation) return;
+    this.actionsMenuOpen.set(false);
+    this.router.navigate(['/doctor/patients', conversation.patientId]);
+  }
+
+  copyConversationId(): void {
+    const conversation = this.selectedConversation();
+    if (!conversation) return;
+    navigator.clipboard.writeText(conversation.id);
+    this.actionsMenuOpen.set(false);
+    this.toast.success('Conversation ID copied');
   }
 
 

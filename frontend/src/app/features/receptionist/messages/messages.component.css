@@ -1,5 +1,7 @@
 .receptionist-layout {
-  background: var(--bg);
+  background: radial-gradient(circle at top right, rgba(16, 185, 129, 0.08), transparent 55%),
+    radial-gradient(circle at 20% 10%, rgba(59, 130, 246, 0.06), transparent 45%),
+    var(--bg);
   min-height: 100vh;
 }
 
@@ -120,13 +122,15 @@
   background: transparent;
   cursor: pointer;
   text-align: left;
-  transition: border-color 0.2s ease, background 0.2s ease;
+  transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .thread.active,
 .thread:hover {
   border-color: rgba(var(--primary-rgb), 0.3);
   background: rgba(var(--primary-rgb), 0.08);
+  box-shadow: 0 16px 30px -24px rgba(16, 185, 129, 0.5);
+  transform: translateY(-1px);
 }
 
 .thread .avatar {
@@ -211,6 +215,7 @@
   color: var(--fg);
   display: grid;
   gap: 0.3rem;
+  animation: bubbleIn 0.25s ease both;
 }
 
 .message span {
@@ -220,7 +225,8 @@
 
 .message.outgoing {
   margin-left: auto;
-  background: rgba(var(--primary-rgb), 0.18);
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.95), rgba(59, 130, 246, 0.85));
+  color: #fff;
 }
 
 .composer {
@@ -247,6 +253,18 @@
   padding: 0.75rem 1.2rem;
   align-self: flex-end;
   cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.2s ease;
+}
+
+.primary:hover,
+.ghost:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 22px -18px rgba(16, 185, 129, 0.6);
+}
+
+.primary:active,
+.ghost:active {
+  transform: translateY(0) scale(0.98);
 }
 
 .ghost {
@@ -259,27 +277,74 @@
   align-items: center;
   gap: 0.45rem;
   cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.2s ease;
 }
 
 .empty-state {
-  flex: 1;
-  display: grid;
-  place-items: center;
+  text-align: center;
   color: var(--muted);
-  gap: 0.6rem;
+  display: grid;
+  gap: 0.4rem;
+  place-items: center;
 }
 
 .empty-state i {
   font-size: 2rem;
+  color: var(--muted);
+}
+
+.floating {
+  animation: floatSoft 3.5s ease-in-out infinite;
+}
+
+@keyframes bubbleIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes floatSoft {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
 }
 
 @media (max-width: 1024px) {
   .panel {
     margin-left: 0;
-    padding: 2rem 1.5rem;
+    padding: 2rem;
   }
 
+  .body {
+    flex-direction: column;
+  }
+
+  app-sidebar {
+    position: static;
+  }
+}
+
+@media (max-width: 900px) {
   .messaging {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .panel {
+    padding: 1.5rem;
+  }
+
+  .hero {
+    flex-direction: column;
   }
 }

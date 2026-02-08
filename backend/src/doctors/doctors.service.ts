@@ -66,6 +66,49 @@ export class DoctorsService {
     return safeDoctor;
   }
 
+  private buildMockPatients() {
+    const seed = [
+      { firstName: 'Abiy', lastName: 'Ahmed', gender: 'Male', age: 32, condition: 'Anxiety' },
+      { firstName: 'Sarah', lastName: 'Miller', gender: 'Female', age: 41, condition: 'Depression' },
+      { firstName: 'Liam', lastName: 'Chen', gender: 'Male', age: 29, condition: 'Hypertension' },
+      { firstName: 'Nadia', lastName: 'Tesfaye', gender: 'Female', age: 36, condition: 'Migraine' },
+      { firstName: 'Carlos', lastName: 'Vega', gender: 'Male', age: 54, condition: 'Diabetes' },
+      { firstName: 'Amina', lastName: 'Omar', gender: 'Female', age: 27, condition: 'Asthma' },
+      { firstName: 'David', lastName: 'Brown', gender: 'Male', age: 45, condition: 'Back Pain' },
+      { firstName: 'Yasmin', lastName: 'Khan', gender: 'Female', age: 31, condition: 'Stress' },
+    ];
+
+    const statusPool = ['completed', 'confirmed', 'pending', 'cancelled'];
+    const timePool = ['09:00', '10:30', '11:15', '13:00', '14:45', '16:10'];
+
+    const makeDate = (daysAgo: number) => {
+      const date = new Date();
+      date.setDate(date.getDate() - daysAgo);
+      return date.toISOString();
+    };
+
+    return Array.from({ length: 24 }).map((_, index) => {
+      const base = seed[index % seed.length];
+      const status = statusPool[index % statusPool.length];
+      const daysAgo = (index % 12) + 1;
+      return {
+        patientId: `mock-patient-${index + 1}`,
+        firstName: base.firstName,
+        lastName: base.lastName,
+        email: `${base.firstName.toLowerCase()}.${base.lastName.toLowerCase()}${index + 1}@example.com`,
+        phoneNumber: `555-10${(index + 1).toString().padStart(2, '0')}`,
+        lastAppointmentDate: makeDate(daysAgo),
+        lastAppointmentTime: timePool[index % timePool.length],
+        lastStatus: status,
+        totalAppointments: (index % 8) + 1,
+        isActive: status !== 'cancelled',
+        gender: base.gender,
+        age: base.age,
+        condition: base.condition,
+      };
+    });
+  }
+
   async createDoctorInvite(createDoctorDto: CreateDoctorDto): Promise<{
     doctor: Partial<User>;
     emailSent: boolean;
@@ -357,19 +400,19 @@ export class DoctorsService {
   }
 
   async getMyPatients(doctorId: string) {
-    const appointments = await this.appointmentsRepository.find({
-      where: { doctorId },
-      relations: ['patient'],
-      order: {
-        appointmentDate: 'DESC',
-        appointmentTime: 'DESC',
-      },
-    });
+    const appointments = await this.appointmentsRepository
+      .createQueryBuilder('appointment')
+      .leftJoinAndSelect('appointment.patient', 'patient')
+      .where('appointment.doctorId = :doctorId', { doctorId })
+      .andWhere('patient.role = :role', { role: UserRole.PATIENT })
+      .orderBy('appointment.appointmentDate', 'DESC')
+      .addOrderBy('appointment.appointmentTime', 'DESC')
+      .getMany();
 
     const map = new Map<string, any>();
 
     for (const appt of appointments) {
-      if (!appt.patient) continue;
+      if (!appt.patient || appt.patientId === doctorId) continue;
       const key = appt.patientId;
       if (!map.has(key)) {
         map.set(key, {
@@ -390,7 +433,12 @@ export class DoctorsService {
       }
     }
 
-    return Array.from(map.values());
+    const results = Array.from(map.values());
+    const useMock = process.env.USE_MOCK_DATA === 'true' || process.env.NODE_ENV !== 'production';
+    if (useMock && results.length === 0) {
+      return this.buildMockPatients();
+    }
+    return results;
   }
 
   async getDashboardData(doctorId: string) {

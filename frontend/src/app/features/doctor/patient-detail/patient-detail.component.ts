@@ -19,6 +19,7 @@ export class PatientDetailComponent implements OnInit {
   isLoading = signal(true);
   patient = signal<any | null>(null);
   appointments = signal<any[]>([]);
+  profileModalOpen = signal(false);
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
@@ -46,6 +47,14 @@ export class PatientDetailComponent implements OnInit {
     this.router.navigate([route]);
   }
 
+  openProfileModal(): void {
+    this.profileModalOpen.set(true);
+  }
+
+  closeProfileModal(): void {
+    this.profileModalOpen.set(false);
+  }
+
   getInitials(): string {
     const p = this.patient();
     const first = (p?.firstName || 'P').charAt(0);
@@ -71,5 +80,10 @@ export class PatientDetailComponent implements OnInit {
     if (days < 7) return `${days}d ago`;
     if (days < 30) return `${Math.floor(days / 7)}w ago`;
     return `${Math.floor(days / 30)}mo ago`;
+  }
+
+  getFullName(): string {
+    const p = this.patient();
+    return p ? `${p.firstName || ''} ${p.lastName || ''}`.trim() : 'Patient';
   }
 }

@@ -1,10 +1,10 @@
-<div class="flex-1 flex flex-col min-w-0">
+<div class="messages-shell flex-1 flex flex-col min-w-0">
   <app-doctor-header [initials]="getDoctorInitials()" [avatarUrl]="currentUser()?.avatar"
     [unreadNotifications]="unreadCount()"></app-doctor-header>
 
-  <div class="flex-1 flex overflow-hidden">
+  <div class="messages-layout flex-1 flex overflow-hidden">
     <div
-      class="w-full md:w-96 lg:w-[420px] bg-[var(--surface-primary)] flex flex-col shadow-lg transition-all duration-300">
+      class="messages-panel w-full md:w-96 lg:w-[420px] bg-[var(--surface-primary)] flex flex-col shadow-lg transition-all duration-300">
       <div class="p-6">
         <div class="flex items-center justify-between mb-4">
           <div>
@@ -13,7 +13,7 @@
               1 ? 's' : '' }}</p>
           </div>
           <button (click)="navigate('/doctor/patients')"
-            class="px-4 py-2 bg-[var(--primary)] text-white rounded-xl font-medium hover:bg-[var(--primary-dark)] transition shadow-md flex items-center gap-2">
+            class="btn-primary px-4 py-2 bg-[var(--primary)] text-white rounded-xl font-medium hover:bg-[var(--primary-dark)] transition shadow-md flex items-center gap-2">
             <i class="bi bi-plus-circle"></i>
             New Message
           </button>
@@ -23,7 +23,7 @@
           <i class="bi bi-search absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]"></i>
           <input type="text" placeholder="Search conversations..." [value]="searchQuery()"
             (input)="searchQuery.set($any($event.target).value); onSearchChange()"
-            class="w-full pl-11 pr-5 py-3 bg-[var(--surface-secondary)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)] transition shadow-sm" />
+            class="w-full pl-11 pr-5 py-3 bg-[var(--surface-secondary)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)] transition shadow-sm input-glow" />
         </div>
       </div>
 
@@ -36,8 +36,9 @@
         </div>
 
         <div *ngFor="let conversation of conversations(); let i = index"
-          class="px-4 py-3 hover:bg-[var(--surface-secondary)] transition cursor-pointer"
+          class="convo-item px-4 py-3 hover:bg-[var(--surface-secondary)] transition cursor-pointer"
           [class.bg-[var(--surface-tertiary)]]="selectedConversation()?.id === conversation.id"
+          [class.convo-selected]="selectedConversation()?.id === conversation.id"
           (click)="selectConversation(conversation)" [@fadeIn]="i">
           <div class="flex items-center gap-4">
             <div
@@ -60,8 +61,8 @@
           </div>
         </div>
 
-        <div *ngIf="!isLoading() && conversations().length === 0" class="p-12 text-center">
-          <i class="bi bi-chat-dots text-5xl text-[var(--text-muted)] mb-4"></i>
+        <div *ngIf="!isLoading() && conversations().length === 0" class="p-12 text-center empty-state">
+          <i class="bi bi-chat-dots text-5xl text-[var(--text-muted)] mb-4 empty-illustration"></i>
           <p class="text-lg font-medium text-[var(--text-secondary)]">No conversations yet</p>
           <p class="text-sm text-[var(--text-secondary)] mt-2">Start a new message from Patients</p>
         </div>
@@ -70,8 +71,8 @@
 
     <div class="flex-1 flex flex-col bg-[var(--surface-primary)]">
       <div *ngIf="!selectedConversation()" class="flex-1 flex items-center justify-center">
-        <div class="text-center">
-          <i class="bi bi-chat-left-text text-6xl text-[var(--text-muted)] mb-6"></i>
+        <div class="text-center empty-state">
+          <i class="bi bi-chat-left-text text-6xl text-[var(--text-muted)] mb-6 empty-illustration"></i>
           <p class="text-xl font-medium text-[var(--text-secondary)]">Select a conversation</p>
           <p class="text-[var(--text-secondary)] mt-2">Click on a patient to view messages</p>
         </div>
@@ -89,16 +90,50 @@
               <p class="text-sm text-emerald-600 dark:text-emerald-400">Online now</p>
             </div>
           </div>
-          <div class="flex gap-3">
-            <button class="p-3 rounded-xl bg-[var(--surface-secondary)] hover:bg-[var(--surface-tertiary)] transition">
+          <div class="header-actions">
+            <button
+              class="icon-btn p-3 rounded-xl bg-[var(--surface-secondary)] hover:bg-[var(--surface-tertiary)] transition"
+              type="button"
+              (click)="startCall('audio')"
+              aria-label="Start audio call"
+              title="Audio call"
+            >
               <i class="bi bi-telephone text-lg"></i>
             </button>
-            <button class="p-3 rounded-xl bg-[var(--surface-secondary)] hover:bg-[var(--surface-tertiary)] transition">
+            <button
+              class="icon-btn p-3 rounded-xl bg-[var(--surface-secondary)] hover:bg-[var(--surface-tertiary)] transition"
+              type="button"
+              (click)="startCall('video')"
+              aria-label="Start video call"
+              title="Video call"
+            >
               <i class="bi bi-camera-video text-lg"></i>
             </button>
-            <button class="p-3 rounded-xl bg-[var(--surface-secondary)] hover:bg-[var(--surface-tertiary)] transition">
-              <i class="bi bi-three-dots-vertical text-lg"></i>
-            </button>
+            <div class="actions-menu">
+              <button
+                class="icon-btn p-3 rounded-xl bg-[var(--surface-secondary)] hover:bg-[var(--surface-tertiary)] transition"
+                type="button"
+                (click)="toggleActionsMenu()"
+                aria-label="More actions"
+                title="More actions"
+              >
+                <i class="bi bi-three-dots-vertical text-lg"></i>
+              </button>
+              <div class="actions-dropdown" *ngIf="actionsMenuOpen()">
+                <button type="button" (click)="openPatientRecords()">
+                  <i class="bi bi-folder2-open"></i>
+                  View records
+                </button>
+                <button type="button" (click)="openPatientProfile()">
+                  <i class="bi bi-person"></i>
+                  Patient profile
+                </button>
+                <button type="button" (click)="copyConversationId()">
+                  <i class="bi bi-clipboard"></i>
+                  Copy conversation ID
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -106,7 +141,8 @@
         <div class="flex-1 overflow-y-auto p-6 space-y-4" #messagesContainer>
           <div *ngFor="let message of messages(); let i = index" class="flex" [class.justify-end]="isMyMessage(message)"
             [class.justify-start]="!isMyMessage(message)" [@fadeInUp]="i">
-            <div class="max-w-xs lg:max-w-md px-5 py-3 rounded-2xl shadow-sm"
+            <div class="message-bubble max-w-xs lg:max-w-md px-5 py-3 rounded-2xl shadow-sm"
+              [class.mine]="isMyMessage(message)" [class.theirs]="!isMyMessage(message)"
               [class.bg-[var(--primary)]]="isMyMessage(message)" [class.text-white]="isMyMessage(message)"
               [class.bg-[var(--surface-secondary)]]="!isMyMessage(message)" [class.rounded-br-sm]="isMyMessage(message)"
               [class.rounded-bl-sm]="!isMyMessage(message)">
@@ -121,9 +157,9 @@
           <div class="flex gap-3">
             <input type="text" placeholder="Type your message..." [value]="messageContent()"
               (input)="messageContent.set($any($event.target).value)" (keyup.enter)="sendMessage()"
-              class="flex-1 px-5 py-4 bg-[var(--surface-secondary)] rounded-full focus:outline-none focus:ring-2 focus:ring-[var(--primary)] transition shadow-sm" />
+              class="flex-1 px-5 py-4 bg-[var(--surface-secondary)] rounded-full focus:outline-none focus:ring-2 focus:ring-[var(--primary)] transition shadow-sm input-glow" />
             <button (click)="sendMessage()" [disabled]="!messageContent().trim()"
-              class="w-14 h-14 bg-[var(--primary)] text-white rounded-full hover:bg-[var(--primary-dark)] disabled:opacity-50 disabled:cursor-not-allowed transition shadow-lg flex items-center justify-center">
+              class="send-btn w-14 h-14 bg-[var(--primary)] text-white rounded-full hover:bg-[var(--primary-dark)] disabled:opacity-50 disabled:cursor-not-allowed transition shadow-lg flex items-center justify-center">
               <i class="bi bi-send text-lg"></i>
             </button>
           </div>

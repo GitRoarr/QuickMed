@@ -1,36 +1,129 @@
 <app-doctor-header></app-doctor-header>
 <div class="patient-detail">
   <ng-container *ngIf="!isLoading(); else loading">
-    <div class="header">
-      <div class="avatar">{{ getInitials() }}</div>
-      <div class="info">
-        <h2>{{ patient()?.firstName }} {{ patient()?.lastName }}</h2>
-        <p class="muted">{{ patient()?.email || 'No email' }}</p>
-        <p class="muted">{{ patient()?.phone || 'No phone' }}</p>
-        <p class="muted">Last seen: {{ formatLastSeen() }}</p>
+    <section class="hero-card">
+      <div class="hero-main">
+        <div class="avatar-lg">
+          <span>{{ getInitials() }}</span>
+        </div>
+        <div class="hero-info">
+          <div class="hero-title">
+            <h2>{{ getFullName() }}</h2>
+            <span class="badge">{{ patient()?.lastStatus || 'Active Patient' }}</span>
+          </div>
+          <p>{{ patient()?.email || 'No email' }} • {{ patient()?.phoneNumber || patient()?.phone || 'No phone' }}</p>
+          <p class="subtle">Last seen {{ formatLastSeen() }}</p>
+        </div>
       </div>
-      <div class="actions">
-        <button class="btn" (click)="navigate('/doctor/patients')">Back</button>
-        <button class="btn primary" (click)="navigate('/doctor/appointments')">New Appointment</button>
+      <div class="hero-actions">
+        <button class="ghost" (click)="navigate('/doctor/patients')">
+          <i class="bi bi-arrow-left"></i> Back
+        </button>
+        <button class="ghost" (click)="openProfileModal()">
+          <i class="bi bi-person-badge"></i> View Profile
+        </button>
+        <button class="primary" (click)="navigate('/doctor/appointments')">
+          <i class="bi bi-calendar-plus"></i> New Appointment
+        </button>
       </div>
-    </div>
+    </section>
+
+    <section class="stats-grid">
+      <div class="stat-card">
+        <p>Total Visits</p>
+        <h3>{{ patient()?.totalAppointments || appointments().length || 0 }}</h3>
+      </div>
+      <div class="stat-card">
+        <p>Last Status</p>
+        <h3>{{ patient()?.lastStatus || '—' }}</h3>
+      </div>
+      <div class="stat-card">
+        <p>Next Follow‑up</p>
+        <h3>{{ appointments()[0]?.appointmentDate || appointments()[0]?.date | date:'mediumDate' || '—' }}</h3>
+      </div>
+      <div class="stat-card">
+        <p>Patient ID</p>
+        <h3>{{ patient()?.patientId || patient()?.id || '—' }}</h3>
+      </div>
+    </section>
 
     <section class="appointments">
-      <h3>Appointments</h3>
-      <div *ngIf="appointments()?.length; else noAppointments">
-        <ul>
-          <li *ngFor="let appt of appointments()">
-            <span>{{ appt?.date }} {{ appt?.time }}</span>
-            <span class="muted">{{ appt?.reason || appt?.status }}</span>
-          </li>
-        </ul>
+      <div class="section-title">
+        <h3>Appointments</h3>
+        <span>{{ appointments().length || 0 }} total</span>
+      </div>
+      <div *ngIf="appointments()?.length; else noAppointments" class="appointment-list">
+        <div class="appointment-card" *ngFor="let appt of appointments()">
+          <div>
+            <h4>{{ appt?.type || 'Consultation' }}</h4>
+            <p>{{ appt?.reason || 'General follow‑up' }}</p>
+          </div>
+          <div class="appointment-meta">
+            <span>{{ appt?.appointmentDate || appt?.date | date:'mediumDate' }}</span>
+            <span>{{ appt?.appointmentTime || appt?.time }}</span>
+          </div>
+          <div class="appointment-status">
+            <span [class.success]="(appt?.status || '').toLowerCase() === 'completed'"
+              [class.warning]="(appt?.status || '').toLowerCase() === 'pending'"
+              [class.danger]="(appt?.status || '').toLowerCase() === 'cancelled'">
+              {{ appt?.status || 'pending' | titlecase }}
+            </span>
+          </div>
+        </div>
       </div>
       <ng-template #noAppointments>
-        <p class="muted">No appointments found.</p>
+        <div class="empty-state">No appointments found.</div>
       </ng-template>
     </section>
   </ng-container>
+
   <ng-template #loading>
     <div class="loading">Loading patient...</div>
   </ng-template>
+
+  <div class="modal-backdrop" *ngIf="profileModalOpen()" (click)="closeProfileModal()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <header>
+        <div>
+          <h3>Patient Profile</h3>
+          <p class="subtle">Clinical snapshot and contact details</p>
+        </div>
+        <button type="button" (click)="closeProfileModal()">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </header>
+      <div class="modal-body">
+        <div class="profile-card">
+          <div class="avatar-xl">{{ getInitials() }}</div>
+          <div>
+            <h4>{{ getFullName() }}</h4>
+            <p>{{ patient()?.email || 'No email' }}</p>
+            <p>{{ patient()?.phoneNumber || patient()?.phone || 'No phone' }}</p>
+          </div>
+        </div>
+        <div class="profile-grid">
+          <div>
+            <span>Patient ID</span>
+            <strong>{{ patient()?.patientId || patient()?.id || '—' }}</strong>
+          </div>
+          <div>
+            <span>Last Seen</span>
+            <strong>{{ formatLastSeen() }}</strong>
+          </div>
+          <div>
+            <span>Total Visits</span>
+            <strong>{{ patient()?.totalAppointments || appointments().length || 0 }}</strong>
+          </div>
+          <div>
+            <span>Status</span>
+            <strong>{{ patient()?.lastStatus || 'Active' }}</strong>
+          </div>
+        </div>
+      </div>
+      <footer>
+        <button class="ghost" (click)="closeProfileModal()">Close</button>
+        <button class="primary" (click)="navigate('/doctor/messages')">Message</button>
+      </footer>
+    </div>
+  </div>
 </div>

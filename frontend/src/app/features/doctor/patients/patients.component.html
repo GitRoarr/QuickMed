@@ -12,34 +12,46 @@
         <p class="text-[var(--text-secondary)]">Care continuity and patient management.</p>
       </header>
 
-      <div
-        class="bg-[var(--surface)] p-4 rounded-2xl shadow-md mb-6 flex flex-col md:flex-row gap-4 justify-between items-center sticky top-0 z-10 transition-all">
-        <div class="relative w-full md:w-72">
-          <i class="bi bi-search absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]"></i>
-          <input type="text" [ngModel]="searchTerm()" (ngModelChange)="searchTerm.set($event)"
-            placeholder="Search name, email..."
-            class="w-full pl-10 pr-4 py-2.5 bg-[var(--input-bg)] rounded-xl text-sm text-[var(--text-primary)] focus:ring-2 focus:ring-[var(--primary)]/20 outline-none transition-all shadow-sm">
+      <div class="stats-grid mb-6">
+        <div class="stat-card">
+          <div class="stat-value">{{ activePatients() }}</div>
+          <div class="stat-label">Active Patients</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">{{ newThisWeek() }}</div>
+          <div class="stat-label">New This Week</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">{{ followUpsDue() }}</div>
+          <div class="stat-label">Follow-ups Due</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">{{ totalVisits() }}</div>
+          <div class="stat-label">Total Visits</div>
+        </div>
+      </div>
+
+      <div class="patients-toolbar mb-6">
+        <div class="search-wrap">
+          <i class="bi bi-search"></i>
+          <input
+            type="text"
+            [ngModel]="searchTerm()"
+            (ngModelChange)="searchTerm.set($event)"
+            placeholder="Search by name, phone, condition..."
+          />
         </div>
 
-        <div class="flex items-center gap-4 w-full md:w-auto">
-          <div class="flex p-1 bg-[var(--surface-tertiary)] rounded-xl">
-            <button *ngFor="let s of statuses" (click)="statusFilter.set(s)" [ngClass]="{
-                'bg-[var(--primary)] text-white shadow-sm': statusFilter()===s,
-                'bg-transparent text-[var(--text-primary)]': statusFilter()!==s
-              }" class="px-4 py-1.5 rounded-xl text-sm font-bold capitalize transition-all">
-              {{s}}
-            </button>
-          </div>
-
-          <div class="flex items-center gap-2 px-3 py-2 bg-[var(--surface-tertiary)] rounded-xl shadow-sm">
-            <span class="text-xs font-bold text-[var(--text-muted)] uppercase">Sort</span>
-            <select [ngModel]="sortBy()" (ngModelChange)="sortBy.set($event)"
-              class="bg-transparent border-none outline-none font-bold text-sm text-[var(--text-primary)] cursor-pointer">
-              <option value="recent">Recently Seen</option>
-              <option value="visits">Most Visits</option>
-              <option value="alpha">A-Z</option>
-            </select>
-          </div>
+        <div class="filter-pills">
+          <button
+            *ngFor="let pill of filterPills"
+            type="button"
+            class="pill"
+            [class.active]="statusFilter() === pill.value"
+            (click)="statusFilter.set(pill.value)"
+          >
+            {{ pill.label }}
+          </button>
         </div>
       </div>
 
@@ -60,87 +72,41 @@
         <p class="text-[var(--text-secondary)] text-sm">Try adjusting filters or search.</p>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6"
-        *ngIf="!isLoading() && filteredPatients().length > 0">
-        <div *ngFor="let p of filteredPatients()"
-          class="group patient-card bg-[var(--surface)] rounded-2xl p-5 shadow-sm hover:shadow-xl transition-all relative overflow-hidden">
-
-          <span class="patient-card__glow"></span>
-
-          <div class="flex items-start justify-between mb-4 relative z-10">
-            <div class="flex gap-4">
-              <div
-                class="w-14 h-14 rounded-xl bg-[var(--surface-tertiary)] text-[var(--text-primary)] flex items-center justify-center font-bold text-lg shadow-sm">
-                {{ getInitials(p) }}
+      <div class="patients-grid" *ngIf="!isLoading() && filteredPatients().length > 0">
+        <div *ngFor="let p of filteredPatients()" class="patient-card">
+          <div class="patient-card__top">
+            <div class="patient-avatar">{{ getInitials(p) }}</div>
+            <div class="patient-info">
+              <div class="patient-name">
+                <span>{{ getFullName(p) }}</span>
+                <span class="status-tag" [class]="getTagTone(p)">{{ getTag(p) }}</span>
               </div>
-              <div>
-                <h3 class="font-bold text-[var(--text-primary)] text-lg leading-tight">{{ getFullName(p) }}</h3>
-                <div class="flex flex-wrap gap-2 mt-1">
-                  <span
-                    class="text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wide bg-[var(--surface-tertiary)] text-[var(--text-secondary)] shadow-sm">{{
-                    getSegment(p) }}</span>
-                  <span *ngIf="p.isActive === false"
-                    class="text-[10px] px-2 py-0.5 rounded-full font-bold bg-[var(--surface-secondary)] text-[var(--text-muted)]">Inactive</span>
-                </div>
-              </div>
+              <div class="patient-meta">{{ getPatientMeta(p) }}</div>
             </div>
           </div>
 
-          <div class="grid grid-cols-3 gap-2 mb-4 relative z-10">
-            <div class="bg-[var(--surface-secondary)] rounded-lg p-2 text-center">
-              <p class="text-[10px] uppercase font-bold text-[var(--text-muted)]">Last Seen</p>
-              <p class="text-sm font-bold text-[var(--text-primary)]">{{ formatLastSeen(p) }}</p>
+          <div class="patient-stats">
+            <div>
+              <div class="label">Last Seen</div>
+              <div class="value">{{ formatLastSeen(p) }}</div>
             </div>
-            <div class="bg-[var(--surface-secondary)] rounded-lg p-2 text-center">
-              <p class="text-[10px] uppercase font-bold text-[var(--text-muted)]">Visits</p>
-              <p class="text-sm font-bold text-[var(--text-primary)]">{{ p.totalAppointments }}</p>
+            <div>
+              <div class="label">Visits</div>
+              <div class="value">{{ p.totalAppointments }}</div>
             </div>
-            <div class="bg-[var(--surface-secondary)] rounded-lg p-2 text-center">
-              <p class="text-[10px] uppercase font-bold text-[var(--text-muted)]">Status</p>
-              <p class="text-sm font-bold truncate" [ngClass]="{
-                  'text-[var(--success)]': getStatusTone(p) === 'success',
-                  'text-[var(--warning)]': getStatusTone(p) === 'warning',
-                  'text-[var(--error)]': getStatusTone(p) === 'error',
-                  'text-[var(--text-muted)]': getStatusTone(p) === 'muted',
-                  'text-[var(--info)]': getStatusTone(p) === 'info'
-                }">{{ p.lastStatus || '-' }}</p>
+            <div>
+              <div class="label">Status</div>
+              <div class="value status" [class]="getTagTone(p)">{{ getTag(p) }}</div>
             </div>
           </div>
 
-          <div class="flex gap-2 relative z-10">
-            <button [routerLink]="['/doctor/patients', p.patientId]"
-              class="flex-1 py-2 rounded-lg bg-[var(--surface-tertiary)] text-[var(--text-secondary)] font-bold text-xs hover:bg-[var(--surface-secondary)] hover:text-[var(--text-primary)] shadow-sm transition-all">Details</button>
-            <button type="button" (click)="toggleQuickMessage(p.patientId)"
-              class="flex-1 py-2 rounded-lg bg-[var(--surface-tertiary)] text-[var(--text-secondary)] font-bold text-xs hover:bg-[var(--surface-secondary)] hover:text-[var(--text-primary)] shadow-sm transition-all">Quick message</button>
-            <button [routerLink]="['/doctor/messages']" [queryParams]="{ patientId: p.patientId }"
-              class="flex-1 py-2 rounded-lg bg-[var(--surface-tertiary)] text-[var(--text-secondary)] font-bold text-xs hover:bg-[var(--surface-secondary)] hover:text-[var(--text-primary)] shadow-sm transition-all">Open chat</button>
-            <button [routerLink]="['/call', p.patientId]"
-              class="w-10 flex items-center justify-center rounded-lg bg-[var(--primary)] text-white hover:brightness-110 transition-colors shadow-lg shadow-[rgba(29,185,84,0.15)]"><i
-                class="bi bi-camera-video"></i></button>
+          <div class="patient-actions">
+            <button type="button" [routerLink]="['/doctor/patients', p.patientId]">Records</button>
+            <button type="button" [routerLink]="['/doctor/messages']" [queryParams]="{ patientId: p.patientId }">
+              Message
+            </button>
+            <button type="button" class="primary" [routerLink]="['/call', p.patientId]">Consult</button>
           </div>
-
-          <div class="quick-message" *ngIf="activeMessagePatientId() === p.patientId">
-            <div class="quick-message__header">
-              <span>Quick message</span>
-              <button type="button" (click)="toggleQuickMessage(p.patientId)" aria-label="Close">
-                <i class="bi bi-x"></i>
-              </button>
-            </div>
-            <textarea
-              rows="3"
-              [ngModel]="getDraft(p.patientId)"
-              (ngModelChange)="updateDraft(p.patientId, $event)"
-              placeholder="Write a short update..."
-            ></textarea>
-            <div class="quick-message__actions">
-              <button type="button" class="ghost" (click)="updateDraft(p.patientId, '')">Clear</button>
-              <button type="button" class="send" (click)="sendQuickMessage(p.patientId)"
-                [disabled]="sendingMessageId() === p.patientId">
-                {{ sendingMessageId() === p.patientId ? 'Sending...' : 'Send' }}
-              </button>
-            </div>
-          </div>
-
         </div>
       </div>
 

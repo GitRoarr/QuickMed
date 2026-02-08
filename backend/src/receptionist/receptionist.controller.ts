@@ -51,9 +51,7 @@ export class ReceptionistController {
   @Post('appointments')
   @Roles(UserRole.RECEPTIONIST, UserRole.ADMIN)
   async createAppointment(@Body() dto: CreateAppointmentDto, @CurrentUser() user: User) {
-    // ensure receptionistId is set to current user
     dto.receptionistId = user.id;
-    // reuse AppointmentsService.create; pass patientId from dto
     return this.appointmentsService.create(dto, dto.patientId, UserRole.RECEPTIONIST);
   }
 

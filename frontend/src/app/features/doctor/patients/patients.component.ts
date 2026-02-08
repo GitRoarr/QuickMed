@@ -42,15 +42,15 @@ export class PatientsComponent implements OnInit {
 
   // Filter Signals
   searchTerm = signal('');
-  statusFilter = signal<'all' | 'active' | 'inactive'>('all');
-  sortBy = signal<'recent' | 'visits' | 'alpha'>('recent');
+  statusFilter = signal<'all' | 'new' | 'active' | 'needs-review' | 'completed'>('all');
 
-  activeMessagePatientId = signal<string | null>(null);
-  messageDrafts = signal<Record<string, string>>({});
-  sendingMessageId = signal<string | null>(null);
-
-  // Typed status options for template iteration
-  readonly statuses = ['all', 'active', 'inactive'] as const;
+  readonly filterPills = [
+    { value: 'all', label: 'All' },
+    { value: 'new', label: 'New' },
+    { value: 'active', label: 'Active' },
+    { value: 'needs-review', label: 'Needs Review' },
+    { value: 'completed', label: 'Completed' },
+  ] as const;
 
   // UI/Theme Signals
   currentUser = signal<any>(null);
@@ -61,33 +61,33 @@ export class PatientsComponent implements OnInit {
   filteredPatients = computed(() => {
     const term = this.searchTerm().toLowerCase().trim();
     const status = this.statusFilter();
-    const sort = this.sortBy();
 
     let list = [...this.patients()];
 
     // Status Filter
     if (status === 'active') {
-      list = list.filter(p => p.isActive !== false);
-    } else if (status === 'inactive') {
-      list = list.filter(p => p.isActive === false);
+      list = list.filter((p) => p.isActive !== false);
+    } else if (status === 'new') {
+      list = list.filter((p) => this.isNewPatient(p));
+    } else if (status === 'needs-review') {
+      list = list.filter((p) => this.isNeedsReview(p));
+    } else if (status === 'completed') {
+      list = list.filter((p) => this.isCompleted(p));
     }
 
     // Search Filter
     if (term) {
-      list = list.filter(p => {
+      list = list.filter((p) => {
         const name = this.getFullName(p).toLowerCase();
         const email = (p.email || '').toLowerCase();
         const phone = (p.phoneNumber || '').toLowerCase();
-        return name.includes(term) || email.includes(term) || phone.includes(term);
+        const condition = (p.condition || '').toLowerCase();
+        return name.includes(term) || email.includes(term) || phone.includes(term) || condition.includes(term);
       });
     }
 
-    // Sort
+    // Default: Recent
     list.sort((a, b) => {
-      if (sort === 'visits') return (b.totalAppointments || 0) - (a.totalAppointments || 0);
-      if (sort === 'alpha') return this.getFullName(a).localeCompare(this.getFullName(b));
-
-      // Default: Recent
       const aDate = this.getLastAppointmentDate(a)?.getTime() || 0;
       const bDate = this.getLastAppointmentDate(b)?.getTime() || 0;
       return bDate - aDate;
@@ -98,24 +98,10 @@ export class PatientsComponent implements OnInit {
 
   // Stats
   totalPatients = computed(() => this.patients().length);
-  activePatients = computed(() => this.patients().filter(p => p.isActive !== false).length);
-  inactivePatients = computed(() => this.patients().filter(p => p.isActive === false).length);
-  avgVisits = computed(() => {
-    const list = this.patients();
-    if (!list.length) return 0;
-    const sum = list.reduce((acc, p) => acc + (p.totalAppointments || 0), 0);
-    return Math.round((sum / list.length) * 10) / 10;
-  });
-  recentlySeen = computed(() => {
-    const now = new Date();
-    const monthAgo = new Date(now.getTime() - 1000 * 60 * 60 * 24 * 30);
-    return this.patients().filter(p => {
-      const last = this.getLastAppointmentDate(p);
-      return last ? last >= monthAgo : false;
-    }).length;
-  });
-
-  Math = Math;
+  activePatients = computed(() => this.patients().filter((p) => p.isActive !== false).length);
+  newThisWeek = computed(() => this.patients().filter((p) => this.isNewPatient(p)).length);
+  followUpsDue = computed(() => this.patients().filter((p) => this.isNeedsReview(p)).length);
+  totalVisits = computed(() => this.patients().reduce((acc, p) => acc + (p.totalAppointments || 0), 0));
 
   constructor() {
   }
@@ -167,38 +153,27 @@ export class PatientsComponent implements OnInit {
     });
   }
 
-  toggleQuickMessage(patientId: string): void {
-    this.activeMessagePatientId.set(
-      this.activeMessagePatientId() === patientId ? null : patientId
-    );
+  isNewPatient(p: DoctorPatientSummary): boolean {
+    const last = this.getLastAppointmentDate(p);
+    if (!last) return false;
+    const now = new Date();
+    const diffDays = Math.floor((now.getTime() - last.getTime()) / (1000 * 60 * 60 * 24));
+    return (p.totalAppointments || 0) <= 1 && diffDays <= 7;
   }
 
-  updateDraft(patientId: string, value: string): void {
-    this.messageDrafts.update((drafts) => ({ ...drafts, [patientId]: value }));
+  isNeedsReview(p: DoctorPatientSummary): boolean {
+    const status = (p.lastStatus || '').toLowerCase();
+    if (['pending', 'cancelled', 'no_show'].includes(status)) return true;
+    const last = this.getLastAppointmentDate(p);
+    if (!last) return false;
+    const now = new Date();
+    const diffDays = Math.floor((now.getTime() - last.getTime()) / (1000 * 60 * 60 * 24));
+    return diffDays > 30;
   }
 
-  getDraft(patientId: string): string {
-    return this.messageDrafts()[patientId] || '';
-  }
-
-  sendQuickMessage(patientId: string): void {
-    const content = this.getDraft(patientId).trim();
-    if (!content) {
-      this.toast.warning('Type a message first.', { title: 'Message' });
-      return;
-    }
-    this.sendingMessageId.set(patientId);
-    this.messageService.sendMessage({ patientId, content }).subscribe({
-      next: () => {
-        this.updateDraft(patientId, '');
-        this.sendingMessageId.set(null);
-        this.toast.success('Message sent', { title: 'Patients' });
-      },
-      error: () => {
-        this.sendingMessageId.set(null);
-        this.toast.error('Failed to send message', { title: 'Patients' });
-      },
-    });
+  isCompleted(p: DoctorPatientSummary): boolean {
+    const status = (p.lastStatus || '').toLowerCase();
+    return status === 'completed' || status === 'confirmed';
   }
 
   getFullName(p: DoctorPatientSummary) {
@@ -249,6 +224,31 @@ export class PatientsComponent implements OnInit {
     if (lastStatus === 'cancelled') return 'error';
     if (lastStatus === 'completed' || lastStatus === 'confirmed') return 'success';
     return 'info';
+  }
+
+  getPatientMeta(p: DoctorPatientSummary): string {
+    const gender = p.gender || 'Patient';
+    const age = p.age ? `${p.age}` : '';
+    const condition = p.condition || 'General care';
+    const pieces = [gender];
+    if (age) pieces.push(age);
+    return `${pieces.join(', ')} • ${condition}`;
+  }
+
+  getTag(p: DoctorPatientSummary): string {
+    if (this.isNewPatient(p)) return 'New';
+    if (this.isNeedsReview(p)) return 'Needs Review';
+    if (this.isCompleted(p)) return 'Completed';
+    if (p.isActive === false) return 'Inactive';
+    return 'Active';
+  }
+
+  getTagTone(p: DoctorPatientSummary): 'new' | 'active' | 'needs-review' | 'completed' | 'inactive' {
+    if (this.isNewPatient(p)) return 'new';
+    if (this.isNeedsReview(p)) return 'needs-review';
+    if (this.isCompleted(p)) return 'completed';
+    if (p.isActive === false) return 'inactive';
+    return 'active';
   }
 
   getDoctorName(): string {

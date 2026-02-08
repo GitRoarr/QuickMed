@@ -15,17 +15,17 @@ export class MessagesController {
     return this.messagesService.getConversationsForUser(user, search);
   }
 
-  @Get('conversations/:conversationId')
-  getMessages(@Param('conversationId') conversationId: string, @CurrentUser() user: User) {
-    return this.messagesService.getMessages(conversationId, user);
-  }
-
   @Get('conversations/with/:counterpartyId')
   getConversationWith(
     @Param('counterpartyId') counterpartyId: string,
     @CurrentUser() user: User,
   ) {
     return this.messagesService.getConversationWith(user, counterpartyId);
+  }
+
+  @Get('conversations/:conversationId')
+  getMessages(@Param('conversationId') conversationId: string, @CurrentUser() user: User) {
+    return this.messagesService.getMessages(conversationId, user);
   }
 
   @Post('send')

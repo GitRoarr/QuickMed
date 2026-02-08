@@ -233,6 +233,7 @@ input {
   color: var(--fg);
   font-size: 0.95rem;
   box-shadow: 0 10px 25px -25px rgba(15, 15, 15, 0.6);
+  animation: bubbleIn 0.25s ease both;
 }
 
 .message-row.mine .message-bubble {
@@ -348,6 +349,28 @@ input {
   display: grid;
   place-items: center;
   font-size: 1.8rem;
+  animation: floatSoft 3.5s ease-in-out infinite;
+}
+
+@keyframes bubbleIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes floatSoft {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
 }
 
 @media (max-width: 900px) {

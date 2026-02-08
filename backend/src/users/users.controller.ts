@@ -20,12 +20,14 @@ import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 import { CurrentUser } from "../auth/decorators/current-user.decorator";
 import { User } from "./entities/user.entity";
 import { UserRole } from "../common/index";
+import { DoctorsService } from "../doctors/doctors.service";
 
 @Controller("users")
 @UseGuards(JwtAuthGuard)
 export class UsersController {
   constructor(
     private readonly usersService: UsersService,
+    private readonly doctorsService: DoctorsService,
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
   ) {}
@@ -41,7 +43,10 @@ export class UsersController {
   }
 
   @Get("patients")
-  findPatients() {
+  findPatients(@CurrentUser() user: User) {
+    if (user.role === UserRole.DOCTOR) {
+      return this.doctorsService.getMyPatients(user.id);
+    }
     return this.usersService.findPatients();
   }
 

@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, Input, Output, EventEmitter } from '@angular/core';
 import { Router } from '@angular/router';
 import { ThemeService } from '@core/services/theme.service';
 import { CommonModule } from '@angular/common';
@@ -23,6 +23,8 @@ interface MenuItem {
   styleUrls: ['./doctor-sidebar.component.css', './sidebar-pill-icon.css']
 })
 export class DoctorSidebarComponent implements OnInit {
+  @Input() isOpen = true;
+  @Output() closed = new EventEmitter<void>();
   themeService = inject(ThemeService);
   private router = inject(Router);
   private authService = inject(AuthService);
@@ -95,5 +97,9 @@ export class DoctorSidebarComponent implements OnInit {
 
   logout(): void {
     this.authService.logout();
+  }
+
+  closeSidebar(): void {
+    this.closed.emit();
   }
 }

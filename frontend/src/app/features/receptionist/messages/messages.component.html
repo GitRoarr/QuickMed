@@ -72,7 +72,7 @@
             </button>
           </div>
           <ng-template #emptyThreads>
-            <p class="muted empty">No conversations yet.</p>
+            <p class="muted empty empty-state">No conversations yet.</p>
           </ng-template>
         </aside>
 
@@ -86,7 +86,7 @@
           </div>
 
           <div class="messages" *ngIf="selectedReceiverId()">
-            <div class="message outgoing" *ngFor="let msg of messages()">
+            <div class="message message-bubble outgoing" *ngFor="let msg of messages()">
               <p>{{ msg.content }}</p>
               <span>{{ msg.createdAt | date:'shortTime' }}</span>
             </div>
@@ -98,7 +98,7 @@
           </div>
 
           <ng-template #emptyChat>
-            <div class="empty-state">
+            <div class="empty-state floating">
               <i class="bi bi-chat-dots"></i>
               <p>Select a contact to start messaging.</p>
             </div>

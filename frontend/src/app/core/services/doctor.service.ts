@@ -76,6 +76,9 @@ export interface DoctorPatientSummary {
   lastStatus?: string;
   totalAppointments: number;
   isActive?: boolean;
+  gender?: string;
+  age?: number;
+  condition?: string;
 }
 
 export interface DoctorListItem {
