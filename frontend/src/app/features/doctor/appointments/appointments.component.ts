@@ -72,7 +72,7 @@ export class AppointmentsComponent implements OnInit {
     // React to filter changes
     effect(() => {
       this.applyFilters();
-    });
+    }, { allowSignalWrites: true });
   }
 
   ngOnInit(): void {
@@ -150,7 +150,11 @@ export class AppointmentsComponent implements OnInit {
   viewConsultation(appt: Appointment): void {
     const appointmentId = String(appt.id);
     this.consultationService.getConsultationByAppointment(appointmentId).subscribe({
-      next: () => {
+      next: (consultation) => {
+        if (!consultation) {
+          this.toast.error('Consultation not found for this appointment');
+          return;
+        }
         this.router.navigate(['/consultation/view', appointmentId]);
       },
       error: () => {

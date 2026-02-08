@@ -11,7 +11,7 @@ import { CommonModule } from '@angular/common';
   styleUrls: ['./consultation-view.component.css']
 })
 export class ConsultationViewComponent implements OnInit {
-  consultation!: Consultation;
+  consultation: Consultation | null = null;
   appointmentId!: string;
 
   private route = inject(ActivatedRoute);
@@ -21,6 +21,10 @@ export class ConsultationViewComponent implements OnInit {
   ngOnInit(): void {
     this.appointmentId = this.route.snapshot.paramMap.get('appointmentId')!;
     this.consultationService.getConsultationByAppointment(this.appointmentId).subscribe(consultation => {
+      if (!consultation) {
+        this.router.navigate(['/doctor/appointments']);
+        return;
+      }
       this.consultation = consultation;
     });
   }

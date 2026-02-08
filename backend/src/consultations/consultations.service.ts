@@ -49,17 +49,13 @@ export class ConsultationsService {
     return this.repo.save(c);
   }
 
-  async findByAppointmentId(appointmentId: string) {
+  async findByAppointmentId(appointmentId: string): Promise<Consultation | null> {
     const consultation = await this.repo.findOne({
       where: { appointmentId },
       relations: ['treatments', 'appointment', 'doctor', 'patient'],
     });
-    if (!consultation) {
-      throw new NotFoundException(
-        `Consultation for appointment ID ${appointmentId} not found`,
-      );
-    }
-    return consultation;
+
+    return consultation ?? null;
   }
 
   async stats(start?: string, end?: string) {
