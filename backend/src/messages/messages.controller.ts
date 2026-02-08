@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Query, UseGuards, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Query, UseGuards, Delete, BadRequestException } from '@nestjs/common';
 import { MessagesService } from './messages.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
@@ -20,6 +20,19 @@ export class MessagesController {
     @Param('counterpartyId') counterpartyId: string,
     @CurrentUser() user: User,
   ) {
+    return this.messagesService.getConversationWith(user, counterpartyId);
+  }
+
+  @Post('conversations')
+  createConversation(
+    @Body() body: { patientId?: string; doctorId?: string },
+    @CurrentUser() user: User,
+  ) {
+    const counterpartyId = user.role === 'doctor' ? body.patientId : body.doctorId;
+    if (!counterpartyId) {
+      throw new BadRequestException('Missing counterparty id');
+    }
+
     return this.messagesService.getConversationWith(user, counterpartyId);
   }
 

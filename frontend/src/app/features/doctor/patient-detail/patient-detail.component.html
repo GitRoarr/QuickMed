@@ -114,8 +114,8 @@
   </ng-template>
 
   <!-- Profile Modal -->
-  <div class="modal-backdrop" [class.open]="profileModalOpen()" (click)="closeProfileModal()">
-    <div class="modal" [class.open]="profileModalOpen()" (click)="$event.stopPropagation()" @fadeSlideIn>
+    <div class="modal-backdrop" [class.open]="profileModalOpen()" (click)="closeProfileModal()">
+      <div class="modal" [class.open]="profileModalOpen()" (click)="$event.stopPropagation()" @fadeSlideIn>
       <header>
         <div>
           <h3>Patient Profile</h3>
@@ -160,7 +160,7 @@
       <footer class="modal-footer">
         <div class="footer-actions">
           <button type="button" class="secondary" (click)="closeProfileModal()">Close</button>
-          <button class="primary" (click)="navigate('/doctor/messages?patientId=' + patient()?.id)">
+          <button class="primary" (click)="messagePatient()">
             <i class="bi bi-chat-dots-fill"></i> Message Patient
           </button>
         </div>

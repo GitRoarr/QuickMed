@@ -68,7 +68,7 @@ import { User } from '@core/models/user.model';
 export class ConsultationFormComponent implements OnInit {
   private fb = inject(FormBuilder);
   private route = inject(ActivatedRoute);
-  private router = inject(Router);
+  public router = inject(Router);
   private consultationService = inject(ConsultationService);
   private appointmentService = inject(AppointmentService);
   private authService = inject(AuthService);
@@ -102,11 +102,10 @@ export class ConsultationFormComponent implements OnInit {
       }
     });
     
-    this.authService.currentUser.subscribe(user => {
-      if (user?.role === 'doctor') {
-        this.doctor.set(user);
-      }
-    })
+    const currentUser = this.authService.currentUser();
+    if (currentUser?.role === 'doctor') {
+      this.doctor.set(currentUser);
+    }
   }
 
   loadInitialData(appointmentId: string): void {
@@ -129,7 +128,7 @@ export class ConsultationFormComponent implements OnInit {
 
   addTreatment(): void {
     const treatmentForm = this.fb.group({
-      type: [TreatmentType.Medication, Validators.required],
+      type: [TreatmentType.MEDICATION, Validators.required],
       name: ['', Validators.required],
       dosage: [''],
       frequency: [''],
@@ -165,7 +164,6 @@ export class ConsultationFormComponent implements OnInit {
     if (!appointmentId || !doctorId || !patientId) {
       console.error('Missing required IDs for submission');
       this.isSubmitting.set(false);
-      // Optionally: show a user-facing error
       return;
     }
 

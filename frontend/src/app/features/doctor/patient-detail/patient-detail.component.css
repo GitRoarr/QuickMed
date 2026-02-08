@@ -228,6 +228,14 @@
 	place-items: center;
 	padding: 1.5rem;
 	z-index: 90;
+	opacity: 0;
+	pointer-events: none;
+	transition: opacity 0.2s ease;
+}
+
+.modal-backdrop.open {
+	opacity: 1;
+	pointer-events: auto;
 }
 
 .modal {
@@ -237,10 +245,20 @@
 	border: 1px solid var(--border-default);
 	box-shadow: 0 50px 90px -60px rgba(15, 23, 42, 0.6);
 	padding: 1.6rem;
-	display: grid;
+	display: flex;
+	flex-direction: column;
 	gap: 1.2rem;
 	position: relative;
 	overflow: hidden;
+	max-height: min(90vh, 720px);
+	opacity: 0;
+	transform: translateY(10px) scale(0.98);
+	transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.modal.open {
+	opacity: 1;
+	transform: translateY(0) scale(1);
 }
 
 .modal::before {
@@ -317,6 +335,8 @@
   display: grid;
   gap: 1.5rem;
   padding: 0 1.5rem;
+	overflow: auto;
+	max-height: calc(90vh - 240px);
 }
 
 .profile-card {

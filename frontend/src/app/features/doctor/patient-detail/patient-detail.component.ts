@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { DoctorService, DoctorPatientDetail } from '@core/services/doctor.service';
 import { DoctorHeaderComponent } from '../shared/doctor-header/doctor-header.component';
+import { MessageService } from '@core/services/message.service';
 import {
   trigger,
   transition,
@@ -49,6 +50,7 @@ export class PatientDetailComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private doctorService = inject(DoctorService);
+  private messagesService = inject(MessageService);
 
   isLoading = signal(true);
   detail = signal<DoctorPatientDetail | null>(null);
@@ -119,5 +121,15 @@ export class PatientDetailComponent implements OnInit {
   getFullName(): string {
     const p = this.patient();
     return p ? `${p.firstName || ''} ${p.lastName || ''}`.trim() : 'Patient';
+  }
+
+  messagePatient() {
+    const patientId = this.patient()?.id;
+    if (!patientId) return;
+
+    this.messagesService.createConversation(patientId).subscribe(conversation => {
+      this.closeProfileModal();
+      this.router.navigate(['/doctor/messages'], { queryParams: { conversationId: conversation.id } });
+    });
   }
 }

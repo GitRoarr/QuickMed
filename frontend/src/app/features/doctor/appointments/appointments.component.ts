@@ -10,6 +10,7 @@ import { AuthService } from '@core/services/auth.service';
 import { BadgeService } from '@core/services/badge.service';
 import { MessageService } from '@core/services/message.service';
 import { NotificationService } from '@core/services/notification.service';
+import { ConsultationService } from '@core/services/consultation.service';
 import { ToastService } from '@core/services/toast.service';
 import { forkJoin } from 'rxjs';
 
@@ -50,6 +51,7 @@ export class AppointmentsComponent implements OnInit {
   private authService = inject(AuthService);
   private messageService = inject(MessageService);
   private notificationService = inject(NotificationService);
+  private consultationService = inject(ConsultationService);
   private toast = inject(ToastService);
   private router = inject(Router);
 
@@ -143,6 +145,18 @@ export class AppointmentsComponent implements OnInit {
     if (appt.patientId) {
       this.router.navigate(['/doctor/patients', appt.patientId]);
     }
+  }
+
+  viewConsultation(appt: Appointment): void {
+    const appointmentId = String(appt.id);
+    this.consultationService.getConsultationByAppointment(appointmentId).subscribe({
+      next: () => {
+        this.router.navigate(['/consultation/view', appointmentId]);
+      },
+      error: () => {
+        this.toast.error('Consultation not found for this appointment');
+      },
+    });
   }
 
   // Layout Helpers

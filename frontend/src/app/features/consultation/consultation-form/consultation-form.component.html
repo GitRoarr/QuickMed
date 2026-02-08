@@ -1,40 +1,190 @@
+<app-doctor-header></app-doctor-header>
+<div class="consultation-container">
+  <div *ngIf="isLoading()" class="loading-shimmer">
+    <div class="shimmer-card"></div>
+  </div>
 
-<div class="container mx-auto p-4">
-  <h2 class="text-2xl font-bold mb-4">Add Consultation</h2>
-  <form [formGroup]="consultationForm" (ngSubmit)="onSubmit()">
-    <div class="mb-4">
-      <label for="notes" class="block text-sm font-medium text-gray-700">Consultation Notes</label>
-      <textarea id="notes" formControlName="notes" rows="4" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"></textarea>
+  <ng-container *ngIf="!isLoading()">
+    <div class="form-header" @fadeSlideIn>
+      <h1>Consultation Form</h1>
+      <p class="subtle">
+        For appointment with
+        <strong>{{ patient()?.firstName }} {{ patient()?.lastName }}</strong>
+      </p>
     </div>
 
-    <div formArrayName="treatments">
-      <h3 class="text-lg font-medium mb-2">Treatments</h3>
-      <div *ngFor="let treatment of treatments.controls; let i=index" [formGroupName]="i" class="p-4 mb-4 border rounded-md">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <label for="type-{{i}}" class="block text-sm font-medium text-gray-700">Type</label>
-            <select id="type-{{i}}" formControlName="type" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
-              <option *ngFor="let type of treatmentTypes" [value]="type">{{type}}</option>
-            </select>
-          </div>
-          <div>
-            <label for="details-{{i}}" class="block text-sm font-medium text-gray-700">Details</label>
-            <input type="text" id="details-{{i}}" formControlName="details" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
-          </div>
-          <div>
-            <label for="instructions-{{i}}" class="block text-sm font-medium text-gray-700">Instructions</label>
-            <input type="text" id="instructions-{{i}}" formControlName="instructions" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+    <form
+      [formGroup]="consultationForm"
+      (ngSubmit)="openModal()"
+      class="consultation-form"
+      @fadeSlideIn
+    >
+      <div class="card">
+        <div class="card-header">
+          <h3>Consultation Notes</h3>
+          <p class="subtle">
+            Record your diagnosis, advice, and observations.
+          </p>
+        </div>
+        <div class="card-body">
+          <textarea
+            formControlName="notes"
+            rows="6"
+            placeholder="Enter detailed notes here..."
+          ></textarea>
+          <div
+            *ngIf="
+              consultationForm.get('notes')?.invalid &&
+              consultationForm.get('notes')?.touched
+            "
+            class="error-text"
+          >
+            Consultation notes are required.
           </div>
         </div>
-        <button type="button" (click)="removeTreatment(i)" class="mt-2 text-red-600 hover:text-red-900">Remove Treatment</button>
       </div>
-      <button type="button" (click)="addTreatment()" class="text-indigo-600 hover:text-indigo-900">Add Treatment</button>
-    </div>
 
-    <div class="mt-6">
-      <button type="submit" [disabled]="!consultationForm.valid" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-        Save Consultation
-      </button>
+      <div class="card">
+        <div class="card-header">
+          <h3>Treatments & Prescriptions</h3>
+          <button type="button" class="ghost" (click)="addTreatment()">
+            <i class="bi bi-plus-circle"></i> Add Treatment
+          </button>
+        </div>
+        <div class="card-body">
+          <div
+            *ngIf="treatments.controls.length === 0"
+            class="empty-state-mini"
+          >
+            <p>No treatments added yet.</p>
+          </div>
+          <div formArrayName="treatments">
+            <div
+              *ngFor="let treatment of treatments.controls; let i = index"
+              [formGroupName]="i"
+              class="treatment-item"
+              @fadeSlideIn
+            >
+              <div class="treatment-header">
+                <h4>Treatment {{ i + 1 }}</h4>
+                <button
+                  type="button"
+                  class="ghost-icon"
+                  (click)="removeTreatment(i)"
+                >
+                  <i class="bi bi-trash"></i>
+                </button>
+              </div>
+              <div class="treatment-grid">
+                <div class="form-field">
+                  <label>Type</label>
+                  <select formControlName="type">
+                    <option *ngFor="let type of treatmentTypes" [value]="type">
+                      {{ type | titlecase }}
+                    </option>
+                  </select>
+                </div>
+                <div class="form-field">
+                  <label>Name / Title</label>
+                  <input
+                    type="text"
+                    formControlName="name"
+                    placeholder="e.g., Paracetamol, Physiotherapy"
+                  />
+                </div>
+                <div class="form-field">
+                  <label>Dosage</label>
+                  <input
+                    type="text"
+                    formControlName="dosage"
+                    placeholder="e.g., 500mg"
+                  />
+                </div>
+                <div class="form-field">
+                  <label>Frequency</label>
+                  <input
+                    type="text"
+                    formControlName="frequency"
+                    placeholder="e.g., Twice a day"
+                  />
+                </div>
+                <div class="form-field full-width">
+                  <label>Duration</label>
+                  <input
+                    type="text"
+                    formControlName="duration"
+                    placeholder="e.g., 7 days"
+                  />
+                </div>
+                <div class="form-field full-width">
+                  <label>Additional Notes</label>
+                  <textarea
+                    formControlName="notes"
+                    rows="2"
+                    placeholder="e.g., Take with food"
+                  ></textarea>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button
+          type="button"
+          class="secondary"
+          (click)="router.navigate(['/doctor/appointments'])"
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          class="primary"
+          [disabled]="consultationForm.invalid || isSubmitting()"
+        >
+          <span *ngIf="!isSubmitting()">
+            <i class="bi bi-check-circle"></i> Save Consultation
+          </span>
+          <span *ngIf="isSubmitting()">Saving...</span>
+        </button>
+      </div>
+    </form>
+  </ng-container>
+</div>
+
+<!-- Confirmation Modal -->
+<div class="modal-backdrop" [class.open]="isModalOpen()">
+  <div
+    class="modal"
+    *ngIf="isModalOpen()"
+    [class.open]="isModalOpen()"
+    @modalAnimation
+  >
+    <header>
+      <h3>Confirm Consultation</h3>
+    </header>
+    <div class="modal-body">
+      <p>
+        Are you sure you want to save this consultation for
+        <strong>{{ patient()?.firstName }} {{ patient()?.lastName }}</strong
+        >?
+      </p>
+      <p class="subtle">This action cannot be undone.</p>
     </div>
-  </form>
+    <footer>
+      <button type="button" class="secondary" (click)="closeModal()">
+        Cancel
+      </button>
+      <button
+        type="button"
+        class="primary"
+        (click)="onSubmit()"
+        [disabled]="isSubmitting()"
+      >
+        <span *ngIf="!isSubmitting()">Confirm & Save</span>
+        <span *ngIf="isSubmitting()">Saving...</span>
+      </button>
+    </footer>
+  </div>
 </div>
