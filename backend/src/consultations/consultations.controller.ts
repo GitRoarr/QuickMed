@@ -22,6 +22,11 @@ export class ConsultationsController {
     return this.service.rate(id, dto);
   }
 
+  @Get('by-appointment/:appointmentId')
+  findByAppointmentId(@Param('appointmentId') appointmentId: string) {
+    return this.service.findByAppointmentId(appointmentId);
+  }
+
   @Get('stats')
   stats(@Query('start') start?: string, @Query('end') end?: string) {
     return this.service.stats(start, end);
