@@ -39,7 +39,6 @@ import { ToastService } from '@core/services/toast.service';
       ])
     ])
   ]
-  // No styleUrls — Tailwind only
 })
 export class MessagesComponent implements OnInit, AfterViewChecked {
   @ViewChild('messagesContainer') private messagesContainer!: ElementRef;
@@ -87,6 +86,20 @@ export class MessagesComponent implements OnInit, AfterViewChecked {
 
   ngAfterViewChecked(): void {
     this.scrollToBottom();
+  }
+
+  removeConversation(conversationId: string, event: MouseEvent): void {
+    event.stopPropagation();
+    this.messageService.deleteConversation(conversationId).subscribe({
+      next: () => {
+        this.conversations.update(convos => convos.filter(c => c.id !== conversationId));
+        if (this.selectedConversation()?.id === conversationId) {
+          this.selectedConversation.set(null);
+        }
+        this.toast.success('Conversation removed');
+      },
+      error: () => this.toast.error('Failed to remove conversation'),
+    });
   }
 
   loadUserData(): void {

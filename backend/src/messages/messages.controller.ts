@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Query, UseGuards, Delete } from '@nestjs/common';
 import { MessagesService } from './messages.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
@@ -36,5 +36,13 @@ export class MessagesController {
   @Get('unread-count')
   getUnreadCount(@CurrentUser() user: User) {
     return this.messagesService.getUnreadCount(user);
+  }
+
+  @Delete('conversations/:conversationId')
+  deleteConversation(
+    @Param('conversationId') conversationId: string,
+    @CurrentUser() user: User,
+  ) {
+    return this.messagesService.deleteConversation(conversationId, user);
   }
 }

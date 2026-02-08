@@ -54,6 +54,9 @@
                 {{ conversation.lastMessageContent || 'No messages yet' }}
               </p>
             </div>
+            <button (click)="removeConversation(conversation.id, $event)" class="remove-btn">
+              <i class="bi bi-x"></i>
+            </button>
             <div *ngIf="conversation.unreadCount > 0"
               class="w-6 h-6 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold">
               {{ conversation.unreadCount }}

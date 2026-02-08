@@ -196,4 +196,20 @@ export class MessagesService {
     });
     return { count };
   }
+
+  async deleteConversation(conversationId: string, user: Pick<User, 'id' | 'role'>): Promise<void> {
+    const conversation = await this.conversationsRepository.findOne({ where: { id: conversationId } });
+
+    if (!conversation) {
+      throw new NotFoundException('Conversation not found');
+    }
+
+    if (conversation.doctorId !== user.id && conversation.patientId !== user.id) {
+      throw new ForbiddenException('You are not part of this conversation');
+    }
+
+    // TypeORM cascades should handle this if set up, but manual deletion is safer
+    await this.messagesRepository.delete({ conversationId });
+    await this.conversationsRepository.delete(conversationId);
+  }
 }

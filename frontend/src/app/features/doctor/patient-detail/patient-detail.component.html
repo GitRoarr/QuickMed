@@ -1,110 +1,145 @@
 <app-doctor-header></app-doctor-header>
-<div class="patient-detail">
+<div class="patient-detail-container">
   <ng-container *ngIf="!isLoading(); else loading">
-    <section class="hero-card">
-      <div class="hero-main">
-        <div class="avatar-lg">
-          <span>{{ getInitials() }}</span>
-        </div>
-        <div class="hero-info">
-          <div class="hero-title">
-            <h2>{{ getFullName() }}</h2>
-            <span class="badge">{{ patient()?.lastStatus || 'Active Patient' }}</span>
+    <ng-container *ngIf="detail() as detailData; else noData">
+      <!-- Hero Card -->
+      <section class="hero-card" @fadeSlideIn>
+        <div class="hero-main">
+          <div class="avatar-lg" [style.background-image]="'url(' + (patient()?.avatar || '') + ')'">
+            <span *ngIf="!patient()?.avatar">{{ getInitials() }}</span>
           </div>
-          <p>{{ patient()?.email || 'No email' }} • {{ patient()?.phoneNumber || patient()?.phone || 'No phone' }}</p>
-          <p class="subtle">Last seen {{ formatLastSeen() }}</p>
+          <div class="hero-info">
+            <div class="hero-title">
+              <h2>{{ getFullName() }}</h2>
+              <span class="badge">{{ stats()?.lastStatus | titlecase }}</span>
+            </div>
+            <p>{{ patient()?.email }} • {{ patient()?.phoneNumber }}</p>
+            <p class="subtle">Last seen: {{ formatLastSeen() }}</p>
+          </div>
         </div>
-      </div>
-      <div class="hero-actions">
-        <button class="ghost" (click)="navigate('/doctor/patients')">
-          <i class="bi bi-arrow-left"></i> Back
-        </button>
-        <button class="ghost" (click)="openProfileModal()">
-          <i class="bi bi-person-badge"></i> View Profile
-        </button>
-        <button class="primary" (click)="navigate('/doctor/appointments')">
-          <i class="bi bi-calendar-plus"></i> New Appointment
-        </button>
-      </div>
-    </section>
+        <div class="hero-actions">
+          <button class="ghost" (click)="navigate('/doctor/patients')">
+            <i class="bi bi-arrow-left"></i> Back
+          </button>
+          <button class="ghost" (click)="openProfileModal()">
+            <i class="bi bi-person-badge"></i> View Profile
+          </button>
+          <button class="primary" (click)="navigate('/doctor/appointments/new?patientId=' + patient()?.id)">
+            <i class="bi bi-calendar-plus"></i> New Appointment
+          </button>
+        </div>
+      </section>
 
-    <section class="stats-grid">
-      <div class="stat-card">
-        <p>Total Visits</p>
-        <h3>{{ patient()?.totalAppointments || appointments().length || 0 }}</h3>
-      </div>
-      <div class="stat-card">
-        <p>Last Status</p>
-        <h3>{{ patient()?.lastStatus || '—' }}</h3>
-      </div>
-      <div class="stat-card">
-        <p>Next Follow‑up</p>
-        <h3>{{ appointments()[0]?.appointmentDate || appointments()[0]?.date | date:'mediumDate' || '—' }}</h3>
-      </div>
-      <div class="stat-card">
-        <p>Patient ID</p>
-        <h3>{{ patient()?.patientId || patient()?.id || '—' }}</h3>
-      </div>
-    </section>
+      <!-- Stats Grid -->
+      <section class="stats-grid" @fadeSlideIn>
+        <div class="stat-card">
+          <i class="bi bi-clipboard2-pulse-fill"></i>
+          <p>Total Visits</p>
+          <h3>{{ stats()?.totalVisits }}</h3>
+        </div>
+        <div class="stat-card">
+          <i class="bi bi-activity"></i>
+          <p>Last Status</p>
+          <h3>{{ stats()?.lastStatus | titlecase }}</h3>
+        </div>
+        <div class="stat-card">
+          <i class="bi bi-calendar-check-fill"></i>
+          <p>Next Follow‑up</p>
+          <h3>{{ stats()?.nextFollowUp | date:'mediumDate' || 'None' }}</h3>
+        </div>
+        <div class="stat-card">
+          <i class="bi bi-person-vcard-fill"></i>
+          <p>Patient ID</p>
+          <h3>{{ patient()?.patientId }}</h3>
+        </div>
+      </section>
 
-    <section class="appointments">
-      <div class="section-title">
-        <h3>Appointments</h3>
-        <span>{{ appointments().length || 0 }} total</span>
-      </div>
-      <div *ngIf="appointments()?.length; else noAppointments" class="appointment-list">
-        <div class="appointment-card" *ngFor="let appt of appointments()">
-          <div>
-            <h4>{{ appt?.type || 'Consultation' }}</h4>
-            <p>{{ appt?.reason || 'General follow‑up' }}</p>
-          </div>
-          <div class="appointment-meta">
-            <span>{{ appt?.appointmentDate || appt?.date | date:'mediumDate' }}</span>
-            <span>{{ appt?.appointmentTime || appt?.time }}</span>
-          </div>
-          <div class="appointment-status">
-            <span [class.success]="(appt?.status || '').toLowerCase() === 'completed'"
-              [class.warning]="(appt?.status || '').toLowerCase() === 'pending'"
-              [class.danger]="(appt?.status || '').toLowerCase() === 'cancelled'">
-              {{ appt?.status || 'pending' | titlecase }}
-            </span>
+      <!-- Appointments List -->
+      <section class="appointments" @fadeSlideIn>
+        <div class="section-title">
+          <h3>Appointment History</h3>
+          <span>{{ appointments()?.length || 0 }} total records</span>
+        </div>
+        <div *ngIf="appointments()?.length; else noAppointments" class="appointment-list" [@listAnimation]="appointments()?.length">
+          <div class="appointment-card" *ngFor="let appt of appointments()">
+            <div class="appt-icon">
+              <i [class]="appt.type === 'video' ? 'bi bi-camera-video-fill' : 'bi bi-hospital-fill'"></i>
+            </div>
+            <div class="appt-details">
+              <h4>{{ appt.type | titlecase }}</h4>
+              <p>{{ appt.date | date:'fullDate' }}</p>
+            </div>
+            <div class="appt-time">
+              <span>{{ appt.time }}</span>
+            </div>
+            <div class="appointment-status">
+              <span class="status-badge" [ngClass]="'status-' + (appt.status | lowercase)">
+                {{ appt.status | titlecase }}
+              </span>
+            </div>
+             <button class="ghost-icon"><i class="bi bi-three-dots-vertical"></i></button>
           </div>
         </div>
-      </div>
-      <ng-template #noAppointments>
-        <div class="empty-state">No appointments found.</div>
-      </ng-template>
-    </section>
+        <ng-template #noAppointments>
+          <div class="empty-state">
+            <i class="bi bi-calendar-x"></i>
+            <h4>No appointments found.</h4>
+            <p>This patient doesn't have any past or upcoming appointments.</p>
+          </div>
+        </ng-template>
+      </section>
+    </ng-container>
   </ng-container>
 
   <ng-template #loading>
-    <div class="loading">Loading patient...</div>
+    <div class="loading-shimmer">
+      <div class="hero-card-shimmer"></div>
+      <div class="stats-grid-shimmer">
+        <div class="stat-card-shimmer"></div>
+        <div class="stat-card-shimmer"></div>
+        <div class="stat-card-shimmer"></div>
+        <div class="stat-card-shimmer"></div>
+      </div>
+      <div class="appointment-list-shimmer"></div>
+    </div>
+  </ng-template>
+  
+  <ng-template #noData>
+     <div class="empty-state full-page">
+        <i class="bi bi-person-x"></i>
+        <h4>Patient Not Found</h4>
+        <p>The requested patient could not be found or you may not have permission to view them.</p>
+        <button class="primary" (click)="navigate('/doctor/patients')">Return to Patient List</button>
+      </div>
   </ng-template>
 
-  <div class="modal-backdrop" *ngIf="profileModalOpen()" (click)="closeProfileModal()">
-    <div class="modal" (click)="$event.stopPropagation()">
+  <!-- Profile Modal -->
+  <div class="modal-backdrop" [class.open]="profileModalOpen()" (click)="closeProfileModal()">
+    <div class="modal" [class.open]="profileModalOpen()" (click)="$event.stopPropagation()" @fadeSlideIn>
       <header>
         <div>
           <h3>Patient Profile</h3>
           <p class="subtle">Clinical snapshot and contact details</p>
         </div>
-        <button type="button" (click)="closeProfileModal()">
+        <button type="button" class="ghost-icon" (click)="closeProfileModal()">
           <i class="bi bi-x-lg"></i>
         </button>
       </header>
-      <div class="modal-body">
+      <div class="modal-body" *ngIf="patient() as p">
         <div class="profile-card">
-          <div class="avatar-xl">{{ getInitials() }}</div>
-          <div>
+          <div class="avatar-xl" [style.background-image]="'url(' + (p.avatar || '') + ')'">
+             <span *ngIf="!p.avatar">{{ getInitials() }}</span>
+          </div>
+          <div class="profile-card-info">
             <h4>{{ getFullName() }}</h4>
-            <p>{{ patient()?.email || 'No email' }}</p>
-            <p>{{ patient()?.phoneNumber || patient()?.phone || 'No phone' }}</p>
+            <p><i class="bi bi-envelope-fill"></i> {{ p.email }}</p>
+            <p><i class="bi bi-telephone-fill"></i> {{ p.phoneNumber }}</p>
           </div>
         </div>
         <div class="profile-grid">
           <div>
             <span>Patient ID</span>
-            <strong>{{ patient()?.patientId || patient()?.id || '—' }}</strong>
+            <strong>{{ p.patientId }}</strong>
           </div>
           <div>
             <span>Last Seen</span>
@@ -112,17 +147,21 @@
           </div>
           <div>
             <span>Total Visits</span>
-            <strong>{{ patient()?.totalAppointments || appointments().length || 0 }}</strong>
+            <strong>{{ stats()?.totalVisits }}</strong>
           </div>
           <div>
             <span>Status</span>
-            <strong>{{ patient()?.lastStatus || 'Active' }}</strong>
+            <strong class="status-badge" [ngClass]="'status-' + (stats()?.lastStatus | lowercase)">
+              {{ stats()?.lastStatus | titlecase }}
+            </strong>
           </div>
         </div>
       </div>
-      <footer>
+      <footer class="modal-footer">
         <button class="ghost" (click)="closeProfileModal()">Close</button>
-        <button class="primary" (click)="navigate('/doctor/messages')">Message</button>
+        <button class="primary" (click)="navigate('/doctor/messages?patientId=' + patient()?.id)">
+          <i class="bi bi-chat-dots-fill"></i> Message Patient
+        </button>
       </footer>
     </div>
   </div>

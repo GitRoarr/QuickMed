@@ -276,63 +276,104 @@
 	place-items: center;
 }
 
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding: 1.5rem;
+  border-top: 1px solid var(--border-soft);
+  background-color: var(--surface-soft);
+  border-radius: 0 0 16px 16px;
+  margin: 0 -1.5rem -1.5rem;
+}
+
+.modal-footer .primary {
+  box-shadow: 0 4px 14px -4px var(--primary-light-text);
+}
+
+.profile-card-info {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.profile-card-info p {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-secondary);
+}
+
+.profile-card-info i {
+  color: var(--primary);
+}
+
 .modal-body {
-	display: grid;
-	gap: 1rem;
-	position: relative;
-	z-index: 1;
+  display: grid;
+  gap: 1.5rem;
+  padding: 0 1.5rem;
 }
 
 .profile-card {
-	display: grid;
-	grid-template-columns: 72px 1fr;
-	align-items: center;
-	gap: 1rem;
-	padding: 1rem;
-	border-radius: 18px;
-	background: var(--surface-secondary);
-	border: 1px solid var(--border-default);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem;
+  border-radius: 12px;
+  background: var(--surface-soft);
+  border: 1px solid var(--border-soft);
 }
 
 .avatar-xl {
-	width: 72px;
-	height: 72px;
-	border-radius: 20px;
-	display: grid;
-	place-items: center;
-	background: rgba(16, 185, 129, 0.15);
-	color: #0f9d58;
-	font-weight: 800;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background-color: var(--primary-lighter);
+  color: var(--primary-dark);
+  display: grid;
+  place-items: center;
+  font-weight: 600;
+  font-size: 1.75rem;
+  background-size: cover;
+  background-position: center;
+  flex-shrink: 0;
+}
+.profile-card h4 {
+  margin: 0 0 0.25rem;
+}
+.profile-card p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
 }
 
 .profile-grid {
-	display: grid;
-	grid-template-columns: repeat(2, minmax(0, 1fr));
-	gap: 0.75rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
 }
-
-.profile-grid div {
-	padding: 0.8rem 0.95rem;
-	border-radius: 14px;
-	background: var(--surface-secondary);
-	border: 1px solid var(--border-default);
-	display: grid;
-	gap: 0.2rem;
+.profile-grid > div {
+  background-color: var(--surface-soft);
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
 }
-
 .profile-grid span {
-	font-size: 0.72rem;
-	color: var(--text-secondary);
-	text-transform: uppercase;
-	letter-spacing: 0.06em;
+  display: block;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.25rem;
+}
+.profile-grid strong {
+  font-weight: 600;
+  color: var(--text-primary);
 }
 
 .modal footer {
-	display: flex;
-	justify-content: flex-end;
-	gap: 0.75rem;
-	position: relative;
-	z-index: 1;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem 1.5rem;
+  border-top: 1px solid var(--border-soft);
+  margin-top: 0.5rem;
 }
 
 .modal footer .ghost,

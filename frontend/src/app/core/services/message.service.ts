@@ -75,4 +75,8 @@ export class MessageService {
   getUnreadCount(): Observable<{ count: number }> {
     return this.http.get<{ count: number }>(`${this.API_URL}/unread-count`);
   }
+
+  deleteConversation(conversationId: string): Observable<void> {
+    return this.http.delete<void>(`${this.API_URL}/conversations/${conversationId}`);
+  }
 }

@@ -59,6 +59,35 @@
   opacity: 1;
 }
 
+.convo-item:hover .remove-btn {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.remove-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 24px;
+  height: 24px;
+  background-color: rgba(0, 0, 0, 0.1);
+  color: var(--text-secondary);
+  border: none;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  transform: scale(0.8);
+  transition: all 0.2s ease-in-out;
+}
+
+.remove-btn:hover {
+  background-color: rgba(0, 0, 0, 0.2);
+  color: var(--text-primary);
+}
+
 .convo-selected {
   border: 1px solid rgba(16, 185, 129, 0.25);
   background: linear-gradient(120deg, rgba(16, 185, 129, 0.08), rgba(59, 130, 246, 0.04));

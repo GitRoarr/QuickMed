@@ -136,8 +136,8 @@ export class DoctorService {
     return this.http.get<DoctorStats>(`${this.apiUrl}/stats`);
   }
 
-  getAnalytics(): Observable<DoctorAnalytics> {
-    return this.http.get<DoctorAnalytics>(`${this.apiUrl}/analytics`);
+  getAnalytics(period: string = '6months'): Observable<DoctorAnalytics> {
+    return this.http.get<DoctorAnalytics>(`${this.apiUrl}/analytics`, { params: { period } });
   }
 
   getPatients(
@@ -165,43 +165,12 @@ export class DoctorService {
   getDoctorList(): Observable<DoctorListItem[]> {
     return this.http.get<DoctorListItem[]>(`${this.apiUrl}/list`);
   }
-}
-
-@Injectable({
-  providedIn: 'root',
-})
-export class DoctorService {
-  private readonly API_URL = `${environment.apiUrl}/doctors`;
-
-  constructor(private http: HttpClient) {}
-
-  getDashboardData(): Observable<DoctorDashboardData> {
-    return this.http.get<DoctorDashboardData>(`${this.API_URL}/dashboard`);
-  }
-
-  getStats(): Observable<DoctorStats> {
-    return this.http.get<DoctorStats>(`${this.API_URL}/stats`);
-  }
-
-  getAnalytics(period: string = '6months'): Observable<DoctorAnalytics> {
-    return this.http.get<DoctorAnalytics>(`${this.API_URL}/analytics`, { params: { period } });
-  }
-
-  getMyPatients(): Observable<DoctorPatientSummary[]> {
-    return this.http.get<DoctorPatientSummary[]>(`${this.API_URL}/patients`);
-  }
-
+  
   listDoctors(): Observable<DoctorListItem[]> {
-    return this.http.get<DoctorListItem[]>(`${this.API_URL}`);
+    return this.http.get<DoctorListItem[]>(`${this.apiUrl}`);
   }
 
-  // Fetch available time slots for a doctor on a specific date
   getAvailability(doctorId: string, date: string): Observable<string[]> {
-    return this.http.get<string[]>(`${this.API_URL}/${doctorId}/availability`, { params: { date } });
-  }
-
-  // Patient detail for doctor view
-  getPatientDetail(patientId: string): Observable<DoctorPatientDetail> {
-    return this.http.get<DoctorPatientDetail>(`${this.API_URL}/patients/${patientId}`);
+    return this.http.get<string[]>(`${this.apiUrl}/${doctorId}/availability`, { params: { date } });
   }
 }

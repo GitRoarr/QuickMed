@@ -55,8 +55,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
   loadDashboardData(): void {
     this.isLoading.set(true);
     this.error.set(null);
-    this.doctorService.getDashboardData().subscribe({
-      next: (data) => {
+    this.doctorService.getDashboard().subscribe({
+      next: (data: DoctorDashboardData) => {
         this.dashboardData.set(data);
         this.isLoading.set(false);
       },

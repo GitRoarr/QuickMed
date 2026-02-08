@@ -139,9 +139,9 @@ export class PatientsComponent implements OnInit {
 
   loadPatients() {
     this.isLoading.set(true);
-    this.doctorService.getMyPatients().subscribe({
+    this.doctorService.getPatients(1, 100).subscribe({
       next: (data) => {
-        this.patients.set(data || []);
+        this.patients.set(data.patients || []);
         this.isLoading.set(false);
       },
       error: (err) => {
