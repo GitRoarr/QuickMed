@@ -135,6 +135,12 @@ export interface AdminDashboardResponse {
   notifications: DashboardNotification[]
 }
 
+export interface AdminSecuritySettings {
+  minPasswordLength: number
+  requireSpecialCharacters: boolean
+  sessionTimeoutMinutes: number
+}
+
 @Injectable({
   providedIn: "root",
 })
@@ -216,6 +222,10 @@ export class AdminService {
         }
       })
     )
+  }
+
+  getSecuritySettings(): Observable<AdminSecuritySettings> {
+    return this.http.get<AdminSecuritySettings>(`${this.apiUrl}/settings/security`)
   }
 
   createAppointment(appointmentData: Partial<Appointment>): Observable<Appointment> {

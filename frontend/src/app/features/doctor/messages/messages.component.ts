@@ -1,6 +1,6 @@
 import { Component, OnInit, signal, inject, AfterViewChecked, ElementRef, ViewChild } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
-import { Router, RouterModule } from '@angular/router';
+import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { trigger, transition, style, animate } from '@angular/animations';
 
@@ -49,6 +49,7 @@ export class MessagesComponent implements OnInit, AfterViewChecked {
   themeService = inject(ThemeService);
   private toast = inject(ToastService);
   private router: Router = inject(Router);
+  private route = inject(ActivatedRoute);
 
   conversations = signal<Conversation[]>([]);
   selectedConversation = signal<Conversation | null>(null);
@@ -63,6 +64,23 @@ export class MessagesComponent implements OnInit, AfterViewChecked {
     this.loadUserData();
     this.loadConversations();
     this.loadUnreadCount();
+    this.bindDeepLink();
+  }
+
+  private bindDeepLink(): void {
+    this.route.queryParams.subscribe((params) => {
+      const patientId = params['patientId'];
+      if (patientId) {
+        this.messageService.getConversationWith(patientId).subscribe({
+          next: (conversation) => {
+            this.selectedConversation.set(conversation);
+            this.loadMessages(conversation.id);
+            this.loadConversations();
+          },
+          error: () => this.toast.error('Failed to open conversation'),
+        });
+      }
+    });
   }
 
   ngAfterViewChecked(): void {
@@ -85,8 +103,9 @@ export class MessagesComponent implements OnInit, AfterViewChecked {
   }
 
   loadUnreadCount(): void {
-    this.notificationService.getUnreadCount().subscribe({
-      next: (count) => this.unreadCount.set(count || 0)
+    this.messageService.getUnreadCount().subscribe({
+      next: (count) => this.unreadCount.set(count?.count || 0),
+      error: () => this.unreadCount.set(0),
     });
   }
 

@@ -141,6 +141,12 @@ export class AdminController {
     return this.adminService.getSystemNotifications();
   }
 
+  @Get('settings/security')
+  @Roles(UserRole.ADMIN)
+  getSecuritySettings() {
+    return this.adminService.getSecuritySettings();
+  }
+
   @Post('reports')
   @Roles(UserRole.ADMIN)
   async generateReport(@Body() req: { type: 'users' | 'appointments' | 'revenue'; startDate?: string; endDate?: string }) {

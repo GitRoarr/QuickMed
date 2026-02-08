@@ -81,6 +81,22 @@ export class MessagesService {
     return conversations;
   }
 
+  async getConversationWith(user: Pick<User, 'id' | 'role'>, counterpartyId: string): Promise<Conversation> {
+    if (!counterpartyId) {
+      throw new BadRequestException('Missing counterparty id');
+    }
+
+    if (user.role === UserRole.DOCTOR) {
+      return this.getOrCreateConversation(user.id, counterpartyId);
+    }
+
+    if (user.role === UserRole.PATIENT) {
+      return this.getOrCreateConversation(counterpartyId, user.id);
+    }
+
+    throw new ForbiddenException('Only doctors and patients can access conversations');
+  }
+
   async getMessages(conversationId: string, user: Pick<User, 'id' | 'role'>): Promise<Message[]> {
     const conversation = await this.conversationsRepository.findOne({
       where: { id: conversationId },

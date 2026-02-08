@@ -24,6 +24,7 @@ export class SettingsComponent implements OnInit {
   loading = signal(false);
   saving = signal(false);
   message = signal<{ type: 'success' | 'error', text: string } | null>(null);
+  securitySettings = signal<{ minPasswordLength: number; requireSpecialCharacters: boolean; sessionTimeoutMinutes: number } | null>(null);
 
   themeForm: FormGroup;
   generalForm: FormGroup;
@@ -56,6 +57,14 @@ export class SettingsComponent implements OnInit {
     this.loadThemes();
     this.loadCurrentTheme();
     this.checkDarkMode();
+    this.loadSecuritySettings();
+  }
+
+  loadSecuritySettings(): void {
+    this.adminService.getSecuritySettings().subscribe({
+      next: (settings) => this.securitySettings.set(settings),
+      error: () => this.securitySettings.set(null),
+    });
   }
 
   checkDarkMode() {

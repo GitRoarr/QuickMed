@@ -30,6 +30,12 @@ export interface AdminDashboardData {
   notifications: any[];
 }
 
+export interface AdminSecuritySettings {
+  minPasswordLength: number;
+  requireSpecialCharacters: boolean;
+  sessionTimeoutMinutes: number;
+}
+
 @Injectable()
 export class AdminService {
   constructor(
@@ -61,6 +67,18 @@ export class AdminService {
 
   async getAdminStats(): Promise<AdminStats> {
     return this.statsService.getAdminStats();
+  }
+
+  getSecuritySettings(): AdminSecuritySettings {
+    const minPasswordLength = Number(process.env.MIN_PASSWORD_LENGTH || 8);
+    const requireSpecialCharacters = String(process.env.REQUIRE_SPECIAL_CHARACTERS || 'true') === 'true';
+    const sessionTimeoutMinutes = Number(process.env.SESSION_TIMEOUT_MINUTES || 30);
+
+    return {
+      minPasswordLength: Number.isFinite(minPasswordLength) ? minPasswordLength : 8,
+      requireSpecialCharacters,
+      sessionTimeoutMinutes: Number.isFinite(sessionTimeoutMinutes) ? sessionTimeoutMinutes : 30,
+    };
   }
 
   async exportUserData(userId: string) {

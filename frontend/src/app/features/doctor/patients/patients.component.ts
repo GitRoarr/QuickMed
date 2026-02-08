@@ -10,6 +10,7 @@ import { AppointmentService } from '@core/services/appointment.service';
 import { forkJoin } from 'rxjs';
 import { DoctorHeaderComponent } from '../shared/doctor-header/doctor-header.component';
 import { DoctorSidebarComponent } from '../shared/doctor-sidebar/doctor-sidebar.component';
+import { ToastService } from '@core/services/toast.service';
 
 interface MenuItem {
   label: string;
@@ -33,6 +34,7 @@ export class PatientsComponent implements OnInit {
   private badgeService = inject(BadgeService);
   private appointmentService = inject(AppointmentService);
   private messageService = inject(MessageService);
+  private toast = inject(ToastService);
 
   // Data Signals
   patients = signal<DoctorPatientSummary[]>([]);
@@ -42,6 +44,10 @@ export class PatientsComponent implements OnInit {
   searchTerm = signal('');
   statusFilter = signal<'all' | 'active' | 'inactive'>('all');
   sortBy = signal<'recent' | 'visits' | 'alpha'>('recent');
+
+  activeMessagePatientId = signal<string | null>(null);
+  messageDrafts = signal<Record<string, string>>({});
+  sendingMessageId = signal<string | null>(null);
 
   // Typed status options for template iteration
   readonly statuses = ['all', 'active', 'inactive'] as const;
@@ -156,7 +162,42 @@ export class PatientsComponent implements OnInit {
         console.error('Failed to load patients', err);
         this.patients.set([]);
         this.isLoading.set(false);
+        this.toast.error('Failed to load patients', { title: 'Patients' });
       }
+    });
+  }
+
+  toggleQuickMessage(patientId: string): void {
+    this.activeMessagePatientId.set(
+      this.activeMessagePatientId() === patientId ? null : patientId
+    );
+  }
+
+  updateDraft(patientId: string, value: string): void {
+    this.messageDrafts.update((drafts) => ({ ...drafts, [patientId]: value }));
+  }
+
+  getDraft(patientId: string): string {
+    return this.messageDrafts()[patientId] || '';
+  }
+
+  sendQuickMessage(patientId: string): void {
+    const content = this.getDraft(patientId).trim();
+    if (!content) {
+      this.toast.warning('Type a message first.', { title: 'Message' });
+      return;
+    }
+    this.sendingMessageId.set(patientId);
+    this.messageService.sendMessage({ patientId, content }).subscribe({
+      next: () => {
+        this.updateDraft(patientId, '');
+        this.sendingMessageId.set(null);
+        this.toast.success('Message sent', { title: 'Patients' });
+      },
+      error: () => {
+        this.sendingMessageId.set(null);
+        this.toast.error('Failed to send message', { title: 'Patients' });
+      },
     });
   }
 

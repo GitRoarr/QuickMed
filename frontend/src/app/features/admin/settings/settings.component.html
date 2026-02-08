@@ -193,18 +193,18 @@
           <h4>Password Policy</h4>
           <div class="info-item">
             <span>Minimum Password Length</span>
-            <strong>8 characters</strong>
+            <strong>{{ (securitySettings()?.minPasswordLength ?? 8) }} characters</strong>
           </div>
           <div class="info-item">
             <span>Require Special Characters</span>
-            <strong>Yes</strong>
+            <strong>{{ (securitySettings()?.requireSpecialCharacters ?? true) ? 'Yes' : 'No' }}</strong>
           </div>
         </div>
         <div class="security-section">
           <h4>Session Management</h4>
           <div class="info-item">
             <span>Session Timeout</span>
-            <strong>30 minutes</strong>
+            <strong>{{ (securitySettings()?.sessionTimeoutMinutes ?? 30) }} minutes</strong>
           </div>
         </div>
       </div>

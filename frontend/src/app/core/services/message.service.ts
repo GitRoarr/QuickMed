@@ -64,6 +64,10 @@ export class MessageService {
     return this.http.get<Message[]>(`${this.API_URL}/conversations/${conversationId}`);
   }
 
+  getConversationWith(counterpartyId: string): Observable<Conversation> {
+    return this.http.get<Conversation>(`${this.API_URL}/conversations/with/${counterpartyId}`);
+  }
+
   sendMessage(payload: { patientId?: string; doctorId?: string; content: string }): Observable<Message> {
     return this.http.post<Message>(`${this.API_URL}/send`, payload);
   }

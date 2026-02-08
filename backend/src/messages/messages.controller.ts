@@ -20,6 +20,14 @@ export class MessagesController {
     return this.messagesService.getMessages(conversationId, user);
   }
 
+  @Get('conversations/with/:counterpartyId')
+  getConversationWith(
+    @Param('counterpartyId') counterpartyId: string,
+    @CurrentUser() user: User,
+  ) {
+    return this.messagesService.getConversationWith(user, counterpartyId);
+  }
+
   @Post('send')
   sendMessage(@Body() body: SendMessageDto, @CurrentUser() user: User) {
     return this.messagesService.sendMessageFromUser(user, body);

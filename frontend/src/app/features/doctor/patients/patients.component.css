@@ -29,3 +29,114 @@ select:focus-visible {
   outline: 2px solid var(--primary);
   outline-offset: 2px;
 }
+
+.patient-card {
+  position: relative;
+  transform: translateZ(0);
+  animation: fadeInUp 0.35s ease both;
+}
+
+.patient-card__glow {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at top right, rgba(16, 185, 129, 0.12), transparent 60%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.patient-card:hover .patient-card__glow {
+  opacity: 1;
+}
+
+.quick-message {
+  margin-top: 1rem;
+  background: var(--surface-secondary);
+  border: 1px solid var(--border-default);
+  border-radius: 16px;
+  padding: 0.75rem;
+  display: grid;
+  gap: 0.65rem;
+  animation: slideDown 0.25s ease both;
+}
+
+.quick-message__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-weight: 700;
+  color: var(--text-primary);
+  font-size: 0.85rem;
+}
+
+.quick-message__header button {
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.quick-message textarea {
+  width: 100%;
+  border: 1px solid var(--border-default);
+  border-radius: 12px;
+  padding: 0.6rem 0.75rem;
+  background: var(--surface);
+  color: var(--text-primary);
+  resize: none;
+  font-size: 0.85rem;
+}
+
+.quick-message__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.quick-message__actions .ghost {
+  border: 1px solid var(--border-default);
+  background: transparent;
+  color: var(--text-secondary);
+  padding: 0.4rem 0.8rem;
+  border-radius: 999px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.quick-message__actions .send {
+  border: none;
+  background: var(--primary);
+  color: #fff;
+  padding: 0.45rem 1rem;
+  border-radius: 999px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 10px 20px -14px rgba(16, 185, 129, 0.6);
+}
+
+.quick-message__actions .send:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

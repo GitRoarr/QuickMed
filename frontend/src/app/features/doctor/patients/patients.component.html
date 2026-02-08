@@ -63,7 +63,9 @@
       <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6"
         *ngIf="!isLoading() && filteredPatients().length > 0">
         <div *ngFor="let p of filteredPatients()"
-          class="group bg-[var(--surface)] rounded-2xl p-5 shadow-sm hover:shadow-xl transition-all relative overflow-hidden">
+          class="group patient-card bg-[var(--surface)] rounded-2xl p-5 shadow-sm hover:shadow-xl transition-all relative overflow-hidden">
+
+          <span class="patient-card__glow"></span>
 
           <div class="flex items-start justify-between mb-4 relative z-10">
             <div class="flex gap-4">
@@ -108,11 +110,35 @@
           <div class="flex gap-2 relative z-10">
             <button [routerLink]="['/doctor/patients', p.patientId]"
               class="flex-1 py-2 rounded-lg bg-[var(--surface-tertiary)] text-[var(--text-secondary)] font-bold text-xs hover:bg-[var(--surface-secondary)] hover:text-[var(--text-primary)] shadow-sm transition-all">Details</button>
+            <button type="button" (click)="toggleQuickMessage(p.patientId)"
+              class="flex-1 py-2 rounded-lg bg-[var(--surface-tertiary)] text-[var(--text-secondary)] font-bold text-xs hover:bg-[var(--surface-secondary)] hover:text-[var(--text-primary)] shadow-sm transition-all">Quick message</button>
             <button [routerLink]="['/doctor/messages']" [queryParams]="{ patientId: p.patientId }"
-              class="flex-1 py-2 rounded-lg bg-[var(--surface-tertiary)] text-[var(--text-secondary)] font-bold text-xs hover:bg-[var(--surface-secondary)] hover:text-[var(--text-primary)] shadow-sm transition-all">Message</button>
+              class="flex-1 py-2 rounded-lg bg-[var(--surface-tertiary)] text-[var(--text-secondary)] font-bold text-xs hover:bg-[var(--surface-secondary)] hover:text-[var(--text-primary)] shadow-sm transition-all">Open chat</button>
             <button [routerLink]="['/call', p.patientId]"
               class="w-10 flex items-center justify-center rounded-lg bg-[var(--primary)] text-white hover:brightness-110 transition-colors shadow-lg shadow-[rgba(29,185,84,0.15)]"><i
                 class="bi bi-camera-video"></i></button>
+          </div>
+
+          <div class="quick-message" *ngIf="activeMessagePatientId() === p.patientId">
+            <div class="quick-message__header">
+              <span>Quick message</span>
+              <button type="button" (click)="toggleQuickMessage(p.patientId)" aria-label="Close">
+                <i class="bi bi-x"></i>
+              </button>
+            </div>
+            <textarea
+              rows="3"
+              [ngModel]="getDraft(p.patientId)"
+              (ngModelChange)="updateDraft(p.patientId, $event)"
+              placeholder="Write a short update..."
+            ></textarea>
+            <div class="quick-message__actions">
+              <button type="button" class="ghost" (click)="updateDraft(p.patientId, '')">Clear</button>
+              <button type="button" class="send" (click)="sendQuickMessage(p.patientId)"
+                [disabled]="sendingMessageId() === p.patientId">
+                {{ sendingMessageId() === p.patientId ? 'Sending...' : 'Send' }}
+              </button>
+            </div>
           </div>
 
         </div>
