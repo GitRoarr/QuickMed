@@ -213,15 +213,25 @@ export class MessagesComponent implements OnInit, AfterViewChecked {
   openPatientRecords(): void {
     const conversation = this.selectedConversation();
     if (!conversation) return;
+    const patientId = conversation.patientId || conversation.patient?.id;
+    if (!patientId) {
+      this.toast.warning('Patient details not available');
+      return;
+    }
     this.actionsMenuOpen.set(false);
-    this.router.navigate(['/doctor/patients', conversation.patientId]);
+    this.router.navigate(['/doctor/patients', patientId]);
   }
 
   openPatientProfile(): void {
     const conversation = this.selectedConversation();
     if (!conversation) return;
+    const patientId = conversation.patientId || conversation.patient?.id;
+    if (!patientId) {
+      this.toast.warning('Patient details not available');
+      return;
+    }
     this.actionsMenuOpen.set(false);
-    this.router.navigate(['/doctor/patients', conversation.patientId]);
+    this.router.navigate(['/doctor/patients', patientId]);
   }
 
   copyConversationId(): void {

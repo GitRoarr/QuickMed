@@ -66,6 +66,13 @@ export class DoctorsController {
     return this.doctorsService.getMyPatients(user.id);
   }
 
+  @Get('patients/:id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.DOCTOR)
+  getPatientDetail(@CurrentUser() user: User, @Param('id') id: string) {
+    return this.doctorsService.getPatientDetail(user.id, id);
+  }
+
   @Patch(':id/validate-license')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)

@@ -341,6 +341,7 @@ export class DoctorsComponent implements OnInit {
    */
   onManualTimeChange(): void {
     if (!this.manualTimeInput) {
+      this.appointmentForm.patchValue({ appointmentTime: '' });
       return;
     }
 
@@ -364,7 +365,9 @@ export class DoctorsComponent implements OnInit {
     // Check if entered time falls within any available slot
     const matchingSlot = slots.find(slot => {
       const startMinutes = toMinutes(slot.startTime || '00:00');
-      const endMinutes = toMinutes(slot.endTime || '23:59');
+      // A slot is typically 30 mins, so we check if the time is within the start and end of any slot.
+      // Assuming 30-minute slots if no end time is provided.
+      const endMinutes = slot.endTime ? toMinutes(slot.endTime) : startMinutes + 30;
 
       // Time must be >= start and < end
       return enteredMinutes >= startMinutes && enteredMinutes < endMinutes;
@@ -379,7 +382,7 @@ export class DoctorsComponent implements OnInit {
     } else {
       // Invalid time - not within any available slot
       this.toast.error(
-        `Time ${this.formatTime12Hour(enteredTime)} is not within doctor's available slots. Please choose from the available time slots above.`,
+        `Time ${this.formatTime12Hour(enteredTime)} is not within the doctor's available slots. Please choose from the available time slots above.`,
         { title: 'Invalid Time' }
       );
       this.manualTimeInput = '';

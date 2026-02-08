@@ -91,25 +91,80 @@ export interface DoctorListItem {
 export interface DoctorPatientDetail {
   patient: {
     id: string;
-    patientId?: string;
+    patientId: string;
     firstName: string;
     lastName: string;
-    email?: string;
-    phoneNumber?: string;
-    avatar?: string;
-    totalAppointments?: number;
-    lastAppointmentDate?: string;
-    lastAppointmentTime?: string;
-    lastStatus?: string;
+    email: string;
+    phoneNumber: string;
+    avatar: string;
+    lastSeen: string;
   };
-  appointments: Array<{
+  stats: {
+    totalVisits: number;
+    lastStatus: string;
+    nextFollowUp: string | null;
+  };
+  appointments: {
     id: string;
-    appointmentDate: string;
-    appointmentTime: string;
+    date: string;
+    time: string;
     type: string;
     status: string;
-    reason?: string;
-  }>;
+  }[];
+}
+
+export interface DoctorListItem {
+  id: string;
+  firstName: string;
+  lastName: string;
+  specialty?: string;
+}
+
+@Injectable({
+  providedIn: 'root',
+})
+export class DoctorService {
+  private apiUrl = `${environment.apiUrl}/doctors`;
+
+  constructor(private http: HttpClient) {}
+
+  getDashboard(): Observable<DoctorDashboardData> {
+    return this.http.get<DoctorDashboardData>(`${this.apiUrl}/dashboard`);
+  }
+
+  getStats(): Observable<DoctorStats> {
+    return this.http.get<DoctorStats>(`${this.apiUrl}/stats`);
+  }
+
+  getAnalytics(): Observable<DoctorAnalytics> {
+    return this.http.get<DoctorAnalytics>(`${this.apiUrl}/analytics`);
+  }
+
+  getPatients(
+    page: number,
+    limit: number,
+    searchTerm?: string,
+    sortBy?: string,
+    order?: 'asc' | 'desc'
+  ): Observable<{ patients: DoctorPatientSummary[]; total: number }> {
+    let params: any = { page, limit };
+    if (searchTerm) params = { ...params, searchTerm };
+    if (sortBy) params = { ...params, sortBy, order };
+    return this.http.get<{ patients: DoctorPatientSummary[]; total: number }>(
+      `${this.apiUrl}/patients`,
+      { params }
+    );
+  }
+
+  getPatientDetail(patientId: string): Observable<DoctorPatientDetail> {
+    return this.http.get<DoctorPatientDetail>(
+      `${this.apiUrl}/patients/${patientId}`
+    );
+  }
+
+  getDoctorList(): Observable<DoctorListItem[]> {
+    return this.http.get<DoctorListItem[]>(`${this.apiUrl}/list`);
+  }
 }
 
 @Injectable({

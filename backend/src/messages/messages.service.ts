@@ -43,20 +43,23 @@ export class MessagesService {
   }
 
   async getConversationsForUser(user: Pick<User, 'id' | 'role'>, search?: string): Promise<Conversation[]> {
-    let query = this.conversationBaseQuery();
+    const queryBuilder = this.conversationsRepository
+      .createQueryBuilder('conversation')
+      .leftJoinAndSelect('conversation.patient', 'patient')
+      .leftJoinAndSelect('conversation.doctor', 'doctor');
 
     if (user.role === UserRole.DOCTOR) {
-      query = query.where('conversation.doctorId = :userId', { userId: user.id });
+      queryBuilder.where('conversation.doctorId = :userId', { userId: user.id });
       if (search) {
-        query = query.andWhere(
+        queryBuilder.andWhere(
           '(LOWER(patient.firstName) LIKE LOWER(:query) OR LOWER(patient.lastName) LIKE LOWER(:query))',
           { query: `%${search}%` },
         );
       }
     } else if (user.role === UserRole.PATIENT) {
-      query = query.where('conversation.patientId = :userId', { userId: user.id });
+      queryBuilder.where('conversation.patientId = :userId', { userId: user.id });
       if (search) {
-        query = query.andWhere(
+        queryBuilder.andWhere(
           '(LOWER(doctor.firstName) LIKE LOWER(:query) OR LOWER(doctor.lastName) LIKE LOWER(:query))',
           { query: `%${search}%` },
         );
@@ -65,7 +68,9 @@ export class MessagesService {
       return [];
     }
 
-    const conversations = await query.getMany();
+    const conversations = await queryBuilder
+      .orderBy('conversation.lastMessageAt', 'DESC')
+      .getMany();
 
     for (const conv of conversations) {
       const unread = await this.messagesRepository.count({

@@ -155,9 +155,7 @@ export class AppointmentsService {
 
     const defaultStatus = createAppointmentDto.status
       ? createAppointmentDto.status
-      : createdByRole === UserRole.PATIENT
-        ? AppointmentStatus.PENDING_PAYMENT
-        : AppointmentStatus.PENDING;
+      : AppointmentStatus.PENDING;
 
     const paymentStatus = createdByRole === UserRole.PATIENT
       ? PaymentStatus.PENDING

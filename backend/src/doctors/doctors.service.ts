@@ -441,6 +441,49 @@ export class DoctorsService {
     return results;
   }
 
+  async getPatientDetail(doctorId: string, patientId: string) {
+    const patient = await this.usersRepository.findOne({
+      where: { id: patientId, role: UserRole.PATIENT },
+    });
+
+    if (!patient) {
+      throw new NotFoundException('Patient not found');
+    }
+
+    const appointments = await this.appointmentsRepository.find({
+      where: { doctorId, patientId },
+      order: { appointmentDate: 'DESC', appointmentTime: 'DESC' },
+    });
+
+    const latest = appointments[0];
+    const nextFollowUp = appointments.find(a => new Date(a.appointmentDate) > new Date());
+
+    return {
+      patient: {
+        id: patient.id,
+        patientId: patient.patientId || patient.id,
+        firstName: patient.firstName,
+        lastName: patient.lastName,
+        email: patient.email,
+        phoneNumber: patient.phoneNumber,
+        avatar: patient.avatar,
+        lastSeen: latest?.appointmentDate,
+      },
+      stats: {
+        totalVisits: appointments.length,
+        lastStatus: latest?.status || 'N/A',
+        nextFollowUp: nextFollowUp?.appointmentDate || null,
+      },
+      appointments: appointments.map((appt) => ({
+        id: appt.id,
+        date: appt.appointmentDate,
+        time: appt.appointmentTime,
+        type: appt.appointmentType || 'General Follow-up',
+        status: appt.status,
+      })),
+    };
+  }
+
   async getDashboardData(doctorId: string) {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
