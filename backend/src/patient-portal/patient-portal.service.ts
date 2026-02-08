@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, Logger } from '@nestjs/common';
+import { Injectable, NotFoundException, Logger, ForbiddenException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, MoreThanOrEqual } from 'typeorm';
 import { Appointment } from '../appointments/entities/appointment.entity';
@@ -6,6 +6,7 @@ import { MedicalRecord, MedicalRecordType } from '../medical-records/entities/me
 import { Prescription, PrescriptionStatus } from '../prescriptions/entities/prescription.entity';
 import { User } from '../users/entities/user.entity';
 import { AppointmentStatus } from '../common';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class PatientPortalService {
@@ -19,6 +20,7 @@ export class PatientPortalService {
     private readonly prescriptionsRepository: Repository<Prescription>,
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   async getDashboard(patientId: string) {
@@ -188,6 +190,36 @@ export class PatientPortalService {
       isVideoConsultation: appointment.isVideoConsultation,
       type: appointment.appointmentType,
     };
+  }
+
+  async requestPrescriptionRefill(patientId: string, prescriptionId: string) {
+    const prescription = await this.prescriptionsRepository.findOne({
+      where: { id: prescriptionId },
+      relations: ['doctor'],
+    });
+
+    if (!prescription) {
+      throw new NotFoundException('Prescription not found');
+    }
+
+    if (prescription.patientId !== patientId) {
+      throw new ForbiddenException('You cannot request a refill for this prescription');
+    }
+
+    const patient = await this.usersRepository.findOne({ where: { id: patientId } });
+    if (!patient) {
+      throw new NotFoundException('Patient not found');
+    }
+
+    if (prescription.doctorId) {
+      await this.notificationsService.createSystemNotification(
+        prescription.doctorId,
+        'Prescription Refill Request',
+        `${patient.firstName} ${patient.lastName} requested a refill for ${prescription.medication}.`,
+      );
+    }
+
+    return { message: 'Refill request sent' };
   }
 }
 

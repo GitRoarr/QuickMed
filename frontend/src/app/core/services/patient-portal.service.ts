@@ -85,5 +85,9 @@ export class PatientPortalService {
   getDashboard(): Observable<PatientDashboardData> {
     return this.http.get<PatientDashboardData>(`${this.API_URL}/dashboard`);
   }
+
+  requestPrescriptionRefill(prescriptionId: string): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${this.API_URL}/prescriptions/${prescriptionId}/refill-request`, {});
+  }
 }
 

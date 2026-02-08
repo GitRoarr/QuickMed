@@ -6,9 +6,10 @@ import { Appointment } from '../appointments/entities/appointment.entity';
 import { MedicalRecord } from '../medical-records/entities/medical-record.entity';
 import { Prescription } from '../prescriptions/entities/prescription.entity';
 import { User } from '../users/entities/user.entity';
+import { NotificationsModule } from '../notifications/notifications.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Appointment, MedicalRecord, Prescription, User])],
+  imports: [TypeOrmModule.forFeature([Appointment, MedicalRecord, Prescription, User]), NotificationsModule],
   controllers: [PatientPortalController],
   providers: [PatientPortalService],
 })

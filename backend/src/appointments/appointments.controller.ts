@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req } from "@nestjs/common"
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req, UnauthorizedException } from "@nestjs/common"
 import  { AppointmentsService } from "./appointments.service"
 import  { CreateAppointmentDto } from "./dto/create-appointment.dto"
 import  { UpdateAppointmentDto } from "./dto/update-appointment.dto"
@@ -30,13 +30,21 @@ export class AppointmentsController {
   }
 
   @Get('my-appointments')
-  getMyAppointments(@CurrentUser() user: User) {
-    if (user.role === UserRole.PATIENT) {
-      return this.appointmentsService.findByPatient(user.id);
-    } else if (user.role === UserRole.DOCTOR) {
-      return this.appointmentsService.findByDoctor(user.id);
+  async getMyAppointments(@CurrentUser() user: User) {
+    if (!user?.id) {
+      throw new UnauthorizedException('User not authenticated');
     }
-    return this.appointmentsService.findAll();
+    try {
+      if (user.role === UserRole.PATIENT) {
+        return await this.appointmentsService.findByPatient(user.id);
+      } else if (user.role === UserRole.DOCTOR) {
+        return await this.appointmentsService.findByDoctor(user.id);
+      }
+      return await this.appointmentsService.findAll();
+    } catch (error) {
+      console.error('[AppointmentsController] Failed to load my-appointments', error);
+      return [];
+    }
   }
 
   @Get('pending-count')

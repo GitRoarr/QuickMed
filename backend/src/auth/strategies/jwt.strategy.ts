@@ -4,7 +4,7 @@ import { ExtractJwt, Strategy } from "passport-jwt";
 import { ConfigService } from "@nestjs/config";
 import { UsersService } from "../../users/users.service";
 import { UserRole } from "@/common";
-import jwt from "jsonwebtoken";
+import * as jwt from "jsonwebtoken";
 
 export interface JwtPayload {
   sub: string;
@@ -24,7 +24,15 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       ignoreExpiration: false,
       secretOrKeyProvider: (request, rawJwtToken, done) => {
         try {
-          const decoded: any = jwt.decode(rawJwtToken);
+          if (!rawJwtToken) {
+            return done(new UnauthorizedException("Missing token"), null);
+          }
+
+          if (!jwt || typeof (jwt as any).decode !== "function") {
+            return done(new UnauthorizedException("JWT decoder unavailable"), null);
+          }
+
+          const decoded: any = (jwt as any).decode(rawJwtToken);
           const issuer = decoded?.iss || "";
           const supabaseSecret = this.configService.get<string>("SUPABASE_JWT_SECRET");
           const appSecret = this.configService.get<string>("JWT_SECRET") || "defaultSecret";

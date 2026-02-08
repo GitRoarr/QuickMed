@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, BadRequestException, ForbiddenException } from "@nestjs/common";
+import { Injectable, NotFoundException, BadRequestException, ForbiddenException, Logger } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { In, Repository } from "typeorm";
 import { Appointment } from "./entities/appointment.entity";
@@ -13,6 +13,7 @@ import { NotificationIntegrationService } from '../notifications/notification-in
 
 @Injectable()
 export class AppointmentsService {
+  private readonly logger = new Logger(AppointmentsService.name);
   constructor(
     @InjectRepository(Appointment)
     private readonly appointmentsRepository: Repository<Appointment>,
@@ -162,9 +163,6 @@ export class AppointmentsService {
       ? PaymentStatus.PENDING
       : PaymentStatus.NOT_PAID;
 
-    const paymentDueAt = createdByRole === UserRole.PATIENT
-      ? new Date(Date.now() + 10 * 60 * 1000)
-      : null;
 
     const appointment = this.appointmentsRepository.create({
       patientId,
@@ -176,7 +174,6 @@ export class AppointmentsService {
       receptionistId: receptionistId ?? null,
       arrived: false,
       paymentStatus,
-      paymentDueAt: paymentDueAt || null,
     });
 
     const savedAppointment = await this.appointmentsRepository.save(appointment);
@@ -218,11 +215,19 @@ export class AppointmentsService {
   }
 
   async findByPatient(patientId: string): Promise<Appointment[]> {
-    return this.appointmentsRepository.find({
-      where: { patientId },
-      relations: ["doctor", 'receptionist'],
-      order: { appointmentDate: "DESC", appointmentTime: "DESC" },
-    });
+    try {
+      return await this.appointmentsRepository.find({
+        where: { patientId },
+        relations: ["doctor", "receptionist"],
+        order: { appointmentDate: "DESC", appointmentTime: "DESC" },
+      });
+    } catch (error) {
+      this.logger.error('Failed to load patient appointments with relations', error as any);
+      return this.appointmentsRepository.find({
+        where: { patientId },
+        order: { appointmentDate: "DESC", appointmentTime: "DESC" },
+      });
+    }
   }
 
   async findByDoctor(doctorId: string): Promise<Appointment[]> {

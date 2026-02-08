@@ -23,7 +23,7 @@
   position: fixed;
   left: 0;
   top: 0;
-  height: 100vh;
+  height: 100svh;
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -108,8 +108,8 @@
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
-  flex: 1;
-  overflow-y: auto;
+  flex: 0 0 auto;
+  overflow-y: visible;
 }
 
 .sidebar-nav.secondary {

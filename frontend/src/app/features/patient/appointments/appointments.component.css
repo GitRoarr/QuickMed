@@ -8,11 +8,21 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 1.5rem;
+  background: var(--surface);
+  border-radius: 22px;
+  padding: 1.5rem 1.75rem;
+  box-shadow: 0 24px 50px -40px rgba(15, 15, 15, 0.45);
 }
 
 .page-header h1 {
   margin: 0;
   color: var(--fg);
+}
+
+.subhead {
+  margin: 0.4rem 0 0;
+  color: var(--muted);
 }
 
 .eyebrow {
@@ -34,11 +44,66 @@
   align-items: center;
   cursor: pointer;
   font-weight: 600;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 12px 25px -18px rgba(15, 157, 88, 0.6);
+}
+
+.primary-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 16px 28px -18px rgba(15, 157, 88, 0.7);
 }
 
 .primary-btn.subtle {
   background: var(--primary-light);
   color: var(--primary-dark);
+}
+
+.summary-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 1rem;
+}
+
+.summary-card {
+  background: var(--surface);
+  border-radius: 18px;
+  padding: 1rem 1.25rem;
+  box-shadow: 0 18px 35px -30px rgba(15, 15, 15, 0.5);
+  border: 1px solid var(--border);
+}
+
+.summary-card p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.summary-card h3 {
+  margin: 0.4rem 0 0.15rem;
+  font-size: 1.6rem;
+  color: var(--fg);
+}
+
+.summary-card span {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.summary-card.accent {
+  background: rgba(16, 185, 129, 0.12);
+  border-color: rgba(16, 185, 129, 0.25);
+}
+
+.summary-card.warning {
+  background: rgba(245, 158, 11, 0.12);
+  border-color: rgba(245, 158, 11, 0.25);
+}
+
+.summary-card.muted {
+  background: rgba(59, 130, 246, 0.08);
+  border-color: rgba(59, 130, 246, 0.2);
 }
 
 .segment-tabs {
@@ -68,6 +133,10 @@
   justify-content: space-between;
   gap: 1rem;
   flex-wrap: wrap;
+  background: var(--surface);
+  border-radius: 18px;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border);
 }
 
 .search-field {
@@ -108,6 +177,14 @@
   border-radius: 18px;
   padding: 1.25rem;
   box-shadow: 0 20px 45px -35px rgba(15, 15, 15, 0.6);
+  border: 1px solid transparent;
+  animation: fadeUp 0.35s ease both;
+}
+
+.appointment-card:hover {
+  border-color: rgba(16, 185, 129, 0.3);
+  transform: translateY(-2px);
+  transition: transform 0.2s ease, border-color 0.2s ease;
 }
 
 .appointment-icon {
@@ -188,12 +265,29 @@
   flex-wrap: wrap;
 }
 
+.ghost-btn {
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--fg);
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  cursor: pointer;
+}
+
 .text-btn {
   border: none;
   background: transparent;
   color: var(--primary);
   font-weight: 600;
   cursor: pointer;
+}
+
+.text-btn.danger {
+  color: #dc2626;
 }
 
 .empty-state {
@@ -208,6 +302,17 @@
   place-items: center;
 }
 
+.empty-icon {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: var(--primary-light);
+  color: var(--primary-dark);
+  display: grid;
+  place-items: center;
+  font-size: 1.6rem;
+}
+
 .spinner {
   width: 40px;
   height: 40px;
@@ -220,6 +325,17 @@
 @keyframes spin {
   to {
     transform: rotate(360deg);
+  }
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
@@ -252,6 +368,19 @@
   background: #0f1c2f;
   box-shadow: 0 20px 45px -35px rgba(0, 0, 0, 0.7);
   border: 1px solid #1f2937;
+}
+
+:host-context(.patient-shell.dark) .page-header,
+:host-context(.patient-shell.dark) .appointments-toolbar,
+:host-context(.patient-shell.dark) .summary-card,
+:host-context(.patient-shell.dark) .empty-state {
+  background: #0f1c2f;
+  border-color: #1f2937;
+}
+
+:host-context(.patient-shell.dark) .ghost-btn {
+  border-color: #1f2937;
+  color: #e2e8f0;
 }
 
 :host-context(.patient-shell.dark) .appointment-icon {

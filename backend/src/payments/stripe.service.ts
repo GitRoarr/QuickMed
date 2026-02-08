@@ -69,7 +69,6 @@ export class StripeService {
     await this.appointmentsRepository.update(appointmentId, {
       status: 'pending_payment',
       paymentStatus: 'pending',
-      paymentDueAt: appointment.paymentDueAt || new Date(Date.now() + 10 * 60 * 1000),
     } as any);
 
     const payment = this.paymentRepository.create({

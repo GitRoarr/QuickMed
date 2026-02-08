@@ -22,6 +22,9 @@ export class DashboardComponent implements OnInit {
 
   isLoading = signal(true);
   dashboard = signal<PatientDashboardData | null>(null);
+  refillLoading = signal(false);
+  refillMessage = signal<string | null>(null);
+  refillTone = signal<'success' | 'error'>('success');
 
   ngOnInit(): void {
     this.loadDashboard();
@@ -102,6 +105,28 @@ export class DashboardComponent implements OnInit {
     return this.dashboard()?.prescriptions ?? [];
   }
 
+  requestRefill(): void {
+    const prescriptions = this.getPrescriptions();
+    if (!prescriptions.length) {
+      this.setRefillStatus('No active prescriptions to refill.', 'error');
+      return;
+    }
+
+    const target = prescriptions[0];
+    this.refillLoading.set(true);
+    this.patientPortalService.requestPrescriptionRefill(target.id).subscribe({
+      next: (res) => {
+        this.refillLoading.set(false);
+        this.setRefillStatus(res?.message || 'Refill request sent.', 'success');
+      },
+      error: (err) => {
+        this.refillLoading.set(false);
+        const msg = err?.error?.message || 'Failed to send refill request.';
+        this.setRefillStatus(msg, 'error');
+      },
+    });
+  }
+
   getLabResults() {
     return this.dashboard()?.labResults ?? [];
   }
@@ -126,5 +151,11 @@ export class DashboardComponent implements OnInit {
       { label: 'Video Visits', value: stats.videoVisits, icon: 'bi-camera-video' },
       { label: 'In-person Visits', value: stats.inPersonVisits, icon: 'bi-geo-alt' },
     ];
+  }
+
+  private setRefillStatus(message: string, tone: 'success' | 'error'): void {
+    this.refillTone.set(tone);
+    this.refillMessage.set(message);
+    setTimeout(() => this.refillMessage.set(null), 3000);
   }
 }

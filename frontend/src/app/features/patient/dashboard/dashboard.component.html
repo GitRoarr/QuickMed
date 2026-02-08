@@ -97,8 +97,21 @@
             <h2>Current Prescriptions</h2>
             <p class="muted">Medications you're actively taking.</p>
           </div>
-          <a class="text-link">Request refill</a>
+          <button
+            class="text-link"
+            type="button"
+            [disabled]="refillLoading() || getPrescriptions().length === 0"
+            (click)="requestRefill()">
+            {{ refillLoading() ? 'Sending...' : 'Request refill' }}
+          </button>
         </div>
+
+        <p
+          *ngIf="refillMessage()"
+          class="refill-status"
+          [class.refill-status--error]="refillTone() === 'error'">
+          {{ refillMessage() }}
+        </p>
 
         <div class="prescription-card" *ngFor="let rx of getPrescriptions()">
           <div>

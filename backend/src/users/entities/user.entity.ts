@@ -100,6 +100,9 @@ export class User extends BaseEntity {
   @OneToMany(() => Appointment, (appointment) => appointment.doctor)
   doctorAppointments: Appointment[];
 
+  @OneToMany(() => Appointment, (appointment) => appointment.receptionist)
+  receptionistAppointments: Appointment[];
+
   @Column({ type: 'boolean', default: true })
   isActive: boolean;
 

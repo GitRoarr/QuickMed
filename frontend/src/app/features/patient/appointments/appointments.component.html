@@ -4,11 +4,35 @@
       <div>
         <p class="eyebrow">My Appointments</p>
         <h1>Manage your medical appointments</h1>
+        <p class="subhead">Track visits, join video calls, and keep your care on schedule.</p>
       </div>
       <button class="primary-btn" (click)="bookNewAppointment()">
         <i class="bi bi-plus"></i>
         Book Appointment
       </button>
+    </div>
+
+    <div class="summary-cards">
+      <div class="summary-card">
+        <p>Total</p>
+        <h3>{{ getAppointmentStats().total }}</h3>
+        <span>All appointments</span>
+      </div>
+      <div class="summary-card accent">
+        <p>Confirmed</p>
+        <h3>{{ getAppointmentStats().confirmed }}</h3>
+        <span>Ready to attend</span>
+      </div>
+      <div class="summary-card warning">
+        <p>Pending</p>
+        <h3>{{ getAppointmentStats().pending }}</h3>
+        <span>Awaiting approval</span>
+      </div>
+      <div class="summary-card muted">
+        <p>Completed</p>
+        <h3>{{ getAppointmentStats().completed }}</h3>
+        <span>Visits done</span>
+      </div>
     </div>
 
     <div class="segment-tabs">
@@ -50,8 +74,12 @@
             <div><i class="bi bi-geo-alt"></i>{{ apt.location || (apt.isVideoConsultation ? 'Virtual visit' : 'Clinic') }}</div>
           </div>
           <div class="actions">
+            <button class="ghost-btn" (click)="viewDetails(apt.id)">
+              <i class="bi bi-eye"></i>
+              Details
+            </button>
             <button class="text-btn" (click)="rescheduleAppointment(apt.id)">Reschedule</button>
-            <button class="text-btn" (click)="cancelAppointment(apt.id)">Cancel</button>
+            <button class="text-btn danger" (click)="cancelAppointment(apt.id)">Cancel</button>
             <button class="primary-btn subtle" *ngIf="apt.isVideoConsultation && apt.status === 'confirmed'" (click)="joinVideoCall(apt.id)">
               Join
             </button>
@@ -60,6 +88,9 @@
       </div>
 
       <div class="empty-state" *ngIf="visibleAppointments().length === 0">
+        <div class="empty-icon">
+          <i class="bi bi-calendar2-week"></i>
+        </div>
         <p>No appointments found.</p>
         <button class="primary-btn" (click)="bookNewAppointment()">Book your next visit</button>
       </div>

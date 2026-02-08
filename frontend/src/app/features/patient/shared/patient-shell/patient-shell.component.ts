@@ -73,6 +73,7 @@ export class PatientShellComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.mobile = typeof window !== 'undefined' && window.innerWidth <= 1024;
+    this.refreshUserProfile();
     this.loadCounts();
     this.loadNotifications();
     this.setupPolling();
@@ -94,6 +95,14 @@ export class PatientShellComponent implements OnInit, OnDestroy {
     this.notificationService.getUnreadCount().subscribe({
       next: (count) => this.unreadNotifications.set(count || 0),
       error: () => this.unreadNotifications.set(0),
+    });
+  }
+
+  private refreshUserProfile(): void {
+    this.authService.refreshProfile().subscribe({
+      error: () => {
+        // ignore profile refresh failures
+      },
     });
   }
 

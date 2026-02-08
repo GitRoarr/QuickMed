@@ -8,6 +8,7 @@ import { DoctorService } from '../../../core/services/doctor.service';
 import { Appointment as AppointmentModel } from '../../../core/models/appointment.model';
 import { PayButtonComponent } from '../../../shared/components/pay-button/pay-button.component';
 import { PatientShellComponent } from '../shared/patient-shell/patient-shell.component';
+import { ToastService } from '@core/services/toast.service';
 
 interface Appointment {
   id: string;
@@ -32,6 +33,7 @@ export class AppointmentsComponent implements OnInit {
   private readonly appointmentService = inject(AppointmentService);
   private readonly authService = inject(AuthService);
   private readonly doctorService = inject(DoctorService);
+  private readonly toast = inject(ToastService);
 
   appointments = signal<AppointmentModel[]>([]);
   isLoading = signal(true);
@@ -78,6 +80,7 @@ export class AppointmentsComponent implements OnInit {
         console.error('Failed to load appointments', err);
         this.appointments.set([]);
         this.isLoading.set(false);
+        this.toast.error('Failed to load appointments', { title: 'Appointments' });
       },
     });
   }
@@ -106,18 +109,22 @@ export class AppointmentsComponent implements OnInit {
 
   rescheduleAppointment(appointmentId: string): void {
     console.log('Reschedule appointment:', appointmentId);
+    this.toast.info('Reschedule flow coming soon.', { title: 'Appointments' });
   }
 
   cancelAppointment(appointmentId: string): void {
     console.log('Cancel appointment:', appointmentId);
+    this.toast.warning('Cancel request sent.', { title: 'Appointments' });
   }
 
   joinVideoCall(appointmentId: string): void {
     console.log('Join video call:', appointmentId);
+    this.toast.success('Opening video room...', { title: 'Appointments' });
   }
 
   viewDetails(appointmentId: string): void {
     console.log('View details:', appointmentId);
+    this.toast.info('Opening appointment details.', { title: 'Appointments' });
   }
 
   goHome() {
