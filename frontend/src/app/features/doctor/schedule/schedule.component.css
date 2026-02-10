@@ -262,3 +262,130 @@ input[type="time"] {
     border-radius: 8px;
   }
 }
+
+/* Shift & Break Cards */
+.shift-card, .break-card {
+  background-color: var(--surface-secondary);
+  padding: 1rem;
+  border-radius: 1rem;
+  border: 1px solid var(--border-light);
+  transition: all 0.3s ease;
+  opacity: 0.6;
+}
+
+.shift-card.enabled {
+  opacity: 1;
+  background-color: var(--surface);
+  box-shadow: 0 4px 15px -5px rgba(0,0,0,0.08);
+}
+
+.shift-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  margin-right: 1rem;
+}
+
+.time-input, .slot-select {
+  background-color: var(--surface-secondary);
+  border: 1px solid var(--border-light);
+  border-radius: 0.5rem;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.time-input:focus, .slot-select:focus {
+  border-color: var(--primary);
+}
+
+.slot-duration {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border-light);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.break-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  opacity: 1;
+}
+
+/* Toggle Switch */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 28px;
+  margin-left: 1rem;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--surface-tertiary);
+  transition: .4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 20px;
+  width: 20px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: .4s;
+}
+
+input:checked + .slider {
+  background-color: var(--primary);
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px var(--primary);
+}
+
+input:checked + .slider:before {
+  transform: translateX(22px);
+}
+
+.slider.round {
+  border-radius: 34px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.shift-card, .break-card {
+  animation: fadeIn 0.5s ease-out forwards;
+}

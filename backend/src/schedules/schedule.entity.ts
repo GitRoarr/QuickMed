@@ -1,11 +1,24 @@
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, Index } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, Index, JoinColumn } from 'typeorm';
 import { User } from '../users/entities/user.entity';
 
+export type Break = {
+  startTime: string;
+  endTime: string;
+  reason?: string;
+};
+
+export type Shift = {
+  type: 'morning' | 'afternoon' | 'evening';
+  startTime: string;
+  endTime: string;
+  slotDuration: number;
+  enabled: boolean;
+};
+
 export type Slot = {
-  startTime?: string;
-  endTime?: string;
-  time?: string; 
-  status: 'available' | 'booked' | 'blocked';
+  startTime: string;
+  endTime: string;
+  status: 'available' | 'booked' | 'blocked' | 'break';
   appointmentId?: string | null;
   blockedReason?: string | null;
 };
@@ -20,6 +33,7 @@ export class DoctorSchedule {
   doctorId: string;
 
   @ManyToOne(() => User, { nullable: false })
+  @JoinColumn({ name: 'doctorId' })
   doctor: User;
 
   @Column({ type: 'date' })
@@ -28,13 +42,9 @@ export class DoctorSchedule {
   @Column({ type: 'jsonb', default: () => "'[]'" })
   slots: Slot[];
 
-  @Column({ type: 'jsonb', nullable: true })
-  sessions: {
-    morning: boolean;
-    break: boolean;
-    evening: boolean;
-  };
+  @Column({ type: 'jsonb', default: () => "'[]'" })
+  shifts: Shift[];
 
-  @Column({ type: 'int', default: 30 })
-  slotDuration: number;
+  @Column({ type: 'jsonb', default: () => "'[]'" })
+  breaks: Break[];
 }

@@ -59,7 +59,7 @@ export class ConflictDetectionService {
 
         // Check for overlaps with existing slots
         for (const slot of existingSlots) {
-            const slotStart = slot.startTime || slot.time || '';
+            const slotStart = slot.startTime || '';
             const slotEnd = slot.endTime || slotStart;
 
             if (this.timesOverlap(newSlot.startTime, newSlot.endTime, slotStart, slotEnd)) {

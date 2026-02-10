@@ -5,6 +5,7 @@ import { UpdateSlotDto } from './dto/update-slot.dto';
 import { GenerateSlotsDto } from './dto/generate-slots.dto';
 import { ApplyTemplateDto } from './dto/apply-template.dto';
 import { BulkSlotUpdateDto } from './dto/bulk-slot-update.dto';
+import { UpdateScheduleDto } from './dto/update-schedule.dto';
 
 @Controller('doctors/schedule')
 export class SchedulesController {
@@ -27,6 +28,13 @@ export class SchedulesController {
     @Query('days') days: string = '30'
   ) {
     return this.svc.getAvailableDates(doctorId, startDate, parseInt(days, 10));
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('')
+  async updateSchedule(@Req() req: any, @Body() body: UpdateScheduleDto) {
+    const doctorId = req.user?.id ?? req.user?.sub ?? req.headers['x-doctor-id'];
+    return this.svc.updateShiftsAndBreaks(doctorId, body.date, body.shifts, body.breaks);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -150,21 +158,6 @@ export class SchedulesController {
   async getDay(@Req() req: any, @Param('date') date: string) {
     const doctorId = req.user?.id ?? req.user?.sub ?? req.headers['x-doctor-id'];
     return this.svc.getDaySchedule(doctorId, date);
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @Post('sessions')
-  async updateSessions(
-    @Req() req: any,
-    @Body() body: { date: string; sessions: any; slotDuration: number },
-  ) {
-    const doctorId = req.user?.id ?? req.user?.sub ?? req.headers['x-doctor-id'];
-    return this.svc.updateSessionAvailability(
-      doctorId,
-      body.date,
-      body.sessions,
-      body.slotDuration,
-    );
   }
 }
 

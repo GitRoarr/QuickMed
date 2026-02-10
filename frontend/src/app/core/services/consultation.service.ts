@@ -1,7 +1,7 @@
 
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, catchError, of, switchMap } from 'rxjs';
 import { environment } from '@environments/environment';
 
 export enum TreatmentType {
@@ -42,7 +42,10 @@ export class ConsultationService {
   }
 
   getConsultationByAppointment(appointmentId: string): Observable<Consultation | null> {
-    return this.http.get<Consultation | null>(`${this.apiUrl}/by-appointment/${appointmentId}`);
+    return this.http.get<Consultation | null>(`${this.apiUrl}/by-appointment/${appointmentId}`).pipe(
+      catchError(() => this.http.get<Consultation | null>(`${this.apiUrl}/${appointmentId}`)),
+      catchError(() => of(null))
+    );
   }
 
   getMyConsultations(): Observable<Consultation[]> {

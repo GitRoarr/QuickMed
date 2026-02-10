@@ -1,7 +1,7 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { In, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DoctorSchedule, Slot } from './schedule.entity';
+import { DoctorSchedule, Slot, Shift, Break } from './schedule.entity';
 import { Appointment } from '../appointments/entities/appointment.entity';
 import { AppointmentStatus } from '../common/index';
 import { SettingsService } from '../settings/settings.service';
@@ -10,12 +10,6 @@ import { GenerateSlotsDto } from './dto/generate-slots.dto';
 import { ApplyTemplateDto } from './dto/apply-template.dto';
 import { BulkSlotUpdateDto } from './dto/bulk-slot-update.dto';
 import { AutoScheduleInitializerService } from './auto-schedule-initializer.service';
-
-const SESSIONS = {
-  morning: { start: '09:00', end: '12:00', allowSlots: true },
-  break: { start: '12:00', end: '14:00', allowSlots: false },
-  evening: { start: '14:00', end: '20:00', allowSlots: true },
-};
 
 @Injectable()
 export class SchedulesService {
@@ -40,36 +34,36 @@ export class SchedulesService {
     return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
   }
 
-  private generateSlots(start: string, end: string, duration: number): string[] {
-    const slots: string[] = [];
-    let current = this.toMinutes(start);
-    const endTime = this.toMinutes(end);
+  private generateSlots(shifts: Shift[], breaks: Break[]): Slot[] {
+    const slots: Slot[] = [];
+    if (!shifts) return slots;
 
-    while (current + duration <= endTime) {
-      slots.push(this.fromMinutes(current));
-      current += duration;
+    for (const shift of shifts) {
+      if (!shift.enabled) continue;
+
+      let current = this.toMinutes(shift.startTime);
+      const end = this.toMinutes(shift.endTime);
+      const duration = shift.slotDuration || 30;
+
+      while (current + duration <= end) {
+        const startTime = this.fromMinutes(current);
+        const endTime = this.fromMinutes(current + duration);
+        
+        const isBreak = (breaks || []).some(
+          b => this.toMinutes(startTime) < this.toMinutes(b.endTime) && this.toMinutes(endTime) > this.toMinutes(b.startTime)
+        );
+
+        if (!isBreak) {
+          slots.push({
+            startTime,
+            endTime,
+            status: 'available',
+          });
+        }
+        current += duration;
+      }
     }
-
     return slots;
-  }
-
-  private getDaySlots(availability: { sessions: any; slotDuration: number }): Record<string, string[]> {
-    const result: Record<string, string[]> = {};
-
-    for (const session in availability.sessions) {
-      if (!availability.sessions[session]) continue;
-
-      const config = (SESSIONS as any)[session];
-      if (!config || !config.allowSlots) continue;
-
-      result[session] = this.generateSlots(
-        config.start,
-        config.end,
-        availability.slotDuration,
-      );
-    }
-
-    return result;
   }
 
   private addMinutes(time: string, minutes: number): string {
@@ -102,71 +96,56 @@ export class SchedulesService {
   async getDaySchedule(doctorId: string, date: string | Date) {
     const dateObj = this.normalizeToDate(date);
 
-    // Auto-initialize schedule from settings if it doesn't exist
     await this.autoInitializer.autoInitializeScheduleIfNeeded(doctorId, dateObj);
 
     let sched = await this.repo.findOne({ where: { doctorId, date: dateObj } });
-    const dateStr = dateObj instanceof Date ? dateObj.toISOString().split('T')[0] : String(dateObj);
+    const dateStr = dateObj.toISOString().split('T')[0];
 
-    // If session-based availability is defined, generate slots from sessions
-    let sessionSlots: Slot[] = [];
-    if (sched?.sessions) {
-      const generated = this.getDaySlots({
-        sessions: sched.sessions,
-        slotDuration: sched.slotDuration || 30,
-      });
-
-      for (const session in generated) {
-        generated[session].forEach((timeStr) => {
-          const startTime = timeStr;
-          const endTime = this.addMinutes(timeStr, sched?.slotDuration || 30);
-          sessionSlots.push({
-            startTime,
-            endTime,
-            status: 'available',
-          });
-        });
-      }
+    let generatedSlots: Slot[] = [];
+    if (sched?.shifts) {
+      generatedSlots = this.generateSlots(sched.shifts, sched.breaks);
     }
 
-    // Manual-only: use stored slots and booked appointments; do not auto-generate from settings
     const storedSlots = sched?.slots || [];
     const appointmentSlots = await this.getBookedSlots(doctorId, dateObj);
-    let mergedSlots = this.mergeSlots(sessionSlots, storedSlots, appointmentSlots);
+    const breakSlots: Slot[] = (sched?.breaks || []).map(b => ({
+      ...b,
+      status: 'break'
+    }));
 
-    // Auto-block past-time available slots
+    let mergedSlots = this.mergeSlots(generatedSlots, storedSlots, appointmentSlots, breakSlots);
+
     const today = this.normalizeToDate(new Date());
     const isPastDay = dateObj.getTime() < today.getTime();
-    const toDateTime = (d: Date, time: string) => {
-      const [h, m] = (time || '').slice(0, 5).split(':').map(Number);
-      const dt = new Date(d);
-      dt.setHours(h || 0, m || 0, 0, 0);
-      return dt;
-    };
     const now = new Date();
+
     const finalSlots: Slot[] = mergedSlots.map((s) => {
       if (s.status !== 'available') return s;
       if (isPastDay) return { ...s, status: 'blocked' as const };
-      const end = s.endTime || s.startTime || s.time || '';
-      const endDt = toDateTime(dateObj, end);
+      
+      const [h, m] = (s.endTime || '').slice(0, 5).split(':').map(Number);
+      const endDt = new Date(dateObj);
+      endDt.setHours(h || 0, m || 0, 0, 0);
+
       if (endDt.getTime() < now.getTime()) {
         return { ...s, status: 'blocked' as const };
       }
       return s;
     });
+
     return {
       date: dateStr,
       slots: finalSlots,
-      sessions: sched?.sessions || null,
-      slotDuration: sched?.slotDuration || 30,
+      shifts: sched?.shifts || [],
+      breaks: sched?.breaks || [],
     };
   }
 
-  async updateSessionAvailability(
+  async updateShiftsAndBreaks(
     doctorId: string,
     date: string | Date,
-    sessions: { morning: boolean; break: boolean; evening: boolean },
-    slotDuration: number = 30,
+    shifts: Shift[],
+    breaks: Break[],
   ) {
     const dateObj = this.normalizeToDate(date);
     let sched = await this.repo.findOne({ where: { doctorId, date: dateObj } });
@@ -176,51 +155,18 @@ export class SchedulesService {
         doctorId,
         date: dateObj,
         slots: [],
+        shifts,
+        breaks,
       });
+    } else {
+      sched.shifts = shifts;
+      sched.breaks = breaks;
     }
 
-    sched.sessions = sessions;
-    sched.slotDuration = slotDuration;
-
-    // Creative Enhancement: Automatically update doctor settings if sessions expand their windows
-    try {
-      let minStart = 1440; // 24h in mins
-      let maxEnd = 0;
-      let hasActiveSession = false;
-
-      for (const [key, active] of Object.entries(sessions)) {
-        if (active) {
-          const config = (SESSIONS as any)[key];
-          if (config) {
-            hasActiveSession = true;
-            const start = this.toMinutes(config.start);
-            const end = this.toMinutes(config.end);
-            if (start < minStart) minStart = start;
-            if (end > maxEnd) maxEnd = end;
-          }
-        }
-      }
-
-      if (hasActiveSession) {
-        const updateSettings: any = {};
-        updateSettings.startTime = this.fromMinutes(minStart);
-        updateSettings.endTime = this.fromMinutes(maxEnd);
-
-        // Sync these to global settings to prevent validation mismatches
-        await this.settingsService.updateSettings(doctorId, updateSettings);
-      }
-    } catch (e) {
-      console.warn('Failed to sync settings with sessions', e);
-    }
-
-    try {
-      await this.repo.save(sched);
-      return this.getDaySchedule(doctorId, date);
-    } catch (error) {
-      console.error('Error saving session availability:', error);
-      throw error;
-    }
+    await this.repo.save(sched);
+    return this.getDaySchedule(doctorId, date);
   }
+  
   async setSingleSlotStatus(
     doctorId: string,
     date: string | Date,
@@ -254,7 +200,6 @@ export class SchedulesService {
     );
   }
 
-  // Public overloads: support legacy single time and new start/end range
   async setSlotStatus(
     doctorId: string,
     date: string | Date,
@@ -318,7 +263,6 @@ export class SchedulesService {
     );
     const dateObj = this.normalizeToDate(date);
 
-    // Prevent modifying past time slots (unless it's marking as booked from appointment creation)
     if (status !== 'booked') {
       const localEnd = new Date(dateObj);
       const [eh, em] = safeEnd.split(':').map(Number);
@@ -342,11 +286,9 @@ export class SchedulesService {
 
     const slots = sched.slots || [];
 
-    // Find slot that overlaps with this time range
     let slot = slots.find((s) => {
-      const sStart = this.normalizeRange(s.startTime || s.time || '', s.endTime).startTime;
-      const sEnd = this.normalizeRange(s.startTime || s.time || '', s.endTime).endTime;
-      // Check if times overlap
+      const sStart = this.normalizeRange(s.startTime, s.endTime).startTime;
+      const sEnd = this.normalizeRange(s.startTime, s.endTime).endTime;
       return (safeStart >= sStart && safeStart < sEnd) ||
         (safeEnd > sStart && safeEnd <= sEnd) ||
         (safeStart <= sStart && safeEnd >= sEnd);
@@ -369,7 +311,6 @@ export class SchedulesService {
       } else {
         slot.appointmentId = null;
       }
-      // Update time range to match
       slot.startTime = safeStart;
       slot.endTime = safeEnd;
     }
@@ -431,11 +372,11 @@ export class SchedulesService {
   }
 
   private mergeSlots(...groups: Slot[][]): Slot[] {
-    const priority: Record<string, number> = { booked: 3, blocked: 2, available: 1 };
+    const priority: Record<string, number> = { booked: 4, break: 3, blocked: 2, available: 1 };
     const map = new Map<string, Slot>();
 
     const upsert = (raw: Slot) => {
-      const normalized = this.normalizeRange(raw.startTime || raw.time || '', raw.endTime);
+      const normalized = this.normalizeRange(raw.startTime, raw.endTime);
       const key = `${normalized.startTime}-${normalized.endTime}`;
       const current = map.get(key);
       const incoming = {
@@ -460,7 +401,7 @@ export class SchedulesService {
     groups.forEach((list) => list.forEach(upsert));
 
     return Array.from(map.values()).sort((a, b) =>
-      (a.startTime || '').localeCompare(b.startTime || ''),
+      (a.startTime).localeCompare(b.startTime),
     );
   }
 
@@ -597,7 +538,7 @@ export class SchedulesService {
       currentDate.setDate(start.getDate() + i);
       const dateStr = currentDate.toISOString().split('T')[0];
       const daySchedule = await this.getDaySchedule(doctorId, dateStr);
-      weekDays.push(daySchedule);
+      weekDays.push(daySchedule as any);
     }
 
     return weekDays;
@@ -618,7 +559,7 @@ export class SchedulesService {
         const today = this.normalizeToDate(new Date());
         if (currentDate.getTime() < today.getTime()) return false;
 
-        const slotEnd = slot.endTime || slot.startTime || slot.time || '';
+        const slotEnd = slot.endTime || slot.startTime;
         const [h, m] = (slotEnd || '').slice(0, 5).split(':').map(Number);
         const slotDateTime = new Date(currentDate);
         slotDateTime.setHours(h || 0, m || 0, 0, 0);
@@ -634,9 +575,6 @@ export class SchedulesService {
     return availableDates;
   }
 
-  /**
-   * Generate slots for a day or date range based on time parameters
-   */
   async generateSlotsForDay(
     doctorId: string,
     dto: GenerateSlotsDto,
@@ -649,7 +587,6 @@ export class SchedulesService {
 
     const results: { date: string; slots: Slot[] }[] = [];
 
-    // Generate slots for each day in the range
     let currentDate = new Date(startDate);
     while (currentDate <= endDate) {
       const slots: Slot[] = [];
@@ -658,7 +595,6 @@ export class SchedulesService {
       while (currentTime < dto.endTime) {
         const slotEnd = this.addMinutes(currentTime, slotDuration);
 
-        // Check if this slot overlaps with a break
         const isBreak = breaks.some(
           (b) => currentTime < b.endTime && slotEnd > b.startTime,
         );
@@ -674,7 +610,6 @@ export class SchedulesService {
         currentTime = this.addMinutes(slotEnd, bufferMinutes);
       }
 
-      // Save the generated slots
       const dateStr = currentDate.toISOString().split('T')[0];
       await this.bulkSaveSlots(doctorId, currentDate, slots);
       results.push({ date: dateStr, slots });
@@ -685,9 +620,6 @@ export class SchedulesService {
     return results;
   }
 
-  /**
-   * Helper method to save multiple slots at once
-   */
   private async bulkSaveSlots(
     doctorId: string,
     date: Date,
@@ -705,25 +637,19 @@ export class SchedulesService {
       });
     }
 
-    // Merge with existing slots (don't overwrite booked slots)
     const existingSlots = sched.slots || [];
     const bookedSlots = existingSlots.filter((s) => s.status === 'booked');
 
-    // Merge new slots with booked slots
     const mergedSlots = this.mergeSlots(bookedSlots, slots);
     sched.slots = mergedSlots;
 
     await this.repo.save(sched);
   }
 
-  /**
-   * Apply a template to specific dates or date range
-   */
   async applyTemplateToDateRange(
     doctorId: string,
     dto: ApplyTemplateDto,
   ): Promise<{ date: string; slots: Slot[] }[]> {
-    // Get the template
     const template = await this.templateService.getTemplate(
       dto.templateId,
       doctorId,
@@ -740,12 +666,10 @@ export class SchedulesService {
 
     const results: { date: string; slots: Slot[] }[] = [];
 
-    // Apply template to each day in the range
     let currentDate = new Date(startDate);
     while (currentDate <= endDate) {
       const dayOfWeek = currentDate.getDay();
 
-      // Only generate slots if this day is in the template's working days
       if (template.workingDays.includes(dayOfWeek)) {
         const slots: Slot[] = [];
         let currentTime = template.startTime;
@@ -756,7 +680,6 @@ export class SchedulesService {
             template.slotDuration || 30,
           );
 
-          // Check if this slot overlaps with a break
           const isBreak = (template.breaks || []).some(
             (b) => currentTime < b.endTime && slotEnd > b.startTime,
           );
@@ -775,7 +698,6 @@ export class SchedulesService {
           );
         }
 
-        // Save the generated slots
         const dateStr = currentDate.toISOString().split('T')[0];
         await this.bulkSaveSlots(doctorId, currentDate, slots);
         results.push({ date: dateStr, slots });
@@ -787,9 +709,6 @@ export class SchedulesService {
     return results;
   }
 
-  /**
-   * Bulk update slot statuses within a time range
-   */
   async bulkUpdateSlotStatus(
     doctorId: string,
     dto: BulkSlotUpdateDto,
@@ -805,7 +724,6 @@ export class SchedulesService {
     });
 
     if (!sched) {
-      // No schedule exists, create new slots if status is available or blocked
       if (dto.status === 'booked') {
         throw new BadRequestException(
           'Cannot book slots that do not exist',
@@ -822,19 +740,16 @@ export class SchedulesService {
     let updatedCount = 0;
     const slots = sched.slots || [];
 
-    // Find all slots that fall within the time range
     for (const slot of slots) {
-      const slotStart = slot.startTime || slot.time || '';
-      const slotEnd = slot.endTime || slotStart;
+      const slotStart = slot.startTime;
+      const slotEnd = slot.endTime;
 
-      // Check if slot overlaps with the update range
       const overlaps =
         (slotStart >= safeStart && slotStart < safeEnd) ||
         (slotEnd > safeStart && slotEnd <= safeEnd) ||
         (slotStart <= safeStart && slotEnd >= safeEnd);
 
       if (overlaps) {
-        // Don't update booked slots unless explicitly allowing
         if (slot.status === 'booked' && dto.status !== 'booked') {
           continue;
         }
@@ -848,11 +763,9 @@ export class SchedulesService {
       }
     }
 
-    // If no slots exist in this range, create them
     if (updatedCount === 0 && dto.status !== 'booked') {
-      // Generate slots for this time range with default duration
       let currentTime = safeStart;
-      const slotDuration = 30; // Default duration
+      const slotDuration = 30; 
 
       while (currentTime < safeEnd) {
         const slotEnd = this.addMinutes(currentTime, slotDuration);
@@ -876,9 +789,6 @@ export class SchedulesService {
     return { success: true, updatedSlots: updatedCount };
   }
 
-  /**
-   * Get detailed week schedule with appointment info
-   */
   async getWeekScheduleDetailed(
     doctorId: string,
     startDate: string,
@@ -924,9 +834,6 @@ export class SchedulesService {
     return weekDays;
   }
 
-  /**
-   * Get month overview with stats per day
-   */
   async getMonthScheduleOverview(
     doctorId: string,
     year: number,

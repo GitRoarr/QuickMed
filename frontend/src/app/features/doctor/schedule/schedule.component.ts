@@ -10,7 +10,7 @@ import { AuthService } from '@core/services/auth.service';
 import { MessageService } from '@core/services/message.service';
 import { NotificationService } from '@core/services/notification.service';
 import { ToastService } from '@core/services/toast.service';
-import { SchedulingService, DoctorSlot } from '../../../core/services/schedule.service';
+import { SchedulingService, DoctorSlot, DaySchedule, Shift, Break } from '../../../core/services/schedule.service';
 
 import { DoctorAnalyticsService } from '@core/services/doctor-analytics.service';
 import { ConflictDetectionService } from '@core/services/conflict-detection.service';
@@ -65,6 +65,25 @@ export class ScheduleComponent implements OnInit {
   newSlotEnd = signal('09:30');
   newSlotSaving = signal(false);
 
+  
+  morningShift = computed(() => this.shifts().find(s => s.type === 'morning'));
+  afternoonShift = computed(() => this.shifts().find(s => s.type === 'afternoon'));
+  eveningShift = computed(() => this.shifts().find(s => s.type === 'evening'));
+  
+  shifts = signal<Shift[]>([]);
+  breaks = signal<Break[]>([]);
+  
+  private initialScheduleState = signal<{ shifts: Shift[], breaks: Break[] }>({ shifts: [], breaks: [] });
+  
+  hasUnsavedChanges = computed(() => {
+    const initial = this.initialScheduleState();
+    const currentShifts = this.shifts();
+    const currentBreaks = this.breaks();
+    
+    return JSON.stringify(initial.shifts) !== JSON.stringify(currentShifts) ||
+           JSON.stringify(initial.breaks) !== JSON.stringify(currentBreaks);
+  });
+
   draggedSlot = signal<DoctorSlot | null>(null);
   sessions = signal<Record<string, boolean>>({ morning: false, break: false, evening: false });
   expandedSessions = signal<Record<string, boolean>>({ morning: false, break: false, evening: false });
@@ -103,6 +122,7 @@ export class ScheduleComponent implements OnInit {
     this.loadWorkingDays();
 
     this.loadAnalytics();
+    this.loadSchedule();
   }
 
   getDoctorInitials(): string {
@@ -113,6 +133,69 @@ export class ScheduleComponent implements OnInit {
   }
 
 
+  loadSchedule(): void {
+    const dateStr = this.toDateOnly(this.selectedDate());
+    this.scheduleService.getDaySchedule(dateStr).subscribe({
+      next: (schedule: DaySchedule) => {
+        const loadedShifts = schedule.shifts || this.getDefaultShifts();
+        const loadedBreaks = schedule.breaks || [];
+        this.shifts.set(loadedShifts);
+        this.breaks.set(loadedBreaks);
+        this.initialScheduleState.set({ shifts: loadedShifts, breaks: loadedBreaks });
+      },
+      error: () => {
+        const defaultShifts = this.getDefaultShifts();
+        this.shifts.set(defaultShifts);
+        this.breaks.set([]);
+        this.initialScheduleState.set({ shifts: defaultShifts, breaks: [] });
+      }
+    });
+  }
+  
+  getDefaultShifts(): Shift[] {
+    return [
+      { type: 'morning', startTime: '09:00', endTime: '12:00', slotDuration: 30, enabled: false },
+      { type: 'afternoon', startTime: '13:00', endTime: '17:00', slotDuration: 30, enabled: false },
+      { type: 'evening', startTime: '18:00', endTime: '21:00', slotDuration: 30, enabled: false }
+    ];
+  }
+  
+  updateShift(type: 'morning' | 'afternoon' | 'evening', changes: Partial<Shift>): void {
+    this.shifts.update(shifts =>
+      shifts.map(shift =>
+        shift.type === type ? { ...shift, ...changes } : shift
+      )
+    );
+  }
+  
+  addBreak(): void {
+    this.breaks.update(breaks => [...breaks, { startTime: '12:00', endTime: '13:00', reason: '' }]);
+  }
+  
+  updateBreak(index: number, changes: Partial<Break>): void {
+    this.breaks.update(breaks =>
+      breaks.map((br, i) => (i === index ? { ...br, ...changes } : br))
+    );
+  }
+  
+  removeBreak(index: number): void {
+    this.breaks.update(breaks => breaks.filter((_, i) => i !== index));
+  }
+  
+  saveSchedule(): void {
+    const schedule = {
+      date: this.toDateOnly(this.selectedDate()),
+      shifts: this.shifts(),
+      breaks: this.breaks(),
+    };
+    this.scheduleService.saveDaySchedule(schedule as DaySchedule).subscribe({
+      next: () => {
+        this.toast.success('Schedule saved successfully!');
+        this.initialScheduleState.set({ shifts: this.shifts(), breaks: this.breaks() });
+      },
+      error: (err: any) => this.toast.error(`Failed to save schedule: ${err.error?.message || 'Server error'}`)
+    });
+  }
 
   setViewMode(mode: 'day' | 'week' | 'month'): void {
     this.viewMode.set(mode);
@@ -597,11 +680,11 @@ export class ScheduleComponent implements OnInit {
       return;
     }
     this.selectedDate.set(date);
-    // If selecting a date outside current month view, update current month
     if (date.getMonth() !== this.currentMonth().getMonth() || date.getFullYear() !== this.currentMonth().getFullYear()) {
       this.currentMonth.set(new Date(date.getFullYear(), date.getMonth(), 1));
     }
     this.loadSlots();
+    this.loadSchedule();
   }
 
   selectToday(): void {

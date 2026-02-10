@@ -37,16 +37,15 @@ export class AutoScheduleInitializerService {
 
         const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
         const currentDayName = dayNames[dateObj.getDay()];
-
-        const isWorkingDay = settings.availableDays.some(
-            day => day.toLowerCase() === currentDayName.toLowerCase(),
-        );
+        const normalizedAvailableDays = (settings.availableDays || []).map((d) => String(d).toLowerCase());
+        const isWorkingDay = normalizedAvailableDays.includes(String(currentDayName).toLowerCase());
 
         if (!isWorkingDay) {
             return false;
         }
 
-        const today = this.normalizeToDate(new Date());
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
         if (dateObj < today) {
             return false;
         }
@@ -54,12 +53,8 @@ export class AutoScheduleInitializerService {
         const newSchedule = this.scheduleRepo.create({
             doctorId,
             date: dateObj,
-            sessions: {
-                morning: true,
-                break: false,
-                evening: true,
-            },
-            slotDuration: settings.appointmentDuration || 30,
+            shifts: [],
+            breaks: [],
             slots: [],
         });
 

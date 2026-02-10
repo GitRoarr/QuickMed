@@ -89,16 +89,22 @@
                     </a>
                 </div>
 
-                <button type="submit" class="btn btn-primary btn-submit" [disabled]="isLoading">
-                    <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2"></span>
-                    {{ isLoading ? "Creating account..." : "Create Account" }}
-                    <i *ngIf="!isLoading" class="bi bi-arrow-right ms-2"></i>
-                </button>
+                <div class="d-grid">
+                  <button type="submit" class="btn btn-primary btn-submit" [disabled]="isLoading">
+                      <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2"></span>
+                      {{ isLoading ? "Creating account..." : "Create Account" }}
+                      <i *ngIf="!isLoading" class="bi bi-arrow-right ms-2"></i>
+                  </button>
+                </div>
 
-                <button type="button" class="btn google-btn" (click)="signInWithGoogle()">
-                    <img src="assets/icons/google.svg" alt="Google" />
-                    Continue with Google
-                </button>
+                <div class="separator">OR</div>
+
+                <div class="d-grid">
+                  <button type="button" class="btn google-btn" (click)="signInWithGoogle()">
+                      <img src="assets/icons/google.svg" alt="Google" />
+                      Continue with Google
+                  </button>
+                </div>
 
                 <div class="text-center mt-4">
                     <p class="switch-auth">

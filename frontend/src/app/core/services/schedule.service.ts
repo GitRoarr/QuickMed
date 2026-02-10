@@ -12,6 +12,29 @@ export interface DoctorSlot {
   blockedReason?: string | null;
 }
 
+export interface Shift {
+  type: 'morning' | 'afternoon' | 'evening';
+  startTime: string;
+  endTime: string;
+  slotDuration: number;
+  enabled: boolean;
+}
+
+export interface Break {
+  startTime: string;
+  endTime: string;
+  reason: string;
+}
+
+export interface DaySchedule {
+  date: string;
+  shifts: Shift[];
+  breaks: Break[];
+  slots: DoctorSlot[];
+  sessions: any;
+  slotDuration: number;
+}
+
 export interface DayScheduleResponse {
   date: string;
   slots: DoctorSlot[];
@@ -33,10 +56,14 @@ export class SchedulingService {
     return doctorId ? { headers: { 'x-doctor-id': doctorId } } : {};
   }
 
-  getDaySchedule(date: Date | string, doctorId?: string): Observable<DayScheduleResponse & { sessions: any, slotDuration: number }> {
+  getDaySchedule(date: Date | string, doctorId?: string): Observable<DaySchedule> {
     const formatted = this.normalizeDate(date);
     return this.http
       .get<any>(`${this.API_URL}/${formatted}`, this.withDoctorHeader(doctorId));
+  }
+
+  saveDaySchedule(schedule: DaySchedule, doctorId?: string): Observable<any> {
+    return this.http.post(`${this.API_URL}/`, schedule, this.withDoctorHeader(doctorId));
   }
 
   updateSessions(date: Date | string, sessions: any, slotDuration: number, doctorId?: string): Observable<any> {
