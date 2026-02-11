@@ -1,8 +1,8 @@
 import { Injectable } from "@angular/core"
-import  { HttpClient } from "@angular/common/http"
-import  { Observable } from "rxjs"
+import { HttpClient } from "@angular/common/http"
+import { Observable } from "rxjs"
 import { environment } from "@environments/environment"
-import  { User } from "../models/user.model"
+import { User } from "../models/user.model"
 
 @Injectable({
   providedIn: "root",
@@ -10,7 +10,7 @@ import  { User } from "../models/user.model"
 export class UserService {
   private readonly API_URL = `${environment.apiUrl}/users`
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   getAll(): Observable<User[]> {
     return this.http.get<User[]>(this.API_URL)
@@ -35,7 +35,7 @@ export class UserService {
   delete(id: string): Observable<void> {
     return this.http.delete<void>(`${this.API_URL}/${id}`)
   }
-   updateAvatar(userId: string, file: File): Observable<User> {
+  updateAvatar(userId: string, file: File): Observable<User> {
     const formData = new FormData();
     formData.append('file', file);
     return this.http.patch<User>(`${this.API_URL}/${userId}/avatar`, formData);
@@ -45,5 +45,5 @@ export class UserService {
     return this.http.patch(`${this.API_URL}/${id}/password`, payload);
   }
 
-  
+
 }

@@ -12,12 +12,15 @@ export interface DoctorSlot {
   blockedReason?: string | null;
 }
 
+export type ShiftStatus = 'past' | 'active' | 'upcoming';
+
 export interface Shift {
   type: 'morning' | 'afternoon' | 'evening';
   startTime: string;
   endTime: string;
   slotDuration: number;
   enabled: boolean;
+  status?: ShiftStatus;
 }
 
 export interface Break {
@@ -28,6 +31,8 @@ export interface Break {
 
 export interface DaySchedule {
   date: string;
+  isToday?: boolean;
+  isPastDay?: boolean;
   shifts: Shift[];
   breaks: Break[];
   slots: DoctorSlot[];
@@ -119,8 +124,8 @@ export class SchedulingService {
     return this.http.get<number[]>(`${this.API_URL}/working-days`);
   }
 
-  updateWorkingDays(days: number[]): Observable<any> {
-    return this.http.post(`${this.API_URL}/working-days`, { days });
+  updateWorkingDays(days: number[], startTime?: string, endTime?: string): Observable<any> {
+    return this.http.post(`${this.API_URL}/working-days`, { days, startTime, endTime });
   }
 
   getMonthlyBlockedDays(year: number, month: number): Observable<string[]> {

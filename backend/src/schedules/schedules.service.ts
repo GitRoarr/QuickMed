@@ -1,7 +1,7 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { In, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DoctorSchedule, Slot, Shift, Break } from './schedule.entity';
+import { DoctorSchedule, Slot, Shift, Break, ShiftStatus } from './schedule.entity';
 import { Appointment } from '../appointments/entities/appointment.entity';
 import { AppointmentStatus } from '../common/index';
 import { SettingsService } from '../settings/settings.service';
@@ -93,13 +93,20 @@ export class SchedulesService {
     return new Date(d.getFullYear(), d.getMonth(), d.getDate());
   }
 
+  private formatLocalDate(date: Date): string {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  }
+
   async getDaySchedule(doctorId: string, date: string | Date) {
     const dateObj = this.normalizeToDate(date);
 
     await this.autoInitializer.autoInitializeScheduleIfNeeded(doctorId, dateObj);
 
     let sched = await this.repo.findOne({ where: { doctorId, date: dateObj } });
-    const dateStr = dateObj.toISOString().split('T')[0];
+    const dateStr = this.formatLocalDate(dateObj);
 
     let generatedSlots: Slot[] = [];
     if (sched?.shifts) {
@@ -133,12 +140,38 @@ export class SchedulesService {
       return s;
     });
 
+    const isToday = dateObj.getTime() === today.getTime();
+    const shiftsWithStatus = (sched?.shifts || []).map(shift => ({
+      ...shift,
+      status: this.computeShiftStatus(shift, dateObj, isToday, now),
+    }));
+
     return {
       date: dateStr,
+      isToday,
+      isPastDay,
       slots: finalSlots,
-      shifts: sched?.shifts || [],
+      shifts: shiftsWithStatus,
       breaks: sched?.breaks || [],
     };
+  }
+
+  private computeShiftStatus(shift: Shift, dateObj: Date, isToday: boolean, now: Date): ShiftStatus {
+    if (!isToday) {
+      const today = this.normalizeToDate(new Date());
+      if (dateObj.getTime() < today.getTime()) return 'past';
+      return 'upcoming';
+    }
+
+    const currentMinutes = now.getHours() * 60 + now.getMinutes();
+    const [endH, endM] = (shift.endTime || '').split(':').map(Number);
+    const shiftEndMinutes = (endH || 0) * 60 + (endM || 0);
+    const [startH, startM] = (shift.startTime || '').split(':').map(Number);
+    const shiftStartMinutes = (startH || 0) * 60 + (startM || 0);
+
+    if (currentMinutes >= shiftEndMinutes) return 'past';
+    if (currentMinutes >= shiftStartMinutes && currentMinutes < shiftEndMinutes) return 'active';
+    return 'upcoming';
   }
 
   async updateShiftsAndBreaks(
@@ -147,7 +180,40 @@ export class SchedulesService {
     shifts: Shift[],
     breaks: Break[],
   ) {
+    console.log('[UpdateShiftsAndBreaks] start', {
+      doctorId,
+      date,
+      shifts,
+      breaks,
+    });
     const dateObj = this.normalizeToDate(date);
+    const today = this.normalizeToDate(new Date());
+    const now = new Date();
+    const isToday = dateObj.getTime() === today.getTime();
+    const isPastDay = dateObj.getTime() < today.getTime();
+
+    if (isPastDay) {
+      throw new BadRequestException('Cannot modify schedule for past dates');
+    }
+
+    // Validate sequential shift times
+    this.validateShiftSequence(shifts);
+
+    // Validate breaks are within shift boundaries
+    this.validateBreaks(breaks, shifts);
+
+    // If today, prevent enabling shifts that have already fully passed
+    if (isToday) {
+      const currentMinutes = now.getHours() * 60 + now.getMinutes();
+      for (const shift of shifts) {
+        const [endH, endM] = (shift.endTime || '').split(':').map(Number);
+        const shiftEndMinutes = (endH || 0) * 60 + (endM || 0);
+        if (shift.enabled && currentMinutes >= shiftEndMinutes) {
+          shift.enabled = false;
+        }
+      }
+    }
+
     let sched = await this.repo.findOne({ where: { doctorId, date: dateObj } });
 
     if (!sched) {
@@ -163,8 +229,61 @@ export class SchedulesService {
       sched.breaks = breaks;
     }
 
-    await this.repo.save(sched);
+    try {
+      await this.repo.save(sched);
+      console.log('[UpdateShiftsAndBreaks] saved schedule', {
+        id: sched.id,
+        doctorId: sched.doctorId,
+        date: sched.date,
+      });
+    } catch (err) {
+      console.error('[UpdateShiftsAndBreaks] save error', err);
+      throw err;
+    }
     return this.getDaySchedule(doctorId, date);
+  }
+
+  private validateShiftSequence(shifts: Shift[]): void {
+    if (!shifts || shifts.length === 0) return;
+
+    const shiftOrder: Record<string, number> = { morning: 0, afternoon: 1, evening: 2 };
+    const sorted = [...shifts].sort((a, b) => (shiftOrder[a.type] ?? 0) - (shiftOrder[b.type] ?? 0));
+
+    for (const shift of sorted) {
+      const startMin = this.toMinutes(shift.startTime);
+      const endMin = this.toMinutes(shift.endTime);
+      if (endMin <= startMin) {
+        throw new BadRequestException(
+          `${shift.type} shift end time must be after start time`,
+        );
+      }
+    }
+
+    // Check consecutive shifts don't overlap
+    for (let i = 0; i < sorted.length - 1; i++) {
+      const current = sorted[i];
+      const next = sorted[i + 1];
+      if (!current.enabled || !next.enabled) continue;
+      const currentEnd = this.toMinutes(current.endTime);
+      const nextStart = this.toMinutes(next.startTime);
+      if (currentEnd > nextStart) {
+        throw new BadRequestException(
+          `${current.type} shift overlaps with ${next.type} shift`,
+        );
+      }
+    }
+  }
+
+  private validateBreaks(breaks: Break[], shifts: Shift[]): void {
+    if (!breaks || breaks.length === 0) return;
+
+    for (const brk of breaks) {
+      const brkStart = this.toMinutes(brk.startTime);
+      const brkEnd = this.toMinutes(brk.endTime);
+      if (brkEnd <= brkStart) {
+        throw new BadRequestException('Break end time must be after start time');
+      }
+    }
   }
   
   async setSingleSlotStatus(
@@ -348,7 +467,7 @@ export class SchedulesService {
   }
 
   private async getBookedSlots(doctorId: string, date: Date): Promise<Slot[]> {
-    const dateStr = date.toISOString().split('T')[0];
+    const dateStr = this.formatLocalDate(date);
     const bookedStatuses = [AppointmentStatus.CONFIRMED, AppointmentStatus.PENDING];
 
     const appointments = await this.appointmentsRepo.find({
@@ -458,8 +577,8 @@ export class SchedulesService {
       .createQueryBuilder('s')
       .where('s.doctorId = :doctorId', { doctorId })
       .andWhere('s.date BETWEEN :start AND :end', {
-        start: startDate.toISOString().split('T')[0],
-        end: endDate.toISOString().split('T')[0],
+        start: this.formatLocalDate(startDate),
+        end: this.formatLocalDate(endDate),
       })
       .getMany();
 
@@ -467,7 +586,7 @@ export class SchedulesService {
       .filter((d) => d.slots.some((s: any) => s.status === 'blocked'))
       .map((d) =>
         d.date instanceof Date
-          ? d.date.toISOString().split('T')[0]
+          ? this.formatLocalDate(d.date)
           : String(d.date),
       );
 
@@ -509,6 +628,8 @@ export class SchedulesService {
   async updateDoctorWorkingDays(
     doctorId: string,
     days: number[],
+    startTime?: string,
+    endTime?: string,
   ): Promise<{ success: boolean; days: number[] }> {
     if (!doctorId) {
       throw new BadRequestException('Doctor id missing for working days update');
@@ -522,9 +643,13 @@ export class SchedulesService {
 
     const sortedDays = [...safeDays].sort((a, b) => a - b);
 
-    await this.settingsService.updateSettings(doctorId, {
+    const updatePayload: any = {
       workingDays: sortedDays,
-    });
+    };
+    if (startTime) updatePayload.startTime = startTime;
+    if (endTime) updatePayload.endTime = endTime;
+
+    await this.settingsService.updateSettings(doctorId, updatePayload);
 
     return { success: true, days: sortedDays };
   }
@@ -536,7 +661,7 @@ export class SchedulesService {
     for (let i = 0; i < 7; i++) {
       const currentDate = new Date(start);
       currentDate.setDate(start.getDate() + i);
-      const dateStr = currentDate.toISOString().split('T')[0];
+      const dateStr = this.formatLocalDate(currentDate);
       const daySchedule = await this.getDaySchedule(doctorId, dateStr);
       weekDays.push(daySchedule as any);
     }
@@ -551,7 +676,7 @@ export class SchedulesService {
     for (let i = 0; i < days; i++) {
       const currentDate = new Date(start);
       currentDate.setDate(start.getDate() + i);
-      const dateStr = currentDate.toISOString().split('T')[0];
+      const dateStr = this.formatLocalDate(currentDate);
       const daySchedule = await this.getDaySchedule(doctorId, dateStr);
       const hasAvailable = daySchedule.slots.some(slot => {
         if (slot.status !== 'available') return false;
@@ -610,7 +735,7 @@ export class SchedulesService {
         currentTime = this.addMinutes(slotEnd, bufferMinutes);
       }
 
-      const dateStr = currentDate.toISOString().split('T')[0];
+      const dateStr = this.formatLocalDate(currentDate);
       await this.bulkSaveSlots(doctorId, currentDate, slots);
       results.push({ date: dateStr, slots });
 
@@ -698,7 +823,7 @@ export class SchedulesService {
           );
         }
 
-        const dateStr = currentDate.toISOString().split('T')[0];
+        const dateStr = this.formatLocalDate(currentDate);
         await this.bulkSaveSlots(doctorId, currentDate, slots);
         results.push({ date: dateStr, slots });
       }
@@ -808,7 +933,7 @@ export class SchedulesService {
     for (let i = 0; i < 7; i++) {
       const currentDate = new Date(start);
       currentDate.setDate(start.getDate() + i);
-      const dateStr = currentDate.toISOString().split('T')[0];
+      const dateStr = this.formatLocalDate(currentDate);
       const daySchedule = await this.getDaySchedule(doctorId, dateStr);
 
       const appointmentCount = daySchedule.slots.filter(

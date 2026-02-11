@@ -10,7 +10,7 @@ import { AuthService } from '@core/services/auth.service';
 import { MessageService } from '@core/services/message.service';
 import { NotificationService } from '@core/services/notification.service';
 import { ToastService } from '@core/services/toast.service';
-import { SchedulingService, DoctorSlot, DaySchedule, Shift, Break } from '../../../core/services/schedule.service';
+import { SchedulingService, DoctorSlot, DaySchedule, Shift, Break, ShiftStatus } from '../../../core/services/schedule.service';
 
 import { DoctorAnalyticsService } from '@core/services/doctor-analytics.service';
 import { ConflictDetectionService } from '@core/services/conflict-detection.service';
@@ -58,7 +58,7 @@ export class ScheduleComponent implements OnInit {
   unreadNotifications = signal(0);
   viewMode = signal<'day' | 'week' | 'month'>('day');
   slotDurationMinutes = signal(30);
-  workingStart = signal('02:00');
+  workingStart = signal('08:00');
   workingEnd = signal('18:00');
   workingDays = signal<number[]>([]);
   newSlotStart = signal('09:00');
@@ -69,6 +69,9 @@ export class ScheduleComponent implements OnInit {
   morningShift = computed(() => this.shifts().find(s => s.type === 'morning'));
   afternoonShift = computed(() => this.shifts().find(s => s.type === 'afternoon'));
   eveningShift = computed(() => this.shifts().find(s => s.type === 'evening'));
+  
+  isSelectedDateToday = signal(false);
+  isSelectedDatePast = signal(false);
   
   shifts = signal<Shift[]>([]);
   breaks = signal<Break[]>([]);
@@ -89,9 +92,9 @@ export class ScheduleComponent implements OnInit {
   expandedSessions = signal<Record<string, boolean>>({ morning: false, break: false, evening: false });
 
   readonly SESSION_CONFIG: Record<string, { label: string, icon: string, time: string, start: string, end: string }> = {
-    morning: { label: 'Morning', icon: '🌅', time: '09:00 AM – 12:00 PM', start: '09:00', end: '12:00' },
-    break: { label: 'Break', icon: '☕', time: '12:00 PM – 02:00 PM', start: '12:00', end: '14:00' },
-    evening: { label: 'Evening', icon: '🌆', time: '02:00 PM – 08:00 PM', start: '14:00', end: '20:00' },
+    morning: { label: 'Morning', icon: '🌅', time: '8:00 AM – 12:00 PM', start: '08:00', end: '12:00' },
+    break: { label: 'Break', icon: '☕', time: '12:00 PM – 05:00 PM', start: '12:00', end: '17:00' },
+    evening: { label: 'Evening', icon: '🌆', time: '5:00 PM – 8:00 PM', start: '17:00', end: '20:00' },
   };
 
   today = new Date();
@@ -137,27 +140,72 @@ export class ScheduleComponent implements OnInit {
     const dateStr = this.toDateOnly(this.selectedDate());
     this.scheduleService.getDaySchedule(dateStr).subscribe({
       next: (schedule: DaySchedule) => {
-        const loadedShifts = schedule.shifts || this.getDefaultShifts();
-        const loadedBreaks = schedule.breaks || [];
+        this.isSelectedDateToday.set(schedule.isToday ?? false);
+        this.isSelectedDatePast.set(schedule.isPastDay ?? false);
+
+        const hasExistingShifts = Array.isArray(schedule.shifts) && schedule.shifts.length > 0;
+        const hasExistingBreaks = Array.isArray(schedule.breaks) && schedule.breaks.length > 0;
+
+        const loadedShifts = hasExistingShifts
+          ? this.normalizeShifts(schedule.shifts)
+          : this.getDefaultShifts();
+        const loadedBreaks = hasExistingBreaks ? schedule.breaks : [];
+
         this.shifts.set(loadedShifts);
         this.breaks.set(loadedBreaks);
-        this.initialScheduleState.set({ shifts: loadedShifts, breaks: loadedBreaks });
+
+        // If there was no schedule yet for this day, treat the
+        // default shifts/breaks as "unsaved" so the Save button
+        // becomes enabled and the doctor can persist them.
+        if (!hasExistingShifts && !hasExistingBreaks) {
+          this.initialScheduleState.set({ shifts: [], breaks: [] });
+        } else {
+          this.initialScheduleState.set({ shifts: loadedShifts, breaks: loadedBreaks });
+        }
       },
       error: () => {
         const defaultShifts = this.getDefaultShifts();
         this.shifts.set(defaultShifts);
         this.breaks.set([]);
-        this.initialScheduleState.set({ shifts: defaultShifts, breaks: [] });
+        this.isSelectedDateToday.set(false);
+        this.isSelectedDatePast.set(false);
+        // On error we also consider the defaults as unsaved.
+        this.initialScheduleState.set({ shifts: [], breaks: [] });
       }
     });
   }
   
   getDefaultShifts(): Shift[] {
     return [
-      { type: 'morning', startTime: '09:00', endTime: '12:00', slotDuration: 30, enabled: false },
-      { type: 'afternoon', startTime: '13:00', endTime: '17:00', slotDuration: 30, enabled: false },
-      { type: 'evening', startTime: '18:00', endTime: '21:00', slotDuration: 30, enabled: false }
+      { type: 'morning', startTime: '08:00', endTime: '12:00', slotDuration: 30, enabled: true },
+      { type: 'afternoon', startTime: '12:00', endTime: '17:00', slotDuration: 30, enabled: true },
+      { type: 'evening', startTime: '17:00', endTime: '20:00', slotDuration: 30, enabled: true }
     ];
+  }
+
+  private normalizeShifts(shifts: Shift[]): Shift[] {
+    const defaults = this.getDefaultShifts();
+    const byType = new Map<Shift['type'], Shift>();
+
+    defaults.forEach((shift) => byType.set(shift.type, { ...shift }));
+
+    (shifts || []).forEach((shift) => {
+      if (!shift?.type) return;
+      const base = byType.get(shift.type) || this.getDefaultShifts().find(s => s.type === shift.type);
+      byType.set(shift.type, {
+        ...base,
+        ...shift,
+        enabled: shift.enabled ?? true,
+        slotDuration: shift.slotDuration ?? base?.slotDuration ?? 30,
+        startTime: shift.startTime || base?.startTime || '08:00',
+        endTime: shift.endTime || base?.endTime || '12:00',
+        status: shift.status,
+      } as Shift);
+    });
+
+    return ['morning', 'afternoon', 'evening']
+      .map((type) => byType.get(type as Shift['type']))
+      .filter((shift): shift is Shift => !!shift);
   }
   
   updateShift(type: 'morning' | 'afternoon' | 'evening', changes: Partial<Shift>): void {
@@ -166,6 +214,46 @@ export class ScheduleComponent implements OnInit {
         shift.type === type ? { ...shift, ...changes } : shift
       )
     );
+  }
+
+  toggleShiftEnabled(type: 'morning' | 'afternoon' | 'evening'): void {
+    const shift = this.shifts().find(s => s.type === type);
+    if (!shift) return;
+    
+    // Block toggling past shifts on today's date
+    if (this.isShiftPast(type)) {
+      this.toast.warning(`${type.charAt(0).toUpperCase() + type.slice(1)} shift has already passed and cannot be modified.`, { title: 'Schedule' });
+      return;
+    }
+    
+    this.updateShift(type, { enabled: !shift.enabled });
+    this.saveSchedule(true);
+  }
+
+  isShiftPast(type: 'morning' | 'afternoon' | 'evening'): boolean {
+    const shift = this.shifts().find(s => s.type === type);
+    return shift?.status === 'past';
+  }
+
+  isShiftActive(type: 'morning' | 'afternoon' | 'evening'): boolean {
+    const shift = this.shifts().find(s => s.type === type);
+    return shift?.status === 'active';
+  }
+
+  isShiftUpcoming(type: 'morning' | 'afternoon' | 'evening'): boolean {
+    const shift = this.shifts().find(s => s.type === type);
+    return shift?.status === 'upcoming' || !shift?.status;
+  }
+
+  getShiftStatusLabel(type: 'morning' | 'afternoon' | 'evening'): string {
+    const shift = this.shifts().find(s => s.type === type);
+    if (!shift?.status) return '';
+    switch (shift.status) {
+      case 'past': return 'Passed';
+      case 'active': return 'Active Now';
+      case 'upcoming': return 'Upcoming';
+      default: return '';
+    }
   }
   
   addBreak(): void {
@@ -182,16 +270,22 @@ export class ScheduleComponent implements OnInit {
     this.breaks.update(breaks => breaks.filter((_, i) => i !== index));
   }
   
-  saveSchedule(): void {
+  saveSchedule(silent: boolean = false): void {
     const schedule = {
       date: this.toDateOnly(this.selectedDate()),
-      shifts: this.shifts(),
+      shifts: this.shifts().map(({ status, ...rest }) => rest),
       breaks: this.breaks(),
     };
     this.scheduleService.saveDaySchedule(schedule as DaySchedule).subscribe({
       next: () => {
-        this.toast.success('Schedule saved successfully!');
+        if (!silent) {
+          this.toast.success('Schedule saved successfully!');
+        }
+        // After a successful save, refresh from backend so UI reflects
+        // the persisted state and newly generated slots.
         this.initialScheduleState.set({ shifts: this.shifts(), breaks: this.breaks() });
+        this.loadSchedule();
+        this.loadSlots();
       },
       error: (err: any) => this.toast.error(`Failed to save schedule: ${err.error?.message || 'Server error'}`)
     });
@@ -265,7 +359,11 @@ export class ScheduleComponent implements OnInit {
   }
 
   saveAvailability(): void {
-    this.scheduleService.updateWorkingDays(this.workingDays()).subscribe({
+    this.scheduleService.updateWorkingDays(
+      this.workingDays(),
+      this.workingStart(),
+      this.workingEnd()
+    ).subscribe({
       next: () => {
         const availableDays = this.workingDays().map(d => this.DAY_NAMES[d]);
         this.settingsService.updateSettings({

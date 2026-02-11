@@ -34,6 +34,12 @@ export class SchedulesController {
   @Post('')
   async updateSchedule(@Req() req: any, @Body() body: UpdateScheduleDto) {
     const doctorId = req.user?.id ?? req.user?.sub ?? req.headers['x-doctor-id'];
+    console.log('[UpdateSchedule] incoming', {
+      doctorId,
+      date: body.date,
+      shifts: body.shifts,
+      breaks: body.breaks,
+    });
     return this.svc.updateShiftsAndBreaks(doctorId, body.date, body.shifts, body.breaks);
   }
 
@@ -112,9 +118,9 @@ export class SchedulesController {
 
   @UseGuards(JwtAuthGuard)
   @Post('working-days')
-  async updateWorkingDays(@Req() req: any, @Body() body: { days: number[] }) {
+  async updateWorkingDays(@Req() req: any, @Body() body: { days: number[]; startTime?: string; endTime?: string }) {
     const doctorId = req.user?.id ?? req.user?.sub ?? req.headers['x-doctor-id'];
-    return this.svc.updateDoctorWorkingDays(doctorId, body.days || []);
+    return this.svc.updateDoctorWorkingDays(doctorId, body.days || [], body.startTime, body.endTime);
   }
 
   @UseGuards(JwtAuthGuard)

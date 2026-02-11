@@ -39,13 +39,19 @@
             </ng-template>
           </div>
           <span class="availability" [class.available]="doctor.available">
-            {{ doctor.available ? 'Available' : 'Unavailable' }}
+            {{ doctor.available ? 'Available Today' : (doctor.nextAvailableDate ? ('Next: ' + (doctor.nextAvailableDate | date:'MMM d')) : 'Unavailable') }}
           </span>
         </div>
 
         <div class="card-body">
           <h3>Dr. {{ doctor.firstName }} {{ doctor.lastName }}</h3>
           <p class="muted">{{ doctor.specialty }}</p>
+
+          <div class="tag-row">
+            <span class="tag">{{ doctor.specialty || 'General' }}</span>
+            <span class="tag ghost">{{ doctor.experience || 0 }}+ yrs</span>
+            <span class="tag ghost" *ngIf="doctor.nextAvailableDate">Next: {{ doctor.nextAvailableDate | date:'EEE, MMM d' }}</span>
+          </div>
 
           <div class="rating">
             <span *ngFor="let star of getStarArray(doctor.rating || 0)" class="star" [class.filled]="star === 1">
@@ -117,7 +123,7 @@
             <div class="slot-selector" *ngIf="availableSlots().length > 0; else noSlots">
 
               <div *ngIf="morningSlots().length > 0" class="session-group mb-6">
-                <p class="session-label">🌅 MORNING (09:00 AM – 12:00 PM)</p>
+                <p class="session-label">🌅 MORNING</p>
                 <div class="slots-grid">
                   <button type="button" *ngFor="let slot of morningSlots()" (click)="selectTimeSlot(slot)"
                     [class.selected]="isTimeSlotSelected(slot)" class="slot-btn">
@@ -126,8 +132,18 @@
                 </div>
               </div>
 
+              <div *ngIf="afternoonSlots().length > 0" class="session-group mb-6">
+                <p class="session-label">☀️ AFTERNOON</p>
+                <div class="slots-grid">
+                  <button type="button" *ngFor="let slot of afternoonSlots()" (click)="selectTimeSlot(slot)"
+                    [class.selected]="isTimeSlotSelected(slot)" class="slot-btn">
+                    {{ formatSlotTime(slot) }}
+                  </button>
+                </div>
+              </div>
+
               <div *ngIf="eveningSlots().length > 0" class="session-group">
-                <p class="session-label">🌆 EVENING (02:00 PM – 08:00 PM)</p>
+                <p class="session-label">🌙 EVENING</p>
                 <div class="slots-grid">
                   <button type="button" *ngFor="let slot of eveningSlots()" (click)="selectTimeSlot(slot)"
                     [class.selected]="isTimeSlotSelected(slot)" class="slot-btn">
@@ -146,7 +162,7 @@
                   <input type="time" class="time-input" [(ngModel)]="manualTimeInput"
                     [ngModelOptions]="{standalone: true}" (change)="onManualTimeChange()" placeholder="HH:MM" />
                 </label>
-                <p class="time-helper-text">Select a time within available slots</p>
+                <p class="time-helper-text">Select a time within the doctor's available slots</p>
               </div>
 
               <input type="hidden" formControlName="appointmentTime" />

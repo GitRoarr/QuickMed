@@ -8,8 +8,14 @@ import { Router } from '@angular/router';
 import { PatientShellComponent } from '../shared/patient-shell/patient-shell.component';
 import { ReviewService, CreateReviewDto } from '../../../core/services/review.service';
 import { SchedulingService, DoctorSlot } from '../../../core/services/schedule.service';
-
 import { ToastService } from '../../../core/services/toast.service';
+import { forkJoin, of } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
+
+type DoctorCard = Doctor & {
+  nextAvailableDate?: string | null;
+  availableToday?: boolean;
+};
 
 @Component({
   selector: 'app-patient-doctors',
@@ -18,9 +24,10 @@ import { ToastService } from '../../../core/services/toast.service';
   templateUrl: './doctors.component.html',
   styleUrls: ['./doctors.component.css']
 })
+
 export class DoctorsComponent implements OnInit {
-  doctors = signal<Doctor[]>([]);
-  filteredDoctors = signal<Doctor[]>([]);
+  doctors = signal<DoctorCard[]>([]);
+  filteredDoctors = signal<DoctorCard[]>([]);
   isLoading = signal(true);
   selectedDoctor = signal<Doctor | null>(null);
   ratingDoctor = signal<Doctor | null>(null);
@@ -35,19 +42,9 @@ export class DoctorsComponent implements OnInit {
   // Manual time picker input
   manualTimeInput: string = '';
 
-  morningSlots = computed(() =>
-    this.availableSlots().filter(s => {
-      const time = s.startTime || s.time || '';
-      return time >= '09:00' && time < '12:00';
-    })
-  );
-
-  eveningSlots = computed(() =>
-    this.availableSlots().filter(s => {
-      const time = s.startTime || s.time || '';
-      return time >= '14:00' && time < '20:00';
-    })
-  );
+  morningSlots = computed(() => this.groupSlotsByRange(0, 12));
+  afternoonSlots = computed(() => this.groupSlotsByRange(12, 17));
+  eveningSlots = computed(() => this.groupSlotsByRange(17, 24));
 
   appointmentForm: FormGroup;
 
@@ -85,7 +82,6 @@ export class DoctorsComponent implements OnInit {
 
     this.userService.getDoctors().subscribe({
       next: (docs: any[]) => {
-        // Backend now returns doctors with availability, rating, and experience
         const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
         const todayName = dayNames[new Date().getDay()];
         const normalize = (s: string) => (s || '').toLowerCase();
@@ -102,7 +98,7 @@ export class DoctorsComponent implements OnInit {
           return normalizedDays.includes(tn) || normalizedDays.includes(shortNames[tn]);
         };
 
-        const doctorsWithData = docs.map(doc => {
+        const doctorsWithData: DoctorCard[] = docs.map(doc => {
           const experience =
             doc.experienceYears ??
             doc.experience ??
@@ -115,8 +111,9 @@ export class DoctorsComponent implements OnInit {
             experience,
           };
         });
-        this.doctors.set(doctorsWithData as Doctor[]);
-        this.filteredDoctors.set(doctorsWithData as Doctor[]);
+        this.doctors.set(doctorsWithData);
+        this.filteredDoctors.set(doctorsWithData);
+        this.loadDoctorAvailability(doctorsWithData);
         this.isLoading.set(false);
       },
       error: (err) => {
@@ -188,11 +185,10 @@ export class DoctorsComponent implements OnInit {
       return;
     }
 
-    // New: Check if time is within doctor's working range
-    if (!this.isWithinDoctorRange(time)) {
-      const doctor = this.selectedDoctor();
-      const range = doctor ? `${this.formatTime12(doctor.startTime || '09:00')} - ${this.formatTime12(doctor.endTime || '17:00')}` : 'working hours';
-      this.toast.error(`Please select a time within the doctor\'s ${range}`, { title: 'Invalid Selection' });
+    // Check against schedule availability
+    const isAvailable = this.availableSlots().some(s => (s.startTime || s.time) === time);
+    if (!isAvailable) {
+      this.toast.error('Selected time is not available. Please choose from the available slots.', { title: 'Invalid Selection' });
       return;
     }
 
@@ -235,29 +231,45 @@ export class DoctorsComponent implements OnInit {
     return h < currentH || (h === currentH && m < currentM);
   }
 
-  private isWithinDoctorRange(timeStr: string): boolean {
-    const doctor = this.selectedDoctor();
-    if (!doctor || !doctor.startTime || !doctor.endTime) return true; // Fallback if no specific range
-
-    const toMin = (t: string) => {
-      const [h, m] = t.split(':').map(Number);
-      return h * 60 + m;
-    };
-
-    const currentMin = toMin(timeStr);
-    const startMin = toMin(doctor.startTime);
-    const endMin = toMin(doctor.endTime);
-
-    return currentMin >= startMin && currentMin < endMin;
+  private groupSlotsByRange(startHour: number, endHour: number): DoctorSlot[] {
+    return this.availableSlots().filter(s => {
+      const time = s.startTime || s.time || '';
+      if (!time) return false;
+      const [h] = time.split(':').map(Number);
+      return h >= startHour && h < endHour;
+    });
   }
 
-  private formatTime12(time: string): string {
-    const [hStr, mStr] = time.split(':');
-    const h = Number(hStr);
-    const m = Number(mStr);
-    const period = h >= 12 ? 'PM' : 'AM';
-    const hr = h % 12 || 12;
-    return `${hr}:${String(m).padStart(2, '0')} ${period}`;
+  private loadDoctorAvailability(doctors: DoctorCard[]): void {
+    if (!doctors.length) return;
+    const today = this.getCurrentDate();
+
+    const requests = doctors.map((doc) =>
+      this.schedulingService.getAvailableDates(doc.id, today, 14).pipe(
+        map((dates) => {
+          const nextDate = (dates || []).find((d) => d >= today) || null;
+          const availableToday = nextDate === today;
+          return {
+            ...doc,
+            available: availableToday,
+            availableToday,
+            nextAvailableDate: nextDate,
+          } as DoctorCard;
+        }),
+        catchError(() => of({
+          ...doc,
+          available: false,
+          availableToday: false,
+          nextAvailableDate: null,
+        } as DoctorCard))
+      )
+    );
+
+    forkJoin(requests).subscribe((updated) => {
+      this.doctors.set(updated);
+      this.filteredDoctors.set(updated);
+      this.filterDoctors();
+    });
   }
 
   loadAvailableSlots(dateStr?: string, allowFallback = true): void {

@@ -85,11 +85,15 @@ export class UsersService {
       doctors.map(async (doctor) => {
         const rating = allRatings[doctor.id] || { average: 0, count: 0 };
         const settings = await this.settingsService.getSettings(doctor.id).catch(() => null);
-        // Check schedule-based availability: any future slot marked 'available'
+        // Check schedule-based availability: any future slot marked 'available' OR any enabled shift
         const futureSchedules = await this.schedulesRepository.find({
           where: { doctorId: doctor.id, date: MoreThanOrEqual(today) },
         });
-        const scheduleHasAvailable = futureSchedules.some(s => Array.isArray(s.slots) && s.slots.some(slot => slot.status === 'available'));
+        const scheduleHasAvailable = futureSchedules.some(s => {
+          const hasStoredSlots = Array.isArray(s.slots) && s.slots.some(slot => slot.status === 'available');
+          const hasEnabledShifts = Array.isArray(s.shifts) && s.shifts.some((shift: any) => shift.enabled);
+          return hasStoredSlots || hasEnabledShifts;
+        });
         
         // Calculate availability based on settings or user fields
         const availableDays = settings?.availableDays || doctor.availableDays || [];

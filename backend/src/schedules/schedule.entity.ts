@@ -7,12 +7,15 @@ export type Break = {
   reason?: string;
 };
 
+export type ShiftStatus = 'past' | 'active' | 'upcoming';
+
 export type Shift = {
   type: 'morning' | 'afternoon' | 'evening';
   startTime: string;
   endTime: string;
   slotDuration: number;
   enabled: boolean;
+  status?: ShiftStatus;
 };
 
 export type Slot = {

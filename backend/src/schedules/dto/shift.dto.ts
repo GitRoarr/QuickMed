@@ -1,4 +1,5 @@
 import { IsString, IsBoolean, IsNumber, IsIn } from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class ShiftDto {
   @IsIn(['morning', 'afternoon', 'evening'])
@@ -10,6 +11,7 @@ export class ShiftDto {
   @IsString()
   endTime: string;
 
+  @Type(() => Number)
   @IsNumber()
   slotDuration: number;
 
