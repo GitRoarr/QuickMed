@@ -1,6 +1,6 @@
 <aside
   class="receptionist-sidebar"
-  [class.dark]="themeService.isDarkMode()"
+  [class.dark]="darkTheme"
   [class.collapsed]="collapsed"
 >
   <div class="sidebar-header">
@@ -85,4 +85,9 @@
       </ng-template>
     </ng-container>
   </nav>
+
+  <button class="theme-toggle-btn" (click)="toggleTheme()">
+    <i *ngIf="darkTheme" class="bi bi-moon-fill"></i>
+    <i *ngIf="!darkTheme" class="bi bi-sun-fill"></i>
+  </button>
 </aside>

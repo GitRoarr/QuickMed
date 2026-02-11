@@ -3,7 +3,7 @@
 }
 
 .doctor-sidebar {
-	background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.98));
+	background: var(--sidebar-bg);
 	box-shadow: 0 24px 60px -40px rgba(15, 23, 42, 0.6);
 }
 

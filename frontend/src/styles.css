@@ -82,6 +82,7 @@ main::-webkit-scrollbar,
 @tailwind components;
 @tailwind utilities;
 
+
 :root {
   --bg: #ffffff;
   --fg: #111111;
@@ -92,6 +93,26 @@ main::-webkit-scrollbar,
   --primary: #16a34a;
   --primary-rgb: 22, 163, 74;
   --primary-hover: #15803d;
+  --sidebar-bg: linear-gradient(180deg, rgba(255,255,255,.98), rgba(248,250,252,.98));
+  --sidebar-text: #0f172a;
+  --sidebar-hover: #f1f5f9;
+}
+
+.dark {
+  --bg: #0b0d17;
+  --fg: #ffffff;
+  --surface: #121420;
+  --border: transparent;
+  /* Remove borders by default in dark mode */
+  --muted: #9ca3af;
+  --primary: #16a34a;
+  --primary-rgb: 22, 163, 74;
+  --primary-hover: #15803d;
+  --shadow: rgba(0, 0, 0, 0.6);
+  --glow: rgba(22, 163, 74, 0.08);
+  --sidebar-bg: #020617;
+  --sidebar-text: #e5e7eb;
+  --sidebar-hover: #020617;
 }
 
 .dark {

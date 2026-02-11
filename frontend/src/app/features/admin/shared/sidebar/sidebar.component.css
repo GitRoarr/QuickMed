@@ -227,3 +227,20 @@
     border-radius: 0;
   }
 }
+
+.theme-toggle-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 1.5rem;
+  color: inherit;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  transition: color 0.3s;
+}
+.theme-toggle-btn .bi-moon-fill {
+  color: #f3f4f6;
+}
+.theme-toggle-btn .bi-sun-fill {
+  color: #fbbf24;
+}

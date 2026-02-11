@@ -1,5 +1,5 @@
+import { Component, OnInit, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Component, Input, inject } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { ThemeService } from '@core/services/theme.service';
 import { AuthService } from '@core/services/auth.service';
@@ -15,21 +15,19 @@ export interface SidebarNavItem {
 @Component({
   selector: 'app-sidebar',
   templateUrl: './sidebar.component.html',
-  standalone: true,
   styleUrls: ['./sidebar.component.css'],
+  standalone: true,
   imports: [CommonModule, RouterModule],
 })
-export class SidebarComponent {
+export class SidebarComponent implements OnInit {
   @Input() title: string = 'QuickMed';
   @Input() menuItems: SidebarNavItem[] = [];
   @Input() secondaryItems: SidebarNavItem[] = [];
   @Input() collapsible: boolean = true;
   @Input() collapsed: boolean = false;
-  themeService = inject(ThemeService);
-  private authService = inject(AuthService);
   darkTheme = false;
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, private themeService: ThemeService, public authService: AuthService) {}
 
   goHome(): void {
     this.router.navigate(['/']); 
@@ -51,10 +49,11 @@ export class SidebarComponent {
   }
 
   ngOnInit(): void {
-    // Listen for theme changes (example)
-    // Replace with your actual theme service or header event
-    document.body.addEventListener('themeChange', (e: any) => {
-      this.darkTheme = e.detail === 'dark';
-    });
+    this.darkTheme = this.themeService.isDarkMode();
+  }
+
+  toggleTheme(): void {
+    this.themeService.toggleTheme();
+    this.darkTheme = this.themeService.isDarkMode();
   }
 }
