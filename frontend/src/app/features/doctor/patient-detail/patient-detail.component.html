@@ -21,8 +21,8 @@
               <i *ngIf="stats()?.lastStatus === 'cancelled'" aria-hidden="true">✖</i>
               {{ stats()?.lastStatus | titlecase }}
             </span>
-            <div class="text-muted text-sm" style="color: #fff;">{{ patient()?.email }} &bull; {{ patient()?.phoneNumber }}</div>
-            <div class="text-xs text-muted" style="color: #fff;">Last seen: {{ formatLastSeen() }}</div>
+            <div class="text-muted text-sm" style="color: #ffffff !important;">{{ patient()?.email }} &bull; {{ patient()?.phoneNumber }}</div>
+            <div class="text-xs text-muted" style="color: #ffffff !important;">Last seen: {{ formatLastSeen() }}</div>
           </div>
         </div>
         <div class="flex gap-2">
@@ -69,7 +69,7 @@
           <div *ngIf="activeTab() === 'appointments'">
             <div *ngIf="appointments().length; else noAppointments">
               <div *ngFor="let appt of appointments()" class="appointment-card mb-2" style="color: #fff;">
-                <div class="font-bold">{{ appt.type | titlecase }} Consultation</div>
+                <div class="font-bold">{{ appt.type | titlecase }}</div>
                 <div class="text-muted text-sm" style="color: #fff;">{{ appt.date | date:'EEEE, MMMM d, y' }} at {{ appt.time }}</div>
                 <div *ngIf="appt.reason" class="text-xs text-muted mt-1" style="color: #fff;">{{ appt.reason }}</div>
                 <span class="badge" [attr.aria-label]="'Status: ' + (appt.status | titlecase)">
