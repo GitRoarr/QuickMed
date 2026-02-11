@@ -434,11 +434,8 @@ export class DoctorsService {
     }
 
     const results = Array.from(map.values());
-    const useMock = process.env.USE_MOCK_DATA === 'true' || process.env.NODE_ENV !== 'production';
-    if (useMock && results.length === 0) {
-      return this.buildMockPatients();
-    }
-    return results;
+    // Always return real data - patients appear here when they book appointments with this doctor
+    return { patients: results, total: results.length };
   }
 
   async getPatientDetail(doctorId: string, patientId: string) {
@@ -455,31 +452,81 @@ export class DoctorsService {
       order: { appointmentDate: 'DESC', appointmentTime: 'DESC' },
     });
 
+    // Get medical records for this patient from this doctor
+    const { MedicalRecord } = await import('../medical-records/entities/medical-record.entity');
+    const medicalRecords = await this.appointmentsRepository.manager.find(MedicalRecord, {
+      where: { patientId, doctorId },
+      order: { createdAt: 'DESC' },
+      take: 10,
+    });
+
+    // Get prescriptions for this patient from this doctor
+    const { Prescription } = await import('../prescriptions/entities/prescription.entity');
+    const prescriptions = await this.appointmentsRepository.manager.find(Prescription, {
+      where: { patientId, doctorId },
+      order: { createdAt: 'DESC' },
+      take: 10,
+    });
+
     const latest = appointments[0];
-    const nextFollowUp = appointments.find(a => new Date(a.appointmentDate) > new Date());
+    const now = new Date();
+    const nextFollowUp = appointments.find(a => new Date(a.appointmentDate) > now);
+    
+    // Calculate completed and cancelled counts
+    const completedCount = appointments.filter(a => a.status === AppointmentStatus.COMPLETED).length;
+    const cancelledCount = appointments.filter(a => a.status === AppointmentStatus.CANCELLED).length;
 
     return {
       patient: {
         id: patient.id,
-        patientId: patient.patientId || patient.id,
+        patientId: patient.patientId || patient.id.slice(0, 8).toUpperCase(),
         firstName: patient.firstName,
         lastName: patient.lastName,
         email: patient.email,
         phoneNumber: patient.phoneNumber,
         avatar: patient.avatar,
         lastSeen: latest?.appointmentDate,
+        dateOfBirth: patient.dateOfBirth,
+        gender: patient.gender,
+        address: patient.address,
+        bloodType: patient.bloodType,
+        allergies: patient.allergies,
+        emergencyContact: patient.emergencyContact,
       },
       stats: {
         totalVisits: appointments.length,
+        completedVisits: completedCount,
+        cancelledVisits: cancelledCount,
         lastStatus: latest?.status || 'N/A',
         nextFollowUp: nextFollowUp?.appointmentDate || null,
+        totalRecords: medicalRecords.length,
+        totalPrescriptions: prescriptions.length,
       },
-      appointments: appointments.map((appt) => ({
+      appointments: appointments.slice(0, 10).map((appt) => ({
         id: appt.id,
         date: appt.appointmentDate,
         time: appt.appointmentTime,
-        type: appt.appointmentType || 'General Follow-up',
+        type: appt.appointmentType || 'consultation',
         status: appt.status,
+        reason: appt.reason,
+        notes: appt.notes,
+      })),
+      medicalRecords: medicalRecords.map((rec: any) => ({
+        id: rec.id,
+        title: rec.title,
+        type: rec.type,
+        recordDate: rec.recordDate,
+        notes: rec.notes,
+        createdAt: rec.createdAt,
+      })),
+      prescriptions: prescriptions.map((pres: any) => ({
+        id: pres.id,
+        medication: pres.medication,
+        dosage: pres.dosage,
+        frequency: pres.frequency,
+        duration: pres.duration,
+        status: pres.status,
+        createdAt: pres.createdAt,
       })),
     };
   }

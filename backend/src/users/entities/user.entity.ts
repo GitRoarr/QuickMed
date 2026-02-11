@@ -39,11 +39,22 @@ export class User extends BaseEntity {
   @Column({ type: 'date', nullable: true })
   dateOfBirth: Date;
 
+
+  @Column({ nullable: true })
+  gender: string;
+
+  @Column({ nullable: true })
+  address: string;
+
   @Column({ nullable: true })
   bloodType: string;
 
+
   @Column({ type: 'simple-array', nullable: true })
   allergies: string[];
+
+  @Column({ nullable: true })
+  emergencyContact: string;
 
   @Column({ type: 'int', default: 0 })
   activeMedicationsCount: number;

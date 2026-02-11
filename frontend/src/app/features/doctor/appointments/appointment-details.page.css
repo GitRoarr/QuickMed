@@ -1,0 +1,80 @@
+.modal-card {
+  background: var(--surface);
+  border-radius: 1.5rem;
+  box-shadow: 0 12px 32px rgba(0,0,0,0.18);
+  padding: 2rem;
+  max-width: 700px;
+  margin: auto;
+}
+.avatar-lg {
+  width: 64px;
+  height: 64px;
+  border-radius: 1rem;
+  background: var(--primary);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1.5rem;
+  background-size: cover;
+  background-position: center;
+}
+.stat-card {
+  background: var(--surface);
+  border-radius: 1rem;
+  padding: 1rem;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+  font-size: 1rem;
+  text-align: left;
+}
+.badge {
+  background: rgba(22,163,74,0.12);
+  color: var(--primary);
+  border-radius: 9999px;
+  padding: 0.25rem 0.75rem;
+  font-weight: 500;
+}
+.card {
+  background: var(--surface);
+  border-radius: 1rem;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+.btn {
+  background: var(--primary);
+  color: #fff;
+  border-radius: 0.75rem;
+  padding: 0.5rem 1.25rem;
+  font-weight: 600;
+  border: none;
+  transition: background 0.2s;
+}
+.btn:hover {
+  background: var(--primary-hover);
+}
+.btn-ghost {
+  background: transparent;
+  color: var(--fg);
+  border: 1px solid var(--border);
+}
+.btn-ghost:hover {
+  background: rgba(0,0,0,0.05);
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.5rem;
+}
+th, td {
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+}
+th {
+  font-weight: 600;
+  color: var(--muted);
+}
+tr {
+  border-bottom: 1px solid var(--border);
+}

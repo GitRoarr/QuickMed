@@ -1,170 +1,109 @@
 <app-doctor-header></app-doctor-header>
-<div class="patient-detail-container">
+<div class="main">
   <ng-container *ngIf="!isLoading(); else loading">
     <ng-container *ngIf="detail() as detailData; else noData">
-      <!-- Hero Card -->
-      <section class="hero-card" @fadeSlideIn>
-        <div class="hero-main">
-          <div class="avatar-lg" [style.background-image]="'url(' + (patient()?.avatar || '') + ')'">
+      <button (click)="navigate('/doctor/patients')" class="btn btn-ghost mb-4"><i class="bi bi-arrow-left"></i> Back to Patients</button>
+      <div class="card flex flex-wrap items-center justify-between gap-6 mb-6">
+        <div class="flex items-center gap-4">
+          <div class="avatar-lg" [style.background-image]="patient()?.avatar ? 'url(' + patient()?.avatar + ')' : ''" [style.background-size]="'cover'" [style.background-position]="'center'">
             <span *ngIf="!patient()?.avatar">{{ getInitials() }}</span>
           </div>
-          <div class="hero-info">
-            <div class="hero-title">
-              <h2>{{ getFullName() }}</h2>
+          <div>
+            <div class="flex items-center gap-2 mb-1">
+              <span class="font-bold text-lg">{{ getFullName() }}</span>
               <span class="badge">{{ stats()?.lastStatus | titlecase }}</span>
             </div>
-            <p>{{ patient()?.email }} • {{ patient()?.phoneNumber }}</p>
-            <p class="subtle">Last seen: {{ formatLastSeen() }}</p>
+            <div class="text-muted text-sm">{{ patient()?.email }} &bull; {{ patient()?.phoneNumber }}</div>
+            <div class="text-xs text-muted">Last seen: {{ formatLastSeen() }}</div>
           </div>
         </div>
-        <div class="hero-actions">
-          <button class="ghost" (click)="navigate('/doctor/patients')">
-            <i class="bi bi-arrow-left"></i> Back
-          </button>
-          <button class="ghost" (click)="openProfileModal()">
-            <i class="bi bi-person-badge"></i> View Profile
-          </button>
-          <button class="primary" (click)="navigate('/doctor/appointments/new?patientId=' + patient()?.id)">
-            <i class="bi bi-calendar-plus"></i> New Appointment
-          </button>
+        <div class="flex gap-2">
+          <button class="btn-ghost btn" (click)="openProfileModal()"><i class="bi bi-person-badge"></i> Full Profile</button>
+          <button class="btn-ghost btn" (click)="messagePatient()"><i class="bi bi-chat-dots"></i> Message</button>
+          <button class="btn" (click)="navigate('/doctor/appointments/new?patientId=' + patient()?.id)"><i class="bi bi-calendar-plus"></i> New Appointment</button>
         </div>
-      </section>
-
-      <!-- Stats Grid -->
-      <section class="stats-grid" @fadeSlideIn>
-        <div class="stat-card">
-          <i class="bi bi-clipboard2-pulse-fill"></i>
-          <p>Total Visits</p>
-          <h3>{{ stats()?.totalVisits }}</h3>
+      </div>
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
+        <div class="stat-card"><div>Total Visits</div><div class="font-bold text-xl">{{ stats()?.totalVisits || 0 }}</div></div>
+        <div class="stat-card"><div>Completed</div><div class="font-bold text-xl">{{ stats()?.completedVisits || 0 }}</div></div>
+        <div class="stat-card"><div>Cancelled</div><div class="font-bold text-xl">{{ stats()?.cancelledVisits || 0 }}</div></div>
+        <div class="stat-card"><div>Records</div><div class="font-bold text-xl">{{ stats()?.totalRecords || 0 }}</div></div>
+        <div class="stat-card"><div>Prescriptions</div><div class="font-bold text-xl">{{ stats()?.totalPrescriptions || 0 }}</div></div>
+        <div class="stat-card"><div>Next Follow-up</div><div class="font-bold text-base">{{ stats()?.nextFollowUp ? (stats()?.nextFollowUp | date:'MMM d') : 'None' }}</div></div>
+      </div>
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+        <div class="card">
+          <div class="font-bold mb-2 text-muted text-xs">PERSONAL INFORMATION</div>
+          <div>Patient ID: <span class="font-semibold">{{ patient()?.patientId || 'N/A' }}</span></div>
+          <div>Age: <span class="font-semibold">{{ getAge() }}</span></div>
+          <div>Gender: <span class="font-semibold">{{ patient()?.gender | titlecase || 'N/A' }}</span></div>
+          <div>Blood Type: <span class="font-semibold">{{ patient()?.bloodType || 'Unknown' }}</span></div>
         </div>
-        <div class="stat-card">
-          <i class="bi bi-activity"></i>
-          <p>Last Status</p>
-          <h3>{{ stats()?.lastStatus | titlecase }}</h3>
+        <div class="card">
+          <div class="font-bold mb-2 text-muted text-xs">CONTACT DETAILS</div>
+          <div>Email: <span class="font-semibold">{{ patient()?.email || 'N/A' }}</span></div>
+          <div>Phone: <span class="font-semibold">{{ patient()?.phoneNumber || 'N/A' }}</span></div>
+          <div>Address: <span class="font-semibold">{{ patient()?.address || 'N/A' }}</span></div>
         </div>
-        <div class="stat-card">
-          <i class="bi bi-calendar-check-fill"></i>
-          <p>Next Follow‑up</p>
-          <h3>{{ stats()?.nextFollowUp | date:'mediumDate' || 'None' }}</h3>
+        <div class="card">
+          <div class="font-bold mb-2 text-muted text-xs">MEDICAL INFO</div>
+          <div>Allergies: <span class="font-semibold">{{ patient()?.allergies || 'None reported' }}</span></div>
+          <div>Emergency Contact: <span class="font-semibold">{{ patient()?.emergencyContact || 'Not provided' }}</span></div>
         </div>
-        <div class="stat-card">
-          <i class="bi bi-person-vcard-fill"></i>
-          <p>Patient ID</p>
-          <h3>{{ patient()?.patientId }}</h3>
+      </div>
+      <!-- Tabs Section -->
+      <div class="card">
+        <div class="flex border-b mb-4">
+          <button (click)="setActiveTab('appointments')" class="btn-ghost flex-1" [ngClass]="activeTab() === 'appointments' ? 'font-bold text-primary' : ''">Appointments <span class="badge ml-2">{{ appointments().length }}</span></button>
+          <button (click)="setActiveTab('records')" class="btn-ghost flex-1" [ngClass]="activeTab() === 'records' ? 'font-bold text-primary' : ''">Medical Records <span class="badge ml-2">{{ medicalRecords().length }}</span></button>
+          <button (click)="setActiveTab('prescriptions')" class="btn-ghost flex-1" [ngClass]="activeTab() === 'prescriptions' ? 'font-bold text-primary' : ''">Prescriptions <span class="badge ml-2">{{ prescriptions().length }}</span></button>
         </div>
-      </section>
-
-      <!-- Appointments List -->
-      <section class="appointments" @fadeSlideIn>
-        <div class="section-title">
-          <h3>Appointment History</h3>
-          <span>{{ appointments()?.length || 0 }} total records</span>
-        </div>
-        <div *ngIf="appointments()?.length; else noAppointments" class="appointment-list" [@listAnimation]="appointments()?.length">
-          <div class="appointment-card" *ngFor="let appt of appointments()">
-            <div class="appt-icon">
-              <i [class]="appt.type === 'video' ? 'bi bi-camera-video-fill' : 'bi bi-hospital-fill'"></i>
+        <div>
+          <div *ngIf="activeTab() === 'appointments'">
+            <div *ngIf="appointments().length; else noAppointments">
+              <div *ngFor="let appt of appointments()" class="appointment-card mb-2">
+                <div class="font-bold">{{ appt.type | titlecase }} Consultation</div>
+                <div class="text-muted text-sm">{{ appt.date | date:'EEEE, MMMM d, y' }} at {{ appt.time }}</div>
+                <div *ngIf="appt.reason" class="text-xs text-muted mt-1">{{ appt.reason }}</div>
+                <span class="badge">{{ appt.status | titlecase }}</span>
+                <div class="flex gap-2">
+                  <button *ngIf="appt.status === 'confirmed'" (click)="startConsultation(appt.id)" class="btn btn-ghost"><i class="bi bi-play-fill"></i></button>
+                  <button *ngIf="appt.status === 'completed'" (click)="viewConsultation(appt.id)" class="btn btn-ghost"><i class="bi bi-eye"></i></button>
+                </div>
+              </div>
             </div>
-            <div class="appt-details">
-              <h4>{{ appt.type | titlecase }}</h4>
-              <p>{{ appt.date | date:'fullDate' }}</p>
+            <ng-template #noAppointments>
+              <div class="empty-state">No appointments found.</div>
+            </ng-template>
+          </div>
+          <div *ngIf="activeTab() === 'records'">
+            <div *ngIf="medicalRecords().length; else noRecords">
+              <div *ngFor="let record of medicalRecords()" class="appointment-card mb-2">
+                <div class="font-bold">{{ record.title }}</div>
+                <div class="text-muted text-sm">{{ record.recordDate | date:'MMMM d, y' }}</div>
+                <div *ngIf="record.notes" class="text-xs text-muted mt-1">{{ record.notes }}</div>
+                <span class="badge">{{ record.type | titlecase }}</span>
+              </div>
             </div>
-            <div class="appt-time">
-              <span>{{ appt.time }}</span>
+            <ng-template #noRecords>
+              <div class="empty-state">No medical records found.</div>
+            </ng-template>
+          </div>
+          <div *ngIf="activeTab() === 'prescriptions'">
+            <div *ngIf="prescriptions().length; else noPrescriptions">
+              <div *ngFor="let rx of prescriptions()" class="appointment-card mb-2">
+                <div class="font-bold">{{ rx.medication }}</div>
+                <div class="text-muted text-sm">{{ rx.dosage }} • {{ rx.frequency }} • {{ rx.duration }}</div>
+                <div class="text-xs text-muted mt-1">Prescribed {{ rx.createdAt | date:'MMMM d, y' }}</div>
+                <span class="badge">{{ rx.status | titlecase }}</span>
+              </div>
             </div>
-            <div class="appointment-status">
-              <span class="status-badge" [ngClass]="'status-' + (appt.status | lowercase)">
-                {{ appt.status | titlecase }}
-              </span>
-            </div>
-             <button class="ghost-icon"><i class="bi bi-three-dots-vertical"></i></button>
+            <ng-template #noPrescriptions>
+              <div class="empty-state">No prescriptions found.</div>
+            </ng-template>
           </div>
         </div>
-        <ng-template #noAppointments>
-          <div class="empty-state">
-            <i class="bi bi-calendar-x"></i>
-            <h4>No appointments found.</h4>
-            <p>This patient doesn't have any past or upcoming appointments.</p>
-          </div>
-        </ng-template>
-      </section>
+      </div>
     </ng-container>
   </ng-container>
-
-  <ng-template #loading>
-    <div class="loading-shimmer">
-      <div class="hero-card-shimmer"></div>
-      <div class="stats-grid-shimmer">
-        <div class="stat-card-shimmer"></div>
-        <div class="stat-card-shimmer"></div>
-        <div class="stat-card-shimmer"></div>
-        <div class="stat-card-shimmer"></div>
-      </div>
-      <div class="appointment-list-shimmer"></div>
-    </div>
-  </ng-template>
-  
-  <ng-template #noData>
-     <div class="empty-state full-page">
-        <i class="bi bi-person-x"></i>
-        <h4>Patient Not Found</h4>
-        <p>The requested patient could not be found or you may not have permission to view them.</p>
-        <button class="primary" (click)="navigate('/doctor/patients')">Return to Patient List</button>
-      </div>
-  </ng-template>
-
-  <!-- Profile Modal -->
-    <div class="modal-backdrop" [class.open]="profileModalOpen()" (click)="closeProfileModal()">
-      <div class="modal" [class.open]="profileModalOpen()" (click)="$event.stopPropagation()" @fadeSlideIn>
-      <header>
-        <div>
-          <h3>Patient Profile</h3>
-          <p class="subtle">Clinical snapshot and contact details</p>
-        </div>
-        <button type="button" class="ghost-icon" (click)="closeProfileModal()">
-          <i class="bi bi-x-lg"></i>
-        </button>
-      </header>
-      <div class="modal-body" *ngIf="patient() as p">
-        <div class="profile-card">
-          <div class="avatar-xl" [style.background-image]="'url(' + (p.avatar || '') + ')'">
-             <span *ngIf="!p.avatar">{{ getInitials() }}</span>
-          </div>
-          <div class="profile-card-info">
-            <h4>{{ getFullName() }}</h4>
-            <p><i class="bi bi-envelope-fill"></i> {{ p.email }}</p>
-            <p><i class="bi bi-telephone-fill"></i> {{ p.phoneNumber }}</p>
-          </div>
-        </div>
-        <div class="profile-grid">
-          <div>
-            <span>Patient ID</span>
-            <strong>{{ p.patientId }}</strong>
-          </div>
-          <div>
-            <span>Last Seen</span>
-            <strong>{{ formatLastSeen() }}</strong>
-          </div>
-          <div>
-            <span>Total Visits</span>
-            <strong>{{ stats()?.totalVisits }}</strong>
-          </div>
-          <div>
-            <span>Status</span>
-            <strong class="status-badge" [ngClass]="'status-' + (stats()?.lastStatus | lowercase)">
-              {{ stats()?.lastStatus | titlecase }}
-            </strong>
-          </div>
-        </div>
-      </div>
-      <footer class="modal-footer">
-        <div class="footer-actions">
-          <button type="button" class="secondary" (click)="closeProfileModal()">Close</button>
-          <button class="primary" (click)="messagePatient()">
-            <i class="bi bi-chat-dots-fill"></i> Message Patient
-          </button>
-        </div>
-      </footer>
-    </div>
-  </div>
 </div>

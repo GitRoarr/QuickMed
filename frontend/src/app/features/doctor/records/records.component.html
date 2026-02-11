@@ -1,4 +1,4 @@
-<div class="flex-1 flex flex-col min-w-0">
+<div class="flex-1 flex flex-col min-w-0 bg-[var(--surface-secondary)]">
   <!-- Shared Header -->
   <app-doctor-header [initials]="getDoctorInitials()" [avatarUrl]="currentUser()?.avatar"
     [unreadNotifications]="unreadNotificationCount()"></app-doctor-header>
@@ -6,111 +6,205 @@
   <!-- Page Content -->
   <main class="flex-1 overflow-y-auto p-6 lg:p-10">
     <!-- Page Header -->
-    <div class="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div class="mb-8 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
       <div>
-        <h1 class="text-3xl font-bold">Medical Records</h1>
+        <h1 class="text-3xl lg:text-4xl font-bold text-[var(--text-primary)]">Medical Records</h1>
         <p class="text-[var(--text-secondary)] mt-2">View and manage all patient medical documents securely</p>
       </div>
       <div class="flex gap-3">
-        <button
-          class="px-5 py-3 bg-[var(--surface-secondary)] text-[var(--text-primary)] rounded-xl font-medium hover:bg-[var(--surface-tertiary)] transition flex items-center gap-2">
-          <i class="bi bi-funnel text-lg"></i>
-          Filter
-        </button>
         <button (click)="uploadRecord()"
-          class="px-5 py-3 bg-[var(--primary)] text-white rounded-xl font-medium hover:bg-[var(--primary-dark)] transition flex items-center gap-2 shadow-md">
-          <i class="bi bi-plus-circle text-lg"></i>
+          class="px-6 py-3.5 bg-gradient-to-r from-[var(--primary)] to-emerald-600 text-white rounded-xl font-semibold hover:shadow-lg hover:shadow-emerald-500/25 active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2">
+          <i class="bi bi-cloud-upload text-lg"></i>
           Upload Record
         </button>
       </div>
     </div>
 
-    <!-- Search Bar -->
-    <div class="mb-8">
-      <div class="relative max-w-2xl">
-        <i class="bi bi-search absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] text-lg"></i>
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+      <div class="bg-[var(--surface-primary)] rounded-2xl p-5 shadow-sm border border-[var(--border-color)]">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+            <i class="bi bi-file-earmark-medical text-blue-600 dark:text-blue-400 text-lg"></i>
+          </div>
+        </div>
+        <p class="text-2xl font-bold text-[var(--text-primary)]">{{ records().length }}</p>
+        <p class="text-sm text-[var(--text-secondary)]">Total Records</p>
+      </div>
+      <div class="bg-[var(--surface-primary)] rounded-2xl p-5 shadow-sm border border-[var(--border-color)]">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="w-10 h-10 rounded-xl bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
+            <i class="bi bi-clipboard2-pulse text-purple-600 dark:text-purple-400 text-lg"></i>
+          </div>
+        </div>
+        <p class="text-2xl font-bold text-[var(--text-primary)]">{{ getCountByType('lab') }}</p>
+        <p class="text-sm text-[var(--text-secondary)]">Lab Reports</p>
+      </div>
+      <div class="bg-[var(--surface-primary)] rounded-2xl p-5 shadow-sm border border-[var(--border-color)]">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="w-10 h-10 rounded-xl bg-cyan-100 dark:bg-cyan-900/30 flex items-center justify-center">
+            <i class="bi bi-image text-cyan-600 dark:text-cyan-400 text-lg"></i>
+          </div>
+        </div>
+        <p class="text-2xl font-bold text-[var(--text-primary)]">{{ getCountByType('imaging') }}</p>
+        <p class="text-sm text-[var(--text-secondary)]">Imaging</p>
+      </div>
+      <div class="bg-[var(--surface-primary)] rounded-2xl p-5 shadow-sm border border-[var(--border-color)]">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
+            <i class="bi bi-check-circle text-emerald-600 dark:text-emerald-400 text-lg"></i>
+          </div>
+        </div>
+        <p class="text-2xl font-bold text-[var(--text-primary)]">{{ getVerifiedCount() }}</p>
+        <p class="text-sm text-[var(--text-secondary)]">Verified</p>
+      </div>
+      <div class="bg-[var(--surface-primary)] rounded-2xl p-5 shadow-sm border border-[var(--border-color)]">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
+            <i class="bi bi-hourglass-split text-amber-600 dark:text-amber-400 text-lg"></i>
+          </div>
+        </div>
+        <p class="text-2xl font-bold text-[var(--text-primary)]">{{ getPendingCount() }}</p>
+        <p class="text-sm text-[var(--text-secondary)]">Pending</p>
+      </div>
+    </div>
+
+    <!-- Search & Filters -->
+    <div class="flex flex-col lg:flex-row gap-4 mb-8">
+      <div class="relative flex-1 max-w-xl">
+        <i class="bi bi-search absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]"></i>
         <input type="text" placeholder="Search by patient name, record type, or description..." [value]="searchQuery()"
           (input)="searchQuery.set($any($event.target).value); onSearchChange()"
-          class="w-full pl-12 pr-6 py-4 bg-[var(--surface-primary)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)] transition shadow-sm" />
+          class="w-full pl-11 pr-4 py-3.5 bg-[var(--surface-primary)] border border-[var(--border-color)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent transition-all" />
+      </div>
+      <div class="flex gap-2 overflow-x-auto pb-2 lg:pb-0">
+        <button *ngFor="let filter of typeFilters" (click)="setTypeFilter(filter.value)"
+          class="px-4 py-2.5 rounded-xl font-medium whitespace-nowrap transition-all"
+          [ngClass]="activeFilter() === filter.value
+            ? 'bg-[var(--primary)]'
+            : 'bg-[var(--surface-primary)] hover:bg-[var(--surface-tertiary)]'"
+          [class.text-white]="activeFilter() === filter.value"
+          [class.border]="activeFilter() !== filter.value">
+          {{ filter.label }}
+        </button>
       </div>
     </div>
 
     <!-- Loading State -->
-    <div *ngIf="isLoading()" class="flex flex-col items-center justify-center py-20">
-      <div class="w-12 h-12 border-4 border-[var(--primary)] border-t-transparent rounded-full animate-spin mb-4"></div>
-      <p class="text-[var(--text-secondary)]">Loading medical records...</p>
+    <div *ngIf="isLoading()" class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+      <div *ngFor="let _ of [1,2,3,4,5,6]"
+        class="bg-[var(--surface-primary)] rounded-2xl p-6 animate-pulse border border-[var(--border-color)]">
+        <div class="flex items-start gap-4 mb-4">
+          <div class="w-14 h-14 bg-gray-200 dark:bg-gray-700 rounded-xl"></div>
+          <div class="flex-1">
+            <div class="h-5 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-2"></div>
+            <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
+          </div>
+          <div class="h-6 w-16 bg-gray-200 dark:bg-gray-700 rounded-full"></div>
+        </div>
+        <div class="space-y-3 pt-4 border-t border-[var(--border-color)]">
+          <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-full"></div>
+          <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-2/3"></div>
+        </div>
+      </div>
     </div>
 
     <!-- Records Grid -->
     <div *ngIf="!isLoading()" class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-      <div *ngFor="let record of records()"
-        class="bg-[var(--surface-primary)] rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden">
+      <div *ngFor="let record of filteredRecords(); trackBy: trackById"
+        class="bg-[var(--surface-primary)] rounded-2xl shadow-sm hover:shadow-lg border border-[var(--border-color)] hover:border-[var(--primary)]/30 transition-all duration-300 overflow-hidden group">
+        
         <!-- Record Header -->
-        <div class="p-6">
-          <div class="flex items-start justify-between">
-            <div class="flex items-center gap-4">
-              <div
-                class="w-12 h-12 bg-gradient-to-br from-[var(--primary)] to-[#15803d] rounded-xl flex items-center justify-center text-white">
-                <i class="bi bi-file-earmark-medical text-xl"></i>
+        <div class="p-6 pb-4">
+          <div class="flex items-start justify-between gap-3">
+            <div class="flex items-start gap-4">
+              <div class="w-14 h-14 rounded-xl flex items-center justify-center shrink-0"
+                [ngClass]="{
+                  'bg-purple-100': record.type === 'lab',
+                  'bg-cyan-100': record.type === 'imaging',
+                  'bg-emerald-100': record.type === 'prescription',
+                  'bg-orange-100': record.type === 'diagnosis',
+                  'bg-gray-100': record.type === 'other'
+                }">
+                <i class="text-2xl"
+                  [ngClass]="{
+                    'bi-clipboard2-pulse text-purple-600': record.type === 'lab',
+                    'bi-image text-cyan-600': record.type === 'imaging',
+                    'bi-capsule text-emerald-600': record.type === 'prescription',
+                    'bi-file-earmark-text text-orange-600': record.type === 'diagnosis',
+                    'bi-file-earmark text-gray-600': record.type === 'other'
+                  }"></i>
               </div>
-              <div>
-                <h3 class="font-semibold text-lg">{{ getRecordTypeLabel(record.type) }}</h3>
-                <p class="text-sm text-[var(--text-secondary)] mt-1">{{ record.description || record.title }}</p>
+              <div class="min-w-0 flex-1">
+                <h3 class="font-bold text-lg text-[var(--text-primary)] truncate">{{ getRecordTypeLabel(record.type) }}</h3>
+                <p class="text-sm text-[var(--text-secondary)] mt-0.5 line-clamp-1">{{ record.description || record.title }}</p>
               </div>
             </div>
-            <span class="px-3 py-1 rounded-full text-xs font-semibold"
-              [class.bg-emerald-100]="record.status === 'verified'"
-              [class.text-emerald-700]="record.status === 'verified'" [class.bg-amber-100]="record.status === 'pending'"
-              [class.text-amber-700]="record.status === 'pending'" [class.bg-red-100]="record.status === 'rejected'"
-              [class.text-red-700]="record.status === 'rejected'">
+            <span class="px-3 py-1 rounded-full text-xs font-semibold shrink-0"
+              [ngClass]="{
+                'bg-emerald-100 text-emerald-700': record.status === 'verified',
+                'bg-amber-100 text-amber-700': record.status === 'pending' || !record.status,
+                'bg-red-100 text-red-700': record.status === 'rejected'
+              }">
               {{ (record.status || 'pending') | titlecase }}
             </span>
           </div>
         </div>
 
         <!-- Record Details -->
-        <div class="p-6 space-y-4">
+        <div class="px-6 pb-4 space-y-3 border-t border-[var(--border-color)] pt-4">
           <div class="flex items-center gap-3 text-sm">
-            <i class="bi bi-person text-[var(--text-secondary)]"></i>
-            <span class="font-medium">Patient:</span>
+            <i class="bi bi-person text-[var(--text-muted)]"></i>
             <span class="text-[var(--text-secondary)]">{{ getPatientName(record) }}</span>
           </div>
           <div class="flex items-center gap-3 text-sm">
-            <i class="bi bi-calendar-date text-[var(--text-secondary)]"></i>
-            <span class="font-medium">Date:</span>
+            <i class="bi bi-calendar3 text-[var(--text-muted)]"></i>
             <span class="text-[var(--text-secondary)]">{{ record.recordDate | date:'mediumDate' }}</span>
           </div>
           <div *ngIf="record.fileSize" class="flex items-center gap-3 text-sm">
-            <i class="bi bi-file-earmark text-[var(--text-secondary)]"></i>
-            <span class="font-medium">Size:</span>
+            <i class="bi bi-file-earmark text-[var(--text-muted)]"></i>
             <span class="text-[var(--text-secondary)]">{{ formatFileSize(record.fileSize) }}</span>
+          </div>
+          <div *ngIf="record.notes" class="pt-2">
+            <p class="text-sm text-[var(--text-secondary)] line-clamp-2 italic">{{ record.notes }}</p>
           </div>
         </div>
 
         <!-- Actions -->
-        <div class="p-6 pt-0 flex gap-3">
+        <div class="px-6 pb-6 flex gap-3">
           <button (click)="viewRecord(record)"
-            class="flex-1 py-3 px-4 bg-[var(--surface-secondary)] rounded-lg font-medium hover:bg-[var(--surface-tertiary)] transition flex items-center justify-center gap-2">
+            class="flex-1 py-2.5 bg-[var(--surface-secondary)] hover:bg-[var(--surface-tertiary)] text-[var(--text-primary)] rounded-xl font-medium transition-all flex items-center justify-center gap-2">
             <i class="bi bi-eye"></i>
             View
           </button>
           <button (click)="downloadRecord(record)"
-            class="flex-1 py-3 px-4 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg font-medium hover:bg-blue-100 dark:hover:bg-blue-900/50 transition flex items-center justify-center gap-2">
+            class="flex-1 py-2.5 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded-xl font-medium transition-all flex items-center justify-center gap-2">
             <i class="bi bi-download"></i>
             Download
           </button>
           <button (click)="deleteRecord(record)"
-            class="py-3 px-4 bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-lg font-medium hover:bg-red-100 dark:hover:bg-red-900/50 transition flex items-center justify-center gap-2">
+            class="py-2.5 px-4 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-xl font-medium transition-all flex items-center justify-center">
             <i class="bi bi-trash"></i>
           </button>
         </div>
       </div>
 
       <!-- Empty State -->
-      <div *ngIf="records().length === 0" class="col-span-full flex flex-col items-center justify-center py-20">
-        <i class="bi bi-file-earmark-medical text-6xl text-[var(--text-muted)] mb-6"></i>
-        <p class="text-xl font-medium text-[var(--text-secondary)]">No medical records found</p>
-        <p class="text-[var(--text-secondary)] mt-2">Try adjusting your search or upload a new record.</p>
+      <div *ngIf="filteredRecords().length === 0" class="col-span-full">
+        <div class="flex flex-col items-center justify-center py-20 bg-[var(--surface-primary)] rounded-2xl border border-dashed border-[var(--border-color)]">
+          <div class="w-20 h-20 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center mb-6">
+            <i class="bi bi-file-earmark-medical text-4xl text-blue-500"></i>
+          </div>
+          <h3 class="text-xl font-semibold text-[var(--text-primary)] mb-2">No medical records found</h3>
+          <p class="text-[var(--text-secondary)] text-center max-w-md mb-6">
+            {{ searchQuery() ? 'Try adjusting your search or filters' : 'Upload your first medical record to get started' }}
+          </p>
+          <button *ngIf="!searchQuery()" (click)="uploadRecord()"
+            class="px-6 py-3 bg-[var(--primary)] text-white rounded-xl font-medium hover:bg-[var(--primary-dark)] transition-all flex items-center gap-2">
+            <i class="bi bi-cloud-upload"></i>
+            Upload Record
+          </button>
+        </div>
       </div>
     </div>
   </main>

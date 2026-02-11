@@ -98,11 +98,21 @@ export interface DoctorPatientDetail {
     phoneNumber: string;
     avatar: string;
     lastSeen: string;
+    dateOfBirth?: string;
+    gender?: string;
+    address?: string;
+    bloodType?: string;
+    allergies?: string;
+    emergencyContact?: string;
   };
   stats: {
     totalVisits: number;
+    completedVisits: number;
+    cancelledVisits: number;
     lastStatus: string;
     nextFollowUp: string | null;
+    totalRecords: number;
+    totalPrescriptions: number;
   };
   appointments: {
     id: string;
@@ -110,6 +120,25 @@ export interface DoctorPatientDetail {
     time: string;
     type: string;
     status: string;
+    reason?: string;
+    notes?: string;
+  }[];
+  medicalRecords: {
+    id: string;
+    title: string;
+    type: string;
+    recordDate: string;
+    notes?: string;
+    createdAt: string;
+  }[];
+  prescriptions: {
+    id: string;
+    medication: string;
+    dosage: string;
+    frequency: string;
+    duration: string;
+    status: string;
+    createdAt: string;
   }[];
 }
 

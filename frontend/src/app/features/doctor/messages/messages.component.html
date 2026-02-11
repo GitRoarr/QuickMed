@@ -37,7 +37,7 @@
 
         <div *ngFor="let conversation of conversations(); let i = index"
           class="convo-item px-4 py-3 hover:bg-[var(--surface-secondary)] transition cursor-pointer"
-          [class.bg-[var(--surface-tertiary)]]="selectedConversation()?.id === conversation.id"
+          [ngClass]="{'bg-[var(--surface-tertiary)]': selectedConversation()?.id === conversation.id}"
           [class.convo-selected]="selectedConversation()?.id === conversation.id"
           (click)="selectConversation(conversation)" [@fadeIn]="i">
           <div class="flex items-center gap-4">
@@ -146,9 +146,10 @@
             [class.justify-start]="!isMyMessage(message)" [@fadeInUp]="i">
             <div class="message-bubble max-w-xs lg:max-w-md px-5 py-3 rounded-2xl shadow-sm"
               [class.mine]="isMyMessage(message)" [class.theirs]="!isMyMessage(message)"
-              [class.bg-[var(--primary)]]="isMyMessage(message)" [class.text-white]="isMyMessage(message)"
-              [class.bg-[var(--surface-secondary)]]="!isMyMessage(message)" [class.rounded-br-sm]="isMyMessage(message)"
-              [class.rounded-bl-sm]="!isMyMessage(message)">
+              [ngClass]="{
+                'bg-[var(--primary)] text-white rounded-br-sm': isMyMessage(message),
+                'bg-[var(--surface-secondary)] rounded-bl-sm': !isMyMessage(message)
+              }">
               <p class="text-sm leading-relaxed">{{ message.content }}</p>
               <p class="text-xs mt-2 opacity-70">{{ message.createdAt | date:'shortTime' }}</p>
             </div>

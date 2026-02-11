@@ -249,18 +249,20 @@ export class DoctorsComponent implements OnInit {
         map((dates) => {
           const nextDate = (dates || []).find((d) => d >= today) || null;
           const availableToday = nextDate === today;
+          const mergedAvailable = availableToday || !!doc.available;
           return {
             ...doc,
-            available: availableToday,
+            available: mergedAvailable,
             availableToday,
             nextAvailableDate: nextDate,
           } as DoctorCard;
         }),
         catchError(() => of({
           ...doc,
-          available: false,
-          availableToday: false,
-          nextAvailableDate: null,
+          // On error, keep whatever availability we already had
+          available: !!doc.available,
+          availableToday: !!doc.available,
+          nextAvailableDate: doc.nextAvailableDate ?? null,
         } as DoctorCard))
       )
     );

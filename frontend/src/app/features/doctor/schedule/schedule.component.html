@@ -18,9 +18,9 @@
 
           <!-- View Mode Toggle -->
           <div class="bg-[var(--surface-tertiary)] p-1 rounded-xl flex">
-            <button *ngFor="let m of viewModes" (click)="setViewMode(m)" [class.bg-[var(--primary)]]="viewMode()===m"
-              [class.text-white]="viewMode()===m" [class.text-[var(--text-secondary)]]="viewMode()!==m"
-              [class.shadow-md]="viewMode()===m"
+            <button *ngFor="let m of viewModes" (click)="setViewMode(m)"
+              [ngClass]="{'bg-[var(--primary)] text-white shadow-md': viewMode()===m}"
+              [class.text-[var(--text-secondary)]]="viewMode()!==m"
               class="px-4 py-1.5 rounded-lg text-sm font-semibold capitalize transition-all">
               {{ m }}
             </button>

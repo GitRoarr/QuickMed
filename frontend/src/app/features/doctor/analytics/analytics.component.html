@@ -15,10 +15,9 @@
       <!-- Period Selector -->
       <div class="flex gap-3 flex-wrap">
         <button *ngFor="let period of periodOptions" (click)="onPeriodChange(period.value)"
-          [class.bg-[var(--primary)]]="selectedPeriod() === period.value"
-          [class.text-white]="selectedPeriod() === period.value"
-          [class.bg-[var(--surface-secondary)]]="selectedPeriod() !== period.value"
-          [class.text-[var(--text-primary)]]="selectedPeriod() !== period.value"
+          [ngClass]="selectedPeriod() === period.value
+            ? 'bg-[var(--primary)] text-white'
+            : 'bg-[var(--surface-secondary)] text-[var(--text-primary)]'"
           class="px-6 py-3 rounded-xl font-semibold hover:opacity-90 transition shadow-md">
           {{ period.label }}
         </button>

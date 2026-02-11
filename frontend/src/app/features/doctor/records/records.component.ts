@@ -1,11 +1,12 @@
-import { Component, OnInit, signal, inject } from '@angular/core';
-import { CommonModule, DatePipe } from '@angular/common';
+import { Component, OnInit, signal, inject, computed } from '@angular/core';
+import { CommonModule, DatePipe, TitleCasePipe } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { DoctorSidebarComponent } from '../shared/doctor-sidebar/doctor-sidebar.component';
 import { DoctorHeaderComponent } from '../shared/doctor-header/doctor-header.component';
 import { AuthService } from '@core/services/auth.service';
 import { MedicalRecordService, MedicalRecord } from '@core/services/medical-record.service';
 import { NotificationService } from '@core/services/notification.service';
+import { ToastService } from '@core/services/toast.service';
 
 @Component({
   selector: 'app-doctor-records',
@@ -13,24 +14,44 @@ import { NotificationService } from '@core/services/notification.service';
   imports: [
     CommonModule,
     DatePipe,
+    TitleCasePipe,
     RouterModule,
     DoctorSidebarComponent,
     DoctorHeaderComponent
   ],
   templateUrl: './records.component.html',
-  // No styleUrls — using Tailwind only
 })
 export class RecordsComponent implements OnInit {
   private authService = inject(AuthService);
   private medicalRecordService = inject(MedicalRecordService);
   private notificationService = inject(NotificationService);
   private router = inject(Router);
+  private toast = inject(ToastService);
 
   records = signal<MedicalRecord[]>([]);
   isLoading = signal(true);
   searchQuery = signal('');
+  activeFilter = signal<'all' | 'lab' | 'imaging' | 'prescription' | 'diagnosis' | 'other'>('all');
   currentUser = signal<any>(null);
   unreadNotificationCount = signal(0);
+
+  typeFilters = [
+    { label: 'All', value: 'all' as const },
+    { label: 'Lab Reports', value: 'lab' as const },
+    { label: 'Imaging', value: 'imaging' as const },
+    { label: 'Prescriptions', value: 'prescription' as const },
+    { label: 'Diagnosis', value: 'diagnosis' as const },
+    { label: 'Other', value: 'other' as const },
+  ];
+
+  filteredRecords = computed(() => {
+    let list = this.records();
+    const filter = this.activeFilter();
+    if (filter !== 'all') {
+      list = list.filter(r => r.type === filter);
+    }
+    return list;
+  });
 
   ngOnInit(): void {
     this.loadUserData();
@@ -49,12 +70,19 @@ export class RecordsComponent implements OnInit {
         this.records.set(data);
         this.isLoading.set(false);
       },
-      error: () => this.isLoading.set(false)
+      error: () => {
+        this.isLoading.set(false);
+        this.toast.error('Failed to load medical records');
+      }
     });
   }
 
   onSearchChange(): void {
     this.loadRecords();
+  }
+
+  setTypeFilter(filter: 'all' | 'lab' | 'imaging' | 'prescription' | 'diagnosis' | 'other'): void {
+    this.activeFilter.set(filter);
   }
 
   loadUnreadNotifications(): void {
@@ -63,15 +91,32 @@ export class RecordsComponent implements OnInit {
     });
   }
 
+  getCountByType(type: string): number {
+    return this.records().filter(r => r.type === type).length;
+  }
+
+  getVerifiedCount(): number {
+    return this.records().filter(r => r.status === 'verified').length;
+  }
+
+  getPendingCount(): number {
+    return this.records().filter(r => r.status === 'pending' || !r.status).length;
+  }
+
   viewRecord(record: MedicalRecord): void {
-    if (record.fileUrl) window.open(record.fileUrl, '_blank');
+    if (record.fileUrl) {
+      window.open(record.fileUrl, '_blank');
+    } else {
+      this.toast.info('No file attached to this record');
+    }
   }
 
   downloadRecord(record: MedicalRecord): void {
     this.medicalRecordService.download(record.id).subscribe({
       next: (res) => {
         if (res.url) window.open(res.url, '_blank');
-      }
+      },
+      error: () => this.toast.error('Failed to download record')
     });
   }
 
@@ -79,8 +124,11 @@ export class RecordsComponent implements OnInit {
     if (!confirm('Are you sure you want to permanently delete this record?')) return;
 
     this.medicalRecordService.delete(record.id).subscribe({
-      next: () => this.loadRecords(),
-      error: () => alert('Failed to delete record. Please try again.')
+      next: () => {
+        this.toast.success('Record deleted successfully');
+        this.loadRecords();
+      },
+      error: () => this.toast.error('Failed to delete record')
     });
   }
 
@@ -127,4 +175,7 @@ export class RecordsComponent implements OnInit {
       : name.substring(0, 2).toUpperCase();
   }
 
+  trackById(index: number, item: MedicalRecord): string {
+    return item.id;
+  }
 }

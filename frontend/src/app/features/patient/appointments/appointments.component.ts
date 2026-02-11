@@ -5,21 +5,11 @@ import { Router, RouterModule } from '@angular/router';
 import { AppointmentService } from '../../../core/services/appointment.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { DoctorService } from '../../../core/services/doctor.service';
+import { DoctorSlot, SchedulingService } from '../../../core/services/schedule.service';
 import { Appointment as AppointmentModel } from '../../../core/models/appointment.model';
 import { PayButtonComponent } from '../../../shared/components/pay-button/pay-button.component';
 import { PatientShellComponent } from '../shared/patient-shell/patient-shell.component';
 import { ToastService } from '@core/services/toast.service';
-
-interface Appointment {
-  id: string;
-  doctor: { firstName: string; lastName: string; specialty: string };
-  appointmentDate: string;
-  appointmentTime: string;
-  location?: string;
-  status: 'confirmed' | 'pending' | 'completed' | 'cancelled';
-  isVideoConsultation?: boolean;
-  notes?: string;
-}
 
 @Component({
   selector: 'app-patient-appointments',
@@ -33,6 +23,7 @@ export class AppointmentsComponent implements OnInit {
   private readonly appointmentService = inject(AppointmentService);
   private readonly authService = inject(AuthService);
   private readonly doctorService = inject(DoctorService);
+  private readonly scheduleService = inject(SchedulingService);
   private readonly toast = inject(ToastService);
 
   appointments = signal<AppointmentModel[]>([]);
@@ -40,9 +31,21 @@ export class AppointmentsComponent implements OnInit {
   searchQuery = signal('');
   activeSegment = signal<'upcoming' | 'completed'>('upcoming');
 
-  availableTimes: string[] = [];
-  selectedDate: string = '';
-  selectedDoctorId: string = '';
+  detailAppointment = signal<AppointmentModel | null>(null);
+  showDetailModal = signal(false);
+  detailLoading = signal(false);
+
+  cancelTarget = signal<AppointmentModel | null>(null);
+  showCancelModal = signal(false);
+  cancelLoading = signal(false);
+
+   rescheduleTarget = signal<AppointmentModel | null>(null);
+  showRescheduleModal = signal(false);
+  rescheduleLoading = signal(false);
+  rescheduleDate = signal('');
+  rescheduleTime = signal('');
+  availableSlots = signal<DoctorSlot[]>([]);
+  slotsLoading = signal(false);
 
   visibleAppointments = computed(() => {
     let list = [...this.appointments()];
@@ -85,9 +88,7 @@ export class AppointmentsComponent implements OnInit {
     });
   }
 
-  onSearchChange(): void {
-    // computed signal automatically reacts
-  }
+  onSearchChange(): void {}
 
   setSegment(segment: 'upcoming' | 'completed'): void {
     this.activeSegment.set(segment);
@@ -99,7 +100,7 @@ export class AppointmentsComponent implements OnInit {
       total: all.length,
       pending: all.filter(a => a.status === 'pending').length,
       confirmed: all.filter(a => a.status === 'confirmed').length,
-      completed: all.filter(a => a.status === 'completed').length
+      completed: all.filter(a => a.status === 'completed').length,
     };
   }
 
@@ -107,47 +108,136 @@ export class AppointmentsComponent implements OnInit {
     this.router.navigate(['/patient/doctors']);
   }
 
-  rescheduleAppointment(appointmentId: string): void {
-    console.log('Reschedule appointment:', appointmentId);
-    this.toast.info('Reschedule flow coming soon.', { title: 'Appointments' });
-  }
-
-  cancelAppointment(appointmentId: string): void {
-    console.log('Cancel appointment:', appointmentId);
-    this.toast.warning('Cancel request sent.', { title: 'Appointments' });
-  }
-
-  joinVideoCall(appointmentId: string): void {
-    console.log('Join video call:', appointmentId);
-    this.toast.success('Opening video room...', { title: 'Appointments' });
-  }
-
-  viewDetails(appointmentId: string): void {
-    console.log('View details:', appointmentId);
-    this.toast.info('Opening appointment details.', { title: 'Appointments' });
-  }
-
   goHome() {
     this.router.navigate(['/']);
   }
 
-  // Example: Call this when a date and doctor are selected
-  fetchAvailableTimes() {
-    if (!this.selectedDoctorId || !this.selectedDate) return;
-    this.doctorService.getAvailability(this.selectedDoctorId, this.selectedDate)
-      .subscribe(times => this.availableTimes = times);
+  viewDetails(appointmentId: string): void {
+    this.detailLoading.set(true);
+    this.showDetailModal.set(true);
+    this.appointmentService.getOne(appointmentId).subscribe({
+      next: (apt) => {
+        this.detailAppointment.set(apt);
+        this.detailLoading.set(false);
+      },
+      error: () => {
+        this.toast.error('Failed to load appointment details');
+        this.showDetailModal.set(false);
+        this.detailLoading.set(false);
+      },
+    });
   }
 
-  // Example: Call this when the date input changes
-  onDateChange(event: Event) {
+  closeDetailModal(): void {
+    this.showDetailModal.set(false);
+    this.detailAppointment.set(null);
+  }
+
+  openCancelModal(apt: AppointmentModel): void {
+    this.cancelTarget.set(apt);
+    this.showCancelModal.set(true);
+  }
+
+  closeCancelModal(): void {
+    this.showCancelModal.set(false);
+    this.cancelTarget.set(null);
+  }
+
+  confirmCancel(): void {
+    const apt = this.cancelTarget();
+    if (!apt) return;
+    this.cancelLoading.set(true);
+    this.appointmentService.cancel(apt.id).subscribe({
+      next: () => {
+        this.toast.success('Appointment cancelled successfully');
+        this.cancelLoading.set(false);
+        this.closeCancelModal();
+        this.loadAppointments();
+      },
+      error: (err) => {
+        this.toast.error(err.error?.message || 'Failed to cancel appointment');
+        this.cancelLoading.set(false);
+      },
+    });
+  }
+
+  // ─── Reschedule Modal ──────────────────────────────────────
+  openRescheduleModal(apt: AppointmentModel): void {
+    this.rescheduleTarget.set(apt);
+    this.rescheduleDate.set('');
+    this.rescheduleTime.set('');
+    this.availableSlots.set([]);
+    this.showRescheduleModal.set(true);
+  }
+
+  closeRescheduleModal(): void {
+    this.showRescheduleModal.set(false);
+    this.rescheduleTarget.set(null);
+  }
+
+  onRescheduleDateChange(event: Event): void {
     const input = event.target as HTMLInputElement;
-    this.selectedDate = input.value;
-    this.fetchAvailableTimes();
+    const dateStr = input.value;
+    this.rescheduleDate.set(dateStr);
+    this.rescheduleTime.set('');
+    if (!dateStr) {
+      this.availableSlots.set([]);
+      return;
+    }
+    const apt = this.rescheduleTarget();
+    if (!apt) return;
+    this.slotsLoading.set(true);
+    this.scheduleService.getDaySchedulePublic(apt.doctorId, dateStr).subscribe({
+      next: (slots) => {
+        const available = (slots || []).filter((s: any) => s.status === 'available');
+        this.availableSlots.set(available);
+        this.slotsLoading.set(false);
+      },
+      error: () => {
+        this.availableSlots.set([]);
+        this.slotsLoading.set(false);
+      },
+    });
   }
 
-  // Example: Call this when the doctor selection changes
-  onDoctorChange(doctorId: string) {
-    this.selectedDoctorId = doctorId;
-    this.fetchAvailableTimes();
+  selectRescheduleSlot(slot: DoctorSlot): void {
+    this.rescheduleTime.set(slot.startTime || slot.time || '');
+  }
+
+  confirmReschedule(): void {
+    const apt = this.rescheduleTarget();
+    const date = this.rescheduleDate();
+    const time = this.rescheduleTime();
+    if (!apt || !date || !time) return;
+    this.rescheduleLoading.set(true);
+    this.appointmentService.update(apt.id, { appointmentDate: date, appointmentTime: time }).subscribe({
+      next: () => {
+        this.toast.success('Appointment rescheduled successfully');
+        this.rescheduleLoading.set(false);
+        this.closeRescheduleModal();
+        this.loadAppointments();
+      },
+      error: (err) => {
+        this.toast.error(err.error?.message || 'Failed to reschedule appointment');
+        this.rescheduleLoading.set(false);
+      },
+    });
+  }
+
+  getMinDate(): string {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  }
+
+  joinVideoCall(appointmentId: string): void {
+    this.toast.success('Opening video room...', { title: 'Appointments' });
+  }
+
+  formatTime(time: string): string {
+    if (!time) return '';
+    const [h, m] = time.split(':').map(Number);
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    const hr = h % 12 || 12;
+    return `${hr}:${String(m).padStart(2, '0')} ${ampm}`;
   }
 }

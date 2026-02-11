@@ -1,124 +1,342 @@
 <app-patient-shell active="records">
-  <div class="records-page">
-    <div class="page-header">
-      <div>
-        <p class="eyebrow">Medical Records</p>
-        <h1>View and manage your medical history</h1>
-      </div>
-    </div>
-
-    <div class="stats-row" *ngIf="!isLoading()">
-      <div class="stat-card">
-        <div class="stat-icon"><i class="bi bi-folder2-open"></i></div>
+  <div class="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800 p-4 md:p-8">
+    <div class="max-w-7xl mx-auto space-y-6">
+      
+      <!-- Header -->
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <p>Total Records</p>
-          <h2>{{ totalRecords() }}</h2>
+          <h1 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">Medical Records</h1>
+          <p class="text-gray-500 dark:text-gray-400 mt-1">View and manage your medical history</p>
         </div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icon accent"><i class="bi bi-clipboard-data"></i></div>
-        <div>
-          <p>Lab Results</p>
-          <h2>{{ labCount() }}</h2>
-        </div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icon"><i class="bi bi-prescription"></i></div>
-        <div>
-          <p>Prescriptions</p>
-          <h2>{{ prescriptionCount() }}</h2>
-        </div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icon accent"><i class="bi bi-image"></i></div>
-        <div>
-          <p>Imaging</p>
-          <h2>{{ imagingCount() }}</h2>
-        </div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icon"><i class="bi bi-file-medical"></i></div>
-        <div>
-          <p>Diagnoses</p>
-          <h2>{{ diagnosisCount() }}</h2>
-        </div>
-      </div>
-    </div>
-
-    <div class="filter-bar" *ngIf="!isLoading()">
-      <div class="search-field">
-        <i class="bi bi-search"></i>
-        <input type="text" placeholder="Search medical records..." />
-      </div>
-      <div class="filter-select">
-        <i class="bi bi-funnel"></i>
-        <select>
-          <option selected>Filter records</option>
-          <option>Recent</option>
-          <option>Last 30 days</option>
-          <option>Last year</option>
-        </select>
-      </div>
-      <div class="filter-chips">
-        <button
-          type="button"
-          class="filter-chip"
-          *ngFor="let option of filterOptions"
-          [class.active]="filterType() === option.value"
-          (click)="setFilter(option.value)"
-        >
-          {{ option.label }}
+        <button (click)="openUploadModal()" type="button" class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-medium rounded-xl hover:from-emerald-600 hover:to-teal-700 transition-all duration-200 shadow-sm hover:shadow-md">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+          </svg>
+          Upload Record
         </button>
       </div>
-    </div>
 
-    <div class="records-list" *ngIf="!isLoading(); else loadingState">
-      <div class="records-table">
-        <div class="records-header">
-          <span>Record Type</span>
-          <span>Title</span>
-          <span>Doctor</span>
-          <span>Date</span>
-          <span>Status</span>
-          <span>Action</span>
+      <!-- Stats Cards -->
+      @if (!isLoading()) {
+      <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+        <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm text-gray-500 dark:text-gray-400">Total Records</p>
+              <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ totalRecords() }}</p>
+            </div>
+            <div class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+              <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+              </svg>
+            </div>
+          </div>
         </div>
-        <div class="record-row" *ngFor="let record of filteredRecords()">
-          <div class="cell">
-            <span class="tag">{{ record.type }}</span>
+        
+        <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm text-gray-500 dark:text-gray-400">Lab Results</p>
+              <p class="text-2xl font-bold text-purple-600 dark:text-purple-400">{{ labCount() }}</p>
+            </div>
+            <div class="w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
+              <svg class="w-5 h-5 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path>
+              </svg>
+            </div>
           </div>
-          <div class="cell">
-            <p class="record-title">{{ record.title }}</p>
+        </div>
+        
+        <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm text-gray-500 dark:text-gray-400">Prescriptions</p>
+              <p class="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{{ prescriptionCount() }}</p>
+            </div>
+            <div class="w-10 h-10 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
+              <svg class="w-5 h-5 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+              </svg>
+            </div>
           </div>
-          <div class="cell muted">
-            {{ record.doctor ? ('Dr. ' + record.doctor.firstName + ' ' + record.doctor.lastName) : '—' }}
+        </div>
+        
+        <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm text-gray-500 dark:text-gray-400">Imaging</p>
+              <p class="text-2xl font-bold text-amber-600 dark:text-amber-400">{{ imagingCount() }}</p>
+            </div>
+            <div class="w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
+              <svg class="w-5 h-5 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+              </svg>
+            </div>
           </div>
-          <div class="cell muted">{{ record.recordDate | date:'MMM d, y' }}</div>
-          <div class="cell">
-            <span class="status-pill">Available</span>
-          </div>
-          <div class="cell actions">
-            <button class="text-btn" (click)="viewRecord(record)">View</button>
-            <button class="primary-btn subtle" (click)="downloadRecord(record)">Download</button>
+        </div>
+        
+        <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm text-gray-500 dark:text-gray-400">Diagnoses</p>
+              <p class="text-2xl font-bold text-pink-600 dark:text-pink-400">{{ diagnosisCount() }}</p>
+            </div>
+            <div class="w-10 h-10 rounded-full bg-pink-100 dark:bg-pink-900/30 flex items-center justify-center">
+              <svg class="w-5 h-5 text-pink-600 dark:text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+              </svg>
+            </div>
           </div>
         </div>
       </div>
+      }
 
-      <div class="empty-state" *ngIf="filteredRecords().length === 0">
-        <div class="empty-illustration">
-          <i class="bi bi-journal-medical"></i>
-        </div>
-        <h3>No records match this filter.</h3>
-        <p>Your medical records will appear here once available.</p>
-        <button class="primary-btn">Request Records</button>
+      <!-- Filter Pills -->
+      @if (!isLoading()) {
+      <div class="flex flex-wrap gap-2">
+        @for (option of filterOptions; track option.value) {
+        <button type="button" (click)="setFilter(option.value)"
+          class="px-4 py-2 rounded-full text-sm font-medium transition-all duration-200"
+          [class.bg-blue-600]="filterType() === option.value"
+          [class.text-white]="filterType() === option.value"
+          [class.bg-white]="filterType() !== option.value"
+          [class.text-gray-700]="filterType() !== option.value"
+          [class.dark:bg-gray-800]="filterType() !== option.value"
+          [class.dark:text-gray-300]="filterType() !== option.value"
+          [class.border]="filterType() !== option.value"
+          [class.border-gray-200]="filterType() !== option.value"
+          [class.dark:border-gray-700]="filterType() !== option.value"
+          [class.hover:bg-gray-50]="filterType() !== option.value"
+          [class.dark:hover:bg-gray-750]="filterType() !== option.value">
+          {{ option.label }}
+        </button>
+        }
       </div>
+      }
+
+      <!-- Loading State -->
+      @if (isLoading()) {
+      <div class="space-y-4 animate-pulse">
+        <div class="grid grid-cols-5 gap-4">
+          @for (i of [1,2,3,4,5]; track i) {
+          <div class="h-24 bg-gray-200 dark:bg-gray-700 rounded-xl"></div>
+          }
+        </div>
+        <div class="h-12 bg-gray-200 dark:bg-gray-700 rounded-xl w-1/2"></div>
+        <div class="h-64 bg-gray-200 dark:bg-gray-700 rounded-xl"></div>
+      </div>
+      }
+
+      <!-- Records List -->
+      @if (!isLoading()) {
+        @if (filteredRecords().length > 0) {
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+          <!-- Table Header -->
+          <div class="hidden md:grid md:grid-cols-6 gap-4 px-6 py-4 bg-gray-50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700 text-sm font-medium text-gray-500 dark:text-gray-400">
+            <span>Record Type</span>
+            <span class="col-span-2">Title</span>
+            <span>Doctor</span>
+            <span>Date</span>
+            <span>Actions</span>
+          </div>
+          
+          <!-- Records -->
+          <div class="divide-y divide-gray-100 dark:divide-gray-700">
+            @for (record of filteredRecords(); track record.id) {
+            <div class="grid grid-cols-1 md:grid-cols-6 gap-4 px-6 py-4 hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors items-center">
+              <!-- Type Badge -->
+              <div>
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium capitalize"
+                  [ngClass]="{
+                    'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400': record.type === 'lab',
+                    'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400': record.type === 'prescription',
+                    'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400': record.type === 'imaging',
+                    'bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-400': record.type === 'diagnosis',
+                    'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300': record.type === 'other'
+                  }">
+                  {{ record.type }}
+                </span>
+              </div>
+              
+              <!-- Title -->
+              <div class="col-span-2">
+                <p class="font-medium text-gray-900 dark:text-white">{{ record.title }}</p>
+                @if (record.notes) {
+                <p class="text-sm text-gray-500 dark:text-gray-400 truncate">{{ record.notes }}</p>
+                }
+              </div>
+              
+              <!-- Doctor -->
+              <div class="text-gray-600 dark:text-gray-300">
+                {{ record.doctor ? ('Dr. ' + record.doctor.firstName + ' ' + record.doctor.lastName) : '—' }}
+              </div>
+              
+              <!-- Date -->
+              <div class="text-gray-500 dark:text-gray-400">
+                {{ record.recordDate | date:'MMM d, y' }}
+              </div>
+              
+              <!-- Actions -->
+              <div class="flex items-center gap-2">
+                @if (record.fileUrl) {
+                <button type="button" (click)="viewRecord(record)" class="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors" title="View">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                  </svg>
+                </button>
+                <button type="button" (click)="downloadRecord(record)" class="p-2 text-gray-500 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg transition-colors" title="Download">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                  </svg>
+                </button>
+                } @else {
+                <span class="text-sm text-gray-400 dark:text-gray-500">No file</span>
+                }
+              </div>
+            </div>
+            }
+          </div>
+        </div>
+        } @else {
+        <!-- Empty State -->
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-12 text-center">
+          <div class="w-24 h-24 rounded-full bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center mx-auto mb-6">
+            <svg class="w-12 h-12 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+          </div>
+          <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">No medical records found</h2>
+          <p class="text-gray-500 dark:text-gray-400 mb-6">Upload your first medical record to get started</p>
+          <button type="button" (click)="openUploadModal()" class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-medium rounded-xl hover:from-emerald-600 hover:to-teal-700 transition-all duration-200 shadow-sm hover:shadow-md">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+            </svg>
+            Upload Record
+          </button>
+        </div>
+        }
+      }
     </div>
   </div>
 </app-patient-shell>
 
-<ng-template #loadingState>
-  <div class="empty-state">
-    <div class="spinner"></div>
-    Loading records...
+<!-- Upload Modal -->
+@if (showUploadModal()) {
+<div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+  <!-- Backdrop -->
+  <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" (click)="closeUploadModal()"></div>
+  
+  <!-- Modal -->
+  <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-lg w-full overflow-hidden">
+    <!-- Header -->
+    <div class="p-6 border-b border-gray-100 dark:border-gray-700">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
+            <svg class="w-6 h-6 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+            </svg>
+          </div>
+          <div>
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Upload Medical Record</h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400">Add a new record to your history</p>
+          </div>
+        </div>
+        <button type="button" (click)="closeUploadModal()" class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+    
+    <!-- Body -->
+    <div class="p-6 space-y-4">
+      <!-- File Upload Area -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">File (Optional)</label>
+        <input type="file" #fileInput (change)="onFileSelect($event)" accept=".pdf,.png,.jpg,.jpeg" class="hidden">
+        
+        @if (!selectedFile()) {
+        <div (click)="triggerFileInput()" class="border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-xl p-8 text-center cursor-pointer hover:border-emerald-400 dark:hover:border-emerald-500 transition-colors">
+          <svg class="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+          </svg>
+          <p class="text-gray-600 dark:text-gray-400 mb-1">Click to upload or drag and drop</p>
+          <p class="text-sm text-gray-400 dark:text-gray-500">PDF, PNG, JPEG up to 10MB</p>
+        </div>
+        } @else {
+        <div class="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-200 dark:border-gray-700">
+          <div class="w-12 h-12 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0">
+            <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="font-medium text-gray-900 dark:text-white truncate">{{ selectedFile()?.name }}</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">{{ formatFileSize(selectedFile()?.size || 0) }}</p>
+          </div>
+          <button type="button" (click)="removeSelectedFile()" class="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+        }
+      </div>
+      
+      <!-- Title -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Title *</label>
+        <input type="text" [(ngModel)]="uploadForm.title" placeholder="e.g., Blood Test Results" class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all">
+      </div>
+      
+      <!-- Type -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Record Type</label>
+        <select [(ngModel)]="uploadForm.type" class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all">
+          <option value="lab">Lab Result</option>
+          <option value="prescription">Prescription</option>
+          <option value="imaging">Imaging</option>
+          <option value="diagnosis">Diagnosis</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+      
+      <!-- Date -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Record Date</label>
+        <input type="date" [(ngModel)]="uploadForm.recordDate" class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all">
+      </div>
+      
+      <!-- Notes -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Notes (Optional)</label>
+        <textarea [(ngModel)]="uploadForm.notes" rows="3" placeholder="Add any additional notes..." class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all resize-none"></textarea>
+      </div>
+    </div>
+    
+    <!-- Footer -->
+    <div class="p-6 border-t border-gray-100 dark:border-gray-700 flex gap-3">
+      <button type="button" (click)="closeUploadModal()" class="flex-1 px-4 py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-medium rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
+        Cancel
+      </button>
+      <button type="button" (click)="uploadRecord()" [disabled]="isUploading() || !uploadForm.title.trim()" class="flex-1 px-4 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-medium rounded-xl hover:from-emerald-600 hover:to-teal-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+        @if (!isUploading()) {
+        Upload Record
+        } @else {
+        <span class="inline-flex items-center gap-2">
+          <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          Uploading...
+        </span>
+        }
+      </button>
+    </div>
   </div>
-</ng-template>
+</div>
+}
 

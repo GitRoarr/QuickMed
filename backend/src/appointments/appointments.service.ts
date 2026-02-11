@@ -344,7 +344,9 @@ export class AppointmentsService {
       // Receptionist can cancel appointments
     }
 
-    if (status === AppointmentStatus.COMPLETED) {
+    // If already completed, we might later add logic
+    // to tear down any associated resources (video room, etc.)
+    if (appointment.status === AppointmentStatus.COMPLETED) {
       // TODO: Add logic to destroy video call/chat room
     }
 
