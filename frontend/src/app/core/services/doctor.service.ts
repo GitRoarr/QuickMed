@@ -202,4 +202,12 @@ export class DoctorService {
   getAvailability(doctorId: string, date: string): Observable<string[]> {
     return this.http.get<string[]>(`${this.apiUrl}/${doctorId}/availability`, { params: { date } });
   }
+
+  getAppointmentDetails(appointmentId: string): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/appointments/${appointmentId}`);
+  }
+
+  getAppointmentsForPatient(patientId: string): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/appointments/patient/${patientId}`);
+  }
 }

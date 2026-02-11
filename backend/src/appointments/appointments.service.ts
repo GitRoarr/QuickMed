@@ -256,7 +256,31 @@ export class AppointmentsService {
       throw new NotFoundException(`Appointment with ID ${id} not found`);
     }
 
-    return appointment;
+    // Fetch related medical records
+    const medicalRecordsService = (this as any).medicalRecordsService;
+    const prescriptionsService = (this as any).prescriptionsService;
+    const consultationsService = (this as any).consultationsService;
+
+    let medicalRecords = [];
+    let prescriptions = [];
+    let consultation = null;
+
+    if (medicalRecordsService && typeof medicalRecordsService.findByAppointment === 'function') {
+      medicalRecords = await medicalRecordsService.findByAppointment(id);
+    }
+    if (prescriptionsService && typeof prescriptionsService.findByAppointment === 'function') {
+      prescriptions = await prescriptionsService.findByAppointment(id, appointment.doctorId);
+    }
+    if (consultationsService && typeof consultationsService.findByAppointmentId === 'function') {
+      consultation = await consultationsService.findByAppointmentId(id);
+    }
+
+    return {
+      ...appointment,
+      medicalRecords,
+      prescriptions,
+      consultation,
+    };
   }
 
   async update(id: string, updateAppointmentDto: UpdateAppointmentDto, user: User): Promise<Appointment> {

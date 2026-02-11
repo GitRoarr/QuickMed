@@ -1,5 +1,11 @@
 <app-doctor-header></app-doctor-header>
 <div class="main">
+  <ng-template #loading>
+    <div class="loading-state">Loading patient details...</div>
+  </ng-template>
+  <ng-template #noData>
+    <div class="empty-state">No patient data found.</div>
+  </ng-template>
   <ng-container *ngIf="!isLoading(); else loading">
     <ng-container *ngIf="detail() as detailData; else noData">
       <button (click)="navigate('/doctor/patients')" class="btn btn-ghost mb-4"><i class="bi bi-arrow-left"></i> Back to Patients</button>
@@ -34,23 +40,29 @@
       <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
         <div class="card">
           <div class="font-bold mb-2 text-muted text-xs">PERSONAL INFORMATION</div>
-          <div>Patient ID: <span class="font-semibold">{{ patient()?.patientId || 'N/A' }}</span></div>
+          <div>Patient ID: <span class="font-semibold">{{ patient()?.patientId ? patient()?.patientId : 'N/A' }}</span></div>
           <div>Age: <span class="font-semibold">{{ getAge() }}</span></div>
-          <div>Gender: <span class="font-semibold">{{ patient()?.gender | titlecase || 'N/A' }}</span></div>
-          <div>Blood Type: <span class="font-semibold">{{ patient()?.bloodType || 'Unknown' }}</span></div>
+          <div>Gender: <span class="font-semibold">{{ patient()?.gender ? (patient()?.gender | titlecase) : 'N/A' }}</span></div>
+          <div>Blood Type: <span class="font-semibold">{{ patient()?.bloodType ? patient()?.bloodType : 'Unknown' }}</span></div>
         </div>
         <div class="card">
           <div class="font-bold mb-2 text-muted text-xs">CONTACT DETAILS</div>
-          <div>Email: <span class="font-semibold">{{ patient()?.email || 'N/A' }}</span></div>
-          <div>Phone: <span class="font-semibold">{{ patient()?.phoneNumber || 'N/A' }}</span></div>
-          <div>Address: <span class="font-semibold">{{ patient()?.address || 'N/A' }}</span></div>
+          <div>Email: <span class="font-semibold">{{ patient()?.email ? patient()?.email : 'N/A' }}</span></div>
+          <div>Phone: <span class="font-semibold">{{ patient()?.phoneNumber ? patient()?.phoneNumber : 'N/A' }}</span></div>
+          <div>Address: <span class="font-semibold">{{ patient()?.address ? patient()?.address : 'N/A' }}</span></div>
         </div>
         <div class="card">
           <div class="font-bold mb-2 text-muted text-xs">MEDICAL INFO</div>
-          <div>Allergies: <span class="font-semibold">{{ patient()?.allergies || 'None reported' }}</span></div>
-          <div>Emergency Contact: <span class="font-semibold">{{ patient()?.emergencyContact || 'Not provided' }}</span></div>
+          <div>Allergies: <span class="font-semibold">{{ patient()?.allergies ? patient()?.allergies : 'None reported' }}</span></div>
+          <div>Emergency Contact: <span class="font-semibold">{{ patient()?.emergencyContact ? patient()?.emergencyContact : 'Not provided' }}</span></div>
         </div>
       </div>
+        <ng-template #loading>
+          <div class="loading-state">Loading patient details...</div>
+        </ng-template>
+        <ng-template #noData>
+          <div class="empty-state">No patient data found.</div>
+        </ng-template>
       <!-- Tabs Section -->
       <div class="card">
         <div class="flex border-b mb-4">

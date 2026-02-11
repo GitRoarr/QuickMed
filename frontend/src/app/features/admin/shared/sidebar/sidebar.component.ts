@@ -27,6 +27,7 @@ export class SidebarComponent {
   @Input() collapsed: boolean = false;
   themeService = inject(ThemeService);
   private authService = inject(AuthService);
+  darkTheme = false;
 
   constructor(private router: Router) {}
 
@@ -47,5 +48,13 @@ export class SidebarComponent {
 
   logout(): void {
     this.authService.logout();
+  }
+
+  ngOnInit(): void {
+    // Listen for theme changes (example)
+    // Replace with your actual theme service or header event
+    document.body.addEventListener('themeChange', (e: any) => {
+      this.darkTheme = e.detail === 'dark';
+    });
   }
 }

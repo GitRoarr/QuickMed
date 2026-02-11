@@ -183,10 +183,47 @@
   justify-content: center;
 }
 
+/* Sidebar base styles */
+.sidebar {
+  background: #fff;
+  color: #222;
+  transition: background 0.3s, color 0.3s;
+}
+
+/* Dark theme styles */
+.sidebar.dark-theme {
+  background: #18181b;
+  color: #f3f4f6;
+}
+
+/* Sidebar menu item styles */
+.sidebar .menu-item {
+  border-radius: 12px;
+  padding: 0.75rem 1.25rem;
+  margin-bottom: 0.5rem;
+  transition: background 0.2s, color 0.2s;
+}
+.sidebar .menu-item.active {
+  background: #6366f1;
+  color: #fff;
+}
+.sidebar .menu-item:hover {
+  background: #27272a;
+  color: #fff;
+}
+
 /* Responsive */
 @media (max-width: 1024px) {
   .receptionist-sidebar {
     position: fixed;
     transform: translateX(0);
+  }
+}
+
+@media (max-width: 900px) {
+  .sidebar {
+    width: 100vw;
+    min-width: unset;
+    border-radius: 0;
   }
 }

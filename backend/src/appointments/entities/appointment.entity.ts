@@ -72,4 +72,13 @@ export class Appointment extends BaseEntity {
 
   @Column()
   doctorId: string;
+
+  @Column({ type: 'json', nullable: true })
+  medicalRecords?: any[];
+
+  @Column({ type: 'json', nullable: true })
+  prescriptions?: any[];
+
+  @Column({ type: 'json', nullable: true })
+  consultation?: any;
 }
