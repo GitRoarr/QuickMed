@@ -322,9 +322,26 @@ button {
 :host-context(.light-theme) .appointment-card {
   border: none !important;
 }
-
-:host-context(.dark-theme) .btn-ghost,
+:host-context(.dark-theme) .card,
+:host-context(.dark-theme) .stat-card,
+:host-context(.dark-theme) section,
 :host-context(.dark-theme) nav,
 :host-context(.dark-theme) .appointment-card {
+  background: #181a20;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.16);
+  border-radius: 12px;
+  border: none !important;
+}
+:host-context(.dark-theme) .btn-ghost {
+  color: #16a34a;
+  background: #181a20;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.16);
+  border: none !important;
+}
+:host-context(.dark-theme) .btn {
+  background: #16a34a;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.16);
   border: none !important;
 }
