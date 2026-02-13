@@ -43,13 +43,25 @@ export interface CreateMedicalRecordDto {
   status?: 'verified' | 'pending' | 'rejected';
 }
 
+export interface MedicalRecordStats {
+  total: number;
+  labCount: number;
+  imagingCount: number;
+  diagnosisCount: number;
+  prescriptionCount: number;
+  otherCount: number;
+  verifiedCount: number;
+  pendingCount: number;
+  thisWeekCount?: number;
+}
+
 @Injectable({
   providedIn: 'root',
 })
 export class MedicalRecordService {
   private readonly API_URL = `${environment.apiUrl}/medical-records`;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   create(data: CreateMedicalRecordDto): Observable<MedicalRecord> {
     return this.http.post<MedicalRecord>(this.API_URL, data);
@@ -61,6 +73,10 @@ export class MedicalRecordService {
       params = params.set('search', search);
     }
     return this.http.get<MedicalRecord[]>(`${this.API_URL}/my`, { params });
+  }
+
+  getStats(): Observable<MedicalRecordStats> {
+    return this.http.get<MedicalRecordStats>(`${this.API_URL}/stats`);
   }
 
   getByPatient(patientId: string): Observable<MedicalRecord[]> {
@@ -85,6 +101,10 @@ export class MedicalRecordService {
 
   download(id: string): Observable<{ url: string }> {
     return this.http.get<{ url: string }>(`${this.API_URL}/${id}/download`);
+  }
+
+  updateStatus(id: string, status: string): Observable<MedicalRecord> {
+    return this.http.patch<MedicalRecord>(`${this.API_URL}/${id}/status`, { status });
   }
 
   delete(id: string): Observable<void> {

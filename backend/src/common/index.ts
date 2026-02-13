@@ -15,6 +15,8 @@ export enum AppointmentStatus {
   WAITING = 'waiting',
   IN_PROGRESS = 'in-progress',
   SCHEDULED = 'scheduled',
+  MISSED = 'missed',
+  OVERDUE = 'overdue',
 }
 
 export enum AppointmentType {

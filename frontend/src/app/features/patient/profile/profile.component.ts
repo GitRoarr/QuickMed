@@ -4,6 +4,7 @@ import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { PatientShellComponent } from '../shared/patient-shell/patient-shell.component';
 import { AuthService } from '@core/services/auth.service';
 import { UserService } from '@core/services/user.service';
+import { ToastService } from '@core/services/toast.service';
 
 @Component({
   selector: 'app-patient-profile',
@@ -16,6 +17,7 @@ export class ProfileComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly userService = inject(UserService);
   private readonly fb = inject(FormBuilder);
+  private readonly toast = inject(ToastService);
 
   user = signal(this.authService.currentUser());
   saving = signal(false);
@@ -72,9 +74,9 @@ export class ProfileComponent implements OnInit {
       bloodType: this.profileForm.value.bloodType,
       allergies: allergiesRaw
         ? (allergiesRaw as string)
-            .split(',')
-            .map((a) => a.trim())
-            .filter(Boolean)
+          .split(',')
+          .map((a) => a.trim())
+          .filter(Boolean)
         : [],
       bloodPressureSystolic: this.toNumber(this.profileForm.value.bloodPressureSystolic),
       bloodPressureDiastolic: this.toNumber(this.profileForm.value.bloodPressureDiastolic),
@@ -90,9 +92,32 @@ export class ProfileComponent implements OnInit {
         this.authService.setUser(updated);
         this.patchForm(updated);
         this.saving.set(false);
+        this.toast.success('Profile updated successfully');
       },
-      error: () => this.saving.set(false),
+      error: (err) => {
+        this.saving.set(false);
+        this.toast.error(err.error?.message || 'Failed to update profile');
+      },
     });
+  }
+
+  onFileSelect(event: any): void {
+    const file = event.target.files[0];
+    if (file && this.user()) {
+      this.saving.set(true);
+      this.userService.updateAvatar(this.user()!.id, file).subscribe({
+        next: (updated) => {
+          this.user.set(updated);
+          this.authService.setUser(updated);
+          this.saving.set(false);
+          this.toast.success('Avatar updated!');
+        },
+        error: () => {
+          this.saving.set(false);
+          this.toast.error('Failed to upload avatar');
+        },
+      });
+    }
   }
 
   private toNumber(value: any, allowFloat = false): number | null {

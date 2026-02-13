@@ -4,21 +4,15 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { DoctorPatientSummary, DoctorService } from '@core/services/doctor.service';
 import { AuthService } from '@core/services/auth.service';
-import { BadgeService } from '@core/services/badge.service';
 import { MessageService } from '@core/services/message.service';
 import { AppointmentService } from '@core/services/appointment.service';
+import { MedicalRecordService } from '@core/services/medical-record.service';
+import { PrescriptionService } from '@core/services/prescription.service';
+import { NotificationService } from '@core/services/notification.service';
 import { forkJoin } from 'rxjs';
 import { DoctorHeaderComponent } from '../shared/doctor-header/doctor-header.component';
 import { DoctorSidebarComponent } from '../shared/doctor-sidebar/doctor-sidebar.component';
 import { ToastService } from '@core/services/toast.service';
-
-interface MenuItem {
-  label: string;
-  icon?: string;
-  route: string;
-  badge?: number;
-  imgSrc?: string;
-}
 
 @Component({
   selector: 'app-doctor-patients',
@@ -31,9 +25,11 @@ export class PatientsComponent implements OnInit {
   private doctorService = inject(DoctorService);
   private authService = inject(AuthService);
   private router = inject(Router);
-  private badgeService = inject(BadgeService);
   private appointmentService = inject(AppointmentService);
   private messageService = inject(MessageService);
+  private medicalRecordService = inject(MedicalRecordService);
+  private prescriptionService = inject(PrescriptionService);
+  private notificationService = inject(NotificationService);
   private toast = inject(ToastService);
 
   // Data Signals
@@ -45,56 +41,19 @@ export class PatientsComponent implements OnInit {
   statusFilter = signal<'all' | 'new' | 'active' | 'needs-review' | 'completed'>('all');
 
   readonly filterPills = [
-    { value: 'all', label: 'All' },
-    { value: 'new', label: 'New' },
-    { value: 'active', label: 'Active' },
-    { value: 'needs-review', label: 'Needs Review' },
-    { value: 'completed', label: 'Completed' },
+    { value: 'all', label: 'All', icon: 'bi-grid' },
+    { value: 'new', label: 'New', icon: 'bi-star' },
+    { value: 'active', label: 'Active', icon: 'bi-check-circle' },
+    { value: 'needs-review', label: 'Needs Review', icon: 'bi-exclamation-circle' },
+    { value: 'completed', label: 'Completed', icon: 'bi-check2-all' },
   ] as const;
 
   // UI/Theme Signals
   currentUser = signal<any>(null);
-  menuItems = signal<MenuItem[]>([]);
-  unreadNotifications = signal(0); // For topbar
+  unreadNotifications = signal(0);
 
   // Computed Logic
-  filteredPatients = computed(() => {
-    const term = this.searchTerm().toLowerCase().trim();
-    const status = this.statusFilter();
-
-    let list = [...this.patients()];
-
-    // Status Filter
-    if (status === 'active') {
-      list = list.filter((p) => p.isActive !== false);
-    } else if (status === 'new') {
-      list = list.filter((p) => this.isNewPatient(p));
-    } else if (status === 'needs-review') {
-      list = list.filter((p) => this.isNeedsReview(p));
-    } else if (status === 'completed') {
-      list = list.filter((p) => this.isCompleted(p));
-    }
-
-    // Search Filter
-    if (term) {
-      list = list.filter((p) => {
-        const name = this.getFullName(p).toLowerCase();
-        const email = (p.email || '').toLowerCase();
-        const phone = (p.phoneNumber || '').toLowerCase();
-        const condition = (p.condition || '').toLowerCase();
-        return name.includes(term) || email.includes(term) || phone.includes(term) || condition.includes(term);
-      });
-    }
-
-    // Default: Recent
-    list.sort((a, b) => {
-      const aDate = this.getLastAppointmentDate(a)?.getTime() || 0;
-      const bDate = this.getLastAppointmentDate(b)?.getTime() || 0;
-      return bDate - aDate;
-    });
-
-    return list;
-  });
+  filteredPatients = computed(() => this.patients());
 
   // Stats
   totalPatients = computed(() => this.patients().length);
@@ -103,43 +62,31 @@ export class PatientsComponent implements OnInit {
   followUpsDue = computed(() => this.patients().filter((p) => this.isNeedsReview(p)).length);
   totalVisits = computed(() => this.patients().reduce((acc, p) => acc + (p.totalAppointments || 0), 0));
 
-  constructor() {
-  }
-
   ngOnInit(): void {
     this.loadUserData();
     this.loadPatients();
-    this.loadBadgeCounts();
+    this.loadNotificationBadge();
+    effect(() => {
+      this.searchTerm();
+      this.statusFilter();
+      this.loadPatients();
+    });
   }
 
   loadUserData(): void {
     this.currentUser.set(this.authService.currentUser());
   }
 
-  loadBadgeCounts(): void {
-    forkJoin({
-      pending: this.appointmentService.getPendingCount(),
-      messages: this.messageService.getUnreadCount()
-    }).subscribe(({ pending, messages }) => {
-      this.updateMenuItems(pending.count || 0, messages.count || 0);
+  loadNotificationBadge(): void {
+    this.notificationService.getUnreadCount().subscribe({
+      next: (count) => this.unreadNotifications.set(count || 0),
+      error: () => { }
     });
-  }
-
-  updateMenuItems(pendingCount: number, messageCount: number): void {
-    this.menuItems.set([
-      { label: 'Dashboard', icon: 'bi-house-door', route: '/doctor/dashboard' },
-      { label: 'Appointments', icon: 'bi-calendar-check', route: '/doctor/appointments', badge: pendingCount || undefined },
-      { label: 'Schedule', icon: 'bi-calendar3', route: '/doctor/schedule' },
-      { label: 'My Patients', icon: 'bi-people', route: '/doctor/patients' },
-      { label: 'Prescriptions', route: '/doctor/prescriptions', imgSrc: 'https://img.icons8.com/ios-filled/24/prescription.png' },
-      { label: 'Messages', icon: 'bi-chat-dots', route: '/doctor/messages', badge: messageCount || undefined },
-      { label: 'Settings', icon: 'bi-gear', route: '/doctor/settings' },
-    ]);
   }
 
   loadPatients() {
     this.isLoading.set(true);
-    this.doctorService.getPatients(1, 100).subscribe({
+    this.doctorService.getPatients(1, 100, this.searchTerm(), this.statusFilter()).subscribe({
       next: (data) => {
         this.patients.set(data.patients || []);
         this.isLoading.set(false);
@@ -148,10 +95,45 @@ export class PatientsComponent implements OnInit {
         console.error('Failed to load patients', err);
         this.patients.set([]);
         this.isLoading.set(false);
-        this.toast.error('Failed to load patients', { title: 'Patients' });
+        this.toast.error('Failed to load patients');
       }
     });
   }
+
+
+  viewRecords(p: DoctorPatientSummary, event: Event): void {
+    event.stopPropagation();
+    this.router.navigate(['/doctor/records'], { queryParams: { patientId: p.patientId } });
+  }
+
+  messagePatient(p: DoctorPatientSummary, event: Event): void {
+    event.stopPropagation();
+    this.messageService.createConversation(p.patientId).subscribe({
+      next: (conversation) => {
+        this.router.navigate(['/doctor/messages'], {
+          queryParams: { conversationId: conversation.id, patientId: p.patientId }
+        });
+      },
+      error: () => {
+        this.router.navigate(['/doctor/messages'], {
+          queryParams: { patientId: p.patientId }
+        });
+      }
+    });
+  }
+
+  consultPatient(p: DoctorPatientSummary, event: Event): void {
+    event.stopPropagation();
+    this.router.navigate(['/doctor/appointments'], {
+      queryParams: { action: 'consult', patientId: p.patientId, patientName: this.getFullName(p) }
+    });
+  }
+
+  viewPatientDetail(p: DoctorPatientSummary): void {
+    this.router.navigate(['/doctor/patients', p.patientId]);
+  }
+
+  
 
   isNewPatient(p: DoctorPatientSummary): boolean {
     const last = this.getLastAppointmentDate(p);
@@ -200,7 +182,7 @@ export class PatientsComponent implements OnInit {
 
   formatLastSeen(p: DoctorPatientSummary) {
     const last = this.getLastAppointmentDate(p);
-    if (!last) return 'No visits yet';
+    if (!last) return 'No visits';
     const now = new Date();
     const diffMs = now.getTime() - last.getTime();
     const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
@@ -209,21 +191,6 @@ export class PatientsComponent implements OnInit {
     if (days < 7) return `${days}d ago`;
     if (days < 30) return `${Math.floor(days / 7)}w ago`;
     return `${Math.floor(days / 30)}mo ago`;
-  }
-
-  getSegment(p: DoctorPatientSummary) {
-    if ((p.totalAppointments || 0) >= 5) return 'High touch';
-    if ((p.totalAppointments || 0) >= 2) return 'Established';
-    return 'New';
-  }
-
-  getStatusTone(p: DoctorPatientSummary) {
-    if (p.isActive === false) return 'muted';
-    const lastStatus = (p.lastStatus || '').toLowerCase();
-    if (lastStatus === 'pending') return 'warning';
-    if (lastStatus === 'cancelled') return 'error';
-    if (lastStatus === 'completed' || lastStatus === 'confirmed') return 'success';
-    return 'info';
   }
 
   getPatientMeta(p: DoctorPatientSummary): string {

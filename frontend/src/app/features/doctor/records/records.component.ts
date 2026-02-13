@@ -1,10 +1,12 @@
 import { Component, OnInit, signal, inject, computed } from '@angular/core';
 import { CommonModule, DatePipe, TitleCasePipe } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { DoctorSidebarComponent } from '../shared/doctor-sidebar/doctor-sidebar.component';
 import { DoctorHeaderComponent } from '../shared/doctor-header/doctor-header.component';
 import { AuthService } from '@core/services/auth.service';
-import { MedicalRecordService, MedicalRecord } from '@core/services/medical-record.service';
+import { MedicalRecordService, MedicalRecord, MedicalRecordStats, CreateMedicalRecordDto } from '@core/services/medical-record.service';
+import { DoctorService, DoctorPatientSummary } from '@core/services/doctor.service';
 import { NotificationService } from '@core/services/notification.service';
 import { ToastService } from '@core/services/toast.service';
 
@@ -16,6 +18,7 @@ import { ToastService } from '@core/services/toast.service';
     DatePipe,
     TitleCasePipe,
     RouterModule,
+    FormsModule,
     DoctorSidebarComponent,
     DoctorHeaderComponent
   ],
@@ -24,6 +27,7 @@ import { ToastService } from '@core/services/toast.service';
 export class RecordsComponent implements OnInit {
   private authService = inject(AuthService);
   private medicalRecordService = inject(MedicalRecordService);
+  private doctorService = inject(DoctorService);
   private notificationService = inject(NotificationService);
   private router = inject(Router);
   private toast = inject(ToastService);
@@ -35,13 +39,45 @@ export class RecordsComponent implements OnInit {
   currentUser = signal<any>(null);
   unreadNotificationCount = signal(0);
 
+  // Stats from backend
+  stats = signal<MedicalRecordStats>({
+    total: 0, labCount: 0, imagingCount: 0, diagnosisCount: 0,
+    prescriptionCount: 0, otherCount: 0, verifiedCount: 0, pendingCount: 0, thisWeekCount: 0
+  });
+
+  // Create modal state
+  showCreateModal = signal(false);
+  isCreating = signal(false);
+  patients = signal<DoctorPatientSummary[]>([]);
+  newRecord: CreateMedicalRecordDto = {
+    title: '',
+    type: 'lab',
+    patientId: '',
+    notes: '',
+    description: '',
+    recordDate: new Date().toISOString().split('T')[0],
+    status: 'pending',
+  };
+
+  // Detail modal
+  showDetailModal = signal(false);
+  selectedRecord = signal<MedicalRecord | null>(null);
+
   typeFilters = [
-    { label: 'All', value: 'all' as const },
-    { label: 'Lab Reports', value: 'lab' as const },
-    { label: 'Imaging', value: 'imaging' as const },
-    { label: 'Prescriptions', value: 'prescription' as const },
-    { label: 'Diagnosis', value: 'diagnosis' as const },
-    { label: 'Other', value: 'other' as const },
+    { label: 'All', value: 'all' as const, icon: 'bi-grid' },
+    { label: 'Lab Reports', value: 'lab' as const, icon: 'bi-clipboard2-pulse' },
+    { label: 'Imaging', value: 'imaging' as const, icon: 'bi-image' },
+    { label: 'Prescriptions', value: 'prescription' as const, icon: 'bi-capsule' },
+    { label: 'Diagnosis', value: 'diagnosis' as const, icon: 'bi-file-earmark-text' },
+    { label: 'Other', value: 'other' as const, icon: 'bi-file-earmark' },
+  ];
+
+  recordTypes = [
+    { label: 'Lab Report', value: 'lab' },
+    { label: 'Imaging Study', value: 'imaging' },
+    { label: 'Prescription', value: 'prescription' },
+    { label: 'Diagnosis Note', value: 'diagnosis' },
+    { label: 'Other Document', value: 'other' },
   ];
 
   filteredRecords = computed(() => {
@@ -56,6 +92,7 @@ export class RecordsComponent implements OnInit {
   ngOnInit(): void {
     this.loadUserData();
     this.loadRecords();
+    this.loadStats();
     this.loadUnreadNotifications();
   }
 
@@ -77,6 +114,13 @@ export class RecordsComponent implements OnInit {
     });
   }
 
+  loadStats(): void {
+    this.medicalRecordService.getStats().subscribe({
+      next: (s) => this.stats.set(s),
+      error: () => { } // fail silently for stats
+    });
+  }
+
   onSearchChange(): void {
     this.loadRecords();
   }
@@ -91,24 +135,93 @@ export class RecordsComponent implements OnInit {
     });
   }
 
-  getCountByType(type: string): number {
-    return this.records().filter(r => r.type === type).length;
+  // Create record modal
+  openCreateModal(): void {
+    this.showCreateModal.set(true);
+    this.resetNewRecord();
+    // Load patients
+    this.doctorService.getPatients(1, 200).subscribe({
+      next: (res) => this.patients.set(res.patients || []),
+      error: () => this.toast.error('Failed to load patients')
+    });
   }
 
-  getVerifiedCount(): number {
-    return this.records().filter(r => r.status === 'verified').length;
+  closeCreateModal(): void {
+    this.showCreateModal.set(false);
   }
 
-  getPendingCount(): number {
-    return this.records().filter(r => r.status === 'pending' || !r.status).length;
+  resetNewRecord(): void {
+    this.newRecord = {
+      title: '',
+      type: 'lab',
+      patientId: '',
+      notes: '',
+      description: '',
+      recordDate: new Date().toISOString().split('T')[0],
+      status: 'pending',
+    };
+  }
+
+  submitRecord(): void {
+    if (!this.newRecord.title || !this.newRecord.patientId) {
+      this.toast.error('Please fill in all required fields');
+      return;
+    }
+    this.isCreating.set(true);
+    this.medicalRecordService.create(this.newRecord).subscribe({
+      next: () => {
+        this.toast.success('Medical record created successfully!');
+        this.showCreateModal.set(false);
+        this.isCreating.set(false);
+        this.loadRecords();
+        this.loadStats();
+      },
+      error: () => {
+        this.isCreating.set(false);
+        this.toast.error('Failed to create record');
+      }
+    });
+  }
+
+  // Detail modal
+  openDetailModal(record: MedicalRecord): void {
+    this.selectedRecord.set(record);
+    this.showDetailModal.set(true);
+  }
+
+  closeDetailModal(): void {
+    this.showDetailModal.set(false);
+    this.selectedRecord.set(null);
+  }
+
+  // Status management
+  verifyRecord(record: MedicalRecord): void {
+    this.medicalRecordService.updateStatus(record.id, 'verified').subscribe({
+      next: (updated) => {
+        this.toast.success('Record verified');
+        this.loadRecords();
+        this.loadStats();
+        if (this.selectedRecord()?.id === record.id) {
+          this.selectedRecord.set({ ...record, status: 'verified' });
+        }
+      },
+      error: () => this.toast.error('Failed to verify record')
+    });
+  }
+
+  rejectRecord(record: MedicalRecord): void {
+    this.medicalRecordService.updateStatus(record.id, 'rejected').subscribe({
+      next: () => {
+        this.toast.success('Record marked as rejected');
+        this.loadRecords();
+        this.loadStats();
+      },
+      error: () => this.toast.error('Failed to update record')
+    });
   }
 
   viewRecord(record: MedicalRecord): void {
-    if (record.fileUrl) {
-      window.open(record.fileUrl, '_blank');
-    } else {
-      this.toast.info('No file attached to this record');
-    }
+    this.openDetailModal(record);
   }
 
   downloadRecord(record: MedicalRecord): void {
@@ -127,13 +240,11 @@ export class RecordsComponent implements OnInit {
       next: () => {
         this.toast.success('Record deleted successfully');
         this.loadRecords();
+        this.loadStats();
+        if (this.showDetailModal()) this.closeDetailModal();
       },
       error: () => this.toast.error('Failed to delete record')
     });
-  }
-
-  uploadRecord(): void {
-    this.router.navigate(['/doctor/records/upload']);
   }
 
   getPatientName(record: MedicalRecord): string {
@@ -151,6 +262,28 @@ export class RecordsComponent implements OnInit {
       other: 'Other Document'
     };
     return labels[type] || type.charAt(0).toUpperCase() + type.slice(1);
+  }
+
+  getRecordTypeIcon(type: string): string {
+    const icons: Record<string, string> = {
+      lab: 'bi-clipboard2-pulse',
+      prescription: 'bi-capsule',
+      imaging: 'bi-image',
+      diagnosis: 'bi-file-earmark-text',
+      other: 'bi-file-earmark'
+    };
+    return icons[type] || 'bi-file-earmark';
+  }
+
+  getRecordTypeColor(type: string): string {
+    const colors: Record<string, string> = {
+      lab: 'purple',
+      prescription: 'emerald',
+      imaging: 'cyan',
+      diagnosis: 'orange',
+      other: 'gray'
+    };
+    return colors[type] || 'gray';
   }
 
   formatFileSize(bytes?: number): string {
@@ -173,6 +306,26 @@ export class RecordsComponent implements OnInit {
     return parts.length >= 2
       ? (parts[0][0] + parts[1][0]).toUpperCase()
       : name.substring(0, 2).toUpperCase();
+  }
+
+  getPatientInitials(name: string): string {
+    const parts = name.trim().split(' ');
+    return parts.length >= 2
+      ? (parts[0][0] + parts[1][0]).toUpperCase()
+      : name.substring(0, 2).toUpperCase();
+  }
+
+  getTimeSince(dateStr: string): string {
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diff = now.getTime() - date.getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 60) return `${mins}m ago`;
+    const hours = Math.floor(mins / 60);
+    if (hours < 24) return `${hours}h ago`;
+    const days = Math.floor(hours / 24);
+    if (days < 7) return `${days}d ago`;
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   }
 
   trackById(index: number, item: MedicalRecord): string {

@@ -90,8 +90,7 @@
         <div
           class="flex items-center gap-1 p-1 bg-[var(--surface-secondary)] rounded-xl w-full md:w-auto overflow-x-auto custom-scrollbar">
           <button *ngFor="let tab of ['all', 'pending', 'confirmed', 'completed', 'cancelled']"
-            (click)="selectedStatus.set(tab)"
-            [ngClass]="{'bg-[var(--surface)]': selectedStatus() === tab}"
+            (click)="selectedStatus.set(tab)" [ngClass]="{'bg-[var(--surface)]': selectedStatus() === tab}"
             [class.text-[var(--primary)]]="selectedStatus() === tab" [class.shadow-sm]="selectedStatus() === tab"
             [class.text-[var(--text-secondary)]]="selectedStatus() !== tab"
             class="px-4 py-2 rounded-lg text-sm font-bold capitalize transition-all duration-200 whitespace-nowrap hover:text-[var(--primary)]">
@@ -230,12 +229,13 @@
       </div>
 
       <!-- Appointment Details Modal -->
-      <app-appointment-details-page
-        *ngIf="showDetailsModal() && selectedAppointment"
-        [appointmentId]="selectedAppointment.id"
-        (closeModal)="closeDetailsModal()"
-        class="modal-overlay"
-      ></app-appointment-details-page>
+      <app-appointment-details-page *ngIf="showDetailsModal() && selectedAppointment"
+        [appointmentId]="selectedAppointment.id" (closeModal)="closeDetailsModal()"
+        class="modal-overlay"></app-appointment-details-page>
+
+      <!-- Consultation View Modal -->
+      <app-consultation-view-modal *ngIf="showConsultationModal() && consultationAppointmentId()"
+        [appointmentId]="consultationAppointmentId()!" (close)="closeConsultationModal()"></app-consultation-view-modal>
 
     </div>
   </main>

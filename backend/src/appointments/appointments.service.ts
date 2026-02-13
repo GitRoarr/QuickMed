@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, BadRequestException, ForbiddenException, Logger } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { In, Repository } from "typeorm";
+import { In, Repository, LessThan } from "typeorm";
 import { Appointment } from "./entities/appointment.entity";
 import { AppointmentStatus, UserRole, PaymentStatus } from '../common/index'
 import { CreateAppointmentDto } from "./dto/create-appointment.dto";
@@ -412,6 +412,61 @@ export class AppointmentsService {
     return this.appointmentsRepository.count({
       where: { doctorId: doctorId, status: 'pending' as any }
     });
+  }
+
+  async markMissedAndOverdueAppointments() {
+    const now = new Date();
+    const todayStr = this.toDateString(now);
+    const timeStr = this.toTimeString(now);
+
+    this.logger.debug(`Checking appointments before ${todayStr} ${timeStr}`);
+
+    // Find appointments that should be marked as missed or overdue
+    // Logic: Date is before today OR (Date is today AND time is before current time)
+    // AND status is PENDING or CONFIRMED
+    const overdueAppointments = await this.appointmentsRepository.find({
+      where: [
+        {
+          appointmentDate: LessThan(todayStr as any),
+          status: In([AppointmentStatus.PENDING, AppointmentStatus.CONFIRMED, AppointmentStatus.SCHEDULED] as any),
+        },
+        {
+          appointmentDate: todayStr as any,
+          appointmentTime: LessThan(timeStr),
+          status: In([AppointmentStatus.PENDING, AppointmentStatus.CONFIRMED, AppointmentStatus.SCHEDULED] as any),
+        },
+      ],
+      relations: ['doctor', 'patient'],
+    });
+
+    if (overdueAppointments.length === 0) {
+      return;
+    }
+
+    this.logger.log(`Found ${overdueAppointments.length} overdue appointments to update`);
+
+    for (const appt of overdueAppointments) {
+      let notificationType: 'overdue' | 'missed' = 'overdue';
+      if (appt.status === AppointmentStatus.PENDING) {
+        appt.status = AppointmentStatus.MISSED;
+        notificationType = 'missed';
+      } else {
+        appt.status = AppointmentStatus.OVERDUE;
+        notificationType = 'overdue';
+      }
+
+      await this.appointmentsRepository.save(appt);
+
+      // Notify doctor
+      if (appt.doctor) {
+        await this.notificationIntegrationService.createAppointmentNotification(
+          appt,
+          notificationType,
+          appt.patient,
+          appt.doctor,
+        );
+      }
+    }
   }
 
   // helper inside the class (add near other private helpers)

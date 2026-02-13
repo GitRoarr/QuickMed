@@ -13,12 +13,20 @@ export interface Prescription {
     firstName: string;
     lastName: string;
   };
+  doctorId?: string;
+  doctor?: {
+    id: string;
+    firstName: string;
+    lastName: string;
+  };
   frequency: string;
   duration: string;
   prescriptionDate: string;
   status: 'active' | 'completed' | 'cancelled';
   notes?: string;
   instructions?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface CreatePrescriptionDto {
@@ -34,13 +42,22 @@ export interface CreatePrescriptionDto {
   instructions?: string;
 }
 
+export interface PrescriptionStats {
+  total: number;
+  activeCount: number;
+  completedCount: number;
+  cancelledCount: number;
+  thisWeekCount: number;
+  thisMonthCount: number;
+}
+
 @Injectable({
   providedIn: 'root',
 })
 export class PrescriptionService {
   private readonly API_URL = `${environment.apiUrl}/prescriptions`;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   create(data: CreatePrescriptionDto): Observable<Prescription> {
     return this.http.post<Prescription>(this.API_URL, data);
@@ -58,6 +75,10 @@ export class PrescriptionService {
       params = params.set('patientId', patientId);
     }
     return this.http.get<Prescription[]>(this.API_URL, { params });
+  }
+
+  getStats(): Observable<PrescriptionStats> {
+    return this.http.get<PrescriptionStats>(`${this.API_URL}/stats`);
   }
 
   getOne(id: string): Observable<Prescription> {

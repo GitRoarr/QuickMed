@@ -9,11 +9,16 @@ import { PrescriptionStatus } from './entities/prescription.entity';
 @Controller('prescriptions')
 @UseGuards(JwtAuthGuard)
 export class PrescriptionsController {
-  constructor(private readonly prescriptionsService: PrescriptionsService) {}
+  constructor(private readonly prescriptionsService: PrescriptionsService) { }
 
   @Post()
   create(@Body() createDto: CreatePrescriptionDto, @CurrentUser() user: User) {
     return this.prescriptionsService.create(createDto, user.id);
+  }
+
+  @Get('stats')
+  getStats(@CurrentUser() user: User) {
+    return this.prescriptionsService.getStats(user.id);
   }
 
   @Get()

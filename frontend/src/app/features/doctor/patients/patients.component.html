@@ -1,115 +1,185 @@
-<div class="flex-1 flex flex-col font-sans transition-colors duration-200">
+<div class="flex-1 flex flex-col min-w-0 bg-[var(--surface-secondary)]">
 
-  <main class="flex-1 flex flex-col overflow-hidden relative">
+  <!-- Shared Header -->
+  <app-doctor-header [initials]="getDoctorInitials()" [avatarUrl]="currentUser()?.avatar"
+    [unreadNotifications]="unreadNotifications()"></app-doctor-header>
 
-    <app-doctor-header [initials]="getDoctorInitials()" [avatarUrl]="currentUser()?.avatar"
-      [unreadNotifications]="unreadNotifications()"></app-doctor-header>
+  <!-- Page Content -->
+  <main class="flex-1 overflow-y-auto px-6 lg:px-10 pb-10">
 
-    <div class="flex-1 overflow-y-auto px-8 pb-8">
+    <!-- Page Header -->
+    <header class="mb-8 pt-2">
+      <h1 class="text-3xl lg:text-4xl font-bold text-[var(--text-primary)]">My Patients</h1>
+      <p class="text-[var(--text-secondary)] mt-2">Care continuity and patient management</p>
+    </header>
 
-      <header class="mb-8">
-        <h1 class="text-2xl font-bold text-[var(--text-primary)] mb-2">My Patients</h1>
-        <p class="text-[var(--text-secondary)]">Care continuity and patient management.</p>
-      </header>
-
-      <div class="stats-grid mb-6">
-        <div class="stat-card">
-          <div class="stat-value">{{ activePatients() }}</div>
-          <div class="stat-label">Active Patients</div>
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div
+        class="bg-[var(--surface-primary)] rounded-2xl p-5 shadow-sm border border-[var(--border-color)] hover:shadow-md hover:border-[var(--primary)]/20 transition-all duration-300 group cursor-default">
+        <div class="flex items-center gap-3 mb-3">
+          <div
+            class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+            <i class="bi bi-people text-white text-lg"></i>
+          </div>
         </div>
-        <div class="stat-card">
-          <div class="stat-value">{{ newThisWeek() }}</div>
-          <div class="stat-label">New This Week</div>
+        <p class="text-2xl font-bold text-[var(--text-primary)]">{{ activePatients() }}</p>
+        <p class="text-sm text-[var(--text-secondary)]">Active Patients</p>
+      </div>
+      <div
+        class="bg-[var(--surface-primary)] rounded-2xl p-5 shadow-sm border border-[var(--border-color)] hover:shadow-md hover:border-blue-400/20 transition-all duration-300 group cursor-default">
+        <div class="flex items-center gap-3 mb-3">
+          <div
+            class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+            <i class="bi bi-person-plus text-white text-lg"></i>
+          </div>
         </div>
-        <div class="stat-card">
-          <div class="stat-value">{{ followUpsDue() }}</div>
-          <div class="stat-label">Follow-ups Due</div>
+        <p class="text-2xl font-bold text-[var(--text-primary)]">{{ newThisWeek() }}</p>
+        <p class="text-sm text-[var(--text-secondary)]">New This Week</p>
+      </div>
+      <div
+        class="bg-[var(--surface-primary)] rounded-2xl p-5 shadow-sm border border-[var(--border-color)] hover:shadow-md hover:border-amber-400/20 transition-all duration-300 group cursor-default">
+        <div class="flex items-center gap-3 mb-3">
+          <div
+            class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+            <i class="bi bi-exclamation-circle text-white text-lg"></i>
+          </div>
         </div>
-        <div class="stat-card">
-          <div class="stat-value">{{ totalVisits() }}</div>
-          <div class="stat-label">Total Visits</div>
+        <p class="text-2xl font-bold text-[var(--text-primary)]">{{ followUpsDue() }}</p>
+        <p class="text-sm text-[var(--text-secondary)]">Follow-ups Due</p>
+      </div>
+      <div
+        class="bg-[var(--surface-primary)] rounded-2xl p-5 shadow-sm border border-[var(--border-color)] hover:shadow-md hover:border-purple-400/20 transition-all duration-300 group cursor-default">
+        <div class="flex items-center gap-3 mb-3">
+          <div
+            class="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-violet-600 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+            <i class="bi bi-calendar-check text-white text-lg"></i>
+          </div>
+        </div>
+        <p class="text-2xl font-bold text-[var(--text-primary)]">{{ totalVisits() }}</p>
+        <p class="text-sm text-[var(--text-secondary)]">Total Visits</p>
+      </div>
+    </div>
+
+    <!-- Search & Filters -->
+    <div class="flex flex-col lg:flex-row gap-4 mb-8">
+      <div class="relative flex-1 max-w-xl">
+        <i class="bi bi-search absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]"></i>
+        <input type="text" placeholder="Search by name, phone, condition..." [ngModel]="searchTerm()"
+          (ngModelChange)="searchTerm.set($event)"
+          class="w-full pl-11 pr-4 py-3.5 bg-[var(--surface-primary)] border border-[var(--border-color)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent transition-all" />
+      </div>
+      <div class="flex gap-2 overflow-x-auto pb-2 lg:pb-0">
+        <button *ngFor="let pill of filterPills" type="button" (click)="statusFilter.set(pill.value)"
+          class="px-4 py-2.5 rounded-xl font-medium whitespace-nowrap transition-all flex items-center gap-2" [ngClass]="statusFilter() === pill.value
+            ? 'bg-[var(--primary)] text-white shadow-md shadow-emerald-500/20'
+            : 'bg-[var(--surface-primary)] hover:bg-[var(--surface-tertiary)] border border-[var(--border-color)]'">
+          <i [class]="pill.icon" class="text-sm"></i>
+          {{ pill.label }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="isLoading()" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+      <div *ngFor="let _ of [1,2,3,4,5,6]"
+        class="bg-[var(--surface-primary)] rounded-2xl p-6 animate-pulse border border-[var(--border-color)]">
+        <div class="flex items-start gap-4 mb-5">
+          <div class="w-14 h-14 bg-gray-200 dark:bg-gray-700 rounded-xl"></div>
+          <div class="flex-1">
+            <div class="h-5 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-2"></div>
+            <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
+          </div>
+        </div>
+        <div class="grid grid-cols-3 gap-4 mb-5">
+          <div class="h-12 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
+          <div class="h-12 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
+          <div class="h-12 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
+        </div>
+        <div class="grid grid-cols-3 gap-3">
+          <div class="h-10 bg-gray-200 dark:bg-gray-700 rounded-xl"></div>
+          <div class="h-10 bg-gray-200 dark:bg-gray-700 rounded-xl"></div>
+          <div class="h-10 bg-gray-200 dark:bg-gray-700 rounded-xl"></div>
         </div>
       </div>
+    </div>
 
-      <div class="patients-toolbar mb-6">
-        <div class="search-wrap">
-          <i class="bi bi-search"></i>
-          <input
-            type="text"
-            [ngModel]="searchTerm()"
-            (ngModelChange)="searchTerm.set($event)"
-            placeholder="Search by name, phone, condition..."
-          />
+    <!-- Empty State -->
+    <div *ngIf="!isLoading() && filteredPatients().length === 0"
+      class="flex flex-col items-center justify-center py-24 bg-[var(--surface-primary)] rounded-2xl border border-dashed border-[var(--border-color)]">
+      <div
+        class="w-24 h-24 rounded-full bg-gradient-to-br from-emerald-100 to-teal-100 dark:from-emerald-900/30 dark:to-teal-900/30 flex items-center justify-center mb-6">
+        <i class="bi bi-people text-4xl text-emerald-500"></i>
+      </div>
+      <h3 class="text-xl font-semibold text-[var(--text-primary)] mb-2">No patients found</h3>
+      <p class="text-[var(--text-secondary)] text-center max-w-md">
+        {{ searchTerm() ? 'Try adjusting your search or filters' : 'Your patient list will appear here once patients
+        book appointments with you' }}
+      </p>
+    </div>
+
+    <!-- Patients Grid -->
+    <div *ngIf="!isLoading() && filteredPatients().length > 0"
+      class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+      <div *ngFor="let p of filteredPatients()"
+        class="bg-[var(--surface-primary)] rounded-2xl shadow-sm hover:shadow-xl border border-[var(--border-color)] hover:border-[var(--primary)]/30 transition-all duration-300 overflow-hidden group cursor-pointer"
+        (click)="viewPatientDetail(p)">
+
+        <!-- Patient Header -->
+        <div class="p-6 pb-4">
+          <div class="flex items-start gap-4">
+            <div
+              class="w-14 h-14 rounded-xl bg-gradient-to-br from-[var(--primary)]/15 to-emerald-500/10 flex items-center justify-center shrink-0 text-[var(--primary)] font-bold text-lg group-hover:scale-105 transition-transform">
+              {{ getInitials(p) }}
+            </div>
+            <div class="min-w-0 flex-1">
+              <div class="flex items-center gap-2.5 flex-wrap">
+                <h3
+                  class="font-bold text-lg text-[var(--text-primary)] truncate group-hover:text-[var(--primary)] transition-colors">
+                  {{ getFullName(p) }}</h3>
+                <span class="status-tag" [class]="getTagTone(p)">{{ getTag(p) }}</span>
+              </div>
+              <p class="text-sm text-[var(--text-secondary)] mt-0.5">{{ getPatientMeta(p) }}</p>
+            </div>
+          </div>
         </div>
 
-        <div class="filter-pills">
-          <button
-            *ngFor="let pill of filterPills"
-            type="button"
-            class="pill"
-            [class.active]="statusFilter() === pill.value"
-            (click)="statusFilter.set(pill.value)"
-          >
-            {{ pill.label }}
+        <!-- Patient Stats -->
+        <div class="px-6 pb-4 grid grid-cols-3 gap-3 border-t border-[var(--border-color)] pt-4">
+          <div class="bg-[var(--surface-secondary)] rounded-xl p-3 text-center">
+            <p class="text-xs text-[var(--text-muted)] uppercase tracking-wider mb-0.5">Last Seen</p>
+            <p class="font-bold text-sm text-[var(--text-primary)]">{{ formatLastSeen(p) }}</p>
+          </div>
+          <div class="bg-[var(--surface-secondary)] rounded-xl p-3 text-center">
+            <p class="text-xs text-[var(--text-muted)] uppercase tracking-wider mb-0.5">Visits</p>
+            <p class="font-bold text-sm text-[var(--text-primary)]">{{ p.totalAppointments }}</p>
+          </div>
+          <div class="bg-[var(--surface-secondary)] rounded-xl p-3 text-center">
+            <p class="text-xs text-[var(--text-muted)] uppercase tracking-wider mb-0.5">Status</p>
+            <p class="font-bold text-sm status-value" [class]="getTagTone(p)">{{ getTag(p) }}</p>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="px-6 pb-6 grid grid-cols-3 gap-3" (click)="$event.stopPropagation()">
+          <button type="button" (click)="viewRecords(p, $event)"
+            class="py-2.5 bg-[var(--surface-secondary)] hover:bg-[var(--surface-tertiary)] text-[var(--text-primary)] rounded-xl font-medium transition-all flex items-center justify-center gap-1.5 text-sm hover:border-[var(--primary)] border border-transparent">
+            <i class="bi bi-file-earmark-medical text-[var(--primary)]"></i>
+            Records
+          </button>
+          <button type="button" (click)="messagePatient(p, $event)"
+            class="py-2.5 bg-[var(--surface-secondary)] hover:bg-[var(--surface-tertiary)] text-[var(--text-primary)] rounded-xl font-medium transition-all flex items-center justify-center gap-1.5 text-sm hover:border-blue-500 border border-transparent">
+            <i class="bi bi-chat-dots text-blue-500"></i>
+            Message
+          </button>
+          <button type="button" (click)="consultPatient(p, $event)"
+            class="py-2.5 bg-gradient-to-r from-[var(--primary)] to-emerald-600 text-white rounded-xl font-semibold transition-all flex items-center justify-center gap-1.5 text-sm hover:shadow-lg hover:shadow-emerald-500/25 active:scale-[0.97]">
+            <i class="bi bi-camera-video"></i>
+            Consult
           </button>
         </div>
       </div>
-
-      <div *ngIf="isLoading()" class="py-12 text-center">
-        <div
-          class="inline-block w-8 h-8 border-4 border-[var(--border-default)] border-t-[var(--primary)] rounded-full animate-spin">
-        </div>
-        <p class="text-[var(--text-secondary)] mt-4">Loading patients...</p>
-      </div>
-
-      <div *ngIf="!isLoading() && filteredPatients().length === 0"
-        class="py-12 text-center bg-[var(--surface-secondary)] rounded-2xl shadow-sm">
-        <div
-          class="w-16 h-16 bg-[var(--surface-secondary)] rounded-full flex items-center justify-center text-[var(--text-muted)] text-3xl mx-auto mb-4">
-          <i class="bi bi-people"></i>
-        </div>
-        <h3 class="font-bold text-[var(--text-primary)]">No patients found</h3>
-        <p class="text-[var(--text-secondary)] text-sm">Try adjusting filters or search.</p>
-      </div>
-
-      <div class="patients-grid" *ngIf="!isLoading() && filteredPatients().length > 0">
-        <div *ngFor="let p of filteredPatients()" class="patient-card">
-          <div class="patient-card__top">
-            <div class="patient-avatar">{{ getInitials(p) }}</div>
-            <div class="patient-info">
-              <div class="patient-name">
-                <span>{{ getFullName(p) }}</span>
-                <span class="status-tag" [class]="getTagTone(p)">{{ getTag(p) }}</span>
-              </div>
-              <div class="patient-meta">{{ getPatientMeta(p) }}</div>
-            </div>
-          </div>
-
-          <div class="patient-stats">
-            <div>
-              <div class="label">Last Seen</div>
-              <div class="value">{{ formatLastSeen(p) }}</div>
-            </div>
-            <div>
-              <div class="label">Visits</div>
-              <div class="value">{{ p.totalAppointments }}</div>
-            </div>
-            <div>
-              <div class="label">Status</div>
-              <div class="value status" [class]="getTagTone(p)">{{ getTag(p) }}</div>
-            </div>
-          </div>
-
-          <div class="patient-actions">
-            <button type="button" [routerLink]="['/doctor/patients', p.patientId]">Records</button>
-            <button type="button" [routerLink]="['/doctor/messages']" [queryParams]="{ patientId: p.patientId }">
-              Message
-            </button>
-            <button type="button" class="primary" [routerLink]="['/call', p.patientId]">Consult</button>
-          </div>
-        </div>
-      </div>
-
     </div>
+
   </main>
 </div>

@@ -1,19 +1,22 @@
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule, DatePipe, TitleCasePipe } from '@angular/common';
 import { Router } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { trigger, transition, style, animate } from '@angular/animations';
 
+import { RouterModule } from '@angular/router';
 import { DoctorHeaderComponent } from '../shared/doctor-header/doctor-header.component';
 import { ThemeService } from '@core/services/theme.service';
 import { AuthService } from '@core/services/auth.service';
-import { PrescriptionService, Prescription } from '@core/services/prescription.service';
+import { PrescriptionService, Prescription, PrescriptionStats } from '@core/services/prescription.service';
+import { DoctorService } from '@core/services/doctor.service';
 import { NotificationService } from '@core/services/notification.service';
 import { ToastService } from '@core/services/toast.service';
 
 @Component({
   selector: 'app-doctor-prescriptions',
   standalone: true,
-  imports: [CommonModule, DatePipe, TitleCasePipe, DoctorHeaderComponent],
+  imports: [CommonModule, DatePipe, TitleCasePipe, FormsModule, DoctorHeaderComponent, RouterModule],
   templateUrl: './prescriptions.component.html',
   animations: [
     trigger('fadeUp', [
@@ -40,11 +43,20 @@ export class PrescriptionsComponent implements OnInit {
   currentUser = signal<any>(null);
   unreadNotificationCount = signal(0);
 
+  // Stats from backend
+  stats = signal<PrescriptionStats>({
+    total: 0, activeCount: 0, completedCount: 0, cancelledCount: 0, thisWeekCount: 0, thisMonthCount: 0
+  });
+
+  // Detail modal
+  showDetailModal = signal(false);
+  selectedPrescription = signal<Prescription | null>(null);
+
   statusFilters = [
-    { label: 'All', value: 'all' as const },
-    { label: 'Active', value: 'active' as const },
-    { label: 'Completed', value: 'completed' as const },
-    { label: 'Cancelled', value: 'cancelled' as const },
+    { label: 'All', value: 'all' as const, icon: 'bi-grid' },
+    { label: 'Active', value: 'active' as const, icon: 'bi-check-circle' },
+    { label: 'Completed', value: 'completed' as const, icon: 'bi-check2-all' },
+    { label: 'Cancelled', value: 'cancelled' as const, icon: 'bi-x-circle' },
   ];
 
   filteredPrescriptions = computed(() => {
@@ -59,6 +71,7 @@ export class PrescriptionsComponent implements OnInit {
   ngOnInit(): void {
     this.currentUser.set(this.auth.currentUser());
     this.load();
+    this.loadStats();
     this.notify.getUnreadCount().subscribe(c => this.unreadNotificationCount.set(c || 0));
   }
 
@@ -76,6 +89,13 @@ export class PrescriptionsComponent implements OnInit {
     });
   }
 
+  loadStats(): void {
+    this.service.getStats().subscribe({
+      next: (s) => this.stats.set(s),
+      error: () => { }
+    });
+  }
+
   onSearchChange(): void {
     this.load();
   }
@@ -84,25 +104,75 @@ export class PrescriptionsComponent implements OnInit {
     this.activeFilter.set(filter);
   }
 
-  getActiveCount(): number {
-    return this.prescriptions().filter(p => p.status === 'active').length;
+  // Detail modal
+  openDetailModal(p: Prescription): void {
+    this.selectedPrescription.set(p);
+    this.showDetailModal.set(true);
   }
 
-  getCompletedCount(): number {
-    return this.prescriptions().filter(p => p.status === 'completed').length;
+  closeDetailModal(): void {
+    this.showDetailModal.set(false);
+    this.selectedPrescription.set(null);
   }
 
-  getThisWeekCount(): number {
-    const now = new Date();
-    const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-    return this.prescriptions().filter(p => {
-      const date = new Date(p.prescriptionDate);
-      return date >= weekAgo && date <= now;
-    }).length;
+  // Status management
+  markCompleted(p: Prescription): void {
+    this.service.updateStatus(p.id, 'completed').subscribe({
+      next: () => {
+        this.toast.success('Prescription marked as completed');
+        this.load();
+        this.loadStats();
+        if (this.selectedPrescription()?.id === p.id) {
+          this.selectedPrescription.set({ ...p, status: 'completed' });
+        }
+      },
+      error: () => this.toast.error('Failed to update prescription')
+    });
+  }
+
+  cancelPrescription(p: Prescription): void {
+    if (!confirm('Are you sure you want to cancel this prescription?')) return;
+    this.service.updateStatus(p.id, 'cancelled').subscribe({
+      next: () => {
+        this.toast.success('Prescription cancelled');
+        this.load();
+        this.loadStats();
+      },
+      error: () => this.toast.error('Failed to cancel prescription')
+    });
+  }
+
+  reactivatePrescription(p: Prescription): void {
+    this.service.updateStatus(p.id, 'active').subscribe({
+      next: () => {
+        this.toast.success('Prescription reactivated');
+        this.load();
+        this.loadStats();
+      },
+      error: () => this.toast.error('Failed to reactivate prescription')
+    });
+  }
+
+  deletePrescription(p: Prescription): void {
+    if (!confirm('Are you sure you want to permanently delete this prescription?')) return;
+    this.service.delete(p.id).subscribe({
+      next: () => {
+        this.toast.success('Prescription deleted');
+        this.load();
+        this.loadStats();
+        if (this.showDetailModal()) this.closeDetailModal();
+      },
+      error: () => this.toast.error('Failed to delete prescription')
+    });
   }
 
   getPatientName(p: Prescription): string {
     return p.patient ? `${p.patient.firstName} ${p.patient.lastName}` : 'Unknown';
+  }
+
+  getPatientInitials(name: string): string {
+    const parts = name.trim().split(' ');
+    return parts.length >= 2 ? (parts[0][0] + parts[1][0]).toUpperCase() : name.substring(0, 2).toUpperCase();
   }
 
   getDoctorInitials(): string {
@@ -110,18 +180,11 @@ export class PrescriptionsComponent implements OnInit {
     return u ? (u.firstName[0] + u.lastName[0]).toUpperCase() : 'DR';
   }
 
-  createNewPrescription(): void {
-    this.router.navigate(['/doctor/prescriptions/create']);
-  }
-
-  viewPrescription(p: Prescription): void {
-    this.toast.info(`Viewing prescription: ${p.medication}`);
-    // Could navigate to detail page: this.router.navigate(['/doctor/prescriptions', p.id]);
-  }
-
-  downloadPrescription(p: Prescription): void {
-    this.toast.success(`Downloading prescription for ${p.medication}`);
-    // Implement actual download logic here
+  getStatusColor(status: string): string {
+    const colors: Record<string, string> = {
+      active: 'emerald', completed: 'blue', cancelled: 'gray'
+    };
+    return colors[status] || 'gray';
   }
 
   trackById(index: number, item: Prescription): string {

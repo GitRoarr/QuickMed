@@ -11,6 +11,7 @@ import { BadgeService } from '@core/services/badge.service';
 import { MessageService } from '@core/services/message.service';
 import { NotificationService } from '@core/services/notification.service';
 import { ConsultationService } from '@core/services/consultation.service';
+import { ConsultationViewModalComponent } from '../../consultation/consultation-view-modal/consultation-view-modal.component';
 import { ToastService } from '@core/services/toast.service';
 import { forkJoin } from 'rxjs';
 import { AppointmentDetailsPage } from './appointment-details.page';
@@ -25,7 +26,7 @@ interface MenuItem {
 @Component({
   selector: 'app-doctor-appointments',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, DatePipe, DoctorHeaderComponent, DoctorSidebarComponent, AppointmentDetailsPage],
+  imports: [CommonModule, FormsModule, RouterModule, DatePipe, DoctorHeaderComponent, DoctorSidebarComponent, AppointmentDetailsPage, ConsultationViewModalComponent],
   templateUrl: './appointments.component.html',
   styleUrls: ['./appointments.component.css'],
 })
@@ -51,6 +52,10 @@ export class AppointmentsComponent implements OnInit {
   // Modal state
   showDetailsModal = signal(false);
   selectedAppointment: Appointment | null = null;
+
+  // Consultation modal state
+  showConsultationModal = signal(false);
+  consultationAppointmentId = signal<string | null>(null);
 
   private appointmentService = inject(AppointmentService);
   private authService = inject(AuthService);
@@ -158,18 +163,13 @@ export class AppointmentsComponent implements OnInit {
 
   viewConsultation(appt: Appointment): void {
     const appointmentId = String(appt.id);
-    this.consultationService.getConsultationByAppointment(appointmentId).subscribe({
-      next: (consultation) => {
-        if (!consultation) {
-          this.toast.error('Consultation not found for this appointment');
-          return;
-        }
-        this.router.navigate(['/consultation/view', appointmentId]);
-      },
-      error: () => {
-        this.toast.error('Consultation not found for this appointment');
-      },
-    });
+    this.consultationAppointmentId.set(appointmentId);
+    this.showConsultationModal.set(true);
+  }
+
+  closeConsultationModal(): void {
+    this.showConsultationModal.set(false);
+    this.consultationAppointmentId.set(null);
   }
 
   // Layout Helpers

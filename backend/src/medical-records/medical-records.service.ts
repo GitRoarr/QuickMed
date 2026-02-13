@@ -13,7 +13,7 @@ export class MedicalRecordsService {
     @InjectRepository(MedicalRecord)
     private readonly recordsRepository: Repository<MedicalRecord>,
     private readonly usersService: UsersService
-  ) {}
+  ) { }
 
   async create(createDto: CreateMedicalRecordDto) {
     const patient = await this.usersService.findOne(createDto.patientId);
@@ -34,7 +34,7 @@ export class MedicalRecordsService {
     const record = this.recordsRepository.create({
       title: createDto.title,
       type: createDto.type ?? MedicalRecordType.OTHER,
-      recordDate: createDto.recordDate ? new Date(createDto.recordDate) : undefined,
+      recordDate: createDto.recordDate ? new Date(createDto.recordDate) : new Date(),
       patient,
       patientId: createDto.patientId,
       doctor,
@@ -116,6 +116,76 @@ export class MedicalRecordsService {
     const rec = await this.recordsRepository.findOne({ where: { id }, relations: ['doctor', 'patient'] });
     if (!rec) throw new NotFoundException(`Record ${id} not found`);
     return rec;
+  }
+
+  async getStatsByDoctor(doctorId: string) {
+    const records = await this.recordsRepository.find({
+      where: { doctorId },
+    });
+
+    const total = records.length;
+    const labCount = records.filter(r => r.type === MedicalRecordType.LAB).length;
+    const imagingCount = records.filter(r => r.type === MedicalRecordType.IMAGING).length;
+    const diagnosisCount = records.filter(r => r.type === MedicalRecordType.DIAGNOSIS).length;
+    const prescriptionCount = records.filter(r => r.type === MedicalRecordType.PRESCRIPTION).length;
+    const otherCount = records.filter(r => r.type === MedicalRecordType.OTHER).length;
+    const verifiedCount = records.filter(r => r.status === 'verified').length;
+    const pendingCount = records.filter(r => r.status === 'pending' || !r.status).length;
+
+    // This week count
+    const now = new Date();
+    const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const thisWeekCount = records.filter(r => {
+      const d = r.recordDate || r.createdAt;
+      return d && new Date(d) >= weekAgo;
+    }).length;
+
+    return {
+      total,
+      labCount,
+      imagingCount,
+      diagnosisCount,
+      prescriptionCount,
+      otherCount,
+      verifiedCount,
+      pendingCount,
+      thisWeekCount,
+    };
+  }
+
+  async getStatsByPatient(patientId: string) {
+    const records = await this.recordsRepository.find({
+      where: { patientId },
+    });
+
+    // This week count
+    const now = new Date();
+    const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const thisWeekCount = records.filter(r => {
+      const d = r.recordDate || r.createdAt;
+      return d && new Date(d) >= weekAgo;
+    }).length;
+
+    return {
+      total: records.length,
+      labCount: records.filter(r => r.type === MedicalRecordType.LAB).length,
+      imagingCount: records.filter(r => r.type === MedicalRecordType.IMAGING).length,
+      diagnosisCount: records.filter(r => r.type === MedicalRecordType.DIAGNOSIS).length,
+      prescriptionCount: records.filter(r => r.type === MedicalRecordType.PRESCRIPTION).length,
+      otherCount: records.filter(r => r.type === MedicalRecordType.OTHER).length,
+      verifiedCount: records.filter(r => r.status === 'verified').length,
+      pendingCount: records.filter(r => r.status === 'pending' || !r.status).length,
+      thisWeekCount,
+    };
+  }
+
+  async updateStatus(id: string, status: string, doctorId: string) {
+    const rec = await this.findOne(id);
+    if (rec.doctorId !== doctorId) {
+      throw new ForbiddenException('You can only update your own records');
+    }
+    rec.status = status;
+    return this.recordsRepository.save(rec);
   }
 
   async delete(id: string, doctorId: string) {

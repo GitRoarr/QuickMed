@@ -1,5 +1,6 @@
 import { Module } from "@nestjs/common";
 import { ConfigModule, ConfigService } from "@nestjs/config";
+import { ScheduleModule } from "@nestjs/schedule";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { join } from "path";
 
@@ -31,6 +32,7 @@ import { WebRtcModule } from "./webrtc/webrtc.module";
         ".env",
       ],
     }),
+    ScheduleModule.forRoot(),
 
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
@@ -63,4 +65,4 @@ import { WebRtcModule } from "./webrtc/webrtc.module";
     WebRtcModule,
   ],
 })
-export class AppModule {}
+export class AppModule { }

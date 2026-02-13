@@ -2,20 +2,82 @@
   <div class="header-bar">
     <div class="spacer"></div>
     <div class="actions">
-      <button class="icon" title="Messages" (click)="goTo('/doctor/messages')">
+
+      <!-- Messages Icon with Badge -->
+      <button class="icon relative" title="Messages" (click)="goTo('/doctor/messages')">
         <i class="bi bi-chat-dots"></i>
+        <span *ngIf="unreadMessages() > 0" class="badge-dot">
+          {{ unreadMessages() > 9 ? '9+' : unreadMessages() }}
+        </span>
       </button>
-      <button class="icon relative" title="Notifications" (click)="goTo('/doctor/notifications')">
-        <i class="bi bi-bell"></i>
-        <span *ngIf="unreadNotifications > 0" class="dot"></span>
-      </button>
+
+      <!-- Notification Bell with Panel -->
+      <div class="relative">
+        <button class="icon relative" title="Notifications" (click)="toggleNotificationPanel()">
+          <i class="bi bi-bell"></i>
+          <span *ngIf="unreadNotifications > 0" class="dot"></span>
+        </button>
+
+        <!-- Notification Dropdown Panel -->
+        <div *ngIf="showNotificationPanel()" class="notification-panel" (click)="$event.stopPropagation()">
+          <div class="notif-panel-header">
+            <h3>Notifications</h3>
+            <button class="mark-all-btn" (click)="goTo('/doctor/notifications')">
+              View All
+            </button>
+          </div>
+
+          <!-- Category Summary -->
+          <div class="notif-categories">
+            <div *ngFor="let cat of notificationTypes" class="notif-cat-item" [class.has-count]="cat.count > 0">
+              <i [class]="cat.icon" [class]="getNotificationColor(cat.type)"></i>
+              <span class="cat-label">{{ cat.label }}</span>
+              <span *ngIf="cat.count > 0" class="cat-badge">{{ cat.count }}</span>
+            </div>
+          </div>
+
+          <!-- Recent Notifications List -->
+          <div class="notif-list" *ngIf="recentNotifications().length > 0">
+            <div class="notif-list-header">Recent</div>
+            <div *ngFor="let n of recentNotifications()" class="notif-item" [class.unread]="!n.read"
+              (click)="markNotificationRead(n)">
+              <div class="notif-item-icon" [ngClass]="getNotificationColor(n.type)">
+                <i [class]="getNotificationIcon(n.type)"></i>
+              </div>
+              <div class="notif-item-content">
+                <p class="notif-item-title">{{ n.title }}</p>
+                <p class="notif-item-msg">{{ n.message }}</p>
+                <span class="notif-item-time">{{ formatTimeAgo(n.createdAt) }}</span>
+              </div>
+              <span *ngIf="!n.read" class="unread-indicator"></span>
+            </div>
+          </div>
+
+          <div *ngIf="recentNotifications().length === 0 && !isLoadingNotifications()" class="notif-empty">
+            <i class="bi bi-bell-slash text-2xl text-[var(--text-muted)]"></i>
+            <p>No notifications yet</p>
+          </div>
+
+          <div class="notif-footer" (click)="goTo('/doctor/notifications')">
+            View all notifications
+          </div>
+        </div>
+      </div>
+
+      <!-- Theme Toggle -->
       <button class="icon" title="Toggle Theme" (click)="toggleTheme()">
-        <i class="bi" [class.bi-brightness-high-fill]="theme === 'light'" [class.bi-moon-stars-fill]="theme === 'dark'"></i>
+        <i class="bi" [class.bi-brightness-high-fill]="theme === 'light'"
+          [class.bi-moon-stars-fill]="theme === 'dark'"></i>
       </button>
+
+      <!-- Avatar -->
       <button class="avatar" title="Profile" (click)="goTo('/doctor/settings')">
         <img *ngIf="avatarUrl; else initialsTpl" [src]="avatarUrl" alt="avatar" />
         <ng-template #initialsTpl><span>{{ initials }}</span></ng-template>
       </button>
     </div>
   </div>
+
+  <!-- Overlay to close panels -->
+  <div *ngIf="showNotificationPanel() || showMessagePanel()" class="panel-overlay" (click)="closePanels()"></div>
 </header>

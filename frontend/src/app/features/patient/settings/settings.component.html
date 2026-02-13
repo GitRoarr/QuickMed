@@ -1,113 +1,257 @@
 <app-patient-shell active="settings">
-  <div class="settings-page">
-    <div class="settings-header">
-      <div>
-        <h1>Settings – Manage your account and preferences</h1>
-      </div>
-    </div>
+  <div class="settings-container">
 
-    <section class="settings-card">
-      <div class="settings-layout">
-        <nav class="settings-tabs">
-          <button type="button" [class.active]="activeTab() === 'profile'" (click)="activeTab.set('profile')">
-            <i class="bi bi-person"></i>
-            Profile
+    <!-- Page Header -->
+    <header class="settings-header">
+      <div class="flex items-center gap-4">
+        <div
+          class="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white shadow-lg shadow-emerald-500/20">
+          <i class="bi bi-gear-fill text-2xl"></i>
+        </div>
+        <div>
+          <h1 class="text-3xl font-extrabold text-[var(--fg)] tracking-tight">Account Settings</h1>
+          <p class="text-[var(--muted)] font-medium">Manage your personal information, security, and preferences</p>
+        </div>
+      </div>
+    </header>
+
+    <div class="settings-grid">
+      <!-- Navigation Sidebar -->
+      <aside class="settings-nav-sidebar">
+        <nav class="nav-stack">
+          <button type="button" [class.active]="activeTab() === 'profile'" (click)="activeTab.set('profile')"
+            class="nav-link">
+            <i class="bi bi-person-circle"></i>
+            <span>Personal Profile</span>
+            <i class="bi bi-chevron-right chevron" *ngIf="activeTab() === 'profile'"></i>
           </button>
-          <button type="button" [class.active]="activeTab() === 'notifications'" (click)="activeTab.set('notifications')">
-            <i class="bi bi-bell"></i>
-            Notifications
+
+          <button type="button" [class.active]="activeTab() === 'notifications'"
+            (click)="activeTab.set('notifications')" class="nav-link">
+            <i class="bi bi-bell-fill"></i>
+            <span>Notifications</span>
+            <i class="bi bi-chevron-right chevron" *ngIf="activeTab() === 'notifications'"></i>
           </button>
-          <button type="button" [class.active]="activeTab() === 'security'" (click)="activeTab.set('security')">
-            <i class="bi bi-shield-lock"></i>
-            Security
+
+          <button type="button" [class.active]="activeTab() === 'security'" (click)="activeTab.set('security')"
+            class="nav-link">
+            <i class="bi bi-shield-lock-fill"></i>
+            <span>Security & Pass</span>
+            <i class="bi bi-chevron-right chevron" *ngIf="activeTab() === 'security'"></i>
           </button>
-          <button type="button" [class.active]="activeTab() === 'privacy'" (click)="activeTab.set('privacy')">
-            <i class="bi bi-lock"></i>
-            Privacy
+
+          <button type="button" [class.active]="activeTab() === 'privacy'" (click)="activeTab.set('privacy')"
+            class="nav-link">
+            <i class="bi bi-eye-fill"></i>
+            <span>Privacy & Data</span>
+            <i class="bi bi-chevron-right chevron" *ngIf="activeTab() === 'privacy'"></i>
           </button>
         </nav>
 
-        <div class="tab-body" [ngSwitch]="activeTab()">
-          <form *ngSwitchCase="'profile'" [formGroup]="profileForm" (ngSubmit)="saveProfile()" class="form-grid">
-            <div class="form-row">
-              <label>
-                <span>Full Name</span>
-                <input formControlName="fullName" type="text" placeholder="Alex Johnson" />
-              </label>
-              <label>
-                <span>Email</span>
-                <input formControlName="email" type="email" placeholder="alex@email.com" />
-              </label>
-              <label>
-                <span>Phone</span>
-                <input formControlName="phoneNumber" type="tel" placeholder="+1 (555) 123-4567" />
-              </label>
-            </div>
-            <button class="primary-btn" type="submit" [disabled]="profileForm.invalid">Save Changes</button>
-          </form>
-
-          <form
-            *ngSwitchCase="'notifications'"
-            [formGroup]="notificationsForm"
-            (ngSubmit)="saveNotifications()"
-            class="preferences">
-            <label class="toggle">
-              <input type="checkbox" formControlName="email" />
-              <span>Email notifications</span>
-            </label>
-            <label class="toggle">
-              <input type="checkbox" formControlName="sms" />
-              <span>SMS alerts</span>
-            </label>
-            <label class="toggle">
-              <input type="checkbox" formControlName="push" />
-              <span>Push notifications</span>
-            </label>
-            <label class="toggle">
-              <input type="checkbox" formControlName="marketing" />
-              <span>Marketing emails</span>
-            </label>
-            <button class="primary-btn" type="submit">Update Preferences</button>
-          </form>
-
-          <form
-            *ngSwitchCase="'security'"
-            [formGroup]="passwordForm"
-            (ngSubmit)="changePassword()"
-            class="form-grid">
-            <label>
-              <span>Current Password</span>
-              <input formControlName="currentPassword" type="password" placeholder="••••••••" />
-            </label>
-            <label>
-              <span>New Password</span>
-              <input formControlName="newPassword" type="password" placeholder="At least 6 characters" />
-            </label>
-            <button class="primary-btn" type="submit" [disabled]="passwordForm.invalid">Update Password</button>
-          </form>
-
-          <div *ngSwitchCase="'privacy'" class="preferences">
-            <label class="toggle">
-              <input type="checkbox" [checked]="privacyPreferences().shareActivity" (change)="setPrivacyPreference('shareActivity', $any($event.target).checked ?? false)" />
-              <span>Share anonymized activity data</span>
-            </label>
-            <label class="toggle">
-              <input type="checkbox" [checked]="privacyPreferences().shareAnalytics" (change)="setPrivacyPreference('shareAnalytics', $any($event.target).checked ?? false)" />
-              <span>Participate in analytics programs</span>
-            </label>
-            <label class="toggle">
-              <input type="checkbox" [checked]="privacyPreferences().personalizedTips" (change)="setPrivacyPreference('personalizedTips', $any($event.target).checked ?? false)" />
-              <span>Receive personalized tips</span>
-            </label>
-            <button class="primary-btn subtle" type="button">Export Data</button>
+        <div class="nav-footer">
+          <div class="help-box">
+            <i class="bi bi-info-circle"></i>
+            <p>Need help with your account? <a href="#">Contact Support</a></p>
           </div>
         </div>
-      </div>
+      </aside>
 
-      <div class="status-banner" *ngIf="statusMessage() as message" [class.error]="statusTone() === 'error'">
-        {{ message }}
-      </div>
-    </section>
+      <!-- Content Area -->
+      <main class="settings-content-card">
+        <div class="tab-content-wrapper" [ngSwitch]="activeTab()">
+
+          <!-- Profile Tab -->
+          <div *ngSwitchCase="'profile'" class="animate-in fade-in slide-in-bottom">
+            <div class="content-header">
+              <h2>Personal Profile</h2>
+              <p>Update your public identity and contact information</p>
+            </div>
+
+            <form [formGroup]="profileForm" (ngSubmit)="saveProfile()" class="space-y-8">
+              <div class="form-grid-layout">
+                <div class="form-group">
+                  <label>Full Name</label>
+                  <div class="input-container">
+                    <i class="bi bi-person"></i>
+                    <input formControlName="fullName" type="text" placeholder="e.g. John Doe" />
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label>Email Address</label>
+                  <div class="input-container">
+                    <i class="bi bi-envelope"></i>
+                    <input formControlName="email" type="email" placeholder="john@example.com" />
+                  </div>
+                </div>
+
+                <div class="form-group lg:col-span-2">
+                  <label>Phone Number</label>
+                  <div class="input-container">
+                    <i class="bi bi-telephone"></i>
+                    <input formControlName="phoneNumber" type="tel" placeholder="+1 (555) 000-0000" />
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-actions-footer">
+                <button type="submit" class="submit-btn" [disabled]="profileForm.invalid">
+                  <i class="bi bi-check-circle"></i>
+                  Save Profile Changes
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Notifications Tab -->
+          <div *ngSwitchCase="'notifications'" class="animate-in fade-in slide-in-bottom">
+            <div class="content-header">
+              <h2>Notifications</h2>
+              <p>Choose how you want to be notified about your health</p>
+            </div>
+
+            <form [formGroup]="notificationsForm" (ngSubmit)="saveNotifications()" class="space-y-8">
+              <div class="preference-list">
+                <div class="preference-item">
+                  <div class="pref-info">
+                    <span class="pref-title">Email Notifications</span>
+                    <p class="pref-desc">Receive appointment reminders and billing alerts via email</p>
+                  </div>
+                  <label class="switch">
+                    <input type="checkbox" formControlName="email">
+                    <span class="slider"></span>
+                  </label>
+                </div>
+
+                <div class="preference-item">
+                  <div class="pref-info">
+                    <span class="pref-title">SMS Alerts</span>
+                    <p class="pref-desc">Get urgent updates and OTPs on your mobile phone</p>
+                  </div>
+                  <label class="switch">
+                    <input type="checkbox" formControlName="sms">
+                    <span class="slider"></span>
+                  </label>
+                </div>
+
+                <div class="preference-item">
+                  <div class="pref-info">
+                    <span class="pref-title">Push Notifications</span>
+                    <p class="pref-desc">Real-time alerts in your browser or mobile app</p>
+                  </div>
+                  <label class="switch">
+                    <input type="checkbox" formControlName="push">
+                    <span class="slider"></span>
+                  </label>
+                </div>
+
+                <div class="preference-item">
+                  <div class="pref-info">
+                    <span class="pref-title">Marketing & Tips</span>
+                    <p class="pref-desc">Receive health tips and news about new services</p>
+                  </div>
+                  <label class="switch">
+                    <input type="checkbox" formControlName="marketing">
+                    <span class="slider"></span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="form-actions-footer">
+                <button type="submit" class="submit-btn">
+                  <i class="bi bi-bell"></i>
+                  Update Preferences
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Security Tab -->
+          <div *ngSwitchCase="'security'" class="animate-in fade-in slide-in-bottom">
+            <div class="content-header">
+              <h2>Security</h2>
+              <p>Ensure your account stays safe with a strong password</p>
+            </div>
+
+            <form [formGroup]="passwordForm" (ngSubmit)="changePassword()" class="space-y-8">
+              <div class="form-grid-layout">
+                <div class="form-group lg:col-span-2">
+                  <label>Current Password</label>
+                  <div class="input-container">
+                    <i class="bi bi-lock"></i>
+                    <input formControlName="currentPassword" type="password" placeholder="••••••••" />
+                  </div>
+                </div>
+
+                <div class="form-group lg:col-span-2">
+                  <label>New Password</label>
+                  <div class="input-container">
+                    <i class="bi bi-shield-lock"></i>
+                    <input formControlName="newPassword" type="password" placeholder="At least 6 characters" />
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-actions-footer">
+                <button type="submit" class="submit-btn" [disabled]="passwordForm.invalid">
+                  <i class="bi bi-key"></i>
+                  Update Password
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Privacy Tab -->
+          <div *ngSwitchCase="'privacy'" class="animate-in fade-in slide-in-bottom">
+            <div class="content-header">
+              <h2>Privacy & Data</h2>
+              <p>Control how your information is handled and shared</p>
+            </div>
+
+            <div class="preference-list">
+              <div class="preference-item">
+                <div class="pref-info">
+                  <span class="pref-title">Anonymized Activity</span>
+                  <p class="pref-desc">Share non-identifiable usage data to help us improve</p>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" [checked]="privacyPreferences().shareActivity"
+                    (change)="setPrivacyPreference('shareActivity', $any($event.target).checked ?? false)">
+                  <span class="slider"></span>
+                </label>
+              </div>
+
+              <div class="preference-item">
+                <div class="pref-info">
+                  <span class="pref-title">Analytics Programs</span>
+                  <p class="pref-desc">Participate in focused health analytics research</p>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" [checked]="privacyPreferences().shareAnalytics"
+                    (change)="setPrivacyPreference('shareAnalytics', $any($event.target).checked ?? false)">
+                  <span class="slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <div class="data-actions-card mt-8 p-6 rounded-3xl bg-[var(--bg)] border border-[var(--border)]">
+              <div class="flex items-center gap-4 mb-4">
+                <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center">
+                  <i class="bi bi-download"></i>
+                </div>
+                <h4 class="font-bold text-[var(--fg)]">Download your data</h4>
+              </div>
+              <p class="text-sm text-[var(--muted)] mb-4 leading-relaxed">
+                Get a copy of all your health records, prescriptions, and appointment history in a secure format.
+              </p>
+              <button type="button"
+                class="px-6 py-2.5 bg-white border border-gray-200 text-gray-700 font-bold rounded-xl text-sm hover:bg-gray-50 transition-all">
+                Request Data Export
+              </button>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
   </div>
 </app-patient-shell>
-

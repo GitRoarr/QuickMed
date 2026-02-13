@@ -1,0 +1,794 @@
+/* ===================================================
+   Consultation View Modal — Premium Theme-Aware
+   =================================================== */
+
+/* ===============================
+   Backdrop
+   =============================== */
+.cv-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    padding: 20px;
+    animation: cvFadeIn 0.2s ease;
+}
+
+/* ===============================
+   Modal Container
+   =============================== */
+.cv-modal {
+    position: relative;
+    width: 100%;
+    max-width: 680px;
+    max-height: 90vh;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    box-shadow:
+        0 40px 100px rgba(0, 0, 0, 0.3),
+        0 0 0 1px rgba(255, 255, 255, 0.03) inset;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    animation: cvSlideUp 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ===============================
+   Close Button
+   =============================== */
+.cv-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    z-index: 10;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    border: none;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(8px);
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.cv-close:hover {
+    background: rgba(255, 255, 255, 0.25);
+    transform: rotate(90deg);
+}
+
+.cv-close svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* ===============================
+   Loading & Error States
+   =============================== */
+.cv-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 20px;
+    gap: 16px;
+    color: var(--muted);
+    font-size: 14px;
+}
+
+.cv-spinner-lg {
+    width: 36px;
+    height: 36px;
+    border: 3px solid var(--border);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: cvSpin 0.7s linear infinite;
+}
+
+.cv-error {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 60px 20px;
+    gap: 12px;
+    text-align: center;
+}
+
+.cv-error-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 16px;
+    background: rgba(239, 68, 68, 0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cv-error-icon svg {
+    width: 28px;
+    height: 28px;
+    color: #ef4444;
+}
+
+.cv-error h3 {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--fg);
+}
+
+/* ===============================
+   Content Wrapper
+   =============================== */
+.cv-content {
+    display: flex;
+    flex-direction: column;
+    max-height: 90vh;
+}
+
+/* ===============================
+   Header Banner
+   =============================== */
+.cv-header {
+    position: relative;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.cv-header-bg {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, var(--primary) 0%, #059669 60%, #047857 100%);
+}
+
+.cv-header-content {
+    position: relative;
+    padding: 28px 28px 24px;
+}
+
+.cv-header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.cv-badge-completed {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 12px;
+    border-radius: 9999px;
+    font-size: 12px;
+    font-weight: 600;
+    background: rgba(255, 255, 255, 0.18);
+    color: white;
+    backdrop-filter: blur(4px);
+}
+
+.cv-badge-completed svg {
+    width: 14px;
+    height: 14px;
+}
+
+.cv-date {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.7);
+    font-weight: 500;
+}
+
+.cv-title {
+    font-size: 22px;
+    font-weight: 800;
+    color: white;
+    letter-spacing: -0.3px;
+    margin: 0;
+}
+
+.cv-subtitle {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.65);
+    margin-top: 4px;
+}
+
+/* ===============================
+   Scrollable Body
+   =============================== */
+.cv-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.cv-body::-webkit-scrollbar {
+    width: 4px;
+}
+
+.cv-body::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.cv-body::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 10px;
+}
+
+/* ===============================
+   People Row
+   =============================== */
+.cv-people-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.cv-person-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    transition: box-shadow 0.2s;
+}
+
+.cv-person-card:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+}
+
+.cv-person-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.cv-person-icon svg {
+    width: 22px;
+    height: 22px;
+}
+
+.cv-person-doctor {
+    background: rgba(var(--primary-rgb), 0.1);
+    color: var(--primary);
+}
+
+.cv-person-patient {
+    background: rgba(99, 102, 241, 0.1);
+    color: #6366f1;
+}
+
+.cv-person-role {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--muted);
+}
+
+.cv-person-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--fg);
+    margin: 2px 0 0;
+}
+
+/* ===============================
+   Meta Strip
+   =============================== */
+.cv-meta-strip {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+}
+
+.cv-meta-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 12px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+}
+
+.cv-meta-item svg {
+    width: 16px;
+    height: 16px;
+    color: var(--primary);
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+.cv-meta-label {
+    display: block;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--muted);
+}
+
+.cv-meta-value {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--fg);
+    margin-top: 2px;
+}
+
+/* ===============================
+   Treatment Stats Row
+   =============================== */
+.cv-stats-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.cv-stat-chip {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px 16px;
+    border-radius: 12px;
+    flex: 1;
+    min-width: 72px;
+}
+
+.cv-stat-num {
+    font-size: 20px;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.cv-stat-label {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    margin-top: 4px;
+    opacity: 0.8;
+}
+
+.cv-stat-total {
+    background: rgba(var(--primary-rgb), 0.08);
+    color: var(--primary);
+}
+
+.cv-stat-med {
+    background: rgba(59, 130, 246, 0.08);
+    color: #3b82f6;
+}
+
+.cv-stat-proc {
+    background: rgba(245, 158, 11, 0.08);
+    color: #f59e0b;
+}
+
+.cv-stat-therapy {
+    background: rgba(236, 72, 153, 0.08);
+    color: #ec4899;
+}
+
+.cv-stat-lab {
+    background: rgba(139, 92, 246, 0.08);
+    color: #8b5cf6;
+}
+
+/* ===============================
+   Sections
+   =============================== */
+.cv-section {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+.cv-section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+}
+
+.cv-section-header h3 {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--fg);
+    margin: 0;
+}
+
+.cv-section-header p {
+    font-size: 12px;
+    color: var(--muted);
+    margin: 2px 0 0;
+}
+
+.cv-section-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.cv-section-icon svg {
+    width: 18px;
+    height: 18px;
+    color: white;
+}
+
+.cv-icon-green {
+    background: linear-gradient(135deg, var(--primary), #059669);
+}
+
+.cv-icon-purple {
+    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+}
+
+.cv-icon-amber {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+}
+
+/* ===============================
+   Clinical Notes
+   =============================== */
+.cv-notes-content {
+    padding: 20px;
+    font-size: 14px;
+    line-height: 1.8;
+    color: var(--fg);
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+/* ===============================
+   Treatments List
+   =============================== */
+.cv-treatments-list {
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.cv-treatment-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    transition: box-shadow 0.2s, transform 0.15s;
+}
+
+.cv-treatment-card:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+    transform: translateY(-1px);
+}
+
+.cv-treatment-top {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.cv-treatment-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.cv-treatment-icon svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* Treatment type colors */
+.cv-type-medication {
+    background: rgba(59, 130, 246, 0.1);
+    color: #3b82f6;
+}
+
+.cv-type-therapy {
+    background: rgba(236, 72, 153, 0.1);
+    color: #ec4899;
+}
+
+.cv-type-procedure {
+    background: rgba(245, 158, 11, 0.1);
+    color: #f59e0b;
+}
+
+.cv-type-lab {
+    background: rgba(139, 92, 246, 0.1);
+    color: #8b5cf6;
+}
+
+.cv-type-default {
+    background: rgba(107, 114, 128, 0.1);
+    color: #6b7280;
+}
+
+.cv-treatment-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.cv-treatment-badges {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 4px;
+}
+
+.cv-treatment-type-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 10px;
+    border-radius: 9999px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: capitalize;
+}
+
+.cv-administered-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    padding: 2px 10px;
+    border-radius: 9999px;
+    font-size: 11px;
+    font-weight: 600;
+    background: rgba(var(--primary-rgb), 0.1);
+    color: var(--primary);
+}
+
+.cv-administered-badge svg {
+    width: 12px;
+    height: 12px;
+}
+
+.cv-treatment-details {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--fg);
+    margin: 0;
+}
+
+.cv-instructions {
+    margin-top: 10px;
+    padding: 10px 14px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-left: 50px;
+}
+
+.cv-instructions-label {
+    display: block;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--muted);
+    margin-bottom: 4px;
+}
+
+.cv-instructions p {
+    font-size: 13px;
+    color: var(--fg);
+    line-height: 1.6;
+    margin: 0;
+}
+
+/* ===============================
+   Feedback Section
+   =============================== */
+.cv-feedback-section {
+    border-color: rgba(245, 158, 11, 0.2);
+}
+
+.cv-stars-row {
+    display: flex;
+    gap: 4px;
+    padding: 0 20px 8px;
+}
+
+.cv-star {
+    font-size: 22px;
+    color: var(--border);
+    transition: color 0.15s;
+}
+
+.cv-star-filled {
+    color: #f59e0b;
+}
+
+.cv-comment {
+    padding: 12px 20px 16px;
+    font-size: 14px;
+    color: var(--fg);
+    font-style: italic;
+    line-height: 1.6;
+    margin: 0;
+}
+
+/* ===============================
+   Footer
+   =============================== */
+.cv-footer {
+    display: flex;
+    gap: 12px;
+    padding: 16px 24px;
+    border-top: 1px solid var(--border);
+    background: var(--surface);
+    flex-shrink: 0;
+}
+
+.cv-btn {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+}
+
+.cv-btn svg {
+    width: 18px;
+    height: 18px;
+}
+
+.cv-btn-outline {
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid var(--border);
+}
+
+.cv-btn-outline:hover {
+    color: var(--fg);
+    border-color: var(--fg);
+}
+
+.cv-btn-primary {
+    background: var(--primary);
+    color: white;
+    box-shadow: 0 4px 16px rgba(var(--primary-rgb), 0.25);
+}
+
+.cv-btn-primary:hover {
+    background: var(--primary-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 8px 24px rgba(var(--primary-rgb), 0.35);
+}
+
+.cv-btn-ghost {
+    background: transparent;
+    color: var(--muted);
+    border: none;
+    padding: 8px 16px;
+}
+
+.cv-btn-ghost:hover {
+    color: var(--fg);
+}
+
+/* ===============================
+   Animations
+   =============================== */
+@keyframes cvFadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes cvSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px) scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes cvSpin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ===============================
+   Responsive
+   =============================== */
+@media (max-width: 640px) {
+    .cv-backdrop {
+        padding: 10px;
+        align-items: flex-end;
+    }
+
+    .cv-modal {
+        max-height: 95vh;
+        border-radius: 20px 20px 0 0;
+    }
+
+    .cv-people-row {
+        grid-template-columns: 1fr;
+    }
+
+    .cv-meta-strip {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .cv-stats-row {
+        flex-wrap: wrap;
+    }
+
+    .cv-instructions {
+        margin-left: 0;
+    }
+}
+
+/* ===============================
+   Print Styles
+   =============================== */
+@media print {
+    .cv-backdrop {
+        position: static;
+        background: none;
+        backdrop-filter: none;
+        padding: 0;
+    }
+
+    .cv-modal {
+        max-height: none;
+        box-shadow: none;
+        border: none;
+    }
+
+    .cv-close,
+    .cv-footer {
+        display: none;
+    }
+
+    .cv-body {
+        overflow: visible;
+    }
+}

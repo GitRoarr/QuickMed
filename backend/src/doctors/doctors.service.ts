@@ -399,7 +399,7 @@ export class DoctorsService {
     await this.usersRepository.remove(doctor);
   }
 
-  async getMyPatients(doctorId: string) {
+  async getMyPatients(doctorId: string, searchTerm?: string, status?: string) {
     const appointments = await this.appointmentsRepository
       .createQueryBuilder('appointment')
       .leftJoinAndSelect('appointment.patient', 'patient')
@@ -433,8 +433,29 @@ export class DoctorsService {
       }
     }
 
-    const results = Array.from(map.values());
-    // Always return real data - patients appear here when they book appointments with this doctor
+    let results = Array.from(map.values());
+
+    // Backend search filter
+    if (searchTerm) {
+      const term = searchTerm.toLowerCase();
+      results = results.filter((p: any) => {
+        const name = `${p.firstName} ${p.lastName}`.toLowerCase();
+        const email = (p.email || '').toLowerCase();
+        const phone = (p.phoneNumber || '').toLowerCase();
+        return name.includes(term) || email.includes(term) || phone.includes(term);
+      });
+    }
+
+    // Backend status filter
+    if (status && status !== 'all') {
+      if (status === 'active') {
+        results = results.filter((p: any) => p.isActive !== false);
+      } else if (status === 'new') {
+        results = results.filter((p: any) => (p.totalAppointments || 0) <= 1);
+      }
+      // Add more status logic as needed
+    }
+
     return { patients: results, total: results.length };
   }
 
@@ -730,12 +751,23 @@ export class DoctorsService {
     const { average: patientSatisfaction, count: satisfactionCount } = await this.reviewsService.getDoctorRating(doctorId);
     const satisfactionTrend = [patientSatisfaction || 0];
 
+    const revenueRaw = await this.paymentRepository
+      .createQueryBuilder('payment')
+      .innerJoin(Appointment, 'appointment', 'appointment.id = payment.appointmentId')
+      .where('appointment.doctorId = :doctorId', { doctorId })
+      .andWhere('payment.status = :status', { status: PaymentStatus.PAID })
+      .andWhere('payment.paidAt BETWEEN :start AND :end', { start: startDate, end: now })
+      .select('COALESCE(SUM(payment.amount), 0)', 'sum')
+      .getRawOne();
+    const revenue = Number(revenueRaw?.sum || 0);
+
     return {
       kpis: {
         totalAppointments: total,
         completionRate: parseFloat(completionRate.toFixed(1)),
         patientSatisfaction: patientSatisfaction,
         newPatients: newPatients,
+        revenue: revenue,
       },
       trends: {
         appointmentsChange: 12, // Mock - calculate from previous period

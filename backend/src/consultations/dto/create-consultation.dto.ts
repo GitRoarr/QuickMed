@@ -1,5 +1,5 @@
 
-import { IsString, IsNotEmpty, IsArray, ValidateNested, IsOptional, IsUUID } from 'class-validator';
+import { IsString, IsNotEmpty, IsArray, ValidateNested, IsOptional, IsUUID, IsBoolean } from 'class-validator';
 import { Type } from 'class-transformer';
 import { TreatmentType } from '../entities/treatment.entity';
 
@@ -15,6 +15,10 @@ class CreateTreatmentDto {
   @IsOptional()
   @IsString()
   instructions?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  administered?: boolean;
 }
 
 export class CreateConsultationDto {

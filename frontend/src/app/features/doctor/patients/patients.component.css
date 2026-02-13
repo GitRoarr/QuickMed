@@ -1,4 +1,4 @@
-/* Custom Scrollbar for the sidebar and main content */
+/* ─── Custom Scrollbar ─── */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -17,268 +17,75 @@
   background: var(--text-secondary);
 }
 
-/* Ensure headers balance */
-h1, h2, h3 {
+h1,
+h2,
+h3 {
   text-wrap: balance;
 }
 
-/* Accessible Focus */
 button:focus-visible,
 input:focus-visible {
   outline: 2px solid var(--primary);
   outline-offset: 2px;
 }
 
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 1rem;
-}
-
-.stat-card {
-  background: var(--surface);
-  border: 1px solid var(--border-default);
-  border-radius: 16px;
-  padding: 1rem 1.25rem;
-  box-shadow: 0 10px 30px -20px rgba(15, 23, 42, 0.25);
-}
-
-.stat-value {
-  font-size: 1.35rem;
-  font-weight: 700;
-  color: var(--text-primary);
-}
-
-.stat-label {
-  font-size: 0.85rem;
-  color: var(--text-secondary);
-  margin-top: 0.15rem;
-}
-
-.patients-toolbar {
-  display: grid;
-  grid-template-columns: minmax(220px, 1.2fr) 2fr;
-  gap: 1rem;
-  align-items: center;
-}
-
-.search-wrap {
-  position: relative;
-}
-
-.search-wrap i {
-  position: absolute;
-  left: 14px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--text-muted);
-}
-
-.search-wrap input {
-  width: 100%;
-  padding: 0.7rem 1rem 0.7rem 2.4rem;
-  border-radius: 999px;
-  border: 1px solid var(--border-default);
-  background: var(--surface);
-  color: var(--text-primary);
-  box-shadow: 0 10px 25px -20px rgba(15, 23, 42, 0.2);
-}
-
-.filter-pills {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
-.pill {
-  border: 1px solid var(--border-default);
-  background: var(--surface);
-  color: var(--text-secondary);
-  padding: 0.4rem 0.9rem;
-  border-radius: 999px;
-  font-weight: 600;
-  font-size: 0.85rem;
-  transition: all 0.2s ease;
-}
-
-.pill.active {
-  background: rgba(16, 185, 129, 0.12);
-  border-color: rgba(16, 185, 129, 0.4);
-  color: var(--primary);
-}
-
-.patients-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 1.4rem;
-}
-
-.patient-card {
-  background: var(--surface);
-  border: 1px solid var(--border-default);
-  border-radius: 22px;
-  padding: 1.5rem 1.6rem;
-  min-height: 240px;
-  box-shadow: 0 18px 40px -30px rgba(15, 23, 42, 0.4);
-  display: grid;
-  gap: 1.2rem;
-  animation: fadeInUp 0.35s ease both;
-}
-
-.patient-card__top {
-  display: flex;
-  gap: 0.85rem;
-  align-items: center;
-}
-
-.patient-avatar {
-  width: 44px;
-  height: 44px;
-  border-radius: 12px;
-  background: rgba(16, 185, 129, 0.15);
-  color: var(--primary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-}
-
-.patient-info {
-  display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
-}
-
-.patient-name {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.5rem;
-  font-weight: 700;
-  color: var(--text-primary);
-}
-
-.patient-meta {
-  font-size: 0.85rem;
-  color: var(--text-secondary);
-}
-
+/* ─── Status Tags ─── */
 .status-tag {
-  padding: 0.2rem 0.6rem;
+  padding: 0.2rem 0.65rem;
   border-radius: 999px;
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   font-weight: 700;
   text-transform: uppercase;
+  letter-spacing: 0.02em;
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
 }
 
 .status-tag.new,
-.value.status.new {
+.status-value.new {
   background: rgba(16, 185, 129, 0.12);
   color: #14a56b;
 }
 
 .status-tag.active,
-.value.status.active {
+.status-value.active {
   background: rgba(34, 197, 94, 0.12);
   color: #16a34a;
 }
 
 .status-tag.needs-review,
-.value.status.needs-review {
+.status-value.needs-review {
   background: rgba(245, 158, 11, 0.12);
   color: #d97706;
 }
 
 .status-tag.completed,
-.value.status.completed {
+.status-value.completed {
   background: rgba(59, 130, 246, 0.12);
   color: #2563eb;
 }
 
 .status-tag.inactive,
-.value.status.inactive {
+.status-value.inactive {
   background: rgba(148, 163, 184, 0.18);
   color: #64748b;
 }
 
-.patient-stats {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 0.75rem;
-  text-align: left;
-}
-
-.patient-stats .label {
-  font-size: 0.7rem;
-  text-transform: uppercase;
-  color: var(--text-muted);
-  font-weight: 700;
-}
-
-.patient-stats .value {
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin-top: 0.15rem;
-}
-
-.patient-actions {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.75rem;
-}
-
-.patient-actions button {
-  border-radius: 999px;
-  border: 1px solid var(--border-default);
-  background: var(--surface);
-  padding: 0.65rem 0.9rem;
-  font-weight: 700;
-  font-size: 0.85rem;
-  color: var(--text-secondary);
-  transition: transform 0.15s ease, box-shadow 0.2s ease, color 0.2s ease, border-color 0.2s ease;
-}
-
-.patient-actions button.primary {
-  background: var(--primary);
-  color: #fff;
-  border-color: var(--primary);
-  box-shadow: 0 14px 30px -22px rgba(16, 185, 129, 0.6);
-}
-
-.patient-actions button:hover {
-  color: var(--text-primary);
-  border-color: var(--primary);
-  transform: translateY(-1px);
-  box-shadow: 0 12px 24px -18px rgba(16, 185, 129, 0.35);
-}
-
-@media (max-width: 900px) {
-  .patients-toolbar {
-    grid-template-columns: 1fr;
-  }
-}
-
+/* ─── Responsive ─── */
 @media (max-width: 640px) {
-  .patient-card {
-    min-height: unset;
-    padding: 1.25rem 1.2rem;
-  }
-
-  .patient-stats {
-    grid-template-columns: 1fr 1fr;
-  }
-
   .patient-actions {
     grid-template-columns: 1fr;
   }
 }
 
+/* ─── Entry Animation ─── */
 @keyframes fadeInUp {
   from {
     opacity: 0;
     transform: translateY(10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);

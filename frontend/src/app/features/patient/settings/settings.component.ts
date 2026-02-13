@@ -5,6 +5,7 @@ import { PatientShellComponent } from '../shared/patient-shell/patient-shell.com
 import { AuthService } from '@core/services/auth.service';
 import { UserService } from '@core/services/user.service';
 import { NotificationService } from '@core/services/notification.service';
+import { ToastService } from '@core/services/toast.service';
 
 @Component({
   selector: 'app-patient-settings',
@@ -18,10 +19,9 @@ export class SettingsComponent implements OnInit {
   private readonly userService = inject(UserService);
   private readonly notificationService = inject(NotificationService);
   private readonly fb = inject(FormBuilder);
+  private readonly toast = inject(ToastService);
 
   activeTab = signal<'profile' | 'notifications' | 'security' | 'privacy'>('profile');
-  statusMessage = signal<string | null>(null);
-  statusTone = signal<'success' | 'error'>('success');
 
   profileForm = this.fb.group({
     fullName: ['', Validators.required],
@@ -88,9 +88,9 @@ export class SettingsComponent implements OnInit {
       .subscribe({
         next: (updated) => {
           this.authService.setUser(updated);
-          this.setStatus('Profile updated successfully', 'success');
+          this.toast.success('Profile updated successfully');
         },
-        error: () => this.setStatus('Failed to update profile', 'error'),
+        error: () => this.toast.error('Failed to update profile'),
       });
   }
 
@@ -104,8 +104,8 @@ export class SettingsComponent implements OnInit {
         marketingEmails: value.marketing ?? false,
       } as any)
       .subscribe({
-        next: () => this.setStatus('Notification preferences saved', 'success'),
-        error: () => this.setStatus('Failed to save notification settings', 'error'),
+        next: () => this.toast.success('Notification preferences saved'),
+        error: () => this.toast.error('Failed to save notification settings'),
       });
   }
 
@@ -119,20 +119,14 @@ export class SettingsComponent implements OnInit {
       .subscribe({
         next: () => {
           this.passwordForm.reset();
-          this.setStatus('Password updated', 'success');
+          this.toast.success('Password updated successfully');
         },
-        error: () => this.setStatus('Failed to update password', 'error'),
+        error: (err) => this.toast.error(err.error?.message || 'Failed to update password'),
       });
   }
 
   setPrivacyPreference(key: keyof ReturnType<typeof this.privacyPreferences>, value: boolean): void {
     this.privacyPreferences.update((prefs) => ({ ...prefs, [key]: value }));
-  }
-
-  private setStatus(message: string, tone: 'success' | 'error'): void {
-    this.statusMessage.set(message);
-    this.statusTone.set(tone);
-    setTimeout(() => this.statusMessage.set(null), 3000);
   }
 }
 

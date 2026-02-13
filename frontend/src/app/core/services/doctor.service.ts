@@ -54,6 +54,7 @@ export interface DoctorAnalytics {
     completionRate: number;
     patientSatisfaction: number;
     newPatients: number;
+    revenue: number;
   };
   trends: {
     appointmentsChange: number;
@@ -173,12 +174,11 @@ export class DoctorService {
     page: number,
     limit: number,
     searchTerm?: string,
-    sortBy?: string,
-    order?: 'asc' | 'desc'
+    status?: string
   ): Observable<{ patients: DoctorPatientSummary[]; total: number }> {
     let params: any = { page, limit };
     if (searchTerm) params = { ...params, searchTerm };
-    if (sortBy) params = { ...params, sortBy, order };
+    if (status) params = { ...params, status };
     return this.http.get<{ patients: DoctorPatientSummary[]; total: number }>(
       `${this.apiUrl}/patients`,
       { params }

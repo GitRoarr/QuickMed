@@ -1,114 +1,217 @@
 <app-patient-shell active="profile">
-  <div class="profile-page" *ngIf="user() as profile">
-    <!-- Top Patient Info Card -->
-    <div class="profile-hero">
-      <div class="profile-hero__avatar">
-        <img *ngIf="profile.avatar; else initials" [src]="profile.avatar" alt="{{ profile.firstName }}" />
-        <ng-template #initials>
-          {{ ((profile.firstName || '').charAt(0) || 'A') + ((profile.lastName || '').charAt(0) || 'J') }}
-        </ng-template>
-      </div>
-      <div class="profile-hero__info">
-        <h1>{{ profile.firstName }} {{ profile.lastName }}</h1>
-        <p class="muted">Patient ID: {{ profile.patientId || profile.id }}</p>
-        <div class="profile-hero__chips">
-          <span class="chip"><i class="bi bi-heart-pulse"></i> Patient Profile</span>
-        </div>
-      </div>
-    </div>
+  <div class="profile-container" *ngIf="user() as profile">
 
-    <!-- Profile Form -->
-    <form class="profile-grid" [formGroup]="profileForm" (ngSubmit)="saveProfile()">
-      <!-- Personal Info -->
-      <div class="section-card span-2">
-        <div class="section-card__header">
-          <div>
-            <h3>Personal Information</h3>
-            <p class="muted">Keep your identity and contact information up to date.</p>
+    <!-- Hero Header -->
+    <header class="profile-header">
+      <div class="profile-hero">
+        <div class="avatar-container">
+          <div class="avatar-wrapper">
+            <img *ngIf="profile.avatar; else initials" [src]="profile.avatar" alt="{{ profile.firstName }}" />
+            <ng-template #initials>
+              {{ ((profile.firstName || '').charAt(0) || 'A') + ((profile.lastName || '').charAt(0) || 'J') }}
+            </ng-template>
+          </div>
+          <label class="avatar-edit-btn" for="avatar-upload">
+            <i class="bi bi-camera-fill"></i>
+            <input type="file" id="avatar-upload" (change)="onFileSelect($event)" accept="image/*" class="hidden">
+          </label>
+        </div>
+
+        <div class="hero-info">
+          <h1>{{ profile.firstName }} {{ profile.lastName }}</h1>
+          <div class="flex items-center gap-3 mt-2">
+            <span class="id-badge">
+              <i class="bi bi-hash"></i>
+              {{ profile.patientId || 'QM-' + profile.id.substring(0, 8) }}
+            </span>
+            <span
+              class="inline-flex items-center gap-1 px-3 py-1 bg-emerald-50 text-emerald-600 rounded-lg text-xs font-bold uppercase tracking-wider border border-emerald-100 dark:bg-emerald-900/20 dark:border-emerald-800">
+              <i class="bi bi-check-circle-fill"></i> Verified Patient
+            </span>
           </div>
         </div>
-        <div class="form-grid">
-          <label>
-            <span>First Name</span>
-            <input formControlName="firstName" type="text" />
-          </label>
-          <label>
-            <span>Last Name</span>
-            <input formControlName="lastName" type="text" />
-          </label>
-          <label>
-            <span>Email</span>
-            <input type="email" [value]="profile.email" disabled />
-          </label>
-          <label>
-            <span>Phone</span>
-            <input formControlName="phoneNumber" type="text" />
-          </label>
-        </div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <form [formGroup]="profileForm" (ngSubmit)="saveProfile()" class="profile-content-grid">
+
+      <!-- Left Column: Form Sections -->
+      <div class="form-sections">
+
+        <!-- Personal Information -->
+        <section class="card">
+          <div class="card-title">
+            <i class="bi bi-person-badge"></i>
+            <div>
+              <h3>Personal Information</h3>
+              <p>Keep your basic contact details up to date</p>
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label>First Name</label>
+              <div class="input-wrapper">
+                <i class="bi bi-person"></i>
+                <input formControlName="firstName" type="text" placeholder="First Name" />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Last Name</label>
+              <div class="input-wrapper">
+                <i class="bi bi-person"></i>
+                <input formControlName="lastName" type="text" placeholder="Last Name" />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Email Address</label>
+              <div class="input-wrapper">
+                <i class="bi bi-envelope"></i>
+                <input type="email" [value]="profile.email" disabled />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Phone Number</label>
+              <div class="input-wrapper">
+                <i class="bi bi-telephone"></i>
+                <input formControlName="phoneNumber" type="text" placeholder="+123 456 7890" />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Health Metrics -->
+        <section class="card">
+          <div class="card-title">
+            <i class="bi bi-activity"></i>
+            <div>
+              <h3>Health Information</h3>
+              <p>Your vital statistics and clinical background</p>
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Blood Type</label>
+              <div class="input-wrapper">
+                <i class="bi bi-droplet"></i>
+                <select formControlName="bloodType">
+                  <option value="">Select Blood Type</option>
+                  <option value="A+">A+</option>
+                  <option value="A-">A-</option>
+                  <option value="B+">B+</option>
+                  <option value="B-">B-</option>
+                  <option value="AB+">AB+</option>
+                  <option value="AB-">AB-</option>
+                  <option value="O+">O+</option>
+                  <option value="O-">O-</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Allergies</label>
+              <div class="input-wrapper">
+                <i class="bi bi-exclamation-triangle"></i>
+                <input formControlName="allergies" type="text" placeholder="e.g. Peanuts, Penicillin" />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Systolic (BP)</label>
+              <div class="input-wrapper">
+                <i class="bi bi-speedometer2"></i>
+                <input formControlName="bloodPressureSystolic" type="number" placeholder="120" />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Diastolic (BP)</label>
+              <div class="input-wrapper">
+                <i class="bi bi-speedometer"></i>
+                <input formControlName="bloodPressureDiastolic" type="number" placeholder="80" />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Heart Rate (BPM)</label>
+              <div class="input-wrapper">
+                <i class="bi bi-heart-pulse"></i>
+                <input formControlName="heartRate" type="number" placeholder="72" />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>BMI</label>
+              <div class="input-wrapper">
+                <i class="bi bi-calculator"></i>
+                <input formControlName="bmi" type="number" step="0.1" placeholder="22.5" />
+              </div>
+            </div>
+
+            <div class="form-group full-width">
+              <label>Last Checkup Date</label>
+              <div class="input-wrapper">
+                <i class="bi bi-calendar-check"></i>
+                <input formControlName="lastCheckupDate" type="date" />
+              </div>
+            </div>
+          </div>
+        </section>
       </div>
 
-      <!-- Health Info -->
-      <div class="section-card span-2">
-        <div class="section-card__header">
-          <div>
-            <h3>Health Information</h3>
-            <p class="muted">Store your latest vitals and clinical information.</p>
-          </div>
-        </div>
-        <div class="form-grid">
-          <label>
-            <span>Blood Type</span>
-            <input formControlName="bloodType" type="text" />
-          </label>
-          <label>
-            <span>Allergies (comma separated)</span>
-            <input formControlName="allergies" type="text" />
-          </label>
-          <label>
-            <span>Blood Pressure Systolic</span>
-            <input formControlName="bloodPressureSystolic" type="number" min="0" />
-          </label>
-          <label>
-            <span>Blood Pressure Diastolic</span>
-            <input formControlName="bloodPressureDiastolic" type="number" min="0" />
-          </label>
-          <label>
-            <span>Heart Rate (BPM)</span>
-            <input formControlName="heartRate" type="number" min="0" />
-          </label>
-          <label>
-            <span>BMI</span>
-            <input formControlName="bmi" type="number" min="0" step="0.1" />
-          </label>
-          <label>
-            <span>Last Checkup</span>
-            <input formControlName="lastCheckupDate" type="date" />
-          </label>
-        </div>
-      </div>
+      <!-- Right Column: Context & Stats -->
+      <aside class="info-sidebar">
 
-      <!-- Account Info -->
-      <div class="account-card">
-        <h3>Account Information</h3>
-        <div class="account-meta">
-          <div>
-            <p class="label">Member since</p>
-            <p>{{ profile.createdAt | date:'MMMM y' }}</p>
+        <!-- Quality Score -->
+        <div class="status-card">
+          <div class="status-icon">
+            <i class="bi bi-shield-check"></i>
           </div>
-          <div>
-            <p class="label">Last update</p>
-            <p>{{ profile.updatedAt | date:'mediumDate' }}</p>
+          <h4>Profile Status</h4>
+          <p class="text-sm font-medium">Your health profile is 85% complete. An up-to-date profile helps our doctors
+            provide better care.</p>
+        </div>
+
+        <!-- System Meta -->
+        <div class="account-details">
+          <h3>Account Metadata</h3>
+          <div class="detail-row">
+            <span>Signed Up</span>
+            <span>{{ profile.createdAt | date:'MMM yyyy' }}</span>
+          </div>
+          <div class="detail-row">
+            <span>Last Updated</span>
+            <span>{{ profile.updatedAt | date:'mediumDate' }}</span>
+          </div>
+          <div class="detail-row">
+            <span>Account Type</span>
+            <span class="capitalize">{{ profile.role }}</span>
+          </div>
+          <div class="detail-row">
+            <span>Login Status</span>
+            <span class="text-emerald-500">Active</span>
           </div>
         </div>
-        <p class="muted">Patient ID: {{ profile.patientId || profile.id }}</p>
-      </div>
 
-      <!-- Actions -->
-      <div class="actions">
-        <button class="primary" type="submit" [disabled]="profileForm.invalid || saving()">
-          {{ saving() ? 'Saving...' : 'Save changes' }}
-        </button>
-      </div>
+        <!-- Save Button -->
+        <div class="profile-actions-sidebar">
+          <button type="submit" class="primary-btn w-full" [disabled]="profileForm.invalid || saving()">
+            @if (saving()) {
+            <div class="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+            Saving...
+            } @else {
+            <i class="bi bi-cloud-check-fill text-lg"></i>
+            Save Profile Changes
+            }
+          </button>
+        </div>
+      </aside>
+
     </form>
   </div>
 </app-patient-shell>

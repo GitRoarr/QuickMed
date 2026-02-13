@@ -62,8 +62,12 @@ export class DoctorsController {
   @Get('patients')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.DOCTOR)
-  getMyPatients(@CurrentUser() user: User) {
-    return this.doctorsService.getMyPatients(user.id);
+  getMyPatients(
+    @CurrentUser() user: User,
+    @Query('searchTerm') searchTerm?: string,
+    @Query('status') status?: string
+  ) {
+    return this.doctorsService.getMyPatients(user.id, searchTerm, status);
   }
 
   @Get('patients/:id')

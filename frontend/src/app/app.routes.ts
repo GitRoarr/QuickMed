@@ -173,6 +173,13 @@ export const routes: Routes = [
           ),
       },
       {
+        path: "prescriptions/create",
+        loadComponent: () =>
+          import("./features/doctor/prescriptions/create-prescription/create-prescription.component").then(
+            (m) => m.CreatePrescriptionComponent
+          ),
+      },
+      {
         path: "prescriptions",
         loadComponent: () =>
           import("./features/doctor/prescriptions/prescriptions.component").then(
@@ -198,6 +205,13 @@ export const routes: Routes = [
         loadComponent: () =>
           import("./features/doctor/analytics/analytics.component").then(
             (m) => m.AnalyticsComponent
+          ),
+      },
+      {
+        path: "notifications",
+        loadComponent: () =>
+          import("./features/doctor/notifications/notifications.component").then(
+            (m) => m.NotificationsComponent
           ),
       },
       {

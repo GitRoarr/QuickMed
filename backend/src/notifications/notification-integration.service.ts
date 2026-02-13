@@ -12,7 +12,7 @@ export class NotificationIntegrationService {
 
   constructor(
     private readonly notificationsService: NotificationsService,
-  ) {}
+  ) { }
 
   setGateway(gateway: NotificationsGateway): void {
     this.notificationsGateway = gateway;
@@ -26,7 +26,7 @@ export class NotificationIntegrationService {
 
   async createAppointmentNotification(
     appointment: Appointment,
-    type: 'created' | 'confirmed' | 'cancelled' | 'rescheduled' | 'reminder_24h' | 'reminder_1h',
+    type: 'created' | 'confirmed' | 'cancelled' | 'rescheduled' | 'reminder_24h' | 'reminder_1h' | 'overdue' | 'missed',
     patient?: User,
     doctor?: User,
   ): Promise<void> {
@@ -80,6 +80,16 @@ export class NotificationIntegrationService {
       case 'reminder_1h':
         notificationData.title = 'Appointment in 1 hour';
         notificationData.message = `Reminder: Your ${channelLabel} starts at ${appointment.appointmentTime}.${chatNote}`;
+        notificationData.priority = NotificationPriority.HIGH;
+        break;
+      case 'overdue':
+        notificationData.title = 'Appointment Overdue';
+        notificationData.message = `The appointment on ${appointment.appointmentDate} at ${appointment.appointmentTime} is overdue. Please complete the consultation.`;
+        notificationData.priority = NotificationPriority.URGENT;
+        break;
+      case 'missed':
+        notificationData.title = 'Appointment Missed';
+        notificationData.message = `The appointment on ${appointment.appointmentDate} at ${appointment.appointmentTime} was missed.`;
         notificationData.priority = NotificationPriority.HIGH;
         break;
     }

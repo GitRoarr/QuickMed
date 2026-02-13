@@ -1,0 +1,226 @@
+<div class="flex-1 flex flex-col min-w-0 bg-[var(--surface-secondary)] min-h-screen">
+    <!-- Header -->
+    <app-doctor-header [initials]="getDoctorInitials()" [avatarUrl]="currentUser()?.avatar"
+        [unreadNotifications]="unreadNotificationCount()"></app-doctor-header>
+
+    <!-- Main Content -->
+    <main class="flex-1 overflow-y-auto p-6 lg:p-10 flex justify-center">
+        <div class="w-full max-w-4xl space-y-8 animate-fade-in-up">
+
+            <!-- Back Link -->
+            <a routerLink="/doctor/prescriptions"
+                class="inline-flex items-center gap-2 text-[var(--text-secondary)] hover:text-[var(--primary)] transition-colors font-medium text-sm group">
+                <div
+                    class="w-8 h-8 rounded-full bg-[var(--surface-primary)] border border-[var(--border-color)] flex items-center justify-center group-hover:border-[var(--primary)] transition-colors shadow-sm">
+                    <i class="bi bi-arrow-left text-lg"></i>
+                </div>
+                Back to prescriptions list
+            </a>
+
+            <!-- Page Header -->
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-3xl lg:text-4xl font-bold text-[var(--text-primary)]">New Prescription</h1>
+                    <p class="text-[var(--text-secondary)] mt-2">Issue a digital prescription for your patient.</p>
+                </div>
+                <div class="hidden sm:flex items-center gap-3">
+                    <div
+                        class="px-4 py-2 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 rounded-lg text-sm font-semibold flex items-center gap-2 border border-emerald-100 dark:border-emerald-800">
+                        <i class="bi bi-shield-check"></i> Secure
+                    </div>
+                    <div
+                        class="px-4 py-2 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 rounded-lg text-sm font-semibold flex items-center gap-2 border border-blue-100 dark:border-blue-800">
+                        <i class="bi bi-lightning-charge"></i> Instant
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Card -->
+            <div
+                class="bg-[var(--surface-primary)] rounded-3xl shadow-xl border border-[var(--border-color)] overflow-hidden">
+
+                <!-- Progress Bar / Visual Header -->
+                <div class="h-2 bg-gradient-to-r from-[var(--primary)] via-emerald-500 to-teal-500"></div>
+
+                <div class="p-8 lg:p-10 space-y-8">
+
+                    <!-- Patient Section -->
+                    <div class="bg-[var(--surface-secondary)]/50 rounded-2xl p-6 border border-[var(--border-color)]">
+                        <h3 class="text-lg font-bold text-[var(--text-primary)] mb-4 flex items-center gap-2">
+                            <span
+                                class="w-8 h-8 rounded-lg bg-[var(--primary)]/10 text-[var(--primary)] flex items-center justify-center text-sm">1</span>
+                            Select Patient
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="relative group">
+                                <label
+                                    class="block text-sm font-semibold text-[var(--text-secondary)] mb-2 uppercase tracking-wide text-xs">Patient
+                                    Name</label>
+                                <div class="relative">
+                                    <i
+                                        class="bi bi-search absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)] group-focus-within:text-[var(--primary)] transition-colors"></i>
+                                    <select [(ngModel)]="newPrescription.patientId"
+                                        class="w-full pl-11 pr-4 py-4 bg-[var(--surface-primary)] border border-[var(--border-color)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent transition-all shadow-sm font-medium appearance-none cursor-pointer hover:border-[var(--primary)]/50">
+                                        <option value="" disabled selected>Select a patient...</option>
+                                        <option *ngFor="let p of patients()" [value]="p.patientId">
+                                            {{ p.firstName }} {{ p.lastName }}
+                                        </option>
+                                    </select>
+                                    <i
+                                        class="bi bi-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none"></i>
+                                </div>
+                                <!-- Loading State -->
+                                <div *ngIf="isLoadingPatients()" class="absolute right-12 top-1/2 -translate-y-1/2">
+                                    <div
+                                        class="w-4 h-4 border-2 border-[var(--primary)] border-t-transparent rounded-full animate-spin">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Context Info (Placeholder or Real if patient selected) -->
+                            <div
+                                class="bg-[var(--surface-tertiary)]/50 rounded-xl p-4 border border-[var(--border-color)] flex items-center gap-4">
+                                <div
+                                    class="w-12 h-12 rounded-full bg-[var(--surface-secondary)] flex items-center justify-center text-2xl text-[var(--text-muted)]">
+                                    <i class="bi bi-person"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium text-[var(--text-primary)]">Patient details will
+                                        appear here</p>
+                                    <p class="text-xs text-[var(--text-secondary)]">Select a patient to proceed</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Prescription Details Section -->
+                    <div>
+                        <h3 class="text-lg font-bold text-[var(--text-primary)] mb-6 flex items-center gap-2">
+                            <span
+                                class="w-8 h-8 rounded-lg bg-[var(--primary)]/10 text-[var(--primary)] flex items-center justify-center text-sm">2</span>
+                            Prescription Details
+                        </h3>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+
+                            <!-- Medication -->
+                            <div class="space-y-2">
+                                <label
+                                    class="block text-sm font-semibold text-[var(--text-secondary)] uppercase tracking-wide text-xs">Medication
+                                    Name</label>
+                                <div class="relative group">
+                                    <input type="text" [(ngModel)]="newPrescription.medication"
+                                        placeholder="e.g. Amoxicillin 500mg"
+                                        class="w-full px-4 py-4 bg-[var(--surface-secondary)] border border-[var(--border-color)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent transition-all font-medium placeholder:font-normal" />
+                                    <div
+                                        class="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)] opacity-0 group-focus-within:opacity-100 transition-opacity">
+                                        <i class="bi bi-capsule"></i>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Dosage -->
+                            <div class="space-y-2">
+                                <label
+                                    class="block text-sm font-semibold text-[var(--text-secondary)] uppercase tracking-wide text-xs">Dosage
+                                    Strength</label>
+                                <div class="relative group">
+                                    <input type="text" [(ngModel)]="newPrescription.dosage" placeholder="e.g. 500mg"
+                                        class="w-full px-4 py-4 bg-[var(--surface-secondary)] border border-[var(--border-color)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent transition-all font-medium placeholder:font-normal" />
+                                </div>
+                            </div>
+
+                            <!-- Frequency -->
+                            <div class="space-y-2">
+                                <label
+                                    class="block text-sm font-semibold text-[var(--text-secondary)] uppercase tracking-wide text-xs">Frequency</label>
+                                <div class="relative">
+                                    <select [(ngModel)]="newPrescription.frequency"
+                                        class="w-full px-4 py-4 bg-[var(--surface-secondary)] border border-[var(--border-color)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent transition-all appearance-none cursor-pointer">
+                                        <option value="" disabled selected>Select frequency...</option>
+                                        <option *ngFor="let f of frequencyOptions" [value]="f">{{ f }}</option>
+                                    </select>
+                                    <i
+                                        class="bi bi-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none"></i>
+                                </div>
+                            </div>
+
+                            <!-- Duration -->
+                            <div class="space-y-2">
+                                <label
+                                    class="block text-sm font-semibold text-[var(--text-secondary)] uppercase tracking-wide text-xs">Duration</label>
+                                <div class="relative">
+                                    <select [(ngModel)]="newPrescription.duration"
+                                        class="w-full px-4 py-4 bg-[var(--surface-secondary)] border border-[var(--border-color)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent transition-all appearance-none cursor-pointer">
+                                        <option value="" disabled selected>Select duration...</option>
+                                        <option *ngFor="let d of durationOptions" [value]="d">{{ d }}</option>
+                                    </select>
+                                    <i
+                                        class="bi bi-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none"></i>
+                                </div>
+                            </div>
+
+                            <!-- Date -->
+                            <div class="space-y-2 md:col-span-2">
+                                <label
+                                    class="block text-sm font-semibold text-[var(--text-secondary)] uppercase tracking-wide text-xs">Prescription
+                                    Date</label>
+                                <input type="date" [(ngModel)]="newPrescription.prescriptionDate"
+                                    class="w-full px-4 py-4 bg-[var(--surface-secondary)] border border-[var(--border-color)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent transition-all font-medium" />
+                            </div>
+
+                            <!-- Instructions -->
+                            <div class="space-y-2 md:col-span-2">
+                                <label
+                                    class="block text-sm font-semibold text-[var(--text-secondary)] uppercase tracking-wide text-xs">
+                                    Instructions for Patient
+                                    <span class="text-[var(--text-muted)] lowercase font-normal ml-1">(Optional)</span>
+                                </label>
+                                <textarea [(ngModel)]="newPrescription.instructions" rows="3"
+                                    placeholder="e.g. Take with food, assume upright position for 30 mins after taking..."
+                                    class="w-full px-4 py-4 bg-[var(--surface-secondary)] border border-[var(--border-color)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent transition-all resize-none"></textarea>
+                            </div>
+
+                            <!-- Notes -->
+                            <div class="space-y-2 md:col-span-2">
+                                <label
+                                    class="block text-sm font-semibold text-[var(--text-secondary)] uppercase tracking-wide text-xs">
+                                    Clinical Notes
+                                    <span class="text-[var(--text-muted)] lowercase font-normal ml-1">(Internal
+                                        Only)</span>
+                                </label>
+                                <textarea [(ngModel)]="newPrescription.notes" rows="2" placeholder="Private notes..."
+                                    class="w-full px-4 py-4 bg-[var(--surface-secondary)] border border-[var(--border-color)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent transition-all resize-none"></textarea>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Footer Actions -->
+                <div
+                    class="bg-[var(--surface-secondary)]/50 p-8 border-t border-[var(--border-color)] flex items-center justify-between">
+                    <button (click)="cancel()"
+                        class="px-8 py-3.5 rounded-xl font-semibold text-[var(--text-secondary)] hover:bg-[var(--surface-tertiary)] hover:text-[var(--text-primary)] transition-all border border-transparent hover:border-[var(--border-color)]">
+                        Cancel
+                    </button>
+
+                    <button (click)="onSubmit()" [disabled]="isSubmitting()"
+                        class="relative overflow-hidden group px-10 py-3.5 bg-gradient-to-r from-[var(--primary)] to-emerald-600 text-white rounded-xl font-bold shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none">
+                        <span class="relative z-10 flex items-center gap-2">
+                            <i *ngIf="!isSubmitting()" class="bi bi-check-lg text-lg"></i>
+                            <i *ngIf="isSubmitting()" class="bi bi-arrow-repeat animate-spin text-lg"></i>
+                            {{ isSubmitting() ? 'Creating Prescription...' : 'Create Prescription' }}
+                        </span>
+                        <div
+                            class="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+                        </div>
+                    </button>
+                </div>
+
+            </div>
+
+        </div>
+    </main>
+</div>

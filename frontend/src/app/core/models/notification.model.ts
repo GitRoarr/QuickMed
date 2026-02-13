@@ -2,7 +2,7 @@ export interface Notification {
   id: string;
   title: string;
   message: string;
-  type: 'info' | 'success' | 'warning' | 'error' | 'appointment' | 'prescription' | 'test_result' | 'system';
+  type: 'info' | 'success' | 'warning' | 'error' | 'appointment' | 'prescription' | 'test_result' | 'system' | 'message' | 'lab' | 'reminder' | 'emergency';
   priority: 'low' | 'medium' | 'high' | 'urgent';
   read: boolean;
   userId: string;
@@ -66,6 +66,10 @@ export interface NotificationStats {
     prescription: number;
     test_result: number;
     system: number;
+    message: number;
+    lab: number;
+    reminder: number;
+    emergency: number;
   };
   byPriority: {
     low: number;

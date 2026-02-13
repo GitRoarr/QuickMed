@@ -1,0 +1,104 @@
+<div class="flex-1 flex flex-col min-w-0 bg-[var(--surface-secondary)] min-h-screen">
+    <!-- Header -->
+    <app-doctor-header [initials]="getDoctorInitials()" [avatarUrl]="currentUser()?.avatar"
+        [unreadNotifications]="unreadCount()"></app-doctor-header>
+
+    <!-- Main Content -->
+    <main class="flex-1 overflow-y-auto p-6 lg:p-10 flex justify-center">
+        <div class="w-full max-w-5xl space-y-6 animate-fade-in-up">
+
+            <!-- Page Header -->
+            <div class="flex items-center justify-between mb-8">
+                <div>
+                    <h1 class="text-3xl lg:text-4xl font-bold text-[var(--text-primary)]">Notifications</h1>
+                    <p class="text-[var(--text-secondary)] mt-2">Manage your alerts and upcoming tasks</p>
+                </div>
+                <button *ngIf="unreadCount() > 0" (click)="markAllAsRead()"
+                    class="px-5 py-2.5 bg-[var(--surface-primary)] border border-[var(--border-color)] text-[var(--primary)] hover:bg-[var(--primary)] hover:text-white rounded-xl font-medium transition-all shadow-sm flex items-center gap-2">
+                    <i class="bi bi-check-all text-lg"></i>
+                    Mark all as read
+                </button>
+            </div>
+
+            <!-- Notifications List -->
+            <div class="space-y-4">
+
+                <div *ngFor="let n of notifications()"
+                    class="group relative bg-[var(--surface-primary)] rounded-2xl p-5 border transition-all hover:shadow-lg flex gap-4 md:items-start"
+                    [class.border-l-4]="!n.read" [class.border-l-[var(--primary)]]="!n.read"
+                    [class.border-transparent]="n.read" [class.opacity-75]="n.read">
+
+                    <!-- Icon -->
+                    <div class="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 text-xl"
+                        [ngClass]="getNotificationColor(n.type)">
+                        <i [class]="getNotificationIcon(n.type)"></i>
+                    </div>
+
+                    <!-- Content -->
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-start justify-between gap-4">
+                            <div>
+                                <h3
+                                    class="font-bold text-[var(--text-primary)] text-lg mb-1 group-hover:text-[var(--primary)] transition-colors">
+                                    {{ n.title }}
+                                </h3>
+                                <p class="text-[var(--text-secondary)] leading-relaxed">{{ n.message }}</p>
+                            </div>
+                            <span
+                                class="text-xs text-[var(--text-secondary)] whitespace-nowrap shrink-0 bg-[var(--surface-secondary)] px-2 py-1 rounded-lg font-medium self-start">
+                                {{ n.createdAt | date:'short' }}
+                            </span>
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="mt-4 flex items-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button *ngIf="!n.read" (click)="markAsRead(n)"
+                                class="text-sm font-medium text-[var(--primary)] hover:underline flex items-center gap-1">
+                                <i class="bi bi-check2"></i> Mark as read
+                            </button>
+                            <button (click)="deleteNotification(n.id)"
+                                class="text-sm font-medium text-red-500 hover:text-red-700 hover:underline flex items-center gap-1 ml-auto">
+                                <i class="bi bi-trash"></i> Delete
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Unread Dot (redundant with border-l but good for visibility) -->
+                    <div *ngIf="!n.read" class="absolute top-5 right-5 w-2 h-2 rounded-full bg-[var(--primary)]"></div>
+                </div>
+
+            </div>
+
+            <!-- Empty State -->
+            <div *ngIf="notifications().length === 0 && !isLoading()" class="py-20 text-center">
+                <div
+                    class="w-24 h-24 rounded-full bg-[var(--surface-primary)] border border-dashed border-[var(--border-color)] flex items-center justify-center mx-auto mb-6">
+                    <i class="bi bi-bell-slash text-4xl text-[var(--text-muted)]"></i>
+                </div>
+                <h3 class="text-xl font-bold text-[var(--text-primary)] mb-2">No notifications yet</h3>
+                <p class="text-[var(--text-secondary)]">All caught up! Check back later for updates.</p>
+            </div>
+
+            <!-- Loading State -->
+            <div *ngIf="isLoading()" class="space-y-4">
+                <div *ngFor="let i of [1,2,3]"
+                    class="bg-[var(--surface-primary)] rounded-2xl p-5 border border-[var(--border-color)] animate-pulse flex gap-4">
+                    <div class="w-12 h-12 rounded-xl bg-gray-200 dark:bg-gray-700"></div>
+                    <div class="flex-1 space-y-3">
+                        <div class="h-5 bg-gray-200 dark:bg-gray-700 rounded w-1/3"></div>
+                        <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-2/3"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Load More -->
+            <div *ngIf="hasMore() && !isLoading() && notifications().length > 0" class="text-center pt-8 pb-12">
+                <button (click)="loadMore()"
+                    class="px-8 py-3 bg-[var(--surface-primary)] border border-[var(--border-color)] rounded-xl font-medium text-[var(--text-secondary)] hover:bg-[var(--surface-secondary)] hover:text-[var(--primary)] transition-all shadow-sm">
+                    Load More
+                </button>
+            </div>
+
+        </div>
+    </main>
+</div>

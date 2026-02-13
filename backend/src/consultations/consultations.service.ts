@@ -8,6 +8,9 @@ import { RateConsultationDto } from './dto/rate-consultation.dto';
 import { CreateConsultationDto } from './dto/create-consultation.dto';
 import { Appointment } from '../appointments/entities/appointment.entity';
 import { UserRole } from '../common/index';
+import { PrescriptionsService } from '../prescriptions/prescriptions.service';
+import { MedicalRecordsService } from '../medical-records/medical-records.service';
+import { MedicalRecordType } from '../medical-records/entities/medical-record.entity';
 
 @Injectable()
 export class ConsultationsService {
@@ -18,7 +21,9 @@ export class ConsultationsService {
     private readonly treatmentRepo: Repository<Treatment>,
     @InjectRepository(Appointment)
     private readonly appointmentRepo: Repository<Appointment>,
-  ) {}
+    private readonly prescriptionsService: PrescriptionsService,
+    private readonly medicalRecordsService: MedicalRecordsService,
+  ) { }
 
   async create(dto: CreateConsultationDto, doctorId: string) {
     // Get the appointment to find patientId
@@ -79,6 +84,37 @@ export class ConsultationsService {
         }),
       );
       await this.treatmentRepo.save(treatments);
+
+      // --- INTEGRATION: Create Prescriptions and Medical Records ---
+      for (const t of dto.treatments) {
+        try {
+          if (t.type === 'medication') {
+            await this.prescriptionsService.create({
+              medication: t.details.split(' ')[0], // Crude medication name extraction
+              dosage: t.details.includes(' ') ? t.details.split(' ').slice(1).join(' ') : 'See instructions',
+              patientId: appointment.patientId,
+              appointmentId: appointment.id,
+              frequency: 'As specified in instructions',
+              duration: 'As specified',
+              instructions: (t.instructions || '') + (t.administered ? ' (Administered during consultation)' : ''),
+              status: 'active' as any,
+            }, doctorId);
+          } else if (t.type === 'lab_test' || t.type === 'procedure') {
+            await this.medicalRecordsService.create({
+              title: `${t.type.toUpperCase()}: ${t.details}`,
+              type: t.type === 'lab_test' ? MedicalRecordType.LAB : MedicalRecordType.DIAGNOSIS,
+              recordDate: new Date().toISOString().split('T')[0],
+              patientId: appointment.patientId,
+              doctorId,
+              appointmentId: appointment.id,
+              notes: t.instructions,
+              status: 'verified',
+            });
+          }
+        } catch (error) {
+          console.error(`Failed to create integrated record for treatment: ${t.details}`, error);
+        }
+      }
     }
 
     // Update appointment status to completed
@@ -202,17 +238,17 @@ export class ConsultationsService {
 
     const avgDuration = completed.length
       ? Math.round(
-          completed.reduce((sum, c) => sum + (c.durationMin ?? 0), 0) /
-            completed.length,
-        )
+        completed.reduce((sum, c) => sum + (c.durationMin ?? 0), 0) /
+        completed.length,
+      )
       : 0;
 
     const avgRating = rated.length
       ? Number(
-          (
-            rated.reduce((sum, c) => sum + (c.rating ?? 0), 0) / rated.length
-          ).toFixed(2),
-        )
+        (
+          rated.reduce((sum, c) => sum + (c.rating ?? 0), 0) / rated.length
+        ).toFixed(2),
+      )
       : 0;
 
     return {

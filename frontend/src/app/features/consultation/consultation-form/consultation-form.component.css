@@ -1,309 +1,806 @@
+/* ===================================================
+   QuickMed Consultation Form — Theme-Aware Styles
+   Uses global CSS vars from styles.css
+   =================================================== */
+
 :host {
   display: block;
-  background-color: #f9fafb;
   min-height: 100vh;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
 }
 
+/* ===============================
+   Page Layout
+   =============================== */
 .consultation-container {
-  max-width: 900px;
+  max-width: 880px;
   margin: 0 auto;
-  padding: 2rem 1.5rem 4rem;
+  padding: 32px 20px 80px;
 }
 
-.form-header {
-  text-align: center;
-  margin-bottom: 2.5rem;
-}
-
-.form-header h1 {
-  font-size: 2.25rem;
+/* ===============================
+   Page Title
+   =============================== */
+.qm-page-title {
+  font-size: 28px;
   font-weight: 800;
-  color: var(--text-primary);
+  letter-spacing: -0.5px;
+  color: var(--fg);
 }
 
-.form-header .subtle {
-  font-size: 1rem;
-  color: var(--text-secondary);
-  margin-top: 0.5rem;
+.qm-page-subtitle {
+  color: var(--muted);
+  font-size: 15px;
+  margin-top: 4px;
 }
 
-.consultation-form {
-  display: grid;
-  gap: 1.75rem;
-}
-
-.card {
-  background: #fff;
-  border-radius: 24px;
-  border: 1px solid var(--border-default);
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.03),
-    0 4px 6px -2px rgba(0, 0, 0, 0.03);
-  overflow: hidden;
-}
-
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1.25rem 1.5rem;
-  border-bottom: 1px solid var(--border-default);
-}
-
-.card-header h3 {
-  margin: 0;
-  font-size: 1.2rem;
-  font-weight: 700;
-}
-
-.card-header .subtle {
-  margin: 0.1rem 0 0;
-  font-size: 0.85rem;
-  color: var(--text-secondary);
-}
-
-.card-body {
-  padding: 1.5rem;
-}
-
-textarea,
-input[type='text'],
-select {
-  width: 100%;
-  padding: 0.75rem 1rem;
-  border-radius: 12px;
-  border: 1px solid var(--border-default);
-  background: var(--surface-secondary);
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
-
-textarea:focus,
-input:focus,
-select:focus {
-  outline: none;
-  border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
-}
-
-.error-text {
-  color: #ef4444;
-  font-size: 0.8rem;
-  margin-top: 0.5rem;
-}
-
-.empty-state-mini {
-  text-align: center;
-  padding: 1.5rem;
-  background: var(--surface-secondary);
-  border-radius: 12px;
-}
-
-.empty-state-mini p {
-  margin: 0;
-  color: var(--text-secondary);
-}
-
-.treatment-item {
-  background: var(--surface-secondary);
-  border: 1px solid var(--border-default);
+/* ===============================
+   Cards
+   =============================== */
+.qm-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 16px;
-  margin-bottom: 1.25rem;
   overflow: hidden;
+  margin-top: 24px;
+  animation: qmFadeUp 0.45s ease forwards;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+  transition: box-shadow 0.3s, border-color 0.3s;
 }
 
-.treatment-header {
+.qm-card:hover {
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+}
+
+/* ===============================
+   Patient Banner
+   =============================== */
+.qm-patient-banner {
+  background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+  padding: 24px;
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 0.75rem 1.25rem;
-  background: #f8f9fa;
-  border-bottom: 1px solid var(--border-default);
+  gap: 16px;
 }
 
-.treatment-header h4 {
-  margin: 0;
-  font-size: 1rem;
-  font-weight: 600;
-}
-
-.treatment-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1rem;
-  padding: 1.25rem;
-}
-
-.form-field {
+.qm-patient-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(10px);
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
-.form-field label {
-  font-size: 0.8rem;
+.qm-patient-avatar svg {
+  width: 28px;
+  height: 28px;
+  color: white;
+}
+
+.qm-patient-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: rgba(255, 255, 255, 0.65);
   font-weight: 600;
-  color: var(--text-secondary);
-  margin-bottom: 0.5rem;
 }
 
-.full-width {
+.qm-patient-name {
+  font-size: 20px;
+  font-weight: 600;
+  color: white;
+  margin-top: 2px;
+}
+
+.qm-patient-email {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.75);
+  margin-top: 1px;
+}
+
+/* ===============================
+   Meta Grid
+   =============================== */
+.qm-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  padding: 16px 24px;
+  border-top: 1px solid var(--border);
+}
+
+.qm-meta-label {
+  font-size: 11px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+
+.qm-meta-value {
+  font-size: 14px;
+  font-weight: 600;
+  margin-top: 3px;
+  color: var(--fg);
+}
+
+.qm-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 12px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 600;
+  background: rgba(var(--primary-rgb), 0.12);
+  color: var(--primary);
+  margin-top: 4px;
+}
+
+/* ===============================
+   Section Header
+   =============================== */
+.qm-section-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.qm-section-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.qm-section-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.qm-section-icon svg {
+  width: 20px;
+  height: 20px;
+  color: white;
+}
+
+.qm-section-icon--green {
+  background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+}
+
+.qm-section-icon--purple {
+  background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+}
+
+.qm-section-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--fg);
+}
+
+.qm-section-desc {
+  font-size: 13px;
+  color: var(--muted);
+  margin-top: 1px;
+}
+
+/* ===============================
+   Section Body
+   =============================== */
+.qm-section-body {
+  padding: 20px 24px;
+}
+
+/* ===============================
+   Form Fields
+   =============================== */
+.qm-textarea,
+.qm-input,
+.qm-select {
+  width: 100%;
+  padding: 12px 16px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  color: var(--fg);
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  resize: none;
+}
+
+.qm-textarea:focus,
+.qm-input:focus,
+.qm-select:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.15);
+}
+
+.qm-textarea::placeholder,
+.qm-input::placeholder {
+  color: var(--muted);
+  opacity: 0.6;
+}
+
+.qm-select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7280' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 36px;
+}
+
+/* ===============================
+   Add Treatment Button
+   =============================== */
+.qm-btn-add {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: rgba(var(--primary-rgb), 0.1);
+  color: var(--primary);
+  font-size: 13px;
+  font-weight: 600;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
+}
+
+.qm-btn-add:hover {
+  background: rgba(var(--primary-rgb), 0.18);
+  transform: translateY(-1px);
+}
+
+.qm-btn-add svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* ===============================
+   Empty State
+   =============================== */
+.qm-empty {
+  text-align: center;
+  padding: 48px 20px;
+  border: 2px dashed var(--border);
+  border-radius: 12px;
+}
+
+.qm-empty svg {
+  width: 48px;
+  height: 48px;
+  color: var(--muted);
+  margin: 0 auto 12px;
+  opacity: 0.35;
+}
+
+.qm-empty p {
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.qm-empty .qm-empty-sub {
+  font-size: 13px;
+  color: var(--muted);
+  opacity: 0.7;
+  margin-top: 4px;
+}
+
+/* ===============================
+   Treatment Card
+   =============================== */
+.qm-treatment {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  margin-top: 12px;
+  animation: qmFadeUp 0.3s ease forwards;
+  transition: box-shadow 0.2s;
+}
+
+.qm-treatment:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+}
+
+.qm-treatment-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.qm-treatment-header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.qm-treatment-type-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.qm-treatment-type-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.qm-type-medication {
+  background: rgba(59, 130, 246, 0.1);
+}
+
+.qm-type-medication svg {
+  color: #3b82f6;
+}
+
+.qm-type-therapy {
+  background: rgba(236, 72, 153, 0.1);
+}
+
+.qm-type-therapy svg {
+  color: #ec4899;
+}
+
+.qm-type-procedure {
+  background: rgba(245, 158, 11, 0.1);
+}
+
+.qm-type-procedure svg {
+  color: #f59e0b;
+}
+
+.qm-type-lab_test {
+  background: rgba(139, 92, 246, 0.1);
+}
+
+.qm-type-lab_test svg {
+  color: #8b5cf6;
+}
+
+.qm-treatment-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--fg);
+}
+
+.qm-btn-delete {
+  background: none;
+  border: none;
+  padding: 8px;
+  color: var(--muted);
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+
+.qm-btn-delete:hover {
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.08);
+}
+
+.qm-btn-delete svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* ===============================
+   Treatment Grid
+   =============================== */
+.qm-treatment-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.qm-treatment-grid .qm-full {
   grid-column: 1 / -1;
 }
 
-.form-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 1rem;
-  margin-top: 1rem;
+.qm-field-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
 }
 
-.ghost,
-.secondary,
-.primary {
-  border-radius: 999px;
-  padding: 0.75rem 1.5rem;
-  font-weight: 700;
-  border: 1px solid transparent;
+.qm-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   cursor: pointer;
+  font-size: 14px;
+  color: var(--muted);
+  padding-bottom: 4px;
+}
+
+.qm-checkbox-label input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--primary);
+  cursor: pointer;
+}
+
+/* ===============================
+   Footer Action Buttons
+   =============================== */
+.qm-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.qm-btn {
+  flex: 1;
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  transition: all 0.2s ease;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 24px;
+  font-size: 15px;
+  font-weight: 600;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  font-family: inherit;
 }
 
-.primary {
+.qm-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+.qm-btn-secondary {
+  background: var(--surface);
+  color: var(--muted);
+  border: 1px solid var(--border);
+}
+
+.qm-btn-secondary:hover {
+  color: var(--fg);
+  background: var(--bg);
+  border-color: var(--primary);
+}
+
+.qm-btn-primary {
   background: var(--primary);
-  color: #fff;
-  box-shadow: 0 8px 20px -10px rgba(16, 185, 129, 0.6);
+  color: white;
+  box-shadow: 0 6px 25px rgba(var(--primary-rgb), 0.25);
 }
 
-.primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 24px -12px rgba(16, 185, 129, 0.7);
+.qm-btn-primary:hover {
+  background: var(--primary-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 10px 35px rgba(var(--primary-rgb), 0.35);
 }
 
-.primary:disabled {
-  background: #a3e6c3;
+.qm-btn-primary:active {
+  transform: translateY(0);
+}
+
+.qm-btn-primary:disabled {
+  opacity: 0.6;
   cursor: not-allowed;
   transform: none;
-  box-shadow: none;
 }
 
-.secondary {
-  background: #fff;
-  border-color: var(--border-default);
-  color: var(--text-primary);
+/* ===============================
+   Confirmation Modal — Clean White/Dark
+   =============================== */
+.qm-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 16px;
+  animation: qmFade 0.2s ease;
 }
 
-.secondary:hover {
-  background: #f8f9fa;
-  border-color: #d1d5db;
+.qm-modal {
+  width: 100%;
+  max-width: 460px;
+  background: var(--surface);
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+  animation: qmScale 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-.ghost {
-  background: transparent;
+.qm-modal-header {
+  padding: 24px 24px 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.qm-modal-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: rgba(var(--primary-rgb), 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.qm-modal-icon svg {
+  width: 24px;
+  height: 24px;
   color: var(--primary);
 }
 
-.ghost:hover {
-  background: rgba(16, 185, 129, 0.08);
+.qm-modal-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--fg);
 }
 
-.ghost-icon {
-  background: transparent;
-  border: none;
-  color: var(--text-secondary);
-  cursor: pointer;
-  padding: 0.5rem;
-  border-radius: 50%;
+.qm-modal-subtitle {
+  font-size: 13px;
+  color: var(--muted);
+  margin-top: 2px;
 }
 
-.ghost-icon:hover {
-  background: var(--surface);
-  color: #ef4444;
+.qm-modal-body {
+  padding: 20px 24px;
+  color: var(--muted);
+  line-height: 1.7;
+  font-size: 14px;
 }
 
-/* Modal Styles */
-.modal-backdrop {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(15, 23, 42, 0.6);
-  display: grid;
-  place-items: center;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.3s ease;
-  z-index: 1000;
+.qm-modal-body strong {
+  color: var(--fg);
+  font-weight: 600;
 }
 
-.modal-backdrop.open {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-.modal {
-  background: #fff;
-  border-radius: 24px;
-  width: 90%;
-  max-width: 480px;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-  overflow: hidden;
-}
-
-.modal header {
-  padding: 1.5rem;
-  border-bottom: 1px solid var(--border-default);
-}
-
-.modal header h3 {
-  margin: 0;
-  font-size: 1.25rem;
-}
-
-.modal .modal-body {
-  padding: 1.5rem;
-}
-
-.modal .modal-body p {
-  margin: 0 0 0.5rem;
-  color: var(--text-secondary);
-}
-
-.modal footer {
+.qm-alert {
+  margin-top: 16px;
+  padding: 14px 16px;
+  background: rgba(245, 158, 11, 0.06);
+  border: 1px solid rgba(245, 158, 11, 0.15);
+  border-radius: 12px;
   display: flex;
-  justify-content: flex-end;
-  gap: 0.75rem;
-  padding: 1rem 1.5rem;
-  background: var(--surface-secondary);
-  border-top: 1px solid var(--border-default);
+  gap: 12px;
 }
 
-/* Shimmer */
-.loading-shimmer {
-  display: grid;
-  gap: 1.75rem;
-}
-.shimmer-card {
-  height: 400px;
-  width: 100%;
-  border-radius: 24px;
-  background: linear-gradient(
-    90deg,
-    #f0f0f0 25%,
-    #e0e0e0 50%,
-    #f0f0f0 75%
-  );
-  background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
+.qm-alert svg {
+  width: 20px;
+  height: 20px;
+  color: #f59e0b;
+  flex-shrink: 0;
+  margin-top: 1px;
 }
 
-@keyframes shimmer {
-  0% {
-    background-position: 200% 0;
+.qm-alert-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #d97706;
+}
+
+.qm-alert-text {
+  font-size: 13px;
+  color: #b45309;
+  margin-top: 2px;
+}
+
+/* ===============================
+   Modal Footer
+   =============================== */
+.qm-modal-footer {
+  padding: 16px 24px;
+  display: flex;
+  gap: 12px;
+  border-top: 1px solid var(--border);
+  background: var(--bg);
+}
+
+.qm-modal-footer .qm-btn {
+  padding: 12px;
+  font-size: 14px;
+}
+
+.qm-btn-cancel {
+  flex: 1;
+  background: var(--surface);
+  color: var(--muted);
+  border: 1px solid var(--border);
+}
+
+.qm-btn-cancel:hover {
+  color: var(--fg);
+  border-color: var(--fg);
+}
+
+.qm-btn-confirm {
+  flex: 1;
+  background: var(--primary);
+  color: white;
+  box-shadow: 0 4px 16px rgba(var(--primary-rgb), 0.25);
+}
+
+.qm-btn-confirm:hover {
+  background: var(--primary-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 25px rgba(var(--primary-rgb), 0.35);
+}
+
+.qm-btn-confirm:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Loading spinner */
+.qm-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: qmSpin 0.6s linear infinite;
+  display: inline-block;
+}
+
+/* ===============================
+   Animations
+   =============================== */
+@keyframes qmFade {
+  from {
+    opacity: 0;
   }
-  100% {
-    background-position: -200% 0;
+
+  to {
+    opacity: 1;
   }
 }
 
+@keyframes qmFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes qmScale {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes qmSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ===============================
+   Validation Error Messages
+   =============================== */
+.qm-field-error {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  font-size: 13px;
+  color: #ef4444;
+  font-weight: 500;
+}
+
+.qm-field-error svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+/* ===============================
+   Loading Spinner (Large)
+   =============================== */
+.qm-spinner-lg {
+  width: 36px;
+  height: 36px;
+  border: 3px solid var(--border);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: qmSpin 0.7s linear infinite;
+  margin: 0 auto;
+}
+
+/* ===============================
+   Modal Summary Section
+   =============================== */
+.qm-summary {
+  margin-top: 16px;
+  padding: 12px 16px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.qm-summary-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 0;
+}
+
+.qm-summary-row+.qm-summary-row {
+  border-top: 1px solid var(--border);
+}
+
+.qm-summary-label {
+  font-size: 13px;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.qm-summary-value {
+  font-size: 13px;
+  color: var(--fg);
+  font-weight: 600;
+}
+
+/* ===============================
+   Responsive
+   =============================== */
+@media (max-width: 640px) {
+  .qm-meta-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .qm-treatment-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .qm-actions {
+    flex-direction: column;
+  }
+
+  .qm-modal {
+    margin: 0 8px;
+  }
+
+  .qm-page-title {
+    font-size: 22px;
+  }
+}
