@@ -10,7 +10,7 @@ export type Break = {
 export type ShiftStatus = 'past' | 'active' | 'upcoming';
 
 export type Shift = {
-  type: 'morning' | 'afternoon' | 'evening' | 'custom';
+  type: 'morning' | 'afternoon' | 'evening' | 'night' | 'custom';
   startTime: string;
   endTime: string;
   slotDuration: number;

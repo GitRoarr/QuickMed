@@ -228,7 +228,7 @@
       (click)="$event.stopPropagation()">
       <!-- Modal Header -->
       <div
-        class="sticky top-0 z-10 flex items-center justify-between p-8 pb-4 bg-white dark:bg-[#121212] bg-opacity-95 backdrop-blur-sm">
+        class="sticky top-0 z-10 flex items-center justify-between p-5 md:p-8 pb-4 bg-white dark:bg-[#121212] bg-opacity-95 backdrop-blur-sm">
         <div class="flex items-center gap-4">
           <div
             class="w-12 h-12 rounded-xl bg-gradient-to-br from-[#1DB954] to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-500/20">
@@ -246,7 +246,7 @@
       </div>
 
       <!-- Modal Body -->
-      <div class="p-8 space-y-6">
+      <div class="p-5 md:p-8 space-y-6">
         <!-- Patient Selection -->
         <div class="space-y-2">
           <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400">
@@ -341,7 +341,7 @@
 
       <!-- Modal Footer -->
       <div
-        class="sticky bottom-0 flex items-center justify-end gap-4 p-8 pt-4 bg-white dark:bg-[#121212] border-t border-slate-100 dark:border-white/5">
+        class="sticky bottom-0 flex items-center justify-end gap-4 p-5 md:p-8 pt-4 bg-white dark:bg-[#121212] border-t border-slate-100 dark:border-white/5">
         <button (click)="closeCreateModal()"
           class="px-8 py-4 rounded-2xl font-black text-sm text-slate-500 hover:bg-slate-100 dark:hover:bg-white/5 transition-all">
           Discard
@@ -370,7 +370,7 @@
       (click)="$event.stopPropagation()">
 
       <!-- Modal Header -->
-      <div class="p-8 pb-6 flex items-start justify-between relative overflow-hidden">
+      <div class="p-5 md:p-8 pb-6 flex items-start justify-between relative overflow-hidden">
         <!-- Background Accent -->
         <div class="absolute top-0 right-0 w-32 h-32 bg-[#1DB954]/5 rounded-full -mr-16 -mt-16 blur-3xl"></div>
 
@@ -402,7 +402,7 @@
       </div>
 
       <!-- Modal Body (Scrollable) -->
-      <div class="flex-1 overflow-y-auto custom-scrollbar p-8 pt-0 space-y-8">
+      <div class="flex-1 overflow-y-auto custom-scrollbar p-5 md:p-8 pt-0 space-y-8">
 
         <!-- Info Grid -->
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -496,7 +496,7 @@
 
       <!-- Modal Footer -->
       <div
-        class="p-8 pt-4 bg-slate-50 dark:bg-white/5 border-t border-slate-100 dark:border-white/10 flex items-center justify-between gap-4">
+        class="p-5 md:p-8 pt-4 bg-slate-50 dark:bg-white/5 border-t border-slate-100 dark:border-white/10 flex items-center justify-between gap-4">
         <div class="flex items-center gap-3 flex-1">
           <button *ngIf="selectedRecord()!.status !== 'verified'" (click)="verifyRecord(selectedRecord()!)"
             class="flex-1 px-8 py-4 text-white rounded-2xl font-black text-sm transition-all duration-300 hover:-translate-y-1 active:scale-95 flex items-center justify-center gap-2 verify-btn">

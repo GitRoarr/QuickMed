@@ -260,92 +260,96 @@
                       </svg>
                     </ng-container>
                   </div>
-                  <div class="flex-1">
-                    <div class="flex items-center gap-2">
-                      <h5 *ngIf="shift.type !== 'custom'" class="font-bold capitalize">{{ shift.type }}</h5>
-                      <input *ngIf="shift.type === 'custom'" type="text" [ngModel]="shift.label"
-                        (ngModelChange)="updateShift(shift, {label: $event})"
-                        class="font-bold bg-transparent border-none outline-none p-0 w-32 focus:ring-0"
-                        placeholder="Shift Label">
-                      <span *ngIf="isShiftPast(shift)" class="shift-status-badge shift-status-past">Passed</span>
-                      <span *ngIf="isShiftActive(shift)" class="shift-status-badge shift-status-active">
-                        <span class="active-dot"></span> Active
-                      </span>
-                    </div>
-                    <div class="flex items-center gap-2 text-sm">
-                      <input type="time" [ngModel]="shift.startTime"
-                        (ngModelChange)="updateShift(shift, {startTime: $event})" class="time-input"
-                        [disabled]="isShiftPast(shift)">
-                      <span>-</span>
-                      <input type="time" [ngModel]="shift.endTime"
-                        (ngModelChange)="updateShift(shift, {endTime: $event})" class="time-input"
-                        [disabled]="isShiftPast(shift)">
-                    </div>
-                  </div>
-                  <div class="flex items-center gap-2">
-                    <button *ngIf="shift.type === 'custom'" (click)="removeShift(shift)"
-                      class="w-8 h-8 rounded-lg flex items-center justify-center text-red-400 hover:bg-red-50 hover:text-red-600 transition-all">
-                      <i class="bi bi-trash"></i>
-                    </button>
-                    <label class="toggle-switch" [class.disabled]="isShiftPast(shift)">
-                      <input type="checkbox" [checked]="shift.enabled" (change)="toggleShiftEnabled(shift)"
-                        [disabled]="isShiftPast(shift)">
-                      <span class="toggle-track">
-                        <span class="toggle-thumb">
-                          <svg *ngIf="shift.enabled && !isShiftPast(shift)" xmlns="http://www.w3.org/2000/svg"
-                            width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                            <polyline points="20 6 9 17 4 12"></polyline>
-                          </svg>
-                          <svg *ngIf="!shift.enabled || isShiftPast(shift)" xmlns="http://www.w3.org/2000/svg"
-                            width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                            <line x1="18" y1="6" x2="6" y2="18"></line>
-                            <line x1="6" y1="6" x2="18" y2="18"></line>
-                          </svg>
+                  <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 w-full">
+                    <div class="flex-1 min-w-0 w-full sm:w-auto">
+                      <div class="flex items-center gap-2 flex-wrap mb-2 sm:mb-1">
+                        <h5 *ngIf="shift.type !== 'custom'" class="font-bold capitalize text-sm sm:text-base">{{
+                          shift.type }}</h5>
+                        <input *ngIf="shift.type === 'custom'" type="text" [ngModel]="shift.label"
+                          (ngModelChange)="updateShift(shift, {label: $event})"
+                          class="font-bold bg-transparent border-none outline-none p-0 w-24 sm:w-32 focus:ring-0 text-sm sm:text-base"
+                          placeholder="Shift Label">
+                        <span *ngIf="isShiftPast(shift)"
+                          class="shift-status-badge shift-status-past text-[10px]">Passed</span>
+                        <span *ngIf="isShiftActive(shift)" class="shift-status-badge shift-status-active text-[10px]">
+                          <span class="active-dot"></span> Active
                         </span>
-                      </span>
-                    </label>
+                      </div>
+                      <div class="flex items-center gap-2 text-xs sm:text-sm">
+                        <input type="time" [ngModel]="shift.startTime"
+                          (ngModelChange)="updateShift(shift, {startTime: $event})" class="time-input w-24 sm:w-auto"
+                          [disabled]="isShiftPast(shift)">
+                        <span class="text-[var(--text-muted)]">-</span>
+                        <input type="time" [ngModel]="shift.endTime"
+                          (ngModelChange)="updateShift(shift, {endTime: $event})" class="time-input w-24 sm:w-auto"
+                          [disabled]="isShiftPast(shift)">
+                      </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                      <button *ngIf="shift.type === 'custom'" (click)="removeShift(shift)"
+                        class="w-8 h-8 rounded-lg flex items-center justify-center text-red-400 hover:bg-red-50 hover:text-red-600 transition-all">
+                        <i class="bi bi-trash"></i>
+                      </button>
+                      <label class="toggle-switch" [class.disabled]="isShiftPast(shift)">
+                        <input type="checkbox" [checked]="shift.enabled" (change)="toggleShiftEnabled(shift)"
+                          [disabled]="isShiftPast(shift)">
+                        <span class="toggle-track">
+                          <span class="toggle-thumb">
+                            <svg *ngIf="shift.enabled && !isShiftPast(shift)" xmlns="http://www.w3.org/2000/svg"
+                              width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                              stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                              <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            <svg *ngIf="!shift.enabled || isShiftPast(shift)" xmlns="http://www.w3.org/2000/svg"
+                              width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                              stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                              <line x1="18" y1="6" x2="6" y2="18"></line>
+                              <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                          </span>
+                        </span>
+                      </label>
+                    </div>
                   </div>
-                </div>
-                <div class="slot-duration" *ngIf="!isShiftPast(shift)">
-                  <label>Slot:</label>
-                  <select [ngModel]="shift.slotDuration" (ngModelChange)="updateShift(shift, {slotDuration: +$event})"
-                    class="slot-select">
-                    <option [value]="15">15m</option>
-                    <option [value]="30">30m</option>
-                    <option [value]="45">45m</option>
-                    <option [value]="60">60m</option>
-                  </select>
+                  <div class="slot-duration" *ngIf="!isShiftPast(shift)">
+                    <label>Slot:</label>
+                    <select [ngModel]="shift.slotDuration" (ngModelChange)="updateShift(shift, {slotDuration: +$event})"
+                      class="slot-select">
+                      <option [value]="15">15m</option>
+                      <option [value]="30">30m</option>
+                      <option [value]="45">45m</option>
+                      <option [value]="60">60m</option>
+                    </select>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          <!-- Breaks Section -->
-          <div>
-            <div class="flex justify-between items-center mb-3">
-              <h4 class="font-bold text-lg text-[var(--text-primary)]">Breaks</h4>
-              <button (click)="addBreak()"
-                class="px-3 py-1 bg-[var(--primary-light)] text-[var(--primary)] rounded-lg text-sm font-bold hover:bg-[var(--primary)] hover:text-white transition-colors">
-                + Add Break
-              </button>
-            </div>
-            <div class="space-y-2">
-              <div *ngFor="let break of breaks(); let i = index" class="break-card">
-                <div class="flex items-center gap-2 text-sm">
-                  <input type="time" [ngModel]="break.startTime" (ngModelChange)="updateBreak(i, {startTime: $event})"
-                    class="time-input">
-                  <span>-</span>
-                  <input type="time" [ngModel]="break.endTime" (ngModelChange)="updateBreak(i, {endTime: $event})"
-                    class="time-input">
-                </div>
-                <input type="text" placeholder="Reason (e.g., Lunch)" [ngModel]="break.reason"
-                  (ngModelChange)="updateBreak(i, {reason: $event})"
-                  class="flex-1 bg-transparent border-none outline-none text-sm p-1">
-                <button (click)="removeBreak(i)" class="text-red-500 hover:text-red-700">
-                  <i class="bi bi-trash"></i>
+            <!-- Breaks Section -->
+            <div>
+              <div class="flex justify-between items-center mb-3">
+                <h4 class="font-bold text-lg text-[var(--text-primary)]">Breaks</h4>
+                <button (click)="addBreak()"
+                  class="px-3 py-1 bg-[var(--primary-light)] text-[var(--primary)] rounded-lg text-sm font-bold hover:bg-[var(--primary)] hover:text-white transition-colors">
+                  + Add Break
                 </button>
+              </div>
+              <div class="space-y-2">
+                <div *ngFor="let break of breaks(); let i = index" class="break-card">
+                  <div class="flex items-center gap-2 text-sm">
+                    <input type="time" [ngModel]="break.startTime" (ngModelChange)="updateBreak(i, {startTime: $event})"
+                      class="time-input">
+                    <span>-</span>
+                    <input type="time" [ngModel]="break.endTime" (ngModelChange)="updateBreak(i, {endTime: $event})"
+                      class="time-input">
+                  </div>
+                  <input type="text" placeholder="Reason (e.g., Lunch)" [ngModel]="break.reason"
+                    (ngModelChange)="updateBreak(i, {reason: $event})"
+                    class="flex-1 bg-transparent border-none outline-none text-sm p-1">
+                  <button (click)="removeBreak(i)" class="text-red-500 hover:text-red-700">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </div>
               </div>
             </div>
           </div>

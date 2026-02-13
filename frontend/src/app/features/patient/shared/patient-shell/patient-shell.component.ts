@@ -1,14 +1,14 @@
 import { Component, inject, HostListener, OnInit, OnDestroy, signal } from '@angular/core';
 import { ThemeService } from '@core/services/theme.service';
 import { CommonModule } from '@angular/common';
-import { RouterModule, Router } from '@angular/router';
+import { RouterModule, Router, NavigationEnd } from '@angular/router';
 import { AuthService } from '@core/services/auth.service';
 import { MessageService, Conversation } from '@core/services/message.service';
 import { NotificationService } from '@core/services/notification.service';
 import { WebSocketService } from '@core/services/websocket.service';
 import { Notification } from '@core/models/notification.model';
 import { Subject, interval } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { takeUntil, filter } from 'rxjs/operators';
 
 interface PatientNavItem {
   label: string;
@@ -83,6 +83,16 @@ export class PatientShellComponent implements OnInit, OnDestroy {
     this.loadNotifications();
     this.setupPolling();
     this.setupRealtimeUpdates();
+
+    // Auto-close sidebar on navigation
+    this.router.events
+      .pipe(
+        filter(event => event instanceof NavigationEnd),
+        takeUntil(this.destroy$)
+      )
+      .subscribe(() => {
+        this.closeSidebar();
+      });
   }
 
   ngOnDestroy(): void {
@@ -298,6 +308,12 @@ export class PatientShellComponent implements OnInit, OnDestroy {
   @HostListener('window:resize')
   onResize(): void {
     this.mobile = typeof window !== 'undefined' && window.innerWidth <= 1024;
+  }
+
+  @HostListener('window:keydown.escape')
+  onEscapeKey(): void {
+    this.closeSidebar();
+    this.closeDropdowns();
   }
 
   logout(): void {

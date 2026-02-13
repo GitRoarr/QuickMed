@@ -252,17 +252,67 @@
   }
 }
 
-@media (max-width: 900px) {
-  .messages-layout {
-    flex-direction: column;
+/* ============================================
+   Mobile Responsive: Master-Detail Layout
+   ============================================ */
+
+/* On mobile, the layout is a stack with only one panel visible */
+@media (max-width: 767px) {
+  .messages-shell {
+    height: 100vh;
+    min-height: 100vh;
+    overflow: hidden;
   }
 
+  .messages-layout {
+    height: calc(100vh - 72px);
+    position: relative;
+  }
+
+  /* Conversation list panel - full width on mobile */
   .messages-panel {
+    position: absolute !important;
+    inset: 0;
     width: 100% !important;
+    max-width: 100% !important;
+    z-index: 10;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+      opacity 0.3s ease;
+  }
+
+  /* When a conversation is selected, slide conversation list away */
+  .messages-panel.hidden {
+    transform: translateX(-100%);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* Chat detail panel - full width on mobile */
+  .messages-layout>.flex-1 {
+    position: absolute !important;
+    inset: 0;
+    z-index: 15;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+      opacity 0.3s ease;
+  }
+
+  /* When no conversation selected, slide chat panel away */
+  .messages-layout>.flex-1.hidden {
+    transform: translateX(100%);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .messages-panel .p-6 {
+    padding: 1rem !important;
+  }
+
+  .message-bubble {
+    max-width: 88% !important;
   }
 
   .header-actions {
-    justify-content: flex-end;
+    gap: 0.35rem;
   }
 }
 
@@ -271,35 +321,12 @@
     box-shadow: none;
   }
 
-  .message-bubble {
-    max-width: 85%;
-  }
-
-  .messages-layout {
-    height: auto;
-  }
-
   .header-actions {
     gap: 0.5rem;
   }
 
   .actions-dropdown {
     min-width: 180px;
-  }
-}
-
-@media (max-width: 520px) {
-  .messages-shell {
-    height: auto;
-    min-height: 100vh;
-  }
-
-  .messages-panel {
-    border-radius: 0;
-  }
-
-  .message-bubble {
-    max-width: 92%;
   }
 }
 

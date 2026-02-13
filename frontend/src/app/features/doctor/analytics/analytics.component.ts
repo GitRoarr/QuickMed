@@ -91,15 +91,77 @@ export class AnalyticsComponent implements OnInit {
       : name.substring(0, 2).toUpperCase();
   }
 
+
+
+  getDonutSegments() {
+    const data = this.analytics();
+    if (!data || !data.appointmentTypeBreakdown) return [];
+
+    const total = data.appointmentTypeBreakdown.reduce((sum, item) => sum + item.count, 0);
+    if (total === 0) return [];
+
+    let cumPercent = 0;
+    const colors = ['var(--primary)', 'var(--success)', 'var(--warning)', 'var(--error)', 'var(--secondary)'];
+
+    return data.appointmentTypeBreakdown.map((item, index) => {
+      const percentage = item.count / total;
+      const dashArray = `${percentage * 100} ${100 - percentage * 100}`;
+      const offset = 25 - cumPercent * 100; // Start at top (25%)
+      cumPercent += percentage;
+
+      return {
+        label: item.type,
+        count: item.count,
+        color: colors[index % colors.length],
+        dashArray: dashArray,
+        offset: offset
+      };
+    });
+  }
+
+  getSatisfactionLinePath(width: number, height: number): string {
+    const data = this.analytics()?.satisfactionTrend;
+    if (!data || data.length === 0) return '';
+
+    const max = 100; // Satisfaction is 0-100
+    const min = 0;
+
+    // X spacing
+    const stepX = width / (data.length - 1 || 1);
+
+    const points = data.map((val, index) => {
+      const x = index * stepX;
+      // Invert Y because SVG 0 is top
+      const y = height - ((val - min) / (max - min)) * height;
+      return `${x},${y}`;
+    });
+
+    return `M ${points.join(' L ')}`;
+  }
+
+  getReviewFillPath(width: number, height: number): string {
+    const linePath = this.getSatisfactionLinePath(width, height);
+    if (!linePath) return '';
+    return `${linePath} L ${width},${height} L 0,${height} Z`;
+  }
+
   getAppointmentTrendData() {
     const data = this.analytics();
     if (!data) return { months: [], completed: [], cancelled: [], noShow: [] };
 
+    // Sort keys chronologically
     const months = Object.keys(data.appointmentTrends).sort();
+
     return {
       months: months.map(m => {
-        const date = new Date(m + '-01');
-        return date.toLocaleDateString('en-US', { month: 'short' });
+        // If m is YYYY-MM
+        if (m.length === 7) {
+          const date = new Date(m + '-01');
+          return date.toLocaleDateString('en-US', { month: 'short' });
+        }
+        // If m is YYYY-MM-DD
+        const date = new Date(m);
+        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
       }),
       completed: months.map(m => data.appointmentTrends[m]?.completed || 0),
       cancelled: months.map(m => data.appointmentTrends[m]?.cancelled || 0),
@@ -110,10 +172,30 @@ export class AnalyticsComponent implements OnInit {
   getMaxChartValue(): number {
     const trendData = this.getAppointmentTrendData();
     const allValues = [...trendData.completed, ...trendData.cancelled, ...trendData.noShow];
-    return allValues.length ? Math.max(...allValues, 1) : 1;
+    // Stacked bar? If stacked, we need max of sums.
+    // The current UI seemed to be side-by-side or stacked? Code in template was doing separate bars in one column?
+    // Let's verify template logic. It was Side-by-side (flex-col inside a flex-row container per month).
+    // Wait, previous template had:
+    // <div class="flex-1 flex flex-col justify-end gap-1 h-full"> ... divs ... </div>
+    // This stacks them vertically? No, `flex-col` stacks them vertical. `justify-end`.
+    // So it's a stacked bar chart! 
+    // If it's a stacked bar chart, the max value should be the max of the SUMs.
+    // Let's check `getBarHeight`. Currently it compares individual value to `getMaxChartValue`.
+    // If they are stacked, the height of each segment is `(value / max) * 100`.
+    // If total height is 100%, then sum of segments should be <= 100%.
+    // So `maxValue` MUST be the max total (completed + cancelled + noShow).
+
+    const maxFunction = () => {
+      const sums = trendData.months.map((_, i) =>
+        (trendData.completed[i] || 0) + (trendData.cancelled[i] || 0) + (trendData.noShow[i] || 0)
+      );
+      return Math.max(...sums, 1);
+    };
+    return maxFunction();
   }
 
   getBarHeight(value: number, maxValue: number): number {
+    // Return percentage of TOTAL height
     return maxValue === 0 ? 0 : (value / maxValue) * 100;
   }
 

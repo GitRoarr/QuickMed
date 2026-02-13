@@ -341,13 +341,100 @@
 }
 
 @media (max-width: 768px) {
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1.25rem;
+  }
+
+  .page-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .page-header .primary-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
   .appointments-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 1rem;
+    gap: 1rem;
+  }
+
+  .search-field {
+    min-width: 100%;
+  }
+
+  .stats {
+    flex-direction: column;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+  }
+
+  .actions {
     flex-direction: column;
     align-items: stretch;
   }
 
-  .stats {
-    justify-content: space-between;
+  .actions button {
+    justify-content: center;
+    width: 100%;
+  }
+
+  /* Stack details grid */
+  .details-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .details-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .badge {
+    align-self: flex-start;
+  }
+
+  .appointment-card {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .appointment-icon {
+    width: 48px;
+    height: 48px;
+    font-size: 1.2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .summary-cards {
+    grid-template-columns: 1fr 1fr;
+    /* 2 cols */
+  }
+
+  .summary-card {
+    padding: 0.75rem;
+  }
+
+  .summary-card h3 {
+    font-size: 1.35rem;
+  }
+
+  .segment-tabs {
+    width: 100%;
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
+  }
+
+  .segment-tabs button {
+    white-space: nowrap;
+    flex: 1;
+    text-align: center;
   }
 }
 

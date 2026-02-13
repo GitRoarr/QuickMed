@@ -380,6 +380,7 @@
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -390,6 +391,7 @@
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -402,9 +404,74 @@
   }
 }
 
-@media (max-width: 640px) {
+@media (max-width: 768px) {
+  .page-header h1 {
+    font-size: 1.5rem;
+  }
+
   .search-controls {
     flex-direction: column;
+    align-items: stretch;
+  }
+
+  .search-input {
+    min-width: 100%;
+  }
+
+  .filter-select {
+    width: 100%;
+  }
+
+  .doctors-grid {
+    grid-template-columns: 1fr;
+    /* Stack cards on mobile */
+  }
+
+  .doctor-card {
+    padding: 1rem;
+  }
+
+  .card-head {
+    align-items: flex-start;
+  }
+
+  .card-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .card-actions button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Modal tweaks */
+  .modal-content {
+    width: 100%;
+    margin: 1rem;
+    max-height: calc(100vh - 2rem);
+    border-radius: 20px;
+  }
+
+  .slots-grid {
+    grid-template-columns: repeat(3, 1fr);
+    /* 3 cols for slots */
+  }
+}
+
+@media (max-width: 480px) {
+  .availability {
+    font-size: 0.75rem;
+    padding: 0.2rem 0.5rem;
+  }
+
+  .slots-grid {
+    grid-template-columns: repeat(2, 1fr);
+    /* 2 cols for slots on small screen */
+  }
+
+  .session-label {
+    margin-bottom: 0.5rem;
   }
 }
 

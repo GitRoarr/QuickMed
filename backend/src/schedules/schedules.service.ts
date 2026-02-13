@@ -344,7 +344,7 @@ export class SchedulesService {
     const sorted = [...shifts].sort((a, b) => {
       const timeComp = this.toMinutes(a.startTime) - this.toMinutes(b.startTime);
       if (timeComp !== 0) return timeComp;
-      const shiftOrder: Record<string, number> = { morning: 0, afternoon: 1, evening: 2, custom: 3 };
+      const shiftOrder: Record<string, number> = { morning: 0, afternoon: 1, evening: 2, night: 3, custom: 4 };
       return (shiftOrder[a.type] ?? 9) - (shiftOrder[b.type] ?? 9);
     });
 

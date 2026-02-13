@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, inject, AfterViewChecked, ElementRef, ViewChild, OnDestroy } from '@angular/core';
+import { Component, OnInit, signal, inject, AfterViewChecked, ElementRef, ViewChild, OnDestroy, HostListener } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -63,6 +63,7 @@ export class MessagesComponent implements OnInit, AfterViewChecked, OnDestroy {
   unreadCount = signal(0);
   currentUser = signal<any>(null);
   actionsMenuOpen = signal(false);
+  isMobile = signal(typeof window !== 'undefined' && window.innerWidth < 768);
 
   // Pickers
   showEmojiPicker = signal(false);
@@ -78,6 +79,11 @@ export class MessagesComponent implements OnInit, AfterViewChecked, OnDestroy {
   isTyping = signal(false);
   typingUser = signal<string | null>(null);
   private subscriptions = new Subscription();
+
+  @HostListener('window:resize')
+  onResize(): void {
+    this.isMobile.set(typeof window !== 'undefined' && window.innerWidth < 768);
+  }
 
   ngOnInit(): void {
     this.loadUserData();

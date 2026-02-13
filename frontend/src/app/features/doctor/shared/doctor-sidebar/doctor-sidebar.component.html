@@ -1,105 +1,71 @@
-<aside
-  class="doctor-sidebar fixed inset-y-0 left-0 z-60 w-64 h-screen flex flex-col overflow-y-auto bg-[var(--sidebar-bg)] shadow-2xl transition-transform duration-300 md:translate-x-0 md:static border-r border-[var(--surface-tertiary)] transform"
-  [class.-translate-x-full]="!isOpen"
-  [class.translate-x-0]="isOpen">
-  <button
-    type="button"
-    class="md:hidden absolute top-4 right-4 w-9 h-9 rounded-full bg-[var(--surface)] shadow flex items-center justify-center"
-    (click)="closeSidebar()"
-    aria-label="Close sidebar"
-  >
-    <i class="bi bi-x text-xl"></i>
+<aside class="doctor-sidebar" [class.sidebar-open]="isOpen" [class.sidebar-closed]="!isOpen">
+
+  <!-- Close Button (mobile) -->
+  <button type="button" class="close-btn" (click)="closeSidebar()" aria-label="Close sidebar">
+    <i class="bi bi-x-lg"></i>
   </button>
-  <div class="p-6">
-    <a routerLink="/doctor/dashboard" (click)="onLogoClick($event)"
-      class="flex items-center gap-3 group cursor-pointer">
-      <div
-        class="w-10 h-10 rounded-lg bg-gradient-to-br from-[var(--primary)] to-[#15803d] flex items-center justify-center text-white font-bold">
-        <img src="assets/images/QuickMed-Logo.png" alt="QuickMed Logo" class="w-8 h-8 object-contain" />
+
+  <!-- Brand -->
+  <div class="sidebar-brand">
+    <a routerLink="/doctor/dashboard" (click)="onLogoClick($event)" class="brand-link">
+      <div class="brand-icon">
+        <img src="assets/images/QuickMed-Logo.png" alt="QuickMed Logo" />
       </div>
-      <div>
-        <h3
-          class="text-base font-bold text-[var(--text-primary)] m-0 group-hover:text-[var(--primary)] transition-colors">
-          QuickMed</h3>
-        <p class="text-xs text-[var(--text-secondary)] m-0">Doctor Portal</p>
+      <div class="brand-text">
+        <h3 class="brand-title">QuickMed</h3>
+        <p class="brand-subtitle">Doctor Portal</p>
       </div>
     </a>
   </div>
 
+  <!-- Navigation -->
   <ng-container *ngIf="!loading(); else sidebarSkeleton">
-    <nav class="flex-1 py-4 overflow-y-auto px-3">
-      <a *ngFor="let item of menuItems()" [routerLink]="item.route"
-        routerLinkActive="bg-[var(--sidebar-active-bg)] text-[var(--sidebar-active-text)] font-semibold border-l-4 border-[var(--primary)]"
-        class="flex items-center gap-3 px-4 py-2.5 text-[var(--sidebar-text)] hover:bg-[var(--sidebar-hover)] hover:text-[var(--text-primary)] transition-colors group relative rounded-lg">
+    <nav class="sidebar-nav">
+      <a *ngFor="let item of menuItems()" [routerLink]="item.route" routerLinkActive="nav-active"
+        (click)="closeSidebar()" class="nav-item">
         <ng-container *ngIf="item.imgSrc; else iconTpl">
           <img
             [src]="item.label === 'Prescriptions' && themeService.isDarkMode() ? 'assets/images/icons8-pill-50.png' : item.imgSrc"
-            alt="{{ item.label }}" class="w-5 h-5 opacity-80 sidebar-pill-icon" />
+            alt="{{ item.label }}" class="nav-item-img sidebar-pill-icon" />
         </ng-container>
         <ng-template #iconTpl>
-          <i [class]="'bi ' + (item.icon || '') + ' text-lg'"></i>
+          <i [class]="'bi ' + (item.icon || '') + ' nav-item-icon'"></i>
         </ng-template>
-        <span>{{ item.label }}</span>
-        <span *ngIf="item.badge && item.badge > 0"
-          class="ml-auto bg-[var(--error)] text-white text-[10px] px-2 py-0.5 rounded-full font-bold">{{ item.badge
-          }}</span>
+        <span class="nav-item-label">{{ item.label }}</span>
+        <span *ngIf="item.badge && item.badge > 0" class="nav-badge">
+          {{ item.badge }}
+        </span>
       </a>
     </nav>
   </ng-container>
 
   <ng-template #sidebarSkeleton>
-    <nav class="flex-1 py-4 overflow-y-auto px-3">
-      <div class="px-6 py-3 flex items-center gap-3">
+    <nav class="sidebar-nav">
+      <div *ngFor="let _ of [1,2,3,4,5,6,7,8]" class="skeleton-item">
         <span class="skeleton-icon"></span>
-        <span class="skeleton-text w-24"></span>
-      </div>
-      <div class="px-6 py-3 flex items-center gap-3">
-        <span class="skeleton-icon"></span>
-        <span class="skeleton-text w-28"></span>
-      </div>
-      <div class="px-6 py-3 flex items-center gap-3">
-        <span class="skeleton-icon"></span>
-        <span class="skeleton-text w-20"></span>
-      </div>
-      <div class="px-6 py-3 flex items-center gap-3">
-        <span class="skeleton-icon"></span>
-        <span class="skeleton-text w-24"></span>
-      </div>
-      <div class="px-6 py-3 flex items-center gap-3">
-        <span class="skeleton-icon"></span>
-        <span class="skeleton-text w-32"></span>
-      </div>
-      <div class="px-6 py-3 flex items-center gap-3">
-        <span class="skeleton-icon"></span>
-        <span class="skeleton-text w-26"></span>
-      </div>
-      <div class="px-6 py-3 flex items-center gap-3">
-        <span class="skeleton-icon"></span>
-        <span class="skeleton-text w-22"></span>
-      </div>
-      <div class="px-6 py-3 flex items-center gap-3">
-        <span class="skeleton-icon"></span>
-        <span class="skeleton-text w-30"></span>
+        <span class="skeleton-text"></span>
       </div>
     </nav>
   </ng-template>
 
-  <div class="p-4 border-t border-[var(--surface-tertiary)]">
-    <div class="flex items-center gap-3 mb-4">
-      <div
-        class="w-10 h-10 rounded-full bg-[var(--surface-tertiary)] overflow-hidden flex items-center justify-center text-[var(--text-primary)] font-bold shadow-sm">
-        <img *ngIf="currentUser()?.avatar; else docInitials" [src]="currentUser()?.avatar"
-          class="w-full h-full object-cover" />
-        <ng-template #docInitials>{{ getDoctorInitials() }}</ng-template>
+  <!-- User Profile Section -->
+  <div class="sidebar-profile">
+    <div class="profile-card">
+      <div class="profile-avatar">
+        <img *ngIf="currentUser()?.avatar; else docInitials" [src]="currentUser()?.avatar" class="avatar-img" />
+        <ng-template #docInitials>
+          <span class="avatar-initials">{{ getDoctorInitials() }}</span>
+        </ng-template>
+        <span class="avatar-status"></span>
       </div>
-      <div class="overflow-hidden">
-        <p class="truncate text-sm font-semibold text-[var(--text-primary)]">Dr. {{ getDoctorName() }}</p>
-        <p class="truncate text-xs text-[var(--text-secondary)]">{{ getDoctorSpecialty() }}</p>
+      <div class="profile-info">
+        <p class="profile-name">Dr. {{ getDoctorName() }}</p>
+        <p class="profile-specialty">{{ getDoctorSpecialty() }}</p>
       </div>
     </div>
-    <button (click)="logout()"
-      class="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg bg-red-600 text-white hover:bg-red-700 transition-all font-bold text-sm shadow-lg shadow-red-500/20 active:scale-95 focus:outline-none focus:ring-2 focus:ring-red-400/60">
-      <i class="bi bi-box-arrow-right"></i> Logout
+    <button (click)="logout()" class="logout-btn" title="Sign out">
+      <i class="bi bi-box-arrow-right"></i>
+      <span>Logout</span>
     </button>
   </div>
 </aside>

@@ -1,10 +1,23 @@
 <div class="patient-shell" [class.sidebar-open]="sidebarOpen" [class.dark]="themeService.isDarkMode()">
+
+  <!-- Premium Hamburger Button (Mobile) -->
+  <button type="button" class="hamburger-btn" [class.is-active]="sidebarOpen" (click)="toggleSidebar()"
+    aria-label="Toggle sidebar">
+    <span class="hamburger-box">
+      <span class="hamburger-line hamburger-line--top"></span>
+      <span class="hamburger-line hamburger-line--middle"></span>
+      <span class="hamburger-line hamburger-line--bottom"></span>
+    </span>
+  </button>
+
+  <!-- Sidebar -->
   <aside class="patient-shell__sidebar" [class.open]="sidebarOpen">
-    <button
-      class="md:hidden absolute top-4 right-4 w-10 h-10 rounded-full bg-[var(--surface)] border border-[var(--border)] flex items-center justify-center text-[var(--primary)]"
-      (click)="closeSidebar()">
+    <!-- Close Button -->
+    <button class="close-sidebar-btn" (click)="closeSidebar()">
       <i class="bi bi-x-lg"></i>
     </button>
+
+    <!-- Brand -->
     <div class="patient-shell__brand" (click)="navigate('/')" title="Back to Home">
       <div class="brand-container">
         <div class="brand-icon">
@@ -17,6 +30,7 @@
       </div>
     </div>
 
+    <!-- Navigation -->
     <nav class="patient-shell__nav">
       <a *ngFor="let item of menuItems" class="patient-shell__nav-item" [routerLink]="item.route"
         routerLinkActive="active" [routerLinkActiveOptions]="{ exact: item.exact !== false }" (click)="closeSidebar()">
@@ -25,16 +39,20 @@
       </a>
     </nav>
 
+    <!-- Profile Card -->
     <div class="patient-shell__profile" *ngIf="user as current">
-      <div class="avatar">
-        <img *ngIf="current.avatar; else initials" [src]="current.avatar" alt="{{ current.firstName }}" />
-        <ng-template #initials>
-          {{ (current.firstName.charAt(0) || 'A') + (current.lastName.charAt(0) || 'J') }}
-        </ng-template>
-      </div>
-      <div class="profile-info">
-        <p class="profile-name">{{ current.firstName }} {{ current.lastName }}</p>
-        <p class="profile-id">{{ current.patientId || 'QM-' + current.id.substring(0,8) }}</p>
+      <div class="profile-card">
+        <div class="avatar">
+          <img *ngIf="current.avatar; else initials" [src]="current.avatar" alt="{{ current.firstName }}" />
+          <ng-template #initials>
+            {{ (current.firstName.charAt(0) || 'A') + (current.lastName.charAt(0) || 'J') }}
+          </ng-template>
+          <span class="avatar-status-dot"></span>
+        </div>
+        <div class="profile-info">
+          <p class="profile-name">{{ current.firstName }} {{ current.lastName }}</p>
+          <p class="profile-id">{{ current.patientId || 'QM-' + current.id.substring(0,8) }}</p>
+        </div>
       </div>
     </div>
 
@@ -44,8 +62,10 @@
     </button>
   </aside>
 
+  <!-- Main Content -->
   <main class="patient-shell__content">
     <div class="patient-shell__topbar">
+      <!-- Messages -->
       <div class="relative">
         <button class="patient-shell__icon-btn" type="button" title="Messages" (click)="toggleMessages($event)">
           <i class="bi bi-chat-dots-fill"></i>
@@ -57,7 +77,6 @@
             <h3>Recent Messages</h3>
             <button class="view-all" (click)="navigate('/patient/messages')">Open Chat</button>
           </div>
-
           <div class="dropdown-body custom-scrollbar" *ngIf="!isLoadingMessages(); else messagesLoading">
             <button *ngFor="let conv of conversations()" class="dropdown-item message-item"
               (click)="openConversation(conv, $event)">
@@ -96,6 +115,7 @@
         </div>
       </div>
 
+      <!-- Notifications -->
       <div class="relative">
         <button class="patient-shell__icon-btn" type="button" title="Notifications"
           (click)="toggleNotifications($event)">
@@ -113,7 +133,6 @@
               Mark all read
             </button>
           </div>
-
           <div class="dropdown-body custom-scrollbar" *ngIf="!isLoadingNotifications(); else notificationsLoading">
             <button *ngFor="let note of notifications()" class="dropdown-item notification-item"
               [class.unread]="!note.read" (click)="openNotification(note, $event)">
@@ -140,12 +159,9 @@
         </div>
       </div>
 
+      <!-- Theme Toggle -->
       <button class="patient-shell__icon-btn theme-toggle" type="button" (click)="toggleTheme()" title="Toggle theme">
         <i class="bi" [ngClass]="themeService.isDarkMode() ? 'bi-moon-stars-fill' : 'bi-brightness-high-fill'"></i>
-      </button>
-
-      <button class="hamburger" (click)="toggleSidebar()" *ngIf="mobile">
-        <i class="bi bi-list text-2xl"></i>
       </button>
     </div>
 

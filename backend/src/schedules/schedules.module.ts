@@ -1,5 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { Payment } from '../payments/entities/payment.entity';
+import { Review } from '../reviews/entities/review.entity';
 import { DoctorSchedule } from './schedule.entity';
 import { SchedulesService } from './schedules.service';
 import { SchedulesController } from './schedules.controller';
@@ -30,6 +32,8 @@ import { NotificationsModule } from '../notifications/notifications.module';
       DoctorAnalytics,
       DoctorSettings,
       ReceptionistTask,
+      Payment,
+      Review,
     ]),
     SettingsModule,
     NotificationsModule,

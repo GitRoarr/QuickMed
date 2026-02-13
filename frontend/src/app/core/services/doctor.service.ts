@@ -64,6 +64,7 @@ export interface DoctorAnalytics {
   };
   appointmentTrends: { [key: string]: { completed: number; cancelled: number; noShow: number } };
   satisfactionTrend: number[];
+  appointmentTypeBreakdown: { type: string; count: number }[];
 }
 
 export interface DoctorPatientSummary {

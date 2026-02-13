@@ -349,23 +349,31 @@
   --fg: #e2e8f0;
   --muted: #9fb1c9;
   --primary: #10b981;
-  --primary-light: rgba(16,185,129,0.16);
+  --primary-light: rgba(16, 185, 129, 0.16);
 }
 
 :host-context(.patient-shell.dark) .dashboard-header {
   background: var(--surface);
   border-color: #1f2937;
-  box-shadow: 0 30px 80px -60px rgba(0,0,0,0.7);
+  box-shadow: 0 30px 80px -60px rgba(0, 0, 0, 0.7);
 }
 
-:host-context(.patient-shell.dark) .dashboard-header h1 { color: var(--fg); }
-:host-context(.patient-shell.dark) .eyebrow { color: var(--muted); }
-:host-context(.patient-shell.dark) .muted { color: var(--muted); }
+:host-context(.patient-shell.dark) .dashboard-header h1 {
+  color: var(--fg);
+}
+
+:host-context(.patient-shell.dark) .eyebrow {
+  color: var(--muted);
+}
+
+:host-context(.patient-shell.dark) .muted {
+  color: var(--muted);
+}
 
 :host-context(.patient-shell.dark) .primary-btn {
   background: var(--primary);
   color: #0b1423;
-  box-shadow: 0 18px 35px -20px rgba(16,185,129,0.6);
+  box-shadow: 0 18px 35px -20px rgba(16, 185, 129, 0.6);
 }
 
 :host-context(.patient-shell.dark) .primary-btn.subtle {
@@ -376,69 +384,243 @@
 :host-context(.patient-shell.dark) .vital-card {
   background: var(--surface);
   border: 1px solid #1f2937;
-  box-shadow: 0 20px 45px -35px rgba(0,0,0,0.7);
+  box-shadow: 0 20px 45px -35px rgba(0, 0, 0, 0.7);
 }
 
-:host-context(.patient-shell.dark) .vital-value { color: var(--fg); }
-:host-context(.patient-shell.dark) .vital-label { color: var(--muted); }
-:host-context(.patient-shell.dark) .vital-status { color: #6ef3b0; }
+:host-context(.patient-shell.dark) .vital-value {
+  color: var(--fg);
+}
+
+:host-context(.patient-shell.dark) .vital-label {
+  color: var(--muted);
+}
+
+:host-context(.patient-shell.dark) .vital-status {
+  color: #6ef3b0;
+}
+
 :host-context(.patient-shell.dark) .vital-icon {
-  background: rgba(16,185,129,0.18);
+  background: rgba(16, 185, 129, 0.18);
   color: #6ef3b0;
 }
 
 :host-context(.patient-shell.dark) .stat-pill {
   background: var(--bg);
-  box-shadow: 0 15px 40px -30px rgba(0,0,0,0.6);
+  box-shadow: 0 15px 40px -30px rgba(0, 0, 0, 0.6);
   border: 1px solid #1f2937;
 }
 
-:host-context(.patient-shell.dark) .pill-label { color: var(--muted); }
-:host-context(.patient-shell.dark) .pill-value { color: var(--fg); }
+:host-context(.patient-shell.dark) .pill-label {
+  color: var(--muted);
+}
+
+:host-context(.patient-shell.dark) .pill-value {
+  color: var(--fg);
+}
+
 :host-context(.patient-shell.dark) .stat-pill i {
   color: #6ef3b0;
-  background: rgba(16,185,129,0.14);
+  background: rgba(16, 185, 129, 0.14);
   border: 1px solid #123524;
 }
 
-:host-context(.patient-shell.dark) .panel { background: var(--surface); color: var(--fg); border: 1px solid #1f2937; box-shadow: 0 40px 70px -55px rgba(0,0,0,0.7); }
-:host-context(.patient-shell.dark) .panel-header h2 { color: var(--fg); }
-:host-context(.patient-shell.dark) .text-link { color: #6ef3b0; }
-:host-context(.patient-shell.dark) .appointment-card { border-color: #1f2937; }
-:host-context(.patient-shell.dark) .appointment-doctor { color: var(--fg); }
-:host-context(.patient-shell.dark) .appointment-details { color: #cbd5e1; }
-:host-context(.patient-shell.dark) .appointment-details i { color: #6ef3b0; }
-:host-context(.patient-shell.dark) .badge { background: var(--bg); color: var(--fg); border: 1px solid #1f2937; }
-:host-context(.patient-shell.dark) .badge-video { background: var(--primary-light); color: #6ef3b0; }
-:host-context(.patient-shell.dark) .prescription-card { border-color: #1f2937; }
-:host-context(.patient-shell.dark) .prescription-name { color: var(--fg); }
-:host-context(.patient-shell.dark) .lab-item { border-color: #1f2937; }
-:host-context(.patient-shell.dark) .lab-title { color: var(--fg); }
-:host-context(.patient-shell.dark) .lab-results .badge { background: var(--primary-light); color: #6ef3b0; border-color: transparent; }
-:host-context(.patient-shell.dark) .empty-state { background: var(--bg); color: var(--muted); border: 1px solid #1f2937; }
-:host-context(.patient-shell.dark) .spinner { border-color: #1f2937; border-top-color: #6ef3b0; }
+:host-context(.patient-shell.dark) .panel {
+  background: var(--surface);
+  color: var(--fg);
+  border: 1px solid #1f2937;
+  box-shadow: 0 40px 70px -55px rgba(0, 0, 0, 0.7);
+}
+
+:host-context(.patient-shell.dark) .panel-header h2 {
+  color: var(--fg);
+}
+
+:host-context(.patient-shell.dark) .text-link {
+  color: #6ef3b0;
+}
+
+:host-context(.patient-shell.dark) .appointment-card {
+  border-color: #1f2937;
+}
+
+:host-context(.patient-shell.dark) .appointment-doctor {
+  color: var(--fg);
+}
+
+:host-context(.patient-shell.dark) .appointment-details {
+  color: #cbd5e1;
+}
+
+:host-context(.patient-shell.dark) .appointment-details i {
+  color: #6ef3b0;
+}
+
+:host-context(.patient-shell.dark) .badge {
+  background: var(--bg);
+  color: var(--fg);
+  border: 1px solid #1f2937;
+}
+
+:host-context(.patient-shell.dark) .badge-video {
+  background: var(--primary-light);
+  color: #6ef3b0;
+}
+
+:host-context(.patient-shell.dark) .prescription-card {
+  border-color: #1f2937;
+}
+
+:host-context(.patient-shell.dark) .prescription-name {
+  color: var(--fg);
+}
+
+:host-context(.patient-shell.dark) .lab-item {
+  border-color: #1f2937;
+}
+
+:host-context(.patient-shell.dark) .lab-title {
+  color: var(--fg);
+}
+
+:host-context(.patient-shell.dark) .lab-results .badge {
+  background: var(--primary-light);
+  color: #6ef3b0;
+  border-color: transparent;
+}
+
+:host-context(.patient-shell.dark) .empty-state {
+  background: var(--bg);
+  color: var(--muted);
+  border: 1px solid #1f2937;
+}
+
+:host-context(.patient-shell.dark) .spinner {
+  border-color: #1f2937;
+  border-top-color: #6ef3b0;
+}
 
 /* Responsive */
+/* Responsive */
+@media (max-width: 1024px) {
+  .content-grid {
+    grid-template-columns: 1fr;
+    /* Stack panels on tablet */
+  }
+}
+
 @media (max-width: 768px) {
-  .dashboard-header { flex-direction: column; align-items: flex-start; gap: 1rem; }
-  .content-grid { grid-template-columns: 1fr; }
-  .patient-dashboard { gap: 1rem; }
-  .vital-card { align-items: flex-start; }
-  .vital-icon { width: 40px; height: 40px; font-size: 1.1rem; }
-  .stats-grid { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
-  .appointment-card { flex-direction: column; align-items: stretch; gap: 0.5rem; }
-  .appointment-meta { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
-  .appointment-actions { justify-content: flex-start; }
-  .prescription-card { flex-direction: column; gap: 0.75rem; }
-  .panel { padding: 1rem; }
-  .patient-dashboard .dashboard-header .primary-btn { width: 100%; justify-content: center; }
+  .patient-dashboard {
+    gap: 1.25rem;
+  }
+
+  .dashboard-header {
+    flex-direction: column;
+    align-items: stretch;
+    /* Stretch content */
+    gap: 1.25rem;
+    padding: 1.5rem;
+  }
+
+  .dashboard-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .dashboard-header .primary-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .vitals-grid {
+    grid-template-columns: repeat(2, 1fr);
+    /* 2 cols on tablet/large mobile */
+  }
+
+  .vital-card {
+    flex-direction: column;
+    /* Icon on top */
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 1rem;
+  }
+
+  .vital-value {
+    font-size: 1.25rem;
+  }
+
+  /* Appointment Card Mobile */
+  .appointment-card {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+    padding: 1.25rem;
+    background: #f8fafc;
+    /* Slight bg to distinguish in list */
+    border-radius: 12px;
+  }
+
+  .appointment-meta {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .appointment-actions {
+    margin-top: 0.5rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    /* 2 buttons per row */
+    gap: 0.75rem;
+  }
+
+  .appointment-actions button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Prescription Card Mobile */
+  .prescription-card {
+    flex-direction: column;
+    gap: 0.5rem;
+    background: #f8fafc;
+    padding: 1rem;
+    border-radius: 12px;
+  }
 }
 
 @media (max-width: 480px) {
-  .patient-shell__content { padding: 1rem; }
-  .dashboard-header h1 { font-size: 1.25rem; }
-  .vitals-grid { grid-template-columns: 1fr; }
-  .stats-grid { grid-template-columns: 1fr 1fr; }
-  .appointment-details { font-size: 0.85rem; }
-  .primary-btn { padding: 0.5rem 0.75rem; }
+  .vitals-grid {
+    grid-template-columns: 1fr;
+    /* 1 col on small mobile */
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+    /* 1 col stats */
+  }
+
+  .dashboard-header {
+    padding: 1.25rem;
+  }
+
+  .vital-card,
+  .stat-pill,
+  .panel {
+    border-radius: 16px;
+  }
+
+  .appointment-actions {
+    grid-template-columns: 1fr;
+    /* Stack buttons fully */
+  }
+
+  .panel-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .panel-header .text-link {
+    align-self: flex-end;
+  }
 }

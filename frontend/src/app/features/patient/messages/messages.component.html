@@ -6,40 +6,34 @@
           <p class="eyebrow">Messages</p>
           <h1>Stay in touch with your care team</h1>
         </div>
-        <div class="header-actions">
+        <div class="header-actions header-actions--top">
           <button class="icon-btn" aria-label="Call doctor">
             <i class="bi bi-telephone"></i>
           </button>
-          <button class="icon-btn" aria-label="Video call doctor">
+          <button class="icon-btn hidden-mobile" aria-label="Video call doctor">
             <i class="bi bi-camera-video"></i>
           </button>
         </div>
       </div>
 
-      <div class="messages-layout">
+      <div class="messages-layout" [class.chat-active]="selectedConversation()">
         <!-- Conversations Sidebar -->
-        <aside class="conversations">
+        <aside class="conversations" [class.panel-hidden]="selectedConversation()">
           <div class="search-field">
             <i class="bi bi-search"></i>
-            <input
-              type="text"
-              placeholder="Search conversations..."
-              [(ngModel)]="searchQuery"
+            <input type="text" placeholder="Search conversations..." [(ngModel)]="searchQuery"
               (ngModelChange)="loadConversations()" />
           </div>
 
           <div class="conversation-list" *ngIf="!isLoadingConversations(); else loadingConversations">
-            <button
-              type="button"
-              class="conversation-item"
-              *ngFor="let conversation of conversations()"
+            <button type="button" class="conversation-item" *ngFor="let conversation of conversations()"
               [class.active]="selectedConversation()?.id === conversation.id"
               (click)="selectConversation(conversation)">
-              
+
               <div class="avatar">
                 {{ conversation.doctor?.firstName?.charAt(0) || conversation.doctor?.lastName?.charAt(0) || 'U' }}
               </div>
-              
+
               <div class="conversation-meta">
                 <div class="meta-row">
                   <p>{{ getRecipientName(conversation) }}</p>
@@ -47,18 +41,24 @@
                 </div>
                 <p class="preview">{{ conversation.lastMessageContent || 'New conversation' }}</p>
               </div>
-              
+
               <span class="pill" *ngIf="conversation.unreadCount">{{ conversation.unreadCount }}</span>
             </button>
           </div>
         </aside>
 
         <!-- Chat View -->
-        <section class="chat-view" *ngIf="selectedConversation(); else emptyState">
+        <section class="chat-view" [class.panel-hidden]="!selectedConversation()"
+          *ngIf="selectedConversation(); else emptyState">
           <header class="chat-header">
             <div class="chat-header__left">
+              <!-- Back Button (mobile) -->
+              <button class="back-btn" (click)="selectedConversation.set(null)" aria-label="Back to conversations">
+                <i class="bi bi-arrow-left"></i>
+              </button>
               <div class="chat-avatar">
-                {{ selectedConversation()?.doctor?.firstName?.charAt(0) || selectedConversation()?.doctor?.lastName?.charAt(0) || 'D' }}
+                {{ selectedConversation()?.doctor?.firstName?.charAt(0) ||
+                selectedConversation()?.doctor?.lastName?.charAt(0) || 'D' }}
               </div>
               <div>
                 <p class="chat-title">{{ getRecipientName(selectedConversation()!) }}</p>
@@ -72,7 +72,7 @@
               <button class="icon-btn" aria-label="Call doctor">
                 <i class="bi bi-telephone"></i>
               </button>
-              <button class="icon-btn" aria-label="Video call doctor">
+              <button class="icon-btn hidden-mobile" aria-label="Video call doctor">
                 <i class="bi bi-camera-video"></i>
               </button>
               <button class="icon-btn" aria-label="More options">
@@ -82,11 +82,8 @@
           </header>
 
           <div class="chat-body">
-            <div
-              *ngFor="let message of messages()"
-              class="message-row"
-              [class.mine]="isOwnMessage(message)">
-              
+            <div *ngFor="let message of messages()" class="message-row" [class.mine]="isOwnMessage(message)">
+
               <div class="message-bubble">
                 <p>{{ message.content }}</p>
                 <span>{{ message.createdAt | date:'shortTime' }}</span>
@@ -95,24 +92,18 @@
           </div>
 
           <footer class="chat-input">
-            <button class="ghost-icon" type="button" aria-label="Attach file">
+            <button class="ghost-icon hidden-mobile" type="button" aria-label="Attach file">
               <i class="bi bi-paperclip"></i>
             </button>
             <button class="ghost-icon" type="button" aria-label="Emoji">
               <i class="bi bi-emoji-smile"></i>
             </button>
-            <textarea
-              rows="2"
-              placeholder="Type your message..."
-              [(ngModel)]="messageContent"
+            <textarea rows="1" placeholder="Type your message..." [(ngModel)]="messageContent"
               (keydown.enter)="sendMessage(); $event.preventDefault()"></textarea>
-            <button
-              class="send-btn"
-              (click)="sendMessage()"
-              [disabled]="!messageContent().trim()"
+            <button class="send-btn" (click)="sendMessage()" [disabled]="!messageContent().trim()"
               [attr.aria-disabled]="!messageContent().trim()">
               <i class="bi bi-send"></i>
-              Send
+              <span class="send-label">Send</span>
             </button>
           </footer>
         </section>
@@ -123,12 +114,13 @@
 
 <ng-template #loadingConversations>
   <div class="empty-state">
-    Loading conversations...
+    <div class="loading-spinner"></div>
+    <p>Loading conversations...</p>
   </div>
 </ng-template>
 
 <ng-template #emptyState>
-  <div class="chat-empty">
+  <div class="chat-empty" [class.panel-hidden]="!selectedConversation()">
     <div class="empty-illustration">
       <i class="bi bi-chat-heart"></i>
     </div>
