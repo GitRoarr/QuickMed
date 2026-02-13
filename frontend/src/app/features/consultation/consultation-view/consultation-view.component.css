@@ -1,1 +1,377 @@
-/* No custom styles needed as of now */
+.consultation-view {
+    min-height: 100vh;
+    background-color: var(--background, #f8fafc);
+    color: var(--fg, #0f172a);
+}
+
+.back-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--muted, #64748b);
+    background: none;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.back-btn:hover {
+    color: var(--primary, #10b981);
+}
+
+.action-group {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.print-btn {
+    background: white;
+    color: #334155;
+    border: 1px solid #e2e8f0;
+    padding: 0.75rem 1.5rem;
+    border-radius: 14px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s;
+}
+
+.print-btn:hover {
+    background: #f8fafc;
+    transform: translateY(-1px);
+}
+
+.share-btn {
+    background: white;
+    color: #334155;
+    border: 1px solid #e2e8f0;
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.report-card {
+    background: white;
+    border-radius: 28px;
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.03);
+}
+
+.primary-gradient {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    border: none;
+}
+
+.doctor-badge-large {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.avatar-img {
+    width: 128px;
+    height: 128px;
+    border-radius: 32px;
+    object-fit: cover;
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    background: white;
+}
+
+.verified-icon {
+    position: absolute;
+    bottom: -10px;
+    right: -10px;
+    background: white;
+    color: #3b82f6;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-size: 1.25rem;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.meta-pill {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 999px;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    backdrop-filter: blur(8px);
+}
+
+.session-type-badge {
+    background: rgba(0, 0, 0, 0.15);
+    padding: 1.25rem;
+    border-radius: 24px;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    min-width: 100px;
+}
+
+.session-type-badge i {
+    font-size: 1.5rem;
+}
+
+.session-type-badge span {
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.card-header {
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid rgba(226, 232, 240, 0.6);
+}
+
+.rich-content {
+    line-height: 1.8;
+}
+
+.prescription-skin {
+    border-top: 6px solid #f43f5e;
+}
+
+.tm-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 18px;
+    display: grid;
+    place-items: center;
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+.tm-icon.medication {
+    background: #eff6ff;
+    color: #3b82f6;
+}
+
+.tm-icon.therapy {
+    background: #fdf2f8;
+    color: #ec4899;
+}
+
+.tm-icon.procedure {
+    background: #fef3c7;
+    color: #d97706;
+}
+
+.tm-icon.lab_test {
+    background: #f5f3ff;
+    color: #8b5cf6;
+}
+
+.type-tag {
+    padding: 0.25rem 0.75rem;
+    border-radius: 999px;
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.type-tag.medication {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+.type-tag.therapy {
+    background: #fce7f3;
+    color: #be185d;
+}
+
+.type-tag.procedure {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.type-tag.lab_test {
+    background: #ede9fe;
+    color: #6d28d9;
+}
+
+.instruction-box {
+    background: #f8fafc;
+    padding: 1rem;
+    border-radius: 12px;
+    border-left: 4px solid #cbd5e1;
+}
+
+.instruction-box label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #64748b;
+    margin-bottom: 0.25rem;
+    text-transform: uppercase;
+}
+
+.instruction-box p {
+    color: #334155;
+    margin: 0;
+    font-weight: 500;
+}
+
+.stat-box {
+    background: #f8fafc;
+    padding: 1rem;
+    border-radius: 18px;
+    text-align: center;
+}
+
+.stat-box label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #94a3b8;
+    margin-bottom: 0.25rem;
+}
+
+.stat-box .val {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #1e293b;
+}
+
+.count-badge {
+    background: #f1f5f9;
+    padding: 0.25rem 0.75rem;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #64748b;
+}
+
+.print-only-footer {
+    display: none;
+}
+
+/* Animations */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.report-card {
+    animation: fadeInUp 0.5s ease backwards;
+}
+
+.report-card:nth-child(1) {
+    animation-delay: 0.1s;
+}
+
+.report-card:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.report-card:nth-child(3) {
+    animation-delay: 0.3s;
+}
+
+/* Dark Mode */
+:host-context(.patient-shell.dark) .consultation-view {
+    background-color: #0b1423;
+    color: #f1f5f9;
+}
+
+:host-context(.patient-shell.dark) .report-card {
+    background-color: #0f1c2f;
+    border-color: rgba(30, 41, 59, 0.5);
+}
+
+:host-context(.patient-shell.dark) .print-btn,
+:host-context(.patient-shell.dark) .share-btn {
+    background: #1e293b;
+    color: #f1f5f9;
+    border-color: #334155;
+}
+
+:host-context(.patient-shell.dark) .instruction-box {
+    background: #0b1423;
+    border-color: #334155;
+}
+
+:host-context(.patient-shell.dark) .instruction-box p {
+    color: #cbd5e1;
+}
+
+:host-context(.patient-shell.dark) .stat-box {
+    background-color: #0b1423;
+}
+
+:host-context(.patient-shell.dark) .stat-box .val {
+    color: white;
+}
+
+/* Printing */
+@media print {
+
+    .back-btn,
+    .action-group,
+    .consultation-view {
+        padding: 0 !important;
+    }
+
+    .back-btn,
+    .action-group {
+        display: none !important;
+    }
+
+    .consultation-view {
+        background: white !important;
+        color: black !important;
+    }
+
+    .report-card {
+        box-shadow: none !important;
+        border: 1px solid #eee !important;
+        animation: none !important;
+        break-inside: avoid;
+    }
+
+    .primary-gradient {
+        background: #f1f5f9 !important;
+        color: black !important;
+        border: 1px solid black !important;
+    }
+
+    .text-white,
+    .text-white\/80 {
+        color: black !important;
+    }
+
+    .meta-pill {
+        background: #eee !important;
+        color: black !important;
+        border: 1px solid #ccc !important;
+    }
+
+    .print-only-footer {
+        display: block !important;
+    }
+}

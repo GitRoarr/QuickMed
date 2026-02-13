@@ -15,7 +15,7 @@ import { ToastService } from '@core/services/toast.service';
 })
 export class MedicalRecordsComponent implements OnInit {
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
-  
+
   records = signal<MedicalRecord[]>([]);
   isLoading = signal(true);
   totalRecords = signal(0);
@@ -24,7 +24,7 @@ export class MedicalRecordsComponent implements OnInit {
   imagingCount = signal(0);
   diagnosisCount = signal(0);
   filterType = signal<MedicalRecord['type'] | 'all'>('all');
-  
+
   // Upload modal state
   showUploadModal = signal(false);
   isUploading = signal(false);
@@ -35,7 +35,7 @@ export class MedicalRecordsComponent implements OnInit {
     notes: '',
     recordDate: new Date().toISOString().split('T')[0]
   };
-  
+
   filterOptions: { label: string; value: MedicalRecord['type'] | 'all' }[] = [
     { label: 'All', value: 'all' },
     { label: 'Lab', value: 'lab' },
@@ -44,7 +44,7 @@ export class MedicalRecordsComponent implements OnInit {
     { label: 'Diagnoses', value: 'diagnosis' },
     { label: 'Other', value: 'other' }
   ];
-  
+
   filteredRecords = computed(() => {
     const type = this.filterType();
     const data = this.records();
@@ -52,10 +52,10 @@ export class MedicalRecordsComponent implements OnInit {
   });
 
   constructor(
-    private recordsService: MedicalRecordService, 
+    private recordsService: MedicalRecordService,
     private auth: AuthService,
     private toastService: ToastService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.loadRecords();
@@ -101,20 +101,36 @@ export class MedicalRecordsComponent implements OnInit {
   viewRecord(rec: MedicalRecord) {
     if (rec.fileUrl) {
       window.open(rec.fileUrl, '_blank');
+    } else {
+      this.toastService.error('No file associated with this record');
     }
   }
 
   downloadRecord(rec: MedicalRecord) {
-    this.recordsService.download(rec.id).subscribe({
-      next: (res) => {
-        if (res.url) window.open(res.url, '_blank');
-        else if (rec.fileUrl) window.open(rec.fileUrl, '_blank');
-      },
-      error: (err) => {
-        console.error('Failed to download', err);
-        this.toastService.error('Failed to download record');
+    if (!rec.fileUrl) {
+      this.toastService.error('No file available to download');
+      return;
+    }
+
+    // If it's a Cloudinary URL, we can use fl_attachment to force download
+    let downloadUrl = rec.fileUrl;
+    if (downloadUrl.includes('cloudinary.com')) {
+      const parts = downloadUrl.split('/upload/');
+      if (parts.length === 2) {
+        downloadUrl = `${parts[0]}/upload/fl_attachment/${parts[1]}`;
       }
-    })
+    }
+
+    // Use a hidden anchor to force download
+    const link = document.createElement('a');
+    link.href = downloadUrl;
+    link.target = '_blank'; // Fallback
+    link.download = rec.title || 'medical-record';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    this.toastService.success('Download started');
   }
 
   setFilter(type: MedicalRecord['type'] | 'all') {
@@ -146,22 +162,22 @@ export class MedicalRecordsComponent implements OnInit {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
       const file = input.files[0];
-      
+
       // Validate file size (max 10MB)
       if (file.size > 10 * 1024 * 1024) {
         this.toastService.error('File too large. Maximum size is 10MB.');
         return;
       }
-      
+
       // Validate file type
       const allowedTypes = ['application/pdf', 'image/png', 'image/jpeg', 'image/jpg'];
       if (!allowedTypes.includes(file.type)) {
         this.toastService.error('Invalid file type. Only PDF, PNG, JPEG allowed.');
         return;
       }
-      
+
       this.selectedFile.set(file);
-      
+
       // Auto-fill title from filename if empty
       if (!this.uploadForm.title) {
         this.uploadForm.title = file.name.replace(/\.[^/.]+$/, '');
@@ -195,7 +211,7 @@ export class MedicalRecordsComponent implements OnInit {
     this.isUploading.set(true);
 
     const file = this.selectedFile();
-    
+
     if (file) {
       // Upload with file
       this.recordsService.uploadFile(file, user.id).subscribe({
@@ -209,7 +225,7 @@ export class MedicalRecordsComponent implements OnInit {
             patientId: user.id,
             fileUrl: response.url
           };
-          
+
           this.recordsService.create(createDto).subscribe({
             next: () => {
               this.toastService.success('Record uploaded successfully');
@@ -239,7 +255,7 @@ export class MedicalRecordsComponent implements OnInit {
         recordDate: this.uploadForm.recordDate,
         patientId: user.id
       };
-      
+
       this.recordsService.create(createDto).subscribe({
         next: () => {
           this.toastService.success('Record created successfully');

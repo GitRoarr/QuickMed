@@ -17,11 +17,13 @@ export interface Message {
     id: string;
     firstName: string;
     lastName: string;
+    avatar?: string;
   };
   receiver?: {
     id: string;
     firstName: string;
     lastName: string;
+    avatar?: string;
   };
 }
 
@@ -36,11 +38,13 @@ export interface Conversation {
     id: string;
     firstName: string;
     lastName: string;
+    avatar?: string;
   };
   doctor?: {
     id: string;
     firstName: string;
     lastName: string;
+    avatar?: string;
   };
 }
 
@@ -50,7 +54,7 @@ export interface Conversation {
 export class MessageService {
   private readonly API_URL = `${environment.apiUrl}/messages`;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   getConversations(search?: string): Observable<Conversation[]> {
     let params = new HttpParams();

@@ -12,22 +12,36 @@
     </div>
 
     <div class="summary-cards">
-      <div class="summary-card"><p>Total</p><h3>{{ getAppointmentStats().total }}</h3><span>All appointments</span></div>
-      <div class="summary-card accent"><p>Confirmed</p><h3>{{ getAppointmentStats().confirmed }}</h3><span>Ready to attend</span></div>
-      <div class="summary-card warning"><p>Pending</p><h3>{{ getAppointmentStats().pending }}</h3><span>Awaiting approval</span></div>
-      <div class="summary-card muted"><p>Completed</p><h3>{{ getAppointmentStats().completed }}</h3><span>Visits done</span></div>
+      <div class="summary-card">
+        <p>Total</p>
+        <h3>{{ getAppointmentStats().total }}</h3><span>All appointments</span>
+      </div>
+      <div class="summary-card accent">
+        <p>Confirmed</p>
+        <h3>{{ getAppointmentStats().confirmed }}</h3><span>Ready to attend</span>
+      </div>
+      <div class="summary-card warning">
+        <p>Pending</p>
+        <h3>{{ getAppointmentStats().pending }}</h3><span>Awaiting approval</span>
+      </div>
+      <div class="summary-card muted">
+        <p>Completed</p>
+        <h3>{{ getAppointmentStats().completed }}</h3><span>Visits done</span>
+      </div>
     </div>
 
     <div class="segment-tabs">
-      <button type="button" [class.active]="activeSegment() === 'upcoming'" (click)="setSegment('upcoming')">Upcoming</button>
-      <button type="button" [class.active]="activeSegment() === 'completed'" (click)="setSegment('completed')">Completed</button>
+      <button type="button" [class.active]="activeSegment() === 'upcoming'"
+        (click)="setSegment('upcoming')">Upcoming</button>
+      <button type="button" [class.active]="activeSegment() === 'completed'"
+        (click)="setSegment('completed')">Completed</button>
     </div>
 
     <div class="appointments-toolbar">
       <div class="search-field">
         <i class="bi bi-search"></i>
-        <input type="text" placeholder="Search doctors, specialties, locations..."
-          [(ngModel)]="searchQuery" (ngModelChange)="onSearchChange()" />
+        <input type="text" placeholder="Search doctors, specialties, locations..." [(ngModel)]="searchQuery"
+          (ngModelChange)="onSearchChange()" />
       </div>
       <div class="stats">
         <span>Total: {{ getAppointmentStats().total }}</span>
@@ -51,14 +65,19 @@
           <div class="details-grid">
             <div><i class="bi bi-calendar-event"></i>{{ apt.appointmentDate | date:'MMM d, y' }}</div>
             <div><i class="bi bi-clock"></i>{{ apt.appointmentTime }}</div>
-            <div><i class="bi bi-geo-alt"></i>{{ apt.location || (apt.isVideoConsultation ? 'Virtual visit' : 'Clinic') }}</div>
+            <div><i class="bi bi-geo-alt"></i>{{ apt.location || (apt.isVideoConsultation ? 'Virtual visit' : 'Clinic')
+              }}</div>
           </div>
           <div class="actions">
             <button class="ghost-btn" (click)="viewDetails(apt.id)"><i class="bi bi-eye"></i> Details</button>
-            <button class="text-btn" (click)="openRescheduleModal(apt)" *ngIf="apt.status !== 'completed' && apt.status !== 'cancelled'">Reschedule</button>
-            <button class="text-btn danger" (click)="openCancelModal(apt)" *ngIf="apt.status !== 'completed' && apt.status !== 'cancelled'">Cancel</button>
-            <button class="primary-btn subtle" *ngIf="apt.isVideoConsultation && apt.status === 'confirmed'" (click)="joinVideoCall(apt.id)">Join</button>
-            <button class="primary-btn" *ngIf="apt.status === 'completed'" [routerLink]="['/consultation/view', apt.id]">View Consultation</button>
+            <button class="text-btn" (click)="openRescheduleModal(apt)"
+              *ngIf="apt.status !== 'completed' && apt.status !== 'cancelled'">Reschedule</button>
+            <button class="text-btn danger" (click)="openCancelModal(apt)"
+              *ngIf="apt.status !== 'completed' && apt.status !== 'cancelled'">Cancel</button>
+            <button class="primary-btn subtle" *ngIf="apt.isVideoConsultation && apt.status === 'confirmed'"
+              (click)="joinVideoCall(apt.id)">Join</button>
+            <button class="primary-btn" *ngIf="apt.status === 'completed'"
+              [routerLink]="['/consultation/view', apt.id]">View Consultation</button>
           </div>
         </div>
       </div>
@@ -86,85 +105,117 @@
 
     <ng-container *ngIf="!detailLoading(); else detailSpinner">
       <ng-container *ngIf="detailAppointment() as apt">
-        <div class="modal-hero" [ngClass]="apt.status">
-          <div class="modal-hero-icon">
-            <i class="bi" [ngClass]="apt.isVideoConsultation ? 'bi-camera-video-fill' : 'bi-calendar-check-fill'"></i>
-          </div>
-          <h2>Appointment Details</h2>
-          <span class="badge lg" [ngClass]="apt.status">{{ apt.status | titlecase }}</span>
-        </div>
-
-        <div class="modal-body">
-          <div class="detail-section">
-            <div class="detail-label"><i class="bi bi-person-circle"></i> Doctor</div>
-            <div class="detail-value">Dr. {{ apt.doctor?.firstName }} {{ apt.doctor?.lastName }}</div>
-            <div class="detail-sub">{{ apt.doctor?.specialty }}</div>
-          </div>
-
-          <div class="detail-row">
-            <div class="detail-section">
-              <div class="detail-label"><i class="bi bi-calendar-event"></i> Date</div>
-              <div class="detail-value">{{ apt.appointmentDate | date:'EEEE, MMMM d, y' }}</div>
-            </div>
-            <div class="detail-section">
-              <div class="detail-label"><i class="bi bi-clock"></i> Time</div>
-              <div class="detail-value">{{ formatTime(apt.appointmentTime) }}</div>
-            </div>
-          </div>
-
-          <div class="detail-row">
-            <div class="detail-section">
-              <div class="detail-label"><i class="bi bi-geo-alt"></i> Location</div>
-              <div class="detail-value">{{ apt.location || (apt.isVideoConsultation ? 'Virtual Visit' : 'Clinic') }}</div>
-            </div>
-            <div class="detail-section">
-              <div class="detail-label"><i class="bi bi-hourglass-split"></i> Duration</div>
-              <div class="detail-value">{{ apt.duration || 30 }} minutes</div>
-            </div>
-          </div>
-
-          <div class="detail-section" *ngIf="apt.reason">
-            <div class="detail-label"><i class="bi bi-chat-left-text"></i> Reason</div>
-            <div class="detail-value">{{ apt.reason }}</div>
-          </div>
-
-          <div class="detail-section" *ngIf="apt.notes">
-            <div class="detail-label"><i class="bi bi-journal-text"></i> Notes</div>
-            <div class="detail-value notes-text">{{ apt.notes }}</div>
-          </div>
-
-          <div class="detail-row">
-            <div class="detail-section">
-              <div class="detail-label"><i class="bi bi-credit-card"></i> Payment</div>
-              <div class="detail-value">
-                <span class="payment-badge" [ngClass]="apt.paymentStatus || 'not_paid'">
-                  {{ (apt.paymentStatus || 'not_paid') === 'paid' ? 'Paid' : (apt.paymentStatus === 'pending' ? 'Pending' : 'Not Paid') }}
-                </span>
+        <!-- New Hero Section -->
+        <div class="modal-premium-header" [ngClass]="apt.status">
+          <div class="header-content">
+            <div class="doctor-badge-container">
+              <div class="doctor-avatar">
+                <img [src]="apt.doctor?.avatar || 'assets/default-doctor.png'" alt="Doctor"
+                  onerror="this.src='https://ui-avatars.com/api/?name=Dr+'+apt.doctor?.firstName+'+'+apt.doctor?.lastName+'&background=10b981&color=fff'">
+              </div>
+              <div class="status-pill" [ngClass]="apt.status">
+                <span class="dot"></span>
+                {{ apt.status | titlecase }}
               </div>
             </div>
-            <div class="detail-section">
-              <div class="detail-label"><i class="bi bi-hash"></i> Type</div>
-              <div class="detail-value">{{ apt.appointmentType || 'General' | titlecase }}</div>
+            <div class="header-text">
+              <h2>Appointment with Dr. {{ apt.doctor?.firstName }}</h2>
+              <p class="specialty">{{ apt.doctor?.specialty || 'Medical Specialist' }}</p>
             </div>
           </div>
         </div>
 
-        <div class="modal-footer">
-          <button class="ghost-btn" (click)="closeDetailModal()">Close</button>
-          <button class="text-btn" (click)="closeDetailModal(); openRescheduleModal(apt)"
-            *ngIf="apt.status !== 'completed' && apt.status !== 'cancelled'">
-            <i class="bi bi-arrow-repeat"></i> Reschedule
-          </button>
-          <button class="text-btn danger" (click)="closeDetailModal(); openCancelModal(apt)"
-            *ngIf="apt.status !== 'completed' && apt.status !== 'cancelled'">
-            <i class="bi bi-x-circle"></i> Cancel
+        <div class="modal-body premium-body">
+          <!-- Quick Info Bar -->
+          <div class="info-strip">
+            <div class="strip-item">
+              <i class="bi bi-calendar3"></i>
+              <span>{{ apt.appointmentDate | date:'MMM d, y' }}</span>
+            </div>
+            <div class="strip-divider"></div>
+            <div class="strip-item">
+              <i class="bi bi-clock"></i>
+              <span>{{ formatTime(apt.appointmentTime) }}</span>
+            </div>
+            <div class="strip-divider"></div>
+            <div class="strip-item">
+              <i class="bi bi-geo-alt"></i>
+              <span>{{ apt.isVideoConsultation ? 'Virtual' : 'Clinic' }}</span>
+            </div>
+          </div>
+
+          <!-- Detailed Information -->
+          <div class="detail-grid-v2">
+            <div class="detail-card-v2">
+              <div class="card-icon"><i class="bi bi-info-circle"></i></div>
+              <div class="card-content">
+                <label>Visit Type</label>
+                <p>{{ apt.appointmentType || 'General Consultation' | titlecase }}</p>
+              </div>
+            </div>
+
+            <div class="detail-card-v2">
+              <div class="card-icon"><i class="bi bi-currency-dollar"></i></div>
+              <div class="card-content">
+                <label>Payment Status</label>
+                <p [ngClass]="apt.paymentStatus || 'not_paid'" class="payment-status">
+                  {{ (apt.paymentStatus || 'not_paid') === 'paid' ? 'Paid' : (apt.paymentStatus === 'pending' ?
+                  'Pending' : 'Unpaid') }}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="content-section" *ngIf="apt.reason">
+            <h3 class="section-title"><i class="bi bi-chat-left-dots"></i> Reason for Visit</h3>
+            <div class="rich-text-box">
+              {{ apt.reason }}
+            </div>
+          </div>
+
+          <div class="content-section" *ngIf="apt.notes">
+            <h3 class="section-title"><i class="bi bi-journal-medical"></i> Pre-visit Notes</h3>
+            <div class="rich-text-box">
+              {{ apt.notes }}
+            </div>
+          </div>
+
+          <!-- Documentation / Virtual Link -->
+          <div class="action-alert" *ngIf="apt.isVideoConsultation && apt.status === 'confirmed'">
+            <div class="alert-icon"><i class="bi bi-camera-video"></i></div>
+            <div class="alert-body">
+              <h4>Ready for your video call?</h4>
+              <p>You can join the call 5 minutes before the scheduled time.</p>
+              <button class="join-btn" (click)="joinVideoCall(apt.id)">Join Now</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer premium-footer">
+          <button class="secondary-btn" (click)="closeDetailModal()">Close</button>
+
+          <div class="main-actions" *ngIf="apt.status !== 'completed' && apt.status !== 'cancelled'">
+            <button class="outline-btn" (click)="closeDetailModal(); openRescheduleModal(apt)">
+              <i class="bi bi-calendar-range"></i> Reschedule
+            </button>
+            <button class="danger-outline-btn" (click)="closeDetailModal(); openCancelModal(apt)">
+              <i class="bi bi-x-circle"></i> Cancel
+            </button>
+          </div>
+
+          <button class="primary-btn-v2" *ngIf="apt.status === 'completed'"
+            [routerLink]="['/consultation/view', apt.id]" (click)="closeDetailModal()">
+            <i class="bi bi-file-earmark-medical"></i> View Report
           </button>
         </div>
       </ng-container>
     </ng-container>
 
     <ng-template #detailSpinner>
-      <div class="modal-spinner"><div class="spinner"></div><p>Loading details...</p></div>
+      <div class="modal-spinner">
+        <div class="premium-loader"></div>
+        <p>Retrieving appointment data...</p>
+      </div>
     </ng-template>
   </div>
 </div>
@@ -178,7 +229,8 @@
       <div class="modal-hero cancel-hero">
         <div class="modal-hero-icon cancel-icon"><i class="bi bi-exclamation-triangle-fill"></i></div>
         <h2>Cancel Appointment?</h2>
-        <p class="cancel-desc">This action cannot be undone. The time slot will be released back to the doctor's schedule.</p>
+        <p class="cancel-desc">This action cannot be undone. The time slot will be released back to the doctor's
+          schedule.</p>
       </div>
 
       <div class="modal-body">
@@ -222,7 +274,8 @@
       <div class="modal-hero reschedule-hero">
         <div class="modal-hero-icon reschedule-icon"><i class="bi bi-arrow-repeat"></i></div>
         <h2>Reschedule Appointment</h2>
-        <p class="cancel-desc">Choose a new date and time for your appointment with Dr. {{ apt.doctor?.firstName }} {{ apt.doctor?.lastName }}.</p>
+        <p class="cancel-desc">Choose a new date and time for your appointment with Dr. {{ apt.doctor?.firstName }} {{
+          apt.doctor?.lastName }}.</p>
       </div>
 
       <div class="modal-body">
@@ -233,8 +286,8 @@
 
         <div class="form-group">
           <label for="reschedule-date"><i class="bi bi-calendar3"></i> New Date</label>
-          <input type="date" id="reschedule-date" class="form-input"
-            [min]="getMinDate()" [value]="rescheduleDate()" (change)="onRescheduleDateChange($event)" />
+          <input type="date" id="reschedule-date" class="form-input" [min]="getMinDate()" [value]="rescheduleDate()"
+            (change)="onRescheduleDateChange($event)" />
         </div>
 
         <div class="form-group" *ngIf="rescheduleDate()">
@@ -271,4 +324,3 @@
     </ng-container>
   </div>
 </div>
-

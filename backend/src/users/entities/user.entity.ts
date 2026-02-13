@@ -120,6 +120,15 @@ export class User extends BaseEntity {
   @Column({ type: 'boolean', default: true })
   notificationsEnabled: boolean;
 
+  @Column({ type: 'boolean', default: true })
+  shareActivity: boolean;
+
+  @Column({ type: 'boolean', default: true })
+  shareAnalytics: boolean;
+
+  @Column({ type: 'boolean', default: true })
+  personalizedTips: boolean;
+
   @Column({ type: 'varchar', default: 'light' })
   theme: string;
 

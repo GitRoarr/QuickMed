@@ -19,9 +19,6 @@
     animation: cvFadeIn 0.2s ease;
 }
 
-/* ===============================
-   Modal Container
-   =============================== */
 .cv-modal {
     position: relative;
     width: 100%;

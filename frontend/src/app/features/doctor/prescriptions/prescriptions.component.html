@@ -32,10 +32,10 @@
         <p class="text-sm text-[var(--text-secondary)]">Total Prescriptions</p>
       </div>
       <div
-        class="bg-[var(--surface-primary)] rounded-2xl p-5 shadow-sm border border-[var(--border-color)] hover:shadow-md hover:border-green-400/20 transition-all duration-300 group cursor-default">
+        class="bg-[var(--surface-primary)] rounded-2xl p-5 shadow-sm border border-[var(--border-color)] hover:shadow-md hover:border-[#1DB954]/20 transition-all duration-300 group cursor-default">
         <div class="flex items-center gap-3 mb-3">
           <div
-            class="w-10 h-10 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+            class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#1DB954] to-emerald-600 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
             <i class="bi bi-check-circle text-white text-lg"></i>
           </div>
         </div>
@@ -43,10 +43,10 @@
         <p class="text-sm text-[var(--text-secondary)]">Active</p>
       </div>
       <div
-        class="bg-[var(--surface-primary)] rounded-2xl p-5 shadow-sm border border-[var(--border-color)] hover:shadow-md hover:border-blue-400/20 transition-all duration-300 group cursor-default">
+        class="bg-[var(--surface-primary)] rounded-2xl p-5 shadow-sm border border-[var(--border-color)] hover:shadow-md hover:border-[#1DB954]/20 transition-all duration-300 group cursor-default">
         <div class="flex items-center gap-3 mb-3">
           <div
-            class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+            class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#1DB954]/80 to-emerald-500/80 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
             <i class="bi bi-check2-all text-white text-lg"></i>
           </div>
         </div>
@@ -54,10 +54,10 @@
         <p class="text-sm text-[var(--text-secondary)]">Completed</p>
       </div>
       <div
-        class="bg-[var(--surface-primary)] rounded-2xl p-5 shadow-sm border border-[var(--border-color)] hover:shadow-md hover:border-amber-400/20 transition-all duration-300 group cursor-default">
+        class="bg-[var(--surface-primary)] rounded-2xl p-5 shadow-sm border border-[var(--border-color)] hover:shadow-md hover:border-[#1DB954]/20 transition-all duration-300 group cursor-default">
         <div class="flex items-center gap-3 mb-3">
           <div
-            class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+            class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#1DB954]/60 to-emerald-400/60 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
             <i class="bi bi-calendar-week text-white text-lg"></i>
           </div>
         </div>
@@ -115,8 +115,7 @@
             <div class="flex items-start gap-4">
               <div class="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 bg-gradient-to-br shadow-sm"
                 [ngClass]="{
-                  'from-emerald-500 to-green-600 shadow-emerald-500/20': p.status === 'active',
-                  'from-blue-500 to-indigo-600 shadow-blue-500/20': p.status === 'completed',
+                  'from-[#1DB954] to-emerald-600 shadow-emerald-500/20': p.status === 'active' || p.status === 'completed',
                   'from-gray-400 to-gray-500': p.status === 'cancelled'
                 }">
                 <i class="bi bi-capsule text-white text-xl"></i>
@@ -129,8 +128,7 @@
               </div>
             </div>
             <span class="px-3 py-1 rounded-full text-xs font-semibold shrink-0" [ngClass]="{
-                'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400': p.status === 'active',
-                'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400': p.status === 'completed',
+                'bg-emerald-100 text-[#1DB954] dark:bg-emerald-900/30 dark:text-[#1DB954]': p.status === 'active' || p.status === 'completed',
                 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400': p.status === 'cancelled'
               }">
               {{ p.status | titlecase }}
@@ -173,7 +171,7 @@
             View
           </button>
           <button *ngIf="p.status === 'active'" (click)="markCompleted(p)"
-            class="flex-1 py-2.5 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded-xl font-medium transition-all flex items-center justify-center gap-2 text-sm">
+            class="flex-1 py-2.5 bg-emerald-50 dark:bg-emerald-900/20 text-[#1DB954] hover:bg-emerald-100 dark:hover:bg-emerald-900/30 rounded-xl font-medium transition-all flex items-center justify-center gap-2 text-sm">
             <i class="bi bi-check2-all"></i>
             Complete
           </button>
@@ -214,125 +212,186 @@
 
 
 
-  <!-- ====== DETAIL MODAL ====== -->
   <div *ngIf="showDetailModal() && selectedPrescription()"
-    class="fixed inset-0 z-50 flex items-center justify-center p-4" (click)="closeDetailModal()">
-    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
-    <div
-      class="relative bg-[var(--surface-primary)] rounded-3xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-[var(--border-color)]"
+    class="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-6" (click)="closeDetailModal()">
+
+    <div @backdropFade class="absolute inset-0 bg-slate-900/40 backdrop-blur-md"></div>
+
+    <div @modalScale
+      class="relative bg-white dark:bg-[#121212] rounded-[2.5rem] shadow-[0_25px_70px_-15px_rgba(0,0,0,0.4)] w-full max-w-2xl max-h-[90vh] overflow-hidden border border-white/20 dark:border-white/10 flex flex-col modal-container"
       (click)="$event.stopPropagation()">
-      <!-- Detail Header -->
-      <div
-        class="sticky top-0 z-10 flex items-center justify-between p-6 pb-4 bg-[var(--surface-primary)] border-b border-[var(--border-color)] rounded-t-3xl">
-        <div class="flex items-center gap-4">
-          <div class="w-14 h-14 rounded-xl flex items-center justify-center bg-gradient-to-br shadow-md" [ngClass]="{
-              'from-emerald-500 to-green-600 shadow-emerald-500/20': selectedPrescription()!.status === 'active',
-              'from-blue-500 to-indigo-600 shadow-blue-500/20': selectedPrescription()!.status === 'completed',
-              'from-gray-400 to-gray-500': selectedPrescription()!.status === 'cancelled'
-            }">
-            <i class="bi bi-capsule text-white text-2xl"></i>
-          </div>
+
+      <div class="p-8 pb-6 flex items-start justify-between relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-32 h-32 bg-[#1DB954]/5 rounded-full -mr-16 -mt-16 blur-3xl"></div>
+
+        <div class="flex items-center gap-6 relative">
           <div>
-            <h2 class="text-xl font-bold text-[var(--text-primary)]">{{ selectedPrescription()!.medication }}</h2>
-            <div class="flex items-center gap-2 mt-1">
-              <span class="text-sm text-[var(--text-secondary)]">{{ selectedPrescription()!.dosage }}</span>
-              <span class="w-1 h-1 rounded-full bg-[var(--text-muted)]"></span>
-              <span class="px-2 py-0.5 rounded-full text-xs font-semibold" [ngClass]="{
-                  'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400': selectedPrescription()!.status === 'active',
-                  'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400': selectedPrescription()!.status === 'completed',
-                  'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400': selectedPrescription()!.status === 'cancelled'
+            <div class="flex items-center gap-3 mb-1">
+              <h2 class="text-3xl font-black text-[var(--text-primary)] tracking-tight">
+                {{ selectedPrescription()!.medication }}
+              </h2>
+              <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest shadow-sm" [ngClass]="{
+                  'bg-[#1DB954]/10 text-[#1DB954] border border-[#1DB954]/20': selectedPrescription()!.status === 'active' || selectedPrescription()!.status === 'completed',
+                  'bg-slate-100 text-slate-600 dark:bg-slate-500/10 dark:text-slate-400 border border-slate-500/20': selectedPrescription()!.status === 'cancelled'
                 }">
-                {{ selectedPrescription()!.status | titlecase }}
+                {{ selectedPrescription()!.status }}
               </span>
             </div>
+            <p class="text-[var(--text-secondary)] font-medium flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-[#1DB954]"></span>
+              {{ selectedPrescription()!.dosage }} Dosage Pattern
+            </p>
           </div>
         </div>
+
         <button (click)="closeDetailModal()"
-          class="w-10 h-10 rounded-xl hover:bg-[var(--surface-secondary)] flex items-center justify-center transition-colors">
-          <i class="bi bi-x-lg text-[var(--text-secondary)]"></i>
+          class="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-white/5 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-500 flex items-center justify-center transition-all duration-300 group shadow-sm">
+          <i class="bi bi-x-lg text-lg group-hover:scale-110"></i>
         </button>
       </div>
 
-      <!-- Detail Body -->
-      <div class="p-6 space-y-6">
-        <!-- Prescription Summary Card -->
-        <div
-          class="bg-gradient-to-br from-[var(--primary)]/5 to-emerald-500/5 rounded-2xl p-5 border border-[var(--primary)]/10">
-          <div class="grid grid-cols-3 gap-4 text-center">
-            <div>
-              <p class="text-xs text-[var(--text-muted)] uppercase tracking-wider mb-1">Frequency</p>
-              <p class="font-bold text-[var(--text-primary)]">{{ selectedPrescription()!.frequency }}</p>
+      <!-- Modal Body (Scrollable) -->
+      <div class="flex-1 overflow-y-auto custom-scrollbar p-8 pt-0 space-y-8">
+
+        <!-- Key Metrics Grid -->
+        <div class="grid grid-cols-3 gap-4">
+          <div
+            class="bg-slate-50 dark:bg-white/5 rounded-3xl p-5 border border-slate-100 dark:border-white/5 transition-hover metric-card group">
+            <div
+              class="w-10 h-10 rounded-xl bg-[#1DB954]/10 text-[#1DB954] flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+              <i class="bi bi-arrow-repeat text-xl"></i>
             </div>
-            <div class="border-l border-r border-[var(--border-color)]">
-              <p class="text-xs text-[var(--text-muted)] uppercase tracking-wider mb-1">Duration</p>
-              <p class="font-bold text-[var(--text-primary)]">{{ selectedPrescription()!.duration }}</p>
+            <p class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">Frequency</p>
+            <p class="text-base font-bold text-[var(--text-primary)] leading-tight mt-1">{{
+              selectedPrescription()!.frequency }}</p>
+          </div>
+
+          <div
+            class="bg-slate-50 dark:bg-white/5 rounded-3xl p-5 border border-slate-100 dark:border-white/5 transition-hover metric-card group">
+            <div
+              class="w-10 h-10 rounded-xl bg-[#1DB954]/10 text-[#1DB954] flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+              <i class="bi bi-calendar-check text-xl"></i>
             </div>
-            <div>
-              <p class="text-xs text-[var(--text-muted)] uppercase tracking-wider mb-1">Dosage</p>
-              <p class="font-bold text-[var(--text-primary)]">{{ selectedPrescription()!.dosage }}</p>
+            <p class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">Duration</p>
+            <p class="text-base font-bold text-[var(--text-primary)] leading-tight mt-1">{{
+              selectedPrescription()!.duration }}</p>
+          </div>
+
+          <div
+            class="bg-slate-50 dark:bg-white/5 rounded-3xl p-5 border border-slate-100 dark:border-white/5 transition-hover metric-card group">
+            <div
+              class="w-10 h-10 rounded-xl bg-[#1DB954]/10 text-[#1DB954] flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+              <i class="bi bi-droplet-fill text-xl"></i>
             </div>
+            <p class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">Exact Dose</p>
+            <p class="text-base font-bold text-[var(--text-primary)] leading-tight mt-1">{{
+              selectedPrescription()!.dosage }}</p>
           </div>
         </div>
 
         <!-- Info Grid -->
-        <div class="grid grid-cols-2 gap-4">
-          <div class="bg-[var(--surface-secondary)] rounded-xl p-4">
-            <p class="text-xs text-[var(--text-muted)] mb-1 uppercase tracking-wider">Patient</p>
-            <div class="flex items-center gap-2">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="space-y-3">
+            <label
+              class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500 flex items-center gap-2">
+              <i class="bi bi-person-badge"></i> Patient Assigned
+            </label>
+            <div
+              class="flex items-center gap-4 bg-slate-50 dark:bg-white/5 p-4 rounded-3xl border border-slate-100 dark:border-white/5">
               <div
-                class="w-8 h-8 rounded-full bg-gradient-to-br from-[var(--primary)] to-emerald-600 flex items-center justify-center text-white text-xs font-bold">
+                class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-slate-200 to-slate-300 dark:from-white/10 dark:to-white/5 flex items-center justify-center text-slate-600 dark:text-slate-300 font-black text-lg shadow-sm">
                 {{ getPatientInitials(getPatientName(selectedPrescription()!)) }}
               </div>
-              <p class="font-semibold text-[var(--text-primary)]">{{ getPatientName(selectedPrescription()!) }}</p>
+              <div>
+                <p class="font-bold text-[var(--text-primary)] leading-none mb-1">{{
+                  getPatientName(selectedPrescription()!) }}</p>
+                <p class="text-xs text-[var(--text-secondary)]">Patient History ID: QM-8293</p>
+              </div>
             </div>
           </div>
-          <div class="bg-[var(--surface-secondary)] rounded-xl p-4">
-            <p class="text-xs text-[var(--text-muted)] mb-1 uppercase tracking-wider">Prescription Date</p>
-            <p class="font-semibold text-[var(--text-primary)]">{{ selectedPrescription()!.prescriptionDate |
-              date:'longDate' }}</p>
+
+          <div class="space-y-3">
+            <label
+              class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500 flex items-center gap-2">
+              <i class="bi bi-clock-history"></i> Issued Details
+            </label>
+            <div
+              class="flex items-center gap-4 bg-slate-50 dark:bg-white/5 p-4 rounded-3xl border border-slate-100 dark:border-white/5">
+              <div class="w-12 h-12 rounded-2xl bg-[#1DB954]/10 text-[#1DB954] flex items-center justify-center">
+                <i class="bi bi-calendar3 text-2xl"></i>
+              </div>
+              <div>
+                <p class="font-bold text-[var(--text-primary)] leading-none mb-1">
+                  {{ selectedPrescription()!.prescriptionDate | date:'longDate' }}
+                </p>
+                <p class="text-xs text-[var(--text-secondary)]">Issued at 09:45 AM</p>
+              </div>
+            </div>
           </div>
         </div>
 
-        <!-- Instructions -->
-        <div *ngIf="selectedPrescription()!.instructions"
-          class="bg-blue-50 dark:bg-blue-900/10 rounded-xl p-4 border border-blue-200 dark:border-blue-800/30">
-          <div class="flex items-center gap-2 mb-2">
-            <i class="bi bi-info-circle text-blue-600"></i>
-            <p class="text-xs text-blue-700 dark:text-blue-400 uppercase tracking-wider font-semibold">Patient
-              Instructions</p>
+        <!-- Instructions Panel -->
+        <div *ngIf="selectedPrescription()!.instructions" class="relative group">
+          <div
+            class="absolute -inset-0.5 bg-gradient-to-r from-[#1DB954] to-emerald-400 rounded-[2rem] blur opacity-10 group-hover:opacity-20 transition duration-500">
           </div>
-          <p class="text-[var(--text-primary)] whitespace-pre-line">{{ selectedPrescription()!.instructions }}</p>
+          <div
+            class="relative bg-white dark:bg-[#181818] border border-emerald-50 dark:border-emerald-900/20 rounded-[2rem] p-6">
+            <div class="flex items-center gap-3 mb-4">
+              <div class="w-10 h-10 rounded-2xl bg-[#1DB954]/10 text-[#1DB954] flex items-center justify-center">
+                <i class="bi bi-megaphone-fill"></i>
+              </div>
+              <p class="font-black text-xs uppercase tracking-widest text-[#1DB954]">Patient Instructions</p>
+            </div>
+            <p class="text-slate-700 dark:text-slate-300 leading-relaxed font-medium whitespace-pre-line italic">
+              "{{ selectedPrescription()!.instructions }}"
+            </p>
+          </div>
         </div>
 
-        <!-- Notes -->
-        <div *ngIf="selectedPrescription()!.notes" class="bg-[var(--surface-secondary)] rounded-xl p-4">
-          <p class="text-xs text-[var(--text-muted)] mb-2 uppercase tracking-wider">Clinical Notes</p>
-          <p class="text-[var(--text-primary)] whitespace-pre-line">{{ selectedPrescription()!.notes }}</p>
+        <!-- clinical Notes Panel -->
+        <div *ngIf="selectedPrescription()!.notes" class="space-y-4">
+          <div class="flex items-center gap-3 px-2">
+            <div class="w-1 h-6 bg-[#1DB954] rounded-full"></div>
+            <p class="font-black text-xs uppercase tracking-widest text-slate-400 dark:text-slate-500">Clinical
+              Observations</p>
+          </div>
+          <div class="bg-slate-50 dark:bg-white/5 rounded-[2rem] p-6 border border-slate-100 dark:border-white/5">
+            <p class="text-slate-600 dark:text-slate-400 leading-relaxed whitespace-pre-line">
+              {{ selectedPrescription()!.notes }}
+            </p>
+          </div>
         </div>
       </div>
 
-      <!-- Detail Footer -->
+      <!-- Modal Footer -->
       <div
-        class="sticky bottom-0 flex items-center justify-between gap-3 p-6 pt-4 bg-[var(--surface-primary)] border-t border-[var(--border-color)] rounded-b-3xl">
-        <div class="flex gap-2">
+        class="p-8 pt-4 bg-slate-50 dark:bg-white/5 border-t border-slate-100 dark:border-white/10 flex items-center justify-between gap-4">
+        <div class="flex items-center gap-3 flex-1">
           <button *ngIf="selectedPrescription()!.status === 'active'" (click)="markCompleted(selectedPrescription()!)"
-            class="px-5 py-2.5 bg-blue-50 dark:bg-blue-900/20 text-blue-600 rounded-xl font-medium hover:bg-blue-100 transition-all flex items-center gap-2 text-sm">
-            <i class="bi bi-check2-all"></i> Complete
+            class="flex-1 px-8 py-4 text-white rounded-2xl font-black text-sm transition-all duration-300 hover:-translate-y-1 active:scale-95 flex items-center justify-center gap-2 finalize-btn">
+            <i class="bi bi-check2-all text-lg"></i>
+            Finalize Treatment
           </button>
+
           <button *ngIf="selectedPrescription()!.status === 'active'"
             (click)="cancelPrescription(selectedPrescription()!)"
-            class="px-5 py-2.5 bg-amber-50 dark:bg-amber-900/20 text-amber-600 rounded-xl font-medium hover:bg-amber-100 transition-all flex items-center gap-2 text-sm">
-            <i class="bi bi-x-circle"></i> Cancel
+            class="px-8 py-4 bg-white dark:bg-white/5 text-slate-600 dark:text-slate-300 hover:bg-amber-50 dark:hover:bg-amber-900/20 hover:text-amber-600 rounded-2xl font-bold text-sm transition-all border border-slate-200 dark:border-white/10 hover:border-amber-500/30 flex items-center justify-center gap-2">
+            <i class="bi bi-x-circle"></i>
+            Void
           </button>
+
           <button *ngIf="selectedPrescription()!.status !== 'active'"
             (click)="reactivatePrescription(selectedPrescription()!)"
-            class="px-5 py-2.5 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 rounded-xl font-medium hover:bg-emerald-100 transition-all flex items-center gap-2 text-sm">
-            <i class="bi bi-arrow-counterclockwise"></i> Reactivate
+            class="flex-1 px-8 py-4 bg-[#1DB954] hover:brightness-110 text-white rounded-2xl font-black text-sm transition-all shadow-lg flex items-center justify-center gap-2">
+            <i class="bi bi-arrow-counterclockwise text-lg"></i>
+            Restore Prescription
           </button>
         </div>
+
         <button (click)="deletePrescription(selectedPrescription()!)"
-          class="px-5 py-2.5 bg-red-50 dark:bg-red-900/20 text-red-600 rounded-xl font-medium hover:bg-red-100 transition-all flex items-center gap-2 text-sm">
-          <i class="bi bi-trash"></i> Delete
+          class="w-14 h-14 bg-red-50 dark:bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white rounded-2xl transition-all duration-300 flex items-center justify-center shadow-sm">
+          <i class="bi bi-trash-fill text-xl"></i>
         </button>
       </div>
     </div>

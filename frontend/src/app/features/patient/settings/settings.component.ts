@@ -22,10 +22,13 @@ export class SettingsComponent implements OnInit {
   private readonly toast = inject(ToastService);
 
   activeTab = signal<'profile' | 'notifications' | 'security' | 'privacy'>('profile');
+  isSaving = signal(false);
+  showPass = false;
 
   profileForm = this.fb.group({
-    fullName: ['', Validators.required],
-    email: ['', [Validators.required, Validators.email]],
+    firstName: ['', Validators.required],
+    lastName: ['', Validators.required],
+    email: [{ value: '', disabled: true }, [Validators.required, Validators.email]],
     phoneNumber: [''],
   });
 
@@ -41,19 +44,30 @@ export class SettingsComponent implements OnInit {
     newPassword: ['', [Validators.required, Validators.minLength(6)]],
   });
 
-  privacyPreferences = signal({
+  privacyPrefs = signal({
     shareActivity: true,
     shareAnalytics: false,
     personalizedTips: true,
   });
 
+  get user() {
+    return this.authService.currentUser();
+  }
+
   ngOnInit(): void {
     const user = this.authService.currentUser();
     if (user) {
       this.profileForm.patchValue({
-        fullName: `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim(),
+        firstName: user.firstName || '',
+        lastName: user.lastName || '',
         email: user.email,
         phoneNumber: user.phoneNumber || '',
+      });
+
+      this.privacyPrefs.set({
+        shareActivity: user.shareActivity ?? true,
+        shareAnalytics: user.shareAnalytics ?? false,
+        personalizedTips: user.personalizedTips ?? true,
       });
     }
 
@@ -74,27 +88,49 @@ export class SettingsComponent implements OnInit {
     const user = this.authService.currentUser();
     if (!user) return;
 
-    const fullName = this.profileForm.value.fullName ?? '';
-    const [firstName, ...rest] = fullName.split(' ');
-    const lastName = rest.join(' ') || user.lastName;
-
+    this.isSaving.set(true);
     this.userService
       .update(user.id, {
-        firstName: firstName || user.firstName,
-        lastName,
-        email: this.profileForm.value.email ?? user.email,
-        phoneNumber: this.profileForm.value.phoneNumber ?? user.phoneNumber,
+        firstName: this.profileForm.getRawValue().firstName || user.firstName,
+        lastName: this.profileForm.getRawValue().lastName || user.lastName,
+        phoneNumber: this.profileForm.getRawValue().phoneNumber ?? user.phoneNumber,
       })
       .subscribe({
         next: (updated) => {
           this.authService.setUser(updated);
           this.toast.success('Profile updated successfully');
+          this.isSaving.set(false);
         },
-        error: () => this.toast.error('Failed to update profile'),
+        error: () => {
+          this.toast.error('Failed to update profile');
+          this.isSaving.set(false);
+        },
       });
   }
 
+  onFileSelected(event: any): void {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const user = this.authService.currentUser();
+    if (!user) return;
+
+    this.isSaving.set(true);
+    this.userService.updateAvatar(user.id, file).subscribe({
+      next: (updated) => {
+        this.authService.setUser(updated);
+        this.toast.success('Avatar updated successfully');
+        this.isSaving.set(false);
+      },
+      error: () => {
+        this.toast.error('Failed to upload avatar');
+        this.isSaving.set(false);
+      },
+    });
+  }
+
   saveNotifications(): void {
+    this.isSaving.set(true);
     const value = this.notificationsForm.value;
     this.notificationService
       .updateNotificationPreferences({
@@ -104,8 +140,14 @@ export class SettingsComponent implements OnInit {
         marketingEmails: value.marketing ?? false,
       } as any)
       .subscribe({
-        next: () => this.toast.success('Notification preferences saved'),
-        error: () => this.toast.error('Failed to save notification settings'),
+        next: () => {
+          this.toast.success('Preferences saved');
+          this.isSaving.set(false);
+        },
+        error: () => {
+          this.toast.error('Failed to save settings');
+          this.isSaving.set(false);
+        },
       });
   }
 
@@ -114,19 +156,38 @@ export class SettingsComponent implements OnInit {
     const user = this.authService.currentUser();
     if (!user) return;
 
+    this.isSaving.set(true);
     this.userService
       .changePassword(user.id, this.passwordForm.value as any)
       .subscribe({
         next: () => {
           this.passwordForm.reset();
           this.toast.success('Password updated successfully');
+          this.isSaving.set(false);
         },
-        error: (err) => this.toast.error(err.error?.message || 'Failed to update password'),
+        error: (err) => {
+          this.toast.error(err.error?.message || 'Failed to update password');
+          this.isSaving.set(false);
+        },
       });
   }
 
-  setPrivacyPreference(key: keyof ReturnType<typeof this.privacyPreferences>, value: boolean): void {
-    this.privacyPreferences.update((prefs) => ({ ...prefs, [key]: value }));
+  updatePrivacy(key: keyof ReturnType<typeof this.privacyPrefs>, value: boolean): void {
+    const user = this.authService.currentUser();
+    if (!user) return;
+
+    // Update locally first for snappy UI
+    this.privacyPrefs.update(prev => ({ ...prev, [key]: value }));
+
+    this.userService.update(user.id, { [key]: value }).subscribe({
+      next: (updated) => {
+        this.authService.setUser(updated);
+      },
+      error: () => {
+        this.toast.error('Failed to update privacy setting');
+        // Revert on error
+        this.privacyPrefs.update(prev => ({ ...prev, [key]: !value }));
+      }
+    });
   }
 }
-

@@ -3,7 +3,7 @@ import { ThemeService } from '@core/services/theme.service';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { AuthService } from '@core/services/auth.service';
-import { MessageService } from '@core/services/message.service';
+import { MessageService, Conversation } from '@core/services/message.service';
 import { NotificationService } from '@core/services/notification.service';
 import { WebSocketService } from '@core/services/websocket.service';
 import { Notification } from '@core/models/notification.model';
@@ -38,8 +38,13 @@ export class PatientShellComponent implements OnInit, OnDestroy {
   unreadMessages = signal(0);
   unreadNotifications = signal(0);
   notificationsOpen = signal(false);
+  messagesOpen = signal(false);
+
   notifications = signal<Notification[]>([]);
+  conversations = signal<Conversation[]>([]);
+
   isLoadingNotifications = signal(false);
+  isLoadingMessages = signal(false);
 
   menuItems: PatientNavItem[] = [
     { label: 'Dashboard', icon: 'bi-speedometer2', route: '/patient/dashboard' },
@@ -106,7 +111,7 @@ export class PatientShellComponent implements OnInit, OnDestroy {
     });
   }
 
-  private loadNotifications(): void {
+  loadNotifications(): void {
     this.isLoadingNotifications.set(true);
     this.notificationService.getNotifications(1, 5).subscribe({
       next: (response) => {
@@ -124,6 +129,20 @@ export class PatientShellComponent implements OnInit, OnDestroy {
     });
   }
 
+  loadConversations(): void {
+    this.isLoadingMessages.set(true);
+    this.messageService.getConversations().subscribe({
+      next: (convs) => {
+        this.conversations.set(convs.slice(0, 5));
+        this.isLoadingMessages.set(false);
+      },
+      error: () => {
+        this.conversations.set([]);
+        this.isLoadingMessages.set(false);
+      },
+    });
+  }
+
   private setupPolling(): void {
     interval(30000)
       .pipe(takeUntil(this.destroy$))
@@ -131,6 +150,9 @@ export class PatientShellComponent implements OnInit, OnDestroy {
         this.loadCounts();
         if (this.notificationsOpen()) {
           this.loadNotifications();
+        }
+        if (this.messagesOpen()) {
+          this.loadConversations();
         }
       });
   }
@@ -141,11 +163,17 @@ export class PatientShellComponent implements OnInit, OnDestroy {
 
     this.websocketService.messages$
       .pipe(takeUntil(this.destroy$))
-      .subscribe(() => this.loadCounts());
+      .subscribe(() => {
+        this.loadCounts();
+        if (this.messagesOpen()) this.loadConversations();
+      });
 
     this.websocketService.conversationUpdated$
       .pipe(takeUntil(this.destroy$))
-      .subscribe(() => this.loadCounts());
+      .subscribe(() => {
+        this.loadCounts();
+        if (this.messagesOpen()) this.loadConversations();
+      });
 
     this.websocketService.notifications$
       .pipe(takeUntil(this.destroy$))
@@ -170,14 +198,26 @@ export class PatientShellComponent implements OnInit, OnDestroy {
   toggleNotifications(event?: MouseEvent): void {
     event?.stopPropagation();
     const next = !this.notificationsOpen();
+    this.messagesOpen.set(false);
     this.notificationsOpen.set(next);
     if (next) {
       this.loadNotifications();
     }
   }
 
-  closeNotifications(): void {
+  toggleMessages(event?: MouseEvent): void {
+    event?.stopPropagation();
+    const next = !this.messagesOpen();
     this.notificationsOpen.set(false);
+    this.messagesOpen.set(next);
+    if (next) {
+      this.loadConversations();
+    }
+  }
+
+  closeDropdowns(): void {
+    this.notificationsOpen.set(false);
+    this.messagesOpen.set(false);
   }
 
   markNotificationRead(notification: Notification, event?: MouseEvent): void {
@@ -212,7 +252,13 @@ export class PatientShellComponent implements OnInit, OnDestroy {
     if (target) {
       this.router.navigateByUrl(target);
     }
-    this.closeNotifications();
+    this.closeDropdowns();
+  }
+
+  openConversation(conv: Conversation, event?: MouseEvent): void {
+    event?.stopPropagation();
+    this.router.navigate(['/patient/messages'], { queryParams: { id: conv.id } });
+    this.closeDropdowns();
   }
 
   private getNotificationRoute(notification: Notification): string | null {
@@ -246,9 +292,7 @@ export class PatientShellComponent implements OnInit, OnDestroy {
 
   @HostListener('document:click')
   onDocumentClick(): void {
-    if (this.notificationsOpen()) {
-      this.closeNotifications();
-    }
+    this.closeDropdowns();
   }
 
   @HostListener('window:resize')
@@ -256,10 +300,7 @@ export class PatientShellComponent implements OnInit, OnDestroy {
     this.mobile = typeof window !== 'undefined' && window.innerWidth <= 1024;
   }
 
-  // Theme is now managed globally by ThemeService
-
   logout(): void {
     this.authService.logout();
   }
 }
-

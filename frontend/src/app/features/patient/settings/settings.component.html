@@ -1,257 +1,308 @@
 <app-patient-shell active="settings">
-  <div class="settings-container">
+  <input #avatarInput type="file" class="hidden" (change)="onFileSelected($event)" accept="image/*">
+  <div class="min-h-screen bg-[var(--bg)] p-4 md:p-8 lg:p-12">
+    <div class="max-w-6xl mx-auto space-y-8">
 
-    <!-- Page Header -->
-    <header class="settings-header">
-      <div class="flex items-center gap-4">
-        <div
-          class="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white shadow-lg shadow-emerald-500/20">
-          <i class="bi bi-gear-fill text-2xl"></i>
+      <!-- Header Section -->
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div class="settings-header space-y-2">
+          <p class="text-[var(--primary)] font-bold text-sm tracking-widest uppercase">Account Settings</p>
+          <h1>Configuration</h1>
         </div>
-        <div>
-          <h1 class="text-3xl font-extrabold text-[var(--fg)] tracking-tight">Account Settings</h1>
-          <p class="text-[var(--muted)] font-medium">Manage your personal information, security, and preferences</p>
+
+        <div
+          class="flex items-center gap-4 bg-white dark:bg-gray-800 p-2 pr-6 rounded-full shadow-lg border border-gray-100 dark:border-gray-700">
+          <div class="relative group cursor-pointer" (click)="avatarInput.click()">
+            <img [src]="user?.avatar || 'https://ui-avatars.com/api/?name=' + user?.firstName + '+' + user?.lastName"
+              class="w-12 h-12 rounded-full object-cover border-2 border-[var(--primary)] shadow-sm" alt="Avatar">
+            <div
+              class="absolute inset-0 bg-black/40 rounded-full opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+              <i class="bi bi-camera text-white text-[10px]"></i>
+            </div>
+          </div>
+          <div>
+            <p class="font-bold text-sm text-[var(--fg)]">{{ user?.firstName }} {{ user?.lastName }}</p>
+            <p class="text-[10px] text-[var(--muted)] font-medium uppercase tracking-wider">Patient ID: {{
+              user?.patientId || 'QM-001' }}</p>
+          </div>
         </div>
       </div>
-    </header>
 
-    <div class="settings-grid">
-      <!-- Navigation Sidebar -->
-      <aside class="settings-nav-sidebar">
-        <nav class="nav-stack">
-          <button type="button" [class.active]="activeTab() === 'profile'" (click)="activeTab.set('profile')"
-            class="nav-link">
-            <i class="bi bi-person-circle"></i>
-            <span>Personal Profile</span>
-            <i class="bi bi-chevron-right chevron" *ngIf="activeTab() === 'profile'"></i>
+      <!-- Main Layout -->
+      <div class="flex flex-col lg:flex-row gap-8">
+
+        <!-- Sidebar Navigation -->
+        <nav class="settings-nav no-scrollbar">
+          <button (click)="activeTab.set('profile')"
+            [class]="activeTab() === 'profile' ? 'nav-link-active' : 'nav-link-inactive'">
+            <i class="bi bi-person-fill"></i>
+            <span>Profile</span>
           </button>
 
-          <button type="button" [class.active]="activeTab() === 'notifications'"
-            (click)="activeTab.set('notifications')" class="nav-link">
+          <button (click)="activeTab.set('notifications')"
+            [class]="activeTab() === 'notifications' ? 'nav-link-active' : 'nav-link-inactive'">
             <i class="bi bi-bell-fill"></i>
             <span>Notifications</span>
-            <i class="bi bi-chevron-right chevron" *ngIf="activeTab() === 'notifications'"></i>
           </button>
 
-          <button type="button" [class.active]="activeTab() === 'security'" (click)="activeTab.set('security')"
-            class="nav-link">
+          <button (click)="activeTab.set('security')"
+            [class]="activeTab() === 'security' ? 'nav-link-active' : 'nav-link-inactive'">
             <i class="bi bi-shield-lock-fill"></i>
-            <span>Security & Pass</span>
-            <i class="bi bi-chevron-right chevron" *ngIf="activeTab() === 'security'"></i>
+            <span>Security</span>
           </button>
 
-          <button type="button" [class.active]="activeTab() === 'privacy'" (click)="activeTab.set('privacy')"
-            class="nav-link">
+          <button (click)="activeTab.set('privacy')"
+            [class]="activeTab() === 'privacy' ? 'nav-link-active' : 'nav-link-inactive'">
             <i class="bi bi-eye-fill"></i>
-            <span>Privacy & Data</span>
-            <i class="bi bi-chevron-right chevron" *ngIf="activeTab() === 'privacy'"></i>
+            <span>Privacy</span>
           </button>
         </nav>
 
-        <div class="nav-footer">
-          <div class="help-box">
-            <i class="bi bi-info-circle"></i>
-            <p>Need help with your account? <a href="#">Contact Support</a></p>
-          </div>
-        </div>
-      </aside>
+        <!-- Dynamic Content Area -->
+        <main
+          class="flex-1 bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-2xl shadow-gray-200/50 dark:shadow-none border border-gray-100 dark:border-gray-700 overflow-hidden">
 
-      <!-- Content Area -->
-      <main class="settings-content-card">
-        <div class="tab-content-wrapper" [ngSwitch]="activeTab()">
+          <div [ngSwitch]="activeTab()" class="p-8 md:p-12 lg:p-16 animate-in slide-in-from-bottom-4 duration-500">
 
-          <!-- Profile Tab -->
-          <div *ngSwitchCase="'profile'" class="animate-in fade-in slide-in-bottom">
-            <div class="content-header">
-              <h2>Personal Profile</h2>
-              <p>Update your public identity and contact information</p>
-            </div>
+            <!-- Profile Tab -->
+            <div *ngSwitchCase="'profile'" class="space-y-12">
+              <div class="flex flex-col md:flex-row items-center gap-10">
+                <div class="avatar-container">
+                  <img
+                    [src]="user?.avatar || 'https://ui-avatars.com/api/?name=' + user?.firstName + '+' + user?.lastName"
+                    class="avatar-image" alt="Profile avatar">
+                  <label class="avatar-upload-btn">
+                    <i class="bi bi-camera-fill"></i>
+                  </label>
+                </div>
+                <div class="text-center md:text-left space-y-3">
+                  <h3 class="text-3xl font-extrabold text-[var(--fg)] tracking-tight">Profile Details</h3>
+                  <p class="text-[var(--muted)] max-w-sm leading-relaxed">Update your personal information to keep your
+                    medical record current.</p>
+                </div>
+              </div>
 
-            <form [formGroup]="profileForm" (ngSubmit)="saveProfile()" class="space-y-8">
-              <div class="form-grid-layout">
-                <div class="form-group">
-                  <label>Full Name</label>
-                  <div class="input-container">
-                    <i class="bi bi-person"></i>
-                    <input formControlName="fullName" type="text" placeholder="e.g. John Doe" />
+              <form [formGroup]="profileForm" (ngSubmit)="saveProfile()" class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div class="premium-group">
+                    <label>First Name</label>
+                    <input formControlName="firstName" type="text" placeholder="John">
+                  </div>
+                  <div class="premium-group">
+                    <label>Last Name</label>
+                    <input formControlName="lastName" type="text" placeholder="Doe">
                   </div>
                 </div>
 
-                <div class="form-group">
-                  <label>Email Address</label>
-                  <div class="input-container">
-                    <i class="bi bi-envelope"></i>
-                    <input formControlName="email" type="email" placeholder="john@example.com" />
+                <div class="premium-group opacity-70">
+                  <label>Email Address (Immutable)</label>
+                  <div class="relative">
+                    <input type="email" [value]="profileForm.get('email')?.value" disabled>
+                    <i class="bi bi-lock-fill absolute right-4 top-1/2 -translate-y-1/2 text-gray-300"></i>
                   </div>
                 </div>
 
-                <div class="form-group lg:col-span-2">
+                <div class="premium-group">
                   <label>Phone Number</label>
-                  <div class="input-container">
-                    <i class="bi bi-telephone"></i>
-                    <input formControlName="phoneNumber" type="tel" placeholder="+1 (555) 000-0000" />
-                  </div>
+                  <input formControlName="phoneNumber" type="tel" placeholder="+1 234 567 8900">
                 </div>
-              </div>
 
-              <div class="form-actions-footer">
-                <button type="submit" class="submit-btn" [disabled]="profileForm.invalid">
-                  <i class="bi bi-check-circle"></i>
-                  Save Profile Changes
-                </button>
-              </div>
-            </form>
-          </div>
-
-          <!-- Notifications Tab -->
-          <div *ngSwitchCase="'notifications'" class="animate-in fade-in slide-in-bottom">
-            <div class="content-header">
-              <h2>Notifications</h2>
-              <p>Choose how you want to be notified about your health</p>
+                <div class="pt-6">
+                  <button type="submit" class="premium-btn primary-btn" [disabled]="profileForm.invalid || isSaving()">
+                    <span *ngIf="!isSaving()">Save Changes</span>
+                    <span *ngIf="isSaving()" class="flex items-center gap-2">
+                      <span class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                      Saving...
+                    </span>
+                  </button>
+                </div>
+              </form>
             </div>
 
-            <form [formGroup]="notificationsForm" (ngSubmit)="saveNotifications()" class="space-y-8">
-              <div class="preference-list">
-                <div class="preference-item">
-                  <div class="pref-info">
-                    <span class="pref-title">Email Notifications</span>
-                    <p class="pref-desc">Receive appointment reminders and billing alerts via email</p>
+            <!-- Notifications Tab -->
+            <div *ngSwitchCase="'notifications'" class="space-y-10">
+              <div class="space-y-2">
+                <h3 class="text-2xl font-bold text-[var(--fg)]">Communication Preferences</h3>
+                <p class="text-[var(--muted)]">Choose how you'd like to stay informed about your health.</p>
+              </div>
+
+              <form [formGroup]="notificationsForm" (ngSubmit)="saveNotifications()" class="space-y-4">
+                <div class="premium-toggle-card">
+                  <div class="icon-wrap bg-blue-50 text-blue-600 dark:bg-blue-900/20">
+                    <i class="bi bi-envelope-paper"></i>
                   </div>
-                  <label class="switch">
+                  <div class="flex-1">
+                    <p class="font-bold text-[var(--fg)]">Email Reports</p>
+                    <p class="text-xs text-[var(--muted)] mt-1">Get weekly summaries and lab result alerts.</p>
+                  </div>
+                  <label class="modern-switch">
                     <input type="checkbox" formControlName="email">
-                    <span class="slider"></span>
+                    <span class="modern-slider"></span>
                   </label>
                 </div>
 
-                <div class="preference-item">
-                  <div class="pref-info">
-                    <span class="pref-title">SMS Alerts</span>
-                    <p class="pref-desc">Get urgent updates and OTPs on your mobile phone</p>
+                <div class="premium-toggle-card">
+                  <div class="icon-wrap bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20">
+                    <i class="bi bi-chat-left-text"></i>
                   </div>
-                  <label class="switch">
+                  <div class="flex-1">
+                    <p class="font-bold text-[var(--fg)]">SMS Alerts</p>
+                    <p class="text-xs text-[var(--muted)] mt-1">Receive text reminders 15 minutes before appointments.
+                    </p>
+                  </div>
+                  <label class="modern-switch">
                     <input type="checkbox" formControlName="sms">
-                    <span class="slider"></span>
+                    <span class="modern-slider"></span>
                   </label>
                 </div>
 
-                <div class="preference-item">
-                  <div class="pref-info">
-                    <span class="pref-title">Push Notifications</span>
-                    <p class="pref-desc">Real-time alerts in your browser or mobile app</p>
+                <div class="premium-toggle-card">
+                  <div class="icon-wrap bg-amber-50 text-amber-600 dark:bg-amber-900/20">
+                    <i class="bi bi-phone"></i>
                   </div>
-                  <label class="switch">
+                  <div class="flex-1">
+                    <p class="font-bold text-[var(--fg)]">Push Notifications</p>
+                    <p class="text-xs text-[var(--muted)] mt-1">Stay updated with real-time app notifications.</p>
+                  </div>
+                  <label class="modern-switch">
                     <input type="checkbox" formControlName="push">
-                    <span class="slider"></span>
+                    <span class="modern-slider"></span>
                   </label>
                 </div>
 
-                <div class="preference-item">
-                  <div class="pref-info">
-                    <span class="pref-title">Marketing & Tips</span>
-                    <p class="pref-desc">Receive health tips and news about new services</p>
-                  </div>
-                  <label class="switch">
-                    <input type="checkbox" formControlName="marketing">
-                    <span class="slider"></span>
-                  </label>
+                <div class="pt-6">
+                  <button type="submit" class="premium-btn primary-btn" [disabled]="isSaving()">
+                    Update Preferences
+                  </button>
                 </div>
-              </div>
-
-              <div class="form-actions-footer">
-                <button type="submit" class="submit-btn">
-                  <i class="bi bi-bell"></i>
-                  Update Preferences
-                </button>
-              </div>
-            </form>
-          </div>
-
-          <!-- Security Tab -->
-          <div *ngSwitchCase="'security'" class="animate-in fade-in slide-in-bottom">
-            <div class="content-header">
-              <h2>Security</h2>
-              <p>Ensure your account stays safe with a strong password</p>
+              </form>
             </div>
 
-            <form [formGroup]="passwordForm" (ngSubmit)="changePassword()" class="space-y-8">
-              <div class="form-grid-layout">
-                <div class="form-group lg:col-span-2">
+            <!-- Security Tab -->
+            <div *ngSwitchCase="'security'" class="space-y-10">
+              <div class="space-y-2">
+                <h3 class="text-2xl font-bold text-[var(--fg)]">Security & Access</h3>
+                <p class="text-[var(--muted)]">Manage your authentication methods and password security.</p>
+              </div>
+
+              <form [formGroup]="passwordForm" (ngSubmit)="changePassword()" class="space-y-6">
+                <div class="premium-group">
                   <label>Current Password</label>
-                  <div class="input-container">
-                    <i class="bi bi-lock"></i>
-                    <input formControlName="currentPassword" type="password" placeholder="••••••••" />
+                  <div class="relative">
+                    <input formControlName="currentPassword" [type]="showPass ? 'text' : 'password'"
+                      placeholder="••••••••">
+                    <button type="button" (click)="showPass = !showPass"
+                      class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">
+                      <i class="bi" [class.bi-eye]="!showPass" [class.bi-eye-slash]="showPass"></i>
+                    </button>
                   </div>
                 </div>
 
-                <div class="form-group lg:col-span-2">
+                <div class="premium-group">
                   <label>New Password</label>
-                  <div class="input-container">
-                    <i class="bi bi-shield-lock"></i>
-                    <input formControlName="newPassword" type="password" placeholder="At least 6 characters" />
+                  <input formControlName="newPassword" type="password" placeholder="Min 6 characters">
+                </div>
+
+                <div
+                  class="bg-blue-50 dark:bg-blue-900/10 p-4 rounded-2xl flex gap-4 items-start border border-blue-100 dark:border-blue-900/30">
+                  <i class="bi bi-info-circle-fill text-blue-500 mt-1"></i>
+                  <p class="text-xs text-blue-700 dark:text-blue-300 leading-relaxed font-medium">
+                    Changing your password will sign you out of all other active sessions for security purposes.
+                  </p>
+                </div>
+
+                <div class="pt-6">
+                  <button type="submit" class="premium-btn bg-gray-900 hover:bg-black dark:bg-white dark:text-black"
+                    [disabled]="passwordForm.invalid || isSaving()">
+                    Confirm New Password
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            <!-- Privacy Tab -->
+            <div *ngSwitchCase="'privacy'" class="space-y-10">
+              <div class="space-y-2">
+                <h3 class="text-2xl font-bold text-[var(--fg)]">Data & Privacy</h3>
+                <p class="text-[var(--muted)]">Control how your data is used and shared within the care network.</p>
+              </div>
+
+              <div class="space-y-4">
+                <div class="premium-toggle-card">
+                  <div class="icon-wrap bg-indigo-50 text-indigo-600 dark:bg-indigo-900/20">
+                    <i class="bi bi-database"></i>
                   </div>
+                  <div class="flex-1">
+                    <p class="font-bold text-[var(--fg)]">Share Activity Logs</p>
+                    <p class="text-xs text-[var(--muted)] mt-1">Allow us to collect anonymized usage data to help us
+                      improve.</p>
+                  </div>
+                  <label class="modern-switch">
+                    <input type="checkbox" [checked]="privacyPrefs().shareActivity"
+                      (change)="updatePrivacy('shareActivity', $any($event.target).checked)">
+                    <span class="modern-slider"></span>
+                  </label>
+                </div>
+
+                <div class="premium-toggle-card">
+                  <div class="icon-wrap bg-purple-50 text-purple-600 dark:bg-purple-900/20">
+                    <i class="bi bi-magic"></i>
+                  </div>
+                  <div class="flex-1">
+                    <p class="font-bold text-[var(--fg)]">Personalized Insights</p>
+                    <p class="text-xs text-[var(--muted)] mt-1">Receive health recommendations tailored to your history.
+                    </p>
+                  </div>
+                  <label class="modern-switch">
+                    <input type="checkbox" [checked]="privacyPrefs().personalizedTips"
+                      (change)="updatePrivacy('personalizedTips', $any($event.target).checked)">
+                    <span class="modern-slider"></span>
+                  </label>
+                </div>
+
+                <div class="premium-toggle-card">
+                  <div class="icon-wrap bg-red-50 text-red-600 dark:bg-red-900/20">
+                    <i class="bi bi-graph-up"></i>
+                  </div>
+                  <div class="flex-1">
+                    <p class="font-bold text-[var(--fg)]">Usage Analytics</p>
+                    <p class="text-xs text-[var(--muted)] mt-1">Provide feedback on feature usage to help shape the
+                      future of QuickMed.</p>
+                  </div>
+                  <label class="modern-switch">
+                    <input type="checkbox" [checked]="privacyPrefs().shareAnalytics"
+                      (change)="updatePrivacy('shareAnalytics', $any($event.target).checked)">
+                    <span class="modern-slider"></span>
+                  </label>
                 </div>
               </div>
 
-              <div class="form-actions-footer">
-                <button type="submit" class="submit-btn" [disabled]="passwordForm.invalid">
-                  <i class="bi bi-key"></i>
-                  Update Password
-                </button>
+              <div class="relative group mt-10">
+                <div
+                  class="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 rounded-3xl blur opacity-10 group-hover:opacity-20 transition">
+                </div>
+                <div
+                  class="relative bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 p-8 rounded-3xl flex flex-col md:flex-row items-center gap-6">
+                  <div
+                    class="w-16 h-16 bg-purple-100 dark:bg-purple-900/20 text-purple-600 rounded-2xl flex items-center justify-center shrink-0">
+                    <i class="bi bi-cloud-download text-2xl"></i>
+                  </div>
+                  <div class="flex-1 text-center md:text-left">
+                    <h4 class="font-bold text-lg text-[var(--fg)]">Data Portability</h4>
+                    <p class="text-xs text-[var(--muted)] mt-1">Download your entire medical history in a secure format
+                      (JSON/PDF). This may take a few minutes.</p>
+                  </div>
+                  <button type="button"
+                    class="px-6 py-3 bg-purple-600 text-white font-bold rounded-xl shadow-lg shadow-purple-500/20 hover:scale-105 transition-transform active:scale-95">
+                    Request Archive
+                  </button>
+                </div>
               </div>
-            </form>
+            </div>
+
           </div>
-
-          <!-- Privacy Tab -->
-          <div *ngSwitchCase="'privacy'" class="animate-in fade-in slide-in-bottom">
-            <div class="content-header">
-              <h2>Privacy & Data</h2>
-              <p>Control how your information is handled and shared</p>
-            </div>
-
-            <div class="preference-list">
-              <div class="preference-item">
-                <div class="pref-info">
-                  <span class="pref-title">Anonymized Activity</span>
-                  <p class="pref-desc">Share non-identifiable usage data to help us improve</p>
-                </div>
-                <label class="switch">
-                  <input type="checkbox" [checked]="privacyPreferences().shareActivity"
-                    (change)="setPrivacyPreference('shareActivity', $any($event.target).checked ?? false)">
-                  <span class="slider"></span>
-                </label>
-              </div>
-
-              <div class="preference-item">
-                <div class="pref-info">
-                  <span class="pref-title">Analytics Programs</span>
-                  <p class="pref-desc">Participate in focused health analytics research</p>
-                </div>
-                <label class="switch">
-                  <input type="checkbox" [checked]="privacyPreferences().shareAnalytics"
-                    (change)="setPrivacyPreference('shareAnalytics', $any($event.target).checked ?? false)">
-                  <span class="slider"></span>
-                </label>
-              </div>
-            </div>
-
-            <div class="data-actions-card mt-8 p-6 rounded-3xl bg-[var(--bg)] border border-[var(--border)]">
-              <div class="flex items-center gap-4 mb-4">
-                <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center">
-                  <i class="bi bi-download"></i>
-                </div>
-                <h4 class="font-bold text-[var(--fg)]">Download your data</h4>
-              </div>
-              <p class="text-sm text-[var(--muted)] mb-4 leading-relaxed">
-                Get a copy of all your health records, prescriptions, and appointment history in a secure format.
-              </p>
-              <button type="button"
-                class="px-6 py-2.5 bg-white border border-gray-200 text-gray-700 font-bold rounded-xl text-sm hover:bg-gray-50 transition-all">
-                Request Data Export
-              </button>
-            </div>
-          </div>
-        </div>
-      </main>
+        </main>
+      </div>
     </div>
   </div>
 </app-patient-shell>

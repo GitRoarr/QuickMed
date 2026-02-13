@@ -5,10 +5,12 @@ import { MedicalRecordsService } from "./medical-records.service";
 import { MedicalRecordsController } from "./medical-records.controller";
 import { UsersModule } from "../users/users.module";
 
+import { CloudinaryModule } from "../profile/cloudinary.module";
+
 @Module({
-  imports: [TypeOrmModule.forFeature([MedicalRecord]), UsersModule],
+  imports: [TypeOrmModule.forFeature([MedicalRecord]), UsersModule, CloudinaryModule],
   providers: [MedicalRecordsService],
   controllers: [MedicalRecordsController],
   exports: [MedicalRecordsService],
 })
-export class MedicalRecordsModule {}
+export class MedicalRecordsModule { }

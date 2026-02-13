@@ -6,6 +6,8 @@ import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 import { CurrentUser } from "../auth/decorators/current-user.decorator";
 import { User } from "../users/entities/user.entity";
 import { UserRole } from "../common/index";
+import { diskStorage } from "multer";
+import * as os from "os";
 
 @Controller('medical-records')
 @UseGuards(JwtAuthGuard)
@@ -13,7 +15,17 @@ export class MedicalRecordsController {
   constructor(private readonly recordsService: MedicalRecordsService) { }
 
   @Post('upload')
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: os.tmpdir(),
+        filename: (req, file, cb) => {
+          const filename = `${Date.now()}-${file.originalname.replace(/\s+/g, '-')}`
+          cb(null, filename)
+        },
+      }),
+    }),
+  )
   uploadRecord(@UploadedFile() file: Express.Multer.File, @Body('patientId') patientId: string, @Body('doctorId') doctorId: string) {
     return this.recordsService.saveRecordFile(file, patientId, doctorId);
   }

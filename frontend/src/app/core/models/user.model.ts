@@ -12,7 +12,7 @@ export interface User {
   email: string
   role: UserRole
   phoneNumber?: string
-  avatar?:string
+  avatar?: string
   medicalHistory?: string
   specialty?: string
   bio?: string
@@ -29,6 +29,9 @@ export interface User {
   testResultsCount?: number
   createdAt: Date
   updatedAt: Date
+  shareActivity?: boolean
+  shareAnalytics?: boolean
+  personalizedTips?: boolean
 }
 
 export interface Doctor extends User {

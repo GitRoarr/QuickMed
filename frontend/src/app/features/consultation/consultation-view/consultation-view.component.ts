@@ -23,7 +23,7 @@ export class ConsultationViewComponent implements OnInit {
   treatmentStats = computed(() => {
     const c = this.consultation();
     if (!c?.treatments) return { total: 0, medications: 0, therapies: 0, procedures: 0, labTests: 0 };
-    
+
     return {
       total: c.treatments.length,
       medications: c.treatments.filter(t => t.type === TreatmentType.MEDICATION).length,
@@ -43,7 +43,7 @@ export class ConsultationViewComponent implements OnInit {
     this.consultationService.getConsultationByAppointment(this.appointmentId).subscribe({
       next: (consultation) => {
         if (!consultation) {
-          this.router.navigate(['/doctor/appointments']);
+          this.router.navigate(['/patient/appointments']);
           return;
         }
         this.consultation.set(consultation);
@@ -51,7 +51,7 @@ export class ConsultationViewComponent implements OnInit {
       },
       error: () => {
         this.loading.set(false);
-        this.router.navigate(['/doctor/appointments']);
+        this.router.navigate(['/patient/appointments']);
       }
     });
   }

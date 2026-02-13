@@ -7,12 +7,16 @@ import { MedicalRecord, MedicalRecordType } from "./entities/medical-record.enti
 import { CreateMedicalRecordDto } from "./dto/create-medical-record.dto";
 import { UsersService } from "../users/users.service";
 
+import { CloudinaryService } from "../profile/cloudinary.service";
+import * as fs from 'fs/promises';
+
 @Injectable()
 export class MedicalRecordsService {
   constructor(
     @InjectRepository(MedicalRecord)
     private readonly recordsRepository: Repository<MedicalRecord>,
-    private readonly usersService: UsersService
+    private readonly usersService: UsersService,
+    private readonly cloudinaryService: CloudinaryService,
   ) { }
 
   async create(createDto: CreateMedicalRecordDto) {
@@ -56,26 +60,18 @@ export class MedicalRecordsService {
   async saveRecordFile(file: Express.Multer.File, patientId: string, doctorId?: string) {
     if (!file) throw new BadRequestException('No file uploaded');
     if (file.size > 10 * 1024 * 1024) throw new BadRequestException('File too large (max 10MB)');
-    if (!['application/pdf', 'image/png', 'image/jpeg'].includes(file.mimetype)) {
-      throw new BadRequestException('Invalid file type. Only PDF, PNG, JPEG allowed.');
+
+    // Upload to Cloudinary
+    const uploadRes = await this.cloudinaryService.uploadImage(file);
+
+    // Clean up temp file
+    if (file.path) {
+      await fs.unlink(file.path).catch(err => console.warn('Failed to delete temp file', err));
     }
 
-    const uploadPath = join(__dirname, '../../uploads', file.originalname);
-    writeFileSync(uploadPath, file.buffer);
-
-    const createDto: any = {
-      patientId,
-      doctorId,
-      title: file.originalname,
-      fileUrl: `/uploads/${file.originalname}`,
-      fileSize: file.size,
-      type: 'FILE',
-    };
-    const record = await this.create(createDto);
     return {
       message: 'File uploaded successfully',
-      record,
-      url: createDto.fileUrl,
+      url: uploadRes.secure_url,
     };
   }
 
