@@ -229,6 +229,14 @@
 
       </div>
 
+      <!-- Appointment Details Modal -->
+      <app-appointment-details-page
+        *ngIf="showDetailsModal() && selectedAppointment"
+        [appointmentId]="selectedAppointment.id"
+        (closeModal)="closeDetailsModal()"
+        class="modal-overlay"
+      ></app-appointment-details-page>
+
     </div>
   </main>
 </div>

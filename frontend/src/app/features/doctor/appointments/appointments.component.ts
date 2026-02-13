@@ -13,6 +13,7 @@ import { NotificationService } from '@core/services/notification.service';
 import { ConsultationService } from '@core/services/consultation.service';
 import { ToastService } from '@core/services/toast.service';
 import { forkJoin } from 'rxjs';
+import { AppointmentDetailsPage } from './appointment-details.page';
 
 interface MenuItem {
   label: string;
@@ -24,7 +25,7 @@ interface MenuItem {
 @Component({
   selector: 'app-doctor-appointments',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, DatePipe, DoctorHeaderComponent, DoctorSidebarComponent],
+  imports: [CommonModule, FormsModule, RouterModule, DatePipe, DoctorHeaderComponent, DoctorSidebarComponent, AppointmentDetailsPage],
   templateUrl: './appointments.component.html',
   styleUrls: ['./appointments.component.css'],
 })
@@ -46,6 +47,10 @@ export class AppointmentsComponent implements OnInit {
 
   // Enums for HTML
   AppointmentStatus = AppointmentStatus;
+
+  // Modal state
+  showDetailsModal = signal(false);
+  selectedAppointment: Appointment | null = null;
 
   private appointmentService = inject(AppointmentService);
   private authService = inject(AuthService);
@@ -142,9 +147,13 @@ export class AppointmentsComponent implements OnInit {
   }
 
   viewPatientDetails(appt: Appointment): void {
-    if (appt.patientId) {
-      this.router.navigate(['/doctor/patients', appt.patientId]);
-    }
+    this.selectedAppointment = appt;
+    this.showDetailsModal.set(true);
+  }
+
+  closeDetailsModal(): void {
+    this.showDetailsModal.set(false);
+    this.selectedAppointment = null;
   }
 
   viewConsultation(appt: Appointment): void {

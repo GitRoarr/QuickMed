@@ -166,13 +166,6 @@ export const routes: Routes = [
           ),
       },
       {
-        path: "patients/:id",
-        loadComponent: () =>
-          import("./features/doctor/patient-detail/patient-detail.component").then(
-            (m) => m.PatientDetailComponent
-          ),
-      },
-      {
         path: "schedule",
         loadComponent: () =>
           import("./features/doctor/schedule/schedule.component").then(

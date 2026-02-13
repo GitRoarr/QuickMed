@@ -1,14 +1,19 @@
 import { DoctorService } from '@core/services/doctor.service';
 import { ActivatedRoute } from '@angular/router';
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-appointment-details-page',
+  standalone: true,
+  imports: [CommonModule],
   templateUrl: './appointment-details.page.html',
   styleUrls: ['./appointment-details.page.css']
 })
 export class AppointmentDetailsPage implements OnInit {
   @Input() appointmentId: string | null = null;
+  @Output() closeModal = new EventEmitter<void>();
+
   appointment: any = null;
   isLoading = true;
   appointments: any[] = [];
@@ -44,6 +49,10 @@ export class AppointmentDetailsPage implements OnInit {
         this.appointment = null;
       }
     });
+  }
+
+  emitCloseModal(): void {
+    this.closeModal.emit();
   }
 
   getInitials(patient: any): string {

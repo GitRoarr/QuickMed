@@ -1,54 +1,60 @@
-<!-- Accessibility improvements for WCAG 2.1 AA compliance -->
 <main class="modal-overlay" aria-label="Appointment Details">
-  <section class="modal-card animated-modal" style="color: #fff;" tabindex="0">
-    <!-- Heading hierarchy and improved contrast -->
-    <header class="flex items-center gap-4 mb-6">
-      <div class="avatar-lg shadow-lg" [style.background-image]="appointment.patient.avatar ? 'url(' + appointment.patient.avatar + ')' : ''" aria-label="Patient Avatar">
-        <span *ngIf="!appointment.patient.avatar">{{ getInitials(appointment.patient) }}</span>
+  <section class="modal-card" tabindex="0">
+    <!-- Header: Patient info -->
+    <header class="modal-header">
+      <div class="avatar-lg" [style.background-image]="appointment.patient?.avatar ? 'url(' + appointment.patient.avatar + ')' : ''" aria-label="Patient Avatar">
+        <span *ngIf="!appointment.patient?.avatar">{{ getInitials(appointment.patient) }}</span>
       </div>
-      <div>
-        <h1 class="font-bold text-3xl text-primary flex items-center gap-2" style="color: #fff;">
-          {{ appointment.patient.name }}
-          <!-- Status badge with icon and accessible label -->
-          <span class="badge badge-success" aria-label="Status: {{ appointment.status | titlecase }}">
-            <i *ngIf="appointment.status === 'completed'" aria-hidden="true">✔</i>
-            <i *ngIf="appointment.status === 'cancelled'" aria-hidden="true">✖</i>
+      <div class="patient-info">
+        <h1 class="patient-name">
+          {{ appointment.patient?.name }}
+          <span class="badge" [ngClass]="{
+            'badge-success': appointment.status === 'completed',
+            'badge-danger': appointment.status === 'cancelled',
+            'badge-info': appointment.status === 'pending'
+          }">
             {{ appointment.status | titlecase }}
           </span>
         </h1>
-        <div class="text-muted text-lg" style="color: #fff;">Age: {{ appointment.patient.age }} • {{ appointment.patient.email }}</div>
-        <div class="text-xs text-muted" style="color: #fff;">Last seen: {{ appointment.patient.lastSeen | date:'MMM d, y' }}</div>
+        <p class="patient-meta">Age: {{ appointment.patient?.age }} • {{ appointment.patient?.email }}</p>
+        <p class="patient-meta">Last seen: {{ appointment.patient?.lastSeen | date:'MMM d, y' }}</p>
       </div>
     </header>
-    <!-- Statistic cards with improved contrast and hierarchy -->
-    <section class="grid grid-cols-2 md:grid-cols-3 gap-6 mb-8" aria-label="Appointment Statistics">
-      <div class="stat-card gradient-card" style="color: #fff; padding: 24px;">
-        <span class="font-bold text-lg">Appointment ID</span><br>
-        <span class="font-extrabold text-2xl" style="color: #fff;">{{ appointment.id }}</span>
+
+    <!-- Appointment Stats -->
+    <section class="stats-grid" aria-label="Appointment Statistics">
+      <div class="stat-card gradient-card">
+        <p class="stat-title">Appointment ID</p>
+        <p class="stat-value">{{ appointment.id }}</p>
       </div>
-      <div class="stat-card gradient-card" style="color: #fff; padding: 24px;">
-        <span class="font-bold text-lg">Date & Time</span><br>
-        <span class="font-extrabold text-2xl" style="color: #fff;">{{ appointment.date | date:'MMM d, y - h:mm a' }}</span>
+      <div class="stat-card gradient-card">
+        <p class="stat-title">Date & Time</p>
+        <p class="stat-value">{{ appointment.date | date:'MMM d, y - h:mm a' }}</p>
       </div>
-      <div class="stat-card gradient-card" style="color: #fff; padding: 24px;">
-        <span class="font-bold text-lg">Status</span><br>
-        <span class="badge badge-info" aria-label="Status: {{ appointment.status | titlecase }}">
-          <i *ngIf="appointment.status === 'completed'" aria-hidden="true">✔</i>
-          <i *ngIf="appointment.status === 'cancelled'" aria-hidden="true">✖</i>
+      <div class="stat-card gradient-card">
+        <p class="stat-title">Status</p>
+        <span class="badge" [ngClass]="{
+          'badge-success': appointment.status === 'completed',
+          'badge-danger': appointment.status === 'cancelled',
+          'badge-info': appointment.status === 'pending'
+        }">
           {{ appointment.status | titlecase }}
         </span>
       </div>
     </section>
-    <!-- Section separation and improved spacing -->
-    <section class="card mb-6 shadow-md" style="color: #fff; padding: 24px;">
-      <h2 class="font-bold text-xl mb-2" style="color: #fff;">Doctor Notes & Diagnosis</h2>
-      <span class="font-semibold text-lg" style="color: #fff;">{{ appointment.diagnosis }}</span>
+
+    <!-- Doctor Notes -->
+    <section class="card section-card">
+      <h2>Doctor Notes & Diagnosis</h2>
+      <p>{{ appointment.diagnosis || 'No notes available.' }}</p>
     </section>
-    <section class="card mb-6 shadow-md" style="color: #fff; padding: 24px;">
-      <h2 class="font-bold text-xl mb-2" style="color: #fff;">Prescription</h2>
-      <table class="w-full prescription-table" aria-label="Prescription Table">
+
+    <!-- Prescription -->
+    <section class="card section-card">
+      <h2>Prescription</h2>
+      <table class="prescription-table" aria-label="Prescription Table">
         <thead>
-          <tr style="color: #fff;">
+          <tr>
             <th scope="col">Medicine</th>
             <th scope="col">Dosage</th>
             <th scope="col">Frequency</th>
@@ -56,7 +62,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let rx of appointment.prescription" style="color: #fff;">
+          <tr *ngFor="let rx of appointment.prescription">
             <td>{{ rx.medicine }}</td>
             <td>{{ rx.dosage }}</td>
             <td>{{ rx.frequency }}</td>
@@ -64,13 +70,13 @@
           </tr>
         </tbody>
       </table>
-      <!-- Empty state for zero records -->
-      <div *ngIf="!appointment.prescription?.length" class="empty-state" style="color: #fff;">No prescriptions found.</div>
+      <p *ngIf="!appointment.prescription?.length" class="empty-state">No prescriptions found.</p>
     </section>
-    <!-- Buttons with visible focus states and proper touch targets -->
-    <nav class="flex gap-4 justify-end mt-8" aria-label="Actions">
-      <button class="btn-ghost btn btn-lg" style="min-width: 44px; min-height: 44px; outline: 2px solid #16a34a; outline-offset: 2px;" tabindex="0">Download Report</button>
-      <button class="btn btn-lg btn-danger" (click)="closeModal()" style="min-width: 44px; min-height: 44px; outline: 2px solid #fff; outline-offset: 2px;" tabindex="0">Close</button>
+
+    <!-- Actions -->
+    <nav class="modal-actions" aria-label="Actions">
+      <button class="btn btn-download" tabindex="0">Download Report</button>
+      <button class="btn btn-close" (click)="emitCloseModal()" tabindex="0">Close</button>
     </nav>
   </section>
 </main>
