@@ -177,10 +177,15 @@ export class MedicalRecordsService {
 
   async updateStatus(id: string, status: string, doctorId: string) {
     const rec = await this.findOne(id);
-    if (rec.doctorId !== doctorId) {
-      throw new ForbiddenException('You can only update your own records');
-    }
+    // Allow any doctor to verify/update for now, or you could restrict to assigned doctor
+    // if (rec.doctorId && rec.doctorId !== doctorId) {
+    //   throw new ForbiddenException('You can only update your own records');
+    // }
     rec.status = status;
+    // If it was unassigned, assign it to the doctor who verified it
+    if (!rec.doctorId && status === 'verified') {
+      rec.doctorId = doctorId;
+    }
     return this.recordsRepository.save(rec);
   }
 

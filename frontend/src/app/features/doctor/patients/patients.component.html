@@ -128,9 +128,13 @@
         <!-- Patient Header -->
         <div class="p-6 pb-4">
           <div class="flex items-start gap-4">
-            <div
-              class="w-14 h-14 rounded-xl bg-gradient-to-br from-[var(--primary)]/15 to-emerald-500/10 flex items-center justify-center shrink-0 text-[var(--primary)] font-bold text-lg group-hover:scale-105 transition-transform">
-              {{ getInitials(p) }}
+            <div class="relative w-14 h-14 shrink-0 group-hover:scale-105 transition-transform">
+              <img *ngIf="p.avatar" [src]="p.avatar" class="w-full h-full object-cover rounded-xl shadow-sm"
+                [alt]="getFullName(p)">
+              <div *ngIf="!p.avatar"
+                class="w-full h-full rounded-xl bg-gradient-to-br from-[var(--primary)]/15 to-emerald-500/10 flex items-center justify-center text-[var(--primary)] font-bold text-lg">
+                {{ getInitials(p) }}
+              </div>
             </div>
             <div class="min-w-0 flex-1">
               <div class="flex items-center gap-2.5 flex-wrap">

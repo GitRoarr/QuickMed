@@ -98,6 +98,45 @@
     transition: transform 0.3s ease;
 }
 
-.status-pill:hover::after {
-    transform: translateX(0);
+@keyframes pulseSlow {
+
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.8;
+        transform: scale(0.98);
+    }
+}
+
+.animate-pulse-slow {
+    animation: pulseSlow 3s ease-in-out infinite;
+}
+
+/* Status specific improvements */
+.bg-orange-100 {
+    background-color: rgba(255, 138, 0, 0.1);
+}
+
+.text-orange-600 {
+    color: #f59e0b;
+}
+
+.border-orange-500 {
+    border-color: #f59e0b;
+}
+
+.bg-red-200 {
+    background-color: rgba(220, 38, 38, 0.2);
+}
+
+.text-red-800 {
+    color: #991b1b;
+}
+
+.bg-red-600 {
+    background-color: #dc2626;
 }

@@ -1,11 +1,11 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req, UnauthorizedException } from "@nestjs/common"
-import  { AppointmentsService } from "./appointments.service"
-import  { CreateAppointmentDto } from "./dto/create-appointment.dto"
-import  { UpdateAppointmentDto } from "./dto/update-appointment.dto"
+import { AppointmentsService } from "./appointments.service"
+import { CreateAppointmentDto } from "./dto/create-appointment.dto"
+import { UpdateAppointmentDto } from "./dto/update-appointment.dto"
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard"
 import { RolesGuard } from "../auth/guards/roles.guard"
 import { CurrentUser } from "../auth/decorators/current-user.decorator"
-import { User} from "../users/entities/user.entity"
+import { User } from "../users/entities/user.entity"
 import { UserRole } from "../common/index"
 
 
@@ -13,15 +13,15 @@ import { UserRole } from "../common/index"
 @UseGuards(JwtAuthGuard)
 
 export class AppointmentsController {
-  constructor(private readonly appointmentsService: AppointmentsService) {}
+  constructor(private readonly appointmentsService: AppointmentsService) { }
 
   @Post()
   @UseGuards(RolesGuard)
   create(@Body() createAppointmentDto: CreateAppointmentDto, @CurrentUser() user: User) {
     return this.appointmentsService.create(createAppointmentDto, user.id, user.role)
   }
-  
-  
+
+
 
   @Get()
   @UseGuards(RolesGuard)
@@ -75,6 +75,11 @@ export class AppointmentsController {
     return this.appointmentsService.update(id, updateAppointmentDto, user)
   }
 
+  @Patch(":id/confirm")
+  confirm(@Param('id') id: string, @CurrentUser() user: User) {
+    return this.appointmentsService.confirm(id, user)
+  }
+
   @Patch(":id/cancel")
   cancel(@Param('id') id: string, @CurrentUser() user: User) {
     return this.appointmentsService.cancel(id, user)
@@ -82,7 +87,8 @@ export class AppointmentsController {
 
   @Delete(':id')
   @UseGuards(RolesGuard)
-  remove(@Param('id') id: string) {
-    return this.appointmentsService.remove(id);
+  remove(@Param('id') id: string, @CurrentUser() user: User) {
+    // As per requirement: DELETE /api/appointments/:id -> sets status = "cancelled"
+    return this.appointmentsService.cancel(id, user);
   }
 }

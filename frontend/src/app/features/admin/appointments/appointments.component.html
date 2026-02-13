@@ -2,11 +2,8 @@
   <div class="appointments-page">
     <div class="flex justify-between items-center mb-6">
       <h2 class="text-2xl font-bold">All Appointments</h2>
-      <button 
-        (click)="openNewAppointmentModal(newAppointmentModal)" 
-        class="primary-btn"
-        (mouseenter)="onButtonHover($event, true)"
-        (mouseleave)="onButtonHover($event, false)">
+      <button (click)="openNewAppointmentModal(newAppointmentModal)" class="primary-btn"
+        (mouseenter)="onButtonHover($event, true)" (mouseleave)="onButtonHover($event, false)">
         New Appointment
       </button>
     </div>
@@ -18,15 +15,11 @@
           <p class="subtitle">{{ filteredAppointments().length }} of {{ totalAppointments() }} appointments</p>
         </div>
         <div class="flex gap-4 items-center">
-          <button 
-            (click)="toggleViewMode()"
-            class="secondary-btn">
+          <button (click)="toggleViewMode()" class="secondary-btn">
             <i [class]="viewMode() === 'list' ? 'bi bi-calendar' : 'bi bi-list'"></i>
             <span>{{ viewMode() === 'list' ? 'Calendar View' : 'List View' }}</span>
           </button>
-          <button 
-            (click)="openCalendarView(calendarModal)"
-            class="secondary-btn">
+          <button (click)="openCalendarView(calendarModal)" class="secondary-btn">
             <i class="bi bi-calendar3"></i>
             <span>View Calendar</span>
           </button>
@@ -39,35 +32,27 @@
           <!-- Status Filter -->
           <div>
             <label class="block text-xs font-medium mb-1">Status</label>
-            <select 
-              [(ngModel)]="selectedStatus" 
-              (ngModelChange)="onStatusChange()"
-              class="filter-input">
+            <select [(ngModel)]="selectedStatus" (ngModelChange)="onStatusChange()" class="filter-input">
               <option value="all">All Status</option>
               <option value="pending">Pending</option>
               <option value="confirmed">Confirmed</option>
               <option value="completed">Completed</option>
               <option value="cancelled">Cancelled</option>
+              <option value="missed">Missed</option>
+              <option value="overdue">Overdue</option>
             </select>
           </div>
 
           <!-- Date Filter -->
           <div>
             <label class="block text-xs font-medium mb-1">Date</label>
-            <input 
-              type="date" 
-              [(ngModel)]="selectedDate"
-              (ngModelChange)="onDateChange()"
-              class="filter-input">
+            <input type="date" [(ngModel)]="selectedDate" (ngModelChange)="onDateChange()" class="filter-input">
           </div>
 
           <!-- Doctor Filter -->
           <div>
             <label class="block text-xs font-medium mb-1">Doctor</label>
-            <select 
-              [(ngModel)]="selectedDoctor"
-              (ngModelChange)="onDoctorChange()"
-              class="filter-input">
+            <select [(ngModel)]="selectedDoctor" (ngModelChange)="onDoctorChange()" class="filter-input">
               <option value="all">All Doctors</option>
               <option *ngFor="let doctor of doctors()" [value]="doctor.id">
                 Dr. {{ doctor.firstName }} {{ doctor.lastName }}
@@ -78,10 +63,7 @@
           <!-- Patient Filter -->
           <div>
             <label class="block text-xs font-medium mb-1">Patient</label>
-            <select 
-              [(ngModel)]="selectedPatient"
-              (ngModelChange)="onPatientChange()"
-              class="filter-input">
+            <select [(ngModel)]="selectedPatient" (ngModelChange)="onPatientChange()" class="filter-input">
               <option value="all">All Patients</option>
               <option *ngFor="let patient of patients()" [value]="patient.id">
                 {{ patient.firstName }} {{ patient.lastName }}
@@ -89,12 +71,10 @@
             </select>
           </div>
         </div>
-        
+
         <!-- Clear Filters -->
         <div class="mt-3 flex justify-end">
-          <button 
-            (click)="clearFilters()"
-            class="text-xs underline">
+          <button (click)="clearFilters()" class="text-xs underline">
             Clear all filters
           </button>
         </div>
@@ -107,8 +87,7 @@
 
       <!-- Appointments List View -->
       <div *ngIf="!isLoading() && viewMode() === 'list'" class="space-y-3">
-        <div 
-          *ngFor="let appointment of filteredAppointments()" 
+        <div *ngFor="let appointment of filteredAppointments()"
           class="appointment-card flex items-center justify-between">
           <div class="flex-1">
             <div class="font-semibold">{{ getPatientName(appointment) }}</div>
@@ -121,7 +100,8 @@
               <span *ngIf="appointment.location">{{ appointment.location }}</span>
             </div>
           </div>
-          <span [ngClass]="getStatusClass(appointment.status)" [style.background-color]="getStatusColor(appointment.status)">{{ appointment.status }}</span>
+          <span [ngClass]="getStatusClass(appointment.status)"
+            [style.background-color]="getStatusColor(appointment.status)">{{ appointment.status }}</span>
           <div class="text-right ml-6">
             <div class="font-semibold">{{ formatTime(appointment.appointmentTime) }}</div>
             <div class="text-xs">{{ formatDate(appointment.appointmentDate) }}</div>
@@ -129,20 +109,21 @@
           <div class="appointment-actions ml-4">
             <button class="action-trigger" (click)="toggleActionMenu($event, appointment.id)">⋮</button>
             <div class="action-menu" *ngIf="activeMenuId() === appointment.id">
-              <button
-                *ngIf="appointment.status !== 'confirmed'"
+              <button *ngIf="appointment.status !== 'confirmed'"
                 (click)="updateAppointmentStatus(appointment, AppointmentStatus.CONFIRMED)">
                 <i class="bi bi-check-lg"></i> Mark confirmed
               </button>
-              <button
-                *ngIf="appointment.status !== 'completed'"
+              <button *ngIf="appointment.status !== 'completed'"
                 (click)="updateAppointmentStatus(appointment, AppointmentStatus.COMPLETED)">
                 <i class="bi bi-check2-circle"></i> Mark completed
               </button>
-              <button
-                *ngIf="appointment.status !== 'cancelled'"
+              <button *ngIf="appointment.status !== 'cancelled'"
                 (click)="updateAppointmentStatus(appointment, AppointmentStatus.CANCELLED)">
                 <i class="bi bi-x-circle"></i> Cancel
+              </button>
+              <button *ngIf="appointment.status !== 'missed' && appointment.status !== 'completed'"
+                (click)="updateAppointmentStatus(appointment, AppointmentStatus.MISSED)">
+                <i class="bi bi-slash-circle"></i> Mark missed
               </button>
               <button class="danger" (click)="deleteAppointment(appointment)">
                 <i class="bi bi-trash"></i> Delete
@@ -163,22 +144,17 @@
       <div *ngIf="!isLoading() && viewMode() === 'calendar'" class="calendar-view">
         <div class="grid grid-cols-7 gap-2">
           <!-- Calendar Header -->
-          <div *ngFor="let day of ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']" 
-               class="text-center font-semibold py-2">
+          <div *ngFor="let day of ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']"
+            class="text-center font-semibold py-2">
             {{ day }}
           </div>
-          
+
           <!-- Calendar Days -->
-          <div 
-            *ngFor="let day of getCalendarDays()"
-            [class.bg-blue-50]="day.hasAppointments"
-            [class.border-blue-300]="day.hasAppointments"
-            class="min-h-24 p-2 border rounded-lg calendar-day">
+          <div *ngFor="let day of getCalendarDays()" [class.bg-blue-50]="day.hasAppointments"
+            [class.border-blue-300]="day.hasAppointments" class="min-h-24 p-2 border rounded-lg calendar-day">
             <div class="text-sm font-medium mb-1">{{ day.date.getDate() }}</div>
             <div class="space-y-1">
-              <div 
-                *ngFor="let apt of day.appointments"
-                [style.background-color]="getStatusColor(apt.status)"
+              <div *ngFor="let apt of day.appointments" [style.background-color]="getStatusColor(apt.status)"
                 class="text-xs text-white p-1 rounded truncate cursor-pointer hover:opacity-80"
                 [title]="getPatientName(apt) + ' - ' + formatTime(apt.appointmentTime)">
                 {{ formatTime(apt.appointmentTime) }} - {{ getPatientName(apt).split(' ')[0] }}
@@ -190,335 +166,268 @@
     </div>
   </div>
 
-<!-- Removed stray closing admin shell tag -->
+  <!-- Removed stray closing admin shell tag -->
 
-<!-- Calendar Modal -->
-<ng-template #calendarModal let-modal>
-  <div class="modal-header">
-    <h3 class="text-lg font-semibold text-gray-900">Calendar View</h3>
-    <button type="button" class="text-gray-400 hover:text-gray-600" (click)="modal.dismiss()">
-      <span aria-hidden="true">&times;</span>
-    </button>
-  </div>
-  <div class="modal-body">
-    <div class="calendar-view-large">
-      <!-- Similar calendar view but larger -->
-      <div class="grid grid-cols-7 gap-2">
-        <div *ngFor="let day of getCalendarDays()" 
-             [class.bg-blue-50]="day.hasAppointments"
-             class="min-h-32 p-2 border border-gray-200 rounded-lg">
-          <div class="text-sm font-medium text-gray-700 mb-2">{{ day.date.getDate() }}</div>
-          <div class="space-y-1">
-            <div *ngFor="let apt of day.appointments"
-                 [style.background-color]="getStatusColor(apt.status)"
-                 class="text-xs text-white p-2 rounded cursor-pointer hover:opacity-80">
-              <div class="font-semibold">{{ formatTime(apt.appointmentTime) }}</div>
-              <div>{{ getPatientName(apt) }}</div>
-              <div class="text-xs opacity-90">{{ getDoctorName(apt) }}</div>
+  <!-- Calendar Modal -->
+  <ng-template #calendarModal let-modal>
+    <div class="modal-header">
+      <h3 class="text-lg font-semibold text-gray-900">Calendar View</h3>
+      <button type="button" class="text-gray-400 hover:text-gray-600" (click)="modal.dismiss()">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="calendar-view-large">
+        <!-- Similar calendar view but larger -->
+        <div class="grid grid-cols-7 gap-2">
+          <div *ngFor="let day of getCalendarDays()" [class.bg-blue-50]="day.hasAppointments"
+            class="min-h-32 p-2 border border-gray-200 rounded-lg">
+            <div class="text-sm font-medium text-gray-700 mb-2">{{ day.date.getDate() }}</div>
+            <div class="space-y-1">
+              <div *ngFor="let apt of day.appointments" [style.background-color]="getStatusColor(apt.status)"
+                class="text-xs text-white p-2 rounded cursor-pointer hover:opacity-80">
+                <div class="font-semibold">{{ formatTime(apt.appointmentTime) }}</div>
+                <div>{{ getPatientName(apt) }}</div>
+                <div class="text-xs opacity-90">{{ getDoctorName(apt) }}</div>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
-</ng-template>
+  </ng-template>
 
-<!-- New Appointment Modal -->
-<ng-template #newAppointmentModal let-modal>
-  <div class="modal-header">
-    <h3 class="text-lg font-semibold text-gray-900">New Appointment</h3>
-    <button type="button" class="text-gray-400 hover:text-gray-600" (click)="modal.dismiss()">
-      <span aria-hidden="true">&times;</span>
-    </button>
-  </div>
-  <div class="modal-body">
-    <!-- Alert Message -->
-    <div *ngIf="alertMessage()" 
-         [ngClass]="alertMessage()?.type === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'"
-         class="p-3 rounded-lg mb-4">
-      {{ alertMessage()?.text }}
+  <!-- New Appointment Modal -->
+  <ng-template #newAppointmentModal let-modal>
+    <div class="modal-header">
+      <h3 class="text-lg font-semibold text-gray-900">New Appointment</h3>
+      <button type="button" class="text-gray-400 hover:text-gray-600" (click)="modal.dismiss()">
+        <span aria-hidden="true">&times;</span>
+      </button>
     </div>
-
-    <form (ngSubmit)="createAppointment()">
-      <div class="grid grid-cols-2 gap-4">
-        <!-- Patient Selection -->
-        <div class="patient-search relative">
-          <label class="block text-sm font-medium text-gray-700 mb-1">Patient *</label>
-          <div class="relative">
-            <div 
-              class="flex items-center gap-3 w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white cursor-text"
-              (click)="openPatientDropdown()">
-              <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden text-xs font-semibold text-gray-600">
-                <ng-container *ngIf="getSelectedPatient() as selectedPatient; else noPatientSelected">
-                  <ng-container *ngIf="selectedPatient.avatar; else selectedPatientInitials">
-                    <img [src]="selectedPatient.avatar" alt="Patient avatar" class="w-full h-full object-cover">
-                  </ng-container>
-                  <ng-template #selectedPatientInitials>
-                    {{ getInitials(selectedPatient) }}
-                  </ng-template>
-                </ng-container>
-                <ng-template #noPatientSelected>
-                  {{ getInitials(undefined) }}
-                </ng-template>
-              </div>
-              <input 
-                type="text"
-                autocomplete="off"
-                [value]="patientSearchTerm()"
-                (input)="onPatientSearchChange($any($event.target).value)"
-                (focus)="openPatientDropdown()"
-                placeholder="Search by name, email, or patient ID"
-                class="flex-1 focus:outline-none border-none text-sm text-gray-900 placeholder-gray-500">
-              <button 
-                type="button"
-                *ngIf="newAppointment().patientId"
-                (click)="clearSelectedPatient($event)"
-                class="text-gray-400 hover:text-gray-600">
-                <i class="bi bi-x-circle-fill"></i>
-              </button>
-            </div>
-
-            <div 
-              *ngIf="patientDropdownOpen()" 
-              class="absolute left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-xl max-h-64 overflow-y-auto z-50">
-              <div *ngIf="patientSearchLoading()" class="p-3 text-sm text-gray-500">
-                Searching patients...
-              </div>
-              <button 
-                type="button"
-                *ngFor="let patient of patientResults()" 
-                (click)="selectPatient(patient)"
-                class="w-full px-3 py-2 flex items-center gap-3 text-left hover:bg-gray-50 focus:bg-gray-50">
-                <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden text-xs font-semibold text-gray-600">
-                  <img 
-                    *ngIf="patient.avatar" 
-                    [src]="patient.avatar" 
-                    alt="Avatar" 
-                    class="w-full h-full object-cover">
-                  <span *ngIf="!patient.avatar">
-                    {{ getInitials(patient) }}
-                  </span>
-                </div>
-                <div>
-                  <p class="text-sm font-semibold text-gray-900">{{ patient.firstName }} {{ patient.lastName }}</p>
-                  <p class="text-xs text-gray-500">{{ patient.email }}</p>
-                  <p class="text-xs text-gray-400" *ngIf="patient.phoneNumber">📞 {{ patient.phoneNumber }}</p>
-                </div>
-              </button>
-              <div 
-                *ngIf="!patientSearchLoading() && patientResults().length === 0" 
-                class="p-3 text-sm text-gray-500">
-                No patients found. Try a different search.
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Doctor Selection -->
-        <div class="doctor-search relative">
-          <label class="block text-sm font-medium text-gray-700 mb-1">Doctor *</label>
-          <div class="relative">
-            <div 
-              class="flex items-center gap-3 w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white cursor-text"
-              (click)="openDoctorDropdown()">
-              <div class="w-10 h-10 rounded-full bg-indigo-50 flex items-center justify-center overflow-hidden text-xs font-semibold text-indigo-600">
-                <ng-container *ngIf="getSelectedDoctor() as selectedDoctor; else noDoctorSelected">
-                  <ng-container *ngIf="selectedDoctor.avatar; else selectedDoctorInitials">
-                    <img [src]="selectedDoctor.avatar" alt="Doctor avatar" class="w-full h-full object-cover">
-                  </ng-container>
-                  <ng-template #selectedDoctorInitials>
-                    {{ getInitials(selectedDoctor, 'DR') }}
-                  </ng-template>
-                </ng-container>
-                <ng-template #noDoctorSelected>
-                  {{ getInitials(undefined, 'DR') }}
-                </ng-template>
-              </div>
-              <input 
-                type="text"
-                autocomplete="off"
-                [value]="doctorSearchTerm()"
-                (input)="onDoctorSearchChange($any($event.target).value)"
-                (focus)="openDoctorDropdown()"
-                placeholder="Search doctors by name, specialty, email..."
-                class="flex-1 focus:outline-none border-none text-sm text-gray-900 placeholder-gray-500">
-              <button 
-                type="button"
-                *ngIf="newAppointment().doctorId"
-                (click)="clearSelectedDoctor($event)"
-                class="text-gray-400 hover:text-gray-600">
-                <i class="bi bi-x-circle-fill"></i>
-              </button>
-            </div>
-
-            <div 
-              *ngIf="doctorDropdownOpen()" 
-              class="absolute left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-xl max-h-64 overflow-y-auto z-50">
-              <div *ngIf="doctorSearchLoading()" class="p-3 text-sm text-gray-500">
-                Searching doctors...
-              </div>
-              <button 
-                type="button"
-                *ngFor="let doctor of doctorResults()" 
-                (click)="selectDoctor(doctor)"
-                class="w-full px-3 py-2 flex items-center gap-3 text-left hover:bg-gray-50 focus:bg-gray-50">
-                <div class="w-10 h-10 rounded-full bg-indigo-50 flex items-center justify-center overflow-hidden text-xs font-semibold text-indigo-600">
-                  <img 
-                    *ngIf="doctor.avatar" 
-                    [src]="doctor.avatar" 
-                    alt="Avatar" 
-                    class="w-full h-full object-cover">
-                  <span *ngIf="!doctor.avatar">
-                    {{ getInitials(doctor, 'DR') }}
-                  </span>
-                </div>
-                <div>
-                  <p class="text-sm font-semibold text-gray-900">Dr. {{ doctor.firstName }} {{ doctor.lastName }}</p>
-                  <p class="text-xs text-gray-500">{{ doctor.specialty || 'General Practitioner' }}</p>
-                  <p class="text-xs text-gray-400">{{ doctor.email }}</p>
-                </div>
-              </button>
-              <div 
-                *ngIf="!doctorSearchLoading() && doctorResults().length === 0" 
-                class="p-3 text-sm text-gray-500">
-                No doctors found. Try refining your search.
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Date -->
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Date *</label>
-          <input 
-            type="date" 
-            [(ngModel)]="newAppointment().appointmentDate"
-            name="appointmentDate"
-            [min]="getMinDate()"
-            class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
-            required>
-        </div>
-
-        <!-- Time -->
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Time *</label>
-          <input 
-            type="time" 
-            [(ngModel)]="newAppointment().appointmentTime"
-            name="appointmentTime"
-            step="900"
-            class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
-            required>
-        </div>
-
-        <!-- Smart Time Suggestions -->
-        <div class="col-span-2">
-          <label class="block text-xs font-semibold text-gray-600 mb-2">Suggested time slots</label>
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
-            <button 
-              type="button"
-              *ngFor="let slot of timeSlots()"
-              (click)="onTimeSlotClick(slot)"
-              [ngClass]="isSlotSelected(slot) ? 'bg-green-500 text-white border border-green-500' : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'"
-              class="px-3 py-2 rounded-lg text-sm font-medium transition text-center">
-              {{ formatTime(slot) }}
-            </button>
-          </div>
-        </div>
-
-        <!-- Appointment Type -->
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Appointment Type</label>
-          <select 
-            [(ngModel)]="newAppointment().appointmentType"
-            name="appointmentType"
-            class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
-            <option *ngFor="let type of appointmentTypes" [value]="type">{{ type }}</option>
-          </select>
-        </div>
-
-        <!-- Status -->
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-          <select 
-            [(ngModel)]="newAppointment().status"
-            name="status"
-            class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
-            <option value="pending">Pending</option>
-            <option value="confirmed">Confirmed</option>
-          </select>
-        </div>
-
-        <!-- Reason -->
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Reason</label>
-          <input 
-            type="text" 
-            [(ngModel)]="newAppointment().reason"
-            name="reason"
-            placeholder="e.g., Annual Checkup, Follow-up"
-            class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
-        </div>
-
-        <!-- Location -->
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Location</label>
-          <input 
-            type="text" 
-            [(ngModel)]="newAppointment().location"
-            name="location"
-            [disabled]="isVideoConsultation()"
-            [placeholder]="isVideoConsultation() ? 'Not required for video consults' : 'e.g., Room 101'"
-            class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm disabled:bg-gray-100 disabled:text-gray-500">
-          <p *ngIf="isVideoConsultation()" class="text-xs text-gray-500 mt-1">
-            Location is automatically set to <strong>Virtual Visit</strong> for video consultations.
-          </p>
-        </div>
-
-        <!-- Video Consultation -->
-        <div class="col-span-2">
-          <label class="flex items-center gap-2">
-            <input 
-              type="checkbox" 
-              name="isVideoConsultation"
-              [checked]="isVideoConsultation()"
-              (change)="handleVideoToggle($any($event.target).checked)"
-              class="rounded border-gray-300 text-green-600 focus:ring-green-500">
-            <span class="text-sm font-medium text-gray-700">Video Consultation (no room needed)</span>
-          </label>
-          <p class="text-xs text-gray-500 mt-1">
-            Enable this to automatically send a virtual meeting link and disable physical room requirements.
-          </p>
-        </div>
-
-        <!-- Notes -->
-        <div class="col-span-2">
-          <label class="block text-sm font-medium text-gray-700 mb-1">Notes</label>
-          <textarea 
-            [(ngModel)]="newAppointment().notes"
-            name="notes"
-            rows="3"
-            placeholder="Additional notes..."
-            class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"></textarea>
-        </div>
+    <div class="modal-body">
+      <!-- Alert Message -->
+      <div *ngIf="alertMessage()"
+        [ngClass]="alertMessage()?.type === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'"
+        class="p-3 rounded-lg mb-4">
+        {{ alertMessage()?.text }}
       </div>
 
-      <div class="modal-footer mt-6 flex justify-end gap-3">
-        <button 
-          type="button" 
-          (click)="modal.dismiss()"
-          class="secondary-btn">
-          Cancel
-        </button>
-        <button 
-          type="submit"
-          class="primary-btn">
-          Create Appointment
-        </button>
-      </div>
-    </form>
-  </div>
-</ng-template>
+      <form (ngSubmit)="createAppointment()">
+        <div class="grid grid-cols-2 gap-4">
+          <!-- Patient Selection -->
+          <div class="patient-search relative">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Patient *</label>
+            <div class="relative">
+              <div
+                class="flex items-center gap-3 w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white cursor-text"
+                (click)="openPatientDropdown()">
+                <div
+                  class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden text-xs font-semibold text-gray-600">
+                  <ng-container *ngIf="getSelectedPatient() as selectedPatient; else noPatientSelected">
+                    <ng-container *ngIf="selectedPatient.avatar; else selectedPatientInitials">
+                      <img [src]="selectedPatient.avatar" alt="Patient avatar" class="w-full h-full object-cover">
+                    </ng-container>
+                    <ng-template #selectedPatientInitials>
+                      {{ getInitials(selectedPatient) }}
+                    </ng-template>
+                  </ng-container>
+                  <ng-template #noPatientSelected>
+                    {{ getInitials(undefined) }}
+                  </ng-template>
+                </div>
+                <input type="text" autocomplete="off" [value]="patientSearchTerm()"
+                  (input)="onPatientSearchChange($any($event.target).value)" (focus)="openPatientDropdown()"
+                  placeholder="Search by name, email, or patient ID"
+                  class="flex-1 focus:outline-none border-none text-sm text-gray-900 placeholder-gray-500">
+                <button type="button" *ngIf="newAppointment().patientId" (click)="clearSelectedPatient($event)"
+                  class="text-gray-400 hover:text-gray-600">
+                  <i class="bi bi-x-circle-fill"></i>
+                </button>
+              </div>
+
+              <div *ngIf="patientDropdownOpen()"
+                class="absolute left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-xl max-h-64 overflow-y-auto z-50">
+                <div *ngIf="patientSearchLoading()" class="p-3 text-sm text-gray-500">
+                  Searching patients...
+                </div>
+                <button type="button" *ngFor="let patient of patientResults()" (click)="selectPatient(patient)"
+                  class="w-full px-3 py-2 flex items-center gap-3 text-left hover:bg-gray-50 focus:bg-gray-50">
+                  <div
+                    class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden text-xs font-semibold text-gray-600">
+                    <img *ngIf="patient.avatar" [src]="patient.avatar" alt="Avatar" class="w-full h-full object-cover">
+                    <span *ngIf="!patient.avatar">
+                      {{ getInitials(patient) }}
+                    </span>
+                  </div>
+                  <div>
+                    <p class="text-sm font-semibold text-gray-900">{{ patient.firstName }} {{ patient.lastName }}</p>
+                    <p class="text-xs text-gray-500">{{ patient.email }}</p>
+                    <p class="text-xs text-gray-400" *ngIf="patient.phoneNumber">📞 {{ patient.phoneNumber }}</p>
+                  </div>
+                </button>
+                <div *ngIf="!patientSearchLoading() && patientResults().length === 0" class="p-3 text-sm text-gray-500">
+                  No patients found. Try a different search.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Doctor Selection -->
+          <div class="doctor-search relative">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Doctor *</label>
+            <div class="relative">
+              <div
+                class="flex items-center gap-3 w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white cursor-text"
+                (click)="openDoctorDropdown()">
+                <div
+                  class="w-10 h-10 rounded-full bg-indigo-50 flex items-center justify-center overflow-hidden text-xs font-semibold text-indigo-600">
+                  <ng-container *ngIf="getSelectedDoctor() as selectedDoctor; else noDoctorSelected">
+                    <ng-container *ngIf="selectedDoctor.avatar; else selectedDoctorInitials">
+                      <img [src]="selectedDoctor.avatar" alt="Doctor avatar" class="w-full h-full object-cover">
+                    </ng-container>
+                    <ng-template #selectedDoctorInitials>
+                      {{ getInitials(selectedDoctor, 'DR') }}
+                    </ng-template>
+                  </ng-container>
+                  <ng-template #noDoctorSelected>
+                    {{ getInitials(undefined, 'DR') }}
+                  </ng-template>
+                </div>
+                <input type="text" autocomplete="off" [value]="doctorSearchTerm()"
+                  (input)="onDoctorSearchChange($any($event.target).value)" (focus)="openDoctorDropdown()"
+                  placeholder="Search doctors by name, specialty, email..."
+                  class="flex-1 focus:outline-none border-none text-sm text-gray-900 placeholder-gray-500">
+                <button type="button" *ngIf="newAppointment().doctorId" (click)="clearSelectedDoctor($event)"
+                  class="text-gray-400 hover:text-gray-600">
+                  <i class="bi bi-x-circle-fill"></i>
+                </button>
+              </div>
+
+              <div *ngIf="doctorDropdownOpen()"
+                class="absolute left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-xl max-h-64 overflow-y-auto z-50">
+                <div *ngIf="doctorSearchLoading()" class="p-3 text-sm text-gray-500">
+                  Searching doctors...
+                </div>
+                <button type="button" *ngFor="let doctor of doctorResults()" (click)="selectDoctor(doctor)"
+                  class="w-full px-3 py-2 flex items-center gap-3 text-left hover:bg-gray-50 focus:bg-gray-50">
+                  <div
+                    class="w-10 h-10 rounded-full bg-indigo-50 flex items-center justify-center overflow-hidden text-xs font-semibold text-indigo-600">
+                    <img *ngIf="doctor.avatar" [src]="doctor.avatar" alt="Avatar" class="w-full h-full object-cover">
+                    <span *ngIf="!doctor.avatar">
+                      {{ getInitials(doctor, 'DR') }}
+                    </span>
+                  </div>
+                  <div>
+                    <p class="text-sm font-semibold text-gray-900">Dr. {{ doctor.firstName }} {{ doctor.lastName }}</p>
+                    <p class="text-xs text-gray-500">{{ doctor.specialty || 'General Practitioner' }}</p>
+                    <p class="text-xs text-gray-400">{{ doctor.email }}</p>
+                  </div>
+                </button>
+                <div *ngIf="!doctorSearchLoading() && doctorResults().length === 0" class="p-3 text-sm text-gray-500">
+                  No doctors found. Try refining your search.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Date -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Date *</label>
+            <input type="date" [(ngModel)]="newAppointment().appointmentDate" name="appointmentDate"
+              [min]="getMinDate()" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" required>
+          </div>
+
+          <!-- Time -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Time *</label>
+            <input type="time" [(ngModel)]="newAppointment().appointmentTime" name="appointmentTime" step="900"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" required>
+          </div>
+
+          <!-- Smart Time Suggestions -->
+          <div class="col-span-2">
+            <label class="block text-xs font-semibold text-gray-600 mb-2">Suggested time slots</label>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              <button type="button" *ngFor="let slot of timeSlots()" (click)="onTimeSlotClick(slot)"
+                [ngClass]="isSlotSelected(slot) ? 'bg-green-500 text-white border border-green-500' : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'"
+                class="px-3 py-2 rounded-lg text-sm font-medium transition text-center">
+                {{ formatTime(slot) }}
+              </button>
+            </div>
+          </div>
+
+          <!-- Appointment Type -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Appointment Type</label>
+            <select [(ngModel)]="newAppointment().appointmentType" name="appointmentType"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+              <option *ngFor="let type of appointmentTypes" [value]="type">{{ type }}</option>
+            </select>
+          </div>
+
+          <!-- Status -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+            <select [(ngModel)]="newAppointment().status" name="status"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+              <option value="pending">Pending</option>
+              <option value="confirmed">Confirmed</option>
+            </select>
+          </div>
+
+          <!-- Reason -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Reason</label>
+            <input type="text" [(ngModel)]="newAppointment().reason" name="reason"
+              placeholder="e.g., Annual Checkup, Follow-up"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+          </div>
+
+          <!-- Location -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Location</label>
+            <input type="text" [(ngModel)]="newAppointment().location" name="location"
+              [disabled]="isVideoConsultation()"
+              [placeholder]="isVideoConsultation() ? 'Not required for video consults' : 'e.g., Room 101'"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm disabled:bg-gray-100 disabled:text-gray-500">
+            <p *ngIf="isVideoConsultation()" class="text-xs text-gray-500 mt-1">
+              Location is automatically set to <strong>Virtual Visit</strong> for video consultations.
+            </p>
+          </div>
+
+          <!-- Video Consultation -->
+          <div class="col-span-2">
+            <label class="flex items-center gap-2">
+              <input type="checkbox" name="isVideoConsultation" [checked]="isVideoConsultation()"
+                (change)="handleVideoToggle($any($event.target).checked)"
+                class="rounded border-gray-300 text-green-600 focus:ring-green-500">
+              <span class="text-sm font-medium text-gray-700">Video Consultation (no room needed)</span>
+            </label>
+            <p class="text-xs text-gray-500 mt-1">
+              Enable this to automatically send a virtual meeting link and disable physical room requirements.
+            </p>
+          </div>
+
+          <!-- Notes -->
+          <div class="col-span-2">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+            <textarea [(ngModel)]="newAppointment().notes" name="notes" rows="3" placeholder="Additional notes..."
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"></textarea>
+          </div>
+        </div>
+
+        <div class="modal-footer mt-6 flex justify-end gap-3">
+          <button type="button" (click)="modal.dismiss()" class="secondary-btn">
+            Cancel
+          </button>
+          <button type="submit" class="primary-btn">
+            Create Appointment
+          </button>
+        </div>
+      </form>
+    </div>
+  </ng-template>
 
 </app-admin-shell>
 <!-- Removed stray closing admin shell tag at EOF -->

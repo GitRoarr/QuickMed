@@ -35,6 +35,8 @@ export class AppointmentsComponent implements OnInit {
   appointments = signal<Appointment[]>([]);
   filteredAppointments = signal<Appointment[]>([]);
   isLoading = signal(true);
+  currentTime = signal(new Date());
+  private refreshInterval: any;
 
   // Filters
   searchQuery = signal('');
@@ -72,7 +74,9 @@ export class AppointmentsComponent implements OnInit {
       total: all.length,
       pending: all.filter(a => a.status === AppointmentStatus.PENDING).length,
       confirmed: all.filter(a => a.status === AppointmentStatus.CONFIRMED).length,
-      completed: all.filter(a => a.status === AppointmentStatus.COMPLETED).length
+      completed: all.filter(a => a.status === AppointmentStatus.COMPLETED).length,
+      overdue: all.filter(a => a.status === AppointmentStatus.OVERDUE).length,
+      missed: all.filter(a => a.status === AppointmentStatus.MISSED).length
     };
   });
 
@@ -90,6 +94,17 @@ export class AppointmentsComponent implements OnInit {
     this.loadAppointments();
     this.loadBadgeCounts();
     this.loadHeaderCounts();
+
+    // Refresh every minute to update timers
+    this.refreshInterval = setInterval(() => {
+      this.currentTime.set(new Date());
+    }, 60000);
+  }
+
+  ngOnDestroy(): void {
+    if (this.refreshInterval) {
+      clearInterval(this.refreshInterval);
+    }
   }
 
   loadUserData(): void {
@@ -141,13 +156,35 @@ export class AppointmentsComponent implements OnInit {
 
   updateStatus(id: string | number, status: AppointmentStatus): void {
     const idStr = String(id);
-    this.appointmentService.update(idStr, { status }).subscribe({
+    if (status === AppointmentStatus.CONFIRMED) {
+      this.appointmentService.confirm(idStr).subscribe({
+        next: () => {
+          this.toast.success('Appointment Confirmed', { title: 'Success' });
+          this.loadAppointments();
+        },
+        error: () => this.toast.error('Failed to confirm appointment', { title: 'Error' })
+      });
+    } else {
+      this.appointmentService.update(idStr, { status }).subscribe({
+        next: () => {
+          const msg = 'Appointment Updated';
+          this.toast.success(msg, { title: 'Success' });
+          this.loadAppointments();
+        },
+        error: () => this.toast.error('Action failed', { title: 'Error' })
+      });
+    }
+  }
+
+  cancelAppointment(id: string | number): void {
+    if (!confirm('Are you sure you want to cancel this appointment?')) return;
+
+    this.appointmentService.delete(String(id)).subscribe({
       next: () => {
-        const msg = status === AppointmentStatus.CONFIRMED ? 'Appointment Confirmed' : 'Appointment Completed';
-        this.toast.success(msg, { title: 'Success' });
-        this.loadAppointments(); // Reload to refresh lists/stats
+        this.toast.success('Appointment Cancelled', { title: 'Success' });
+        this.loadAppointments();
       },
-      error: () => this.toast.error('Action failed', { title: 'Error' })
+      error: () => this.toast.error('Failed to cancel appointment', { title: 'Error' })
     });
   }
 
@@ -229,5 +266,40 @@ export class AppointmentsComponent implements OnInit {
     const period = hour >= 12 ? 'PM' : 'AM';
     const displayHour = hour % 12 || 12;
     return `${displayHour}:${m} ${period}`;
+  }
+
+  getRemainingTime(appointment: Appointment): string {
+    const apptDate = new Date(`${appointment.appointmentDate}T${appointment.appointmentTime}`);
+    const now = this.currentTime();
+    const diff = apptDate.getTime() - now.getTime();
+
+    if (diff <= 0) return '';
+
+    const minutes = Math.floor(diff / 60000);
+    const hours = Math.floor(minutes / 60);
+    const remainingMinutes = minutes % 60;
+
+    if (hours > 24) return '';
+    if (hours > 0) return `${hours}h ${remainingMinutes}m`;
+    return `${remainingMinutes}m`;
+  }
+
+  isUpcoming(appointment: Appointment): boolean {
+    if (appointment.status !== AppointmentStatus.CONFIRMED && appointment.status !== AppointmentStatus.PENDING) return false;
+    const apptDate = new Date(`${appointment.appointmentDate}T${appointment.appointmentTime}`);
+    const now = this.currentTime();
+    const diff = apptDate.getTime() - now.getTime();
+    // Within next 24 hours but not passed
+    return diff > 0 && diff < 24 * 60 * 60 * 1000;
+  }
+
+  isOverdue(appointment: Appointment): boolean {
+    if (appointment.status === AppointmentStatus.OVERDUE || appointment.status === AppointmentStatus.MISSED) return true;
+
+    if (appointment.status !== AppointmentStatus.CONFIRMED && appointment.status !== AppointmentStatus.PENDING) return false;
+
+    const apptDate = new Date(`${appointment.appointmentDate}T${appointment.appointmentTime}`);
+    const now = this.currentTime();
+    return apptDate.getTime() < now.getTime();
   }
 }

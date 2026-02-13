@@ -1,10 +1,11 @@
-import { Injectable, signal } from "@angular/core"
+import { Injectable, signal, computed } from "@angular/core"
 
 @Injectable({
   providedIn: "root",
 })
 export class ThemeService {
   isDarkMode = signal<boolean>(false)
+  isDark = computed(() => this.isDarkMode())
 
   constructor() {
     const savedTheme = localStorage.getItem("theme")
@@ -15,7 +16,7 @@ export class ThemeService {
       // also add `dark` on documentElement so :root.dark rules apply
       try {
         document.documentElement.classList.add("dark")
-      } catch (e) {}
+      } catch (e) { }
       // also add `dark` on body so component-level CSS targeting `body.dark` applies
       try {
         document.body.classList.add("dark")
@@ -31,19 +32,19 @@ export class ThemeService {
       document.documentElement.classList.add('dark-theme')
       try {
         document.documentElement.classList.add('dark')
-      } catch (e) {}
+      } catch (e) { }
       try {
         document.body.classList.add('dark')
-      } catch (e) {}
+      } catch (e) { }
       localStorage.setItem('theme', 'dark')
     } else {
       document.documentElement.classList.remove('dark-theme')
       try {
         document.documentElement.classList.remove('dark')
-      } catch (e) {}
+      } catch (e) { }
       try {
         document.body.classList.remove('dark')
-      } catch (e) {}
+      } catch (e) { }
       localStorage.setItem('theme', 'light')
     }
   }
@@ -55,19 +56,19 @@ export class ThemeService {
       document.documentElement.classList.add("dark-theme")
       try {
         document.documentElement.classList.add("dark")
-      } catch (e) {}
+      } catch (e) { }
       try {
         document.body.classList.add("dark")
-      } catch (e) {}
+      } catch (e) { }
       localStorage.setItem("theme", "dark")
     } else {
       document.documentElement.classList.remove("dark-theme")
       try {
         document.documentElement.classList.remove("dark")
-      } catch (e) {}
+      } catch (e) { }
       try {
         document.body.classList.remove("dark")
-      } catch (e) {}
+      } catch (e) { }
       localStorage.setItem("theme", "light")
     }
   }

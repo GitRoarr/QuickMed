@@ -1,0 +1,188 @@
+<div class="receptionist-layout" [class.dark]="themeService.isDark()">
+    <app-header></app-header>
+    <div class="body">
+        <app-sidebar [title]="'QuickMed'" [menuItems]="menuItems" [secondaryItems]="secondaryItems"></app-sidebar>
+
+        <main class="panel">
+            <header class="settings-header">
+                <div class="title-wrap">
+                    <h1>Account Settings</h1>
+                    <p>Manage your profile, security, and interface preferences.</p>
+                </div>
+            </header>
+
+            <div class="settings-container glass-card">
+                <!-- Sidebar Tabs -->
+                <aside class="settings-nav">
+                    <button [class.active]="activeTab() === 'profile'" (click)="activeTab.set('profile')">
+                        <i class="bi bi-person-circle"></i>
+                        <span>Profile Details</span>
+                    </button>
+                    <button [class.active]="activeTab() === 'security'" (click)="activeTab.set('security')">
+                        <i class="bi bi-shield-lock"></i>
+                        <span>Security</span>
+                    </button>
+                    <button [class.active]="activeTab() === 'appearance'" (click)="activeTab.set('appearance')">
+                        <i class="bi bi-palette"></i>
+                        <span>Appearance</span>
+                    </button>
+                </aside>
+
+                <!-- Main Content Area -->
+                <div class="settings-content">
+                    <!-- Profile Section -->
+                    <section *ngIf="activeTab() === 'profile'" class="animate-in">
+                        <div class="section-title">
+                            <h3>Profile Information</h3>
+                            <p>Update your personal details and contact info.</p>
+                        </div>
+
+                        <div class="avatar-upload-box">
+                            <div class="current-avatar">
+                                <img *ngIf="authService.currentUser()?.avatar" [src]="authService.currentUser()?.avatar"
+                                    alt="Avatar">
+                                <div *ngIf="!authService.currentUser()?.avatar" class="avatar-placeholder">
+                                    {{ authService.currentUser()?.firstName?.[0] }}{{
+                                    authService.currentUser()?.lastName?.[0] }}
+                                </div>
+                            </div>
+                            <div class="upload-controls">
+                                <label for="avatar-input" class="upload-btn">
+                                    <i class="bi bi-camera"></i>
+                                    Change Photo
+                                </label>
+                                <input id="avatar-input" type="file" (change)="onFileSelected($event)" hidden
+                                    accept="image/*">
+                                <p class="hint">JPG, GIF or PNG. Max size of 2MB.</p>
+                            </div>
+                        </div>
+
+                        <form [formGroup]="profileForm" (ngSubmit)="saveProfile()" class="settings-form">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>First Name</label>
+                                    <input type="text" formControlName="firstName" placeholder="e.g. John">
+                                </div>
+                                <div class="form-group">
+                                    <label>Last Name</label>
+                                    <input type="text" formControlName="lastName" placeholder="e.g. Doe">
+                                </div>
+                                <div class="form-group full-width">
+                                    <label>Email Address</label>
+                                    <div class="input-with-icon">
+                                        <i class="bi bi-envelope"></i>
+                                        <input type="email" formControlName="email">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Phone Number</label>
+                                    <input type="tel" formControlName="phoneNumber" placeholder="+1 (555) 000-0000">
+                                </div>
+                                <div class="form-group">
+                                    <label>Department</label>
+                                    <input type="text" formControlName="department" disabled>
+                                </div>
+                            </div>
+
+                            <div class="form-actions">
+                                <button type="submit" class="save-btn" [disabled]="isSaving() || profileForm.invalid">
+                                    <i class="bi" [class.bi-check2]="!isSaving()" [class.bi-arrow-repeat]="isSaving()"
+                                        [class.spin]="isSaving()"></i>
+                                    {{ isSaving() ? 'Saving Changes...' : 'Save Profile' }}
+                                </button>
+                            </div>
+                        </form>
+                    </section>
+
+                    <!-- Security Section -->
+                    <section *ngIf="activeTab() === 'security'" class="animate-in">
+                        <div class="section-title">
+                            <h3>Security Settings</h3>
+                            <p>Manage your password and account protection.</p>
+                        </div>
+
+                        <form [formGroup]="passwordForm" (ngSubmit)="changePassword()" class="settings-form">
+                            <div class="form-group full-width">
+                                <label>Current Password</label>
+                                <input type="password" formControlName="currentPassword" placeholder="••••••••">
+                            </div>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>New Password</label>
+                                    <input type="password" formControlName="newPassword"
+                                        placeholder="Minimum 6 characters">
+                                </div>
+                                <div class="form-group">
+                                    <label>Confirm New Password</label>
+                                    <input type="password" formControlName="confirmPassword"
+                                        placeholder="Re-type password">
+                                </div>
+                            </div>
+
+                            <div class="password-alerts"
+                                *ngIf="passwordForm.errors?.['notSame'] && passwordForm.get('confirmPassword')?.touched">
+                                <p class="error-msg"><i class="bi bi-exclamation-triangle"></i> Passwords do not match
+                                </p>
+                            </div>
+
+                            <div class="form-actions">
+                                <button type="submit" class="save-btn" [disabled]="isSaving() || passwordForm.invalid">
+                                    {{ isSaving() ? 'Updating Password...' : 'Update Password' }}
+                                </button>
+                            </div>
+                        </form>
+
+                        <div class="security-card warning">
+                            <div class="icon-wrap">
+                                <i class="bi bi-shield-lock-fill"></i>
+                            </div>
+                            <div class="text">
+                                <h4>Two-Factor Authentication</h4>
+                                <p>Add an extra layer of security to your account. (Coming Soon)</p>
+                            </div>
+                            <button class="action-link" disabled>Enable 2FA</button>
+                        </div>
+                    </section>
+
+                    <!-- Appearance Section -->
+                    <section *ngIf="activeTab() === 'appearance'" class="animate-in">
+                        <div class="section-title">
+                            <h3>Display Preferences</h3>
+                            <p>Customize how QuickMed looks on your device.</p>
+                        </div>
+
+                        <div class="theme-selector">
+                            <div class="theme-option" [class.active]="!themeService.isDark()"
+                                (click)="themeService.setTheme('light')">
+                                <div class="preview light">
+                                    <div class="circles"><span></span><span></span><span></span></div>
+                                </div>
+                                <span class="label">Light Mode</span>
+                            </div>
+                            <div class="theme-option" [class.active]="themeService.isDark()"
+                                (click)="themeService.setTheme('dark')">
+                                <div class="preview dark">
+                                    <div class="circles"><span></span><span></span><span></span></div>
+                                </div>
+                                <span class="label">Dark Mode</span>
+                            </div>
+                        </div>
+
+                        <div class="appearance-toggles">
+                            <div class="toggle-row">
+                                <div class="info">
+                                    <h4>Compact Mode</h4>
+                                    <p>Reduce whitespace to show more content.</p>
+                                </div>
+                                <div class="toggle-switch">
+                                    <input type="checkbox" id="compact-toggle">
+                                    <label for="compact-toggle"></label>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>

@@ -56,6 +56,10 @@ export class AuthService {
     return this.http.post<{ message: string }>(`${this.API_URL}/forgot-password`, { email });
   }
 
+  resetPassword(email: string, token: string, newPassword: string): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${this.API_URL}/reset-password`, { email, token, newPassword });
+  }
+
   refreshProfile(): Observable<User | null> {
     const user = this.currentUser();
     if (!user?.id) return of(null);

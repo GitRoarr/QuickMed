@@ -26,7 +26,7 @@ export class NotificationIntegrationService {
 
   async createAppointmentNotification(
     appointment: Appointment,
-    type: 'created' | 'confirmed' | 'cancelled' | 'rescheduled' | 'reminder_24h' | 'reminder_1h' | 'overdue' | 'missed',
+    type: 'created' | 'confirmed' | 'cancelled' | 'rescheduled' | 'reminder_24h' | 'reminder_1h' | 'reminder_30m' | 'overdue' | 'missed',
     patient?: User,
     doctor?: User,
   ): Promise<void> {
@@ -39,7 +39,7 @@ export class NotificationIntegrationService {
         appointmentId: appointment.id,
         appointmentDate: appointment.appointmentDate,
         appointmentTime: appointment.appointmentTime,
-        reminderOffsetMinutes: type === 'reminder_24h' ? 1440 : type === 'reminder_1h' ? 60 : undefined,
+        reminderOffsetMinutes: type === 'reminder_24h' ? 1440 : type === 'reminder_1h' ? 60 : type === 'reminder_30m' ? 30 : undefined,
         channel: appointment.isVideoConsultation || appointment.appointmentType === AppointmentType.VIDEO_CALL ? 'video' : 'in_person',
         chatEnabled: appointment.isVideoConsultation || appointment.appointmentType === AppointmentType.VIDEO_CALL,
         doctorName: doctor ? `${doctor.firstName} ${doctor.lastName}` : 'Unknown Doctor',
@@ -80,6 +80,11 @@ export class NotificationIntegrationService {
       case 'reminder_1h':
         notificationData.title = 'Appointment in 1 hour';
         notificationData.message = `Reminder: Your ${channelLabel} starts at ${appointment.appointmentTime}.${chatNote}`;
+        notificationData.priority = NotificationPriority.HIGH;
+        break;
+      case 'reminder_30m':
+        notificationData.title = 'Upcoming Appointment (30 min)';
+        notificationData.message = `Upcoming ${channelLabel} with ${patient?.firstName} ${patient?.lastName} at ${appointment.appointmentTime}`;
         notificationData.priority = NotificationPriority.HIGH;
         break;
       case 'overdue':
@@ -240,6 +245,7 @@ export class NotificationIntegrationService {
     const windows = [
       { type: 'reminder_24h' as const, startOffset: 1440 - 10, endOffset: 1440 + 10 },
       { type: 'reminder_1h' as const, startOffset: 60 - 10, endOffset: 60 + 10 },
+      { type: 'reminder_30m' as const, startOffset: 30 - 5, endOffset: 30 + 5 },
     ];
 
     for (const window of windows) {

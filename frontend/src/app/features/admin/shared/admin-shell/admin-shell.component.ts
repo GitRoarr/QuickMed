@@ -12,7 +12,7 @@ import { HeaderComponent } from '../header/header.component';
   standalone: true,
   imports: [CommonModule, RouterModule, SidebarComponent, HeaderComponent],
   templateUrl: './admin-shell.component.html',
-  styleUrls: ['./admin-shell.component.css']
+  styleUrls: ['./admin-shell.component.scss']
 })
 export class AdminShellComponent implements OnInit {
   private router = inject(Router);

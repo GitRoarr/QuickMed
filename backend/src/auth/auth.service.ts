@@ -13,10 +13,10 @@ import { EmailService } from "../common/services/email.service";
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly usersService: UsersService, 
+    private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
     private readonly emailService: EmailService
-  ) {}
+  ) { }
 
   async register(registerDto: RegisterDto): Promise<{ user: Partial<User>; token: string }> {
     const { email, password, firstName, lastName, phoneNumber } = registerDto;
@@ -38,26 +38,26 @@ export class AuthService {
 
   async login(loginDto: LoginDto): Promise<{ user: Partial<User>; token: string }> {
     const { email, password } = loginDto;
-    
+
     const user = await this.usersService.findByEmail(email);
     if (!user) {
       console.log(`[Auth] Login failed: User not found with email: ${email}`);
       throw new UnauthorizedException("Invalid email or password");
     }
-    
+
     console.log(`[Auth] User found: ${user.email}`);
     console.log(`[Auth] User role: ${user.role}`);
     console.log(`[Auth] Password exists: ${!!user.password}`);
-    
+
     if (!user.password) {
       console.log('[Auth] No password set for user');
       throw new UnauthorizedException("Invalid email or password");
     }
-    
+
     try {
       // Check if password is a valid bcrypt hash (starts with $2a$, $2b$, or $2y$)
       const isValidBcryptHash = /^\$2[ayb]\$.{56}$/.test(user.password);
-      
+
       if (!isValidBcryptHash) {
         console.log(`[Auth] Password is not a valid bcrypt hash. User may need to reset password.`);
         throw new UnauthorizedException("Invalid email or password. Please contact administrator to reset your password.");
@@ -65,7 +65,7 @@ export class AuthService {
 
       const isPasswordValid = await bcrypt.compare(password, user.password);
       console.log(`[Auth] Password validation ${isPasswordValid ? 'succeeded' : 'failed'}`);
-      
+
       if (!isPasswordValid) {
         throw new UnauthorizedException("Invalid email or password");
       }
@@ -76,14 +76,14 @@ export class AuthService {
       console.log(`[Auth] Password comparison error:`, error.message);
       throw new UnauthorizedException("Invalid email or password");
     }
-    
+
     const token = this.generateToken(user);
     const { password: _, ...userWithoutPassword } = user;
-    
+
     console.log(`[Auth] Login successful for user: ${user.email}`);
-    return { 
-      user: userWithoutPassword, 
-      token 
+    return {
+      user: userWithoutPassword,
+      token
     };
   }
 
@@ -95,7 +95,7 @@ export class AuthService {
 
   async forgotPassword(forgotPasswordDto: ForgotPasswordDto): Promise<{ message: string }> {
     const { email } = forgotPasswordDto;
-    
+
     const user = await this.usersService.findByEmail(email);
     if (!user) {
       // Don't reveal if user exists or not for security
@@ -141,8 +141,33 @@ export class AuthService {
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
     await this.usersService.update(user.id, { password: hashedPassword, mustChangePassword: false } as any);
-    
+
     return { message: `Password reset successfully for ${email}. New password: ${newPassword}` };
+  }
+
+  async resetPassword(email: string, token: string, newPassword: string): Promise<{ message: string }> {
+    const user = await this.usersService.findByEmail(email);
+
+    // Security: Check if user exists and token matches
+    if (!user || user.inviteToken !== token) {
+      throw new UnauthorizedException("Invalid or expired reset token");
+    }
+
+    // Check expiry
+    if (!user.inviteExpiresAt || new Date() > user.inviteExpiresAt) {
+      throw new UnauthorizedException("Reset token has expired");
+    }
+
+    // Hash and update password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    await this.usersService.update(user.id, {
+      password: hashedPassword,
+      inviteToken: null,
+      inviteExpiresAt: null,
+      mustChangePassword: false,
+    } as any);
+
+    return { message: "Password has been successfully reset." };
   }
 
   private generateToken(user: User): string {

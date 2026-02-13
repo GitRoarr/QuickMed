@@ -1,11 +1,13 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { ReceptionistService } from '@app/core/services/receptionist.service';
 import { AlertMessageComponent } from '@app/shared/components/alert-message/alert-message.component';
 import { HeaderComponent } from '@app/features/admin/shared/header';
 import { SidebarComponent } from '@app/features/admin/shared/sidebar';
 import { AuthService } from '@core/services/auth.service';
+import { ThemeService } from '@core/services/theme.service';
 
 @Component({
   selector: 'app-receptionist-patient-form',
@@ -16,6 +18,8 @@ import { AuthService } from '@core/services/auth.service';
 })
 export class PatientFormComponent implements OnInit {
   private readonly receptionistService = inject(ReceptionistService);
+  private readonly router = inject(Router);
+  public readonly themeService = inject(ThemeService);
   private readonly authService = inject(AuthService);
 
   menuItems = [
@@ -37,7 +41,7 @@ export class PatientFormComponent implements OnInit {
   isSaving = signal(false);
   message = signal<{ type: 'success' | 'error' | 'info'; text: string } | null>(null);
 
-  ngOnInit(): void {}
+  ngOnInit(): void { }
 
   save(): void {
     const payload = { ...this.model() };
@@ -51,6 +55,8 @@ export class PatientFormComponent implements OnInit {
         this.isSaving.set(false);
         this.message.set({ type: 'success', text: 'Patient created. Temporary password was sent.' });
         this.model.set({ firstName: '', lastName: '', email: '', phoneNumber: '', dateOfBirth: '', medicalHistory: '' });
+        // Optionally redirect after a short delay
+        setTimeout(() => this.router.navigate(['/receptionist/dashboard']), 1500);
       },
       error: (err) => {
         this.isSaving.set(false);

@@ -1,4 +1,4 @@
-import { Controller, UseGuards, Post, Body, Get, Param, Patch, Query, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, UseGuards, Post, Body, Get, Param, Patch, Query, HttpCode, HttpStatus, Delete } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -12,10 +12,11 @@ import { UsersService } from '../users/users.service';
 import { UpdateUserDto } from '../users/dto/update-user.dto';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { User } from '../users/entities/user.entity';
-import { CreateReceptionistInviteDto } from './dto/create-receptionist-invite.dto';
+import { CreateReceptionistInviteDto, BulkInviteDto, ResendInviteDto, RevokeInviteDto } from './dto/create-receptionist-invite.dto';
 import { Public } from '../auth/decorators/public.decorator';
 import { SetReceptionistPasswordDto } from './dto/set-receptionist-password.dto';
 import { SendReceptionistMessageDto } from './dto/send-receptionist-message.dto';
+import { InviteStatus } from './entities/receptionist-invitation.entity';
 
 @Controller('receptionist')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -25,14 +26,100 @@ export class ReceptionistController {
     private readonly appointmentsService: AppointmentsService,
     private readonly usersService: UsersService,
     private readonly adminService: AdminService,
-  ) {}
+  ) { }
+
+  // ============================================================
+  // INVITATION MANAGEMENT ENDPOINTS
+  // ============================================================
+
+  /** Create a new receptionist invitation */
+  @Post('invite')
+  @Roles(UserRole.ADMIN)
+  @HttpCode(HttpStatus.CREATED)
+  async createReceptionistInvite(
+    @Body() dto: CreateReceptionistInviteDto,
+    @CurrentUser() user: User,
+  ) {
+    return this.receptionistService.createReceptionistInvite(dto, user?.id);
+  }
+
+  /** Resend an existing invitation */
+  @Post('invite/resend')
+  @Roles(UserRole.ADMIN)
+  @HttpCode(HttpStatus.OK)
+  async resendInvite(
+    @Body() dto: ResendInviteDto,
+    @CurrentUser() user: User,
+  ) {
+    return this.receptionistService.resendInvite(dto, user?.id);
+  }
+
+  /** Revoke a pending invitation */
+  @Post('invite/revoke')
+  @Roles(UserRole.ADMIN)
+  @HttpCode(HttpStatus.OK)
+  async revokeInvite(
+    @Body() dto: RevokeInviteDto,
+    @CurrentUser() user: User,
+  ) {
+    return this.receptionistService.revokeInvite(dto, user?.id);
+  }
+
+  /** Bulk invite receptionists */
+  @Post('invite/bulk')
+  @Roles(UserRole.ADMIN)
+  @HttpCode(HttpStatus.CREATED)
+  async bulkInvite(
+    @Body() dto: BulkInviteDto,
+    @CurrentUser() user: User,
+  ) {
+    return this.receptionistService.bulkInvite(dto, user?.id);
+  }
+
+  /** List invitations with filtering & pagination */
+  @Get('invitations')
+  @Roles(UserRole.ADMIN)
+  async listInvitations(
+    @Query('status') status?: InviteStatus,
+    @Query('search') search?: string,
+    @Query('page') page = 1,
+    @Query('limit') limit = 20,
+    @Query('sortBy') sortBy?: string,
+    @Query('sortOrder') sortOrder?: 'ASC' | 'DESC',
+  ) {
+    return this.receptionistService.listInvitations({
+      status,
+      search,
+      page: Number(page),
+      limit: Number(limit),
+      sortBy,
+      sortOrder,
+    });
+  }
+
+  /** Get invitation statistics */
+  @Get('invitations/stats')
+  @Roles(UserRole.ADMIN)
+  async getInvitationStats() {
+    return this.receptionistService.getInvitationStats();
+  }
+
+  /** Set password — public endpoint for invited receptionists */
+  @Post('set-password')
+  @Public()
+  @HttpCode(HttpStatus.OK)
+  async setReceptionistPassword(@Body() dto: SetReceptionistPasswordDto) {
+    return this.receptionistService.setReceptionistPassword(dto.uid, dto.token, dto.password);
+  }
+
+  // ============================================================
+  // PATIENT MANAGEMENT
+  // ============================================================
 
   @Post('patients')
   @Roles(UserRole.RECEPTIONIST, UserRole.ADMIN)
   async createPatient(@Body() dto: CreateUserDto) {
-    // force role to PATIENT regardless
     dto.role = UserRole.PATIENT;
-    // reuse AdminService to ensure temp-password + notifications behavior
     return this.adminService.createUser(dto as any);
   }
 
@@ -47,6 +134,10 @@ export class ReceptionistController {
   async listPatients(@Query('search') search?: string, @Query('page') page = 1, @Query('limit') limit = 20) {
     return (this.usersService as any).findPatients();
   }
+
+  // ============================================================
+  // APPOINTMENT MANAGEMENT
+  // ============================================================
 
   @Post('appointments')
   @Roles(UserRole.RECEPTIONIST, UserRole.ADMIN)
@@ -121,6 +212,10 @@ export class ReceptionistController {
     return this.receptionistService.listDoctorAvailability(date);
   }
 
+  // ============================================================
+  // REPORTS
+  // ============================================================
+
   @Get('reports/daily')
   @Roles(UserRole.RECEPTIONIST, UserRole.ADMIN)
   async getDailyReport(@Query('date') date?: string) {
@@ -162,6 +257,10 @@ export class ReceptionistController {
     return this.receptionistService.getNoShowReport({ startDate, endDate });
   }
 
+  // ============================================================
+  // MESSAGING
+  // ============================================================
+
   @Get('messages/threads')
   @Roles(UserRole.RECEPTIONIST)
   async getMessageThreads(@CurrentUser() user: User) {
@@ -178,21 +277,5 @@ export class ReceptionistController {
   @Roles(UserRole.RECEPTIONIST)
   async sendMessage(@CurrentUser() user: User, @Body() dto: SendReceptionistMessageDto) {
     return this.receptionistService.sendReceptionistMessage(user.id, dto);
-  }
-
-  // Invitation endpoints (public - no auth required for setting password)
-  @Post('invite')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN)
-  @HttpCode(HttpStatus.CREATED)
-  async createReceptionistInvite(@Body() dto: CreateReceptionistInviteDto) {
-    return this.receptionistService.createReceptionistInvite(dto);
-  }
-
-  @Post('set-password')
-  @Public()
-  @HttpCode(HttpStatus.OK)
-  async setReceptionistPassword(@Body() dto: SetReceptionistPasswordDto) {
-    return this.receptionistService.setReceptionistPassword(dto.uid, dto.token, dto.password);
   }
 }

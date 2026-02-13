@@ -7,56 +7,88 @@
         </div>
         <div class="brand-text">
           <p class="brand-title">QuickMed</p>
-          <p class="brand-subtitle">Admin Portal</p>
+          <p class="brand-subtitle">Administrator</p>
         </div>
       </div>
     </div>
 
-    <nav class="admin-shell__nav" [attr.aria-hidden]="!sidebarOpen() && mobile()">
-      <a
-        *ngFor="let item of menuItems"
-        class="admin-shell__nav-item"
-        [routerLink]="item.route"
-        routerLinkActive="active"
-        [routerLinkActiveOptions]="{ exact: item.exact !== false }"
-        (click)="closeSidebar()"
-      >
-        <ng-container *ngIf="item.iconImgLight || item.iconImgDark; else iconClass">
-          <img class="nav-icon-img" [src]="themeService.isDarkMode() ? item.iconImgDark : item.iconImgLight" [alt]="item.label + ' icon'" />
-        </ng-container>
-        <ng-template #iconClass>
-          <i class="bi" [ngClass]="item.icon"></i>
-        </ng-template>
-        <span>{{ item.label }}</span>
+    <!-- Navigation -->
+    <nav class="admin-shell__nav">
+      <div class="nav-section-label">Main Menu</div>
+      <a *ngFor="let item of menuItems" class="admin-shell__nav-item" [routerLink]="item.route"
+        routerLinkActive="active" [routerLinkActiveOptions]="{ exact: item.exact !== false }" (click)="closeSidebar()">
+        <div class="nav-item-content">
+          <ng-container *ngIf="item.iconImgLight || item.iconImgDark; else iconClass">
+            <img class="nav-icon-img" [src]="themeService.isDarkMode() ? item.iconImgDark : item.iconImgLight"
+              [alt]="item.label + ' icon'" />
+          </ng-container>
+          <ng-template #iconClass>
+            <i class="bi" [ngClass]="item.icon"></i>
+          </ng-template>
+          <span>{{ item.label }}</span>
+        </div>
+        <div class="active-indicator"></div>
       </a>
     </nav>
 
-    <div class="admin-shell__profile" *ngIf="currentUser() as user">
-      <div class="avatar">
-        <span *ngIf="!user.avatar">
-          {{ (user.firstName?.charAt(0) || 'A') + (user.lastName?.charAt(0) || 'D') }}
-        </span>
-        <img *ngIf="user.avatar" [src]="user.avatar" alt="{{ user.firstName }}" />
+    <!-- Bottom Actions -->
+    <div class="admin-shell__footer">
+      <div class="theme-toggle-box" (click)="toggleTheme()">
+        <div class="toggle-btn" [class.dark]="themeService.isDarkMode()">
+          <i class="bi" [class.bi-sun-fill]="!themeService.isDarkMode()"
+            [class.bi-moon-stars-fill]="themeService.isDarkMode()"></i>
+        </div>
+        <span>{{ themeService.isDarkMode() ? 'Dark Mode' : 'Light Mode' }}</span>
       </div>
-      <div>
-        <p class="profile-name">{{ user.firstName }} {{ user.lastName }}</p>
-        <p class="profile-role">Administrator</p>
+
+      <div class="profile-card" *ngIf="currentUser() as user">
+        <div class="profile-info">
+          <div class="avatar">
+            <span *ngIf="!user.avatar">
+              {{ (user.firstName?.charAt(0) || 'A') + (user.lastName?.charAt(0) || 'D') }}
+            </span>
+            <img *ngIf="user.avatar" [src]="user.avatar" alt="{{ user.firstName }}" />
+          </div>
+          <div class="details">
+            <p class="name">{{ user.firstName }} {{ user.lastName }}</p>
+            <p class="role">Admin</p>
+          </div>
+        </div>
+        <button class="logout-btn" (click)="logout(); closeSidebar()" title="Logout">
+          <i class="bi bi-box-arrow-right"></i>
+        </button>
       </div>
     </div>
-
-    <button class="admin-shell__logout" type="button" (click)="logout(); closeSidebar()">
-      <i class="bi bi-box-arrow-right"></i>
-      Logout
-    </button>
   </aside>
 
+  <!-- Content Overlay for Mobile -->
+  <div class="sidebar-overlay" *ngIf="sidebarOpen() && mobile()" (click)="closeSidebar()"></div>
+
   <main class="admin-shell__content">
-    <div class="admin-shell__topbar">
-      <app-header 
-        [searchPlaceholder]="searchPlaceholder"
-        [unreadNotifications]="unreadNotifications()"
-      ></app-header>
+    <header class="admin-shell__header">
+      <button class="menu-trigger" (click)="toggleSidebar()" *ngIf="mobile()">
+        <i class="bi bi-list"></i>
+      </button>
+
+      <div class="top-search" [attr.data-placeholder]="searchPlaceholder">
+        <i class="bi bi-search"></i>
+        <input type="text" [placeholder]="searchPlaceholder">
+      </div>
+
+      <div class="header-actions">
+        <div class="action-btn notification-btn">
+          <i class="bi bi-bell"></i>
+          <span class="badge" *ngIf="unreadNotifications() > 0">{{ unreadNotifications() }}</span>
+        </div>
+        <div class="action-btn theme-switch" (click)="toggleTheme()">
+          <i class="bi" [class.bi-sun]="!themeService.isDarkMode()"
+            [class.bi-moon-stars]="themeService.isDarkMode()"></i>
+        </div>
+      </div>
+    </header>
+
+    <div class="admin-shell__body">
+      <ng-content></ng-content>
     </div>
-    <ng-content></ng-content>
   </main>
 </div>

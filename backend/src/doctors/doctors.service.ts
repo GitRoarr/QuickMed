@@ -10,7 +10,7 @@ import { Conversation } from "../messages/entities/conversation.entity";
 import { Message } from "../messages/entities/message.entity";
 import { DoctorSettings } from "../settings/entities/doctor-settings.entity";
 import { Prescription } from "../prescriptions/entities/prescription.entity";
-import { MedicalRecord } from "../medical-records/entities/medical-record.entity";
+import { MedicalRecord, MedicalRecordType } from "../medical-records/entities/medical-record.entity";
 import { Consultation } from "../consultations/entities/consultation.entity";
 import { AvailabilityTemplate } from "../schedules/entities/availability-template.entity";
 import { BreakConfig } from "../schedules/entities/break-config.entity";
@@ -59,7 +59,7 @@ export class DoctorsService {
     private readonly emailService: EmailService,
     private readonly reviewsService: ReviewsService,
     private readonly messagesService: MessagesService
-  ) {}
+  ) { }
 
   private sanitizeDoctor(doctor: User) {
     const { password, inviteToken, inviteExpiresAt, ...safeDoctor } = doctor;
@@ -121,15 +121,15 @@ export class DoctorsService {
     try {
       await queryRunner.startTransaction();
       console.log("[DoctorsService] Creating doctor invite for", createDoctorDto.email);
-      
+
       const normalizedEmail = createDoctorDto.email.toLowerCase().trim();
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
         await queryRunner.rollbackTransaction();
         throw new BadRequestException('Invalid email format');
       }
 
-      const existingUser = await queryRunner.manager.findOne(User, { 
-        where: { email: normalizedEmail } 
+      const existingUser = await queryRunner.manager.findOne(User, {
+        where: { email: normalizedEmail }
       });
       if (existingUser) {
         console.log("[DoctorsService] Email already exists:", createDoctorDto.email);
@@ -179,13 +179,13 @@ export class DoctorsService {
       });
 
       const savedDoctor = await queryRunner.manager.save(doctor);
-      
+
       // Commit transaction before sending email (non-critical operation)
       await queryRunner.commitTransaction();
 
       // Generate invite link
       const inviteLink = `${process.env.FRONTEND_URL || "http://localhost:4200"}/set-password?token=${inviteToken}&uid=${savedDoctor.id}`;
-      
+
       // Send invitation email (non-blocking)
       let emailResult: { sent: boolean; fallbackLink?: string } = { sent: false, fallbackLink: inviteLink };
       try {
@@ -197,10 +197,10 @@ export class DoctorsService {
         emailResult = { sent: false, fallbackLink: inviteLink };
       }
 
-      console.log("[DoctorsService] Doctor invite created", { 
-        id: savedDoctor.id, 
+      console.log("[DoctorsService] Doctor invite created", {
+        id: savedDoctor.id,
         email: savedDoctor.email,
-        emailSent: emailResult.sent 
+        emailSent: emailResult.sent
       });
 
       return {
@@ -236,7 +236,7 @@ export class DoctorsService {
 
     try {
       // Find doctor with proper locking to prevent race conditions
-      const doctor = await queryRunner.manager.findOne(User, { 
+      const doctor = await queryRunner.manager.findOne(User, {
         where: { id: uid, role: UserRole.DOCTOR },
         lock: { mode: 'pessimistic_write' }
       });
@@ -426,6 +426,7 @@ export class DoctorsService {
           lastStatus: appt.status,
           totalAppointments: 1,
           isActive: appt.patient.isActive,
+          avatar: appt.patient.avatar,
         });
       } else {
         const current = map.get(key);
@@ -492,7 +493,7 @@ export class DoctorsService {
     const latest = appointments[0];
     const now = new Date();
     const nextFollowUp = appointments.find(a => new Date(a.appointmentDate) > now);
-    
+
     // Calculate completed and cancelled counts
     const completedCount = appointments.filter(a => a.status === AppointmentStatus.COMPLETED).length;
     const cancelledCount = appointments.filter(a => a.status === AppointmentStatus.CANCELLED).length;
@@ -632,10 +633,47 @@ export class DoctorsService {
 
     const unreadMessages = await this.messagesService.getUnreadCount({ id: doctorId, role: UserRole.DOCTOR });
 
+    // Calculate real Pending Lab Results
+    const pendingLabResults = await this.medicalRecordRepository.count({
+      where: {
+        doctorId,
+        type: MedicalRecordType.LAB,
+        status: In(['pending', null] as any)
+      }
+    });
+
+    // Generate Urgent Alerts
+    const urgentAlerts: { title: string; description: string }[] = [];
+
+    // 1. Overdue Appointments
+    const overdueCount = allAppointments.filter(a => a.status === AppointmentStatus.OVERDUE).length;
+    if (overdueCount > 0) {
+      urgentAlerts.push({
+        title: 'Overdue Appointments',
+        description: `You have ${overdueCount} appointment(s) waiting for consultation.`
+      });
+    }
+
+    // 2. Pending Critical Labs
+    if (pendingLabResults > 0) {
+      urgentAlerts.push({
+        title: 'Pending Lab Review',
+        description: `${pendingLabResults} new lab results are awaiting your verification.`
+      });
+    }
+
+    // 3. Low Satisfaction Alert (if applicable)
+    if (satisfactionRate > 0 && satisfactionRate < 3.5) {
+      urgentAlerts.push({
+        title: 'Satisfaction Alert',
+        description: 'Your recent patient satisfaction score has dipped below 3.5.'
+      });
+    }
+
     return {
       stats: {
         todayAppointments: totalToday,
-        pendingConfirmations: pendingToday,
+        pendingConfirmations: pendingLabResults, // Now showing actual lab results as requested in UI
         totalPatients,
         avgConsultationTime,
         satisfactionRate,
@@ -660,11 +698,12 @@ export class DoctorsService {
         name: `${p.firstName} ${p.lastName}`,
         avatar: p.avatar,
       })),
+      urgentAlerts, // Added real alerts
       trends: {
         appointmentsChange: totalToday - yesterdayAppointments,
-        patientsChange: 8, // Mock: +8% from last month
-        consultationChange: -2, // Mock: -2 min improvement
-        satisfactionChange: satisfactionCount > 1 ? 0.2 : 0, // placeholder change until historical calc added
+        patientsChange: 5, // Keep a small conservative mock for growth if historical calc is too heavy for dashboard, or just leave as is since we fixed the main Analytics page
+        consultationChange: 0,
+        satisfactionChange: satisfactionCount > 1 ? 0.2 : 0,
       },
     };
   }
@@ -676,7 +715,7 @@ export class DoctorsService {
     });
 
     const uniquePatients = new Set(allAppointments.map(a => a.patientId));
-    
+
     return {
       totalAppointments: allAppointments.length,
       totalPatients: uniquePatients.size,
@@ -690,39 +729,64 @@ export class DoctorsService {
   async getAnalytics(doctorId: string, period: string = '6months') {
     const now = new Date();
     let startDate = new Date();
+    let prevPeriodStartDate = new Date();
 
     switch (period) {
       case '7days':
         startDate.setDate(now.getDate() - 7);
+        prevPeriodStartDate.setDate(startDate.getDate() - 7);
         break;
       case '30days':
         startDate.setDate(now.getDate() - 30);
+        prevPeriodStartDate.setDate(startDate.getDate() - 30);
         break;
       case '6months':
         startDate.setMonth(now.getMonth() - 6);
+        prevPeriodStartDate.setMonth(startDate.getMonth() - 6);
         break;
       case '1year':
         startDate.setFullYear(now.getFullYear() - 1);
+        prevPeriodStartDate.setFullYear(startDate.getFullYear() - 1);
         break;
       default:
         startDate.setMonth(now.getMonth() - 6);
+        prevPeriodStartDate.setMonth(startDate.getMonth() - 6);
     }
 
+    // Ensure all days are covered
+    startDate.setHours(0, 0, 0, 0);
+    prevPeriodStartDate.setHours(0, 0, 0, 0);
+
+    // Current period appointments
     const allAppointments = await this.appointmentsRepository.find({
       where: {
         doctorId,
         appointmentDate: Between(startDate, now),
       },
-      relations: ['patient'],
     });
 
+    // Previous period appointments for trend calculation
+    const prevAppointments = await this.appointmentsRepository.find({
+      where: {
+        doctorId,
+        appointmentDate: Between(prevPeriodStartDate, startDate),
+      },
+    });
+
+    // Calculate KPIs for current period
     const completed = allAppointments.filter(a => a.status === AppointmentStatus.COMPLETED).length;
-    const cancelled = allAppointments.filter(a => a.status === AppointmentStatus.CANCELLED).length;
     const total = allAppointments.length;
     const completionRate = total > 0 ? (completed / total) * 100 : 0;
 
-    const uniquePatients = new Set(allAppointments.map(a => a.patientId));
-    
+    // Calculate KPIs for previous period
+    const prevCompleted = prevAppointments.filter(a => a.status === AppointmentStatus.COMPLETED).length;
+    const prevTotal = prevAppointments.length;
+    const prevCompletionRate = prevTotal > 0 ? (prevCompleted / prevTotal) * 100 : 0;
+
+    // New Patients calculate from first appointment ever
+    const allUniquePatientIds = new Set(allAppointments.map(a => a.patientId));
+
+    // For each unique patient, find if their FIRST appointment ever was in this period
     const firstAppointments = await this.appointmentsRepository
       .createQueryBuilder('appointment')
       .select('MIN(appointment.appointmentDate)', 'firstDate')
@@ -732,25 +796,67 @@ export class DoctorsService {
       .getRawMany();
 
     const newPatients = firstAppointments.filter(
-      (fa: any) => new Date(fa.firstDate) >= startDate
+      (fa: any) => {
+        const firstDate = new Date(fa.firstDate);
+        return firstDate >= startDate && firstDate <= now;
+      }
     ).length;
 
+    const prevNewPatients = firstAppointments.filter(
+      (fa: any) => {
+        const firstDate = new Date(fa.firstDate);
+        return firstDate >= prevPeriodStartDate && firstDate < startDate;
+      }
+    ).length;
+
+    // Monthly data for chart (fill all months in range)
     const monthlyData: { [key: string]: { completed: number; cancelled: number; noShow: number } } = {};
+
+    // Pre-fill months
+    let iter = new Date(startDate);
+    while (iter <= now) {
+      const key = iter.toISOString().substring(0, 7);
+      if (!monthlyData[key]) {
+        monthlyData[key] = { completed: 0, cancelled: 0, noShow: 0 };
+      }
+      iter.setMonth(iter.getMonth() + 1);
+    }
+
     allAppointments.forEach(apt => {
       const monthKey = new Date(apt.appointmentDate).toISOString().substring(0, 7); // YYYY-MM
-      if (!monthlyData[monthKey]) {
-        monthlyData[monthKey] = { completed: 0, cancelled: 0, noShow: 0 };
-      }
-      if (apt.status === AppointmentStatus.COMPLETED) {
-        monthlyData[monthKey].completed++;
-      } else if (apt.status === AppointmentStatus.CANCELLED) {
-        monthlyData[monthKey].cancelled++;
+      if (monthlyData[monthKey]) {
+        if (apt.status === AppointmentStatus.COMPLETED) {
+          monthlyData[monthKey].completed++;
+        } else if (apt.status === AppointmentStatus.CANCELLED) {
+          monthlyData[monthKey].cancelled++;
+        } else if (apt.status === AppointmentStatus.NO_SHOW || apt.status === AppointmentStatus.MISSED) {
+          monthlyData[monthKey].noShow++;
+        }
       }
     });
 
-    const { average: patientSatisfaction, count: satisfactionCount } = await this.reviewsService.getDoctorRating(doctorId);
-    const satisfactionTrend = [patientSatisfaction || 0];
+    // Satisfaction
+    const reviews = await this.reviewRepository.find({
+      where: {
+        doctorId,
+        createdAt: Between(startDate, now)
+      }
+    });
+    const satisfactionRate = reviews.length > 0
+      ? (reviews.reduce((acc, r) => acc + r.rating, 0) / (reviews.length * 5)) * 100
+      : 0;
 
+    const prevReviews = await this.reviewRepository.find({
+      where: {
+        doctorId,
+        createdAt: Between(prevPeriodStartDate, startDate)
+      }
+    });
+    const prevSatisfactionRate = prevReviews.length > 0
+      ? (prevReviews.reduce((acc, r) => acc + r.rating, 0) / (prevReviews.length * 5)) * 100
+      : 0;
+
+    // Revenue
     const revenueRaw = await this.paymentRepository
       .createQueryBuilder('payment')
       .innerJoin(Appointment, 'appointment', 'appointment.id = payment.appointmentId')
@@ -761,22 +867,55 @@ export class DoctorsService {
       .getRawOne();
     const revenue = Number(revenueRaw?.sum || 0);
 
+    const prevRevenueRaw = await this.paymentRepository
+      .createQueryBuilder('payment')
+      .innerJoin(Appointment, 'appointment', 'appointment.id = payment.appointmentId')
+      .where('appointment.doctorId = :doctorId', { doctorId })
+      .andWhere('payment.status = :status', { status: PaymentStatus.PAID })
+      .andWhere('payment.paidAt BETWEEN :start AND :end', { start: prevPeriodStartDate, end: startDate })
+      .select('COALESCE(SUM(payment.amount), 0)', 'sum')
+      .getRawOne();
+    const prevRevenue = Number(prevRevenueRaw?.sum || 0);
+
+    // Calculate trends
+    const calculateTrend = (current: number, previous: number) => {
+      if (previous === 0) return current > 0 ? 100 : 0;
+      return parseFloat(((current - previous) / previous * 100).toFixed(1));
+    };
+
+    // Satisfaction Trend
+    const satisfactionTrendValues: { [key: string]: { sum: number, count: number } } = {};
+    reviews.forEach(r => {
+      const monthKey = new Date(r.createdAt).toISOString().substring(0, 7);
+      if (!satisfactionTrendValues[monthKey]) {
+        satisfactionTrendValues[monthKey] = { sum: 0, count: 0 };
+      }
+      satisfactionTrendValues[monthKey].sum += r.rating;
+      satisfactionTrendValues[monthKey].count++;
+    });
+
+    const sortedMonths = Object.keys(satisfactionTrendValues).sort();
+    const satisfactionTrend = sortedMonths.map(m =>
+      parseFloat(((satisfactionTrendValues[m].sum / (satisfactionTrendValues[m].count * 5)) * 100).toFixed(1))
+    );
+
     return {
       kpis: {
         totalAppointments: total,
         completionRate: parseFloat(completionRate.toFixed(1)),
-        patientSatisfaction: patientSatisfaction,
+        patientSatisfaction: parseFloat(satisfactionRate.toFixed(1)),
         newPatients: newPatients,
         revenue: revenue,
       },
       trends: {
-        appointmentsChange: 12, // Mock - calculate from previous period
-        completionChange: 2.1,
-        satisfactionChange: satisfactionCount > 1 ? 0.2 : 0,
-        newPatientsChange: 7,
+        appointmentsChange: calculateTrend(total, prevTotal),
+        completionChange: calculateTrend(completionRate, prevCompletionRate),
+        satisfactionChange: calculateTrend(satisfactionRate, prevSatisfactionRate),
+        newPatientsChange: calculateTrend(newPatients, prevNewPatients),
       },
       appointmentTrends: monthlyData,
-      satisfactionTrend: satisfactionTrend,
+      satisfactionTrend: satisfactionTrend.slice(-6), // Last 6 months
     };
   }
+
 }

@@ -6,6 +6,7 @@ import { Appointment } from '../appointments/entities/appointment.entity';
 import { User } from '../users/entities/user.entity';
 import { Message } from '../messages/entities/message.entity';
 import { ReceptionistMessage } from './entities/receptionist-message.entity';
+import { ReceptionistInvitation } from './entities/receptionist-invitation.entity';
 import { Payment } from '../payments/entities/payment.entity';
 import { EmailModule } from '@/common/services/email.module';
 import { SmsModule } from '@/common/services/sms.module';
@@ -17,9 +18,9 @@ import { SchedulesModule } from '../schedules/schedules.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Appointment, User, Message, ReceptionistMessage, Payment]), 
-    EmailModule, 
-    SmsModule, 
+    TypeOrmModule.forFeature([Appointment, User, Message, ReceptionistMessage, ReceptionistInvitation, Payment]),
+    EmailModule,
+    SmsModule,
     CloudinaryModule,
     forwardRef(() => AdminModule),
     AppointmentsModule,
@@ -30,4 +31,4 @@ import { SchedulesModule } from '../schedules/schedules.module';
   providers: [ReceptionistService],
   exports: [ReceptionistService],
 })
-export class ReceptionistModule {}
+export class ReceptionistModule { }

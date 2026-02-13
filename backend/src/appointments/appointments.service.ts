@@ -353,11 +353,50 @@ export class AppointmentsService {
     return updatedAppointment;
   }
 
+
+  async confirm(id: string, user: User): Promise<Appointment> {
+    const appointment = await this.findOne(id);
+
+    if (user.role === UserRole.PATIENT) {
+      throw new ForbiddenException("Patients cannot confirm appointments");
+    }
+
+    if (user.role === UserRole.DOCTOR && appointment.doctorId !== user.id) {
+      throw new ForbiddenException("You can only confirm appointments assigned to you");
+    }
+
+    if (appointment.status === AppointmentStatus.CANCELLED) {
+      throw new BadRequestException("Cannot confirm a cancelled appointment");
+    }
+
+    appointment.status = AppointmentStatus.CONFIRMED;
+    const confirmedAppointment = await this.appointmentsRepository.save(appointment);
+
+    try {
+      await this.notificationIntegrationService.createAppointmentNotification(
+        confirmedAppointment,
+        'confirmed' as any, // Cast as any if 'confirmed' is not explicitly listed in type union yet
+        appointment.patient,
+        appointment.doctor,
+      );
+    } catch (e) {
+      this.logger.error('Failed to send confirmation notification', e);
+    }
+
+    return confirmedAppointment;
+  }
+
   async cancel(id: string, user: User): Promise<Appointment> {
     const appointment = await this.findOne(id);
 
-    if (user.role === UserRole.PATIENT && appointment.patientId !== user.id) {
-      throw new ForbiddenException("You can only cancel your own appointments");
+    if (user.role === UserRole.PATIENT) {
+      if (appointment.patientId !== user.id) {
+        throw new ForbiddenException("You can only cancel your own appointments");
+      }
+      // "Patient (before confirmation)"
+      if (appointment.status !== AppointmentStatus.PENDING) {
+        throw new ForbiddenException("You can only cancel pending appointments");
+      }
     }
 
     if (user.role === UserRole.DOCTOR && appointment.doctorId !== user.id) {

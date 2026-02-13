@@ -16,7 +16,10 @@ import { ThemeService } from './theme.service';
 import { CreateThemeDto } from './dto/create-theme.dto';
 import { UpdateThemeDto } from './dto/update-theme.dto';
 import { ReceptionistService } from '../receptionist/receptionist.service';
-import { CreateReceptionistInviteDto } from '../receptionist/dto/create-receptionist-invite.dto';
+import { CreateReceptionistInviteDto, ResendInviteDto, RevokeInviteDto, BulkInviteDto } from '../receptionist/dto/create-receptionist-invite.dto';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { User } from '../users/entities/user.entity';
+import { InviteStatus } from '../receptionist/entities/receptionist-invitation.entity';
 
 @Controller('admin')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -26,7 +29,7 @@ export class AdminController {
     private readonly doctorsService: DoctorsService,
     private readonly themeService: ThemeService,
     private readonly receptionistService: ReceptionistService
-  ) {}
+  ) { }
 
   @Get('dashboard')
   @Get('stats')
@@ -213,12 +216,71 @@ export class AdminController {
     return this.adminService.getDoctorsOverview(search, status as any, specialty);
   }
 
-  // ---------------- Receptionist Management ----------------
+  // ---------------- Receptionist Invitation Management ----------------
   @Post('receptionists/invite')
   @Roles(UserRole.ADMIN)
   @HttpCode(HttpStatus.CREATED)
-  async inviteReceptionist(@Body() dto: CreateReceptionistInviteDto) {
-    return this.receptionistService.createReceptionistInvite(dto);
+  async inviteReceptionist(
+    @Body() dto: CreateReceptionistInviteDto,
+    @CurrentUser() user: User,
+  ) {
+    return this.receptionistService.createReceptionistInvite(dto, user?.id);
+  }
+
+  @Post('receptionists/invite/resend')
+  @Roles(UserRole.ADMIN)
+  @HttpCode(HttpStatus.OK)
+  async resendReceptionistInvite(
+    @Body() dto: ResendInviteDto,
+    @CurrentUser() user: User,
+  ) {
+    return this.receptionistService.resendInvite(dto, user?.id);
+  }
+
+  @Post('receptionists/invite/revoke')
+  @Roles(UserRole.ADMIN)
+  @HttpCode(HttpStatus.OK)
+  async revokeReceptionistInvite(
+    @Body() dto: RevokeInviteDto,
+    @CurrentUser() user: User,
+  ) {
+    return this.receptionistService.revokeInvite(dto, user?.id);
+  }
+
+  @Post('receptionists/invite/bulk')
+  @Roles(UserRole.ADMIN)
+  @HttpCode(HttpStatus.CREATED)
+  async bulkInviteReceptionists(
+    @Body() dto: BulkInviteDto,
+    @CurrentUser() user: User,
+  ) {
+    return this.receptionistService.bulkInvite(dto, user?.id);
+  }
+
+  @Get('receptionists/invitations')
+  @Roles(UserRole.ADMIN)
+  async listReceptionistInvitations(
+    @Query('status') status?: InviteStatus,
+    @Query('search') search?: string,
+    @Query('page') page = 1,
+    @Query('limit') limit = 20,
+    @Query('sortBy') sortBy?: string,
+    @Query('sortOrder') sortOrder?: 'ASC' | 'DESC',
+  ) {
+    return this.receptionistService.listInvitations({
+      status,
+      search,
+      page: Number(page),
+      limit: Number(limit),
+      sortBy,
+      sortOrder,
+    });
+  }
+
+  @Get('receptionists/invitations/stats')
+  @Roles(UserRole.ADMIN)
+  async getReceptionistInvitationStats() {
+    return this.receptionistService.getInvitationStats();
   }
 
   // ---------------- Analytics ----------------

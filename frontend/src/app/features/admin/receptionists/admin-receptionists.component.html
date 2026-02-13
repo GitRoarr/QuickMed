@@ -1,94 +1,120 @@
-<app-admin-shell searchPlaceholder="Search receptionists...">
+<app-admin-shell searchPlaceholder="Search the squad...">
   <div class="receptionist-page">
-    <header class="page-head">
-      <div>
-        <p class="eyebrow">Front Desk Squad</p>
-        <h1>Receptionist Management</h1>
-        <p class="subtitle">Hire, onboard, and empower receptionists who keep the clinic running smoothly.</p>
-      </div>
-      <button class="primary-btn" (click)="inviteForm.reset()">
-        <i class="bi bi-person-plus-fill"></i> Invite Receptionist
-      </button>
-    </header>
 
-    <div class="dual-grid">
-      <section class="invite-card">
-        <h3><i class="bi bi-lightning-charge-fill"></i> Quick Invite</h3>
-        <form [formGroup]="inviteForm" (ngSubmit)="inviteReceptionist()">
-          <div class="form-row">
-            <div class="form-group">
-              <input type="text" formControlName="firstName" placeholder="First Name">
-            </div>
-            <div class="form-group">
-              <input type="text" formControlName="lastName" placeholder="Last Name">
-            </div>
-          </div>
-          <div class="form-group">
-            <input type="email" formControlName="email" placeholder="Email Address">
-          </div>
-          <div class="form-group">
-            <input type="tel" formControlName="phoneNumber" placeholder="Phone (optional)">
-          </div>
-          <button type="submit" class="submit-btn" [disabled]="loading() || inviteForm.invalid">
-            {{ loading() ? 'Creating Account...' : 'Send Invite' }}
+    <!-- ============== MODERN HERO HEADER ============== -->
+    <section class="hero-section">
+      <div class="hero-content">
+        <span class="badge-premium">
+          <i class="bi bi-shield-check"></i> Command Center
+        </span>
+        <h1>The Front Desk<br>Superstars</h1>
+        <p>Manage, empower, and scale your reception team. They are the first heartbeat of the clinic experience.</p>
+
+        <div class="hero-actions">
+          <button class="btn-premium primary" (click)="openInviteModal()">
+            <i class="bi bi-person-plus-fill"></i> Invite Receptionist
           </button>
-        </form>
-
-        <div class="invite-link" *ngIf="inviteLink()">
-          <div class="invite-link__header">
-            <div>
-              <h4>Share invitation link</h4>
-              <p>Send this link to {{ inviteEmail() || 'the receptionist' }} to set a password.</p>
-            </div>
-            <button type="button" class="copy-btn" (click)="copyInviteLink()">
-              <i class="bi bi-clipboard"></i> Copy
-            </button>
-          </div>
-          <div class="invite-link__value">{{ inviteLink() }}</div>
+          <button class="btn-premium glass" (click)="openBulkModal()">
+            <i class="bi bi-people-fill"></i> Bulk Onboard
+          </button>
         </div>
+      </div>
 
-        <div class="invite-link" *ngIf="invitePreviewUrl()">
-          <div class="invite-link__header">
-            <div>
-              <h4>Email preview link</h4>
-              <p>Open the sent invite email preview.</p>
-            </div>
-            <a class="copy-btn" [href]="invitePreviewUrl()" target="_blank" rel="noopener">
-              <i class="bi bi-box-arrow-up-right"></i> Open
-            </a>
-          </div>
-          <div class="invite-link__value">{{ invitePreviewUrl() }}</div>
+      <div class="hero-illustration">
+        <img src="assets/images/receptionists/receptionist-hero.png" alt="Receptionist Team">
+        <div class="status-overlay">
+          <span class="dot"></span>
+          <span>{{ activeReceptionists().length }} Active Now</span>
         </div>
-      </section>
+      </div>
+    </section>
 
-      <!-- Filter Panel -->
-      <section class="filter-card">
-        <h3><i class="bi bi-funnel-fill"></i> Advanced Filters</h3>
-        <form [formGroup]="filterForm">
-          <div class="form-group">
-            <input type="text" formControlName="search" placeholder="Search by name, email or ID...">
-          </div>
-          <div class="form-group mt-3">
-            <select formControlName="status">
-              <option value="all">View All Statuses</option>
-              <option value="active">Active Members</option>
-              <option value="inactive">Inactive Members</option>
-            </select>
-          </div>
-        </form>
-      </section>
+    <!-- ============== PREMIUM STATS DASHBOARD ============== -->
+    <div class="dashboard-stats">
+      <div class="stat-card">
+        <div class="icon-box emerald">
+          <i class="bi bi-send-check"></i>
+        </div>
+        <div class="stat-data">
+          <span class="value">{{ inviteStats().totalSent }}</span>
+          <span class="label">Sent invites</span>
+        </div>
+        <div class="trend up" *ngIf="inviteStats().acceptanceRate >= 0">+{{ inviteStats().acceptanceRate }}%</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="icon-box amber">
+          <i class="bi bi-hourglass-split"></i>
+        </div>
+        <div class="stat-data">
+          <span class="value">{{ inviteStats().pending }}</span>
+          <span class="label">Pending</span>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="icon-box indigo">
+          <i class="bi bi-people"></i>
+        </div>
+        <div class="stat-data">
+          <span class="value">{{ activeReceptionists().length }}</span>
+          <span class="label">Total Team</span>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="icon-box rose">
+          <i class="bi bi-lightning-charge"></i>
+        </div>
+        <div class="stat-data">
+          <span class="value">{{ inviteStats().acceptanceRate }}%</span>
+          <span class="label">Success Rate</span>
+        </div>
+      </div>
     </div>
 
-    <!-- Grid for Receptionists -->
-    <div class="receptionist-grid">
-      <div *ngFor="let user of receptionists()" class="receptionist-card">
-        <span class="status-badge" [class.active]="user.isActive" [class.inactive]="!user.isActive">
-          {{ user.isActive ? 'Active Member' : 'Inactive' }}
-        </span>
+    <!-- ============== NAVIGATION & FILTERS ============== -->
+    <div class="section-nav">
+      <div class="nav-tabs">
+        <div class="nav-link" [class.active]="activeTab() === 'members'" (click)="setActiveTab('members')">
+          <i class="bi bi-grid-1x2"></i> Team Grid <span class="badge-count">{{ receptionists().length }}</span>
+        </div>
+        <div class="nav-link" [class.active]="activeTab() === 'invitations'" (click)="setActiveTab('invitations')">
+          <i class="bi bi-clock-history"></i> History <span class="badge-count">{{ invitations().length }}</span>
+        </div>
+      </div>
 
-        <div class="card-head">
-          <div class="avatar-wrapper">
-            <div class="avatar">{{ getInitials(user) }}</div>
+      <div class="nav-filters" [formGroup]="filterForm" *ngIf="activeTab() === 'members'">
+        <div style="position: relative; display: flex; align-items: center;">
+          <i class="bi bi-search i-search"></i>
+          <input type="text" formControlName="search" class="search-input" placeholder="Find a team member...">
+        </div>
+        <select formControlName="status" class="search-input" style="padding-left: 1rem; min-width: 151px;">
+          <option value="all">All Status</option>
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
+          <option value="pending">Pending Setup</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- ============== TEAM MEMBERS GRID ============== -->
+    <div *ngIf="activeTab() === 'members'" class="members-grid fade-in">
+      <div *ngFor="let user of receptionists()" class="member-card">
+        <div class="card-header">
+          <span class="status-badge" [class.active]="user.isActive && !isPending(user)"
+            [class.pending]="isPending(user)" [class.inactive]="!user.isActive">
+            {{ isPending(user) ? 'Pending Setup' : (user.isActive ? 'Active' : 'Deactivated') }}
+          </span>
+          <button class="more-btn" (click)="toggleActive(user)">
+            <i class="bi bi-power"></i>
+          </button>
+        </div>
+
+        <div class="card-profile">
+          <div class="avatar-wrap">
+            <div class="avatar-img">{{ getInitials(user) }}</div>
+            <div class="online-indicator" *ngIf="user.isActive && !isPending(user)"></div>
           </div>
           <div class="info">
             <h3>{{ user.firstName }} {{ user.lastName }}</h3>
@@ -96,36 +122,240 @@
           </div>
         </div>
 
+        <div class="card-stats">
+          <div class="mini-stat">
+            <span class="label">Joined</span>
+            <span class="value">{{ getTimeAgo(user.createdAt + '') }}</span>
+          </div>
+          <div class="mini-stat">
+            <span class="label">Department</span>
+            <span class="value">{{ user.department || 'Front Desk' }}</span>
+          </div>
+        </div>
+
         <div class="card-actions">
-          <button *ngIf="!user.isActive" class="action-btn activate" [disabled]="togglingId() === user.id"
-            (click)="toggleActive(user)">
-            <i class="bi" [class.bi-check-circle-fill]="togglingId() !== user.id"
-              [class.bi-arrow-repeat]="togglingId() === user.id" [class.spin]="togglingId() === user.id"></i>
-            {{ togglingId() === user.id ? 'Activating...' : 'Activate' }}
-          </button>
-          <button *ngIf="user.isActive" class="action-btn deactivate" [disabled]="togglingId() === user.id"
-            (click)="toggleActive(user)">
-            <i class="bi" [class.bi-pause-circle-fill]="togglingId() !== user.id"
-              [class.bi-arrow-repeat]="togglingId() === user.id" [class.spin]="togglingId() === user.id"></i>
-            {{ togglingId() === user.id ? 'Deactivating...' : 'Deactivate' }}
-          </button>
-          <button class="action-btn remove" [disabled]="togglingId() === user.id" (click)="removeReceptionist(user.id)">
-            <i class="bi bi-trash3-fill"></i> Remove
-          </button>
+          <ng-container *ngIf="isPending(user)">
+            <button class="btn-primary-sm" (click)="resendInvite(user)" [disabled]="actionLoadingId() === user.id">
+              <i class="bi bi-arrow-clockwise"></i> Resend
+            </button>
+            <button class="btn-outline" (click)="openRevokeModal(user)">Revoke</button>
+          </ng-container>
+
+          <ng-container *ngIf="user.isActive && !isPending(user)">
+            <button class="btn-outline" (click)="toggleActive(user)">Deactivate</button>
+            <button class="btn-danger-light" (click)="removeReceptionist(user.id)">
+              <i class="bi bi-trash"></i>
+            </button>
+          </ng-container>
+
+          <ng-container *ngIf="!user.isActive">
+            <button class="btn-primary-sm" (click)="toggleActive(user)">Activate</button>
+            <button class="btn-danger-light" (click)="removeReceptionist(user.id)">
+              <i class="bi bi-trash"></i>
+            </button>
+          </ng-container>
         </div>
       </div>
 
       <!-- Empty State -->
       <div *ngIf="receptionists().length === 0 && !loading()" class="empty-state">
-        <i class="bi bi-people"></i>
-        <p>No receptionists found matching your criteria.</p>
+        <div class="empty-art">
+          <i class="bi bi-people"></i>
+        </div>
+        <h3>No superstars yet</h3>
+        <p>Your team is empty. Start building your squad by inviting your first receptionist.</p>
+        <button class="btn-premium primary" (click)="openInviteModal()">
+          <i class="bi bi-person-plus-fill"></i> Send First Invite
+        </button>
       </div>
 
       <!-- Loader -->
-      <div *ngIf="loading()" class="loader">
-        <i class="bi bi-arrow-repeat spin"></i>
-        <p>Updating receptionist list...</p>
+      <div *ngIf="loading()" class="loader" style="grid-column: 1/-1; padding: 4rem;">
+        <div class="loader-spinner"></div>
+        <p>Syncing with backend...</p>
       </div>
     </div>
+
+    <!-- ============== HISTORY TABLE ============== -->
+    <div *ngIf="activeTab() === 'invitations'" class="invitations-table-container fade-in">
+
+      <!-- Sub Filters -->
+      <div class="section-nav"
+        style="padding: 1.5rem; justify-content: flex-start; gap: 1rem; border-bottom: 1px solid #f1f5f9;">
+        <button class="nav-link" [class.active]="invitationFilter() === 'all'"
+          (click)="invitationFilter.set('all')">All</button>
+        <button class="nav-link" [class.active]="invitationFilter() === 'pending'"
+          (click)="invitationFilter.set('pending')">Pending</button>
+        <button class="nav-link" [class.active]="invitationFilter() === 'accepted'"
+          (click)="invitationFilter.set('accepted')">Accepted</button>
+        <button class="nav-link" [class.active]="invitationFilter() === 'revoked'"
+          (click)="invitationFilter.set('revoked')">Revoked</button>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Invitee</th>
+            <th>Email</th>
+            <th>Status</th>
+            <th>Sent Date</th>
+            <th>Resends</th>
+            <th style="text-align: right;">Email Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let inv of filteredInvitations()">
+            <td>
+              <div class="user-cell">
+                <div class="avatar-sm">{{ getInitials(inv) }}</div>
+                <span>{{ inv.firstName }} {{ inv.lastName }}</span>
+              </div>
+            </td>
+            <td>{{ inv.email }}</td>
+            <td>
+              <span class="status-badge" [class.pending]="inv.status === 'pending'"
+                [class.active]="inv.status === 'accepted'" [class.inactive]="inv.status === 'revoked'">
+                {{ inv.status | titlecase }}
+              </span>
+            </td>
+            <td>{{ getTimeAgo(inv.createdAt) }}</td>
+            <td><span class="badge-count">{{ inv.resendCount || 0 }}</span></td>
+            <td style="text-align: right;">
+              <span
+                style="display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 600; font-size: 0.85rem;">
+                <i class="bi bi-check-circle-fill" style="color: #10b981" *ngIf="inv.emailDelivered"></i>
+                <i class="bi bi-exclamation-triangle-fill" style="color: #f43f5e" *ngIf="!inv.emailDelivered"></i>
+                {{ inv.emailDelivered ? 'Delivered' : 'Failed' }}
+              </span>
+            </td>
+          </tr>
+          <tr *ngIf="invitations().length === 0">
+            <td colspan="6" style="padding: 4rem; text-align: center; color: var(--text-muted);">
+              No invitations found in the history.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ============== MODALS ============== -->
+
+    <!-- Invite Modal -->
+    <div class="modal-overlay" *ngIf="showInviteModal()" (click)="closeInviteModal()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <button class="modal-close" (click)="closeInviteModal()"><i class="bi bi-x"></i></button>
+
+        <div *ngIf="inviteStep() === 'form'">
+          <div class="modal-header">
+            <i class="bi" [class.bi-person-plus-fill]="modalMode() === 'invite'"
+              [class.bi-pencil-square]="modalMode() === 'edit'"></i>
+            <h2>{{ modalMode() === 'invite' ? 'Invite New Teammate' : 'Edit Teammate' }}</h2>
+            <p>{{ modalMode() === 'invite' ? 'Send a warm welcome to your new receptionist.' : 'Update information for
+              this superstar.' }}</p>
+          </div>
+          <div class="modal-body">
+            <form [formGroup]="inviteForm" (ngSubmit)="handleInviteSubmit()">
+              <div class="form-grid">
+                <div class="form-group">
+                  <label>First Name</label>
+                  <input type="text" formControlName="firstName" placeholder="e.g. Sarah">
+                </div>
+                <div class="form-group">
+                  <label>Last Name</label>
+                  <input type="text" formControlName="lastName" placeholder="e.g. Miller">
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Email Address</label>
+                <input type="email" formControlName="email" placeholder="sarah@clinic.com">
+              </div>
+              <div class="form-group">
+                <label>Department</label>
+                <input type="text" formControlName="department" placeholder="e.g. Front Desk">
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button class="btn-premium glass" style="color: var(--text-main); border: 1px solid #e2e8f0;"
+              (click)="closeInviteModal()">Cancel</button>
+            <button class="btn-premium primary" (click)="handleInviteSubmit()" [disabled]="inviteLoading()">
+              {{ inviteLoading() ? (modalMode() === 'invite' ? 'Sending...' : 'Saving...') : (modalMode() === 'invite' ?
+              'Send Invitation' : 'Save Changes') }}
+            </button>
+          </div>
+        </div>
+
+        <!-- Success Step -->
+        <div *ngIf="inviteStep() === 'success'" class="modal-body" style="text-align: center;">
+          <i class="bi bi-check-circle-fill"
+            style="font-size: 5rem; color: var(--primary); margin-bottom: 2rem; display: block;"></i>
+          <h2>Invitation Sent!</h2>
+          <p>Your invite has been dispatched to <b>{{ inviteEmail() }}</b>.</p>
+          <div class="modal-footer" style="margin-top: 3rem; padding: 0;">
+            <button class="btn-premium primary" (click)="closeInviteModal()">Great, thanks!</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bulk Modal -->
+    <div class="modal-overlay" *ngIf="showBulkModal()" (click)="closeBulkModal()">
+      <div class="modal-content" style="max-width: 800px;" (click)="$event.stopPropagation()">
+        <button class="modal-close" (click)="closeBulkModal()"><i class="bi bi-x"></i></button>
+        <div class="modal-header">
+          <i class="bi bi-people-fill"></i>
+          <h2>Bulk Onboard</h2>
+          <p>Bring in the whole squad at once.</p>
+        </div>
+        <div class="modal-body">
+          <div *ngFor="let row of bulkInvites(); let i = index"
+            style="display: grid; grid-template-columns: 1fr 1fr 1.5fr 40px; gap: 0.5rem; margin-bottom: 1rem;">
+            <input type="text" [value]="row.firstName"
+              (input)="updateBulkRow(i, 'firstName', $any($event.target).value)" placeholder="First">
+            <input type="text" [value]="row.lastName" (input)="updateBulkRow(i, 'lastName', $any($event.target).value)"
+              placeholder="Last">
+            <input type="email" [value]="row.email" (input)="updateBulkRow(i, 'email', $any($event.target).value)"
+              placeholder="Email">
+            <button class="more-btn" (click)="removeBulkRow(i)" style="color: #f43f5e" *ngIf="bulkInvites().length > 1">
+              <i class="bi bi-trash"></i>
+            </button>
+          </div>
+          <button class="btn-premium glass" style="width: 100%; border: 2px dashed #e2e8f0; color: var(--text-muted)"
+            (click)="addBulkRow()">
+            <i class="bi bi-plus"></i> Add Another Row
+          </button>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-premium primary" (click)="submitBulkInvite()" [disabled]="inviteLoading()">
+            {{ inviteLoading() ? 'Processing...' : 'Send All Invites' }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Revoke Modal -->
+    <div class="modal-overlay" *ngIf="showRevokeModal()" (click)="closeRevokeModal()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <button class="modal-close" (click)="closeRevokeModal()"><i class="bi bi-x"></i></button>
+        <div class="modal-header" style="background: linear-gradient(135deg, #451a1a 0%, #1a0a0a 100%);">
+          <i class="bi bi-exclamation-triangle-fill" style="color: #ef4444;"></i>
+          <h2>Revoke Access</h2>
+          <p>Are you sure you want to revoke the invitation for <b>{{ revokeTarget()?.name }}</b>?</p>
+        </div>
+        <div class="modal-body">
+          <p style="color: var(--text-muted); text-align: center;">This will immediately invalidate the invite link and
+            prevent the user from joining.</p>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-premium glass" style="color: var(--text-main); border: 1px solid #e2e8f0;"
+            (click)="closeRevokeModal()">Keep Invitation</button>
+          <button class="btn-premium primary" style="background: #ef4444;" (click)="confirmRevoke()"
+            [disabled]="actionLoadingId() === revokeTarget()?.id">
+            {{ actionLoadingId() === revokeTarget()?.id ? 'Revoking...' : 'Confirm Revoke' }}
+          </button>
+        </div>
+      </div>
+    </div>
+
   </div>
 </app-admin-shell>

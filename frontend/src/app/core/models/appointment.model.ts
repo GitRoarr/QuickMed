@@ -5,6 +5,8 @@ export enum AppointmentStatus {
   CONFIRMED = "confirmed",
   CANCELLED = "cancelled",
   COMPLETED = "completed",
+  MISSED = "missed",
+  OVERDUE = "overdue",
 }
 
 export interface Appointment {

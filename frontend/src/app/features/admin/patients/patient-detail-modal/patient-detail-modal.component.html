@@ -4,7 +4,9 @@
         <header class="modal-header">
             <div class="hero-profile">
                 <div class="avatar-large">
-                    {{ patient.initials }}
+                    <img *ngIf="patient.raw?.avatar" [src]="patient.raw.avatar" [alt]="patient.fullName"
+                        style="width: 100%; height: 100%; object-fit: cover;">
+                    <span *ngIf="!patient.raw?.avatar">{{ patient.initials }}</span>
                 </div>
                 <div class="hero-info">
                     <h2>{{ patient.fullName }}</h2>

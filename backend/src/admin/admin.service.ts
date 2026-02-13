@@ -6,11 +6,12 @@ import * as bcrypt from 'bcrypt';
 import { EmailService } from '../common/services/email.service';
 import { SmsService } from '../common/services/sms.service';
 import { Appointment } from '../appointments/entities/appointment.entity';
+import { Payment } from '../payments/entities/payment.entity';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { UpdateUserDto } from '../users/dto/update-user.dto';
 import { CreateAppointmentDto } from '../appointments/dto/create-appointment.dto';
 import { UpdateAppointmentDto } from '../appointments/dto/update-appointment.dto';
-import { UserRole, AppointmentStatus, AppointmentType } from '../common/index';
+import { UserRole, AppointmentStatus, AppointmentType, PaymentStatus } from '../common/index';
 import { AdminStatsService, AdminStats } from './admin.stats.service';
 import { DoctorsService } from '../doctors/doctors.service';
 import { ReviewsService } from '../reviews/reviews.service';
@@ -571,6 +572,8 @@ export class AdminService {
         confirmed: appointments.filter(a => a.status === AppointmentStatus.CONFIRMED).length,
         completed: appointments.filter(a => a.status === AppointmentStatus.COMPLETED).length,
         cancelled: appointments.filter(a => a.status === AppointmentStatus.CANCELLED).length,
+        missed: appointments.filter(a => a.status === AppointmentStatus.MISSED).length,
+        overdue: appointments.filter(a => a.status === AppointmentStatus.OVERDUE).length,
       };
 
       // Doctor performance
@@ -619,14 +622,21 @@ export class AdminService {
         patientsByDate = [];
       }
 
-      // Revenue trends
+      // Revenue trends - fetch real payments
       const revenueByDate: { [key: string]: number } = {};
-      appointments
-        .filter(a => a.status === AppointmentStatus.COMPLETED)
-        .forEach(apt => {
-          const dateKey = new Date(apt.appointmentDate).toISOString().split('T')[0];
-          revenueByDate[dateKey] = (revenueByDate[dateKey] || 0) + 150; // example price
-        });
+      const payments = await this.appointmentRepository.manager.find(Payment, {
+        where: {
+          status: PaymentStatus.PAID,
+          paidAt: Between(start, end)
+        }
+      });
+
+      payments.forEach(payment => {
+        if (payment.paidAt) {
+          const dateKey = new Date(payment.paidAt).toISOString().split('T')[0];
+          revenueByDate[dateKey] = (revenueByDate[dateKey] || 0) + Number(payment.amount);
+        }
+      });
 
       const consultationStats = await this.consultationsService.stats(
         start.toISOString(),

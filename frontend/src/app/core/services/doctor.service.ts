@@ -80,6 +80,7 @@ export interface DoctorPatientSummary {
   gender?: string;
   age?: number;
   condition?: string;
+  avatar?: string;
 }
 
 export interface DoctorListItem {
@@ -156,7 +157,7 @@ export interface DoctorListItem {
 export class DoctorService {
   private apiUrl = `${environment.apiUrl}/doctors`;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   getDashboard(): Observable<DoctorDashboardData> {
     return this.http.get<DoctorDashboardData>(`${this.apiUrl}/dashboard`);
@@ -194,7 +195,7 @@ export class DoctorService {
   getDoctorList(): Observable<DoctorListItem[]> {
     return this.http.get<DoctorListItem[]>(`${this.apiUrl}/list`);
   }
-  
+
   listDoctors(): Observable<DoctorListItem[]> {
     return this.http.get<DoctorListItem[]>(`${this.apiUrl}`);
   }

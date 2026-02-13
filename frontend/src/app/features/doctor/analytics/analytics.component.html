@@ -14,8 +14,7 @@
 
       <!-- Period Selector -->
       <div class="flex gap-3 flex-wrap">
-        <button *ngFor="let period of periodOptions" (click)="onPeriodChange(period.value)"
-          [ngClass]="selectedPeriod() === period.value
+        <button *ngFor="let period of periodOptions" (click)="onPeriodChange(period.value)" [ngClass]="selectedPeriod() === period.value
             ? 'bg-[var(--primary)] text-white'
             : 'bg-[var(--surface-secondary)] text-[var(--text-primary)]'"
           class="px-6 py-3 rounded-xl font-semibold hover:opacity-90 transition shadow-md">
@@ -35,7 +34,8 @@
       <!-- KPI Cards -->
       <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-8">
 
-        <div class="bg-[var(--surface)] rounded-3xl p-8 shadow-lg hover:shadow-xl transition-all duration-500" [@fadeInUp]>
+        <div class="bg-[var(--surface)] rounded-3xl p-8 shadow-lg hover:shadow-xl transition-all duration-500"
+          [@fadeInUp]>
           <div class="flex items-center justify-between mb-4">
             <h3 class="text-lg font-semibold text-[var(--text-secondary)]">Revenue</h3>
             <div class="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-xl flex items-center justify-center">
@@ -154,17 +154,39 @@
         </div>
 
         <!-- Patient Satisfaction Trend (Placeholder for future chart) -->
-        <div
-          class="bg-[var(--surface)] rounded-3xl p-8 shadow-lg flex items-center justify-center transition-all duration-500"
-          [@fadeInUp]>
-          <div class="text-center">
-            <div
-              class="w-32 h-32 mx-auto mb-6 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center shadow-2xl">
-              <span class="text-5xl font-bold text-white">{{ analytics()!.kpis.patientSatisfaction }}%</span>
+        <div class="bg-[var(--surface)] rounded-3xl p-8 shadow-lg transition-all duration-500" [@fadeInUp]>
+          <div class="flex flex-col h-full">
+            <h3 class="text-xl font-bold mb-2">Patient Satisfaction</h3>
+            <p class="text-[var(--text-secondary)] mb-6">Historical satisfaction trend</p>
+
+            <div class="flex-1 flex items-center justify-center py-4">
+              <div class="relative w-48 h-48 rounded-full flex items-center justify-center shadow-inner"
+                [style.background]="'conic-gradient(var(--amber-500) ' + (analytics()!.kpis.patientSatisfaction || 0) + '%, var(--surface-secondary) 0%)'">
+                <div
+                  class="absolute inset-4 bg-[var(--surface)] rounded-full flex flex-col items-center justify-center shadow-md">
+                  <span class="text-4xl font-bold text-[var(--text-primary)]">{{ analytics()!.kpis.patientSatisfaction
+                    }}%</span>
+                  <span class="text-xs text-[var(--text-secondary)] mt-1">Satisfaction Rate</span>
+                </div>
+              </div>
             </div>
-            <h3 class="text-2xl font-bold">Patient Satisfaction</h3>
-            <p class="text-[var(--text-secondary)] mt-2">Consistently excellent feedback</p>
-            <p class="text-sm text-[var(--text-muted)] mt-4">Trend chart coming soon</p>
+
+            <div class="mt-6">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-sm font-semibold">Satisfaction Trend</span>
+                <span class="text-xs text-[var(--text-secondary)]">Last 6 data points</span>
+              </div>
+              <div class="h-16 flex items-end gap-1 px-1">
+                <div *ngFor="let point of analytics()!.satisfactionTrend"
+                  class="flex-1 bg-amber-400/30 hover:bg-amber-400 transition-colors rounded-t-sm"
+                  [style.height.%]="point">
+                </div>
+                <div *ngIf="!analytics()!.satisfactionTrend || analytics()!.satisfactionTrend.length === 0"
+                  class="w-full text-center text-xs text-[var(--text-muted)] italic py-4">
+                  No historical data available yet
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>

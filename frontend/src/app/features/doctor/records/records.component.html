@@ -23,10 +23,10 @@
     <!-- Stats Cards - Backend driven -->
     <div class="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
       <div
-        class="bg-[var(--surface-primary)] rounded-2xl p-5 shadow-sm border border-[var(--border-color)] hover:shadow-md hover:border-[var(--primary)]/20 transition-all duration-300 group cursor-default">
+        class="bg-[var(--surface-primary)] rounded-2xl p-5 shadow-sm border border-[var(--border-color)] hover:shadow-md hover:border-[#1DB954]/20 transition-all duration-300 group cursor-default">
         <div class="flex items-center gap-3 mb-3">
           <div
-            class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+            class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#1DB954] to-emerald-600 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
             <i class="bi bi-file-earmark-medical text-white text-lg"></i>
           </div>
         </div>
@@ -34,10 +34,10 @@
         <p class="text-sm text-[var(--text-secondary)]">Total Records</p>
       </div>
       <div
-        class="bg-[var(--surface-primary)] rounded-2xl p-5 shadow-sm border border-[var(--border-color)] hover:shadow-md hover:border-purple-400/20 transition-all duration-300 group cursor-default">
+        class="bg-[var(--surface-primary)] rounded-2xl p-5 shadow-sm border border-[var(--border-color)] hover:shadow-md hover:border-[#1DB954]/20 transition-all duration-300 group cursor-default">
         <div class="flex items-center gap-3 mb-3">
           <div
-            class="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-violet-600 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+            class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#1DB954]/90 to-emerald-500/90 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
             <i class="bi bi-clipboard2-pulse text-white text-lg"></i>
           </div>
         </div>
@@ -45,10 +45,10 @@
         <p class="text-sm text-[var(--text-secondary)]">Lab Reports</p>
       </div>
       <div
-        class="bg-[var(--surface-primary)] rounded-2xl p-5 shadow-sm border border-[var(--border-color)] hover:shadow-md hover:border-cyan-400/20 transition-all duration-300 group cursor-default">
+        class="bg-[var(--surface-primary)] rounded-2xl p-5 shadow-sm border border-[var(--border-color)] hover:shadow-md hover:border-[#1DB954]/20 transition-all duration-300 group cursor-default">
         <div class="flex items-center gap-3 mb-3">
           <div
-            class="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-teal-600 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+            class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#1DB954]/80 to-emerald-500/80 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
             <i class="bi bi-image text-white text-lg"></i>
           </div>
         </div>
@@ -56,10 +56,10 @@
         <p class="text-sm text-[var(--text-secondary)]">Imaging</p>
       </div>
       <div
-        class="bg-[var(--surface-primary)] rounded-2xl p-5 shadow-sm border border-[var(--border-color)] hover:shadow-md hover:border-emerald-400/20 transition-all duration-300 group cursor-default">
+        class="bg-[var(--surface-primary)] rounded-2xl p-5 shadow-sm border border-[var(--border-color)] hover:shadow-md hover:border-[#1DB954]/20 transition-all duration-300 group cursor-default">
         <div class="flex items-center gap-3 mb-3">
           <div
-            class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+            class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#1DB954]/70 to-emerald-500/70 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
             <i class="bi bi-check-circle text-white text-lg"></i>
           </div>
         </div>
@@ -67,10 +67,10 @@
         <p class="text-sm text-[var(--text-secondary)]">Verified</p>
       </div>
       <div
-        class="bg-[var(--surface-primary)] rounded-2xl p-5 shadow-sm border border-[var(--border-color)] hover:shadow-md hover:border-amber-400/20 transition-all duration-300 group cursor-default">
+        class="bg-[var(--surface-primary)] rounded-2xl p-5 shadow-sm border border-[var(--border-color)] hover:shadow-md hover:border-[#1DB954]/20 transition-all duration-300 group cursor-default">
         <div class="flex items-center gap-3 mb-3">
           <div
-            class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+            class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#1DB954]/60 to-emerald-500/60 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
             <i class="bi bi-hourglass-split text-white text-lg"></i>
           </div>
         </div>
@@ -127,31 +127,20 @@
         <div class="p-6 pb-4">
           <div class="flex items-start justify-between gap-3">
             <div class="flex items-start gap-4">
-              <div class="w-14 h-14 rounded-xl flex items-center justify-center shrink-0" [ngClass]="{
-                  'bg-purple-100 dark:bg-purple-900/30': record.type === 'lab',
-                  'bg-cyan-100 dark:bg-cyan-900/30': record.type === 'imaging',
-                  'bg-emerald-100 dark:bg-emerald-900/30': record.type === 'prescription',
-                  'bg-orange-100 dark:bg-orange-900/30': record.type === 'diagnosis',
-                  'bg-gray-100 dark:bg-gray-800/50': record.type === 'other'
-                }">
-                <i class="text-2xl" [ngClass]="{
-                    'bi-clipboard2-pulse text-purple-600 dark:text-purple-400': record.type === 'lab',
-                    'bi-image text-cyan-600 dark:text-cyan-400': record.type === 'imaging',
-                    'bi-capsule text-emerald-600 dark:text-emerald-400': record.type === 'prescription',
-                    'bi-file-earmark-text text-orange-600 dark:text-orange-400': record.type === 'diagnosis',
-                    'bi-file-earmark text-gray-600 dark:text-gray-400': record.type === 'other'
-                  }"></i>
+              <div
+                class="w-14 h-14 rounded-xl flex items-center justify-center shrink-0 bg-[#1DB954]/10 text-[#1DB954]">
+                <i class="text-2xl" [class]="getRecordTypeIcon(record.type)"></i>
               </div>
               <div class="min-w-0 flex-1">
                 <h3
-                  class="font-bold text-lg text-[var(--text-primary)] truncate group-hover:text-[var(--primary)] transition-colors">
+                  class="font-bold text-lg text-[var(--text-primary)] truncate group-hover:text-[#1DB954] transition-colors">
                   {{ record.title || getRecordTypeLabel(record.type) }}</h3>
                 <p class="text-sm text-[var(--text-secondary)] mt-0.5 line-clamp-1">{{ record.description ||
                   getRecordTypeLabel(record.type) }}</p>
               </div>
             </div>
             <span class="px-3 py-1 rounded-full text-xs font-semibold shrink-0" [ngClass]="{
-                'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400': record.status === 'verified',
+                'bg-emerald-100 text-[#1DB954] dark:bg-emerald-900/30 dark:text-[#1DB954]': record.status === 'verified',
                 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400': record.status === 'pending' || !record.status,
                 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400': record.status === 'rejected'
               }">
@@ -195,7 +184,7 @@
             View
           </button>
           <button *ngIf="record.status !== 'verified'" (click)="verifyRecord(record)"
-            class="flex-1 py-2.5 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/30 rounded-xl font-medium transition-all flex items-center justify-center gap-2 text-sm">
+            class="flex-1 py-2.5 bg-emerald-50 dark:bg-emerald-900/20 text-[#1DB954] hover:bg-emerald-100 dark:hover:bg-emerald-900/30 rounded-xl font-medium transition-all flex items-center justify-center gap-2 text-sm">
             <i class="bi bi-check-circle"></i>
             Verify
           </button>
@@ -230,112 +219,120 @@
   </main>
 
   <!-- ====== CREATE RECORD MODAL ====== -->
+  <!-- ====== CREATE RECORD MODAL ====== -->
   <div *ngIf="showCreateModal()" class="fixed inset-0 z-50 flex items-center justify-center p-4"
     (click)="closeCreateModal()">
-    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
-    <div
-      class="relative bg-[var(--surface-primary)] rounded-3xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-[var(--border-color)]"
+    <div @backdropFade class="absolute inset-0 bg-slate-900/40 backdrop-blur-md"></div>
+    <div @modalScale
+      class="relative bg-white dark:bg-[#121212] rounded-[2.5rem] shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-white/20 dark:border-white/10"
       (click)="$event.stopPropagation()">
       <!-- Modal Header -->
       <div
-        class="sticky top-0 z-10 flex items-center justify-between p-6 pb-4 bg-[var(--surface-primary)] border-b border-[var(--border-color)] rounded-t-3xl">
-        <div class="flex items-center gap-3">
+        class="sticky top-0 z-10 flex items-center justify-between p-8 pb-4 bg-white dark:bg-[#121212] bg-opacity-95 backdrop-blur-sm">
+        <div class="flex items-center gap-4">
           <div
-            class="w-12 h-12 rounded-xl bg-gradient-to-br from-[var(--primary)] to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-500/20">
-            <i class="bi bi-file-earmark-medical text-white text-xl"></i>
+            class="w-12 h-12 rounded-xl bg-gradient-to-br from-[#1DB954] to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-500/20">
+            <i class="bi bi-file-earmark-plus text-white text-xl"></i>
           </div>
           <div>
-            <h2 class="text-xl font-bold text-[var(--text-primary)]">New Medical Record</h2>
-            <p class="text-sm text-[var(--text-secondary)]">Add a new record for a patient</p>
+            <h2 class="text-xl font-black text-[var(--text-primary)] tracking-tight">New Medical Record</h2>
+            <p class="text-xs text-[var(--text-secondary)] font-medium">Add a new document to patient history</p>
           </div>
         </div>
         <button (click)="closeCreateModal()"
-          class="w-10 h-10 rounded-xl hover:bg-[var(--surface-secondary)] flex items-center justify-center transition-colors">
-          <i class="bi bi-x-lg text-[var(--text-secondary)]"></i>
+          class="w-10 h-10 rounded-xl hover:bg-slate-100 dark:hover:bg-white/5 flex items-center justify-center transition-colors text-slate-400">
+          <i class="bi bi-x-lg"></i>
         </button>
       </div>
 
       <!-- Modal Body -->
-      <div class="p-6 space-y-5">
+      <div class="p-8 space-y-6">
         <!-- Patient Selection -->
-        <div>
-          <label class="block text-sm font-semibold text-[var(--text-primary)] mb-2">
-            <i class="bi bi-person mr-1.5 text-[var(--primary)]"></i>Patient *
+        <div class="space-y-2">
+          <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400">
+            Assigned Patient *
           </label>
-          <select [(ngModel)]="newRecord.patientId"
-            class="w-full px-4 py-3.5 bg-[var(--surface-secondary)] border border-[var(--border-color)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)] transition-all appearance-none">
-            <option value="">Select a patient...</option>
-            <option *ngFor="let p of patients()" [value]="p.patientId">{{ p.firstName }} {{ p.lastName }}</option>
-          </select>
+          <div class="relative group">
+            <i class="bi bi-person absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+            <select [(ngModel)]="newRecord.patientId"
+              class="w-full pl-11 pr-4 py-4 bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/5 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#1DB954] transition-all appearance-none font-semibold text-[var(--text-primary)]">
+              <option value="">Select a patient...</option>
+              <option *ngFor="let p of patients()" [value]="p.patientId">{{ p.firstName }} {{ p.lastName }}</option>
+            </select>
+            <i
+              class="bi bi-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
+          </div>
         </div>
 
         <!-- Record Type & Title -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label class="block text-sm font-semibold text-[var(--text-primary)] mb-2">
-              <i class="bi bi-tag mr-1.5 text-[var(--primary)]"></i>Record Type *
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="space-y-2">
+            <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400">
+              Record Category *
             </label>
-            <select [(ngModel)]="newRecord.type"
-              class="w-full px-4 py-3.5 bg-[var(--surface-secondary)] border border-[var(--border-color)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)] transition-all appearance-none">
-              <option *ngFor="let t of recordTypes" [value]="t.value">{{ t.label }}</option>
-            </select>
+            <div class="relative">
+              <i class="bi bi-tag absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+              <select [(ngModel)]="newRecord.type"
+                class="w-full pl-11 pr-10 py-4 bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/5 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#1DB954] transition-all appearance-none font-semibold text-[var(--text-primary)]">
+                <option *ngFor="let t of recordTypes" [value]="t.value">{{ t.label }}</option>
+              </select>
+              <i
+                class="bi bi-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
+            </div>
           </div>
-          <div>
-            <label class="block text-sm font-semibold text-[var(--text-primary)] mb-2">
-              <i class="bi bi-calendar3 mr-1.5 text-[var(--primary)]"></i>Record Date *
+          <div class="space-y-2">
+            <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400">
+              Record Date *
             </label>
-            <input type="date" [(ngModel)]="newRecord.recordDate"
-              class="w-full px-4 py-3.5 bg-[var(--surface-secondary)] border border-[var(--border-color)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)] transition-all" />
+            <div class="relative">
+              <i class="bi bi-calendar3 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+              <input type="date" [(ngModel)]="newRecord.recordDate"
+                class="w-full pl-11 pr-4 py-4 bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/5 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#1DB954] transition-all font-semibold text-[var(--text-primary)]" />
+            </div>
           </div>
         </div>
 
         <!-- Title -->
-        <div>
-          <label class="block text-sm font-semibold text-[var(--text-primary)] mb-2">
-            <i class="bi bi-card-heading mr-1.5 text-[var(--primary)]"></i>Title *
+        <div class="space-y-2">
+          <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400">
+            Document Title *
           </label>
-          <input type="text" [(ngModel)]="newRecord.title" placeholder="e.g., Complete Blood Count, Chest X-Ray..."
-            class="w-full px-4 py-3.5 bg-[var(--surface-secondary)] border border-[var(--border-color)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)] transition-all" />
-        </div>
-
-        <!-- Description -->
-        <div>
-          <label class="block text-sm font-semibold text-[var(--text-primary)] mb-2">
-            <i class="bi bi-text-paragraph mr-1.5 text-[var(--primary)]"></i>Description
-          </label>
-          <input type="text" [(ngModel)]="newRecord.description" placeholder="Brief description of the record..."
-            class="w-full px-4 py-3.5 bg-[var(--surface-secondary)] border border-[var(--border-color)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)] transition-all" />
+          <div class="relative">
+            <i class="bi bi-card-heading absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+            <input type="text" [(ngModel)]="newRecord.title" placeholder="e.g., Complete Blood Count, Chest X-Ray..."
+              class="w-full pl-11 pr-4 py-4 bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/5 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#1DB954] transition-all font-semibold text-[var(--text-primary)]" />
+          </div>
         </div>
 
         <!-- Notes -->
-        <div>
-          <label class="block text-sm font-semibold text-[var(--text-primary)] mb-2">
-            <i class="bi bi-journal-text mr-1.5 text-[var(--primary)]"></i>Clinical Notes
+        <div class="space-y-2">
+          <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400">
+            Clinical Observations
           </label>
-          <textarea [(ngModel)]="newRecord.notes" rows="4" placeholder="Add clinical notes, observations, findings..."
-            class="w-full px-4 py-3.5 bg-[var(--surface-secondary)] border border-[var(--border-color)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)] transition-all resize-none"></textarea>
+          <textarea [(ngModel)]="newRecord.notes" rows="4" placeholder="Add clinical notes, findings or observations..."
+            class="w-full px-6 py-4 bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/5 rounded-3xl focus:outline-none focus:ring-2 focus:ring-[#1DB954] transition-all resize-none font-semibold text-[var(--text-primary)]"></textarea>
         </div>
 
-        <!-- Status -->
-        <div>
-          <label class="block text-sm font-semibold text-[var(--text-primary)] mb-2">
-            <i class="bi bi-shield-check mr-1.5 text-[var(--primary)]"></i>Status
+        <!-- Status Selection -->
+        <div class="space-y-3">
+          <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 px-1">
+            Verification Status
           </label>
-          <div class="flex gap-3">
+          <div class="flex gap-4">
             <label class="flex-1 cursor-pointer">
               <input type="radio" [(ngModel)]="newRecord.status" value="pending" class="hidden peer" />
               <div
-                class="px-4 py-3 rounded-xl border-2 border-[var(--border-color)] peer-checked:border-amber-500 peer-checked:bg-amber-50 dark:peer-checked:bg-amber-900/20 flex items-center justify-center gap-2 transition-all">
-                <i class="bi bi-hourglass-split text-amber-600"></i>
-                <span class="font-medium text-sm">Pending</span>
+                class="px-6 py-4 rounded-2xl border-2 border-slate-100 dark:border-white/5 peer-checked:border-amber-500 peer-checked:bg-amber-500/5 flex items-center justify-center gap-3 transition-all">
+                <i class="bi bi-hourglass-split text-amber-500"></i>
+                <span class="font-bold text-sm text-[var(--text-primary)]">Pending Review</span>
               </div>
             </label>
             <label class="flex-1 cursor-pointer">
               <input type="radio" [(ngModel)]="newRecord.status" value="verified" class="hidden peer" />
               <div
-                class="px-4 py-3 rounded-xl border-2 border-[var(--border-color)] peer-checked:border-emerald-500 peer-checked:bg-emerald-50 dark:peer-checked:bg-emerald-900/20 flex items-center justify-center gap-2 transition-all">
-                <i class="bi bi-check-circle text-emerald-600"></i>
-                <span class="font-medium text-sm">Verified</span>
+                class="px-6 py-4 rounded-2xl border-2 border-slate-100 dark:border-white/5 peer-checked:border-[#1DB954] peer-checked:bg-[#1DB954]/5 flex items-center justify-center gap-3 transition-all">
+                <i class="bi bi-shield-check text-[#1DB954]"></i>
+                <span class="font-bold text-sm text-[var(--text-primary)]">Verified</span>
               </div>
             </label>
           </div>
@@ -344,131 +341,184 @@
 
       <!-- Modal Footer -->
       <div
-        class="sticky bottom-0 flex items-center justify-end gap-3 p-6 pt-4 bg-[var(--surface-primary)] border-t border-[var(--border-color)] rounded-b-3xl">
+        class="sticky bottom-0 flex items-center justify-end gap-4 p-8 pt-4 bg-white dark:bg-[#121212] border-t border-slate-100 dark:border-white/5">
         <button (click)="closeCreateModal()"
-          class="px-6 py-3 rounded-xl font-medium hover:bg-[var(--surface-secondary)] transition-all text-[var(--text-secondary)]">
-          Cancel
+          class="px-8 py-4 rounded-2xl font-black text-sm text-slate-500 hover:bg-slate-100 dark:hover:bg-white/5 transition-all">
+          Discard
         </button>
-        <button (click)="submitRecord()" [disabled]="isCreating()"
-          class="px-8 py-3 bg-gradient-to-r from-[var(--primary)] to-emerald-600 text-white rounded-xl font-semibold hover:shadow-lg hover:shadow-emerald-500/25 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2">
-          <i class="bi bi-check-lg" *ngIf="!isCreating()"></i>
-          <i class="bi bi-arrow-repeat animate-spin" *ngIf="isCreating()"></i>
-          {{ isCreating() ? 'Creating...' : 'Create Record' }}
+        <button (click)="submitRecord()" [disabled]="isCreating() || !newRecord.title"
+          class="px-10 py-4 text-white rounded-2xl font-black text-sm shadow-xl transition-all active:scale-95 disabled:opacity-50 verify-btn flex items-center gap-3">
+          <i class="bi bi-cloud-upload-fill text-lg" *ngIf="!isCreating()"></i>
+          <div class="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" *ngIf="isCreating()">
+          </div>
+          {{ isCreating() ? 'Saving Document...' : 'Securely Save' }}
         </button>
       </div>
     </div>
   </div>
 
-  <!-- ====== DETAIL MODAL ====== -->
-  <div *ngIf="showDetailModal() && selectedRecord()" class="fixed inset-0 z-50 flex items-center justify-center p-4"
-    (click)="closeDetailModal()">
-    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
-    <div
-      class="relative bg-[var(--surface-primary)] rounded-3xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-[var(--border-color)]"
+  <!-- ====== PREMIUM DETAIL MODAL ====== -->
+  <div *ngIf="showDetailModal() && selectedRecord()"
+    class="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-6" (click)="closeDetailModal()">
+
+    <!-- Backdrop with Blur -->
+    <div @backdropFade class="absolute inset-0 bg-slate-900/40 backdrop-blur-md"></div>
+
+    <!-- Modal Container -->
+    <div @modalScale
+      class="relative bg-white dark:bg-[#121212] rounded-[2.5rem] shadow-[0_25px_70px_-15px_rgba(0,0,0,0.4)] w-full max-w-2xl max-h-[90vh] overflow-hidden border border-white/20 dark:border-white/10 flex flex-col modal-container"
       (click)="$event.stopPropagation()">
-      <!-- Detail Header -->
-      <div
-        class="sticky top-0 z-10 flex items-center justify-between p-6 pb-4 bg-[var(--surface-primary)] border-b border-[var(--border-color)] rounded-t-3xl">
-        <div class="flex items-center gap-4">
-          <div class="w-14 h-14 rounded-xl flex items-center justify-center" [ngClass]="{
-              'bg-purple-100 dark:bg-purple-900/30': selectedRecord()!.type === 'lab',
-              'bg-cyan-100 dark:bg-cyan-900/30': selectedRecord()!.type === 'imaging',
-              'bg-emerald-100 dark:bg-emerald-900/30': selectedRecord()!.type === 'prescription',
-              'bg-orange-100 dark:bg-orange-900/30': selectedRecord()!.type === 'diagnosis',
-              'bg-gray-100 dark:bg-gray-800': selectedRecord()!.type === 'other'
-            }">
-            <i class="text-2xl" [class]="getRecordTypeIcon(selectedRecord()!.type)" [ngClass]="{
-                'text-purple-600': selectedRecord()!.type === 'lab',
-                'text-cyan-600': selectedRecord()!.type === 'imaging',
-                'text-emerald-600': selectedRecord()!.type === 'prescription',
-                'text-orange-600': selectedRecord()!.type === 'diagnosis',
-                'text-gray-600': selectedRecord()!.type === 'other'
-              }"></i>
-          </div>
+
+      <!-- Modal Header -->
+      <div class="p-8 pb-6 flex items-start justify-between relative overflow-hidden">
+        <!-- Background Accent -->
+        <div class="absolute top-0 right-0 w-32 h-32 bg-[#1DB954]/5 rounded-full -mr-16 -mt-16 blur-3xl"></div>
+
+        <div class="flex items-center gap-6 relative">
           <div>
-            <h2 class="text-xl font-bold text-[var(--text-primary)]">{{ selectedRecord()!.title ||
-              getRecordTypeLabel(selectedRecord()!.type) }}</h2>
-            <div class="flex items-center gap-2 mt-1">
-              <span class="text-sm text-[var(--text-secondary)]">{{ getRecordTypeLabel(selectedRecord()!.type) }}</span>
-              <span class="w-1 h-1 rounded-full bg-[var(--text-muted)]"></span>
-              <span class="px-2 py-0.5 rounded-full text-xs font-semibold" [ngClass]="{
-                  'bg-emerald-100 text-emerald-700': selectedRecord()!.status === 'verified',
-                  'bg-amber-100 text-amber-700': selectedRecord()!.status === 'pending' || !selectedRecord()!.status,
-                  'bg-red-100 text-red-700': selectedRecord()!.status === 'rejected'
+            <div class="flex items-center gap-3 mb-1">
+              <h2 class="text-2xl font-black text-[var(--text-primary)] tracking-tight">
+                {{ selectedRecord()!.title || getRecordTypeLabel(selectedRecord()!.type) }}
+              </h2>
+              <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest shadow-sm" [ngClass]="{
+                  'bg-[#1DB954]/10 text-[#1DB954] border border-[#1DB954]/20': selectedRecord()!.status === 'verified',
+                  'bg-amber-100 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400 border border-amber-500/20': selectedRecord()!.status === 'pending' || !selectedRecord()!.status,
+                  'bg-red-100 text-red-700 dark:bg-red-500/10 dark:text-red-400 border border-red-500/20': selectedRecord()!.status === 'rejected'
                 }">
-                {{ (selectedRecord()!.status || 'pending') | titlecase }}
+                {{ (selectedRecord()!.status || 'pending') }}
               </span>
             </div>
+            <p class="text-[var(--text-secondary)] font-medium flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-[#1DB954]"></span>
+              {{ getRecordTypeLabel(selectedRecord()!.type) }}
+            </p>
           </div>
         </div>
+
         <button (click)="closeDetailModal()"
-          class="w-10 h-10 rounded-xl hover:bg-[var(--surface-secondary)] flex items-center justify-center transition-colors">
-          <i class="bi bi-x-lg text-[var(--text-secondary)]"></i>
+          class="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-white/5 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-500 flex items-center justify-center transition-all duration-300 group shadow-sm">
+          <i class="bi bi-x-lg text-lg group-hover:scale-110"></i>
         </button>
       </div>
 
-      <!-- Detail Body -->
-      <div class="p-6 space-y-6">
+      <!-- Modal Body (Scrollable) -->
+      <div class="flex-1 overflow-y-auto custom-scrollbar p-8 pt-0 space-y-8">
+
         <!-- Info Grid -->
-        <div class="grid grid-cols-2 gap-4">
-          <div class="bg-[var(--surface-secondary)] rounded-xl p-4">
-            <p class="text-xs text-[var(--text-muted)] mb-1 uppercase tracking-wider">Patient</p>
-            <div class="flex items-center gap-2">
-              <div
-                class="w-8 h-8 rounded-full bg-gradient-to-br from-[var(--primary)] to-emerald-600 flex items-center justify-center text-white text-xs font-bold">
-                {{ getPatientInitials(getPatientName(selectedRecord()!)) }}
-              </div>
-              <p class="font-semibold text-[var(--text-primary)]">{{ getPatientName(selectedRecord()!) }}</p>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div
+            class="bg-slate-50 dark:bg-white/5 rounded-3xl p-4 border border-slate-100 dark:border-white/5 transition-hover metric-card group">
+            <p class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider mb-1">Record
+              Date</p>
+            <p class="text-sm font-bold text-[var(--text-primary)] leading-tight">{{ selectedRecord()!.recordDate |
+              date:'mediumDate' }}</p>
+          </div>
+
+          <div
+            class="bg-slate-50 dark:bg-white/5 rounded-3xl p-4 border border-slate-100 dark:border-white/5 transition-hover metric-card group">
+            <p class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider mb-1">Created At
+            </p>
+            <p class="text-sm font-bold text-[var(--text-primary)] leading-tight">{{ selectedRecord()!.createdAt |
+              date:'shortDate' }}</p>
+          </div>
+
+          <div
+            class="bg-slate-50 dark:bg-white/5 rounded-3xl p-4 border border-slate-100 dark:border-white/5 transition-hover metric-card group">
+            <p class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider mb-1">File Size
+            </p>
+            <p class="text-sm font-bold text-[var(--text-primary)] leading-tight">{{
+              formatFileSize(selectedRecord()!.fileSize) }}</p>
+          </div>
+
+          <div
+            class="bg-slate-50 dark:bg-white/5 rounded-3xl p-4 border border-slate-100 dark:border-white/5 transition-hover metric-card group">
+            <p class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider mb-1">Reference
+            </p>
+            <p class="text-sm font-bold text-[var(--text-primary)] leading-tight">#{{
+              selectedRecord()!.id.substring(0,6).toUpperCase() }}</p>
+          </div>
+        </div>
+
+        <!-- Patient Info Card -->
+        <div class="space-y-3">
+          <label
+            class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500 flex items-center gap-2 px-2">
+            <i class="bi bi-person-badge"></i> Assigned Patient
+          </label>
+          <div
+            class="flex items-center gap-4 bg-slate-50 dark:bg-white/5 p-4 rounded-3xl border border-slate-100 dark:border-white/5">
+            <div
+              class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-[#1DB954]/20 to-emerald-500/20 flex items-center justify-center text-[#1DB954] font-black text-lg shadow-sm">
+              {{ getPatientInitials(getPatientName(selectedRecord()!)) }}
+            </div>
+            <div>
+              <p class="font-bold text-[var(--text-primary)] leading-none mb-1">{{ getPatientName(selectedRecord()!) }}
+              </p>
+              <p class="text-xs text-[var(--text-secondary)]">Patient ID: {{ selectedRecord()!.patientId }}</p>
             </div>
           </div>
-          <div class="bg-[var(--surface-secondary)] rounded-xl p-4">
-            <p class="text-xs text-[var(--text-muted)] mb-1 uppercase tracking-wider">Record Date</p>
-            <p class="font-semibold text-[var(--text-primary)]">{{ selectedRecord()!.recordDate | date:'longDate' }}</p>
+        </div>
+
+        <!-- Description Panel -->
+        <div *ngIf="selectedRecord()!.description" class="relative group">
+          <div
+            class="absolute -inset-0.5 bg-gradient-to-r from-[#1DB954] to-emerald-400 rounded-[2rem] blur opacity-5 group-hover:opacity-10 transition duration-500">
           </div>
-          <div class="bg-[var(--surface-secondary)] rounded-xl p-4">
-            <p class="text-xs text-[var(--text-muted)] mb-1 uppercase tracking-wider">Created</p>
-            <p class="font-semibold text-[var(--text-primary)]">{{ selectedRecord()!.createdAt | date:'medium' }}</p>
-          </div>
-          <div class="bg-[var(--surface-secondary)] rounded-xl p-4">
-            <p class="text-xs text-[var(--text-muted)] mb-1 uppercase tracking-wider">File Size</p>
-            <p class="font-semibold text-[var(--text-primary)]">{{ formatFileSize(selectedRecord()!.fileSize) }}</p>
+          <div
+            class="relative bg-white dark:bg-[#181818] border border-slate-100 dark:border-white/5 rounded-[2rem] p-6">
+            <div class="flex items-center gap-3 mb-4">
+              <div class="w-10 h-10 rounded-2xl bg-[#1DB954]/10 text-[#1DB954] flex items-center justify-center">
+                <i class="bi bi-file-earmark-text"></i>
+              </div>
+              <p class="font-black text-xs uppercase tracking-widest text-slate-400 dark:text-slate-500">Record
+                Description</p>
+            </div>
+            <p class="text-slate-700 dark:text-slate-300 leading-relaxed font-semibold">
+              {{ selectedRecord()!.description }}
+            </p>
           </div>
         </div>
 
-        <!-- Description -->
-        <div *ngIf="selectedRecord()!.description" class="bg-[var(--surface-secondary)] rounded-xl p-4">
-          <p class="text-xs text-[var(--text-muted)] mb-2 uppercase tracking-wider">Description</p>
-          <p class="text-[var(--text-primary)]">{{ selectedRecord()!.description }}</p>
-        </div>
-
-        <!-- Notes -->
-        <div *ngIf="selectedRecord()!.notes" class="bg-[var(--surface-secondary)] rounded-xl p-4">
-          <p class="text-xs text-[var(--text-muted)] mb-2 uppercase tracking-wider">Clinical Notes</p>
-          <p class="text-[var(--text-primary)] whitespace-pre-line">{{ selectedRecord()!.notes }}</p>
+        <!-- clinical Notes Panel -->
+        <div *ngIf="selectedRecord()!.notes" class="space-y-4">
+          <div class="flex items-center gap-3 px-2">
+            <div class="w-1 h-6 bg-[#1DB954] rounded-full"></div>
+            <p class="font-black text-xs uppercase tracking-widest text-slate-400 dark:text-slate-500">Clinical
+              Observations</p>
+          </div>
+          <div class="bg-slate-50 dark:bg-white/5 rounded-[2rem] p-6 border border-slate-100 dark:border-white/5">
+            <p class="text-slate-600 dark:text-slate-400 leading-relaxed whitespace-pre-line italic">
+              "{{ selectedRecord()!.notes }}"
+            </p>
+          </div>
         </div>
       </div>
 
-      <!-- Detail Footer -->
+      <!-- Modal Footer -->
       <div
-        class="sticky bottom-0 flex items-center justify-between gap-3 p-6 pt-4 bg-[var(--surface-primary)] border-t border-[var(--border-color)] rounded-b-3xl">
-        <div class="flex gap-2">
+        class="p-8 pt-4 bg-slate-50 dark:bg-white/5 border-t border-slate-100 dark:border-white/10 flex items-center justify-between gap-4">
+        <div class="flex items-center gap-3 flex-1">
           <button *ngIf="selectedRecord()!.status !== 'verified'" (click)="verifyRecord(selectedRecord()!)"
-            class="px-5 py-2.5 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 rounded-xl font-medium hover:bg-emerald-100 transition-all flex items-center gap-2 text-sm">
-            <i class="bi bi-check-circle"></i> Verify
+            class="flex-1 px-8 py-4 text-white rounded-2xl font-black text-sm transition-all duration-300 hover:-translate-y-1 active:scale-95 flex items-center justify-center gap-2 verify-btn">
+            <i class="bi bi-shield-check text-lg"></i>
+            Verify Document
           </button>
+
           <button *ngIf="selectedRecord()!.status !== 'rejected'" (click)="rejectRecord(selectedRecord()!)"
-            class="px-5 py-2.5 bg-red-50 dark:bg-red-900/20 text-red-600 rounded-xl font-medium hover:bg-red-100 transition-all flex items-center gap-2 text-sm">
-            <i class="bi bi-x-circle"></i> Reject
+            class="px-8 py-4 bg-white dark:bg-white/5 text-slate-600 dark:text-slate-300 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-500 rounded-2xl font-bold text-sm transition-all border border-slate-200 dark:border-white/10 hover:border-red-500/30 flex items-center justify-center gap-2">
+            <i class="bi bi-x-circle"></i>
+            Reject
           </button>
         </div>
-        <div class="flex gap-2">
+
+        <div class="flex items-center gap-3">
           <button *ngIf="selectedRecord()!.fileUrl" (click)="downloadRecord(selectedRecord()!)"
-            class="px-5 py-2.5 bg-blue-50 dark:bg-blue-900/20 text-blue-600 rounded-xl font-medium hover:bg-blue-100 transition-all flex items-center gap-2 text-sm">
-            <i class="bi bi-download"></i> Download
+            class="w-14 h-14 bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 hover:bg-[#1DB954] hover:text-white rounded-2xl transition-all duration-300 flex items-center justify-center shadow-sm">
+            <i class="bi bi-download text-xl"></i>
           </button>
           <button (click)="deleteRecord(selectedRecord()!)"
-            class="px-5 py-2.5 bg-red-50 dark:bg-red-900/20 text-red-600 rounded-xl font-medium hover:bg-red-100 transition-all flex items-center gap-2 text-sm">
-            <i class="bi bi-trash"></i> Delete
+            class="w-14 h-14 bg-red-50 dark:bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white rounded-2xl transition-all duration-300 flex items-center justify-center shadow-sm">
+            <i class="bi bi-trash-fill text-xl"></i>
           </button>
         </div>
       </div>

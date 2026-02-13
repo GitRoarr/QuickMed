@@ -31,7 +31,7 @@ export class AppointmentsComponent implements OnInit {
   selectedPatient = signal<string>('all');
   viewMode = signal<'list' | 'calendar'>('list');
   totalAppointments = signal(0);
-  
+
   // Sidebar menu items (for app-sidebar usage in template)
   menuItems: { label: string; icon: string; route: string }[] = [
     { label: 'Overview', icon: 'bi-grid', route: '/admin/overview' },
@@ -43,27 +43,27 @@ export class AppointmentsComponent implements OnInit {
     { label: 'Analytics', icon: 'bi-bar-chart', route: '/admin/analytics' },
     { label: 'Settings', icon: 'bi-gear', route: '/admin/settings' },
   ];
-  
+
   // Notification state
   showNotificationDropdown = signal(false);
   notifications = signal<Notification[]>([]);
   unreadCount = signal(0);
   isLoadingNotifications = signal(false);
-  
+
   // Calendar state
   showCalendarModal = signal(false);
-  
+
   calendarDate = signal(new Date());
   calendarAppointments = signal<{ [key: string]: Appointment[] }>({});
 
   // Row action menu state
   activeMenuId = signal<string | null>(null);
-  
+
   // Search debounce
   private searchSubject = new Subject<string>();
   private patientSearchSubject = new Subject<string>();
   private doctorSearchSubject = new Subject<string>();
-  
+
   // New appointment form
   showNewAppointmentModal = signal(false);
   newAppointment = signal({
@@ -92,7 +92,7 @@ export class AppointmentsComponent implements OnInit {
   patientSearchLoading = signal(false);
   doctorSearchLoading = signal(false);
   timeSlots = signal<string[]>([]);
-  
+
   // Map frontend types to backend enum values
   getAppointmentTypeEnum(type: string): string {
     const typeMap: { [key: string]: string } = {
@@ -104,7 +104,7 @@ export class AppointmentsComponent implements OnInit {
     };
     return typeMap[type] || 'Consultation';
   }
-  
+
   alertMessage = signal<{ type: 'success' | 'error', text: string } | null>(null);
 
   notificationService = inject(NotificationService);
@@ -144,7 +144,7 @@ export class AppointmentsComponent implements OnInit {
     this.loadPatientsAndDoctors();
     this.loadNotifications();
     this.loadUnreadCount();
-    
+
     // Auto-refresh notifications every 30 seconds
     setInterval(() => {
       this.loadUnreadCount();
@@ -161,7 +161,7 @@ export class AppointmentsComponent implements OnInit {
     this.isLoading.set(true);
     const search = this.searchQuery().trim() || undefined;
     const status = this.selectedStatus() !== 'all' ? this.selectedStatus() : undefined;
-    
+
     this.adminService.getAllAppointments(1, 1000, status, search).subscribe({
       next: (response) => {
         this.appointments.set(response.data);
@@ -179,12 +179,12 @@ export class AppointmentsComponent implements OnInit {
 
   applyFilters() {
     let filtered = [...this.appointments()];
-    
+
     // Filter by status
     if (this.selectedStatus() !== 'all') {
       filtered = filtered.filter(apt => apt.status === this.selectedStatus());
     }
-    
+
     // Filter by date
     if (this.selectedDate()) {
       const selectedDateStr = new Date(this.selectedDate()).toISOString().split('T')[0];
@@ -193,17 +193,17 @@ export class AppointmentsComponent implements OnInit {
         return aptDate === selectedDateStr;
       });
     }
-    
+
     // Filter by doctor
     if (this.selectedDoctor() !== 'all') {
       filtered = filtered.filter(apt => apt.doctorId === this.selectedDoctor());
     }
-    
+
     // Filter by patient
     if (this.selectedPatient() !== 'all') {
       filtered = filtered.filter(apt => apt.patientId === this.selectedPatient());
     }
-    
+
     // Apply search filter
     const searchTerm = this.searchQuery().toLowerCase().trim();
     if (searchTerm) {
@@ -213,22 +213,22 @@ export class AppointmentsComponent implements OnInit {
         const type = this.getAppointmentType(apt).toLowerCase();
         const reason = (apt.reason || '').toLowerCase();
         const location = (apt.location || '').toLowerCase();
-        
+
         return patientName.includes(searchTerm) ||
-               doctorName.includes(searchTerm) ||
-               type.includes(searchTerm) ||
-               reason.includes(searchTerm) ||
-               location.includes(searchTerm);
+          doctorName.includes(searchTerm) ||
+          type.includes(searchTerm) ||
+          reason.includes(searchTerm) ||
+          location.includes(searchTerm);
       });
     }
-    
+
     // Sort by date and time
     filtered.sort((a, b) => {
       const dateA = new Date(`${a.appointmentDate}T${a.appointmentTime}`);
       const dateB = new Date(`${b.appointmentDate}T${b.appointmentTime}`);
       return dateA.getTime() - dateB.getTime();
     });
-    
+
     this.filteredAppointments.set(filtered);
     this.updateCalendarAppointments();
   }
@@ -393,7 +393,7 @@ export class AppointmentsComponent implements OnInit {
 
   createAppointment() {
     const form = this.newAppointment();
-    
+
     if (!form.patientId || !form.doctorId || !form.appointmentDate || !form.appointmentTime) {
       this.showAlert('error', 'Please fill in all required fields (Patient, Doctor, Date, Time)');
       return;
@@ -401,7 +401,7 @@ export class AppointmentsComponent implements OnInit {
 
     // Format date properly for backend
     const appointmentDate = new Date(form.appointmentDate).toISOString().split('T')[0];
-    
+
     const payload: any = {
       patientId: form.patientId,
       doctorId: form.doctorId,
@@ -471,6 +471,10 @@ export class AppointmentsComponent implements OnInit {
         return '#3b82f6'; // Blue
       case 'cancelled':
         return '#ef4444'; // Red
+      case 'missed':
+        return '#9ca3af'; // Gray-400
+      case 'overdue':
+        return '#dc2626'; // Red-600
       default:
         return '#6b7280'; // Gray
     }
@@ -492,7 +496,7 @@ export class AppointmentsComponent implements OnInit {
     const today = new Date();
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
-    
+
     if (date.toDateString() === today.toDateString()) {
       return 'Today';
     } else if (date.toDateString() === tomorrow.toDateString()) {
@@ -551,7 +555,7 @@ export class AppointmentsComponent implements OnInit {
       this.closeActionMenu();
       return;
     }
-    this.adminService.updateAppointment(appointment.id, { status }).subscribe({
+    this.adminService.updateAppointment(appointment.id, { status: status as any }).subscribe({
       next: () => {
         this.showAlert('success', `Appointment marked as ${status}.`);
         this.closeActionMenu();
@@ -596,25 +600,25 @@ export class AppointmentsComponent implements OnInit {
     const currentDate = new Date(this.calendarDate());
     const firstDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
     const lastDay = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
-    
+
     // Start from the first day of the week
     const startDate = new Date(firstDay);
     startDate.setDate(startDate.getDate() - startDate.getDay());
-    
+
     // Generate 42 days (6 weeks)
     for (let i = 0; i < 42; i++) {
       const date = new Date(startDate);
       date.setDate(startDate.getDate() + i);
       const dateKey = date.toISOString().split('T')[0];
       const appointments = this.calendarAppointments()[dateKey] || [];
-      
+
       days.push({
         date,
         appointments,
         hasAppointments: appointments.length > 0
       });
     }
-    
+
     return days;
   }
 

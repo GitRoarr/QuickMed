@@ -10,7 +10,7 @@ import { Appointment, CreateAppointmentRequest, UpdateAppointmentRequest } from 
 export class AppointmentService {
   private readonly API_URL = `${environment.apiUrl}/appointments`
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   create(data: CreateAppointmentRequest): Observable<Appointment> {
     return this.http.post<Appointment>(this.API_URL, data)
@@ -44,12 +44,16 @@ export class AppointmentService {
     return this.http.patch<Appointment>(`${this.API_URL}/${id}`, data)
   }
 
+  confirm(id: string): Observable<Appointment> {
+    return this.http.patch<Appointment>(`${this.API_URL}/${id}/confirm`, {})
+  }
+
   cancel(id: string): Observable<Appointment> {
     return this.http.patch<Appointment>(`${this.API_URL}/${id}/cancel`, {})
   }
 
-  delete(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.API_URL}/${id}`)
+  delete(id: string): Observable<Appointment> {
+    return this.http.delete<Appointment>(`${this.API_URL}/${id}`)
   }
 
   getPendingCount(): Observable<{ count: number }> {

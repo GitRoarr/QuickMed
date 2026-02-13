@@ -2,6 +2,7 @@ import { Injectable } from "@angular/core"
 import { HttpClient, HttpParams } from "@angular/common/http"
 import { Observable, map } from "rxjs"
 import { environment } from "../../../environments/environment"
+import { AppointmentStatus } from "../models/appointment.model"
 
 export interface User {
   id: string
@@ -21,10 +22,10 @@ export interface User {
   isActive: boolean
   licenseValidated?: boolean
   employmentConfirmed?: boolean
+  department?: string
   createdAt: Date
   updatedAt: Date
   password?: string
-
 }
 
 export interface Appointment {
@@ -33,7 +34,7 @@ export interface Appointment {
   doctorId: string
   appointmentDate: string
   appointmentTime: string
-  status: "pending" | "confirmed" | "completed" | "cancelled"
+  status: AppointmentStatus
   notes?: string
   isVideoConsultation: boolean
   location?: string
@@ -283,8 +284,33 @@ export class AdminService {
     return this.http.get<DoctorOverviewResponse>(`${this.apiUrl}/doctors/overview`, { params })
   }
 
-  inviteReceptionist(data: { firstName: string; lastName: string; email: string; phoneNumber?: string }): Observable<any> {
+  inviteReceptionist(data: { firstName: string; lastName: string; email: string; phoneNumber?: string; department?: string; personalMessage?: string }): Observable<any> {
     return this.http.post<any>(`${this.apiUrl}/receptionists/invite`, data)
+  }
+
+  resendReceptionistInvite(userId: string): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/receptionists/invite/resend`, { userId })
+  }
+
+  revokeReceptionistInvite(userId: string, reason?: string): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/receptionists/invite/revoke`, { userId, reason })
+  }
+
+  bulkInviteReceptionists(invites: Array<{ firstName: string; lastName: string; email: string; phoneNumber?: string }>): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/receptionists/invite/bulk`, { invites })
+  }
+
+  listReceptionistInvitations(filters?: { status?: string; search?: string; page?: number; limit?: number }): Observable<any> {
+    let params = new HttpParams()
+    if (filters?.status) params = params.set("status", filters.status)
+    if (filters?.search) params = params.set("search", filters.search)
+    if (filters?.page) params = params.set("page", filters.page.toString())
+    if (filters?.limit) params = params.set("limit", filters.limit.toString())
+    return this.http.get<any>(`${this.apiUrl}/receptionists/invitations`, { params })
+  }
+
+  getReceptionistInvitationStats(): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/receptionists/invitations/stats`)
   }
 
   getAnalytics(startDate?: string, endDate?: string): Observable<any> {

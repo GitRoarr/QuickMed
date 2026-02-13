@@ -1,7 +1,8 @@
-import { Module } from "@nestjs/common";
+import { Module, OnModuleInit } from "@nestjs/common";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { ScheduleModule } from "@nestjs/schedule";
 import { TypeOrmModule } from "@nestjs/typeorm";
+import { DataSource } from "typeorm";
 import { join } from "path";
 
 import { AuthModule } from "./auth/auth.module";
@@ -65,4 +66,25 @@ import { WebRtcModule } from "./webrtc/webrtc.module";
     WebRtcModule,
   ],
 })
-export class AppModule { }
+export class AppModule implements OnModuleInit {
+  constructor(private dataSource: DataSource) { }
+
+  async onModuleInit() {
+    try {
+      if (this.dataSource.driver.options.type === 'postgres') {
+        const queryRunner = this.dataSource.createQueryRunner();
+        await queryRunner.connect();
+        try {
+          await queryRunner.query(`ALTER TYPE appointment_status_enum ADD VALUE IF NOT EXISTS 'missed'`);
+          await queryRunner.query(`ALTER TYPE appointment_status_enum ADD VALUE IF NOT EXISTS 'overdue'`);
+        } catch (e) {
+          console.warn('Failed to update appointment_status_enum (might already exist or wrong name)', e);
+        } finally {
+          await queryRunner.release();
+        }
+      }
+    } catch (e) {
+      console.error('Error in onModuleInit', e);
+    }
+  }
+}

@@ -39,6 +39,13 @@ export const routes: Routes = [
       ),
   },
   {
+    path: "reset-password",
+    loadComponent: () =>
+      import("./features/auth/reset-password/reset-password.component").then(
+        (m) => m.ResetPasswordComponent
+      ),
+  },
+  {
     path: "auth/callback",
     loadComponent: () =>
       import("./features/auth/auth-callback/auth-callback.component").then(
@@ -356,6 +363,14 @@ export const routes: Routes = [
       {
         path: 'schedule',
         loadComponent: () => import('./features/receptionist/schedule/schedule.component').then(m => m.ReceptionistScheduleComponent)
+      },
+      {
+        path: 'settings',
+        loadComponent: () => import('./features/receptionist/settings/settings.component').then(m => m.SettingsComponent)
+      },
+      {
+        path: 'logout',
+        loadComponent: () => import('./features/receptionist/logout/logout.component').then(m => m.LogoutComponent)
       },
       {
         path: '',

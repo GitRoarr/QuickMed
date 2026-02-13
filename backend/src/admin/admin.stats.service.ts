@@ -3,8 +3,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Between } from 'typeorm';
 import { User } from '../users/entities/user.entity';
 import { Appointment } from '../appointments/entities/appointment.entity';
-import { UserRole, AppointmentStatus } from '../common/index';
+import { UserRole, AppointmentStatus, PaymentStatus } from '../common/index';
 import { ConsultationsService } from '../consultations/consultations.service';
+import { Payment } from '../payments/entities/payment.entity';
 
 export interface AdminStats {
   totalUsers: number;
@@ -16,6 +17,8 @@ export interface AdminStats {
   confirmedAppointments: number;
   completedAppointments: number;
   cancelledAppointments: number;
+  missedAppointments: number;
+  overdueAppointments: number;
   todayAppointments: number;
   thisWeekAppointments: number;
   thisMonthAppointments: number;
@@ -31,6 +34,8 @@ export class AdminStatsService {
     private userRepository: Repository<User>,
     @InjectRepository(Appointment)
     private appointmentRepository: Repository<Appointment>,
+    @InjectRepository(Payment)
+    private paymentRepository: Repository<Payment>,
     private readonly consultationsService: ConsultationsService,
   ) { }
 
@@ -45,6 +50,8 @@ export class AdminStatsService {
       confirmedAppointments,
       completedAppointments,
       cancelledAppointments,
+      missedAppointments,
+      overdueAppointments,
       todayAppointments,
       thisWeekAppointments,
       thisMonthAppointments,
@@ -58,6 +65,8 @@ export class AdminStatsService {
       this.appointmentRepository.count({ where: { status: AppointmentStatus.CONFIRMED } }),
       this.appointmentRepository.count({ where: { status: AppointmentStatus.COMPLETED } }),
       this.appointmentRepository.count({ where: { status: AppointmentStatus.CANCELLED } }),
+      this.appointmentRepository.count({ where: { status: AppointmentStatus.MISSED } }),
+      this.appointmentRepository.count({ where: { status: AppointmentStatus.OVERDUE } }),
       this.getTodayAppointmentsCount(),
       this.getThisWeekAppointmentsCount(),
       this.getThisMonthAppointmentsCount(),
@@ -73,6 +82,8 @@ export class AdminStatsService {
       confirmedAppointments,
       completedAppointments,
       cancelledAppointments,
+      missedAppointments,
+      overdueAppointments,
       todayAppointments,
       thisWeekAppointments,
       thisMonthAppointments,
@@ -112,10 +123,12 @@ export class AdminStatsService {
   }
 
   private async calculateRevenue(): Promise<number> {
-    const completedAppointments = await this.appointmentRepository.count({
-      where: { status: AppointmentStatus.COMPLETED },
-    });
-    return completedAppointments * 150; // example fixed price
+    const revenueRaw = await this.paymentRepository
+      .createQueryBuilder('payment')
+      .where('payment.status = :status', { status: PaymentStatus.PAID })
+      .select('SUM(payment.amount)', 'sum')
+      .getRawOne();
+    return Number(revenueRaw?.sum || 0);
   }
 
   private async getAverageAppointmentDuration(): Promise<number> {

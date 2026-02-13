@@ -2,12 +2,10 @@ import { Entity, Column, ManyToOne, JoinColumn } from 'typeorm';
 import { BaseEntity } from '../../common/entities/base.entity';
 import { Appointment } from '../../appointments/entities/appointment.entity';
 import { User } from '../../users/entities/user.entity';
+import { PaymentStatus } from '../../common/index';
+export { PaymentStatus };
 
-export enum PaymentStatus {
-  PENDING = 'pending',
-  PAID = 'paid',
-  FAILED = 'failed',
-}
+
 
 export enum PaymentMethod {
   STRIPE = 'stripe',
