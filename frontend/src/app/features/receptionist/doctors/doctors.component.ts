@@ -170,4 +170,13 @@ export class ReceptionistDoctorsComponent implements OnInit {
       }
     });
   }
+
+  getAvailableCount(slots: any[]): number {
+    return (slots || []).filter(s => s.status === 'available').length;
+  }
+
+  getFirstAvailable(slots: any[]): any {
+    return (slots || []).find(s => s.status === 'available');
+  }
 }
+

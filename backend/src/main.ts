@@ -12,8 +12,11 @@ dotenv.config() // fallback to CWD
 async function bootstrap() {
   const app = await NestFactory.create(AppModule)
 
+  // Explicitly restrict CORS to defined origins for production
+  const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:4200';
+
   app.enableCors({
-    origin: true,
+    origin: frontendUrl.split(','), // Support comma-separated list of origins
     credentials: true,
     allowedHeaders: ['Authorization', 'Content-Type', 'Accept', 'x-doctor-id'],
     methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
@@ -29,9 +32,16 @@ async function bootstrap() {
   )
 
   app.setGlobalPrefix("api")
+  app.enableShutdownHooks();
 
   const port = process.env.PORT || 3000
   await app.listen(port)
-  console.log(`Backend API running on http://localhost:${port}/api`)
+
+  // Production logging should be less verbose
+  if (process.env.NODE_ENV !== 'production') {
+    console.log(`Backend API running on http://localhost:${port}/api`)
+    console.log(`CORS allowed for: ${frontendUrl}`)
+  }
 }
 bootstrap()
+

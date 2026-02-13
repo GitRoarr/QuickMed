@@ -65,88 +65,61 @@
             </div>
 
             <div class="availability-timeline">
-              <div class="timeline-section">
-                <div class="section-title">
-                  <div class="title-group">
-                    <i class="bi bi-brightness-high"></i>
-                    Morning
-                    <span class="status-badge" [class.active]="doc.availability?.shifts?.morning?.enabled">
-                      {{ doc.availability?.shifts?.morning?.enabled ? 'Enabled' : 'Disabled' }}
-                    </span>
+              <div class="shift-wrapper" *ngFor="let shift of [
+                { id: 'morning', label: 'Morning', icon: 'bi-brightness-high', slots: doc.groupedSlots.morning, data: doc.availability?.shifts?.morning },
+                { id: 'afternoon', label: 'Afternoon', icon: 'bi-sun', slots: doc.groupedSlots.afternoon, data: doc.availability?.shifts?.afternoon },
+                { id: 'evening', label: 'Evening', icon: 'bi-moon-stars', slots: doc.groupedSlots.evening, data: doc.availability?.shifts?.evening }
+              ]">
+                <div class="shift-header">
+                  <div class="shift-meta">
+                    <i [class]="shift.icon"></i>
+                    <span class="shift-label">{{ shift.label }}</span>
+                    <span class="shift-status" [class.active]="shift.data?.enabled">{{ shift.data?.enabled ? 'Active' :
+                      'Offline' }}</span>
                   </div>
-                  <button class="toggle-btn" (click)="toggleShift(doc, 'morning')">
-                    {{ doc.availability?.shifts?.morning?.enabled ? 'Disable' : 'Enable' }}
-                  </button>
+                  <div class="shift-controls">
+                    <span class="available-count" *ngIf="shift.data?.enabled">{{ getAvailableCount(shift.slots) }}
+                      available</span>
+                    <button class="mini-toggle" (click)="toggleShift(doc, shift.id)">
+                      <i class="bi" [class.bi-toggle-on]="shift.data?.enabled"
+                        [class.bi-toggle-off]="!shift.data?.enabled"></i>
+                    </button>
+                  </div>
                 </div>
-                <div class="slots-row" *ngIf="doc.groupedSlots.morning.length">
-                  <button *ngFor="let slot of doc.groupedSlots.morning" class="slot-chip"
-                    [class.booked]="slot.status === 'booked'" [class.blocked]="slot.status === 'blocked'"
-                    (click)="bookSlot(doc, slot)">
-                    {{ slot.startTime || slot.time }}
-                  </button>
+
+                <!-- NEW: Amazing Availability Bar -->
+                <div class="availability-bar" *ngIf="shift.data?.enabled && shift.slots.length; else disabledState">
+                  <div class="bar-segments">
+                    <div *ngFor="let slot of shift.slots" class="segment" [class.booked]="slot.status === 'booked'"
+                      [class.blocked]="slot.status === 'blocked'" [class.available]="slot.status === 'available'"
+                      (click)="bookSlot(doc, slot)" [attr.data-time]="slot.startTime || slot.time">
+                      <div class="segment-tooltip">{{ slot.startTime || slot.time }} - {{ slot.status }}</div>
+                    </div>
+                  </div>
                 </div>
-                <div class="no-slots"
-                  *ngIf="!doc.groupedSlots.morning.length && doc.availability?.shifts?.morning?.enabled">
-                  No slots in this shift
+
+                <ng-template #disabledState>
+                  <div class="shift-disabled-message">
+                    {{ shift.data?.enabled ? 'No slots scheduled for this period.' : 'Shift is currently disabled.' }}
+                  </div>
+                </ng-template>
+
+                <!-- Quick Action for the nearest slot -->
+                <div class="next-action" *ngIf="shift.data?.enabled && getFirstAvailable(shift.slots) as first">
+                  <p>Next: <span>{{ first.startTime || first.time }}</span></p>
+                  <button (click)="bookSlot(doc, first)">Quick Book</button>
                 </div>
               </div>
 
-              <div class="timeline-section">
-                <div class="section-title">
-                  <div class="title-group">
-                    <i class="bi bi-sun"></i>
-                    Afternoon
-                    <span class="status-badge" [class.active]="doc.availability?.shifts?.afternoon?.enabled">
-                      {{ doc.availability?.shifts?.afternoon?.enabled ? 'Enabled' : 'Disabled' }}
-                    </span>
-                  </div>
-                  <button class="toggle-btn" (click)="toggleShift(doc, 'afternoon')">
-                    {{ doc.availability?.shifts?.afternoon?.enabled ? 'Disable' : 'Enable' }}
-                  </button>
-                </div>
-                <div class="slots-row" *ngIf="doc.groupedSlots.afternoon.length">
-                  <button *ngFor="let slot of doc.groupedSlots.afternoon" class="slot-chip"
-                    [class.booked]="slot.status === 'booked'" [class.blocked]="slot.status === 'blocked'"
-                    (click)="bookSlot(doc, slot)">
-                    {{ slot.startTime || slot.time }}
-                  </button>
-                </div>
-                <div class="no-slots"
-                  *ngIf="!doc.groupedSlots.afternoon.length && doc.availability?.shifts?.afternoon?.enabled">
-                  No slots in this shift
-                </div>
-              </div>
-
-              <div class="timeline-section">
-                <div class="section-title">
-                  <div class="title-group">
-                    <i class="bi bi-moon-stars"></i>
-                    Evening
-                    <span class="status-badge" [class.active]="doc.availability?.shifts?.evening?.enabled">
-                      {{ doc.availability?.shifts?.evening?.enabled ? 'Enabled' : 'Disabled' }}
-                    </span>
-                  </div>
-                  <button class="toggle-btn" (click)="toggleShift(doc, 'evening')">
-                    {{ doc.availability?.shifts?.evening?.enabled ? 'Disable' : 'Enable' }}
-                  </button>
-                </div>
-                <div class="slots-row" *ngIf="doc.groupedSlots.evening.length">
-                  <button *ngFor="let slot of doc.groupedSlots.evening" class="slot-chip"
-                    [class.booked]="slot.status === 'booked'" [class.blocked]="slot.status === 'blocked'"
-                    (click)="bookSlot(doc, slot)">
-                    {{ slot.startTime || slot.time }}
-                  </button>
-                </div>
-                <div class="no-slots"
-                  *ngIf="!doc.groupedSlots.evening.length && doc.availability?.shifts?.evening?.enabled">
-                  No slots in this shift
-                </div>
-              </div>
-
-              <div class="no-slots" *ngIf="!doc.availability?.slots?.length">
-                No availability defined for this date.
+              <!-- Status Legend -->
+              <div class="status-legend" *ngIf="doc.availability?.slots?.length">
+                <div class="legend-item"><span class="dot available"></span> Available</div>
+                <div class="legend-item"><span class="dot booked"></span> Booked</div>
+                <div class="legend-item"><span class="dot blocked"></span> Blocked</div>
               </div>
             </div>
+
+
           </div>
         </article>
       </section>
