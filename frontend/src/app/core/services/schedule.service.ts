@@ -15,12 +15,13 @@ export interface DoctorSlot {
 export type ShiftStatus = 'past' | 'active' | 'upcoming';
 
 export interface Shift {
-  type: 'morning' | 'afternoon' | 'evening';
+  type: 'morning' | 'afternoon' | 'evening' | 'custom';
   startTime: string;
   endTime: string;
   slotDuration: number;
   enabled: boolean;
   status?: ShiftStatus;
+  label?: string;
 }
 
 export interface Break {

@@ -1,18 +1,14 @@
 <div class="receptionist-layout">
   <app-header></app-header>
   <div class="body">
-    <app-sidebar
-      [title]="'QuickMed'"
-      [menuItems]="menuItems"
-      [secondaryItems]="secondaryItems"
-    ></app-sidebar>
+    <app-sidebar [title]="'QuickMed'" [menuItems]="menuItems" [secondaryItems]="secondaryItems"></app-sidebar>
 
     <main class="panel">
       <section class="hero">
         <div>
-          <p class="eyebrow">Messages</p>
-          <h1>Receptionist Inbox</h1>
-          <p class="muted">Send appointment reminders and coordinate care instantly.</p>
+          <p class="eyebrow">Direct Messaging</p>
+          <h1>Secure Messages</h1>
+          <p class="muted">Coordinate patient care and staff communications in real-time.</p>
         </div>
         <div class="hero-actions">
           <button class="ghost" type="button" (click)="loadThreads()">
@@ -22,85 +18,163 @@
         </div>
       </section>
 
-      <section class="messaging">
+      <section class="messaging glass" [class.has-selection]="!!selectedReceiverId()">
         <aside class="thread-panel">
           <div class="panel-head">
-            <h3>Conversations</h3>
-            <input type="text" placeholder="Search" [ngModel]="searchValue" (ngModelChange)="searchValue = $event" />
+            <div class="search-wrapper">
+              <i class="bi bi-search"></i>
+              <input type="text" placeholder="Search conversations..." [ngModel]="searchValue"
+                (ngModelChange)="searchValue = $event" />
+            </div>
           </div>
 
-          <div class="new-message">
-            <p class="muted">Start a new message</p>
-            <div class="selector">
-              <label>
-                <span>Patient</span>
+          <div class="new-message-section">
+            <p class="section-title">Start a new message</p>
+            <div class="selector-grid">
+              <div class="select-group">
+                <i class="bi bi-person"></i>
                 <select (change)="startNewMessage('patient', $any($event.target).value)">
-                  <option value="">Select patient</option>
+                  <option value="">Patient</option>
                   <option *ngFor="let p of patients()" [value]="p.id">
                     {{ p.firstName }} {{ p.lastName }}
                   </option>
                 </select>
-              </label>
-              <label>
-                <span>Doctor</span>
+              </div>
+              <div class="select-group">
+                <i class="bi bi-stethoscope"></i>
                 <select (change)="startNewMessage('doctor', $any($event.target).value)">
-                  <option value="">Select doctor</option>
+                  <option value="">Doctor</option>
                   <option *ngFor="let d of doctors()" [value]="d.id">
                     Dr. {{ d.firstName }} {{ d.lastName }}
                   </option>
                 </select>
-              </label>
+              </div>
             </div>
           </div>
 
-          <div class="thread-list" *ngIf="filteredThreads().length; else emptyThreads">
-            <button
-              class="thread"
-              *ngFor="let thread of filteredThreads()"
-              [class.active]="thread.receiverId === selectedReceiverId()"
-              (click)="selectThread(thread)"
-            >
-              <div class="avatar">
+          <div class="thread-list scroll-area" *ngIf="filteredThreads().length; else emptyThreads">
+            <button class="thread-card" *ngFor="let thread of filteredThreads()"
+              [class.active]="thread.receiverId === selectedReceiverId()" (click)="selectThread(thread)">
+              <div class="avatar-wrapper">
                 <img *ngIf="thread.receiverAvatar" [src]="thread.receiverAvatar" alt="" />
-                <span *ngIf="!thread.receiverAvatar">{{ thread.receiverName.charAt(0) || 'U' }}</span>
+                <div class="avatar-placeholder" *ngIf="!thread.receiverAvatar"
+                  [style.background-color]="'var(--primary-light)'">
+                  {{ thread.receiverName.charAt(0) || 'U' }}
+                </div>
+                <div class="status-indicator online"></div>
               </div>
-              <div class="details">
-                <p class="name">{{ thread.receiverName }}</p>
-                <p class="preview">{{ thread.lastMessage || 'No message yet' }}</p>
+              <div class="thread-info">
+                <div class="thread-top">
+                  <span class="name">{{ thread.receiverName }}</span>
+                  <span class="time">{{ thread.lastMessageAt | date:'shortTime' }}</span>
+                </div>
+                <div class="thread-bottom">
+                  <p class="preview">{{ thread.lastMessage || 'No message yet' }}</p>
+                  <span class="badge" *ngIf="(thread.unreadCount || 0) > 0">{{ thread.unreadCount }}</span>
+                </div>
               </div>
-              <div class="meta">{{ thread.receiverRole | titlecase }}</div>
             </button>
           </div>
           <ng-template #emptyThreads>
-            <p class="muted empty empty-state">No conversations yet.</p>
+            <div class="empty-threads">
+              <i class="bi bi-chat-left-text"></i>
+              <p>No active conversations</p>
+            </div>
           </ng-template>
         </aside>
 
-        <section class="chat-panel">
-          <div class="chat-head" *ngIf="selectedReceiverId(); else emptyChat">
-            <div>
-              <p class="eyebrow">Active chat</p>
-              <h3>{{ selectedThread()?.receiverName || 'New message' }}</h3>
+        <section class="chat-container">
+          <div class="chat-header" *ngIf="selectedReceiverId(); else emptyChat">
+            <div class="header-left">
+              <button class="icon-btn mobile-back-btn" (click)="deselectThread()">
+                <i class="bi bi-arrow-left"></i>
+              </button>
+              <div class="avatar-small">
+                <img *ngIf="selectedThread()?.receiverAvatar" [src]="selectedThread()?.receiverAvatar" alt="" />
+                <span *ngIf="!selectedThread()?.receiverAvatar">{{ selectedThread()?.receiverName?.charAt(0) || 'U'
+                  }}</span>
+              </div>
+              <div>
+                <h3>{{ selectedThread()?.receiverName || 'Direct Message' }}</h3>
+                <p class="status">
+                  <span class="dot online"></span>
+                  Active now
+                </p>
+              </div>
             </div>
-            <span class="chip">{{ selectedReceiverRole() | titlecase }}</span>
+            <div class="header-right">
+              <span class="role-chip">{{ selectedReceiverRole() | titlecase }}</span>
+              <button class="icon-btn"><i class="bi bi-telephone"></i></button>
+              <button class="icon-btn"><i class="bi bi-three-dots-vertical"></i></button>
+            </div>
           </div>
 
-          <div class="messages" *ngIf="selectedReceiverId()">
-            <div class="message message-bubble outgoing" *ngFor="let msg of messages()">
-              <p>{{ msg.content }}</p>
-              <span>{{ msg.createdAt | date:'shortTime' }}</span>
+          <div class="messages-container scroll-area" *ngIf="selectedReceiverId()">
+            <div *ngFor="let msg of messages()" class="message-wrapper"
+              [class.outgoing]="msg.senderId === authService.currentUser()?.id">
+              <div class="message-bubble" [class.gif-bubble]="msg.content.startsWith('![gif]')">
+                <div *ngIf="msg.content.startsWith('![gif]')" class="gif-content">
+                  <img [src]="msg.content.match('(https?://[^)]+)')?.[1]" alt="gif" />
+                </div>
+                <p *ngIf="!msg.content.startsWith('![gif]')">{{ msg.content }}</p>
+                <div class="message-meta">
+                  {{ msg.createdAt | date:'shortTime' }}
+                  <i class="bi bi-check2-all" *ngIf="msg.senderId === authService.currentUser()?.id"></i>
+                </div>
+              </div>
+            </div>
+
+            <div class="typing-indicator" *ngIf="otherUserTyping()">
+              <div class="dot"></div>
+              <div class="dot"></div>
+              <div class="dot"></div>
+              <span>{{ selectedThread()?.receiverName }} is typing...</span>
             </div>
           </div>
 
-          <div class="composer" *ngIf="selectedReceiverId()">
-            <textarea [ngModel]="draftValue" (ngModelChange)="draftValue = $event" placeholder="Write a quick update..."></textarea>
-            <button class="primary" type="button" (click)="send()">Send</button>
+
+          <div class="chat-composer" *ngIf="selectedReceiverId()">
+            <div class="composer-actions">
+              <button class="icon-btn" (click)="toggleEmojiPicker()"><i class="bi bi-emoji-smile"></i></button>
+              <button class="icon-btn" (click)="toggleGifPicker()"><i class="bi bi-images"></i></button>
+              <button class="icon-btn"><i class="bi bi-paperclip"></i></button>
+            </div>
+
+            <div class="input-wrapper">
+              <textarea [ngModel]="draftValue" (ngModelChange)="draftValue = $event"
+                placeholder="Type your message here..." (keydown.enter)="$event.preventDefault(); send()"></textarea>
+            </div>
+
+            <button class="send-btn" [disabled]="!draft().trim()" (click)="send()">
+              <i class="bi bi-send-fill"></i>
+            </button>
+
+            <!-- Floating Pickers -->
+            <div class="emoji-picker glass" *ngIf="showEmojiPicker()">
+              <div class="picker-content">
+                <span *ngFor="let emoji of emojis" (click)="addEmoji(emoji)">{{ emoji }}</span>
+              </div>
+            </div>
+
+            <div class="gif-picker glass" *ngIf="showGifPicker()">
+              <div class="picker-header">
+                <input type="text" placeholder="Search Giphy..." [(ngModel)]="gifSearchQuery"
+                  (keyup.enter)="searchGifs()" />
+              </div>
+              <div class="gif-grid scroll-area">
+                <img *ngFor="let gif of gifs()" [src]="gif.url" (click)="selectGif(gif)" alt="gif" />
+              </div>
+            </div>
           </div>
 
           <ng-template #emptyChat>
-            <div class="empty-state floating">
-              <i class="bi bi-chat-dots"></i>
-              <p>Select a contact to start messaging.</p>
+            <div class="empty-chat-state">
+              <div class="illustration">
+                <i class="bi bi-chat-quote-fill"></i>
+              </div>
+              <h2>Your Conversations</h2>
+              <p>Select a colleague or patient to start messaging. Your messages are secure and encrypted.</p>
+              <button class="primary" (click)="loadThreads()">View All Inboxes</button>
             </div>
           </ng-template>
         </section>

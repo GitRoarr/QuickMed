@@ -1,11 +1,7 @@
 <div class="receptionist-layout">
   <app-header></app-header>
   <div class="body">
-    <app-sidebar
-      [title]="'QuickMed'"
-      [menuItems]="menuItems"
-      [secondaryItems]="secondaryItems"
-    ></app-sidebar>
+    <app-sidebar [title]="'QuickMed'" [menuItems]="menuItems" [secondaryItems]="secondaryItems"></app-sidebar>
 
     <main class="panel">
       <section class="hero">
@@ -28,32 +24,129 @@
 
       <section class="cards" *ngIf="doctors().length; else empty">
         <article class="doc-card" *ngFor="let doc of doctors()">
-          <div class="doc-header">
-            <div class="avatar">
-              <img *ngIf="doc.avatar" [src]="doc.avatar" alt="" />
-              <span *ngIf="!doc.avatar">{{ doc.name.charAt(0) }}</span>
+          <div class="doc-main">
+            <div class="doc-info-group">
+              <div class="doc-header">
+                <div class="avatar">
+                  <img *ngIf="doc.avatar" [src]="doc.avatar" alt="" />
+                  <span *ngIf="!doc.avatar">{{ doc.name.charAt(0) }}</span>
+                </div>
+                <div>
+                  <h3>{{ doc.name }}</h3>
+                  <p class="muted">{{ doc.specialty || 'General' }}</p>
+                </div>
+              </div>
+
+              <div class="stats-grid">
+                <div class="stat-item available">
+                  <span class="label">Available</span>
+                  <span class="value">{{ doc.availability?.available }}</span>
+                </div>
+                <div class="stat-item booked">
+                  <span class="label">Booked</span>
+                  <span class="value">{{ doc.availability?.booked }}</span>
+                </div>
+                <div class="stat-item blocked">
+                  <span class="label">Blocked</span>
+                  <span class="value">{{ doc.availability?.blocked }}</span>
+                </div>
+              </div>
+
+              <div class="actions">
+                <button class="btn-primary-sm" (click)="bookSlot(doc, null)">
+                  <i class="bi bi-calendar-plus"></i>
+                  Book Appointment
+                </button>
+                <button class="btn-secondary-sm" (click)="addCustomSlot(doc)">
+                  <i class="bi bi-plus-circle"></i>
+                  Add Slot
+                </button>
+              </div>
             </div>
-            <div>
-              <h3>{{ doc.name }}</h3>
-              <p class="muted">{{ doc.specialty || 'General' }}</p>
+
+            <div class="availability-timeline">
+              <div class="timeline-section">
+                <div class="section-title">
+                  <div class="title-group">
+                    <i class="bi bi-brightness-high"></i>
+                    Morning
+                    <span class="status-badge" [class.active]="doc.availability?.shifts?.morning?.enabled">
+                      {{ doc.availability?.shifts?.morning?.enabled ? 'Enabled' : 'Disabled' }}
+                    </span>
+                  </div>
+                  <button class="toggle-btn" (click)="toggleShift(doc, 'morning')">
+                    {{ doc.availability?.shifts?.morning?.enabled ? 'Disable' : 'Enable' }}
+                  </button>
+                </div>
+                <div class="slots-row" *ngIf="doc.groupedSlots.morning.length">
+                  <button *ngFor="let slot of doc.groupedSlots.morning" class="slot-chip"
+                    [class.booked]="slot.status === 'booked'" [class.blocked]="slot.status === 'blocked'"
+                    (click)="bookSlot(doc, slot)">
+                    {{ slot.startTime || slot.time }}
+                  </button>
+                </div>
+                <div class="no-slots"
+                  *ngIf="!doc.groupedSlots.morning.length && doc.availability?.shifts?.morning?.enabled">
+                  No slots in this shift
+                </div>
+              </div>
+
+              <div class="timeline-section">
+                <div class="section-title">
+                  <div class="title-group">
+                    <i class="bi bi-sun"></i>
+                    Afternoon
+                    <span class="status-badge" [class.active]="doc.availability?.shifts?.afternoon?.enabled">
+                      {{ doc.availability?.shifts?.afternoon?.enabled ? 'Enabled' : 'Disabled' }}
+                    </span>
+                  </div>
+                  <button class="toggle-btn" (click)="toggleShift(doc, 'afternoon')">
+                    {{ doc.availability?.shifts?.afternoon?.enabled ? 'Disable' : 'Enable' }}
+                  </button>
+                </div>
+                <div class="slots-row" *ngIf="doc.groupedSlots.afternoon.length">
+                  <button *ngFor="let slot of doc.groupedSlots.afternoon" class="slot-chip"
+                    [class.booked]="slot.status === 'booked'" [class.blocked]="slot.status === 'blocked'"
+                    (click)="bookSlot(doc, slot)">
+                    {{ slot.startTime || slot.time }}
+                  </button>
+                </div>
+                <div class="no-slots"
+                  *ngIf="!doc.groupedSlots.afternoon.length && doc.availability?.shifts?.afternoon?.enabled">
+                  No slots in this shift
+                </div>
+              </div>
+
+              <div class="timeline-section">
+                <div class="section-title">
+                  <div class="title-group">
+                    <i class="bi bi-moon-stars"></i>
+                    Evening
+                    <span class="status-badge" [class.active]="doc.availability?.shifts?.evening?.enabled">
+                      {{ doc.availability?.shifts?.evening?.enabled ? 'Enabled' : 'Disabled' }}
+                    </span>
+                  </div>
+                  <button class="toggle-btn" (click)="toggleShift(doc, 'evening')">
+                    {{ doc.availability?.shifts?.evening?.enabled ? 'Disable' : 'Enable' }}
+                  </button>
+                </div>
+                <div class="slots-row" *ngIf="doc.groupedSlots.evening.length">
+                  <button *ngFor="let slot of doc.groupedSlots.evening" class="slot-chip"
+                    [class.booked]="slot.status === 'booked'" [class.blocked]="slot.status === 'blocked'"
+                    (click)="bookSlot(doc, slot)">
+                    {{ slot.startTime || slot.time }}
+                  </button>
+                </div>
+                <div class="no-slots"
+                  *ngIf="!doc.groupedSlots.evening.length && doc.availability?.shifts?.evening?.enabled">
+                  No slots in this shift
+                </div>
+              </div>
+
+              <div class="no-slots" *ngIf="!doc.availability?.slots?.length">
+                No availability defined for this date.
+              </div>
             </div>
-          </div>
-          <div class="stats">
-            <div>
-              <p>Available</p>
-              <h4>{{ doc.availability?.available }}</h4>
-            </div>
-            <div>
-              <p>Booked</p>
-              <h4>{{ doc.availability?.booked }}</h4>
-            </div>
-            <div>
-              <p>Blocked</p>
-              <h4>{{ doc.availability?.blocked }}</h4>
-            </div>
-          </div>
-          <div class="slots">
-            <span *ngFor="let slot of doc.availability?.slots">{{ slot.startTime || slot.time }}</span>
           </div>
         </article>
       </section>
@@ -70,5 +163,67 @@
         </div>
       </ng-template>
     </main>
+  </div>
+
+  <!-- Add Slot Modal -->
+  <div class="modal-overlay" *ngIf="showAddSlotModal()" (click)="closeAddSlotModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Add Custom Slot</h2>
+        <button class="close-btn" (click)="closeAddSlotModal()">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <p class="modal-subtitle">Add a one-off availability slot for <strong>{{ selectedDoctor()?.name }}</strong>.</p>
+
+        <div class="form-group">
+          <label>Date</label>
+          <div class="input-wrapper">
+            <i class="bi bi-calendar"></i>
+            <input type="date" [ngModel]="newSlotDate()" (ngModelChange)="newSlotDate.set($event)">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Start Time</label>
+            <div class="input-wrapper">
+              <i class="bi bi-clock"></i>
+              <input type="time" [ngModel]="newSlotStartTime()" (ngModelChange)="newSlotStartTime.set($event)">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>End Time</label>
+            <div class="input-wrapper">
+              <i class="bi bi-clock-history"></i>
+              <input type="time" [ngModel]="newSlotEndTime()" (ngModelChange)="newSlotEndTime.set($event)">
+            </div>
+          </div>
+        </div>
+
+        <div class="info-box" *ngIf="newSlotStartTime() && newSlotEndTime()">
+          <i class="bi bi-info-circle"></i>
+          <span>New slot will be created from <strong>{{ newSlotStartTime() }}</strong> to <strong>{{ newSlotEndTime()
+              }}</strong>.</span>
+        </div>
+
+        <div class="error-box" *ngIf="errorMessage()">
+          <i class="bi bi-exclamation-triangle"></i>
+          <span>{{ errorMessage() }}</span>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="ghost" (click)="closeAddSlotModal()">Cancel</button>
+        <button class="btn-primary-sm" (click)="confirmAddSlot()"
+          [disabled]="!newSlotDate() || !newSlotStartTime() || !newSlotEndTime()">
+          <i class="bi bi-plus-lg"></i>
+          Add Slot
+        </button>
+      </div>
+    </div>
   </div>
 </div>

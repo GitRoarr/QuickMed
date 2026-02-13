@@ -9,7 +9,7 @@ export interface Message {
   senderId: string;
   receiverId: string;
   content: string;
-  senderType: 'doctor' | 'patient';
+  senderType: 'doctor' | 'patient' | 'receptionist';
   isRead: boolean;
   readAt?: string;
   createdAt: string;
@@ -29,8 +29,9 @@ export interface Message {
 
 export interface Conversation {
   id: string;
-  doctorId: string;
-  patientId: string;
+  doctorId?: string;
+  patientId?: string;
+  receptionistId?: string;
   unreadCount: number;
   lastMessageAt?: string;
   lastMessageContent?: string;
@@ -41,6 +42,12 @@ export interface Conversation {
     avatar?: string;
   };
   doctor?: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    avatar?: string;
+  };
+  receptionist?: {
     id: string;
     firstName: string;
     lastName: string;
@@ -72,7 +79,7 @@ export class MessageService {
     return this.http.get<Conversation>(`${this.API_URL}/conversations/with/${counterpartyId}`);
   }
 
-  sendMessage(payload: { patientId?: string; doctorId?: string; content: string }): Observable<Message> {
+  sendMessage(payload: { patientId?: string; doctorId?: string; receptionistId?: string; content: string }): Observable<Message> {
     return this.http.post<Message>(`${this.API_URL}/send`, payload);
   }
 

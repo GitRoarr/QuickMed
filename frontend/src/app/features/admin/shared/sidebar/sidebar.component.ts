@@ -3,10 +3,13 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { ThemeService } from '@core/services/theme.service';
 import { AuthService } from '@core/services/auth.service';
+import { SidebarService } from '@core/services/sidebar.service';
 
 export interface SidebarNavItem {
   label: string;
-  icon: string;
+  icon?: string;
+  iconImgLight?: string;
+  iconImgDark?: string;
   route?: string;
   exact?: boolean;
   action?: () => void;
@@ -25,12 +28,19 @@ export class SidebarComponent implements OnInit {
   @Input() secondaryItems: SidebarNavItem[] = [];
   @Input() collapsible: boolean = true;
   @Input() collapsed: boolean = false;
-  darkTheme = false;
+  constructor(
+    private router: Router,
+    public themeService: ThemeService,
+    public authService: AuthService,
+    public sidebarService: SidebarService
+  ) { }
 
-  constructor(private router: Router, private themeService: ThemeService, public authService: AuthService) {}
+  get darkTheme(): boolean {
+    return this.themeService.isDarkMode();
+  }
 
   goHome(): void {
-    this.router.navigate(['/']); 
+    this.router.navigate(['/']);
   }
 
   toggleCollapse(): void {
@@ -38,22 +48,29 @@ export class SidebarComponent implements OnInit {
     this.collapsed = !this.collapsed;
   }
 
+  closeSidebarOnMobile(): void {
+    if (window.innerWidth <= 1024) {
+      this.sidebarService.close();
+    }
+  }
+
   handleItemClick(item: SidebarNavItem, event?: Event): void {
     if (!item.action) return;
     if (event) event.preventDefault();
     item.action();
+    this.closeSidebarOnMobile();
   }
+
+
 
   logout(): void {
     this.authService.logout();
   }
 
   ngOnInit(): void {
-    this.darkTheme = this.themeService.isDarkMode();
   }
 
   toggleTheme(): void {
     this.themeService.toggleTheme();
-    this.darkTheme = this.themeService.isDarkMode();
   }
 }

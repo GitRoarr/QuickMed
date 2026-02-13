@@ -23,7 +23,7 @@ export class WebSocketService {
   public typing$ = this.typingSubject.asObservable();
   public conversationUpdated$ = this.conversationUpdatedSubject.asObservable();
 
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService) { }
 
   private getToken(): string | null {
     const token = this.authService.getToken();
@@ -137,6 +137,8 @@ export class WebSocketService {
     patientId?: string;
     doctorId?: string;
     conversationId?: string;
+    receiverId?: string;
+    receiverRole?: string;
   }): void {
     if (this.messagesSocket && this.isMessagesConnected) {
       this.messagesSocket.emit('sendMessage', payload);
@@ -158,6 +160,14 @@ export class WebSocketService {
   markAllNotificationsAsRead(): void {
     if (this.notificationsSocket && this.isNotificationsConnected) {
       this.notificationsSocket.emit('markAllAsRead');
+    }
+  }
+
+  disconnectMessages(): void {
+    if (this.messagesSocket) {
+      this.messagesSocket.disconnect();
+      this.messagesSocket = null;
+      this.isMessagesConnected = false;
     }
   }
 

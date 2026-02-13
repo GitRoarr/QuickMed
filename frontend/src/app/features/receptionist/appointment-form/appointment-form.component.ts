@@ -37,16 +37,14 @@ export class AppointmentFormComponent implements OnInit {
 
   secondaryItems = [
     { label: 'Settings', icon: 'bi-gear', route: '/receptionist/settings' },
-    { label: 'Logout', icon: 'bi-box-arrow-right', action: () => this.authService.logout() },
+    { label: 'Logout', icon: 'bi-box-arrow-right', route: '/receptionist/logout' },
   ];
 
   doctors = signal<DoctorListItem[]>([]);
   patients = signal<any[]>([]);
-  availableSlots = signal<any[]>([]);
 
   model = signal<any>({ patientId: '', doctorId: '', appointmentDate: '', appointmentTime: '', notes: '' });
   isSaving = signal(false);
-  isLoadingSlots = signal(false);
 
   ngOnInit(): void {
     this.loadDoctors();
@@ -71,29 +69,7 @@ export class AppointmentFormComponent implements OnInit {
     });
   }
 
-  onDoctorOrDateChange(): void {
-    const { doctorId, appointmentDate } = this.model();
-    if (!doctorId || !appointmentDate) return;
-
-    this.isLoadingSlots.set(true);
-    this.receptionistService.listDoctorAvailability(appointmentDate).subscribe({
-      next: (docs) => {
-        const docAvailability = docs.find(d => d.id === doctorId);
-        if (docAvailability) {
-          this.availableSlots.set(docAvailability.availability.slots || []);
-        } else {
-          this.availableSlots.set([]);
-          this.toast.warning('No availability found for this doctor on selected date.');
-        }
-        this.isLoadingSlots.set(false);
-      },
-      error: () => {
-        this.isLoadingSlots.set(false);
-        this.availableSlots.set([]);
-        this.toast.error('Failed to load availability.');
-      }
-    });
-  }
+  // Removed slot loading logic as per user request for manual time picker
 
   save(): void {
     const payload = this.model();

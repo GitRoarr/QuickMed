@@ -1,83 +1,139 @@
-<div class="receptionist-layout">
+<div class="receptionist-layout" [class.dark]="themeService.isDark()">
   <app-header></app-header>
   <div class="body">
-    <app-sidebar
-      [title]="'QuickMed'"
-      [menuItems]="menuItems"
-      [secondaryItems]="secondaryItems"
-    ></app-sidebar>
+    <app-sidebar [title]="'QuickMed'" [menuItems]="menuItems" [secondaryItems]="secondaryItems"></app-sidebar>
 
     <main class="panel">
+      <!-- Feedback Toast -->
+      <div class="feedback-toast" *ngIf="feedback()" [class.error]="feedback()?.type === 'error'">
+        <i class="bi" [class.bi-check-circle]="feedback()?.type === 'success'"
+          [class.bi-exclamation-circle]="feedback()?.type === 'error'"></i>
+        {{ feedback()?.message }}
+      </div>
+
       <section class="hero">
-        <div>
-          <p class="eyebrow">Payments</p>
+        <div class="hero-text">
+          <p class="eyebrow">Financial Management</p>
           <h1>Receptionist Payments</h1>
-          <p class="muted">Track pending payments and record pay-at-desk transactions.</p>
+          <p class="muted">Efficiently track and manage patient transactions at the front desk.</p>
         </div>
         <div class="hero-actions">
-          <button class="ghost" type="button" (click)="loadPayments()">
+          <div class="search-box">
+            <i class="bi bi-search"></i>
+            <input type="text" placeholder="Search patient or doctor..." [ngModel]="searchQuery()"
+              (ngModelChange)="onSearch($event)" />
+          </div>
+          <button class="action-btn secondary" type="button" (click)="loadPayments()" [class.loading]="loading()">
             <i class="bi bi-arrow-clockwise"></i>
-            Refresh
+            <span>Refresh</span>
           </button>
         </div>
       </section>
 
-      <section class="filters">
-        <label>
-          <span>Status</span>
-          <select [ngModel]="statusFilter()" (ngModelChange)="statusFilter.set($event); loadPayments()">
-            <option value="not_paid">Not paid</option>
-            <option value="pending">Pending</option>
-            <option value="paid">Paid</option>
-          </select>
-        </label>
-        <label>
-          <span>Date</span>
-          <input type="date" [ngModel]="dateFilter()" (ngModelChange)="dateFilter.set($event); loadPayments()" />
-        </label>
+      <section class="filters-bar">
+        <div class="filter-group">
+          <label class="filter-label">
+            <i class="bi bi-funnel"></i>
+            <span>Status</span>
+          </label>
+          <div class="segmented-control">
+            <button [class.active]="statusFilter() === 'not_paid'"
+              (click)="statusFilter.set('not_paid'); loadPayments()">Not Paid</button>
+            <button [class.active]="statusFilter() === 'pending'"
+              (click)="statusFilter.set('pending'); loadPayments()">Pending</button>
+            <button [class.active]="statusFilter() === 'paid'"
+              (click)="statusFilter.set('paid'); loadPayments()">Paid</button>
+          </div>
+        </div>
+
+        <div class="filter-group">
+          <label class="filter-label">
+            <i class="bi bi-calendar3"></i>
+            <span>Date Filter</span>
+          </label>
+          <input type="date" class="date-input" [ngModel]="dateFilter()"
+            (ngModelChange)="dateFilter.set($event); loadPayments()" />
+        </div>
       </section>
 
-      <section class="table-card">
-        <header class="table-header">
-          <div>
-            <h3>Payment queue</h3>
-            <p class="muted">Confirm payments quickly and keep appointments on track.</p>
+      <div class="table-container shadow-premium transition-all">
+        <div class="table-header">
+          <div class="header-info">
+            <h3>Payment Queue</h3>
+            <span class="badge">{{ filteredPayments().length }} Records</span>
           </div>
-        </header>
+        </div>
 
-        <div class="table-wrap" *ngIf="filteredPayments().length; else empty">
-          <table>
+        <div class="table-wrapper" *ngIf="filteredPayments().length > 0; else emptyState">
+          <table class="premium-table">
             <thead>
               <tr>
-                <th>Patient</th>
+                <th>Patient Details</th>
                 <th>Doctor</th>
-                <th>Date</th>
-                <th>Time</th>
-                <th>Status</th>
-                <th>Action</th>
+                <th>Schedule</th>
+                <th>Payment Status</th>
+                <th class="text-right">Action</th>
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let row of filteredPayments()">
-                <td>{{ row.patient?.firstName }} {{ row.patient?.lastName }}</td>
-                <td>Dr. {{ row.doctor?.firstName }} {{ row.doctor?.lastName }}</td>
-                <td>{{ row.appointmentDate | date }}</td>
-                <td>{{ row.appointmentTime }}</td>
-                <td><span class="status" [class.paid]="row.paymentStatus === 'paid'">{{ row.paymentStatus }}</span></td>
+              <tr *ngFor="let row of filteredPayments()" class="table-row">
                 <td>
-                  <button class="ghost" type="button" (click)="markCashPaid(row)" [disabled]="row.paymentStatus === 'paid'">
-                    Mark paid
+                  <div class="patient-cell">
+                    <div class="avatar-mini">
+                      {{ row.patient?.firstName?.[0] }}{{ row.patient?.lastName?.[0] }}
+                    </div>
+                    <div class="info">
+                      <span class="name">{{ row.patient?.firstName }} {{ row.patient?.lastName }}</span>
+                      <span class="subtext">ID: #{{ row.patient?.id?.slice(0, 8) }}</span>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <div class="doctor-info">
+                    <span class="name">Dr. {{ row.doctor?.firstName }} {{ row.doctor?.lastName }}</span>
+                  </div>
+                </td>
+                <td>
+                  <div class="time-info">
+                    <span class="date">{{ row.appointmentDate | date:'mediumDate' }}</span>
+                    <span class="time">{{ row.appointmentTime }}</span>
+                  </div>
+                </td>
+                <td>
+                  <span class="status-pill" [attr.data-status]="row.paymentStatus">
+                    <i class="bi" [ngClass]="{
+                      'bi-clock-history': row.paymentStatus === 'pending',
+                      'bi-check-circle-fill': row.paymentStatus === 'paid',
+                      'bi-exclamation-circle': row.paymentStatus === 'not_paid'
+                    }"></i>
+                    {{ row.paymentStatus | titlecase }}
+                  </span>
+                </td>
+                <td class="text-right">
+                  <button *ngIf="row.paymentStatus !== 'paid'" class="pay-btn" (click)="markCashPaid(row)"
+                    [disabled]="loading()">
+                    <i class="bi bi-cash"></i>
+                    Mark Paid
                   </button>
+                  <span *ngIf="row.paymentStatus === 'paid'" class="paid-check">
+                    <i class="bi bi-check2-all"></i>
+                  </span>
                 </td>
               </tr>
             </tbody>
           </table>
         </div>
 
-        <ng-template #empty>
-          <p class="muted">No payments found for the selected filters.</p>
+        <ng-template #emptyState>
+          <div class="empty-placeholder">
+            <div class="icon-circle">
+              <i class="bi bi-cash-stack"></i>
+            </div>
+            <h4>No Payments Found</h4>
+            <p class="muted">Try adjusting your filters or search query to find what you're looking for.</p>
+          </div>
         </ng-template>
-      </section>
+      </div>
     </main>
   </div>
 </div>

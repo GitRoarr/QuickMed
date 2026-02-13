@@ -9,15 +9,22 @@ export class Conversation extends BaseEntity {
   @JoinColumn({ name: 'doctorId' })
   doctor: User;
 
-  @Column()
+  @Column({ nullable: true })
   doctorId: string;
 
   @ManyToOne(() => User)
   @JoinColumn({ name: 'patientId' })
   patient: User;
 
-  @Column()
+  @Column({ nullable: true })
   patientId: string;
+
+  @ManyToOne(() => User)
+  @JoinColumn({ name: 'receptionistId' })
+  receptionist: User;
+
+  @Column({ nullable: true })
+  receptionistId: string;
 
   @OneToMany(() => Message, (message) => message.conversation)
   messages: Message[];

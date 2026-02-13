@@ -517,26 +517,54 @@
 @media (max-width: 1024px) {
   .patient-shell__sidebar {
     transform: translateX(-100%);
+    box-shadow: 20px 0 60px rgba(0, 0, 0, 0.2);
+    width: 280px;
+    visibility: hidden;
   }
 
   .patient-shell.sidebar-open .patient-shell__sidebar {
     transform: translateX(0);
+    visibility: visible;
   }
 
   .patient-shell__content {
     margin-left: 0;
-    padding: 1.5rem;
+    padding: 1.25rem;
+    width: 100%;
+  }
+
+  .patient-shell__topbar {
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+    padding: 0.5rem 0;
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    background: var(--bg);
   }
 
   .dropdown-panel {
-    width: calc(100vw - 3rem);
+    width: calc(100vw - 2.5rem);
+    right: -0.5rem;
     max-width: 380px;
   }
 }
 
-.hamburger {
+.hamburger-menu {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
-  border: none;
-  background: transparent;
-  color: var(--fg);
+  font-size: 1.5rem;
+  transition: all 0.2s ease;
+}
+
+.hamburger-menu:active {
+  transform: scale(0.92);
 }

@@ -7,6 +7,8 @@ export enum AppointmentStatus {
   COMPLETED = "completed",
   MISSED = "missed",
   OVERDUE = "overdue",
+  WAITING = "waiting",
+  IN_PROGRESS = "in-progress"
 }
 
 export interface Appointment {

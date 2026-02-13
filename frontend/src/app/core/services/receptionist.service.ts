@@ -7,7 +7,7 @@ import { environment } from '@environments/environment';
 export class ReceptionistService {
   private readonly API_URL = `${environment.apiUrl}/receptionist`;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   createPatient(data: any): Observable<any> {
     return this.http.post<any>(`${this.API_URL}/patients`, data);
@@ -37,10 +37,11 @@ export class ReceptionistService {
     return this.http.patch<any>(`${this.API_URL}/appointments/${id}/payment`, { paymentStatus });
   }
 
-  getDashboard(doctorId?: string, status?: string): Observable<any> {
+  getDashboard(doctorId?: string, status?: string, search?: string): Observable<any> {
     const params: any = {};
     if (doctorId) params.doctorId = doctorId;
     if (status) params.status = status;
+    if (search) params.search = search;
     const qs = new URLSearchParams(params).toString();
     return this.http.get<any>(`${this.API_URL}/dashboard${qs ? `?${qs}` : ''}`);
   }
@@ -68,10 +69,11 @@ export class ReceptionistService {
     return this.http.get<any>(`${this.API_URL}/appointments/${id}`);
   }
 
-  listPayments(filters?: { status?: string; date?: string }): Observable<any[]> {
+  listPayments(filters?: { status?: string; date?: string; search?: string }): Observable<any[]> {
     const params: any = {};
     if (filters?.status) params.status = filters.status;
     if (filters?.date) params.date = filters.date;
+    if (filters?.search) params.search = filters.search;
     const qs = new URLSearchParams(params).toString();
     return this.http.get<any[]>(`${this.API_URL}/payments${qs ? `?${qs}` : ''}`);
   }
@@ -79,6 +81,14 @@ export class ReceptionistService {
   listDoctorAvailability(date?: string): Observable<any[]> {
     const qs = date ? `?date=${encodeURIComponent(date)}` : '';
     return this.http.get<any[]>(`${this.API_URL}/doctors/availability${qs}`);
+  }
+
+  updateDoctorSchedule(doctorId: string, date: string, shifts: any[], breaks: any[] = []): Observable<any> {
+    return this.http.post<any>(`${this.API_URL}/doctors/${doctorId}/schedule`, { date, shifts, breaks });
+  }
+
+  addDoctorSlot(doctorId: string, date: string, slot: any): Observable<any> {
+    return this.http.post<any>(`${this.API_URL}/doctors/${doctorId}/slots`, { date, slot });
   }
 
   getDailyReport(date?: string): Observable<any> {

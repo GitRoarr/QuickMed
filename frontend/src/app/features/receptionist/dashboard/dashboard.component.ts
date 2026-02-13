@@ -1,5 +1,6 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { ReceptionistService } from '@app/core/services/receptionist.service';
 import { ThemeService } from '@core/services/theme.service';
 import { AuthService } from '@core/services/auth.service';
@@ -10,7 +11,7 @@ import { Router } from '@angular/router';
 @Component({
   selector: 'app-receptionist-dashboard',
   standalone: true,
-  imports: [CommonModule, HeaderComponent, SidebarComponent],
+  imports: [CommonModule, FormsModule, HeaderComponent, SidebarComponent],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css'],
 })
@@ -57,6 +58,7 @@ export class DashboardComponent implements OnInit {
   timeline = signal<any[]>([]);
   recentPatients = signal<any[]>([]);
   tasks = signal<{ id: string; title: string; status: string }[]>([]);
+  searchQuery = signal('');
   isLoading = signal(false);
 
   ngOnInit(): void {
@@ -65,7 +67,7 @@ export class DashboardComponent implements OnInit {
 
   loadDashboard(): void {
     this.isLoading.set(true);
-    this.receptionistService.getDashboard().subscribe({
+    this.receptionistService.getDashboard(undefined, undefined, this.searchQuery()).subscribe({
       next: (res) => {
         this.todayAppointments.set(res.todayAppointments || []);
         this.pendingPayments.set(res.pendingPayments || []);
@@ -87,18 +89,34 @@ export class DashboardComponent implements OnInit {
   }
 
   getStatusLabel(row: any): string {
-    if (row?.arrived) return 'Checked-in';
-    if (!row?.status) return 'Pending';
-    return row.status.replace('_', ' ').replace('-', ' ');
+    if (row?.arrived && row?.status === 'waiting') return 'Waiting Room';
+    if (row?.status === 'in-progress') return 'In Session';
+    if (!row?.status) return 'Scheduled';
+
+    return row.status.split('_').map((word: string) =>
+      word.charAt(0).toUpperCase() + word.slice(1)
+    ).join(' ');
   }
 
   getStatusClass(row: any): string {
     const status = (row?.status || '').toLowerCase();
-    if (row?.arrived) return 'status checked-in';
-    if (status === 'waiting') return 'status waiting';
     if (status === 'completed') return 'status completed';
     if (status === 'cancelled') return 'status cancelled';
+    if (status === 'overdue' || status === 'missed') return 'status overdue';
+    if (status === 'in-progress') return 'status in-session';
+    if (row?.arrived || status === 'waiting') return 'status waiting';
+    if (status === 'no_show') return 'status no-show';
     return 'status pending';
+  }
+
+  canCheckIn(row: any): boolean {
+    const status = (row?.status || '').toLowerCase();
+    return !row.arrived && !['completed', 'cancelled', 'missed', 'expired'].includes(status);
+  }
+
+  canModify(row: any): boolean {
+    const status = (row?.status || '').toLowerCase();
+    return !['completed', 'cancelled'].includes(status);
   }
 
   markCheckedIn(id: string): void {
@@ -113,6 +131,10 @@ export class DashboardComponent implements OnInit {
       next: () => this.loadDashboard(),
       error: (err) => console.error('Failed to update appointment', err),
     });
+  }
+
+  onSearch(): void {
+    this.loadDashboard();
   }
 
   goToRegisterPatient(): void {

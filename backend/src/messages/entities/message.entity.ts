@@ -6,6 +6,7 @@ import { Conversation } from './conversation.entity';
 export enum MessageSenderType {
   DOCTOR = 'doctor',
   PATIENT = 'patient',
+  RECEPTIONIST = 'receptionist',
 }
 
 @Entity('messages')

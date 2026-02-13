@@ -59,6 +59,7 @@
   border: 2px solid var(--primary);
   color: var(--primary);
   font-weight: 800;
+  background: var(--primary-light);
 }
 
 .calendar-day-outside {
@@ -264,7 +265,8 @@ input[type="time"] {
 }
 
 /* Shift & Break Cards */
-.shift-card, .break-card {
+.shift-card,
+.break-card {
   background-color: var(--surface-secondary);
   padding: 1rem;
   border-radius: 1rem;
@@ -276,7 +278,7 @@ input[type="time"] {
 .shift-card.enabled {
   opacity: 1;
   background-color: var(--surface);
-  box-shadow: 0 4px 15px -5px rgba(0,0,0,0.08);
+  box-shadow: 0 4px 15px -5px rgba(0, 0, 0, 0.08);
 }
 
 .shift-icon {
@@ -290,7 +292,8 @@ input[type="time"] {
   margin-right: 1rem;
 }
 
-.time-input, .slot-select {
+.time-input,
+.slot-select {
   background-color: var(--surface-secondary);
   border: 1px solid var(--border-light);
   border-radius: 0.5rem;
@@ -301,7 +304,8 @@ input[type="time"] {
   transition: border-color 0.2s ease;
 }
 
-.time-input:focus, .slot-select:focus {
+.time-input:focus,
+.slot-select:focus {
   border-color: var(--primary);
 }
 
@@ -356,7 +360,7 @@ input[type="time"] {
   align-items: center;
 }
 
-input:checked + .toggle-track {
+input:checked+.toggle-track {
   background: var(--primary);
   border-color: var(--primary);
 }
@@ -380,12 +384,12 @@ input:checked + .toggle-track {
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
-input:checked + .toggle-track .toggle-thumb {
+input:checked+.toggle-track .toggle-thumb {
   transform: translateX(24px);
   color: var(--primary);
 }
 
-input:not(:checked) + .toggle-track .toggle-thumb {
+input:not(:checked)+.toggle-track .toggle-thumb {
   color: var(--text-muted);
 }
 
@@ -409,15 +413,27 @@ input:not(:checked) + .toggle-track .toggle-thumb {
 }
 
 .shift-status-past {
-  background: #fef2f2;
-  color: #ef4444;
-  border: 1px solid #fecaca;
+  background: rgba(239, 68, 68, 0.1);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.dark .shift-status-past {
+  background: rgba(239, 68, 68, 0.2);
+  color: #fca5a5;
+  border-color: rgba(239, 68, 68, 0.3);
 }
 
 .shift-status-active {
-  background: #f0fdf4;
-  color: #16a34a;
-  border: 1px solid #bbf7d0;
+  background: rgba(34, 197, 94, 0.1);
+  color: #22c55e;
+  border: 1px solid rgba(34, 197, 94, 0.2);
+}
+
+.dark .shift-status-active {
+  background: rgba(34, 197, 94, 0.2);
+  color: #4ade80;
+  border-color: rgba(34, 197, 94, 0.3);
 }
 
 .active-dot {
@@ -430,8 +446,17 @@ input:not(:checked) + .toggle-track .toggle-thumb {
 }
 
 @keyframes pulse-dot {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.5; transform: scale(0.8); }
+
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.5;
+    transform: scale(0.8);
+  }
 }
 
 /* Shift Past State */
@@ -453,7 +478,7 @@ input:not(:checked) + .toggle-track .toggle-thumb {
 .shift-card.shift-active {
   border-color: var(--primary) !important;
   background: var(--surface) !important;
-  box-shadow: 0 0 0 1px var(--primary-light), 0 4px 15px -5px rgba(0,0,0,0.08) !important;
+  box-shadow: 0 0 0 1px var(--primary-light), 0 4px 15px -5px rgba(0, 0, 0, 0.08) !important;
 }
 
 /* Keep old switch styles for backward compatibility elsewhere */
@@ -493,15 +518,15 @@ input:not(:checked) + .toggle-track .toggle-thumb {
   transition: .4s;
 }
 
-input:checked + .slider {
+input:checked+.slider {
   background-color: var(--primary);
 }
 
-input:focus + .slider {
+input:focus+.slider {
   box-shadow: 0 0 1px var(--primary);
 }
 
-input:checked + .slider:before {
+input:checked+.slider:before {
   transform: translateX(22px);
 }
 
@@ -515,10 +540,18 @@ input:checked + .slider:before {
 
 /* Animations */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.shift-card, .break-card {
+.shift-card,
+.break-card {
   animation: fadeIn 0.5s ease-out forwards;
 }

@@ -3,7 +3,6 @@
     <div class="spacer"></div>
     <div class="actions">
 
-      <!-- Messages Icon with Badge -->
       <button class="icon relative" title="Messages" (click)="goTo('/doctor/messages')">
         <i class="bi bi-chat-dots"></i>
         <span *ngIf="unreadMessages() > 0" class="badge-dot">
@@ -11,14 +10,12 @@
         </span>
       </button>
 
-      <!-- Notification Bell with Panel -->
       <div class="relative">
         <button class="icon relative" title="Notifications" (click)="toggleNotificationPanel()">
           <i class="bi bi-bell"></i>
           <span *ngIf="unreadNotifications > 0" class="dot"></span>
         </button>
 
-        <!-- Notification Dropdown Panel -->
         <div *ngIf="showNotificationPanel()" class="notification-panel" (click)="$event.stopPropagation()">
           <div class="notif-panel-header">
             <h3>Notifications</h3>
@@ -27,7 +24,6 @@
             </button>
           </div>
 
-          <!-- Category Summary -->
           <div class="notif-categories">
             <div *ngFor="let cat of notificationTypes" class="notif-cat-item" [class.has-count]="cat.count > 0">
               <i [class]="cat.icon" [class]="getNotificationColor(cat.type)"></i>
@@ -36,7 +32,6 @@
             </div>
           </div>
 
-          <!-- Recent Notifications List -->
           <div class="notif-list" *ngIf="recentNotifications().length > 0">
             <div class="notif-list-header">Recent</div>
             <div *ngFor="let n of recentNotifications()" class="notif-item" [class.unread]="!n.read"
@@ -64,13 +59,11 @@
         </div>
       </div>
 
-      <!-- Theme Toggle -->
       <button class="icon" title="Toggle Theme" (click)="toggleTheme()">
         <i class="bi" [class.bi-brightness-high-fill]="theme === 'light'"
           [class.bi-moon-stars-fill]="theme === 'dark'"></i>
       </button>
 
-      <!-- Avatar -->
       <button class="avatar" title="Profile" (click)="goTo('/doctor/settings')">
         <img *ngIf="avatarUrl; else initialsTpl" [src]="avatarUrl" alt="avatar" />
         <ng-template #initialsTpl><span>{{ initials }}</span></ng-template>
@@ -78,6 +71,5 @@
     </div>
   </div>
 
-  <!-- Overlay to close panels -->
   <div *ngIf="showNotificationPanel() || showMessagePanel()" class="panel-overlay" (click)="closePanels()"></div>
 </header>

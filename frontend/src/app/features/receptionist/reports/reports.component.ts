@@ -31,7 +31,7 @@ export class ReceptionistReportsComponent implements OnInit {
 
   secondaryItems = [
     { label: 'Settings', icon: 'bi-gear', route: '/receptionist/settings' },
-    { label: 'Logout', icon: 'bi-box-arrow-right', action: () => this.authService.logout() },
+    { label: 'Logout', icon: 'bi-box-arrow-right', route: '/receptionist/logout' },
   ];
 
   reportType = signal<'daily' | 'appointments' | 'patients' | 'payments' | 'doctors' | 'no-shows'>('daily');

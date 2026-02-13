@@ -26,7 +26,6 @@ export class ConsultationsService {
   ) { }
 
   async create(dto: CreateConsultationDto, doctorId: string) {
-    // Get the appointment to find patientId
     const appointment = await this.appointmentRepo.findOne({
       where: { id: dto.appointmentId },
       relations: ['patient', 'doctor'],
@@ -42,11 +41,9 @@ export class ConsultationsService {
     });
 
     if (existing) {
-      // Update existing consultation
       existing.notes = dto.notes;
       const savedConsultation = await this.repo.save(existing);
 
-      // Remove old treatments and add new ones
       await this.treatmentRepo.delete({ consultationId: existing.id });
 
       if (dto.treatments && dto.treatments.length > 0) {
@@ -62,7 +59,6 @@ export class ConsultationsService {
       return this.findOne(savedConsultation.id);
     }
 
-    // Create new consultation
     const consultation = this.repo.create({
       appointmentId: dto.appointmentId,
       doctorId,
@@ -190,7 +186,18 @@ export class ConsultationsService {
       rating: null,
       comment: null,
     });
-    return this.repo.save(entity);
+    const savedConsultation = await this.repo.save(entity);
+
+    // Update appointment status to in-progress
+    if (dto.appointmentId) {
+      const appointment = await this.appointmentRepo.findOne({ where: { id: dto.appointmentId } });
+      if (appointment) {
+        appointment.status = 'in-progress' as any;
+        await this.appointmentRepo.save(appointment);
+      }
+    }
+
+    return savedConsultation;
   }
 
   async end(id: string) {

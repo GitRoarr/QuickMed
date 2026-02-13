@@ -1,16 +1,13 @@
-<aside
-  class="receptionist-sidebar"
-  [class.dark]="darkTheme"
-  [class.collapsed]="collapsed"
->
+<aside class="receptionist-sidebar" [class.dark]="darkTheme" [class.collapsed]="collapsed"
+  [class.open]="sidebarService.isOpen()">
+  <button
+    class="md:hidden absolute top-4 right-4 w-10 h-10 rounded-full bg-[var(--sidebar-surface)] flex items-center justify-center text-white"
+    (click)="sidebarService.close()">
+    <i class="bi bi-x-lg"></i>
+  </button>
   <div class="sidebar-header">
-    <button
-      class="collapse-toggle"
-      type="button"
-      (click)="toggleCollapse()"
-      [attr.aria-pressed]="collapsed"
-      [attr.title]="collapsed ? 'Expand sidebar' : 'Collapse sidebar'"
-    >
+    <button class="collapse-toggle" type="button" (click)="toggleCollapse()" [attr.aria-pressed]="collapsed"
+      [attr.title]="collapsed ? 'Expand sidebar' : 'Collapse sidebar'">
       <i class="bi" [ngClass]="collapsed ? 'bi-layout-sidebar-inset' : 'bi-layout-sidebar'">
       </i>
     </button>
@@ -26,28 +23,29 @@
 
   <nav class="sidebar-nav">
     <ng-container *ngFor="let item of menuItems">
-      <a
-        *ngIf="item.route; else actionItem"
-        [routerLink]="item.route"
-        routerLinkActive="active"
-        [routerLinkActiveOptions]="{ exact: item.exact ?? false }"
-        class="nav-link"
-        [attr.aria-label]="item.label"
-        [attr.title]="collapsed ? item.label : null"
-        (click)="handleItemClick(item, $event)"
-      >
-        <i class="bi" [ngClass]="item.icon"></i>
+      <a *ngIf="item.route; else actionItem" [routerLink]="item.route" routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: item.exact ?? false }" class="nav-link"
+        [class.logout-btn]="item.label === 'Logout'" [attr.aria-label]="item.label"
+        [attr.title]="collapsed ? item.label : null" (click)="[handleItemClick(item, $event), closeSidebarOnMobile()]">
+        <ng-container *ngIf="item.iconImgLight || item.iconImgDark; else iconClass">
+          <img class="nav-icon-img" [src]="themeService.isDarkMode() ? item.iconImgDark : item.iconImgLight"
+            [alt]="item.label + ' icon'" />
+        </ng-container>
+        <ng-template #iconClass>
+          <i class="bi" [ngClass]="item.icon || ''"></i>
+        </ng-template>
         <span class="nav-text">{{ item.label }}</span>
       </a>
       <ng-template #actionItem>
-        <button
-          class="nav-link action"
-          type="button"
-          [attr.aria-label]="item.label"
-          [attr.title]="collapsed ? item.label : null"
-          (click)="handleItemClick(item)"
-        >
-          <i class="bi" [ngClass]="item.icon"></i>
+        <button class="nav-link action" type="button" [class.logout-btn]="item.label === 'Logout'"
+          [attr.aria-label]="item.label" [attr.title]="collapsed ? item.label : null" (click)="handleItemClick(item)">
+          <ng-container *ngIf="item.iconImgLight || item.iconImgDark; else iconClassAction">
+            <img class="nav-icon-img" [src]="themeService.isDarkMode() ? item.iconImgDark : item.iconImgLight"
+              [alt]="item.label + ' icon'" />
+          </ng-container>
+          <ng-template #iconClassAction>
+            <i class="bi" [ngClass]="item.icon || ''"></i>
+          </ng-template>
           <span class="nav-text">{{ item.label }}</span>
         </button>
       </ng-template>
@@ -58,36 +56,33 @@
 
   <nav class="sidebar-nav secondary" *ngIf="secondaryItems.length">
     <ng-container *ngFor="let item of secondaryItems">
-      <a
-        *ngIf="item.route; else secondaryAction"
-        [routerLink]="item.route"
-        routerLinkActive="active"
-        [routerLinkActiveOptions]="{ exact: item.exact ?? false }"
-        class="nav-link"
-        [attr.aria-label]="item.label"
-        [attr.title]="collapsed ? item.label : null"
-        (click)="handleItemClick(item, $event)"
-      >
-        <i class="bi" [ngClass]="item.icon"></i>
+      <a *ngIf="item.route; else secondaryAction" [routerLink]="item.route" routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: item.exact ?? false }" class="nav-link"
+        [class.logout-btn]="item.label === 'Logout'" [attr.aria-label]="item.label"
+        [attr.title]="collapsed ? item.label : null" (click)="[handleItemClick(item, $event), closeSidebarOnMobile()]">
+        <ng-container *ngIf="item.iconImgLight || item.iconImgDark; else iconClassSecondary">
+          <img class="nav-icon-img" [src]="themeService.isDarkMode() ? item.iconImgDark : item.iconImgLight"
+            [alt]="item.label + ' icon'" />
+        </ng-container>
+        <ng-template #iconClassSecondary>
+          <i class="bi" [ngClass]="item.icon || ''"></i>
+        </ng-template>
         <span class="nav-text">{{ item.label }}</span>
       </a>
       <ng-template #secondaryAction>
-        <button
-          class="nav-link action"
-          type="button"
-          [attr.aria-label]="item.label"
-          [attr.title]="collapsed ? item.label : null"
-          (click)="handleItemClick(item)"
-        >
-          <i class="bi" [ngClass]="item.icon"></i>
+        <button class="nav-link action" type="button" [class.logout-btn]="item.label === 'Logout'"
+          [attr.aria-label]="item.label" [attr.title]="collapsed ? item.label : null" (click)="handleItemClick(item)">
+          <ng-container *ngIf="item.iconImgLight || item.iconImgDark; else iconClassSecondaryAction">
+            <img class="nav-icon-img" [src]="themeService.isDarkMode() ? item.iconImgDark : item.iconImgLight"
+              [alt]="item.label + ' icon'" />
+          </ng-container>
+          <ng-template #iconClassSecondaryAction>
+            <i class="bi" [ngClass]="item.icon || ''"></i>
+          </ng-template>
           <span class="nav-text">{{ item.label }}</span>
         </button>
       </ng-template>
     </ng-container>
   </nav>
 
-  <button class="theme-toggle-btn" (click)="toggleTheme()">
-    <i *ngIf="darkTheme" class="bi bi-moon-fill"></i>
-    <i *ngIf="!darkTheme" class="bi bi-sun-fill"></i>
-  </button>
 </aside>

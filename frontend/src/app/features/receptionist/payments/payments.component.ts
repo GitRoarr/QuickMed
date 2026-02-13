@@ -6,6 +6,7 @@ import { SidebarComponent } from '@app/features/admin/shared/sidebar';
 import { ReceptionistService } from '@app/core/services/receptionist.service';
 import { PaymentService } from '@app/core/services/payment.service';
 import { AuthService } from '@core/services/auth.service';
+import { ThemeService } from '@core/services/theme.service';
 
 @Component({
   selector: 'app-receptionist-payments',
@@ -18,6 +19,7 @@ export class ReceptionistPaymentsComponent implements OnInit {
   private readonly receptionistService = inject(ReceptionistService);
   private readonly paymentService = inject(PaymentService);
   authService = inject(AuthService);
+  themeService = inject(ThemeService);
 
   menuItems = [
     { label: 'Dashboard', icon: 'bi-speedometer2', route: '/receptionist/dashboard', exact: true },
@@ -31,13 +33,15 @@ export class ReceptionistPaymentsComponent implements OnInit {
 
   secondaryItems = [
     { label: 'Settings', icon: 'bi-gear', route: '/receptionist/settings' },
-    { label: 'Logout', icon: 'bi-box-arrow-right', action: () => this.authService.logout() },
+    { label: 'Logout', icon: 'bi-box-arrow-right', route: '/receptionist/logout' },
   ];
 
   statusFilter = signal<string>('not_paid');
   dateFilter = signal<string>('');
+  searchQuery = signal<string>('');
   payments = signal<any[]>([]);
   loading = signal(false);
+  feedback = signal<{ type: 'success' | 'error', message: string } | null>(null);
 
   filteredPayments = computed(() => this.payments());
 
@@ -50,6 +54,7 @@ export class ReceptionistPaymentsComponent implements OnInit {
     this.receptionistService.listPayments({
       status: this.statusFilter() || undefined,
       date: this.dateFilter() || undefined,
+      search: this.searchQuery() || undefined,
     }).subscribe({
       next: (list) => {
         this.payments.set(list || []);
@@ -59,11 +64,25 @@ export class ReceptionistPaymentsComponent implements OnInit {
     });
   }
 
+  onSearch(query: string): void {
+    this.searchQuery.set(query);
+    this.loadPayments();
+  }
+
   markCashPaid(row: any): void {
     if (!row?.id) return;
+    this.loading.set(true);
     this.paymentService.createCashPayment({ appointmentId: row.id }).subscribe({
-      next: () => this.loadPayments(),
-      error: () => this.loadPayments(),
+      next: () => {
+        this.feedback.set({ type: 'success', message: 'Payment recorded successfully' });
+        this.loadPayments();
+        setTimeout(() => this.feedback.set(null), 3000);
+      },
+      error: (err) => {
+        this.feedback.set({ type: 'error', message: err.error?.message || 'Failed to record payment' });
+        this.loading.set(false);
+        setTimeout(() => this.feedback.set(null), 5000);
+      },
     });
   }
 }

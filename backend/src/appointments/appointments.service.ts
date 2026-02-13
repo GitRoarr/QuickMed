@@ -155,11 +155,13 @@ export class AppointmentsService {
 
     const defaultStatus = createAppointmentDto.status
       ? createAppointmentDto.status
-      : AppointmentStatus.PENDING;
+      : (createdByRole === UserRole.RECEPTIONIST || createdByRole === UserRole.ADMIN
+        ? AppointmentStatus.CONFIRMED
+        : AppointmentStatus.PENDING);
 
-    const paymentStatus = createdByRole === UserRole.PATIENT
-      ? PaymentStatus.PENDING
-      : PaymentStatus.NOT_PAID;
+    const paymentStatus = (createdByRole === UserRole.RECEPTIONIST || createdByRole === UserRole.ADMIN)
+      ? PaymentStatus.NOT_PAID
+      : PaymentStatus.PENDING;
 
 
     const appointment = this.appointmentsRepository.create({

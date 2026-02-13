@@ -10,12 +10,13 @@ export type Break = {
 export type ShiftStatus = 'past' | 'active' | 'upcoming';
 
 export type Shift = {
-  type: 'morning' | 'afternoon' | 'evening';
+  type: 'morning' | 'afternoon' | 'evening' | 'custom';
   startTime: string;
   endTime: string;
   slotDuration: number;
   enabled: boolean;
   status?: ShiftStatus;
+  label?: string;
 };
 
 export type Slot = {

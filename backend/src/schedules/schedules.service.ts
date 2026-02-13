@@ -11,6 +11,11 @@ import { ApplyTemplateDto } from './dto/apply-template.dto';
 import { BulkSlotUpdateDto } from './dto/bulk-slot-update.dto';
 import { AutoScheduleInitializerService } from './auto-schedule-initializer.service';
 
+import { ReceptionistTask } from '../receptionist/entities/receptionist-task.entity';
+
+import { NotificationIntegrationService } from '../notifications/notification-integration.service';
+import { UserRole } from '../common/index';
+
 @Injectable()
 export class SchedulesService {
   constructor(
@@ -18,9 +23,12 @@ export class SchedulesService {
     private readonly repo: Repository<DoctorSchedule>,
     @InjectRepository(Appointment)
     private readonly appointmentsRepo: Repository<Appointment>,
+    @InjectRepository(ReceptionistTask)
+    private readonly taskRepo: Repository<ReceptionistTask>,
     private readonly settingsService: SettingsService,
     private readonly templateService: AvailabilityTemplateService,
     private readonly autoInitializer: AutoScheduleInitializerService,
+    private readonly notificationIntegration: NotificationIntegrationService,
   ) { }
 
   private toMinutes(time: string): number {
@@ -48,7 +56,7 @@ export class SchedulesService {
       while (current + duration <= end) {
         const startTime = this.fromMinutes(current);
         const endTime = this.fromMinutes(current + duration);
-        
+
         const isBreak = (breaks || []).some(
           b => this.toMinutes(startTime) < this.toMinutes(b.endTime) && this.toMinutes(endTime) > this.toMinutes(b.startTime)
         );
@@ -129,7 +137,7 @@ export class SchedulesService {
     const finalSlots: Slot[] = mergedSlots.map((s) => {
       if (s.status !== 'available') return s;
       if (isPastDay) return { ...s, status: 'blocked' as const };
-      
+
       const [h, m] = (s.endTime || '').slice(0, 5).split(':').map(Number);
       const endDt = new Date(dateObj);
       endDt.setHours(h || 0, m || 0, 0, 0);
@@ -231,6 +239,10 @@ export class SchedulesService {
 
     try {
       await this.repo.save(sched);
+
+      // Perform conflict detection against existing appointments
+      await this.detectAndNotifyConflicts(doctorId, dateObj, shifts, breaks);
+
       console.log('[UpdateShiftsAndBreaks] saved schedule', {
         id: sched.id,
         doctorId: sched.doctorId,
@@ -243,11 +255,98 @@ export class SchedulesService {
     return this.getDaySchedule(doctorId, date);
   }
 
+  private async detectAndNotifyConflicts(
+    doctorId: string,
+    date: Date,
+    shifts: Shift[],
+    breaks: Break[],
+  ): Promise<void> {
+    const bookedAppointments = await this.appointmentsRepo.find({
+      where: {
+        doctorId,
+        appointmentDate: this.formatLocalDate(date) as any,
+        status: In([AppointmentStatus.PENDING, AppointmentStatus.CONFIRMED]) as any,
+      },
+      relations: ['patient', 'doctor'],
+    });
+
+    if (bookedAppointments.length === 0) return;
+
+    const enabledShifts = shifts.filter(s => s.enabled);
+    const conflicts: Appointment[] = [];
+
+    for (const apt of bookedAppointments) {
+      const aptStart = this.toMinutes(apt.appointmentTime);
+      const aptEnd = aptStart + (apt.duration || 30);
+
+      // Check if within any enabled shift
+      const inShift = enabledShifts.some(shift => {
+        const shiftStart = this.toMinutes(shift.startTime);
+        const shiftEnd = this.toMinutes(shift.endTime);
+        return aptStart >= shiftStart && aptEnd <= shiftEnd;
+      });
+
+      // Check if overlaps with any break
+      const inBreak = breaks.some(brk => {
+        const brkStart = this.toMinutes(brk.startTime);
+        const brkEnd = this.toMinutes(brk.endTime);
+        return (aptStart >= brkStart && aptStart < brkEnd) ||
+          (aptEnd > brkStart && aptEnd <= brkEnd) ||
+          (aptStart <= brkStart && aptEnd >= brkEnd);
+      });
+
+      if (!inShift || inBreak) {
+        conflicts.push(apt);
+      }
+    }
+
+    if (conflicts.length > 0) {
+      console.log(`[SchedulesService] Found ${conflicts.length} conflicts for doctor ${doctorId} on ${date.toISOString()}`);
+
+      for (const apt of conflicts) {
+        const suggestedSlot = await this.findSuggestedSlot(doctorId, date, apt.duration || 30);
+
+        await this.taskRepo.save({
+          title: `Reschedule ${apt.patient?.firstName} ${apt.patient?.lastName}`,
+          description: `Doctor schedule changed for ${apt.doctor?.lastName}. Appointment at ${apt.appointmentTime} is now outside working hours.${suggestedSlot ? ` Suggested alternative: ${suggestedSlot}` : ' No alternative slots found today.'}`,
+          status: 'pending' as any,
+          priority: 'high' as any,
+          relatedEntityId: apt.id,
+          relatedEntityType: 'appointment',
+        });
+      }
+
+      // Notify all receptionists about the new tasks
+      await this.notificationIntegration.createRoleBasedNotification(
+        UserRole.RECEPTIONIST,
+        'Scheduling Conflicts Detected',
+        `${conflicts.length} appointments affected by recent schedule changes. Action required in Tasks.`,
+        'high',
+      );
+    }
+  }
+
+  private async findSuggestedSlot(doctorId: string, date: Date, duration: number): Promise<string | null> {
+    const daySched = await this.getDaySchedule(doctorId, date);
+    const available = daySched.slots.filter(s => s.status === 'available');
+
+    // Simple heuristic: find the first available slot that fits
+    for (const slot of available) {
+      if (slot.startTime) return slot.startTime;
+    }
+
+    return null;
+  }
+
   private validateShiftSequence(shifts: Shift[]): void {
     if (!shifts || shifts.length === 0) return;
 
-    const shiftOrder: Record<string, number> = { morning: 0, afternoon: 1, evening: 2 };
-    const sorted = [...shifts].sort((a, b) => (shiftOrder[a.type] ?? 0) - (shiftOrder[b.type] ?? 0));
+    const sorted = [...shifts].sort((a, b) => {
+      const timeComp = this.toMinutes(a.startTime) - this.toMinutes(b.startTime);
+      if (timeComp !== 0) return timeComp;
+      const shiftOrder: Record<string, number> = { morning: 0, afternoon: 1, evening: 2, custom: 3 };
+      return (shiftOrder[a.type] ?? 9) - (shiftOrder[b.type] ?? 9);
+    });
 
     for (const shift of sorted) {
       const startMin = this.toMinutes(shift.startTime);
@@ -285,7 +384,7 @@ export class SchedulesService {
       }
     }
   }
-  
+
   async setSingleSlotStatus(
     doctorId: string,
     date: string | Date,
@@ -890,7 +989,7 @@ export class SchedulesService {
 
     if (updatedCount === 0 && dto.status !== 'booked') {
       let currentTime = safeStart;
-      const slotDuration = 30; 
+      const slotDuration = 30;
 
       while (currentTime < safeEnd) {
         const slotEnd = this.addMinutes(currentTime, slotDuration);

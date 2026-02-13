@@ -96,30 +96,18 @@
           <div class="header-actions">
             <button
               class="icon-btn p-3 rounded-xl bg-[var(--surface-secondary)] hover:bg-[var(--surface-tertiary)] transition"
-              type="button"
-              (click)="startCall('audio')"
-              aria-label="Start audio call"
-              title="Audio call"
-            >
+              type="button" (click)="startCall('audio')" aria-label="Start audio call" title="Audio call">
               <i class="bi bi-telephone text-lg"></i>
             </button>
             <button
               class="icon-btn p-3 rounded-xl bg-[var(--surface-secondary)] hover:bg-[var(--surface-tertiary)] transition"
-              type="button"
-              (click)="startCall('video')"
-              aria-label="Start video call"
-              title="Video call"
-            >
+              type="button" (click)="startCall('video')" aria-label="Start video call" title="Video call">
               <i class="bi bi-camera-video text-lg"></i>
             </button>
             <div class="actions-menu">
               <button
                 class="icon-btn p-3 rounded-xl bg-[var(--surface-secondary)] hover:bg-[var(--surface-tertiary)] transition"
-                type="button"
-                (click)="toggleActionsMenu()"
-                aria-label="More actions"
-                title="More actions"
-              >
+                type="button" (click)="toggleActionsMenu()" aria-label="More actions" title="More actions">
                 <i class="bi bi-three-dots-vertical text-lg"></i>
               </button>
               <div class="actions-dropdown" *ngIf="actionsMenuOpen()">
@@ -144,27 +132,96 @@
         <div class="flex-1 overflow-y-auto p-6 space-y-4" #messagesContainer>
           <div *ngFor="let message of messages(); let i = index" class="flex" [class.justify-end]="isMyMessage(message)"
             [class.justify-start]="!isMyMessage(message)" [@fadeInUp]="i">
-            <div class="message-bubble max-w-xs lg:max-w-md px-5 py-3 rounded-2xl shadow-sm"
-              [class.mine]="isMyMessage(message)" [class.theirs]="!isMyMessage(message)"
-              [ngClass]="{
+            <div
+              class="message-bubble max-w-xs lg:max-w-md px-5 py-3 rounded-2xl shadow-sm transition-all hover:shadow-md"
+              [class.mine]="isMyMessage(message)" [class.theirs]="!isMyMessage(message)" [ngClass]="{
                 'bg-[var(--primary)] text-white rounded-br-sm': isMyMessage(message),
-                'bg-[var(--surface-secondary)] rounded-bl-sm': !isMyMessage(message)
+                'bg-white dark:bg-gray-800 rounded-bl-sm border border-gray-100 dark:border-gray-700': !isMyMessage(message)
               }">
-              <p class="text-sm leading-relaxed">{{ message.content }}</p>
-              <p class="text-xs mt-2 opacity-70">{{ message.createdAt | date:'shortTime' }}</p>
+
+              <div *ngIf="isGif(message.content); else textMsg">
+                <img [src]="getGifUrl(message.content)" class="rounded-lg max-w-full" alt="GIF" loading="lazy">
+              </div>
+              <ng-template #textMsg>
+                <p class="text-sm leading-relaxed break-words">{{ message.content }}</p>
+              </ng-template>
+
+              <div class="flex items-center justify-end gap-1 mt-1 opacity-70">
+                <p class="text-[10px]">{{ message.createdAt | date:'shortTime' }}</p>
+                <i *ngIf="isMyMessage(message)" class="bi"
+                  [ngClass]="message.isRead ? 'bi-check-all text-blue-200' : 'bi-check'"></i>
+              </div>
+            </div>
+          </div>
+
+          <!-- Typing Indicator in Chat Flow (optional) -->
+          <div *ngIf="typingUser()" class="flex justify-start ml-2 mb-2" [@fadeInUp]>
+            <div class="bg-gray-100 dark:bg-gray-800 px-4 py-2 rounded-2xl rounded-bl-sm flex items-center gap-1">
+              <span class="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></span>
+              <span class="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-100"></span>
+              <span class="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-200"></span>
             </div>
           </div>
         </div>
 
         <!-- Message Input -->
-        <div class="p-6">
-          <div class="flex gap-3">
-            <input type="text" placeholder="Type your message..." [value]="messageContent()"
-              (input)="messageContent.set($any($event.target).value)" (keyup.enter)="sendMessage()"
-              class="flex-1 px-5 py-4 bg-[var(--surface-secondary)] rounded-full focus:outline-none focus:ring-2 focus:ring-[var(--primary)] transition shadow-sm input-glow" />
+        <div class="p-4 border-t border-[var(--border-color)] bg-[var(--surface-primary)] relative">
+
+          <!-- Emoji Picker -->
+          <div *ngIf="showEmojiPicker()"
+            class="absolute bottom-20 left-4 z-50 bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 w-72 p-3 animate-up origin-bottom-left">
+            <div class="grid grid-cols-6 gap-2 max-h-60 overflow-y-auto">
+              <button *ngFor="let emoji of emojis" (click)="addEmoji(emoji)"
+                class="text-2xl hover:bg-gray-100 dark:hover:bg-gray-700 p-1 rounded transition transform hover:scale-110">
+                {{ emoji }}
+              </button>
+            </div>
+          </div>
+
+          <!-- GIF Picker -->
+          <div *ngIf="showGifPicker()"
+            class="absolute bottom-20 left-16 z-50 bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 w-80 p-3 animate-up origin-bottom-left">
+            <div class="relative mb-3">
+              <i class="bi bi-search absolute left-3 top-2.5 text-gray-400"></i>
+              <input type="text" placeholder="Search GIFs..." [value]="gifSearchQuery()"
+                (input)="gifSearchQuery.set($any($event.target).value); searchGifs()"
+                class="w-full pl-9 pr-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-sm focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent transition" />
+            </div>
+            <div class="h-60 overflow-y-auto grid grid-cols-2 gap-2 pr-1 custom-scrollbar">
+              <div *ngIf="isLoadingGifs()" class="col-span-2 flex justify-center py-8 text-[var(--primary)]">
+                <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-current"></div>
+              </div>
+              <img *ngFor="let gif of gifs()" [src]="gif.url" (click)="selectGif(gif)"
+                class="w-full h-24 object-cover rounded-lg cursor-pointer hover:opacity-80 transition shadow-sm border border-transparent hover:border-[var(--primary)]" />
+            </div>
+          </div>
+
+          <div
+            class="flex items-end gap-2 bg-[var(--surface-secondary)] p-2 rounded-3xl shadow-inner transition-all focus-within:ring-2 focus-within:ring-[var(--primary)]/20">
+            <div class="flex gap-1 pb-1 pl-1">
+              <button (click)="toggleEmojiPicker()"
+                class="p-2 text-gray-500 hover:text-[var(--primary)] hover:bg-white/50 rounded-full transition relative group"
+                title="Emoji">
+                <i class="bi bi-emoji-smile text-xl"></i>
+              </button>
+              <button (click)="toggleGifPicker()"
+                class="p-2 text-gray-500 hover:text-[var(--primary)] hover:bg-white/50 rounded-full transition"
+                title="GIF">
+                <i class="bi bi-filetype-gif text-xl"></i>
+              </button>
+              <button class="p-2 text-gray-500 hover:text-[var(--primary)] hover:bg-white/50 rounded-full transition"
+                title="Attach file">
+                <i class="bi bi-paperclip text-xl"></i>
+              </button>
+            </div>
+
+            <textarea placeholder="Type a message..." [value]="messageContent()"
+              (input)="messageContent.set($any($event.target).value); onTyping()" (keyup.enter)="sendMessage()"
+              class="flex-1 px-4 py-3 bg-transparent text-[var(--text-primary)] placeholder-gray-400 focus:outline-none resize-none max-h-32 min-h-[48px] custom-scrollbar leading-normal"></textarea>
+
             <button (click)="sendMessage()" [disabled]="!messageContent().trim()"
-              class="send-btn w-14 h-14 bg-[var(--primary)] text-white rounded-full hover:bg-[var(--primary-dark)] disabled:opacity-50 disabled:cursor-not-allowed transition shadow-lg flex items-center justify-center">
-              <i class="bi bi-send text-lg"></i>
+              class="w-10 h-10 mb-1 mr-1 bg-[var(--primary)] text-white rounded-full hover:bg-[var(--primary-dark)] disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md hover:shadow-lg flex items-center justify-center transform active:scale-95">
+              <i class="bi bi-send-fill text-sm pl-0.5"></i>
             </button>
           </div>
         </div>

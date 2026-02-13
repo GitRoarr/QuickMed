@@ -277,6 +277,43 @@
   font-size: 0.95rem;
 }
 
+.table-filters {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.search-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-box i {
+  position: absolute;
+  left: 1rem;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.search-box input {
+  padding: 0.6rem 1rem 0.6rem 2.5rem;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--glass-bg);
+  color: var(--fg);
+  font-size: 0.9rem;
+  width: 280px;
+  transition: all 0.2s ease;
+}
+
+.search-box input:focus {
+  outline: none;
+  border-color: var(--primary);
+  width: 320px;
+  box-shadow: 0 0 0 4px rgba(22, 163, 74, 0.1);
+}
+
 .glass-card {
   background: var(--glass-bg);
   backdrop-filter: blur(16px) saturate(180%);
@@ -383,17 +420,30 @@ td {
   color: #64748b;
 }
 
-.status-pill.checked-in {
-  background: rgba(34, 197, 94, 0.15);
-  color: #16a34a;
+.status-pill.checked-in,
+.status-pill.waiting {
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+}
+
+.status-pill.in-session {
+  background: rgba(59, 130, 246, 0.15);
+  color: #3b82f6;
 }
 
 .status-pill.completed {
-  background: rgba(16, 185, 129, 0.15);
-  color: #059669;
+  background: rgba(30, 41, 59, 0.15);
+  color: #1e293b;
 }
 
-.status-pill.cancelled {
+.receptionist-layout.dark .status-pill.completed {
+  background: rgba(241, 245, 249, 0.15);
+  color: #f1f5f9;
+}
+
+.status-pill.cancelled,
+.status-pill.overdue,
+.status-pill.no-show {
   background: rgba(239, 68, 68, 0.15);
   color: #ef4444;
 }

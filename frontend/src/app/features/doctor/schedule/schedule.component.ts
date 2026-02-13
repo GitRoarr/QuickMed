@@ -65,26 +65,26 @@ export class ScheduleComponent implements OnInit {
   newSlotEnd = signal('09:30');
   newSlotSaving = signal(false);
 
-  
+
   morningShift = computed(() => this.shifts().find(s => s.type === 'morning'));
   afternoonShift = computed(() => this.shifts().find(s => s.type === 'afternoon'));
   eveningShift = computed(() => this.shifts().find(s => s.type === 'evening'));
-  
+
   isSelectedDateToday = signal(false);
   isSelectedDatePast = signal(false);
-  
+
   shifts = signal<Shift[]>([]);
   breaks = signal<Break[]>([]);
-  
+
   private initialScheduleState = signal<{ shifts: Shift[], breaks: Break[] }>({ shifts: [], breaks: [] });
-  
+
   hasUnsavedChanges = computed(() => {
     const initial = this.initialScheduleState();
     const currentShifts = this.shifts();
     const currentBreaks = this.breaks();
-    
+
     return JSON.stringify(initial.shifts) !== JSON.stringify(currentShifts) ||
-           JSON.stringify(initial.breaks) !== JSON.stringify(currentBreaks);
+      JSON.stringify(initial.breaks) !== JSON.stringify(currentBreaks);
   });
 
   draggedSlot = signal<DoctorSlot | null>(null);
@@ -174,7 +174,7 @@ export class ScheduleComponent implements OnInit {
       }
     });
   }
-  
+
   getDefaultShifts(): Shift[] {
     return [
       { type: 'morning', startTime: '08:00', endTime: '12:00', slotDuration: 30, enabled: true },
@@ -185,14 +185,15 @@ export class ScheduleComponent implements OnInit {
 
   private normalizeShifts(shifts: Shift[]): Shift[] {
     const defaults = this.getDefaultShifts();
-    const byType = new Map<Shift['type'], Shift>();
+    const byType = new Map<string, Shift>();
 
     defaults.forEach((shift) => byType.set(shift.type, { ...shift }));
 
-    (shifts || []).forEach((shift) => {
+    (shifts || []).forEach((shift, index) => {
       if (!shift?.type) return;
-      const base = byType.get(shift.type) || this.getDefaultShifts().find(s => s.type === shift.type);
-      byType.set(shift.type, {
+      const key = shift.type === 'custom' ? `custom-${index}` : shift.type;
+      const base = byType.get(key) || this.getDefaultShifts().find(s => s.type === shift.type);
+      byType.set(key, {
         ...base,
         ...shift,
         enabled: shift.enabled ?? true,
@@ -203,50 +204,75 @@ export class ScheduleComponent implements OnInit {
       } as Shift);
     });
 
-    return ['morning', 'afternoon', 'evening']
-      .map((type) => byType.get(type as Shift['type']))
-      .filter((shift): shift is Shift => !!shift);
+    return Array.from(byType.values()).sort((a, b) => {
+      if (a.startTime < b.startTime) return -1;
+      if (a.startTime > b.startTime) return 1;
+      return 0;
+    });
   }
-  
-  updateShift(type: 'morning' | 'afternoon' | 'evening', changes: Partial<Shift>): void {
+
+  updateShift(shiftToUpdate: Shift, changes: Partial<Shift>): void {
     this.shifts.update(shifts =>
       shifts.map(shift =>
-        shift.type === type ? { ...shift, ...changes } : shift
+        shift === shiftToUpdate ? { ...shift, ...changes } : shift
       )
     );
   }
 
-  toggleShiftEnabled(type: 'morning' | 'afternoon' | 'evening'): void {
-    const shift = this.shifts().find(s => s.type === type);
+  toggleShiftEnabled(shift: Shift): void {
     if (!shift) return;
-    
+
     // Block toggling past shifts on today's date
-    if (this.isShiftPast(type)) {
-      this.toast.warning(`${type.charAt(0).toUpperCase() + type.slice(1)} shift has already passed and cannot be modified.`, { title: 'Schedule' });
+    if (this.isShiftPast(shift)) {
+      this.toast.warning(`${(shift.label || shift.type).charAt(0).toUpperCase() + (shift.label || shift.type).slice(1)} shift has already passed and cannot be modified.`, { title: 'Schedule' });
       return;
     }
-    
-    this.updateShift(type, { enabled: !shift.enabled });
+
+    this.updateShift(shift, { enabled: !shift.enabled });
     this.saveSchedule(true);
   }
 
-  isShiftPast(type: 'morning' | 'afternoon' | 'evening'): boolean {
-    const shift = this.shifts().find(s => s.type === type);
+  addShift(): void {
+    const lastShift = this.shifts()[this.shifts().length - 1];
+    const newStart = lastShift ? lastShift.endTime : '20:00';
+    const newEnd = this.conflictService.addMinutes(newStart, 120); // Default 2 hours
+
+    const newShift: Shift = {
+      type: 'custom',
+      label: 'Night Shift',
+      startTime: newStart,
+      endTime: newEnd,
+      slotDuration: 30,
+      enabled: true,
+      status: 'upcoming'
+    };
+
+    this.shifts.update(s => [...s, newShift]);
+    this.toast.info('New shift added. Don\'t forget to save changes!', { title: 'Schedule' });
+  }
+
+  removeShift(shiftToRemove: Shift): void {
+    if (shiftToRemove.type !== 'custom') {
+      this.toast.error('Standard shifts cannot be removed, only disabled.', { title: 'Schedule' });
+      return;
+    }
+    this.shifts.update(s => s.filter(sh => sh !== shiftToRemove));
+    this.toast.info('Shift removed. Save changes to apply.', { title: 'Schedule' });
+  }
+
+  isShiftPast(shift: Shift): boolean {
     return shift?.status === 'past';
   }
 
-  isShiftActive(type: 'morning' | 'afternoon' | 'evening'): boolean {
-    const shift = this.shifts().find(s => s.type === type);
+  isShiftActive(shift: Shift): boolean {
     return shift?.status === 'active';
   }
 
-  isShiftUpcoming(type: 'morning' | 'afternoon' | 'evening'): boolean {
-    const shift = this.shifts().find(s => s.type === type);
+  isShiftUpcoming(shift: Shift): boolean {
     return shift?.status === 'upcoming' || !shift?.status;
   }
 
-  getShiftStatusLabel(type: 'morning' | 'afternoon' | 'evening'): string {
-    const shift = this.shifts().find(s => s.type === type);
+  getShiftStatusLabel(shift: Shift): string {
     if (!shift?.status) return '';
     switch (shift.status) {
       case 'past': return 'Passed';
@@ -255,22 +281,36 @@ export class ScheduleComponent implements OnInit {
       default: return '';
     }
   }
-  
+
   addBreak(): void {
     this.breaks.update(breaks => [...breaks, { startTime: '12:00', endTime: '13:00', reason: '' }]);
   }
-  
+
   updateBreak(index: number, changes: Partial<Break>): void {
     this.breaks.update(breaks =>
       breaks.map((br, i) => (i === index ? { ...br, ...changes } : br))
     );
   }
-  
+
   removeBreak(index: number): void {
     this.breaks.update(breaks => breaks.filter((_, i) => i !== index));
   }
-  
+
   saveSchedule(silent: boolean = false): void {
+    const currentSlots = this.slots();
+    const displacement = this.conflictService.checkScheduleDisplacement(
+      currentSlots,
+      this.shifts(),
+      this.breaks()
+    );
+
+    if (displacement.displacedCount > 0 && !silent) {
+      const confirmSave = confirm(
+        `Warning: Saving these changes will displace ${displacement.displacedCount} booked appointments (at ${displacement.displacedAppointments.join(', ')}). \n\nThe receptionist will be automatically notified to reschedule them. \n\nDo you want to proceed?`
+      );
+      if (!confirmSave) return;
+    }
+
     const schedule = {
       date: this.toDateOnly(this.selectedDate()),
       shifts: this.shifts().map(({ status, ...rest }) => rest),

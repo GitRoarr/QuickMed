@@ -12,5 +12,17 @@ export class SendMessageDto {
   @IsOptional()
   @IsString()
   doctorId?: string;
+
+  @IsOptional()
+  @IsString()
+  receptionistId?: string;
+
+  @IsOptional()
+  @IsString()
+  receiverId?: string;
+
+  @IsOptional()
+  @IsString()
+  receiverRole?: string;
 }
 

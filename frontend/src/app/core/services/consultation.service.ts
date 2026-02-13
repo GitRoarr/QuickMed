@@ -74,4 +74,12 @@ export class ConsultationService {
   getMyConsultations(): Observable<Consultation[]> {
     return this.http.get<Consultation[]>(`${this.apiUrl}/my-consultations`);
   }
+
+  start(dto: { appointmentId?: string; doctorId: string; patientId: string }): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/start`, dto);
+  }
+
+  end(id: string): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/${id}/end`, {});
+  }
 }

@@ -92,13 +92,19 @@
             <h3><i class="bi bi-card-list"></i> Appointment Queue</h3>
             <p>Live tracking of patient arrivals and clinical status.</p>
           </div>
-          <div class="table-filters" *ngIf="appointmentsTable().length > 0">
-            <span class="badge">{{ appointmentsTable().length }} appointments today</span>
+          <div class="table-filters">
+            <div class="search-box">
+              <i class="bi bi-search"></i>
+              <input type="text" placeholder="Search patient or doctor..." [(ngModel)]="searchQuery"
+                (input)="onSearch()" />
+            </div>
+            <span class="badge" *ngIf="appointmentsTable().length > 0">{{ appointmentsTable().length }} appointments
+              today</span>
           </div>
         </header>
 
         <div class="table-wrapper glass-card" *ngIf="appointmentsTable().length; else emptyTable">
-          <table>
+          <table class="table-responsive-stack">
             <thead>
               <tr>
                 <th>Patient</th>
@@ -110,7 +116,7 @@
             </thead>
             <tbody>
               <tr *ngFor="let row of appointmentsTable()" class="table-row">
-                <td>
+                <td data-label="Patient">
                   <div class="patient-cell">
                     <div class="patient-avatar">{{ row.patient?.firstName?.[0] || 'P' }}</div>
                     <div class="patient-meta">
@@ -120,34 +126,37 @@
                     </div>
                   </div>
                 </td>
-                <td>
+                <td data-label="Doctor">
                   <div class="doctor-cell">
                     <i class="bi bi-stethoscope"></i>
                     Dr. {{ row.doctorName || (row.doctor?.firstName + ' ' + row.doctor?.lastName) }}
                   </div>
                 </td>
-                <td>
+                <td data-label="Schedule">
                   <div class="time-cell">
                     <i class="bi bi-clock"></i>
                     {{ row.time || row.appointmentTime }}
                   </div>
                 </td>
-                <td>
+                <td data-label="Status">
                   <span class="status-pill" [class]="getStatusClass(row)">
                     {{ getStatusLabel(row) }}
                   </span>
                 </td>
-                <td>
+                <td data-label="Actions" class="text-right">
                   <div class="action-group">
-                    <button class="checkin-btn" *ngIf="!row.arrived" (click)="markCheckedIn(row.id)">
+                    <button class="checkin-btn" *ngIf="canCheckIn(row)" (click)="markCheckedIn(row.id)">
                       <i class="bi bi-box-arrow-in-right"></i> Check-in
                     </button>
-                    <button class="complete-btn" title="Mark as Completed" (click)="updateStatus(row.id, 'completed')">
-                      <i class="bi bi-check-lg"></i>
-                    </button>
-                    <button class="cancel-btn" title="Cancel Appointment" (click)="updateStatus(row.id, 'cancelled')">
-                      <i class="bi bi-x-lg"></i>
-                    </button>
+                    <ng-container *ngIf="canModify(row)">
+                      <button class="complete-btn" title="Mark as Completed"
+                        (click)="updateStatus(row.id, 'completed')">
+                        <i class="bi bi-check-lg"></i>
+                      </button>
+                      <button class="cancel-btn" title="Cancel Appointment" (click)="updateStatus(row.id, 'cancelled')">
+                        <i class="bi bi-x-lg"></i>
+                      </button>
+                    </ng-container>
                   </div>
                 </td>
               </tr>
@@ -157,10 +166,14 @@
 
         <ng-template #emptyTable>
           <div class="empty-state glass-card">
-            <div class="empty-icon"><i class="bi bi-calendar-x"></i></div>
-            <h4>Quiet day ahead</h4>
-            <p>No appointments registered for today yet.</p>
-            <button class="btn-primary sm" (click)="goToBookAppointment()">Book first visit</button>
+            <div class="empty-icon"><i class="bi bi-search" *ngIf="searchQuery()"></i><i class="bi bi-calendar-x"
+                *ngIf="!searchQuery()"></i></div>
+            <h4>{{ searchQuery() ? 'No results found' : 'Quiet day ahead' }}</h4>
+            <p>{{ searchQuery() ? 'Try a different search term.' : 'No appointments registered for today yet.' }}</p>
+            <button class="action-btn primary sm mx-auto" *ngIf="!searchQuery()" (click)="goToBookAppointment()">Book
+              first visit</button>
+            <button class="action-btn secondary sm mx-auto" *ngIf="searchQuery()"
+              (click)="searchQuery.set(''); onSearch()">Clear Search</button>
           </div>
         </ng-template>
       </section>

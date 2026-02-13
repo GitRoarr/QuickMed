@@ -18,7 +18,7 @@ import { Router } from '@angular/router';
 })
 export class SettingsComponent implements OnInit {
     private readonly fb = inject(FormBuilder);
-    private readonly authService = inject(AuthService);
+    public readonly authService = inject(AuthService);
     private readonly userService = inject(UserService);
     private readonly toast = inject(ToastService);
     private readonly router = inject(Router);
@@ -32,7 +32,7 @@ export class SettingsComponent implements OnInit {
         lastName: ['', Validators.required],
         email: [{ value: '', disabled: true }, [Validators.required, Validators.email]],
         phoneNumber: [''],
-        department: ['']
+        department: [{ value: '', disabled: true }]
     });
 
     passwordForm = this.fb.group({
@@ -48,13 +48,16 @@ export class SettingsComponent implements OnInit {
     });
 
     menuItems = [
-        { label: 'Dashboard', icon: 'bi-speedometer2', route: '/receptionist/dashboard', exact: true },
-        { label: 'Appointments', icon: 'bi-calendar-check', route: '/receptionist/appointments' },
-        { label: 'Patients', icon: 'bi-people', route: '/receptionist/patients' },
-        { label: 'Messages', icon: 'bi-chat-dots', route: '/receptionist/messages' },
-        { label: 'Payments', icon: 'bi-cash-stack', route: '/receptionist/payments' },
-        { label: 'Doctors', icon: 'bi-stethoscope', route: '/receptionist/doctors' },
-        { label: 'Reports', icon: 'bi-bar-chart', route: '/receptionist/reports' },
+                { label: 'Dashboard', icon: 'bi-speedometer2', route: '/receptionist/dashboard', exact: true },
+                { label: 'Appointments', icon: 'bi-calendar-check', route: '/receptionist/appointments' },
+                { label: 'Patients', icon: 'bi-people', route: '/receptionist/patients' },
+                { label: 'Messages', icon: 'bi-chat-dots', route: '/receptionist/messages' },
+                { label: 'Payments', icon: 'bi-cash-stack', route: '/receptionist/payments' },
+                { label: 'Doctors',
+                    iconImgLight: 'https://img.icons8.com/?size=100&id=60999&format=png&color=000000',
+                    iconImgDark: 'https://img.icons8.com/?size=100&id=60999&format=png&color=4e91fd',
+                    route: '/receptionist/doctors' },
+                { label: 'Reports', icon: 'bi-bar-chart', route: '/receptionist/reports' },
     ];
 
     secondaryItems = [

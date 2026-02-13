@@ -1,8 +1,9 @@
-import { Component, OnInit, signal, inject, AfterViewChecked, ElementRef, ViewChild } from '@angular/core';
+import { Component, OnInit, signal, inject, AfterViewChecked, ElementRef, ViewChild, OnDestroy } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { trigger, transition, style, animate } from '@angular/animations';
+import { Subscription } from 'rxjs';
 
 import { DoctorSidebarComponent } from '../shared/doctor-sidebar/doctor-sidebar.component';
 import { DoctorHeaderComponent } from '../shared/doctor-header/doctor-header.component';
@@ -11,6 +12,7 @@ import { AuthService } from '@core/services/auth.service';
 import { NotificationService } from '@core/services/notification.service';
 import { ThemeService } from '@core/services/theme.service';
 import { ToastService } from '@core/services/toast.service';
+import { WebSocketService } from '@core/services/websocket.service';
 
 @Component({
   selector: 'app-doctor-messages',
@@ -40,12 +42,13 @@ import { ToastService } from '@core/services/toast.service';
     ])
   ]
 })
-export class MessagesComponent implements OnInit, AfterViewChecked {
+export class MessagesComponent implements OnInit, AfterViewChecked, OnDestroy {
   @ViewChild('messagesContainer') private messagesContainer!: ElementRef;
 
   private authService = inject(AuthService);
   private messageService = inject(MessageService);
   private notificationService = inject(NotificationService);
+  private wsService = inject(WebSocketService);
   themeService = inject(ThemeService);
   private toast = inject(ToastService);
   private router: Router = inject(Router);
@@ -61,11 +64,70 @@ export class MessagesComponent implements OnInit, AfterViewChecked {
   currentUser = signal<any>(null);
   actionsMenuOpen = signal(false);
 
+  // Pickers
+  showEmojiPicker = signal(false);
+  showGifPicker = signal(false);
+  gifSearchQuery = signal('');
+  gifs = signal<any[]>([]);
+  isLoadingGifs = signal(false);
+
+  // Common Emojis
+  emojis = ['😀', '😂', '😍', '👍', '🙏', '🎉', '🔥', '🤔', '😊', '🥳', '👋', '❤️', '✅', '❌', '🏥', '💊'];
+
+  // Real-time
+  isTyping = signal(false);
+  typingUser = signal<string | null>(null);
+  private subscriptions = new Subscription();
+
   ngOnInit(): void {
     this.loadUserData();
     this.loadConversations();
     this.loadUnreadCount();
     this.bindDeepLink();
+
+    // Connect WebSocket
+    this.wsService.connectMessages();
+
+    // Subscribe to messages
+    this.subscriptions.add(
+      this.wsService.messages$.subscribe((msg: any) => {
+        if (!msg) return;
+
+        // Update messages list if conversation is active
+        if (this.selectedConversation()?.id === msg.conversationId) {
+          const formattedMsg: Message = {
+            ...msg,
+            senderType: msg.sender?.role || 'patient', // fallback
+            createdAt: msg.createdAt || new Date().toISOString()
+          };
+          this.messages.update(msgs => [...msgs, formattedMsg]);
+
+          // Mark as read immediately if viewing
+          // this.messageService.markAsRead(msg.id).subscribe(); // If implemented
+          this.scrollToBottom();
+        }
+
+        // Update conversation list preview
+        this.updateConversationPreview(msg);
+        this.loadUnreadCount();
+      })
+    );
+
+    // Subscribe to typing
+    this.subscriptions.add(
+      this.wsService.typing$.subscribe((data: any) => {
+        if (this.selectedConversation()?.id === data.conversationId) {
+          if (data.userId !== this.currentUser()?.id) {
+            this.typingUser.set(data.isTyping ? 'Typing...' : null);
+          }
+        }
+      })
+    );
+  }
+
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
+    this.wsService.disconnectMessages();
   }
 
   private bindDeepLink(): void {
@@ -128,13 +190,20 @@ export class MessagesComponent implements OnInit, AfterViewChecked {
     this.selectedConversation.set(conversation);
     this.actionsMenuOpen.set(false);
     this.loadMessages(conversation.id);
+    this.typingUser.set(null);
+    this.showEmojiPicker.set(false);
+    this.showGifPicker.set(false);
   }
 
   loadMessages(conversationId: string): void {
     this.messageService.getMessages(conversationId).subscribe({
       next: (data) => {
         this.messages.set(data);
-        this.loadConversations(); // Refresh unread counts
+        // Mark conversation as read (locally for now, backend usually handles on fetch or dedicated endpoint)
+        // Optimistically update unread count for this convo
+        this.conversations.update(convos => convos.map(c =>
+          c.id === conversationId ? { ...c, unreadCount: 0 } : c
+        ));
       },
       error: () => this.toast.error('Failed to load messages')
     });
@@ -144,16 +213,67 @@ export class MessagesComponent implements OnInit, AfterViewChecked {
     const content = this.messageContent().trim();
     if (!content || !this.selectedConversation()) return;
 
-    this.messageService.sendMessage({
-      patientId: this.selectedConversation()!.patientId,
-      content
-    }).subscribe({
-      next: () => {
-        this.messageContent.set('');
-        this.loadMessages(this.selectedConversation()!.id);
-        this.toast.success('Message sent');
-      },
-      error: () => this.toast.error('Failed to send message')
+    const conversation = this.selectedConversation()!;
+    const receiverId = conversation.patientId || conversation.patient?.id;
+    // Determine receiver role. Assuming patient for now if doctor chat.
+    // But could be receptionist.
+    // If it's a conversation with patient, role is patient.
+    const receiverRole = conversation.patientId ? 'patient' : conversation.receptionistId ? 'receptionist' : 'doctor';
+
+    if (!receiverId) return;
+
+    // Use WebSocket for sending
+    this.wsService.sendMessage({
+      content,
+      receiverId,
+      receiverRole: receiverRole as any // assuming 'patient' | 'doctor' | 'receptionist'
+    } as any);
+
+    // Optimistic update
+    const tempMsg: Message = {
+      id: 'temp-' + Date.now(),
+      conversationId: conversation.id,
+      senderId: this.currentUser()?.id,
+      receiverId: receiverId,
+      content,
+      senderType: 'doctor',
+      isRead: false,
+      createdAt: new Date().toISOString()
+    };
+
+    this.messages.update(msgs => [...msgs, tempMsg]);
+    this.messageContent.set('');
+
+    // update preview
+    this.updateConversationPreview(tempMsg);
+  }
+
+  onTyping(): void {
+    const conv = this.selectedConversation();
+    if (conv) {
+      this.wsService.sendTyping(conv.id, this.messageContent().length > 0);
+    }
+  }
+
+  private updateConversationPreview(msg: Message | any) {
+    this.conversations.update(convos => {
+      const idx = convos.findIndex(c => c.id === msg.conversationId);
+      if (idx !== -1) {
+        const updated = [...convos];
+        updated[idx] = {
+          ...updated[idx],
+          lastMessageContent: msg.content,
+          lastMessageAt: msg.createdAt,
+          unreadCount: (msg.senderId !== this.currentUser()?.id && this.selectedConversation()?.id !== msg.conversationId)
+            ? updated[idx].unreadCount + 1
+            : updated[idx].unreadCount
+        };
+        // Move to top
+        const [moved] = updated.splice(idx, 1);
+        updated.unshift(moved);
+        return updated;
+      }
+      return convos;
     });
   }
 
@@ -162,17 +282,22 @@ export class MessagesComponent implements OnInit, AfterViewChecked {
   }
 
   getPatientName(conversation: Conversation): string {
-    return conversation.patient
-      ? `${conversation.patient.firstName} ${conversation.patient.lastName}`
-      : 'Unknown Patient';
+    if (conversation.patient) {
+      return `${conversation.patient.firstName} ${conversation.patient.lastName}`;
+    }
+    if (conversation.receptionist) {
+      return `${conversation.receptionist.firstName} ${conversation.receptionist.lastName} (Receptionist)`;
+    }
+    return 'Unknown';
+    // Logic needs to adapt if chatting with someone else
   }
 
   getPatientInitials(conversation: Conversation): string {
     const name = this.getPatientName(conversation);
-    const parts = name.split(' ');
+    const parts = name.replace('(Receptionist)', '').trim().split(' ');
     return parts.length >= 2
       ? (parts[0][0] + parts[1][0]).toUpperCase()
-      : name.charAt(0).toUpperCase() || 'P';
+      : name.charAt(0).toUpperCase() || '?';
   }
 
   getTimeAgo(date: string | undefined): string {
@@ -202,7 +327,8 @@ export class MessagesComponent implements OnInit, AfterViewChecked {
   }
 
   isMyMessage(message: Message): boolean {
-    return message.senderType === 'doctor';
+    return message.senderId === this.currentUser()?.id;
+    // Safer than relying on senderType string match, since backend might send 'doctor' or 'receptionist'
   }
 
   navigate(route: string): void {
@@ -247,6 +373,54 @@ export class MessagesComponent implements OnInit, AfterViewChecked {
     this.router.navigate(['/doctor/patients', patientId]);
   }
 
+  toggleEmojiPicker(): void {
+    this.showEmojiPicker.update(v => !v);
+    if (this.showEmojiPicker()) this.showGifPicker.set(false);
+  }
+
+  addEmoji(emoji: string): void {
+    this.messageContent.update(c => c + emoji);
+    this.showEmojiPicker.set(false);
+  }
+
+  toggleGifPicker(): void {
+    this.showGifPicker.update(v => !v);
+    if (this.showGifPicker()) {
+      this.showEmojiPicker.set(false);
+      this.searchGifs();
+    }
+  }
+
+  searchGifs(): void {
+    this.isLoadingGifs.set(true);
+    // Simulate API call or use real one if available. 
+    // Using placeholders for demo as in Receptionist component.
+    setTimeout(() => {
+      this.gifs.set([
+        { url: 'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExbXcwOHZ1eGZtbnYwZnN6bnYwZnMzbnYwZnM0bnYwZnM1bnYwZnM2/3o7TKSjRrfIPjeiVyM/giphy.gif' },
+        { url: 'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExbXcwOHZ1eGZtbnYwZnN6bnYwZnMzbnYwZnM0bnYwZnM1bnYwZnM2/26AHP7PeRRbAqn6vK/giphy.gif' },
+        { url: 'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExbXcwOHZ1eGZtbnYwZnN6bnYwZnMzbnYwZnM0bnYwZnM1bnYwZnM2/l0HlHFRb68qGNj80M/giphy.gif' }
+      ]);
+      this.isLoadingGifs.set(false);
+    }, 500);
+  }
+
+  selectGif(gif: any): void {
+    const gifContent = `![gif](${gif.url})`;
+    // Send directly as message
+    this.messageContent.set(gifContent);
+    this.sendMessage();
+    this.showGifPicker.set(false);
+  }
+
+  isGif(content: string): boolean {
+    return content.startsWith('![gif](') && content.endsWith(')');
+  }
+
+  getGifUrl(content: string): string {
+    return content.substring(7, content.length - 1);
+  }
+
   copyConversationId(): void {
     const conversation = this.selectedConversation();
     if (!conversation) return;
@@ -254,8 +428,6 @@ export class MessagesComponent implements OnInit, AfterViewChecked {
     this.actionsMenuOpen.set(false);
     this.toast.success('Conversation ID copied');
   }
-
-
 
   private scrollToBottom(): void {
     if (this.messagesContainer) {

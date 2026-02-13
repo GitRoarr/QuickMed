@@ -44,7 +44,7 @@
               <label for="doctor">Doctor</label>
               <div class="select-wrapper">
                 <i class="bi bi-stethoscope"></i>
-                <select id="doctor" [(ngModel)]="model().doctorId" name="doctorId" (change)="onDoctorOrDateChange()">
+                <select id="doctor" [(ngModel)]="model().doctorId" name="doctorId">
                   <option value="" disabled>Select doctor</option>
                   <option *ngFor="let doc of doctors()" [value]="doc.id">
                     Dr. {{ doc.firstName }} {{ doc.lastName }} {{ doc.specialty ? '· ' + doc.specialty : '' }}
@@ -58,28 +58,15 @@
               <label for="date">Date</label>
               <div class="input-wrapper">
                 <i class="bi bi-calendar3"></i>
-                <input id="date" [(ngModel)]="model().appointmentDate" name="appointmentDate" type="date"
-                  (change)="onDoctorOrDateChange()" />
+                <input id="date" [(ngModel)]="model().appointmentDate" name="appointmentDate" type="date" />
               </div>
             </div>
 
-            <div class="field" *ngIf="availableSlots().length > 0">
-              <label>Select Time Slot</label>
-              <div class="slots-grid">
-                <button type="button" *ngFor="let slot of availableSlots()" class="slot-btn"
-                  [class.selected]="model().appointmentTime === slot.startTime"
-                  [class.booked]="slot.status !== 'available'" [disabled]="slot.status !== 'available'"
-                  (click)="model().appointmentTime = slot.startTime">
-                  {{ slot.startTime }}
-                </button>
-              </div>
-            </div>
-
-            <div class="field" *ngIf="availableSlots().length === 0">
-              <label for="time">Time (Manual)</label>
+            <div class="field">
+              <label for="time">Appointment Time</label>
               <div class="input-wrapper">
                 <i class="bi bi-clock"></i>
-                <input id="time" [(ngModel)]="model().appointmentTime" name="appointmentTime" type="time" />
+                <input id="time" [(ngModel)]="model().appointmentTime" name="appointmentTime" type="time" step="900" />
               </div>
             </div>
 

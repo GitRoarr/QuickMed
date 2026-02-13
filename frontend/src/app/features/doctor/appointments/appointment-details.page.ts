@@ -67,6 +67,8 @@ export class AppointmentDetailsPage implements OnInit {
       case 'completed': return 'ad-status-completed';
       case 'cancelled': return 'ad-status-cancelled';
       case 'pending': return 'ad-status-pending';
+      case 'waiting': return 'ad-status-waiting';
+      case 'in-progress': return 'ad-status-in-progress';
       default: return 'ad-status-default';
     }
   }

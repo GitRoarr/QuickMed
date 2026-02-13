@@ -400,34 +400,70 @@
 @media (max-width: 1024px) {
   .admin-shell__sidebar {
     position: fixed;
-    left: calc(-1 * var(--sidebar-width));
+    left: 0;
+    transform: translateX(-100%);
+    box-shadow: 20px 0 60px rgba(0, 0, 0, 0.2);
+    visibility: hidden;
 
     &.sidebar-open {
-      left: 0;
+      transform: translateX(0);
+      visibility: visible;
     }
   }
 
   .sidebar-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(4px);
-    z-index: 90;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(6px);
+    z-index: 95;
+    animation: fadeIn 0.3s ease;
+  }
+
+  .admin-shell {
+    &.sidebar-open {
+      .admin-shell__sidebar {
+        transform: translateX(0);
+        visibility: visible;
+      }
+    }
   }
 
   .admin-shell__header {
-    padding: 0 1.25rem;
+    padding: 0 1rem;
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    background: var(--bg-sidebar);
 
     .top-search {
       display: none;
     }
+
+    .menu-trigger {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: var(--bg-main);
+      color: var(--primary);
+    }
   }
 
   .admin-shell__body {
-    padding: 1.5rem;
+    padding: 1.25rem 1rem;
+    overflow-x: hidden;
   }
 }
 
-.admin-shell.sidebar-open .admin-shell__sidebar {
-  left: 0;
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }

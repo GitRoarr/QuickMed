@@ -11,9 +11,12 @@ import { SendReceptionistMessageDto } from './dto/send-receptionist-message.dto'
 import { SchedulesService } from '../schedules/schedules.service';
 import { Payment } from '../payments/entities/payment.entity';
 import { CreateReceptionistInviteDto, ResendInviteDto, RevokeInviteDto, BulkInviteDto } from './dto/create-receptionist-invite.dto';
+import { ReceptionistTask } from './entities/receptionist-task.entity';
 import { EmailService } from '../common/services/email.service';
 import * as bcrypt from 'bcrypt';
 import { v4 as uuidv4 } from 'uuid';
+
+import { MessagesService } from '../messages/messages.service';
 
 @Injectable()
 export class ReceptionistService {
@@ -21,11 +24,12 @@ export class ReceptionistService {
     @InjectRepository(Appointment) private readonly appointmentRepo: Repository<Appointment>,
     @InjectRepository(User) private readonly userRepo: Repository<User>,
     @InjectRepository(Message) private readonly messageRepo: Repository<Message>,
-    @InjectRepository(ReceptionistMessage) private readonly receptionistMessageRepo: Repository<ReceptionistMessage>,
     @InjectRepository(Payment) private readonly paymentRepo: Repository<Payment>,
     @InjectRepository(ReceptionistInvitation) private readonly invitationRepo: Repository<ReceptionistInvitation>,
+    @InjectRepository(ReceptionistTask) private readonly taskRepo: Repository<ReceptionistTask>,
     private readonly emailService: EmailService,
     private readonly schedulesService: SchedulesService,
+    private readonly messagesService: MessagesService,
   ) { }
 
   // ============================================================
@@ -661,7 +665,7 @@ export class ReceptionistService {
   // DASHBOARD & APPOINTMENTS
   // ============================================================
 
-  async getTodayAppointments(filter?: { doctorId?: string; status?: string }) {
+  async getTodayAppointments(filter?: { doctorId?: string; status?: string; search?: string }) {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const tomorrow = new Date(today);
@@ -675,6 +679,13 @@ export class ReceptionistService {
 
     if (filter?.doctorId) qb.andWhere('a.doctorId = :doctorId', { doctorId: filter.doctorId });
     if (filter?.status) qb.andWhere('a.status = :status', { status: filter.status });
+
+    if (filter?.search) {
+      qb.andWhere(
+        '(patient.firstName ILIKE :search OR patient.lastName ILIKE :search OR doctor.firstName ILIKE :search OR doctor.lastName ILIKE :search)',
+        { search: `%${filter.search}%` },
+      );
+    }
 
     return qb.orderBy('a.appointmentTime', 'ASC').getMany();
   }
@@ -721,7 +732,7 @@ export class ReceptionistService {
     return this.appointmentRepo.find({ where: { status: AppointmentStatus.WAITING }, relations: ['patient', 'doctor'] });
   }
 
-  async getDashboardInsights(filter?: { doctorId?: string; status?: string; userId?: string }) {
+  async getDashboardInsights(filter?: { doctorId?: string; status?: string; search?: string; userId?: string }) {
     const [todayAppointments, pendingPayments, waiting, checkedInCount, pendingPaymentsCount, unreadMessages] = await Promise.all([
       this.getTodayAppointments(filter),
       this.getPendingPayments(),
@@ -760,11 +771,10 @@ export class ReceptionistService {
       }))
       .slice(0, 4);
 
-    const tasks = [
-      { id: 'insurance-check', title: 'Confirm insurance for afternoon patients', status: 'in_progress' },
-      { id: 'follow-up-calls', title: 'Call no-show patients from yesterday', status: 'pending' },
-      { id: 'prepare-lab', title: 'Prepare lab documents for Dr. Chen', status: 'completed' },
-    ];
+    const tasks = await this.taskRepo.find({
+      order: { createdAt: 'DESC' },
+      take: 5,
+    });
 
     const appointmentsTable = todayAppointments.map((appt) => ({
       id: appt.id,
@@ -835,7 +845,7 @@ export class ReceptionistService {
     return qb.getMany();
   }
 
-  async listPayments(filters?: { status?: string; date?: string }) {
+  async listPayments(filters?: { status?: string; date?: string; search?: string }) {
     const qb = this.appointmentRepo
       .createQueryBuilder('a')
       .leftJoinAndSelect('a.patient', 'patient')
@@ -844,7 +854,7 @@ export class ReceptionistService {
       .addOrderBy('a.appointmentTime', 'ASC');
 
     if (filters?.status) {
-      qb.where('a.paymentStatus = :status', { status: filters.status });
+      qb.andWhere('a.paymentStatus = :status', { status: filters.status });
     }
 
     if (filters?.date) {
@@ -854,6 +864,13 @@ export class ReceptionistService {
       nextDay.setDate(nextDay.getDate() + 1);
       qb.andWhere('a.appointmentDate >= :date', { date })
         .andWhere('a.appointmentDate < :nextDay', { nextDay });
+    }
+
+    if (filters?.search) {
+      qb.andWhere(
+        '(patient.firstName ILIKE :search OR patient.lastName ILIKE :search OR doctor.firstName ILIKE :search OR doctor.lastName ILIKE :search)',
+        { search: `%${filters.search}%` },
+      );
     }
 
     return qb.getMany();
@@ -871,6 +888,7 @@ export class ReceptionistService {
     for (const doc of doctors) {
       const day = await this.schedulesService.getDaySchedule(doc.id, targetDate);
       const slots = day?.slots || [];
+      const shifts = day?.shifts || [];
       const totalSlots = slots.length;
       const available = slots.filter((s: any) => s.status === 'available').length;
       const booked = slots.filter((s: any) => s.status === 'booked').length;
@@ -887,12 +905,34 @@ export class ReceptionistService {
           available,
           booked,
           blocked,
-          slots: slots.slice(0, 20),
+          slots: slots, // Return all slots instead of slice(0, 20)
+          shifts: shifts, // Include shifts
         },
       });
     }
 
     return results;
+  }
+
+  async updateDoctorSchedule(doctorId: string, date: string, data: { shifts: any[], breaks: any[] }) {
+    const doctor = await this.userRepo.findOne({ where: { id: doctorId, role: UserRole.DOCTOR } });
+    if (!doctor) throw new NotFoundException('Doctor not found');
+
+    return this.schedulesService.updateShiftsAndBreaks(doctorId, date, data.shifts, data.breaks);
+  }
+
+  async addDoctorSlot(doctorId: string, date: string, slot: { startTime: string, endTime: string, status: string, reason?: string }) {
+    const doctor = await this.userRepo.findOne({ where: { id: doctorId, role: UserRole.DOCTOR } });
+    if (!doctor) throw new NotFoundException('Doctor not found');
+
+    return (this.schedulesService as any).setSlotStatus(
+      doctorId,
+      date,
+      slot.startTime,
+      slot.endTime,
+      slot.status as any,
+      slot.reason,
+    );
   }
 
   private getDateRange(date?: string, startDate?: string, endDate?: string) {
@@ -1090,55 +1130,72 @@ export class ReceptionistService {
   }
 
   async listReceptionistThreads(senderId: string) {
-    const messages = await this.receptionistMessageRepo.find({
-      where: { senderId },
-      relations: ['receiver'],
-      order: { createdAt: 'DESC' },
-      take: 200,
-    });
+    const conversations = await this.messagesService.getConversationsForUser({ id: senderId, role: UserRole.RECEPTIONIST });
 
-    const threads = new Map<string, any>();
-    for (const msg of messages) {
-      if (threads.has(msg.receiverId)) continue;
-      threads.set(msg.receiverId, {
-        receiverId: msg.receiverId,
-        receiverRole: msg.receiverRole,
-        receiverName: `${msg.receiver?.firstName || ''} ${msg.receiver?.lastName || ''}`.trim(),
-        receiverAvatar: msg.receiver?.avatar || null,
-        lastMessage: msg.content,
-        lastMessageAt: msg.createdAt,
-      });
-    }
+    return conversations.map(conv => {
+      let receiver: User | null = null;
+      let receiverRole: 'patient' | 'doctor' | 'receptionist' = 'patient';
 
-    return Array.from(threads.values());
+      if (conv.patientId && conv.patientId !== senderId) {
+        receiver = conv.patient;
+        receiverRole = 'patient';
+      } else if (conv.doctorId && conv.doctorId !== senderId) {
+        receiver = conv.doctor;
+        receiverRole = 'doctor';
+      } else if (conv.receptionistId && conv.receptionistId !== senderId) {
+        receiver = conv.receptionist;
+        receiverRole = 'receptionist';
+      }
+
+      // If no valid receiver found (e.g. self chat or data issue), skip or handle gracefully
+      if (!receiver) return null;
+
+      return {
+        id: conv.id, // Conversation ID
+        receiverId: receiver.id,
+        receiverRole: receiverRole,
+        receiverName: `${receiver.firstName} ${receiver.lastName}`.trim(),
+        receiverAvatar: receiver.avatar || null,
+        lastMessage: conv.lastMessageContent,
+        lastMessageAt: conv.lastMessageAt,
+        unreadCount: conv.unreadCount,
+      };
+    }).filter(Boolean); // Filter out nulls
   }
 
   async getReceptionistThread(senderId: string, receiverId: string) {
-    return this.receptionistMessageRepo.find({
-      where: { senderId, receiverId },
-      relations: ['sender', 'receiver'],
-      order: { createdAt: 'ASC' },
-    });
-  }
+    // We need to find the conversation first.
+    // Since we don't know the role of receiverId immediately (unless we query User),
+    // we can try to find an existing conversation where sender is receptionist and receiver is generic.
+    // Or we can query the User to get the role.
 
-  async sendReceptionistMessage(senderId: string, dto: SendReceptionistMessageDto) {
-    if (![UserRole.PATIENT, UserRole.DOCTOR].includes(dto.receiverRole)) {
-      throw new BadRequestException('Receiver must be a patient or doctor');
-    }
-
-    const receiver = await this.userRepo.findOne({ where: { id: dto.receiverId, role: dto.receiverRole } });
+    // Efficient way: check conversation repository directly or query user.
+    // Let's query user to be safe and accurate.
+    const receiver = await this.userRepo.findOne({ where: { id: receiverId } });
     if (!receiver) {
       throw new NotFoundException('Receiver not found');
     }
 
-    const message = this.receptionistMessageRepo.create({
-      senderId,
-      receiverId: dto.receiverId,
-      receiverRole: dto.receiverRole,
-      content: dto.content,
-      isRead: false,
-    });
+    const conversation = await this.messagesService.getConversationWith(
+      { id: senderId, role: UserRole.RECEPTIONIST },
+      receiverId,
+      receiver.role as UserRole
+    );
 
-    return this.receptionistMessageRepo.save(message);
+    return this.messagesService.getMessages(conversation.id, { id: senderId, role: UserRole.RECEPTIONIST });
+  }
+
+  async sendReceptionistMessage(senderId: string, dto: SendReceptionistMessageDto) {
+    const sender = await this.userRepo.findOne({ where: { id: senderId } });
+    if (!sender) throw new NotFoundException('Sender not found');
+
+    return this.messagesService.sendMessageFromUser(
+      { id: senderId, role: UserRole.RECEPTIONIST },
+      {
+        content: dto.content,
+        receiverId: dto.receiverId,
+        receiverRole: dto.receiverRole,
+      }
+    );
   }
 }

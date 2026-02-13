@@ -128,20 +128,20 @@
             All →</a>
         </div>
         <div class="overflow-x-auto">
-          <table class="w-full">
+          <table class="w-full table-responsive-stack">
             <thead class="bg-[var(--surface)] text-xs uppercase tracking-wider text-[var(--muted)]">
               <tr>
                 <th class="px-6 py-4 text-left">Patient</th>
                 <th class="px-6 py-4 text-left">Time</th>
                 <th class="px-6 py-4 text-left">Status</th>
-                <th class="px-6 py-4 text-left">Action</th>
+                <th class="px-6 py-4 text-left text-right">Action</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-[var(--border)]">
               <ng-container *ngIf="!isLoading(); else loadingAppointments">
                 <tr *ngFor="let apt of dashboardData()?.todayAppointments || []"
                   class="hover:bg-[var(--primary)/0.1] transition-colors">
-                  <td class="px-6 py-4">
+                  <td class="px-6 py-4" data-label="Patient">
                     <div class="flex items-center gap-3">
                       <div
                         class="w-9 h-9 rounded-full bg-[var(--primary)/0.1] flex items-center justify-center text-sm font-bold">
@@ -150,15 +150,15 @@
                       <span class="font-medium">{{ apt.patient }}</span>
                     </div>
                   </td>
-                  <td class="px-6 py-4 text-sm">{{ apt.time }}</td>
-                  <td class="px-6 py-4">
+                  <td class="px-6 py-4 text-sm" data-label="Time">{{ apt.time }}</td>
+                  <td class="px-6 py-4" data-label="Status">
                     <span
                       [class]="apt.status === 'Confirmed' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'"
                       class="inline-flex px-3 py-1 rounded-full text-xs font-medium">
                       {{ apt.status }}
                     </span>
                   </td>
-                  <td class="px-6 py-4">
+                  <td class="px-6 py-4 text-right" data-label="Action">
                     <button class="text-[var(--primary)] hover:text-[var(--primary-dark)]">
                       <i class="bi bi-arrow-right-circle text-lg"></i>
                     </button>

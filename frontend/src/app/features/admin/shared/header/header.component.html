@@ -1,15 +1,13 @@
 <header class="admin-header">
   <div class="header-bar">
+    <button class="md:hidden menu-trigger-btn mr-4" (click)="toggleSidebar()" aria-label="Toggle Menu">
+      <i class="bi bi-list text-2xl"></i>
+    </button>
     <div class="flex-1 max-w-md">
       <div class="search-container">
         <i class="bi bi-search"></i>
-        <input 
-          type="text" 
-          [(ngModel)]="searchQuery"
-          (input)="onSearchInput()"
-          [placeholder]="searchPlaceholder" 
-          class="search-input"
-        />
+        <input type="text" [(ngModel)]="searchQuery" (input)="onSearchInput()" [placeholder]="searchPlaceholder"
+          class="search-input" />
       </div>
     </div>
     <div class="actions">
@@ -23,7 +21,7 @@
       <button class="icon" title="Toggle Theme" (click)="toggleDarkMode()">
         <i class="bi" [class.bi-brightness-high-fill]="!isDarkMode" [class.bi-moon-stars-fill]="isDarkMode"></i>
       </button>
-      
+
     </div>
   </div>
 </header>

@@ -1,21 +1,55 @@
+.logout-text {
+  color: #ef4444 !important;
+  /* Tailwind red-500 */
+  font-weight: 600;
+}
+
+.nav-link.logout-btn {
+  background: #ef4444;
+  color: #ffffff !important;
+  border-color: #ef4444;
+  margin-top: 1rem;
+  font-weight: 700;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+}
+
+.nav-link.logout-btn:hover {
+  background: #dc2626;
+  color: #ffffff !important;
+  border-color: #dc2626;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(239, 68, 68, 0.35);
+}
+
+.nav-link.logout-btn i {
+  color: #ffffff !important;
+}
+
+.nav-link.logout-btn .nav-text {
+  color: #ffffff !important;
+}
+
 /* Receptionist Sidebar - Dark, modern, collapsible */
 :root {
+  --sidebar-bg: #ffffff;
+  --sidebar-surface: #f8fafc;
+  --sidebar-border: #e2e8f0;
+  --sidebar-text: #0f172a;
+  --sidebar-muted: #64748b;
+  --sidebar-accent: var(--primary);
+  --sidebar-accent-soft: rgba(22, 163, 74, 0.08);
+  --sidebar-hover: rgba(22, 163, 74, 0.06);
+}
+
+.dark {
   --sidebar-bg: #0b0b0b;
   --sidebar-surface: #111318;
   --sidebar-border: rgba(255, 255, 255, 0.08);
   --sidebar-text: #f8fafc;
   --sidebar-muted: rgba(255, 255, 255, 0.65);
   --sidebar-accent: var(--primary);
-  --sidebar-accent-soft: rgba(var(--primary-rgb), 0.18);
-  --sidebar-hover: rgba(var(--primary-rgb), 0.12);
-}
-
-.dark {
-  --sidebar-bg: #050505;
-  --sidebar-surface: #0b0d12;
-  --sidebar-border: rgba(255, 255, 255, 0.1);
-  --sidebar-text: #ffffff;
-  --sidebar-muted: rgba(255, 255, 255, 0.7);
+  --sidebar-accent-soft: rgba(var(--primary-rgb, 22, 163, 74), 0.18);
+  --sidebar-hover: rgba(var(--primary-rgb, 22, 163, 74), 0.12);
 }
 
 .receptionist-sidebar {
@@ -203,28 +237,50 @@
   margin-bottom: 0.5rem;
   transition: background 0.2s, color 0.2s;
 }
+
 .sidebar .menu-item.active {
   background: #6366f1;
   color: #fff;
 }
+
 .sidebar .menu-item:hover {
   background: #27272a;
   color: #fff;
 }
 
-/* Responsive */
+/* Responsive Sidebar */
 @media (max-width: 1024px) {
   .receptionist-sidebar {
-    position: fixed;
+    transform: translateX(-100%);
+    box-shadow: 0 0 40px rgba(0, 0, 0, 0.2);
+  }
+
+  .receptionist-sidebar.open {
     transform: translateX(0);
+  }
+
+  /* Backdrop for mobile */
+  .receptionist-sidebar.open::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 260px;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(4px);
+    z-index: -1;
+    pointer-events: auto;
+    /* Allow clicking to close if we add a listener */
   }
 }
 
 @media (max-width: 900px) {
-  .sidebar {
-    width: 100vw;
-    min-width: unset;
-    border-radius: 0;
+
+  /* On very small screens (phones), the backdrop might cover everything or we adjust width */
+  .receptionist-sidebar {
+    width: 280px;
+    /* Slightly wider for touch targets */
   }
 }
 
@@ -238,9 +294,11 @@
   margin-bottom: 1rem;
   transition: color 0.3s;
 }
+
 .theme-toggle-btn .bi-moon-fill {
   color: #f3f4f6;
 }
+
 .theme-toggle-btn .bi-sun-fill {
   color: #fbbf24;
 }

@@ -1,5 +1,10 @@
 <div class="patient-shell" [class.sidebar-open]="sidebarOpen" [class.dark]="themeService.isDarkMode()">
-  <aside class="patient-shell__sidebar">
+  <aside class="patient-shell__sidebar" [class.open]="sidebarOpen">
+    <button
+      class="md:hidden absolute top-4 right-4 w-10 h-10 rounded-full bg-[var(--surface)] border border-[var(--border)] flex items-center justify-center text-[var(--primary)]"
+      (click)="closeSidebar()">
+      <i class="bi bi-x-lg"></i>
+    </button>
     <div class="patient-shell__brand" (click)="navigate('/')" title="Back to Home">
       <div class="brand-container">
         <div class="brand-icon">

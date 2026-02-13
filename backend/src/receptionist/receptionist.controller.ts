@@ -170,8 +170,9 @@ export class ReceptionistController {
     @CurrentUser() user: User,
     @Query('doctorId') doctorId?: string,
     @Query('status') status?: string,
+    @Query('search') search?: string,
   ) {
-    return this.receptionistService.getDashboardInsights({ doctorId, status, userId: user?.id });
+    return this.receptionistService.getDashboardInsights({ doctorId, status, search, userId: user?.id });
   }
 
   @Get('appointments')
@@ -202,14 +203,30 @@ export class ReceptionistController {
 
   @Get('payments')
   @Roles(UserRole.RECEPTIONIST, UserRole.ADMIN)
-  async listPayments(@Query('status') status?: string, @Query('date') date?: string) {
-    return this.receptionistService.listPayments({ status, date });
+  async listPayments(
+    @Query('status') status?: string,
+    @Query('date') date?: string,
+    @Query('search') search?: string,
+  ) {
+    return this.receptionistService.listPayments({ status, date, search });
   }
 
   @Get('doctors/availability')
   @Roles(UserRole.RECEPTIONIST, UserRole.ADMIN)
   async listDoctorAvailability(@Query('date') date?: string) {
     return this.receptionistService.listDoctorAvailability(date);
+  }
+
+  @Post('doctors/:id/schedule')
+  @Roles(UserRole.RECEPTIONIST, UserRole.ADMIN)
+  async updateDoctorSchedule(@Param('id') doctorId: string, @Body() body: { date: string, shifts: any[], breaks: any[] }) {
+    return this.receptionistService.updateDoctorSchedule(doctorId, body.date, body);
+  }
+
+  @Post('doctors/:id/slots')
+  @Roles(UserRole.RECEPTIONIST, UserRole.ADMIN)
+  async addDoctorSlot(@Param('id') doctorId: string, @Body() body: { date: string, slot: any }) {
+    return this.receptionistService.addDoctorSlot(doctorId, body.date, body.slot);
   }
 
   // ============================================================

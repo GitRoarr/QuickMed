@@ -113,6 +113,43 @@ export class ConflictDetectionService {
     }
 
     /**
+     * Check if proposed shifts/breaks will displace any existing booked appointments
+     */
+    checkScheduleDisplacement(
+        existingSlots: DoctorSlot[],
+        newShifts: any[],
+        newBreaks: any[]
+    ): { displacedCount: number; displacedAppointments: string[] } {
+        const displacedAppointments: string[] = [];
+        const bookedSlots = existingSlots.filter(s => s.status === 'booked');
+        const enabledShifts = newShifts.filter(s => s.enabled);
+
+        for (const slot of bookedSlots) {
+            const slotStart = slot.startTime || slot.time || '';
+            const slotEnd = slot.endTime || slotStart;
+
+            // Check if slot falls within any enabled shift
+            const inShift = enabledShifts.some(shift => {
+                return slotStart >= shift.startTime && slotEnd <= shift.endTime;
+            });
+
+            // Check if slot overlaps with any break
+            const inBreak = newBreaks.some(brk => {
+                return this.timesOverlap(slotStart, slotEnd, brk.startTime, brk.endTime);
+            });
+
+            if (!inShift || inBreak) {
+                displacedAppointments.push(`${slotStart}`);
+            }
+        }
+
+        return {
+            displacedCount: displacedAppointments.length,
+            displacedAppointments
+        };
+    }
+
+    /**
      * Helper to add minutes to a time string
      */
     addMinutes(time: string, minutes: number): string {

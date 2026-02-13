@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ThemeService } from '@core/services/theme.service';
 import { NotificationService } from '@core/services/notification.service';
+import { SidebarService } from '@core/services/sidebar.service';
 
 @Component({
   selector: 'app-header',
@@ -21,9 +22,14 @@ export class HeaderComponent implements OnInit, OnChanges {
   searchQuery: string = '';
   themeService = inject(ThemeService);
   private readonly notificationService = inject(NotificationService);
+  private sidebarService = inject(SidebarService);
 
   readonly notificationCount = signal(0);
-  
+
+  toggleSidebar() {
+    this.sidebarService.toggle();
+  }
+
   get isDarkMode(): boolean {
     return this.themeService.isDarkMode();
   }

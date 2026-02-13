@@ -16,6 +16,10 @@ import { DoctorAnalyticsController } from './doctor-analytics.controller';
 import { AutoScheduleInitializerService } from './auto-schedule-initializer.service';
 import { DoctorSettings } from '../settings/entities/doctor-settings.entity';
 
+import { ReceptionistTask } from '../receptionist/entities/receptionist-task.entity';
+
+import { NotificationsModule } from '../notifications/notifications.module';
+
 @Module({
   imports: [
     TypeOrmModule.forFeature([
@@ -25,8 +29,10 @@ import { DoctorSettings } from '../settings/entities/doctor-settings.entity';
       BreakConfig,
       DoctorAnalytics,
       DoctorSettings,
+      ReceptionistTask,
     ]),
     SettingsModule,
+    NotificationsModule,
   ],
   providers: [
     SchedulesService,

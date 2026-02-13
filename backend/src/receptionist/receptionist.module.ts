@@ -5,6 +5,7 @@ import { ReceptionistService } from './receptionist.service';
 import { Appointment } from '../appointments/entities/appointment.entity';
 import { User } from '../users/entities/user.entity';
 import { Message } from '../messages/entities/message.entity';
+import { ReceptionistTask } from './entities/receptionist-task.entity';
 import { ReceptionistMessage } from './entities/receptionist-message.entity';
 import { ReceptionistInvitation } from './entities/receptionist-invitation.entity';
 import { Payment } from '../payments/entities/payment.entity';
@@ -15,17 +16,25 @@ import { AdminModule } from '../admin/admin.module';
 import { AppointmentsModule } from '../appointments/appointments.module';
 import { UsersModule } from '../users/users.module';
 import { SchedulesModule } from '../schedules/schedules.module';
+import { MessagesModule } from '../messages/messages.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Appointment, User, Message, ReceptionistMessage, ReceptionistInvitation, Payment]),
+    TypeOrmModule.forFeature([
+      Appointment,
+      User,
+      Message,
+      ReceptionistMessage,
+      ReceptionistInvitation,
+      Payment,
+      ReceptionistTask,
+    ]),
     EmailModule,
     SmsModule,
     CloudinaryModule,
-    forwardRef(() => AdminModule),
-    AppointmentsModule,
-    UsersModule,
     SchedulesModule,
+    forwardRef(() => AdminModule),
+    MessagesModule,
   ],
   controllers: [ReceptionistController],
   providers: [ReceptionistService],

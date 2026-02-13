@@ -188,6 +188,24 @@ export class AppointmentsComponent implements OnInit {
     });
   }
 
+  startConsultation(appointmentId: string | number): void {
+    const id = String(appointmentId);
+    const appt = this.appointments().find(a => String(a.id) === id);
+    if (!appt) return;
+
+    this.consultationService.start({
+      appointmentId: id,
+      doctorId: appt.doctorId,
+      patientId: appt.patientId
+    }).subscribe({
+      next: (res) => {
+        this.toast.success('Consultation started', { title: 'Success' });
+        this.router.navigate(['/consultation/add', id], { queryParams: { consultationId: res.id } });
+      },
+      error: (err) => this.toast.error('Failed to start consultation', { title: 'Error' })
+    });
+  }
+
   viewPatientDetails(appt: Appointment): void {
     this.selectedAppointment = appt;
     this.showDetailsModal.set(true);
