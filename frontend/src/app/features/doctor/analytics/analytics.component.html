@@ -1,247 +1,312 @@
-<div class="flex-1 flex flex-col min-w-0 bg-[#F9FAFB] dark:bg-gray-900 h-full">
+<div class="analytics-container flex flex-col h-full overflow-hidden">
   <!-- Shared Header -->
   <app-doctor-header [initials]="getDoctorInitials()" [avatarUrl]="currentUser()?.avatar"
     [unreadNotifications]="unreadNotificationCount()"></app-doctor-header>
 
-  <!-- Analytics Content -->
-  <main class="flex-1 overflow-y-auto p-6 lg:p-10 space-y-8">
-    <!-- Page Header -->
-    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-      <div>
-        <h1
-          class="text-3xl lg:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[var(--primary)] to-blue-600">
-          Analytics & Insights</h1>
-        <p class="text-lg text-[var(--text-secondary)] mt-2">Track practice performance with real-time metrics</p>
-      </div>
+  <!-- Main Content -->
+  <main class="flex-1 overflow-y-auto custom-scrollbar p-4 md:p-8 lg:p-10">
+    <div class="max-w-[1600px] mx-auto space-y-10 fade-in-up">
 
-      <!-- Period Selector -->
-      <div
-        class="flex bg-white dark:bg-gray-800 p-1.5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
-        <button *ngFor="let period of periodOptions" (click)="onPeriodChange(period.value)" [class]="selectedPeriod() === period.value
-            ? 'bg-[var(--primary)] text-white shadow-md'
-            : 'text-[var(--text-secondary)] hover:bg-gray-50 dark:hover:bg-gray-700'"
-          class="px-5 py-2.5 rounded-xl font-medium transition-all duration-200 text-sm">
-          {{ period.label }}
-        </button>
-      </div>
-    </div>
-
-    <!-- Loading State -->
-    <div *ngIf="isLoading()" class="flex flex-col items-center justify-center py-32">
-      <div class="relative w-20 h-20">
-        <div class="absolute inset-0 border-4 border-[var(--primary)]/20 rounded-full"></div>
-        <div class="absolute inset-0 border-4 border-[var(--primary)] border-t-transparent rounded-full animate-spin">
-        </div>
-      </div>
-      <p class="mt-6 text-xl font-medium text-[var(--text-secondary)] animate-pulse">Analyzing data...</p>
-    </div>
-
-    <!-- Analytics Content -->
-    <div *ngIf="!isLoading() && analytics()" class="space-y-8" [@fadeInUp]>
-
-      <!-- KPI Cards -->
-      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
-        <!-- Revenue -->
-        <div
-          class="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-[0_2px_20px_-4px_rgba(0,0,0,0.05)] border border-gray-100 dark:border-gray-700 hover:-translate-y-1 transition-transform duration-300">
-          <div class="flex justify-between items-start mb-4">
-            <div
-              class="w-12 h-12 rounded-2xl bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
-              <i class="bi bi-currency-dollar text-2xl"></i>
-            </div>
-            <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-600">+12.5%</span>
-          </div>
-          <div class="space-y-1">
-            <p class="text-sm font-medium text-[var(--text-secondary)]">Total Revenue</p>
-            <h3 class="text-3xl font-bold text-gray-900 dark:text-white">${{ analytics()!.kpis.revenue | number:'1.0-0'
-              }}</h3>
-          </div>
+      <!-- Page Header -->
+      <div class="flex flex-col xl:flex-row xl:items-end justify-between gap-6">
+        <div>
+          <h1 class="analytics-title">Analytics & Insights</h1>
+          <p class="subtitle">Track your practice performance with real-time metrics and trends</p>
         </div>
 
-        <!-- Appointments -->
-        <div
-          class="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-[0_2px_20px_-4px_rgba(0,0,0,0.05)] border border-gray-100 dark:border-gray-700 hover:-translate-y-1 transition-transform duration-300">
-          <div class="flex justify-between items-start mb-4">
-            <div
-              class="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-blue-600 dark:text-blue-400">
-              <i class="bi bi-calendar-check text-2xl"></i>
-            </div>
-            <span class="px-2.5 py-1 rounded-full text-xs font-medium"
-              [ngClass]="analytics()!.trends.appointmentsChange >= 0 ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600'">
-              {{ analytics()!.trends.appointmentsChange >= 0 ? '+' : '' }}{{ analytics()!.trends.appointmentsChange }}%
-            </span>
-          </div>
-          <div class="space-y-1">
-            <p class="text-sm font-medium text-[var(--text-secondary)]">Appointments</p>
-            <h3 class="text-3xl font-bold text-gray-900 dark:text-white">{{ analytics()!.kpis.totalAppointments }}</h3>
-          </div>
-        </div>
-
-        <!-- Completion Rate -->
-        <div
-          class="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-[0_2px_20px_-4px_rgba(0,0,0,0.05)] border border-gray-100 dark:border-gray-700 hover:-translate-y-1 transition-transform duration-300">
-          <div class="flex justify-between items-start mb-4">
-            <div
-              class="w-12 h-12 rounded-2xl bg-violet-50 dark:bg-violet-900/20 flex items-center justify-center text-violet-600 dark:text-violet-400">
-              <i class="bi bi-pie-chart text-2xl"></i>
-            </div>
-            <span class="px-2.5 py-1 rounded-full text-xs font-medium"
-              [ngClass]="analytics()!.trends.completionChange >= 0 ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600'">
-              {{ analytics()!.trends.completionChange >= 0 ? '+' : '' }}{{ analytics()!.trends.completionChange }}%
-            </span>
-          </div>
-          <div class="space-y-1">
-            <p class="text-sm font-medium text-[var(--text-secondary)]">Completion Rate</p>
-            <h3 class="text-3xl font-bold text-gray-900 dark:text-white">{{ analytics()!.kpis.completionRate }}%</h3>
-          </div>
-        </div>
-
-        <!-- Satisfaction -->
-        <div
-          class="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-[0_2px_20px_-4px_rgba(0,0,0,0.05)] border border-gray-100 dark:border-gray-700 hover:-translate-y-1 transition-transform duration-300">
-          <div class="flex justify-between items-start mb-4">
-            <div
-              class="w-12 h-12 rounded-2xl bg-amber-50 dark:bg-amber-900/20 flex items-center justify-center text-amber-500 dark:text-amber-400">
-              <i class="bi bi-star-fill text-2xl"></i>
-            </div>
-            <span class="px-2.5 py-1 rounded-full text-xs font-medium"
-              [ngClass]="analytics()!.trends.satisfactionChange >= 0 ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600'">
-              {{ analytics()!.trends.satisfactionChange >= 0 ? '+' : '' }}{{ analytics()!.trends.satisfactionChange }}%
-            </span>
-          </div>
-          <div class="space-y-1">
-            <p class="text-sm font-medium text-[var(--text-secondary)]">Satisfaction</p>
-            <h3 class="text-3xl font-bold text-gray-900 dark:text-white">{{ analytics()!.kpis.patientSatisfaction }}%
-            </h3>
-          </div>
+        <!-- Period Selector -->
+        <div class="period-selector">
+          <button *ngFor="let period of periodOptions" (click)="onPeriodChange(period.value)" class="period-btn"
+            [class.active]="selectedPeriod() === period.value">
+            {{ period.label }}
+          </button>
         </div>
       </div>
 
-      <!-- Main Charts Grid -->
-      <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+      <!-- Loading State -->
+      <div *ngIf="isLoading()" class="loading-container">
+        <div class="loading-spinner">
+          <div class="spinner-ring"></div>
+          <div class="spinner-active"></div>
+        </div>
+        <p class="loading-text">Gathering insights...</p>
+      </div>
 
-        <!-- Appointment Trends -->
-        <div
-          class="xl:col-span-2 bg-white dark:bg-gray-800 rounded-3xl p-8 shadow-[0_2px_20px_-4px_rgba(0,0,0,0.05)] border border-gray-100 dark:border-gray-700">
-          <div class="flex items-center justify-between mb-8">
-            <div>
-              <h3 class="text-xl font-bold text-gray-900 dark:text-white">Appointment Trends</h3>
-              <p class="text-sm text-[var(--text-secondary)] mt-1">Completion, Cancellation & No-Show rates</p>
-            </div>
-            <!-- Legend -->
-            <div class="flex gap-4 text-xs font-medium">
-              <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-[var(--success)]"></span>
-                Completed</div>
-              <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-[var(--warning)]"></span>
-                Cancelled</div>
-              <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-[var(--error)]"></span>
-                No-Show</div>
-            </div>
-          </div>
+      <!-- Content Grid -->
+      <div *ngIf="!isLoading() && analytics()" class="space-y-8" [@fadeInUp]>
 
-          <div class="h-80 flex items-end gap-3 lg:gap-6">
-            <ng-container *ngFor="let month of getAppointmentTrendData().months; let i = index">
-              <div class="flex-1 flex flex-col items-center group relative cursor-pointer">
-                <!-- Tooltip -->
-                <div
-                  class="absolute bottom-full mb-2 bg-gray-900 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity z-10 whitespace-nowrap pointer-events-none">
-                  {{ getCompletedValue(i) }} Completed, {{ getCancelledValue(i) }} Cancelled
-                </div>
+        <!-- KPI Cards Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
 
-                <div
-                  class="w-full bg-gray-100 dark:bg-gray-700 rounded-t-lg relative h-full flex flex-col justify-end overflow-hidden">
-                  <div class="w-full bg-[var(--success)] transition-all duration-700 hover:brightness-110"
-                    [style.height.%]="getBarHeight(getCompletedValue(i), getMaxChartValue())"></div>
-                  <div class="w-full bg-[var(--warning)] transition-all duration-700 hover:brightness-110"
-                    [style.height.%]="getBarHeight(getCancelledValue(i), getMaxChartValue())"></div>
-                  <div class="w-full bg-[var(--error)] transition-all duration-700 hover:brightness-110"
-                    [style.height.%]="getBarHeight(getNoShowValue(i), getMaxChartValue())"></div>
-                </div>
-                <span class="text-xs text-[var(--text-secondary)] mt-3 font-medium">{{ month }}</span>
+          <!-- Revenue -->
+          <div class="kpi-card group">
+            <div class="flex justify-between items-start mb-6">
+              <div class="kpi-icon-wrapper icon-emerald">
+                <i class="bi bi-currency-dollar"></i>
               </div>
-            </ng-container>
-          </div>
-        </div>
-
-        <!-- Appointment Types (Donut) -->
-        <div
-          class="bg-white dark:bg-gray-800 rounded-3xl p-8 shadow-[0_2px_20px_-4px_rgba(0,0,0,0.05)] border border-gray-100 dark:border-gray-700 flex flex-col">
-          <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Consultation Types</h3>
-          <p class="text-sm text-[var(--text-secondary)] mb-6">Distribution by appointment type</p>
-
-          <div class="flex-1 flex items-center justify-center relative">
-            <svg viewBox="0 0 36 36" class="w-48 h-48 transform -rotate-90">
-              <!-- Background Circle -->
-              <path class="text-gray-100 dark:text-gray-700"
-                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none"
-                stroke="currentColor" stroke-width="3" />
-
-              <!-- Segments -->
-              <circle *ngFor="let seg of getDonutSegments()" [attr.stroke-dasharray]="seg.dashArray"
-                [attr.stroke-dashoffset]="seg.offset" [attr.stroke]="seg.color" cx="18" cy="18" r="15.9155" fill="none"
-                stroke-width="3" stroke-linecap="round"
-                class="transition-all duration-1000 ease-out hover:opacity-80" />
-            </svg>
-            <!-- Center Text -->
-            <div class="absolute inset-0 flex flex-col items-center justify-center">
-              <span class="text-3xl font-bold text-gray-900 dark:text-white">{{ analytics()!.kpis.totalAppointments
-                }}</span>
-              <span class="text-xs text-gray-500 font-medium tracking-wider uppercase">Total</span>
+              <span class="kpi-badge badge-positive flex items-center gap-1">
+                <i class="bi bi-graph-up-arrow text-xs"></i> +12.5%
+              </span>
             </div>
-          </div>
-
-          <div class="mt-8 space-y-3">
-            <div *ngFor="let seg of getDonutSegments()" class="flex items-center justify-between">
-              <div class="flex items-center gap-2">
-                <span class="w-3 h-3 rounded-full" [style.background-color]="seg.color"></span>
-                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ seg.label }}</span>
-              </div>
-              <span class="text-sm font-bold text-gray-900 dark:text-white">{{ seg.count }}</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Patient Satisfaction Trend -->
-        <div
-          class="xl:col-span-3 bg-white dark:bg-gray-800 rounded-3xl p-8 shadow-[0_2px_20px_-4px_rgba(0,0,0,0.05)] border border-gray-100 dark:border-gray-700 overflow-hidden relative">
-          <div class="flex justify-between items-end mb-6 relative z-10">
             <div>
-              <h3 class="text-xl font-bold text-gray-900 dark:text-white">Patient Satisfaction Trend</h3>
-              <p class="text-sm text-[var(--text-secondary)] mt-1">Average rating over time</p>
-            </div>
-            <div class="text-right">
-              <p class="text-3xl font-bold text-[var(--primary)]">{{ analytics()!.kpis.patientSatisfaction }}%</p>
-              <p class="text-xs text-[var(--text-secondary)]">Current Score</p>
+              <p class="kpi-label">Total Revenue</p>
+              <h3 class="kpi-value">${{ analytics()!.kpis.revenue | number:'1.0-0' }}</h3>
             </div>
           </div>
 
-          <!-- SVG Chart -->
-          <div class="h-64 w-full relative group">
-            <svg class="w-full h-full overflow-visible" preserveAspectRatio="none" viewBox="0 0 1000 200">
-              <defs>
-                <linearGradient id="satisfactionGradient" x1="0" x2="0" y1="0" y2="1">
-                  <stop offset="0%" stop-color="var(--primary)" stop-opacity="0.2" />
-                  <stop offset="100%" stop-color="var(--primary)" stop-opacity="0" />
-                </linearGradient>
-              </defs>
-              <!-- Area Fill -->
-              <path [attr.d]="getReviewFillPath(1000, 200)" fill="url(#satisfactionGradient)"
-                class="transition-all duration-1000 ease-in-out" />
-              <!-- Line -->
-              <path [attr.d]="getSatisfactionLinePath(1000, 200)" stroke="var(--primary)" stroke-width="3" fill="none"
-                stroke-linecap="round" stroke-linejoin="round"
-                class="drop-shadow-lg transition-all duration-1000 ease-in-out" />
+          <!-- Appointments -->
+          <div class="kpi-card group">
+            <div class="flex justify-between items-start mb-6">
+              <div class="kpi-icon-wrapper icon-blue">
+                <i class="bi bi-calendar-check"></i>
+              </div>
+              <span class="kpi-badge"
+                [ngClass]="analytics()!.trends.appointmentsChange >= 0 ? 'badge-positive' : 'badge-negative'">
+                <i class="bi"
+                  [ngClass]="analytics()!.trends.appointmentsChange >= 0 ? 'bi-arrow-up-short' : 'bi-arrow-down-short'"></i>
+                {{ analytics()!.trends.appointmentsChange }}%
+              </span>
+            </div>
+            <div>
+              <p class="kpi-label">Appointments</p>
+              <h3 class="kpi-value">{{ analytics()!.kpis.totalAppointments }}</h3>
+            </div>
+          </div>
 
-              <!-- Grid Lines -->
-              <line x1="0" y1="200" x2="1000" y2="200" stroke="#E5E7EB" stroke-width="1" />
-              <line x1="0" y1="100" x2="1000" y2="100" stroke="#E5E7EB" stroke-width="1" stroke-dasharray="4 4" />
-              <line x1="0" y1="0" x2="1000" y2="0" stroke="#E5E7EB" stroke-width="1" stroke-dasharray="4 4" />
-            </svg>
+          <!-- Completion Rate -->
+          <div class="kpi-card group">
+            <div class="flex justify-between items-start mb-6">
+              <div class="kpi-icon-wrapper icon-violet">
+                <i class="bi bi-pie-chart"></i>
+              </div>
+              <span class="kpi-badge"
+                [ngClass]="analytics()!.trends.completionChange >= 0 ? 'badge-positive' : 'badge-negative'">
+                <i class="bi"
+                  [ngClass]="analytics()!.trends.completionChange >= 0 ? 'bi-arrow-up-short' : 'bi-arrow-down-short'"></i>
+                {{ analytics()!.trends.completionChange }}%
+              </span>
+            </div>
+            <div>
+              <p class="kpi-label">Completion Rate</p>
+              <h3 class="kpi-value">{{ analytics()!.kpis.completionRate }}%</h3>
+            </div>
+          </div>
 
-            <!-- Interaction Line (visible on hover would require JS mouse events, skipped for cleaner CSS-only approach or basic hover) -->
+          <!-- Satisfaction -->
+          <div class="kpi-card group">
+            <div class="flex justify-between items-start mb-6">
+              <div class="kpi-icon-wrapper icon-amber">
+                <i class="bi bi-star-fill"></i>
+              </div>
+              <span class="kpi-badge"
+                [ngClass]="analytics()!.trends.satisfactionChange >= 0 ? 'badge-positive' : 'badge-negative'">
+                <i class="bi"
+                  [ngClass]="analytics()!.trends.satisfactionChange >= 0 ? 'bi-arrow-up-short' : 'bi-arrow-down-short'"></i>
+                {{ analytics()!.trends.satisfactionChange }}%
+              </span>
+            </div>
+            <div>
+              <p class="kpi-label">Satisfaction</p>
+              <h3 class="kpi-value">{{ analytics()!.kpis.patientSatisfaction }}%</h3>
+            </div>
           </div>
         </div>
 
+        <!-- Charts Grid -->
+        <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
+
+          <div class="chart-card xl:col-span-2 flex flex-col">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-2">
+              <div>
+                <h3 class="chart-title">Appointment Activity</h3>
+                <p class="chart-subtitle">Monthly breakdown of appointment status</p>
+              </div>
+              <div class="chart-legend">
+                <div class="legend-item cursor-pointer hover:opacity-80">
+                  <div class="legend-dot bg-emerald-500"></div>
+                  <span>Completed</span>
+                </div>
+                <div class="legend-item cursor-pointer hover:opacity-80">
+                  <div class="legend-dot bg-amber-400"></div>
+                  <span>Cancelled</span>
+                </div>
+                <div class="legend-item cursor-pointer hover:opacity-80">
+                  <div class="legend-dot bg-red-400"></div>
+                  <span>No-Show</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="relative w-full h-[320px] mt-4 select-none">
+              <svg class="w-full h-full overflow-visible" viewBox="0 0 1000 340" preserveAspectRatio="none">
+                <defs>
+                  <!-- Gradients -->
+                  <linearGradient id="gradCompleted" x1="0" x2="0" y1="0" y2="1">
+                    <stop offset="0%" stop-color="#10b981" stop-opacity="0.2" />
+                    <stop offset="100%" stop-color="#10b981" stop-opacity="0" />
+                  </linearGradient>
+                  <linearGradient id="gradCancelled" x1="0" x2="0" y1="0" y2="1">
+                    <stop offset="0%" stop-color="#fbbf24" stop-opacity="0.2" />
+                    <stop offset="100%" stop-color="#fbbf24" stop-opacity="0" />
+                  </linearGradient>
+                  <linearGradient id="gradNoShow" x1="0" x2="0" y1="0" y2="1">
+                    <stop offset="0%" stop-color="#f87171" stop-opacity="0.2" />
+                    <stop offset="100%" stop-color="#f87171" stop-opacity="0" />
+                  </linearGradient>
+                </defs>
+
+                <!-- Grid Lines -->
+                <line x1="0" y1="0" x2="1000" y2="0" stroke="var(--border)" stroke-opacity="0.5" stroke-dasharray="4" />
+                <line x1="0" y1="100" x2="1000" y2="100" stroke="var(--border)" stroke-opacity="0.5"
+                  stroke-dasharray="4" />
+                <line x1="0" y1="200" x2="1000" y2="200" stroke="var(--border)" stroke-opacity="0.5"
+                  stroke-dasharray="4" />
+                <line x1="0" y1="300" x2="1000" y2="300" stroke="var(--border)" stroke-opacity="0.5" />
+
+                <!-- Areas -->
+                <path [attr.d]="getTrendAreaPath('completed', 1000, 300)" fill="url(#gradCompleted)"
+                  class="transition-all duration-500" />
+                <path [attr.d]="getTrendAreaPath('cancelled', 1000, 300)" fill="url(#gradCancelled)"
+                  class="transition-all duration-500" />
+                <path [attr.d]="getTrendAreaPath('noShow', 1000, 300)" fill="url(#gradNoShow)"
+                  class="transition-all duration-500" />
+
+                <!-- Lines -->
+                <path [attr.d]="getTrendPath('completed', 1000, 300)" fill="none" stroke="#10b981" stroke-width="3"
+                  stroke-linecap="round" stroke-linejoin="round"
+                  class="filter drop-shadow-sm transition-all duration-500" />
+                <path [attr.d]="getTrendPath('cancelled', 1000, 300)" fill="none" stroke="#fbbf24" stroke-width="3"
+                  stroke-linecap="round" stroke-linejoin="round"
+                  class="filter drop-shadow-sm transition-all duration-500" />
+                <path [attr.d]="getTrendPath('noShow', 1000, 300)" fill="none" stroke="#f87171" stroke-width="3"
+                  stroke-linecap="round" stroke-linejoin="round"
+                  class="filter drop-shadow-sm transition-all duration-500" />
+
+                <!-- Points & Labels -->
+                <g *ngFor="let point of getTrendPoints('completed', 1000, 300); let last = last">
+                  <!-- X-Axis Labels (Only show once using one of the series loops) -->
+                  <text [attr.x]="point.x" y="330" text-anchor="middle"
+                    class="text-xs font-semibold fill-slate-500 dark:fill-slate-400" style="font-size: 14px;">{{
+                    point.label }}</text>
+
+                  <!-- Dots -->
+                  <circle [attr.cx]="point.x" [attr.cy]="point.y" r="4" fill="#10b981" stroke="white" stroke-width="2"
+                    class="hover:r-6 transition-all cursor-pointer">
+                    <title>{{ point.val }} Completed</title>
+                  </circle>
+                </g>
+
+                <g *ngFor="let point of getTrendPoints('cancelled', 1000, 300)">
+                  <circle [attr.cx]="point.x" [attr.cy]="point.y" r="4" fill="#fbbf24" stroke="white" stroke-width="2"
+                    class="hover:r-6 transition-all cursor-pointer">
+                    <title>{{ point.val }} Cancelled</title>
+                  </circle>
+                </g>
+
+                <g *ngFor="let point of getTrendPoints('noShow', 1000, 300)">
+                  <circle [attr.cx]="point.x" [attr.cy]="point.y" r="4" fill="#f87171" stroke="white" stroke-width="2"
+                    class="hover:r-6 transition-all cursor-pointer">
+                    <title>{{ point.val }} No-Show</title>
+                  </circle>
+                </g>
+              </svg>
+            </div>
+          </div>
+
+          <!-- Appointment Types (Donut) -->
+          <div class="chart-card flex flex-col">
+            <div>
+              <h3 class="chart-title">Consultation Types</h3>
+              <p class="chart-subtitle">Distribution by category</p>
+            </div>
+
+            <div class="donut-container">
+              <svg viewBox="0 0 36 36" class="donut-svg">
+                <!-- Background Circle -->
+                <path class="text-slate-100 dark:text-slate-800"
+                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none"
+                  stroke="currentColor" stroke-width="2.5" />
+
+                <!-- Segments -->
+                <circle *ngFor="let seg of getDonutSegments()" class="donut-segment"
+                  [attr.stroke-dasharray]="seg.dashArray" [attr.stroke-dashoffset]="seg.offset"
+                  [attr.stroke]="seg.color" cx="18" cy="18" r="15.9155" fill="none" stroke-width="2.5"
+                  stroke-linecap="round" />
+              </svg>
+
+              <div class="donut-center">
+                <span class="donut-total-value">{{ analytics()!.kpis.totalAppointments }}</span>
+                <span class="donut-total-label">Total</span>
+              </div>
+            </div>
+
+            <div class="type-legend">
+              <div *ngFor="let seg of getDonutSegments()" class="type-item">
+                <div class="type-label-wrapper">
+                  <div class="type-color-indicator" [style.background-color]="seg.color"></div>
+                  <span class="type-name">{{ seg.label }}</span>
+                </div>
+                <span class="type-count">{{ seg.count }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Patient Satisfaction (Line Area) -->
+          <div class="chart-card xl:col-span-3">
+            <div class="flex flex-col sm:flex-row justify-between items-end mb-6">
+              <div>
+                <h3 class="chart-title">Satisfaction Trend</h3>
+                <p class="chart-subtitle">Patient rating performance over time</p>
+              </div>
+              <div class="text-right">
+                <div class="current-score-badge">{{ analytics()!.kpis.patientSatisfaction }}%</div>
+                <div class="score-label">Current Score</div>
+              </div>
+            </div>
+
+            <div class="satisfaction-chart-container">
+              <svg class="satisfaction-svg" preserveAspectRatio="none" viewBox="0 0 1000 300">
+                <defs>
+                  <linearGradient id="satisfactionGradient" x1="0" x2="0" y1="0" y2="1">
+                    <stop offset="0%" stop-color="#22c55e" stop-opacity="0.2" />
+                    <stop offset="100%" stop-color="#22c55e" stop-opacity="0" />
+                  </linearGradient>
+
+                  <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+                    <feGaussianBlur stdDeviation="4" result="coloredBlur" />
+                    <feMerge>
+                      <feMergeNode in="coloredBlur" />
+                      <feMergeNode in="SourceGraphic" />
+                    </feMerge>
+                  </filter>
+                </defs>
+
+                <!-- Grid -->
+                <line x1="0" y1="225" x2="1000" y2="225" class="grid-line" />
+                <line x1="0" y1="150" x2="1000" y2="150" class="grid-line grid-line-dashed" />
+                <line x1="0" y1="75" x2="1000" y2="75" class="grid-line grid-line-dashed" />
+
+                <!-- Area Fill -->
+                <path [attr.d]="getReviewFillPath(1000, 300)" fill="url(#satisfactionGradient)"
+                  class="satisfaction-area" />
+
+                <!-- Line -->
+                <path [attr.d]="getSatisfactionLinePath(1000, 300)" stroke="#16a34a" fill="none"
+                  class="satisfaction-line" filter="url(#glow)" />
+
+                <!-- Data Points -->
+                <!-- Use a getter for points to avoid complexity in template if possible, or simple ngFor -->
+                <!-- Note: getSatisfactionPoints is not year implemented in TS but I will add it next -->
+                <!-- For now, I'll rely on the TS update happening right after this -->
+                <g *ngFor="let point of getSatisfactionPoints(1000, 300)">
+                  <circle [attr.cx]="point.x" [attr.cy]="point.y" r="6" fill="#16a34a" stroke="white" stroke-width="2"
+                    class="cursor-pointer transition-all duration-300 hover:r-8" />
+                </g>
+              </svg>
+            </div>
+          </div>
+
+        </div>
       </div>
     </div>
   </main>

@@ -1,0 +1,9 @@
+export const environment = {
+  production: true,
+  apiUrl: "https://api.yourdomain.com/api",
+  stripePublishableKey: "YOUR_STRIPE_PUBLISHABLE_KEY",
+  supabaseUrl: "YOUR_SUPABASE_URL",
+  supabaseAnonKey: "YOUR_SUPABASE_ANON_KEY",
+  googleClientId: "YOUR_GOOGLE_CLIENT_ID",
+  googleRedirectUri: "https://yourdomain.com/auth/callback"
+}

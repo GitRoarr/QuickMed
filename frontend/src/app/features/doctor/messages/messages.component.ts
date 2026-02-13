@@ -63,7 +63,7 @@ export class MessagesComponent implements OnInit, AfterViewChecked, OnDestroy {
   unreadCount = signal(0);
   currentUser = signal<any>(null);
   actionsMenuOpen = signal(false);
-  isMobile = signal(typeof window !== 'undefined' && window.innerWidth < 768);
+  isMobile = signal(typeof window !== 'undefined' && window.innerWidth < 1024);
 
   // Pickers
   showEmojiPicker = signal(false);
@@ -82,7 +82,7 @@ export class MessagesComponent implements OnInit, AfterViewChecked, OnDestroy {
 
   @HostListener('window:resize')
   onResize(): void {
-    this.isMobile.set(typeof window !== 'undefined' && window.innerWidth < 768);
+    this.isMobile.set(typeof window !== 'undefined' && window.innerWidth < 1024);
   }
 
   ngOnInit(): void {

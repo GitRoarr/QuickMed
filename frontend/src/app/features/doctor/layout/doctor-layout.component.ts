@@ -41,8 +41,8 @@ import { filter } from 'rxjs/operators';
 
       <!-- Main Content Area -->
       <div class="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
-        <main class="flex-1 overflow-y-auto overflow-x-hidden p-4 md:p-8">
-          <div class="max-w-7xl mx-auto w-full pl-14 md:pl-0">
+        <main class="flex-1 overflow-y-auto overflow-x-hidden p-4 md:p-8 lg:ml-[280px] transition-all duration-300">
+          <div class="max-w-7xl mx-auto w-full pl-14 lg:pl-0">
             <router-outlet></router-outlet>
           </div>
         </main>

@@ -3,7 +3,7 @@
 }
 
 /* ============================================
-   Premium Doctor Sidebar — Slide-in on all sizes
+   Premium Doctor Sidebar
    ============================================ */
 .doctor-sidebar {
 	width: 272px;
@@ -12,7 +12,7 @@
 	flex-direction: column;
 	background: var(--sidebar-bg, #ffffff);
 	border-right: 1px solid var(--surface-tertiary, #e2e8f0);
-	box-shadow: none;
+	box-shadow: 4px 0 24px -8px rgba(0, 0, 0, 0.06);
 	overflow-y: auto;
 	overflow-x: hidden;
 	transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1),
@@ -21,21 +21,29 @@
 	top: 0;
 	left: 0;
 	z-index: 60;
-	transform: translateX(-110%);
 }
 
-/* Sidebar Open — slides in */
-.doctor-sidebar.sidebar-open {
-	transform: translateX(0);
-	box-shadow:
-		20px 0 60px -10px rgba(0, 0, 0, 0.15),
-		8px 0 30px -5px rgba(0, 0, 0, 0.08);
+/* Desktop: always visible */
+@media (min-width: 1024px) {
+	.doctor-sidebar {
+		transform: translateX(0) !important;
+		width: 280px;
+	}
 }
 
-/* Mobile: narrower sidebar */
-@media (max-width: 768px) {
+/* Mobile/Tablet: slide-in animation */
+@media (max-width: 1023px) {
 	.doctor-sidebar {
 		width: min(280px, 80vw);
+		transform: translateX(-110%);
+		box-shadow: none;
+	}
+
+	.doctor-sidebar.sidebar-open {
+		transform: translateX(0);
+		box-shadow:
+			20px 0 60px -10px rgba(0, 0, 0, 0.15),
+			8px 0 30px -5px rgba(0, 0, 0, 0.08);
 	}
 }
 
@@ -72,6 +80,12 @@
 	cursor: pointer;
 	transition: all 0.2s ease;
 	z-index: 5;
+}
+
+@media (min-width: 1024px) {
+	.close-btn {
+		display: none;
+	}
 }
 
 .close-btn:hover {

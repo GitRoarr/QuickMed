@@ -19,6 +19,7 @@ import { ThemeService } from '@core/services/theme.service';
     DoctorHeaderComponent
   ],
   templateUrl: './analytics.component.html',
+  styleUrls: ['./analytics.component.css'],
   animations: [
     trigger('fadeInUp', [
       transition(':enter', [
@@ -57,8 +58,6 @@ export class AnalyticsComponent implements OnInit {
     this.currentUser.set(this.authService.currentUser());
   }
 
-
-
   loadAnalytics(): void {
     this.isLoading.set(true);
     this.doctorService.getAnalytics(this.selectedPeriod()).subscribe({
@@ -91,8 +90,6 @@ export class AnalyticsComponent implements OnInit {
       : name.substring(0, 2).toUpperCase();
   }
 
-
-
   getDonutSegments() {
     const data = this.analytics();
     if (!data || !data.appointmentTypeBreakdown) return [];
@@ -101,7 +98,7 @@ export class AnalyticsComponent implements OnInit {
     if (total === 0) return [];
 
     let cumPercent = 0;
-    const colors = ['var(--primary)', 'var(--success)', 'var(--warning)', 'var(--error)', 'var(--secondary)'];
+    const colors = ['#10b981', '#3b82f6', '#8b5cf6', '#f59e0b', '#ef4444'];
 
     return data.appointmentTypeBreakdown.map((item, index) => {
       const percentage = item.count / total;
@@ -119,9 +116,9 @@ export class AnalyticsComponent implements OnInit {
     });
   }
 
-  getSatisfactionLinePath(width: number, height: number): string {
+  getSatisfactionPoints(width: number, height: number): { x: number, y: number, val: number }[] {
     const data = this.analytics()?.satisfactionTrend;
-    if (!data || data.length === 0) return '';
+    if (!data || data.length === 0) return [];
 
     const max = 100; // Satisfaction is 0-100
     const min = 0;
@@ -129,14 +126,44 @@ export class AnalyticsComponent implements OnInit {
     // X spacing
     const stepX = width / (data.length - 1 || 1);
 
-    const points = data.map((val, index) => {
+    return data.map((val, index) => {
       const x = index * stepX;
-      // Invert Y because SVG 0 is top
-      const y = height - ((val - min) / (max - min)) * height;
-      return `${x},${y}`;
+      // Invert Y because SVG 0 is top. Leave some padding.
+      const padding = 20;
+      const availableHeight = height - (padding * 2);
+      const y = (height - padding) - ((val - min) / (max - min)) * availableHeight;
+      return { x, y, val };
     });
+  }
 
-    return `M ${points.join(' L ')}`;
+  getSatisfactionLinePath(width: number, height: number): string {
+    const points = this.getSatisfactionPoints(width, height);
+    if (points.length === 0) return '';
+
+    if (points.length === 1) {
+      return `M ${points[0].x},${points[0].y} L ${width},${points[0].y}`;
+    }
+
+    // Catmull-Rom to Bezier conversion for smooth curves
+    const k = 1; // Tension
+    let path = `M ${points[0].x},${points[0].y}`;
+
+    for (let i = 0; i < points.length - 1; i++) {
+      const p0 = points[i - 1] || points[i];
+      const p1 = points[i];
+      const p2 = points[i + 1];
+      const p3 = points[i + 2] || p2;
+
+      const cp1x = p1.x + (p2.x - p0.x) / 6 * k;
+      const cp1y = p1.y + (p2.y - p0.y) / 6 * k;
+
+      const cp2x = p2.x - (p3.x - p1.x) / 6 * k;
+      const cp2y = p2.y - (p3.y - p1.y) / 6 * k;
+
+      path += ` C ${cp1x},${cp1y} ${cp2x},${cp2y} ${p2.x},${p2.y}`;
+    }
+
+    return path;
   }
 
   getReviewFillPath(width: number, height: number): string {
@@ -169,46 +196,85 @@ export class AnalyticsComponent implements OnInit {
     };
   }
 
+  getTrendPoints(category: 'completed' | 'cancelled' | 'noShow', width: number, height: number): { x: number, y: number, val: number, label: string }[] {
+    const data = this.getAppointmentTrendData();
+    const values = data[category];
+    const months = data.months;
+
+    if (!values || values.length === 0) return [];
+
+    // Find global max across all categories for consistent scaling
+    const maxVal = Math.max(
+      ...data.completed,
+      ...data.cancelled,
+      ...data.noShow,
+      1 // Avoid divide by zero
+    );
+
+    // Add 10% padding to top
+    const scaleMax = maxVal * 1.1;
+    const minVal = 0;
+
+    const stepX = width / (values.length - 1 || 1);
+    const padding = 20; // Bottom padding for labels space if needed, though usually handled outside
+    // Actually inside SVG we usually want full height usage minus some padding
+    const availableHeight = height - 40; // 20 top, 20 bottom
+
+    return values.map((val, index) => {
+      const x = index * stepX;
+      // Y: 0 is top. 
+      // val = 0 -> y = height - 20
+      // val = max -> y = 20
+      const y = (height - 20) - ((val / scaleMax) * availableHeight);
+      return { x, y, val, label: months[index] };
+    });
+  }
+
+  getTrendPath(category: 'completed' | 'cancelled' | 'noShow', width: number, height: number): string {
+    const points = this.getTrendPoints(category, width, height);
+    return this.pointsToPath(points);
+  }
+
+  getTrendAreaPath(category: 'completed' | 'cancelled' | 'noShow', width: number, height: number): string {
+    const points = this.getTrendPoints(category, width, height);
+    if (points.length === 0) return '';
+    const linePath = this.pointsToPath(points);
+    return `${linePath} L ${width},${height} L 0,${height} Z`;
+  }
+
+  private pointsToPath(points: { x: number, y: number }[]): string {
+    if (points.length === 0) return '';
+    if (points.length === 1) return `M ${points[0].x},${points[0].y} L ${points[0].x},${points[0].y}`;
+
+    const k = 0.35; // Tension/Smoothing factor
+    let path = `M ${points[0].x},${points[0].y}`;
+
+    for (let i = 0; i < points.length - 1; i++) {
+      const p0 = points[i - 1] || points[i];
+      const p1 = points[i];
+      const p2 = points[i + 1];
+      const p3 = points[i + 2] || p2;
+
+      const cp1x = p1.x + (p2.x - p0.x) * k;
+      const cp1y = p1.y + (p2.y - p0.y) * k;
+
+      const cp2x = p2.x - (p3.x - p1.x) * k;
+      const cp2y = p2.y - (p3.y - p1.y) * k;
+
+      path += ` C ${cp1x},${cp1y} ${cp2x},${cp2y} ${p2.x},${p2.y}`;
+    }
+    return path;
+  }
+
   getMaxChartValue(): number {
     const trendData = this.getAppointmentTrendData();
-    const allValues = [...trendData.completed, ...trendData.cancelled, ...trendData.noShow];
-    // Stacked bar? If stacked, we need max of sums.
-    // The current UI seemed to be side-by-side or stacked? Code in template was doing separate bars in one column?
-    // Let's verify template logic. It was Side-by-side (flex-col inside a flex-row container per month).
-    // Wait, previous template had:
-    // <div class="flex-1 flex flex-col justify-end gap-1 h-full"> ... divs ... </div>
-    // This stacks them vertically? No, `flex-col` stacks them vertical. `justify-end`.
-    // So it's a stacked bar chart! 
-    // If it's a stacked bar chart, the max value should be the max of the SUMs.
-    // Let's check `getBarHeight`. Currently it compares individual value to `getMaxChartValue`.
-    // If they are stacked, the height of each segment is `(value / max) * 100`.
-    // If total height is 100%, then sum of segments should be <= 100%.
-    // So `maxValue` MUST be the max total (completed + cancelled + noShow).
-
-    const maxFunction = () => {
-      const sums = trendData.months.map((_, i) =>
-        (trendData.completed[i] || 0) + (trendData.cancelled[i] || 0) + (trendData.noShow[i] || 0)
-      );
-      return Math.max(...sums, 1);
-    };
-    return maxFunction();
-  }
-
-  getBarHeight(value: number, maxValue: number): number {
-    // Return percentage of TOTAL height
-    return maxValue === 0 ? 0 : (value / maxValue) * 100;
-  }
-
-  getCompletedValue(index: number): number {
-    return this.getAppointmentTrendData().completed[index] || 0;
-  }
-
-  getCancelledValue(index: number): number {
-    return this.getAppointmentTrendData().cancelled[index] || 0;
-  }
-
-  getNoShowValue(index: number): number {
-    return this.getAppointmentTrendData().noShow[index] || 0;
+    // For line chart, we want the max occurring value
+    return Math.max(
+      ...trendData.completed,
+      ...trendData.cancelled,
+      ...trendData.noShow,
+      1
+    );
   }
 
 }
