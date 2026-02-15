@@ -71,7 +71,7 @@ export class HomeComponent implements OnInit {
     private landingMetrics: LandingMetricsService,
     private reviewService: ReviewService,
     private userService: UserService,
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.loadSummary()
@@ -331,17 +331,17 @@ export class HomeComponent implements OnInit {
         break
     }
   }
- getUserAvatar(): string {
-  const user = this.currentUser()
-  return user?.avatar || 'assets/images/profile-placeholder.png'
-}
-getInitials(firstName?: string, lastName?: string): string {
-  if (!firstName && !lastName) return '?'
-  const firstInitial = firstName ? firstName.charAt(0).toUpperCase() : ''
-  const lastInitial = lastName ? lastName.charAt(0).toUpperCase() : ''
-  return `${firstInitial}${lastInitial}`
-}
-navbarClasses() {
+  getUserAvatar(): string {
+    const user = this.currentUser()
+    return user?.avatar || 'assets/images/profile-placeholder.png'
+  }
+  getInitials(firstName?: string, lastName?: string): string {
+    if (!firstName && !lastName) return '?'
+    const firstInitial = firstName ? firstName.charAt(0).toUpperCase() : ''
+    const lastInitial = lastName ? lastName.charAt(0).toUpperCase() : ''
+    return `${firstInitial}${lastInitial}`
+  }
+  navbarClasses() {
     return {
       "bg-light": !this.isDarkMode(),
       "bg-dark": this.isDarkMode(),

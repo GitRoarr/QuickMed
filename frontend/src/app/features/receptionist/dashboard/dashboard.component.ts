@@ -6,12 +6,12 @@ import { ThemeService } from '@core/services/theme.service';
 import { AuthService } from '@core/services/auth.service';
 import { HeaderComponent } from '@app/features/admin/shared/header';
 import { SidebarComponent } from '@app/features/admin/shared/sidebar';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-receptionist-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, HeaderComponent, SidebarComponent],
+  imports: [CommonModule, FormsModule, HeaderComponent, SidebarComponent, RouterModule],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css'],
 })
@@ -153,5 +153,9 @@ export class DashboardComponent implements OnInit {
 
   goToMessages(): void {
     this.router.navigate(['/messages']);
+  }
+
+  goToHome(): void {
+    this.router.navigate(['/']);
   }
 }

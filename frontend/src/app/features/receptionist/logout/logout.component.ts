@@ -5,14 +5,14 @@ import { AuthService } from '@core/services/auth.service';
 import { ThemeService } from '@core/services/theme.service';
 
 @Component({
-    selector: 'app-receptionist-logout',
-    standalone: true,
-    imports: [CommonModule],
-    template: `
+  selector: 'app-receptionist-logout',
+  standalone: true,
+  imports: [CommonModule],
+  template: `
     <div class="logout-overlay" [class.dark]="themeService.isDark()">
       <div class="content">
         <div class="logo">
-          <img src="assets/images/QuickMed-Logo.png" alt="QuickMed">
+          <img src="assets/images/QuickMed-Logo-Light.png" alt="QuickMed">
         </div>
         <div class="spinner"></div>
         <h2>Logging you out...</h2>
@@ -20,7 +20,7 @@ import { ThemeService } from '@core/services/theme.service';
       </div>
     </div>
   `,
-    styles: [`
+  styles: [`
     .logout-overlay {
       position: fixed;
       inset: 0;
@@ -39,7 +39,7 @@ import { ThemeService } from '@core/services/theme.service';
       animation: fadeIn 0.5s ease;
     }
     .logo {
-      width: 80px;
+      width: 200px;
       margin-bottom: 2rem;
       margin-inline: auto;
     }
@@ -61,14 +61,14 @@ import { ThemeService } from '@core/services/theme.service';
   `]
 })
 export class LogoutComponent implements OnInit {
-    private readonly router = inject(Router);
-    private readonly authService = inject(AuthService);
-    themeService = inject(ThemeService);
+  private readonly router = inject(Router);
+  private readonly authService = inject(AuthService);
+  themeService = inject(ThemeService);
 
-    ngOnInit(): void {
-        setTimeout(() => {
-            this.authService.logout();
-            this.router.navigate(['/login']);
-        }, 2000);
-    }
+  ngOnInit(): void {
+    setTimeout(() => {
+      this.authService.logout();
+      this.router.navigate(['/login']);
+    }, 2000);
+  }
 }

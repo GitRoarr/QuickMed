@@ -35,45 +35,12 @@
   margin-bottom: 1.5rem;
 }
 
-.logo-container {
+.logo-container-main {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.75rem;
-  margin-bottom: 0.5rem;
-}
-
-.logo-icon {
-  width: 60px;
-  height: 60px;
-  background: var(--primary);
-  border-radius: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-size: 28px;
-  box-shadow: 0 4px 20px rgba(22, 163, 74, 0.3);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.logo-icon:hover {
-  transform: scale(1.05);
-  box-shadow: 0 6px 25px rgba(22, 163, 74, 0.4);
-}
-
-.logo-img {
-  width: 32px;
-  height: 32px;
-  object-fit: contain;
-  display: block;
-}
-
-.logo-text {
-  font-size: 2rem;
-  font-weight: 800;
-  color: #111827;
-  margin: 0;
+  margin-bottom: 2rem;
+  cursor: pointer;
 }
 
 .portal-label {

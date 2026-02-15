@@ -5,6 +5,7 @@
     (click)="sidebarService.close()">
     <i class="bi bi-x-lg"></i>
   </button>
+  <!-- Brand Header -->
   <div class="sidebar-header">
     <button class="collapse-toggle" type="button" (click)="toggleCollapse()" [attr.aria-pressed]="collapsed"
       [attr.title]="collapsed ? 'Expand sidebar' : 'Collapse sidebar'">
@@ -12,40 +13,57 @@
       </i>
     </button>
 
-    <div class="brand" (click)="goHome()" title="Back to Home">
-      <img src="assets/images/QuickMed-Logo.png" alt="QuickMed Logo" />
-      <div class="brand-text" *ngIf="!collapsed">
-        <p class="brand-title">{{ title }}</p>
-        <p class="brand-subtitle">Receptionist</p>
+    <div class="brand" (click)="goHome()" title="Back to Home" *ngIf="!collapsed">
+      <div class="brand-header">
+        <div class="brand-logo-wrapper">
+          <img src="assets/images/QuickMed-Logo-Light.png" alt="QuickMed Logo" />
+        </div>
+        <div class="brand-portal-badge">
+          <span class="portal-dot"></span>
+          <span class="portal-text">{{ title || 'Portal' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="brand-collapsed" *ngIf="collapsed">
+      <div class="brand-logo-wrapper">
+        <img src="assets/images/QuickMed-Logo-Light.png" alt="QuickMed Logo" />
       </div>
     </div>
   </div>
 
+  <div class="sidebar-divider"></div>
+
+  <!-- Navigation -->
   <nav class="sidebar-nav">
     <ng-container *ngFor="let item of menuItems">
       <a *ngIf="item.route; else actionItem" [routerLink]="item.route" routerLinkActive="active"
         [routerLinkActiveOptions]="{ exact: item.exact ?? false }" class="nav-link"
         [class.logout-btn]="item.label === 'Logout'" [attr.aria-label]="item.label"
         [attr.title]="collapsed ? item.label : null" (click)="[handleItemClick(item, $event), closeSidebarOnMobile()]">
-        <ng-container *ngIf="item.iconImgLight || item.iconImgDark; else iconClass">
-          <img class="nav-icon-img" [src]="themeService.isDarkMode() ? item.iconImgDark : item.iconImgLight"
-            [alt]="item.label + ' icon'" />
-        </ng-container>
-        <ng-template #iconClass>
-          <i class="bi" [ngClass]="item.icon || ''"></i>
-        </ng-template>
+        <div class="nav-icon-wrapper">
+          <ng-container *ngIf="item.iconImgLight || item.iconImgDark; else iconClass">
+            <img class="nav-icon-img" [src]="themeService.isDarkMode() ? item.iconImgDark : item.iconImgLight"
+              [alt]="item.label + ' icon'" />
+          </ng-container>
+          <ng-template #iconClass>
+            <i class="bi" [ngClass]="item.icon || ''"></i>
+          </ng-template>
+        </div>
         <span class="nav-text">{{ item.label }}</span>
       </a>
       <ng-template #actionItem>
         <button class="nav-link action" type="button" [class.logout-btn]="item.label === 'Logout'"
           [attr.aria-label]="item.label" [attr.title]="collapsed ? item.label : null" (click)="handleItemClick(item)">
-          <ng-container *ngIf="item.iconImgLight || item.iconImgDark; else iconClassAction">
-            <img class="nav-icon-img" [src]="themeService.isDarkMode() ? item.iconImgDark : item.iconImgLight"
-              [alt]="item.label + ' icon'" />
-          </ng-container>
-          <ng-template #iconClassAction>
-            <i class="bi" [ngClass]="item.icon || ''"></i>
-          </ng-template>
+          <div class="nav-icon-wrapper">
+            <ng-container *ngIf="item.iconImgLight || item.iconImgDark; else iconClassAction">
+              <img class="nav-icon-img" [src]="themeService.isDarkMode() ? item.iconImgDark : item.iconImgLight"
+                [alt]="item.label + ' icon'" />
+            </ng-container>
+            <ng-template #iconClassAction>
+              <i class="bi" [ngClass]="item.icon || ''"></i>
+            </ng-template>
+          </div>
           <span class="nav-text">{{ item.label }}</span>
         </button>
       </ng-template>

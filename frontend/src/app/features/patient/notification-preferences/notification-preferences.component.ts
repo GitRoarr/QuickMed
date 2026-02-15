@@ -1,6 +1,7 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router, RouterModule } from '@angular/router';
 
 interface NotificationPreferences {
   emailNotifications: boolean;
@@ -19,16 +20,17 @@ interface NotificationPreferences {
 @Component({
   selector: 'app-notification-preferences',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './notification-preferences.component.html',
   styleUrls: ['./notification-preferences.component.css']
 })
 export class NotificationPreferencesComponent implements OnInit {
+  private readonly router = inject(Router);
   isLoading = signal(false);
   isSaving = signal(false);
   showSuccessMessage = signal(false);
   sidebarCollapsed = signal(false);
-  
+
   preferences = signal<NotificationPreferences>({
     emailNotifications: true,
     pushNotifications: true,
@@ -94,6 +96,10 @@ export class NotificationPreferencesComponent implements OnInit {
 
   toggleSidebar(): void {
     this.sidebarCollapsed.set(!this.sidebarCollapsed());
+  }
+
+  goHome(): void {
+    this.router.navigate(['/']);
   }
 }
 

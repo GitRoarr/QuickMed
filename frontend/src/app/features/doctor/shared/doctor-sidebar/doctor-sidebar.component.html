@@ -5,32 +5,38 @@
     <i class="bi bi-x-lg"></i>
   </button>
 
-  <!-- Brand -->
+  <!-- Brand Header -->
   <div class="sidebar-brand">
     <a routerLink="/doctor/dashboard" (click)="onLogoClick($event)" class="brand-link">
-      <div class="brand-icon">
-        <img src="assets/images/QuickMed-Logo.png" alt="QuickMed Logo" />
-      </div>
-      <div class="brand-text">
-        <h3 class="brand-title">QuickMed</h3>
-        <p class="brand-subtitle">Doctor Portal</p>
+      <div class="brand-header">
+        <div class="brand-logo-wrapper">
+          <img src="assets/images/QuickMed-Logo-Light.png" alt="QuickMed Logo" />
+        </div>
+        <div class="brand-portal-badge">
+          <span class="portal-dot"></span>
+          <span class="portal-text">Doctor Portal</span>
+        </div>
       </div>
     </a>
   </div>
+
+  <div class="sidebar-divider"></div>
 
   <!-- Navigation -->
   <ng-container *ngIf="!loading(); else sidebarSkeleton">
     <nav class="sidebar-nav">
       <a *ngFor="let item of menuItems()" [routerLink]="item.route" routerLinkActive="nav-active"
         (click)="closeSidebar()" class="nav-item">
-        <ng-container *ngIf="item.imgSrc; else iconTpl">
-          <img
-            [src]="item.label === 'Prescriptions' && themeService.isDarkMode() ? 'assets/images/icons8-pill-50.png' : item.imgSrc"
-            alt="{{ item.label }}" class="nav-item-img sidebar-pill-icon" />
-        </ng-container>
-        <ng-template #iconTpl>
-          <i [class]="'bi ' + (item.icon || '') + ' nav-item-icon'"></i>
-        </ng-template>
+        <div class="nav-icon-wrapper">
+          <ng-container *ngIf="item.imgSrc; else iconTpl">
+            <img
+              [src]="item.label === 'Prescriptions' && themeService.isDarkMode() ? 'assets/images/icons8-pill-50.png' : item.imgSrc"
+              alt="{{ item.label }}" class="nav-item-img sidebar-pill-icon" />
+          </ng-container>
+          <ng-template #iconTpl>
+            <i [class]="'bi ' + (item.icon || '') + ' nav-item-icon'"></i>
+          </ng-template>
+        </div>
         <span class="nav-item-label">{{ item.label }}</span>
         <span *ngIf="item.badge && item.badge > 0" class="nav-badge">
           {{ item.badge }}
@@ -48,7 +54,9 @@
     </nav>
   </ng-template>
 
-  <!-- User Profile Section -->
+  <div class="sidebar-divider"></div>
+
+  <!-- Profile Card -->
   <div class="sidebar-profile">
     <div class="profile-card">
       <div class="profile-avatar">
@@ -62,10 +70,9 @@
         <p class="profile-name">Dr. {{ getDoctorName() }}</p>
         <p class="profile-specialty">{{ getDoctorSpecialty() }}</p>
       </div>
+      <button (click)="logout()" class="profile-logout-btn" title="Sign out">
+        <i class="bi bi-box-arrow-right"></i>
+      </button>
     </div>
-    <button (click)="logout()" class="logout-btn" title="Sign out">
-      <i class="bi bi-box-arrow-right"></i>
-      <span>Logout</span>
-    </button>
   </div>
 </aside>

@@ -30,7 +30,11 @@ export class LoginComponent implements OnInit {
     });
   }
 
-  ngOnInit() {}
+  ngOnInit() { }
+
+  public goHome(): void {
+    this.router.navigate(['/']);
+  }
 
   onSubmit(): void {
     if (this.loginForm.invalid) return;

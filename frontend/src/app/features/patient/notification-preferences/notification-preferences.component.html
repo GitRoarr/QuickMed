@@ -1,15 +1,11 @@
 <div class="preferences-container">
   <aside class="sidebar" [class.collapsed]="sidebarCollapsed()">
     <div class="sidebar-header">
-      <div class="logo" *ngIf="!sidebarCollapsed()" (click)="goHome()" style="cursor:pointer">
-        <div class="logo-icon">
-          <img src="assets/images/QuickMed-Logo.png" alt="QuickMed Logo" class="h-8 mb-2" />
+      <a class="logo" *ngIf="!sidebarCollapsed()" routerLink="/" style="cursor:pointer; text-decoration: none;">
+        <div class="logo-wrapper-mini">
+          <img src="assets/images/QuickMed-Logo-Light.png" alt="QuickMed Logo" class="h-8 w-auto" />
         </div>
-        <div class="logo-text">
-          <h3>QuickMed</h3>
-          <p>Patient Portal</p>
-        </div>
-      </div>
+      </a>
       <button class="toggle-btn" (click)="toggleSidebar()">
         <i class="bi" [class.bi-chevron-right]="sidebarCollapsed()" [class.bi-chevron-left]="!sidebarCollapsed()"></i>
       </button>
@@ -41,8 +37,8 @@
           <p>Receive notifications via email</p>
         </div>
         <label class="toggle-switch">
-          <input type="checkbox" [checked]="preferences().emailNotifications" 
-                 (change)="updatePreference('emailNotifications', $event.target.checked)">
+          <input type="checkbox" [checked]="preferences().emailNotifications"
+            (change)="updatePreference('emailNotifications', $event.target.checked)">
           <span class="toggle-slider"></span>
         </label>
       </div>
@@ -53,8 +49,8 @@
           <p>Receive push notifications</p>
         </div>
         <label class="toggle-switch">
-          <input type="checkbox" [checked]="preferences().pushNotifications" 
-                 (change)="updatePreference('pushNotifications', $event.target.checked)">
+          <input type="checkbox" [checked]="preferences().pushNotifications"
+            (change)="updatePreference('pushNotifications', $event.target.checked)">
           <span class="toggle-slider"></span>
         </label>
       </div>
@@ -65,8 +61,8 @@
           <p>Receive notifications via SMS</p>
         </div>
         <label class="toggle-switch">
-          <input type="checkbox" [checked]="preferences().smsNotifications" 
-                 (change)="updatePreference('smsNotifications', $event.target.checked)">
+          <input type="checkbox" [checked]="preferences().smsNotifications"
+            (change)="updatePreference('smsNotifications', $event.target.checked)">
           <span class="toggle-slider"></span>
         </label>
       </div>
@@ -81,14 +77,3 @@
     </div>
   </main>
 </div>
-
-
-
-
-
-
-
-
-
-
-

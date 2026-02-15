@@ -17,27 +17,33 @@
       <i class="bi bi-x-lg"></i>
     </button>
 
-    <!-- Brand -->
+    <!-- Brand Header -->
     <div class="patient-shell__brand" (click)="navigate('/')" title="Back to Home">
-      <div class="brand-container">
-        <div class="brand-icon">
-          <img src="assets/images/QuickMed-Logo.png" alt="QuickMed Logo" />
+      <div class="brand-header">
+        <div class="brand-logo-wrapper">
+          <img src="assets/images/QuickMed-Logo-Light.png" alt="QuickMed Logo" />
         </div>
-        <div class="brand-text">
-          <p class="brand-title">QuickMed</p>
-          <p class="brand-subtitle">Patient Portal</p>
+        <div class="brand-portal-badge">
+          <span class="portal-dot"></span>
+          <span class="portal-text">Patient Portal</span>
         </div>
       </div>
     </div>
+
+    <div class="sidebar-divider"></div>
 
     <!-- Navigation -->
     <nav class="patient-shell__nav">
       <a *ngFor="let item of menuItems" class="patient-shell__nav-item" [routerLink]="item.route"
         routerLinkActive="active" [routerLinkActiveOptions]="{ exact: item.exact !== false }" (click)="closeSidebar()">
-        <i class="bi" [ngClass]="item.icon"></i>
+        <div class="nav-icon-wrapper">
+          <i class="bi" [ngClass]="item.icon"></i>
+        </div>
         <span>{{ item.label }}</span>
       </a>
     </nav>
+
+    <div class="sidebar-divider"></div>
 
     <!-- Profile Card -->
     <div class="patient-shell__profile" *ngIf="user as current">
@@ -53,13 +59,11 @@
           <p class="profile-name">{{ current.firstName }} {{ current.lastName }}</p>
           <p class="profile-id">{{ current.patientId || 'QM-' + current.id.substring(0,8) }}</p>
         </div>
+        <button class="profile-logout-btn" type="button" (click)="logout(); closeSidebar()" title="Logout">
+          <i class="bi bi-box-arrow-right"></i>
+        </button>
       </div>
     </div>
-
-    <button class="patient-shell__logout" type="button" (click)="logout(); closeSidebar()">
-      <i class="bi bi-box-arrow-right"></i>
-      Logout
-    </button>
   </aside>
 
   <!-- Main Content -->

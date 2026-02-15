@@ -52,49 +52,88 @@
 }
 
 .brand-chip {
+  text-decoration: none;
+  display: block;
+}
+
+.brand-header {
   display: flex;
   align-items: center;
-  gap: 1.25rem;
+  gap: 1rem;
 }
 
-.logo-wrapper {
-  width: 56px;
-  height: 56px;
-  background: white;
-  border-radius: 16px;
+.brand-logo-wrapper {
+  width: 52px;
+  height: 52px;
+  min-width: 52px;
+  border-radius: 14px;
+  background: linear-gradient(145deg, #f0fdf4, #dcfce7);
+  border: 1.5px solid rgba(22, 163, 74, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   padding: 8px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
-  display: grid;
-  place-items: center;
-  border: 1px solid var(--border);
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 4px 12px -2px rgba(22, 163, 74, 0.12);
 }
 
-.logo-wrapper img {
+.dark .brand-logo-wrapper {
+  background: linear-gradient(145deg, rgba(22, 163, 74, 0.15), rgba(22, 163, 74, 0.08));
+  border-color: rgba(22, 163, 74, 0.2);
+}
+
+.brand-logo-wrapper img {
   width: 100%;
   height: 100%;
   object-fit: contain;
 }
 
-.eyebrow {
-  font-size: 0.75rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 2px;
-  color: var(--primary);
-  margin: 0;
+.brand-chip:hover .brand-logo-wrapper {
+  transform: scale(1.08) rotate(2deg);
+  box-shadow: 0 8px 20px -4px rgba(22, 163, 74, 0.2);
 }
 
-.dashboard-header h1 {
-  font-size: 2.25rem;
+.brand-portal-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.portal-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--primary);
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.15);
+  animation: portalPulse 2.5s ease-in-out infinite;
+}
+
+@keyframes portalPulse {
+
+  0%,
+  100% {
+    box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.15);
+  }
+
+  50% {
+    box-shadow: 0 0 0 7px rgba(22, 163, 74, 0.08), 0 0 14px rgba(22, 163, 74, 0.12);
+  }
+}
+
+.portal-text {
+  font-size: 0.85rem;
   font-weight: 800;
-  margin: 0;
-  letter-spacing: -0.03em;
+  color: var(--primary);
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  line-height: 1;
 }
 
 .subtitle {
   color: var(--muted);
   font-size: 1rem;
-  margin-top: 0.5rem;
+  margin-top: 0.75rem;
+  opacity: 0.8;
 }
 
 .refresh-btn {

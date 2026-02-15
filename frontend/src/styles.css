@@ -222,6 +222,341 @@ body {
   }
 }
 
+@keyframes logoFloatComplex {
+
+  0%,
+  100% {
+    transform: translateY(0) rotate(0);
+  }
+
+  25% {
+    transform: translateY(-8px) rotate(2deg);
+  }
+
+  50% {
+    transform: translateY(-4px) rotate(-2deg);
+  }
+
+  75% {
+    transform: translateY(-10px) rotate(1deg);
+  }
+}
+
+@keyframes logoInnerPulse {
+
+  0%,
+  100% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 0 rgba(22, 163, 74, 0));
+  }
+
+  50% {
+    transform: scale(1.08);
+    filter: drop-shadow(0 0 15px rgba(22, 163, 74, 0.4));
+  }
+}
+
+@keyframes logoRingRotate {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ═══════════════════════════════════════════
+   Animated Gradient Border - Logo Circular
+   ═══════════════════════════════════════════ */
+
+@property --border-angle {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+
+@keyframes borderSpin {
+  to {
+    --border-angle: 360deg;
+  }
+}
+
+@keyframes glowPulse {
+
+  0%,
+  100% {
+    box-shadow:
+      0 0 15px rgba(22, 163, 74, 0.15),
+      0 0 30px rgba(22, 163, 74, 0.05);
+  }
+
+  50% {
+    box-shadow:
+      0 0 25px rgba(22, 163, 74, 0.3),
+      0 0 50px rgba(22, 163, 74, 0.1),
+      0 0 80px rgba(22, 163, 74, 0.05);
+  }
+}
+
+@keyframes orbitDot {
+  from {
+    transform: rotate(0deg) translateX(60px) rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg) translateX(60px) rotate(-360deg);
+  }
+}
+
+@keyframes orbitDotSm {
+  from {
+    transform: rotate(0deg) translateX(32px) rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg) translateX(32px) rotate(-360deg);
+  }
+}
+
+.logo-circular {
+  --size: 110px;
+  width: var(--size);
+  height: var(--size);
+  border-radius: 50%;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: visible;
+  background: var(--surface, #fff);
+  border: none;
+  transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+    box-shadow 0.5s ease;
+  animation: glowPulse 4s ease-in-out infinite;
+}
+
+/* Animated conic-gradient border ring */
+.logo-circular::before {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  padding: 4px;
+  background: conic-gradient(from var(--border-angle),
+      #16a34a 0%,
+      #10b981 25%,
+      #34d399 40%,
+      #6ee7b7 50%,
+      #34d399 60%,
+      #10b981 75%,
+      #16a34a 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: borderSpin 3s linear infinite;
+  z-index: -1;
+}
+
+/* Outer dashed orbit ring */
+.logo-circular::after {
+  content: '';
+  position: absolute;
+  inset: -20px;
+  border: 1.5px dashed rgba(22, 163, 74, 0.2);
+  border-radius: 50%;
+  animation: logoRingRotate 25s linear infinite reverse;
+  pointer-events: none;
+}
+
+/* Orbiting dot */
+.logo-circular .orbit-dot,
+.logo-circular+.orbit-dot-pseudo {
+  display: none;
+}
+
+.logo-circular img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  animation: logoInnerPulse 4s infinite ease-in-out;
+  filter: drop-shadow(0 2px 8px rgba(22, 163, 74, 0.15));
+}
+
+.logo-circular:hover {
+  transform: scale(1.12) rotate(8deg);
+  box-shadow:
+    0 0 30px rgba(22, 163, 74, 0.35),
+    0 0 60px rgba(22, 163, 74, 0.15),
+    0 15px 40px rgba(0, 0, 0, 0.1);
+}
+
+.logo-circular:hover::before {
+  animation-duration: 1.2s;
+}
+
+/* ═══════════════════════════════════════════
+   Small Circular Logo for Sidebars
+   ═══════════════════════════════════════════ */
+
+.logo-circular-sm {
+  --size-sm: 54px;
+  width: var(--size-sm);
+  height: var(--size-sm);
+  border-radius: 50%;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: visible;
+  background: var(--surface, #fff);
+  border: none;
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+    box-shadow 0.4s ease;
+  animation: glowPulse 5s ease-in-out infinite;
+}
+
+.logo-circular-sm::before {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  padding: 3px;
+  background: conic-gradient(from var(--border-angle),
+      #16a34a 0%,
+      #10b981 25%,
+      #6ee7b7 50%,
+      #10b981 75%,
+      #16a34a 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: borderSpin 4s linear infinite;
+  z-index: -1;
+}
+
+.logo-circular-sm img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  animation: logoInnerPulse 4s infinite ease-in-out;
+  filter: drop-shadow(0 1px 4px rgba(22, 163, 74, 0.15));
+}
+
+.logo-circular-sm:hover {
+  transform: scale(1.15) rotate(10deg);
+  box-shadow:
+    0 0 20px rgba(22, 163, 74, 0.3),
+    0 0 40px rgba(22, 163, 74, 0.1);
+}
+
+.logo-circular-sm:hover::before {
+  animation-duration: 1s;
+}
+
+/* ═══════════════════════════════════════════
+   Hero Image Animated Border
+   ═══════════════════════════════════════════ */
+
+.hero-image-frame {
+  position: relative;
+  border-radius: 1.5rem;
+  overflow: visible;
+  transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.hero-image-frame::before {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 1.75rem;
+  padding: 4px;
+  background: conic-gradient(from var(--border-angle),
+      #16a34a 0%,
+      #10b981 15%,
+      #34d399 30%,
+      #a7f3d0 45%,
+      #6ee7b7 55%,
+      #34d399 70%,
+      #10b981 85%,
+      #16a34a 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: borderSpin 4s linear infinite;
+  z-index: 0;
+}
+
+.hero-image-frame::after {
+  content: '';
+  position: absolute;
+  inset: -12px;
+  border-radius: 2rem;
+  border: 1.5px dashed rgba(22, 163, 74, 0.15);
+  animation: logoRingRotate 30s linear infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.hero-image-frame>* {
+  position: relative;
+  z-index: 1;
+}
+
+.hero-image-frame:hover {
+  transform: translateY(-6px);
+}
+
+.hero-image-frame:hover::before {
+  animation-duration: 1.5s;
+}
+
+/* ═══════════════════════════════════════════
+   Brand Logo Animated Wrapper (Sidebars)
+   ═══════════════════════════════════════════ */
+
+.brand-logo-animated {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  border-radius: 14px;
+  overflow: visible;
+}
+
+.brand-logo-animated::before {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: 16px;
+  padding: 3px;
+  background: conic-gradient(from var(--border-angle),
+      #16a34a,
+      #10b981,
+      #6ee7b7,
+      #10b981,
+      #16a34a);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: borderSpin 5s linear infinite;
+  z-index: -1;
+  opacity: 0.7;
+  transition: opacity 0.3s ease;
+}
+
+.brand-logo-animated:hover::before {
+  opacity: 1;
+  animation-duration: 1.5s;
+}
+
 /* Global Transitions - limited to theme-critical properties */
 .dark body,
 .dark .card,

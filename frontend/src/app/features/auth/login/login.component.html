@@ -1,14 +1,6 @@
 <div class="auth-container">
   <div class="auth-wrapper">
-    <div class="auth-header text-center">
-      <div class="logo-container">
-        <div class="logo-icon">
-          <img src="assets/images/QuickMed-Logo.png" alt="QuickMed logo" class="logo-img" />
-        </div>
-        <h1 class="logo-text">QuickMed</h1>
-      </div>
-      <p class="portal-label">Sign in to your account</p>
-    </div>
+
 
     <div class="auth-card">
       <div class="auth-card-header">
@@ -27,14 +19,9 @@
           <label for="email" class="form-label">
             <i class="bi bi-envelope me-2"></i>Email Address
           </label>
-          <input
-            type="email"
-            class="form-control"
-            id="email"
-            formControlName="email"
+          <input type="email" class="form-control" id="email" formControlName="email"
             placeholder="your.email@example.com"
-            [class.is-invalid]="loginForm.get('email')?.invalid && loginForm.get('email')?.touched"
-          />
+            [class.is-invalid]="loginForm.get('email')?.invalid && loginForm.get('email')?.touched" />
           <div class="invalid-feedback" *ngIf="loginForm.get('email')?.invalid && loginForm.get('email')?.touched">
             Please enter a valid email address
           </div>
@@ -45,24 +32,15 @@
             <i class="bi bi-lock me-2"></i>Password
           </label>
           <div class="password-input-wrapper">
-            <input
-              [type]="showPassword ? 'text' : 'password'"
-              class="form-control"
-              id="password"
-              formControlName="password"
-              placeholder="••••••••"
-              [class.is-invalid]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched"
-            />
-            <button
-              type="button"
-              class="password-toggle-btn"
-              (click)="togglePasswordVisibility()"
-              tabindex="-1"
-            >
+            <input [type]="showPassword ? 'text' : 'password'" class="form-control" id="password"
+              formControlName="password" placeholder="••••••••"
+              [class.is-invalid]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched" />
+            <button type="button" class="password-toggle-btn" (click)="togglePasswordVisibility()" tabindex="-1">
               <i [class]="showPassword ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
             </button>
           </div>
-          <div class="invalid-feedback" *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched">
+          <div class="invalid-feedback"
+            *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched">
             Password must be at least 6 characters
           </div>
         </div>
