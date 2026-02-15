@@ -42,7 +42,7 @@ export class DoctorSidebarComponent implements OnInit {
 
   onLogoClick(event: Event) {
     event.preventDefault();
-    this.router.navigate(['/doctor/dashboard']);
+    this.router.navigate(['/']);
   }
 
   loadBadges(): void {

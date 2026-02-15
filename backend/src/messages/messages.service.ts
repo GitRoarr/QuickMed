@@ -221,5 +221,21 @@ export class MessagesService {
     await this.messagesRepository.delete({ conversationId });
     await this.conversationsRepository.delete(conversationId);
   }
+
+  async deleteMessage(messageId: string, user: Pick<User, 'id' | 'role'>): Promise<Message> {
+    const message = await this.messagesRepository.findOne({ where: { id: messageId } });
+
+    if (!message) {
+      throw new NotFoundException('Message not found');
+    }
+
+    // Only sender can delete for everyone
+    if (message.senderId !== user.id) {
+      throw new ForbiddenException('You can only delete your own messages');
+    }
+
+    await this.messagesRepository.delete(messageId);
+    return message;
+  }
 }
 

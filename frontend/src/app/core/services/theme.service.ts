@@ -4,72 +4,36 @@ import { Injectable, signal, computed } from "@angular/core"
   providedIn: "root",
 })
 export class ThemeService {
-  isDarkMode = signal<boolean>(false)
-  isDark = computed(() => this.isDarkMode())
+  isDarkMode = signal<boolean>(false);
+  isDark = computed(() => this.isDarkMode());
 
   constructor() {
-    const savedTheme = localStorage.getItem("theme")
+    const savedTheme = localStorage.getItem("theme");
     if (savedTheme === "dark") {
-      this.isDarkMode.set(true)
-      // keep existing class for other logic
-      document.documentElement.classList.add("dark-theme")
-      // also add `dark` on documentElement so :root.dark rules apply
-      try {
-        document.documentElement.classList.add("dark")
-      } catch (e) { }
-      // also add `dark` on body so component-level CSS targeting `body.dark` applies
-      try {
-        document.body.classList.add("dark")
-      } catch (e) {
-        // ignore in non-browser environments
-      }
-    }
-  }
-
-  setTheme(mode: 'light' | 'dark'): void {
-    this.isDarkMode.set(mode === 'dark')
-    if (mode === 'dark') {
-      document.documentElement.classList.add('dark-theme')
-      try {
-        document.documentElement.classList.add('dark')
-      } catch (e) { }
-      try {
-        document.body.classList.add('dark')
-      } catch (e) { }
-      localStorage.setItem('theme', 'dark')
+      this.setTheme('dark');
     } else {
-      document.documentElement.classList.remove('dark-theme')
-      try {
-        document.documentElement.classList.remove('dark')
-      } catch (e) { }
-      try {
-        document.body.classList.remove('dark')
-      } catch (e) { }
-      localStorage.setItem('theme', 'light')
+      this.setTheme('light');
     }
   }
 
   toggleTheme(): void {
-    this.isDarkMode.update((value) => !value)
+    const isDark = !this.isDarkMode();
+    this.setTheme(isDark ? 'dark' : 'light');
+  }
 
-    if (this.isDarkMode()) {
-      document.documentElement.classList.add("dark-theme")
-      try {
-        document.documentElement.classList.add("dark")
-      } catch (e) { }
-      try {
-        document.body.classList.add("dark")
-      } catch (e) { }
-      localStorage.setItem("theme", "dark")
+  setTheme(theme: 'dark' | 'light'): void {
+    this.isDarkMode.set(theme === 'dark');
+    const root = document.documentElement;
+    const body = document.body;
+
+    if (theme === 'dark') {
+      root.classList.add('dark');
+      body.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
     } else {
-      document.documentElement.classList.remove("dark-theme")
-      try {
-        document.documentElement.classList.remove("dark")
-      } catch (e) { }
-      try {
-        document.body.classList.remove("dark")
-      } catch (e) { }
-      localStorage.setItem("theme", "light")
+      root.classList.remove('dark');
+      body.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
     }
   }
 }

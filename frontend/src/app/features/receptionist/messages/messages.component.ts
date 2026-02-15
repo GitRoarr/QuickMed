@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy, inject, signal, computed, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { HeaderComponent } from '@app/features/admin/shared/header';
 import { SidebarComponent } from '@app/features/admin/shared/sidebar';
 import { ReceptionistService } from '@app/core/services/receptionist.service';
@@ -32,6 +33,7 @@ export class ReceptionistMessagesComponent implements OnInit, OnDestroy {
   private readonly doctorService = inject(DoctorService);
   private readonly wsService = inject(WebSocketService);
   authService = inject(AuthService);
+  private readonly router = inject(Router);
 
   private subscriptions = new Subscription();
 
@@ -41,10 +43,12 @@ export class ReceptionistMessagesComponent implements OnInit, OnDestroy {
     { label: 'Patients', icon: 'bi-people', route: '/receptionist/patients' },
     { label: 'Messages', icon: 'bi-chat-dots', route: '/receptionist/messages' },
     { label: 'Payments', icon: 'bi-cash-stack', route: '/receptionist/payments' },
-    { label: 'Doctors',
+    {
+      label: 'Doctors',
       iconImgLight: 'https://img.icons8.com/?size=100&id=60999&format=png&color=000000',
       iconImgDark: 'https://img.icons8.com/?size=100&id=60999&format=png&color=4e91fd',
-      route: '/receptionist/doctors' },
+      route: '/receptionist/doctors'
+    },
     { label: 'Reports', icon: 'bi-bar-chart', route: '/receptionist/reports' },
   ];
 
@@ -117,7 +121,10 @@ export class ReceptionistMessagesComponent implements OnInit, OnDestroy {
         if (msg.conversationId === this.selectedThread()?.id ||
           msg.senderId === this.selectedReceiverId() ||
           msg.receiverId === this.selectedReceiverId()) {
-          this.messages.update(prev => [...prev, msg]);
+          this.messages.update(prev => {
+            const exists = prev.some(m => m.id === msg.id);
+            return exists ? prev : [...prev, msg];
+          });
         }
         this.loadThreads();
       })
@@ -127,6 +134,15 @@ export class ReceptionistMessagesComponent implements OnInit, OnDestroy {
       this.wsService.typing$.subscribe(data => {
         if (data.userId === this.selectedReceiverId()) {
           this.otherUserTyping.set(data.isTyping);
+        }
+      })
+    );
+
+    this.subscriptions.add(
+      this.wsService.messageDeleted$.subscribe(data => {
+        if (!data) return;
+        if (data.conversationId === this.selectedThread()?.id) {
+          this.messages.update(prev => prev.filter(m => m.id !== data.messageId));
         }
       })
     );
@@ -171,7 +187,7 @@ export class ReceptionistMessagesComponent implements OnInit, OnDestroy {
       this.wsService.joinConversation(thread.id);
     }
   }
-  
+
 
   deselectThread(): void {
     this.selectedReceiverId.set('');
@@ -215,6 +231,14 @@ export class ReceptionistMessagesComponent implements OnInit, OnDestroy {
     this.draft.set('');
     this.showEmojiPicker.set(false);
     this.showGifPicker.set(false);
+  }
+
+  deleteMessage(messageId: string, event: MouseEvent): void {
+    event.stopPropagation();
+    if (!messageId) return;
+    this.wsService.deleteMessage(messageId);
+    // Optimistic update
+    this.messages.update(msgs => msgs.filter(m => m.id !== messageId));
   }
 
   emitTyping(): void {
@@ -264,6 +288,24 @@ export class ReceptionistMessagesComponent implements OnInit, OnDestroy {
   selectGif(gif: any): void {
     this.draft.set(`![gif](${gif.url})`);
     this.send();
+  }
+
+  startCall(): void {
+    const threadId = this.selectedThread()?.id;
+    if (!threadId) return;
+    this.router.navigate(['/call', threadId]);
+  }
+
+  triggerFileSelect(): void {
+    const fileInput = document.getElementById('message-file-input') as HTMLInputElement;
+    fileInput?.click();
+  }
+
+  onFileSelected(event: any): void {
+    const file = event.target.files?.[0];
+    if (file) {
+      alert(`File "${file.name}" selected for upload.`);
+    }
   }
 
   scrollToBottom(): void {

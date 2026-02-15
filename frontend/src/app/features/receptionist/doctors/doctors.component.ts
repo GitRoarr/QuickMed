@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -25,7 +25,13 @@ export class ReceptionistDoctorsComponent implements OnInit {
     { label: 'Patients', icon: 'bi-people', route: '/receptionist/patients' },
     { label: 'Messages', icon: 'bi-chat-dots', route: '/receptionist/messages' },
     { label: 'Payments', icon: 'bi-cash-stack', route: '/receptionist/payments' },
-    { label: 'Doctors', icon: 'bi-stethoscope', route: '/receptionist/doctors' },
+    {
+      label: 'Doctors',
+      iconImgLight: 'https://img.icons8.com/?size=100&id=60999&format=png&color=000000',
+      iconImgDark: 'https://img.icons8.com/?size=100&id=60999&format=png&color=000000',
+      route: '/receptionist/doctors'
+    },
+
     { label: 'Reports', icon: 'bi-bar-chart', route: '/receptionist/reports' },
   ];
 
@@ -35,8 +41,22 @@ export class ReceptionistDoctorsComponent implements OnInit {
   ];
 
   dateFilter = signal(new Date().toISOString().split('T')[0]);
+  searchQuery = signal('');
   doctors = signal<any[]>([]);
   loading = signal(false);
+
+  filteredDoctors = computed(() => {
+    const query = this.searchQuery().toLowerCase().trim();
+    const allDoctors = this.doctors();
+
+    if (!query) return allDoctors;
+
+    return allDoctors.filter(doc =>
+      doc.name.toLowerCase().includes(query) ||
+      (doc.specialty && doc.specialty.toLowerCase().includes(query))
+    );
+  });
+
 
   ngOnInit(): void {
     this.loadAvailability();

@@ -58,7 +58,36 @@
   padding: 0.6rem 0.85rem;
   background: var(--bg);
   color: var(--fg);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
+
+.hero-actions input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.1);
+}
+
+.search-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 280px;
+}
+
+.search-input-wrapper i {
+  position: absolute;
+  left: 1rem;
+  color: var(--muted);
+  font-size: 0.9rem;
+  pointer-events: none;
+}
+
+.search-input-wrapper input {
+  width: 100%;
+  padding-left: 2.75rem !important;
+}
+
 
 .cards {
   display: grid;

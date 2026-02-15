@@ -21,7 +21,7 @@
     <!-- Stats Cards - Backend Driven -->
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
       <div
-        class="bg-[var(--surface-primary)] rounded-2xl p-5 shadow-sm border border-[var(--border-color)] hover:shadow-md hover:border-[var(--primary)]/20 transition-all duration-300 group cursor-default">
+        class="bg-[var(--surface)] rounded-2xl p-5 shadow-sm hover:shadow-xl hover:translate-y-[-4px] transition-all duration-300 group cursor-default">
         <div class="flex items-center gap-3 mb-3">
           <div
             class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
@@ -32,7 +32,7 @@
         <p class="text-sm text-[var(--text-secondary)]">Total Prescriptions</p>
       </div>
       <div
-        class="bg-[var(--surface-primary)] rounded-2xl p-5 shadow-sm border border-[var(--border-color)] hover:shadow-md hover:border-[#1DB954]/20 transition-all duration-300 group cursor-default">
+        class="bg-[var(--surface)] rounded-2xl p-5 shadow-sm hover:shadow-xl hover:translate-y-[-4px] transition-all duration-300 group cursor-default">
         <div class="flex items-center gap-3 mb-3">
           <div
             class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#1DB954] to-emerald-600 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
@@ -43,7 +43,7 @@
         <p class="text-sm text-[var(--text-secondary)]">Active</p>
       </div>
       <div
-        class="bg-[var(--surface-primary)] rounded-2xl p-5 shadow-sm border border-[var(--border-color)] hover:shadow-md hover:border-[#1DB954]/20 transition-all duration-300 group cursor-default">
+        class="bg-[var(--surface)] rounded-2xl p-5 shadow-sm hover:shadow-xl hover:translate-y-[-4px] transition-all duration-300 group cursor-default">
         <div class="flex items-center gap-3 mb-3">
           <div
             class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#1DB954]/80 to-emerald-500/80 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
@@ -54,7 +54,7 @@
         <p class="text-sm text-[var(--text-secondary)]">Completed</p>
       </div>
       <div
-        class="bg-[var(--surface-primary)] rounded-2xl p-5 shadow-sm border border-[var(--border-color)] hover:shadow-md hover:border-[#1DB954]/20 transition-all duration-300 group cursor-default">
+        class="bg-[var(--surface)] rounded-2xl p-5 shadow-sm hover:shadow-xl hover:translate-y-[-4px] transition-all duration-300 group cursor-default">
         <div class="flex items-center gap-3 mb-3">
           <div
             class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#1DB954]/60 to-emerald-400/60 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
@@ -72,13 +72,13 @@
         <i class="bi bi-search absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]"></i>
         <input type="text" placeholder="Search by medication or patient..." [value]="searchQuery()"
           (input)="searchQuery.set($any($event.target).value); onSearchChange()"
-          class="w-full pl-11 pr-4 py-3.5 bg-[var(--surface-primary)] border border-[var(--border-color)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent transition-all" />
+          class="w-full pl-11 pr-4 py-3.5 bg-[var(--surface)] border border-transparent focus:border-[var(--primary)] shadow-sm rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent transition-all" />
       </div>
       <div class="flex gap-2 overflow-x-auto pb-2 lg:pb-0">
         <button *ngFor="let filter of statusFilters" (click)="setStatusFilter(filter.value)"
           class="px-4 py-2.5 rounded-xl font-medium whitespace-nowrap transition-all flex items-center gap-2" [ngClass]="activeFilter() === filter.value
             ? 'bg-[var(--primary)] text-white shadow-md shadow-emerald-500/20'
-            : 'bg-[var(--surface-primary)] hover:bg-[var(--surface-tertiary)] border border-[var(--border-color)]'">
+            : 'bg-[var(--surface)] hover:bg-[var(--surface-tertiary)] shadow-sm'">
           <i [class]="filter.icon" class="text-sm"></i>
           {{ filter.label }}
         </button>
@@ -87,8 +87,7 @@
 
     <!-- Loading State -->
     <div *ngIf="isLoading()" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-      <div *ngFor="let _ of [1,2,3,4,5,6]"
-        class="bg-[var(--surface-primary)] rounded-2xl p-6 animate-pulse border border-[var(--border-color)]">
+      <div *ngFor="let _ of [1,2,3,4,5,6]" class="bg-[var(--surface)] rounded-2xl p-6 animate-pulse shadow-sm">
         <div class="flex items-start gap-4 mb-4">
           <div class="w-12 h-12 bg-gray-200 dark:bg-gray-700 rounded-xl"></div>
           <div class="flex-1">
@@ -106,7 +105,7 @@
     <!-- Prescriptions Grid -->
     <div *ngIf="!isLoading()" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
       <div *ngFor="let p of filteredPrescriptions(); trackBy: trackById" [@fadeUp]
-        class="bg-[var(--surface-primary)] rounded-2xl shadow-sm hover:shadow-xl border border-[var(--border-color)] hover:border-[var(--primary)]/30 transition-all duration-300 overflow-hidden group cursor-pointer"
+        class="bg-[var(--surface)] rounded-2xl shadow-sm hover:shadow-2xl hover:translate-y-[-4px] transition-all duration-300 overflow-hidden group cursor-pointer"
         (click)="openDetailModal(p)">
 
         <!-- Card Header -->
@@ -137,7 +136,7 @@
         </div>
 
         <!-- Card Body -->
-        <div class="px-6 pb-4 space-y-2.5 border-t border-[var(--border-color)] pt-4">
+        <div class="px-6 pb-4 space-y-2.5 pt-4">
           <div class="flex items-center gap-3 text-sm">
             <div class="w-7 h-7 rounded-full bg-[var(--surface-secondary)] flex items-center justify-center">
               <i class="bi bi-person text-[var(--text-muted)] text-xs"></i>
@@ -189,8 +188,7 @@
 
       <!-- Empty State -->
       <div *ngIf="filteredPrescriptions().length === 0" class="col-span-full">
-        <div
-          class="flex flex-col items-center justify-center py-24 bg-[var(--surface-primary)] rounded-2xl border border-dashed border-[var(--border-color)]">
+        <div class="flex flex-col items-center justify-center py-24 bg-[var(--surface)] rounded-2xl shadow-sm">
           <div
             class="w-24 h-24 rounded-full bg-gradient-to-br from-emerald-100 to-teal-100 dark:from-emerald-900/30 dark:to-teal-900/30 flex items-center justify-center mb-6">
             <i class="bi bi-capsule text-4xl text-emerald-500"></i>
@@ -218,7 +216,7 @@
     <div @backdropFade class="absolute inset-0 bg-slate-900/40 backdrop-blur-md"></div>
 
     <div @modalScale
-      class="relative bg-white dark:bg-[#121212] rounded-[2.5rem] shadow-[0_25px_70px_-15px_rgba(0,0,0,0.4)] w-full max-w-2xl max-h-[90vh] overflow-hidden border border-white/20 dark:border-white/10 flex flex-col modal-container"
+      class="relative bg-white dark:bg-[var(--surface)] rounded-[2.5rem] shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden border border-[var(--border)] flex flex-col modal-container"
       (click)="$event.stopPropagation()">
 
       <div class="p-8 pb-6 flex items-start justify-between relative overflow-hidden">

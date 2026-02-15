@@ -39,18 +39,19 @@
             </ng-template>
           </div>
           <span class="availability" [class.available]="doctor.available">
-            {{ doctor.available ? 'Available Today' : (doctor.nextAvailableDate ? ('Next: ' + (doctor.nextAvailableDate | date:'MMM d')) : 'Unavailable') }}
+            {{ doctor.available ? 'Available Today' : (doctor.nextAvailableDate ? ('Next: ' + (doctor.nextAvailableDate
+            | date:'MMM d')) : 'Unavailable') }}
           </span>
         </div>
 
         <div class="card-body">
           <h3>Dr. {{ doctor.firstName }} {{ doctor.lastName }}</h3>
-          <p class="muted">{{ doctor.specialty }}</p>
 
           <div class="tag-row">
             <span class="tag">{{ doctor.specialty || 'General' }}</span>
             <span class="tag ghost">{{ doctor.experience || 0 }}+ yrs</span>
-            <span class="tag ghost" *ngIf="doctor.nextAvailableDate">Next: {{ doctor.nextAvailableDate | date:'EEE, MMM d' }}</span>
+            <span class="tag ghost" *ngIf="doctor.nextAvailableDate">Next: {{ doctor.nextAvailableDate | date:'EEE, MMM
+              d' }}</span>
           </div>
 
           <div class="rating">
@@ -59,7 +60,6 @@
             </span>
             <span class="rating-text">
               {{ doctor.rating || 0 }} ({{ doctor.ratingCount || 0 }})
-              · {{ doctor.experience || 0 }}+ years
             </span>
           </div>
 

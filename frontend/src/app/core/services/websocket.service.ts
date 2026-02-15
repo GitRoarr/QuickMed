@@ -17,11 +17,13 @@ export class WebSocketService {
   private notificationSubject = new Subject<any>();
   private typingSubject = new Subject<any>();
   private conversationUpdatedSubject = new Subject<any>();
+  private messageDeletedSubject = new Subject<any>();
 
   public messages$ = this.messageSubject.asObservable();
   public notifications$ = this.notificationSubject.asObservable();
   public typing$ = this.typingSubject.asObservable();
   public conversationUpdated$ = this.conversationUpdatedSubject.asObservable();
+  public messageDeleted$ = this.messageDeletedSubject.asObservable();
 
   constructor(private authService: AuthService) { }
 
@@ -70,6 +72,10 @@ export class WebSocketService {
 
     this.messagesSocket.on('userTyping', (data: any) => {
       this.typingSubject.next(data);
+    });
+
+    this.messagesSocket.on('messageDeleted', (data: any) => {
+      this.messageDeletedSubject.next(data);
     });
 
     this.messagesSocket.on('error', (error: any) => {
@@ -148,6 +154,12 @@ export class WebSocketService {
   sendTyping(conversationId: string, isTyping: boolean): void {
     if (this.messagesSocket && this.isMessagesConnected) {
       this.messagesSocket.emit('typing', { conversationId, isTyping });
+    }
+  }
+
+  deleteMessage(messageId: string): void {
+    if (this.messagesSocket && this.isMessagesConnected) {
+      this.messagesSocket.emit('deleteMessage', { messageId });
     }
   }
 

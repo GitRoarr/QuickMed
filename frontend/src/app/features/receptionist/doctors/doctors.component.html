@@ -11,6 +11,11 @@
           <p class="muted">Match patients to live availability and keep schedules aligned.</p>
         </div>
         <div class="hero-actions">
+          <div class="search-input-wrapper">
+            <i class="bi bi-search"></i>
+            <input type="text" [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event)"
+              placeholder="Search doctor or specialty..." />
+          </div>
           <label>
             <span>Date</span>
             <input type="date" [ngModel]="dateFilter()" (ngModelChange)="dateFilter.set($event); loadAvailability()" />
@@ -20,10 +25,11 @@
             Refresh
           </button>
         </div>
+
       </section>
 
-      <section class="cards" *ngIf="doctors().length; else empty">
-        <article class="doc-card" *ngFor="let doc of doctors()">
+      <section class="cards" *ngIf="filteredDoctors().length; else empty">
+        <article class="doc-card" *ngFor="let doc of filteredDoctors()">
           <div class="doc-main">
             <div class="doc-info-group">
               <div class="doc-header">

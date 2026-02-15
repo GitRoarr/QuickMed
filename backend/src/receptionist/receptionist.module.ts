@@ -35,6 +35,8 @@ import { MessagesModule } from '../messages/messages.module';
     SchedulesModule,
     forwardRef(() => AdminModule),
     MessagesModule,
+    AppointmentsModule,
+    UsersModule,
   ],
   controllers: [ReceptionistController],
   providers: [ReceptionistService],

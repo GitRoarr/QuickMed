@@ -20,7 +20,7 @@ export class MessagesGateway implements OnGatewayConnection, OnGatewayDisconnect
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
     private readonly messagesService: MessagesService,
-  ) {}
+  ) { }
 
   async handleConnection(client: Socket) {
     try {
@@ -118,6 +118,24 @@ export class MessagesGateway implements OnGatewayConnection, OnGatewayDisconnect
       conversationId: payload.conversationId,
       isTyping: payload.isTyping,
     });
+  }
+
+  @SubscribeMessage('deleteMessage')
+  async handleDeleteMessage(client: Socket, payload: { messageId: string }) {
+    const user = client.data.user as { id: string; role: UserRole } | undefined;
+    if (!user || !payload?.messageId) return;
+
+    try {
+      const message = await this.messagesService.deleteMessage(payload.messageId, user);
+      if (message) {
+        this.server.to(message.conversationId).emit('messageDeleted', {
+          messageId: payload.messageId,
+          conversationId: message.conversationId,
+        });
+      }
+    } catch (error) {
+      client.emit('error', { message: 'Failed to delete message', error: error.message });
+    }
   }
 
   private extractToken(client: Socket): string | undefined {

@@ -16,7 +16,7 @@
     <!-- Stats Cards -->
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
       <div
-        class="bg-[var(--surface-primary)] rounded-2xl p-5 shadow-sm border border-[var(--border-color)] hover:shadow-md hover:border-[var(--primary)]/20 transition-all duration-300 group cursor-default">
+        class="bg-[var(--surface)] rounded-2xl p-5 shadow-sm hover:shadow-xl hover:translate-y-[-4px] transition-all duration-300 group cursor-default">
         <div class="flex items-center gap-3 mb-3">
           <div
             class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
@@ -27,7 +27,7 @@
         <p class="text-sm text-[var(--text-secondary)]">Active Patients</p>
       </div>
       <div
-        class="bg-[var(--surface-primary)] rounded-2xl p-5 shadow-sm border border-[var(--border-color)] hover:shadow-md hover:border-blue-400/20 transition-all duration-300 group cursor-default">
+        class="bg-[var(--surface)] rounded-2xl p-5 shadow-sm hover:shadow-xl hover:translate-y-[-4px] transition-all duration-300 group cursor-default">
         <div class="flex items-center gap-3 mb-3">
           <div
             class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
@@ -38,7 +38,7 @@
         <p class="text-sm text-[var(--text-secondary)]">New This Week</p>
       </div>
       <div
-        class="bg-[var(--surface-primary)] rounded-2xl p-5 shadow-sm border border-[var(--border-color)] hover:shadow-md hover:border-amber-400/20 transition-all duration-300 group cursor-default">
+        class="bg-[var(--surface)] rounded-2xl p-5 shadow-sm hover:shadow-xl hover:translate-y-[-4px] transition-all duration-300 group cursor-default">
         <div class="flex items-center gap-3 mb-3">
           <div
             class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
@@ -49,7 +49,7 @@
         <p class="text-sm text-[var(--text-secondary)]">Follow-ups Due</p>
       </div>
       <div
-        class="bg-[var(--surface-primary)] rounded-2xl p-5 shadow-sm border border-[var(--border-color)] hover:shadow-md hover:border-purple-400/20 transition-all duration-300 group cursor-default">
+        class="bg-[var(--surface)] rounded-2xl p-5 shadow-sm hover:shadow-xl hover:translate-y-[-4px] transition-all duration-300 group cursor-default">
         <div class="flex items-center gap-3 mb-3">
           <div
             class="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-violet-600 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
@@ -67,13 +67,13 @@
         <i class="bi bi-search absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]"></i>
         <input type="text" placeholder="Search by name, phone, condition..." [ngModel]="searchTerm()"
           (ngModelChange)="searchTerm.set($event)"
-          class="w-full pl-11 pr-4 py-3.5 bg-[var(--surface-primary)] border border-[var(--border-color)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent transition-all" />
+          class="w-full pl-11 pr-4 py-3.5 bg-[var(--surface)] border border-transparent focus:border-[var(--primary)] shadow-sm rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent transition-all" />
       </div>
       <div class="flex gap-2 overflow-x-auto pb-2 lg:pb-0">
         <button *ngFor="let pill of filterPills" type="button" (click)="statusFilter.set(pill.value)"
           class="px-4 py-2.5 rounded-xl font-medium whitespace-nowrap transition-all flex items-center gap-2" [ngClass]="statusFilter() === pill.value
             ? 'bg-[var(--primary)] text-white shadow-md shadow-emerald-500/20'
-            : 'bg-[var(--surface-primary)] hover:bg-[var(--surface-tertiary)] border border-[var(--border-color)]'">
+            : 'bg-[var(--surface)] hover:bg-[var(--surface-tertiary)] shadow-sm'">
           <i [class]="pill.icon" class="text-sm"></i>
           {{ pill.label }}
         </button>
@@ -82,8 +82,7 @@
 
     <!-- Loading State -->
     <div *ngIf="isLoading()" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-      <div *ngFor="let _ of [1,2,3,4,5,6]"
-        class="bg-[var(--surface-primary)] rounded-2xl p-6 animate-pulse border border-[var(--border-color)]">
+      <div *ngFor="let _ of [1,2,3,4,5,6]" class="bg-[var(--surface)] rounded-2xl p-6 animate-pulse shadow-sm">
         <div class="flex items-start gap-4 mb-5">
           <div class="w-14 h-14 bg-gray-200 dark:bg-gray-700 rounded-xl"></div>
           <div class="flex-1">
@@ -106,7 +105,7 @@
 
     <!-- Empty State -->
     <div *ngIf="!isLoading() && filteredPatients().length === 0"
-      class="flex flex-col items-center justify-center py-24 bg-[var(--surface-primary)] rounded-2xl border border-dashed border-[var(--border-color)]">
+      class="flex flex-col items-center justify-center py-24 bg-[var(--surface)] rounded-2xl shadow-sm">
       <div
         class="w-24 h-24 rounded-full bg-gradient-to-br from-emerald-100 to-teal-100 dark:from-emerald-900/30 dark:to-teal-900/30 flex items-center justify-center mb-6">
         <i class="bi bi-people text-4xl text-emerald-500"></i>
@@ -122,7 +121,7 @@
     <div *ngIf="!isLoading() && filteredPatients().length > 0"
       class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
       <div *ngFor="let p of filteredPatients()"
-        class="bg-[var(--surface-primary)] rounded-2xl shadow-sm hover:shadow-xl border border-[var(--border-color)] hover:border-[var(--primary)]/30 transition-all duration-300 overflow-hidden group cursor-pointer"
+        class="bg-[var(--surface)] rounded-2xl shadow-sm hover:shadow-2xl hover:translate-y-[-4px] transition-all duration-300 overflow-hidden group cursor-pointer"
         (click)="viewPatientDetail(p)">
 
         <!-- Patient Header -->
@@ -149,7 +148,7 @@
         </div>
 
         <!-- Patient Stats -->
-        <div class="px-6 pb-4 grid grid-cols-3 gap-3 border-t border-[var(--border-color)] pt-4">
+        <div class="px-6 pb-4 grid grid-cols-3 gap-3 pt-4">
           <div class="bg-[var(--surface-secondary)] rounded-xl p-3 text-center">
             <p class="text-xs text-[var(--text-muted)] uppercase tracking-wider mb-0.5">Last Seen</p>
             <p class="font-bold text-sm text-[var(--text-primary)]">{{ formatLastSeen(p) }}</p>

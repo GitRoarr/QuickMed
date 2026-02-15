@@ -15,7 +15,7 @@ interface MessagePayload {
 export class MessagesSocketService implements OnDestroy {
   private socket?: Socket;
 
-  constructor(private readonly authService: AuthService) {}
+  constructor(private readonly authService: AuthService) { }
 
   connect(): void {
     if (this.socket || !this.authService.getToken()) {
@@ -41,6 +41,10 @@ export class MessagesSocketService implements OnDestroy {
     this.socket?.emit('sendMessage', payload);
   }
 
+  deleteMessage(messageId: string): void {
+    this.socket?.emit('deleteMessage', { messageId });
+  }
+
   onMessage(handler: (message: any) => void): void {
     this.socket?.on('message', handler);
   }
@@ -55,6 +59,14 @@ export class MessagesSocketService implements OnDestroy {
 
   offConversationUpdated(handler: (event: { conversationId: string }) => void): void {
     this.socket?.off('conversationUpdated', handler);
+  }
+
+  onMessageDeleted(handler: (event: { messageId: string; conversationId: string }) => void): void {
+    this.socket?.on('messageDeleted', handler);
+  }
+
+  offMessageDeleted(handler: (event: { messageId: string; conversationId: string }) => void): void {
+    this.socket?.off('messageDeleted', handler);
   }
 
   ngOnDestroy(): void {

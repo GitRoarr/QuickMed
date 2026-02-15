@@ -91,6 +91,10 @@ export class MessageService {
     return this.http.delete<void>(`${this.API_URL}/conversations/${conversationId}`);
   }
 
+  deleteMessage(messageId: string): Observable<void> {
+    return this.http.delete<void>(`${this.API_URL}/${messageId}`);
+  }
+
   createConversation(patientId: string): Observable<Conversation> {
     return this.http.post<Conversation>(`${this.API_URL}/conversations`, { patientId });
   }

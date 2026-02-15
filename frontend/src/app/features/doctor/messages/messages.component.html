@@ -1,152 +1,132 @@
-<div class="messages-shell flex-1 flex flex-col min-w-0">
+<div class="messages-shell">
   <app-doctor-header [initials]="getDoctorInitials()" [avatarUrl]="currentUser()?.avatar"
     [unreadNotifications]="unreadCount()"></app-doctor-header>
 
-  <div class="messages-layout flex-1 flex overflow-hidden relative">
+  <div class="messages-layout">
     <!-- Conversations List Panel -->
-    <div
-      class="messages-panel w-full md:w-96 lg:w-[420px] bg-[var(--surface-primary)] flex flex-col shadow-lg transition-all duration-300 md:flex"
-      [class.hidden]="selectedConversation() && isMobile()">
-      <div class="p-4 md:p-6">
-        <div class="flex items-center justify-between mb-4">
-          <div>
-            <h2 class="text-xl md:text-2xl font-bold">Messages</h2>
-            <p class="text-sm text-[var(--text-secondary)] mt-1">{{ unreadCount() }} unread message{{ unreadCount() !==
-              1 ? 's' : '' }}</p>
-          </div>
+    <div class="messages-panel w-full md:w-80 lg:w-[380px]" [class.hidden]="selectedConversation() && isMobile()">
+      <div class="messages-panel-header">
+        <div class="flex items-center justify-between mb-2">
+          <h2 class="text-2xl font-extrabold tracking-tight">Messages</h2>
           <button (click)="navigate('/doctor/patients')"
-            class="btn-primary px-3 md:px-4 py-2 bg-[var(--primary)] text-white rounded-xl font-medium hover:bg-[var(--primary-dark)] transition shadow-md flex items-center gap-2">
-            <i class="bi bi-plus-circle"></i>
-            <span class="hidden sm:inline">New Message</span>
-            <span class="sm:hidden">New</span>
+            class="w-10 h-10 rounded-xl bg-[var(--primary)] text-white flex items-center justify-center shadow-lg hover:scale-110 transition-transform active:scale-95"
+            title="New Message">
+            <i class="bi bi-pencil-square text-lg"></i>
           </button>
         </div>
+        <p class="text-sm text-[var(--text-secondary)] font-medium">
+          {{ unreadCount() }} unread message{{ unreadCount() !== 1 ? 's' : '' }}
+        </p>
 
-        <div class="relative">
-          <i class="bi bi-search absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]"></i>
+        <div class="search-wrapper">
           <input type="text" placeholder="Search conversations..." [value]="searchQuery()"
-            (input)="searchQuery.set($any($event.target).value); onSearchChange()"
-            class="w-full pl-11 pr-5 py-3 bg-[var(--surface-secondary)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)] transition shadow-sm input-glow" />
+            (input)="searchQuery.set($any($event.target).value); onSearchChange()" class="search-input" />
+          <i class="bi bi-search search-icon"></i>
         </div>
       </div>
 
-      <div class="flex-1 overflow-y-auto">
-        <div *ngIf="isLoading()" class="p-8 text-center">
-          <div
-            class="w-10 h-10 border-4 border-[var(--primary)] border-t-transparent rounded-full animate-spin mx-auto mb-4">
-          </div>
-          <p class="text-[var(--text-secondary)]">Loading conversations...</p>
+      <div class="conversations-scroll custom-scrollbar">
+        <div *ngIf="isLoading()" class="py-12 flex flex-col items-center">
+          <div class="w-10 h-10 border-4 border-[var(--primary)] border-t-transparent rounded-full animate-spin"></div>
+          <p class="mt-4 text-[var(--text-secondary)] font-medium">Loading...</p>
         </div>
 
-        <div *ngFor="let conversation of conversations(); let i = index"
-          class="convo-item px-4 py-3 hover:bg-[var(--surface-secondary)] transition cursor-pointer border-b border-[var(--border)]/30 last:border-0"
-          [ngClass]="{'bg-[var(--surface-tertiary)]': selectedConversation()?.id === conversation.id}"
+        <div *ngFor="let conversation of conversations(); let i = index" class="convo-item animate-fade-in-up"
+          [style.animation-delay]="(i * 0.05) + 's'"
           [class.convo-selected]="selectedConversation()?.id === conversation.id"
-          (click)="selectConversation(conversation)" [@fadeIn]="i">
-          <div class="flex items-center gap-3 md:gap-4">
-            <div
-              class="w-11 h-11 md:w-12 md:h-12 rounded-full bg-gradient-to-br from-[var(--primary)] to-emerald-600 flex items-center justify-center text-white font-bold text-base md:text-lg shadow-md flex-shrink-0">
+          (click)="selectConversation(conversation)">
+          <div class="convo-avatar-wrapper">
+            <div class="convo-avatar">
               {{ getPatientInitials(conversation) }}
             </div>
-            <div class="flex-1 min-w-0">
-              <div class="flex items-center justify-between">
-                <h3 class="font-semibold truncate text-sm md:text-base">{{ getPatientName(conversation) }}</h3>
-                <span class="text-xs text-[var(--text-secondary)] whitespace-nowrap ml-2">{{
-                  getTimeAgo(conversation.lastMessageAt) }}</span>
-              </div>
-              <div class="flex items-center justify-between mt-1">
-                <p class="text-xs md:text-sm text-[var(--text-secondary)] truncate flex-1 pr-2">
-                  {{ conversation.lastMessageContent || 'No messages yet' }}
-                </p>
-                <div *ngIf="conversation.unreadCount > 0"
-                  class="w-5 h-5 bg-red-500 text-white text-[10px] rounded-full flex items-center justify-center font-bold shadow-sm">
-                  {{ conversation.unreadCount }}
-                </div>
+            <div class="status-indicator"></div>
+          </div>
+          <div class="convo-info">
+            <div class="convo-name-row">
+              <span class="convo-name">{{ getPatientName(conversation) }}</span>
+              <span class="convo-time">{{ getTimeAgo(conversation.lastMessageAt) }}</span>
+            </div>
+            <div class="convo-msg-row">
+              <p class="convo-last-msg">
+                {{ conversation.lastMessageContent || 'No messages yet' }}
+              </p>
+              <div *ngIf="conversation.unreadCount > 0" class="unread-badge">
+                {{ conversation.unreadCount }}
               </div>
             </div>
           </div>
         </div>
 
-        <div *ngIf="!isLoading() && conversations().length === 0" class="p-12 text-center empty-state">
-          <i class="bi bi-chat-dots text-5xl text-[var(--text-muted)] mb-4 empty-illustration"></i>
-          <p class="text-lg font-medium text-[var(--text-secondary)]">No conversations yet</p>
-          <p class="text-sm text-[var(--text-secondary)] mt-2">Start a new message from Patients</p>
+        <div *ngIf="!isLoading() && conversations().length === 0" class="empty-chat py-12">
+          <i class="bi bi-chat-heart text-5xl text-[var(--text-muted)] opacity-50 mb-4"></i>
+          <p class="text-[var(--text-secondary)] font-medium">No conversations found</p>
         </div>
       </div>
     </div>
 
     <!-- Message Detail Panel -->
-    <div class="flex-1 flex flex-col bg-[var(--surface-primary)] md:flex"
-      [class.hidden]="!selectedConversation() && isMobile()">
-      <div *ngIf="!selectedConversation()" class="flex-1 items-center justify-center hidden md:flex">
-        <div class="text-center empty-state p-6">
-          <div
-            class="w-24 h-24 bg-[var(--surface-secondary)] rounded-full flex items-center justify-center mx-auto mb-6">
-            <i class="bi bi-chat-left-text text-4xl text-[var(--text-muted)]"></i>
-          </div>
-          <p class="text-xl font-bold text-[var(--fg)]">Select a conversation</p>
-          <p class="text-[var(--text-secondary)] mt-2">Choose a patient from the list to start chatting</p>
+    <div class="message-detail-panel" [class.hidden]="!selectedConversation() && isMobile()">
+      <!-- No Selected Conversation State -->
+      <div *ngIf="!selectedConversation()" class="empty-chat h-full">
+        <div class="empty-illustration">
+          <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="100" cy="100" r="80" fill="var(--primary-light)" />
+            <path
+              d="M140 70H60C54.5 70 50 74.5 50 80V120C50 125.5 54.5 130 60 130H110L140 150V130C145.5 130 150 125.5 150 120V80C150 74.5 145.5 70 140 70Z"
+              fill="var(--primary)" />
+            <circle cx="80" cy="100" r="4" fill="white" />
+            <circle cx="100" cy="100" r="4" fill="white" />
+            <circle cx="120" cy="100" r="4" fill="white" />
+          </svg>
         </div>
+        <h3 class="empty-title">Select a conversation</h3>
+        <p class="empty-subtitle">Choose a patient from the list to start a secure medical consultation chat.</p>
       </div>
 
-      <div *ngIf="selectedConversation()" class="flex flex-col h-full bg-[var(--surface-primary)]">
+      <ng-container *ngIf="selectedConversation()">
         <!-- Chat Header -->
-        <div
-          class="p-3 md:p-6 flex items-center justify-between border-b border-[var(--border)] bg-[var(--surface-primary)] z-10">
-          <div class="flex items-center gap-2.5 md:gap-4">
-            <!-- Back Button (visible on mobile) -->
+        <div class="chat-header">
+          <div class="chat-user-info">
             <button (click)="selectedConversation.set(null)"
-              class="md:hidden w-9 h-9 rounded-xl bg-[var(--surface-secondary)] flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--primary)] hover:bg-[var(--surface-tertiary)] transition-all active:scale-95">
-              <i class="bi bi-arrow-left text-lg"></i>
+              class="md:hidden w-10 h-10 rounded-xl bg-white/50 dark:bg-black/20 flex items-center justify-center mr-2">
+              <i class="bi bi-chevron-left"></i>
             </button>
-            <div
-              class="w-10 h-10 md:w-12 md:h-12 rounded-full bg-gradient-to-br from-[var(--primary)] to-emerald-600 flex items-center justify-center text-white font-bold text-sm md:text-lg shadow-lg">
+            <div class="chat-avatar">
               {{ getPatientInitials(selectedConversation()!) }}
             </div>
             <div>
-              <h3 class="text-sm md:text-lg font-bold text-[var(--fg)] truncate max-w-[140px] md:max-w-none">{{
-                getPatientName(selectedConversation()!) }}
-              </h3>
-              <div class="flex items-center gap-1.5">
-                <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
-                <p class="text-xs text-emerald-600 dark:text-emerald-400 font-medium">Online</p>
+              <h3 class="chat-user-name">{{ getPatientName(selectedConversation()!) }}</h3>
+              <div class="chat-status">
+                <span class="status-dot"></span>
+                <span>Active Now</span>
               </div>
             </div>
           </div>
-          <div class="header-actions flex gap-1 md:gap-2">
-            <button
-              class="icon-btn w-8 h-8 md:w-10 md:h-10 rounded-xl bg-[var(--surface-secondary)] hover:bg-[var(--surface-tertiary)] transition flex items-center justify-center text-[var(--text-primary)]"
-              type="button" (click)="startCall('audio')" aria-label="Start audio call">
-              <i class="bi bi-telephone text-sm md:text-base"></i>
+          <div class="flex items-center gap-2">
+            <button class="action-btn" (click)="startCall('audio')" title="Voice Call">
+              <i class="bi bi-telephone-fill"></i>
             </button>
-            <button
-              class="icon-btn w-8 h-8 md:w-10 md:h-10 rounded-xl bg-[var(--surface-secondary)] hover:bg-[var(--surface-tertiary)] transition flex items-center justify-center text-[var(--text-primary)] hidden sm:flex"
-              type="button" (click)="startCall('video')" aria-label="Start video call">
-              <i class="bi bi-camera-video text-sm md:text-base"></i>
+            <button class="action-btn" (click)="startCall('video')" title="Video Call">
+              <i class="bi bi-camera-video-fill"></i>
             </button>
             <div class="relative">
-              <button
-                class="icon-btn w-8 h-8 md:w-10 md:h-10 rounded-xl bg-[var(--surface-secondary)] hover:bg-[var(--surface-tertiary)] transition flex items-center justify-center text-[var(--text-primary)]"
-                type="button" (click)="toggleActionsMenu()" aria-label="More actions">
-                <i class="bi bi-three-dots-vertical text-sm md:text-base"></i>
+              <button class="action-btn" (click)="toggleActionsMenu()">
+                <i class="bi bi-three-dots-vertical"></i>
               </button>
-              <div
-                class="absolute right-0 top-full mt-2 w-48 bg-[var(--surface)] border border-[var(--border)] rounded-xl shadow-xl py-1 z-50 flex flex-col"
-                *ngIf="actionsMenuOpen()">
-                <button type="button"
-                  class="px-4 py-2 text-left text-sm hover:bg-[var(--surface-secondary)] flex items-center gap-2"
-                  (click)="openPatientRecords()">
-                  <i class="bi bi-folder2-open"></i> View records
+              <div *ngIf="actionsMenuOpen()"
+                class="absolute right-0 top-full mt-2 w-48 bg-[var(--surface)] border border-[var(--border-light)] rounded-2xl shadow-2xl py-2 z-50 animate-fade-in-up">
+                <button (click)="openPatientRecords()"
+                  class="w-full px-4 py-2.5 text-left text-sm hover:bg-[var(--surface-secondary)] flex items-center gap-3">
+                  <i class="bi bi-file-earmark-medical text-[var(--primary)]"></i> Medical Records
                 </button>
-                <button type="button"
-                  class="px-4 py-2 text-left text-sm hover:bg-[var(--surface-secondary)] flex items-center gap-2"
-                  (click)="openPatientProfile()">
-                  <i class="bi bi-person"></i> Patient profile
+                <button (click)="openPatientProfile()"
+                  class="w-full px-4 py-2.5 text-left text-sm hover:bg-[var(--surface-secondary)] flex items-center gap-3">
+                  <i class="bi bi-person-badge text-[var(--primary)]"></i> View Profile
                 </button>
-                <button type="button"
-                  class="px-4 py-2 text-left text-sm hover:bg-[var(--surface-secondary)] flex items-center gap-2"
-                  (click)="copyConversationId()">
-                  <i class="bi bi-clipboard"></i> Copy ID
+                <div class="h-px bg-[var(--border-light)] my-1"></div>
+                <button (click)="copyConversationId()"
+                  class="w-full px-4 py-2.5 text-left text-sm hover:bg-[var(--surface-secondary)] flex items-center gap-3">
+                  <i class="bi bi-clipboard"></i> Copy Chat ID
                 </button>
               </div>
             </div>
@@ -154,107 +134,76 @@
         </div>
 
         <!-- Messages Area -->
-        <div class="flex-1 overflow-y-auto p-3 md:p-6 space-y-3 md:space-y-4 bg-[var(--bg-secondary)]/30"
-          #messagesContainer>
-          <div *ngFor="let message of messages(); let i = index" class="flex" [class.justify-end]="isMyMessage(message)"
-            [class.justify-start]="!isMyMessage(message)" [@fadeInUp]="i">
-            <div
-              class="message-bubble max-w-[85%] md:max-w-[75%] lg:max-w-md px-3.5 md:px-4 py-2.5 md:py-3 rounded-2xl shadow-sm transition-all hover:shadow-md relative group"
-              [class.mine]="isMyMessage(message)" [class.theirs]="!isMyMessage(message)" [ngClass]="{
-                'bg-[var(--primary)] text-white rounded-br-sm': isMyMessage(message),
-                'bg-[var(--surface)] text-[var(--fg)] rounded-bl-sm border border-[var(--border)]': !isMyMessage(message)
-              }">
-
+        <div class="messages-container custom-scrollbar" #messagesContainer>
+          <div *ngFor="let message of messages(); let i = index" class="message-group"
+            [class.mine]="isMyMessage(message)" [class.theirs]="!isMyMessage(message)">
+            <div class="message-bubble" [class.mine]="isMyMessage(message)" [class.theirs]="!isMyMessage(message)">
               <div *ngIf="isGif(message.content); else textMsg">
                 <img [src]="getGifUrl(message.content)" class="rounded-lg max-w-full" alt="GIF" loading="lazy">
               </div>
               <ng-template #textMsg>
-                <p class="text-sm leading-relaxed break-words whitespace-pre-wrap">{{ message.content }}</p>
+                {{ message.content }}
               </ng-template>
 
-              <div class="flex items-center justify-end gap-1 mt-1 opacity-70"
-                [class.text-blue-100]="isMyMessage(message)" [class.text-[var(--text-muted)]]="!isMyMessage(message)">
-                <p class="text-[10px]">{{ message.createdAt | date:'shortTime' }}</p>
-                <i *ngIf="isMyMessage(message)" class="bi text-[10px]"
-                  [ngClass]="message.isRead ? 'bi-check-all' : 'bi-check'"></i>
-              </div>
+              <!-- Delete Button (Only for my messages) -->
+              <button *ngIf="isMyMessage(message)" (click)="deleteMessage(message.id, $event)" class="delete-msg-btn"
+                title="Delete message">
+                <i class="bi bi-trash-fill"></i>
+              </button>
+            </div>
+            <div class="message-info">
+              <span>{{ message.createdAt | date:'h:mm a' }}</span>
+              <i *ngIf="isMyMessage(message)" class="bi"
+                [ngClass]="message.isRead ? 'bi-check-all text-blue-400' : 'bi-check'"></i>
             </div>
           </div>
 
           <!-- Typing Indicator -->
-          <div *ngIf="typingUser()" class="flex justify-start ml-2 mb-2" [@fadeInUp]>
-            <div
-              class="bg-[var(--surface)] px-4 py-3 rounded-2xl rounded-bl-sm flex items-center gap-1 shadow-sm border border-[var(--border)]">
-              <span class="w-1.5 h-1.5 bg-[var(--text-muted)] rounded-full animate-bounce"></span>
-              <span class="w-1.5 h-1.5 bg-[var(--text-muted)] rounded-full animate-bounce delay-100"></span>
-              <span class="w-1.5 h-1.5 bg-[var(--text-muted)] rounded-full animate-bounce delay-200"></span>
+          <div *ngIf="typingUser()" class="message-group theirs animate-fade-in-up">
+            <div class="bg-white/50 dark:bg-black/20 p-3 rounded-2xl rounded-bl-sm flex items-center gap-1.5">
+              <span class="w-1.5 h-1.5 bg-[var(--primary)] rounded-full animate-bounce"></span>
+              <span class="w-1.5 h-1.5 bg-[var(--primary)] rounded-full animate-bounce [animation-delay:0.2s]"></span>
+              <span class="w-1.5 h-1.5 bg-[var(--primary)] rounded-full animate-bounce [animation-delay:0.4s]"></span>
             </div>
           </div>
         </div>
 
         <!-- Message Input -->
-        <div class="p-2.5 md:p-4 border-t border-[var(--border)] bg-[var(--surface-primary)] relative z-20">
-
-          <!-- Emoji Picker -->
-          <div *ngIf="showEmojiPicker()"
-            class="absolute bottom-16 md:bottom-20 left-2 md:left-4 z-50 bg-[var(--surface)] rounded-2xl shadow-2xl border border-[var(--border)] w-64 md:w-72 p-3 animate-up origin-bottom-left">
-            <div class="grid grid-cols-6 gap-1.5 md:gap-2 max-h-52 md:max-h-60 overflow-y-auto custom-scrollbar">
+        <div class="chat-input-wrapper">
+          <!-- Emoji/GIF Pickers could go here if shown -->
+          <div *ngIf="showEmojiPicker()" class="picker-container absolute animate-fade-in-up">
+            <div class="grid grid-cols-6 gap-2">
               <button *ngFor="let emoji of emojis" (click)="addEmoji(emoji)"
-                class="text-xl md:text-2xl hover:bg-[var(--surface-secondary)] p-1.5 md:p-2 rounded-xl transition transform hover:scale-110">
+                class="text-2xl hover:bg-[var(--surface-secondary)] p-2 rounded-xl transition-transform hover:scale-110">
                 {{ emoji }}
               </button>
             </div>
           </div>
 
-          <!-- GIF Picker -->
-          <div *ngIf="showGifPicker()"
-            class="absolute bottom-16 md:bottom-20 left-2 md:left-16 z-50 bg-[var(--surface)] rounded-2xl shadow-2xl border border-[var(--border)] w-72 md:w-80 p-3 animate-up origin-bottom-left">
-            <div class="relative mb-3">
-              <i class="bi bi-search absolute left-3 top-2.5 text-[var(--text-muted)]"></i>
-              <input type="text" placeholder="Search GIFs..." [value]="gifSearchQuery()"
-                (input)="gifSearchQuery.set($any($event.target).value); searchGifs()"
-                class="w-full pl-9 pr-3 py-2 rounded-xl border border-[var(--border)] bg-[var(--bg)] text-sm focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent transition text-[var(--fg)]" />
-            </div>
-            <div class="h-52 md:h-60 overflow-y-auto grid grid-cols-2 gap-2 pr-1 custom-scrollbar">
-              <div *ngIf="isLoadingGifs()" class="col-span-2 flex justify-center py-8 text-[var(--primary)]">
-                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-current"></div>
-              </div>
-              <img *ngFor="let gif of gifs()" [src]="gif.url" (click)="selectGif(gif)"
-                class="w-full h-24 object-cover rounded-lg cursor-pointer hover:opacity-80 transition shadow-sm border-2 border-transparent hover:border-[var(--primary)]" />
-            </div>
-          </div>
-
-          <div
-            class="flex items-end gap-1.5 md:gap-2 bg-[var(--surface-secondary)] p-1.5 md:p-2 rounded-2xl md:rounded-3xl shadow-inner transition-all focus-within:ring-2 focus-within:ring-[var(--primary)]/20 border border-transparent focus-within:border-[var(--primary)]/30">
-            <div class="flex gap-0.5 pb-1 pl-0.5 md:pl-1">
-              <button (click)="toggleEmojiPicker()"
-                class="p-1.5 md:p-2 text-[var(--text-secondary)] hover:text-[var(--primary)] hover:bg-[var(--surface)] rounded-full transition relative group"
-                title="Emoji">
-                <i class="bi bi-emoji-smile text-lg md:text-xl"></i>
+          <div class="chat-input-container">
+            <div class="chat-actions">
+              <input type="file" id="message-file-input" style="display: none;" (change)="onFileSelected($event)">
+              <button class="action-btn" (click)="toggleEmojiPicker()" title="Emoji">
+                <i class="bi bi-emoji-smile"></i>
               </button>
-              <button (click)="toggleGifPicker()"
-                class="p-1.5 md:p-2 text-[var(--text-secondary)] hover:text-[var(--primary)] hover:bg-[var(--surface)] rounded-full transition"
-                title="GIF">
-                <i class="bi bi-filetype-gif text-lg md:text-xl"></i>
+              <button class="action-btn" (click)="toggleGifPicker()" title="GIF">
+                <i class="bi bi-filetype-gif"></i>
               </button>
-              <button
-                class="p-1.5 md:p-2 text-[var(--text-secondary)] hover:text-[var(--primary)] hover:bg-[var(--surface)] rounded-full transition hidden sm:block"
-                title="Attach file">
-                <i class="bi bi-paperclip text-lg md:text-xl"></i>
+              <button class="action-btn hidden sm:flex" (click)="triggerFileSelect()" title="Attach">
+                <i class="bi bi-paperclip"></i>
               </button>
             </div>
 
-            <textarea placeholder="Type a message..." [value]="messageContent()"
+            <textarea placeholder="Type your medical advice..." [value]="messageContent()"
               (input)="messageContent.set($any($event.target).value); onTyping()" (keyup.enter)="sendMessage()"
-              class="flex-1 px-2 py-2.5 md:py-3 bg-transparent text-[var(--fg)] placeholder-[var(--text-muted)] focus:outline-none resize-none max-h-28 md:max-h-32 min-h-[42px] md:min-h-[48px] custom-scrollbar leading-relaxed text-sm md:text-base"></textarea>
+              class="chat-input custom-scrollbar"></textarea>
 
-            <button (click)="sendMessage()" [disabled]="!messageContent().trim()"
-              class="w-10 h-10 md:w-12 md:h-12 mb-0.5 mr-0.5 bg-[var(--primary)] text-white rounded-full hover:bg-[var(--primary-dark)] disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md hover:shadow-lg flex items-center justify-center transform active:scale-95">
-              <i class="bi bi-send-fill text-base md:text-lg pl-0.5"></i>
+            <button (click)="sendMessage()" [disabled]="!messageContent().trim()" class="send-btn">
+              <i class="bi bi-send-fill text-xl"></i>
             </button>
           </div>
         </div>
-      </div>
+      </ng-container>
     </div>
   </div>
 </div>

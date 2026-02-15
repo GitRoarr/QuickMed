@@ -8,12 +8,15 @@
    Base Container
 ==================== */
 .analytics-container {
-    background: linear-gradient(135deg, #f8fafc 0%, #f0f4f8 100%);
+    background: var(--bg);
     min-height: 100vh;
+    transition: background 0.3s ease;
 }
 
 .dark .analytics-container {
-    background: linear-gradient(135deg, #0b0d17 0%, #0f1419 100%);
+    background: radial-gradient(circle at top right, rgba(22, 163, 74, 0.05), transparent 40%),
+        radial-gradient(circle at 10% 20%, rgba(59, 130, 246, 0.05), transparent 30%),
+        var(--bg);
 }
 
 /* ====================
@@ -185,49 +188,33 @@
    KPI Cards
 ==================== */
 .kpi-card {
-    background: rgba(255, 255, 255, 0.95);
+    background: var(--surface);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border-radius: 1.5rem;
     padding: 1.75rem;
-    border: 1px solid rgba(226, 232, 240, 0.6);
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04), 0 2px 8px rgba(0, 0, 0, 0.02);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     overflow: hidden;
 }
 
-.kpi-card::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    right: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle, rgba(22, 163, 74, 0.03) 0%, transparent 70%);
-    opacity: 0;
-    transition: opacity 0.4s;
-}
-
-.kpi-card:hover::before {
-    opacity: 1;
-}
-
 .kpi-card:hover {
     transform: translateY(-8px) scale(1.02);
-    box-shadow: 0 12px 48px rgba(0, 0, 0, 0.12), 0 4px 16px rgba(0, 0, 0, 0.08);
-    border-color: rgba(22, 163, 74, 0.2);
+    box-shadow: var(--shadow-lg);
+    border-color: rgba(var(--primary-rgb), 0.3);
 }
 
 .dark .kpi-card {
-    background: rgba(18, 20, 32, 0.95);
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), 0 0 16px rgba(22, 163, 74, 0.08);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
 }
 
 .dark .kpi-card:hover {
-    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.8), 0 0 32px rgba(22, 163, 74, 0.15);
-    border-color: rgba(22, 163, 74, 0.3);
+    box-shadow: var(--shadow-lg), 0 0 32px rgba(var(--primary-rgb), 0.1);
+    border-color: var(--primary);
 }
 
 .kpi-icon-wrapper {
@@ -316,7 +303,7 @@
 .kpi-label {
     font-size: 0.875rem;
     font-weight: 600;
-    color: #64748b;
+    color: var(--text-secondary);
     margin-bottom: 0.5rem;
 }
 
@@ -328,57 +315,45 @@
     font-size: 2.25rem;
     font-weight: 800;
     letter-spacing: -0.025em;
-    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-    background-clip: text;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-
-.dark .kpi-value {
-    background: linear-gradient(135deg, #f8fafc 0%, #cbd5e1 100%);
-    background-clip: text;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: var(--text-primary);
 }
 
 /* ====================
    Chart Containers
 ==================== */
 .chart-card {
-    background: rgba(255, 255, 255, 0.95);
+    background: var(--surface);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border-radius: 1.75rem;
-    padding: 2rem;
-    border: 1px solid rgba(226, 232, 240, 0.6);
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04), 0 2px 8px rgba(0, 0, 0, 0.02);
-    transition: all 0.3s;
+    padding: 2.5rem;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .dark .chart-card {
-    background: rgba(18, 20, 32, 0.95);
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), 0 0 16px rgba(22, 163, 74, 0.08);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-lg);
+}
+
+.chart-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
 }
 
 .chart-title {
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: #0f172a;
-    margin-bottom: 0.25rem;
-}
-
-.dark .chart-title {
-    color: #f8fafc;
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.01em;
 }
 
 .chart-subtitle {
     font-size: 0.875rem;
-    color: #64748b;
-}
-
-.dark .chart-subtitle {
-    color: #94a3b8;
+    color: var(--text-secondary);
 }
 
 /* ====================
@@ -562,17 +537,7 @@
 .donut-total-value {
     font-size: 2.5rem;
     font-weight: 800;
-    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-    background-clip: text;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-
-.dark .donut-total-value {
-    background: linear-gradient(135deg, #f8fafc 0%, #cbd5e1 100%);
-    background-clip: text;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: var(--text-primary);
 }
 
 .donut-total-label {

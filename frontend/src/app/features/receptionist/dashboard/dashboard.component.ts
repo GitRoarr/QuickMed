@@ -27,10 +27,13 @@ export class DashboardComponent implements OnInit {
     { label: 'Patients', icon: 'bi-people', route: '/receptionist/patients' },
     { label: 'Messages', icon: 'bi-chat-dots', route: '/receptionist/messages' },
     { label: 'Payments', icon: 'bi-cash-stack', route: '/receptionist/payments' },
-    { label: 'Doctors',
+    {
+      label: 'Doctors',
       iconImgLight: 'https://img.icons8.com/?size=100&id=60999&format=png&color=000000',
-      iconImgDark: 'https://img.icons8.com/?size=100&id=60999&format=png&color=4e91fd',
-      route: '/receptionist/doctors' },
+      iconImgDark: 'https://img.icons8.com/?size=100&id=60999&format=png&color=000000',
+      route: '/receptionist/doctors'
+    },
+
     { label: 'Reports', icon: 'bi-bar-chart', route: '/receptionist/reports' },
   ];
 

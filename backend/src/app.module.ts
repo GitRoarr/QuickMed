@@ -75,10 +75,11 @@ export class AppModule implements OnModuleInit {
         const queryRunner = this.dataSource.createQueryRunner();
         await queryRunner.connect();
         try {
-          await queryRunner.query(`ALTER TYPE appointment_status_enum ADD VALUE IF NOT EXISTS 'missed'`);
-          await queryRunner.query(`ALTER TYPE appointment_status_enum ADD VALUE IF NOT EXISTS 'overdue'`);
+          // Use plural 'appointments_status_enum' as that's what TypeORM usually generates for Appointment entity table
+          await queryRunner.query(`ALTER TYPE "appointments_status_enum" ADD VALUE IF NOT EXISTS 'missed'`);
+          await queryRunner.query(`ALTER TYPE "appointments_status_enum" ADD VALUE IF NOT EXISTS 'overdue'`);
         } catch (e) {
-          console.warn('Failed to update appointment_status_enum (might already exist or wrong name)', e);
+          console.warn('Failed to update appointments_status_enum (might already exist or wrong name)', e);
         } finally {
           await queryRunner.release();
         }

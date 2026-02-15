@@ -6,11 +6,11 @@
           <p class="eyebrow">Messages</p>
           <h1>Stay in touch with your care team</h1>
         </div>
-        <div class="header-actions header-actions--top">
-          <button class="icon-btn" aria-label="Call doctor">
+        <div class="header-actions" *ngIf="selectedConversation()">
+          <button class="icon-btn" aria-label="Call doctor" (click)="triggerCall()">
             <i class="bi bi-telephone"></i>
           </button>
-          <button class="icon-btn hidden-mobile" aria-label="Video call doctor">
+          <button class="icon-btn" aria-label="Video call doctor" (click)="triggerVideoCall()">
             <i class="bi bi-camera-video"></i>
           </button>
         </div>
@@ -31,13 +31,13 @@
               (click)="selectConversation(conversation)">
 
               <div class="avatar">
-                {{ conversation.doctor?.firstName?.charAt(0) || conversation.doctor?.lastName?.charAt(0) || 'U' }}
+                {{ conversation.doctor?.firstName?.charAt(0) || conversation.doctor?.lastName?.charAt(0) || 'D' }}
               </div>
 
               <div class="conversation-meta">
                 <div class="meta-row">
                   <p>{{ getRecipientName(conversation) }}</p>
-                  <span>{{ conversation.lastMessageAt | date:'shortTime' }}</span>
+                  <span *ngIf="conversation.lastMessageAt">{{ conversation.lastMessageAt | date:'h:mm a' }}</span>
                 </div>
                 <p class="preview">{{ conversation.lastMessageContent || 'New conversation' }}</p>
               </div>
@@ -63,16 +63,16 @@
               <div>
                 <p class="chat-title">{{ getRecipientName(selectedConversation()!) }}</p>
                 <p class="chat-subtitle">
-                  Doctor
+                  Doctor ·
                   <span class="status-pill"><span class="status-dot"></span> Online</span>
                 </p>
               </div>
             </div>
             <div class="header-actions">
-              <button class="icon-btn" aria-label="Call doctor">
+              <button class="icon-btn" aria-label="Call doctor" (click)="triggerCall()">
                 <i class="bi bi-telephone"></i>
               </button>
-              <button class="icon-btn hidden-mobile" aria-label="Video call doctor">
+              <button class="icon-btn" aria-label="Video call doctor" (click)="triggerVideoCall()">
                 <i class="bi bi-camera-video"></i>
               </button>
               <button class="icon-btn" aria-label="More options">
@@ -81,30 +81,42 @@
             </div>
           </header>
 
-          <div class="chat-body">
+          <div class="chat-body" #chatContainer>
             <div *ngFor="let message of messages()" class="message-row" [class.mine]="isOwnMessage(message)">
-
               <div class="message-bubble">
                 <p>{{ message.content }}</p>
-                <span>{{ message.createdAt | date:'shortTime' }}</span>
+
+                <!-- Delete Message Button -->
+                <button *ngIf="isOwnMessage(message)" class="delete-msg-btn" (click)="deleteMessage(message.id, $event)"
+                  title="Delete message">
+                  <i class="bi bi-trash-fill"></i>
+                </button>
+              </div>
+              <div class="message-meta">
+                <span>{{ message.createdAt | date:'h:mm a' }}</span>
               </div>
             </div>
           </div>
 
-          <footer class="chat-input">
-            <button class="ghost-icon hidden-mobile" type="button" aria-label="Attach file">
-              <i class="bi bi-paperclip"></i>
-            </button>
-            <button class="ghost-icon" type="button" aria-label="Emoji">
-              <i class="bi bi-emoji-smile"></i>
-            </button>
-            <textarea rows="1" placeholder="Type your message..." [(ngModel)]="messageContent"
-              (keydown.enter)="sendMessage(); $event.preventDefault()"></textarea>
-            <button class="send-btn" (click)="sendMessage()" [disabled]="!messageContent().trim()"
-              [attr.aria-disabled]="!messageContent().trim()">
-              <i class="bi bi-send"></i>
-              <span class="send-label">Send</span>
-            </button>
+          <footer class="chat-input-wrapper">
+            <div class="emoji-picker" *ngIf="showEmojiPicker()">
+              <button type="button" *ngFor="let emoji of emojis" (click)="addEmoji(emoji)">{{ emoji }}</button>
+            </div>
+            <div class="chat-input">
+              <input type="file" id="message-file-input" style="display: none;" (change)="onFileSelected($event)">
+              <button class="ghost-icon" type="button" aria-label="Attach file" (click)="triggerFileSelect()">
+                <i class="bi bi-paperclip"></i>
+              </button>
+              <button class="ghost-icon" type="button" aria-label="Emoji" (click)="toggleEmojiPicker()">
+                <i class="bi bi-emoji-smile"></i>
+              </button>
+              <textarea rows="1" placeholder="Type your message..." [(ngModel)]="messageContent"
+                (keydown.enter)="sendMessage(); $event.preventDefault()"></textarea>
+              <button class="send-btn" (click)="sendMessage()" [disabled]="!messageContent().trim()">
+                <i class="bi bi-send"></i>
+                <span class="send-label">Send</span>
+              </button>
+            </div>
           </footer>
         </section>
       </div>
@@ -113,7 +125,7 @@
 </app-patient-shell>
 
 <ng-template #loadingConversations>
-  <div class="empty-state">
+  <div class="chat-empty">
     <div class="loading-spinner"></div>
     <p>Loading conversations...</p>
   </div>

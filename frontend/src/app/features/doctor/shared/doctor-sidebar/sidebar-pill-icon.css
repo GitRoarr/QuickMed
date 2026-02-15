@@ -1,5 +1,9 @@
 .sidebar-pill-icon {
+  width: 1.35rem;
+  height: 1.35rem;
   filter: grayscale(1) brightness(0.7);
+  object-fit: contain;
+  display: inline-block;
 }
 .dark .sidebar-pill-icon {
   filter: grayscale(1) brightness(0.5);

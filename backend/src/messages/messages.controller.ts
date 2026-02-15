@@ -3,12 +3,13 @@ import { MessagesService } from './messages.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { User } from '../users/entities/user.entity';
+import { UserRole } from '../common/index';
 import { SendMessageDto } from './dto/send-message.dto';
 
 @Controller('messages')
 @UseGuards(JwtAuthGuard)
 export class MessagesController {
-  constructor(private readonly messagesService: MessagesService) {}
+  constructor(private readonly messagesService: MessagesService) { }
 
   @Get('conversations')
   getConversations(@CurrentUser() user: User, @Query('search') search?: string) {
@@ -19,21 +20,46 @@ export class MessagesController {
   getConversationWith(
     @Param('counterpartyId') counterpartyId: string,
     @CurrentUser() user: User,
+    @Query('role') role?: UserRole,
   ) {
-    return this.messagesService.getConversationWith(user, counterpartyId);
+    let counterpartyRole = role;
+    if (!counterpartyRole) {
+      if (user.role === UserRole.DOCTOR) counterpartyRole = UserRole.PATIENT;
+      else if (user.role === UserRole.PATIENT) counterpartyRole = UserRole.DOCTOR;
+      else if (user.role === UserRole.RECEPTIONIST) counterpartyRole = UserRole.DOCTOR;
+      else throw new BadRequestException('Could not determine counterparty role');
+    }
+    return this.messagesService.getConversationWith(user, counterpartyId, counterpartyRole);
   }
 
   @Post('conversations')
   createConversation(
-    @Body() body: { patientId?: string; doctorId?: string },
+    @Body() body: { patientId?: string; doctorId?: string; receptionistId?: string; role?: UserRole },
     @CurrentUser() user: User,
   ) {
-    const counterpartyId = user.role === 'doctor' ? body.patientId : body.doctorId;
+    let counterpartyId = body.patientId || body.doctorId || body.receptionistId;
+    let counterpartyRole = body.role;
+
+    if (!counterpartyRole) {
+      if (body.patientId) counterpartyRole = UserRole.PATIENT;
+      else if (body.doctorId) counterpartyRole = UserRole.DOCTOR;
+      else if (body.receptionistId) counterpartyRole = UserRole.RECEPTIONIST;
+      else {
+        if (user.role === UserRole.DOCTOR) counterpartyRole = UserRole.PATIENT;
+        else if (user.role === UserRole.PATIENT) counterpartyRole = UserRole.DOCTOR;
+        else if (user.role === UserRole.RECEPTIONIST) counterpartyRole = UserRole.DOCTOR;
+      }
+    }
+
     if (!counterpartyId) {
       throw new BadRequestException('Missing counterparty id');
     }
 
-    return this.messagesService.getConversationWith(user, counterpartyId);
+    if (!counterpartyRole) {
+      throw new BadRequestException('Could not determine counterparty role');
+    }
+
+    return this.messagesService.getConversationWith(user, counterpartyId, counterpartyRole);
   }
 
   @Get('conversations/:conversationId')
@@ -57,5 +83,13 @@ export class MessagesController {
     @CurrentUser() user: User,
   ) {
     return this.messagesService.deleteConversation(conversationId, user);
+  }
+
+  @Delete(':messageId')
+  deleteMessage(
+    @Param('messageId') messageId: string,
+    @CurrentUser() user: User,
+  ) {
+    return this.messagesService.deleteMessage(messageId, user);
   }
 }

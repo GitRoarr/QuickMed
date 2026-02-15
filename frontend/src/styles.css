@@ -84,25 +84,34 @@ main::-webkit-scrollbar,
 
 
 :root {
-  --bg: #ffffff;
-  --fg: #111111;
-  --surface: #ffffff;
-  --surface-secondary: #f8fafc;
-  --surface-tertiary: #f1f5f9;
-  --border: #e2e8f0;
-  --border-light: #f1f5f9;
-  --muted: #64748b;
-  --text-primary: #0f172a;
-  --text-secondary: #475569;
-  --text-muted: #94a3b8;
+  /* Common Colors */
   --primary: #16a34a;
   --primary-rgb: 22, 163, 74;
   --primary-hover: #15803d;
-  --primary-light: rgba(22, 163, 74, 0.08);
-  --success: #22c55e;
+  --success: #10b981;
   --warning: #f59e0b;
   --danger: #ef4444;
   --info: #3b82f6;
+
+  /* Light Theme Variables */
+  --bg: #f8fafc;
+  --fg: #0f172a;
+  --surface: #ffffff;
+  --surface-rgb: 255, 255, 255;
+  --surface-secondary: #f1f5f9;
+  --surface-tertiary: #e2e8f0;
+  --border: #e2e8f0;
+  --border-light: #f1f5f9;
+  --border-color: #e2e8f0;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow: 0 4px 20px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+  --surface-alt: #f1f5f9;
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.3);
 
   /* Shift Colors - Light Mode */
   --morning-bg: #fff7ed;
@@ -115,75 +124,163 @@ main::-webkit-scrollbar,
   --custom-text: #16a34a;
   --past-bg: #f1f5f9;
   --past-text: #64748b;
-
-  --sidebar-bg: linear-gradient(180deg, rgba(255, 255, 255, .98), rgba(248, 250, 252, .98));
-  --sidebar-text: #0f172a;
-  --sidebar-hover: #f1f5f9;
-  --sidebar-active-bg: rgba(22, 163, 74, 0.08);
-  --sidebar-active-text: #16a34a;
 }
 
 .dark {
-  --bg: #0b0d17;
+  /* Dark Theme Variables */
+  --bg: #0b1120;
   --fg: #f8fafc;
-  --surface: #121420;
-  --surface-secondary: #1e293b;
-  --surface-tertiary: #334155;
-  --border: rgba(255, 255, 255, 0.08);
-  --border-light: rgba(255, 255, 255, 0.05);
-  --muted: #94a3b8;
+  --surface: #161e31;
+  --surface-rgb: 30, 41, 59;
+  --surface-secondary: #334155;
+  --surface-tertiary: #475569;
+  --border: rgba(255, 255, 255, 0.03);
+  --border-light: rgba(255, 255, 255, 0.02);
+  --border-color: rgba(255, 255, 255, 0.03);
   --text-primary: #f8fafc;
   --text-secondary: #cbd5e1;
-  --text-muted: #94a3b8;
-  --primary: #16a34a;
-  --primary-rgb: 22, 163, 74;
-  --primary-hover: #15803d;
-  --primary-light: rgba(22, 163, 74, 0.15);
-  --success: #22c55e;
-  --warning: #f59e0b;
-  --danger: #ef4444;
-  --info: #3b82f6;
+  --text-muted: #64748b;
+  --shadow-sm: 0 2px 4px 0 rgba(0, 0, 0, 0.3);
+  --shadow: 0 10px 40px -6px rgba(0, 0, 0, 0.5), 0 0 20px -2px rgba(0, 0, 0, 0.2);
+  --shadow-lg: 0 30px 70px -10px rgba(0, 0, 0, 0.7), 0 0 30px -5px rgba(0, 0, 0, 0.3);
+  --surface-alt: rgba(255, 255, 255, 0.05);
+  --glass-bg: rgba(15, 23, 42, 0.8);
+  --glass-border: rgba(255, 255, 255, 0.03);
 
   /* Shift Colors - Dark Mode */
-  --morning-bg: rgba(234, 88, 12, 0.15);
-  --morning-text: #fb923c;
-  --afternoon-bg: rgba(217, 119, 6, 0.15);
-  --afternoon-text: #fbbf24;
-  --evening-bg: rgba(79, 70, 229, 0.15);
-  --evening-text: #818cf8;
-  --custom-bg: rgba(22, 163, 74, 0.15);
-  --custom-text: #4ade80;
+  --morning-bg: rgba(234, 88, 12, 0.2);
+  --morning-text: #fdba74;
+  --afternoon-bg: rgba(217, 119, 6, 0.2);
+  --afternoon-text: #fcd34d;
+  --evening-bg: rgba(79, 70, 229, 0.2);
+  --evening-text: #a5b4fc;
+  --custom-bg: rgba(22, 163, 74, 0.2);
+  --custom-text: #86efac;
   --past-bg: rgba(255, 255, 255, 0.05);
-  --past-text: #64748b;
-
-  --shadow: rgba(0, 0, 0, 0.6);
-  --glow: rgba(22, 163, 74, 0.08);
-  --sidebar-bg: #020617;
-  --sidebar-text: #e5e7eb;
-  --sidebar-hover: #020617;
-  --sidebar-active-bg: rgba(22, 163, 74, 0.15);
-  --sidebar-active-text: #16a34a;
+  --past-text: #94a3b8;
 }
-
-/* Global Border Removal for Dark Mode */
-.dark :is(.border, .border-gray-100, .border-gray-200, .border-slate-100, .border-zinc-100) {
-  border-color: transparent !important;
-}
-
 
 body {
   background-color: var(--bg);
-  color: var(--fg);
-  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont;
+  color: var(--text-primary);
+  font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  min-height: 100vh;
 }
 
+/* Premium Logo Animations */
+@keyframes logoFloat {
 
-/* .app-root */
-.app-root {
-  min-height: 100vh;
-  width: 100%;
-  background-color: var(--bg);
-  color: var(--fg);
+  0%,
+  100% {
+    transform: translateY(0) rotate(0);
+  }
+
+  33% {
+    transform: translateY(-3px) rotate(-2deg);
+  }
+
+  66% {
+    transform: translateY(-1px) rotate(2deg);
+  }
+}
+
+@keyframes logoPulse {
+
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: 0 4px 12px rgba(15, 157, 88, 0.35);
+  }
+
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 8px 24px rgba(15, 157, 88, 0.5);
+  }
+}
+
+@keyframes logoShimmer {
+  0% {
+    background-position: -200% 0;
+  }
+
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes logoSpinSubtle {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Global Transitions - limited to theme-critical properties */
+.dark body,
+.dark .card,
+.dark .surface,
+.dark .panel {
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Remove universal transition which can cause jitter/blur */
+*,
+*::before,
+*::after {
+  transition: none;
+}
+
+/* Re-enable transitions for interactive elements only */
+button,
+a,
+input,
+select,
+textarea,
+.nav-item,
+.card,
+.doctor-card {
+  transition: all 0.2s ease;
+}
+
+/* Base Utility Overrides */
+.bg-surface {
+  background-color: var(--surface) !important;
+}
+
+.bg-bg {
+  background-color: var(--bg) !important;
+}
+
+.text-primary {
+  color: var(--text-primary) !important;
+}
+
+.text-secondary {
+  color: var(--text-secondary) !important;
+}
+
+.text-muted {
+  color: var(--text-muted) !important;
+}
+
+.border-default {
+  border-color: var(--border) !important;
+}
+
+/* Dashboard Glass Panels */
+.glass-panel {
+  background: var(--glass-bg);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow);
 }
 
 /* .card */
@@ -229,41 +326,40 @@ body {
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
 }
 
-/* Ensure dark theme exact surface color on admin cards */
-.dark :where(.stat-card, .metric-card, .settings-section, .appointments-container, .appointment-card, .patient-card, .table-card, .chart-card, .modal-card) {
-  background: #0b0b0b;
-  /* pure black surface in dark theme */
-  border-color: transparent !important;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55), 0 0 24px rgba(22, 163, 74, 0.06);
-}
-
-/* Force black backgrounds for common utility classes inside admin dark theme */
-.admin-shell.dark :where(.card,
+/* Global Dark Theme Card Support */
+.dark :where(.card,
   .stat-card,
+  .metric-card,
+  .stats-card,
+  .glass-panel,
   .dash-card,
   .um-card,
   .um-stat-card,
+  .settings-section,
+  .appointments-container,
   .appointment-card,
+  .patient-card,
   .table-card,
   .chart-card,
-  .list-item,
+  .modal-card,
+  .modal-overlay,
   .panel,
   .section,
   section) {
-  background-color: #0b0b0b !important;
-  border-color: transparent !important;
-  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.6), 0 0 24px rgba(22, 163, 74, 0.06) !important;
+  background-color: var(--surface) !important;
+  border: none !important;
+  box-shadow: var(--shadow-lg) !important;
 }
 
-/* Force black backgrounds for common utility classes inside admin dark theme */
-.admin-shell.dark :where(.bg-white,
+/* Base Utility Overrides for Dark Mode */
+.dark :where(.bg-white,
   .bg-gray-50, .bg-gray-100,
   .bg-slate-50, .bg-slate-100,
   .bg-zinc-50, .bg-zinc-100,
   .bg-neutral-50, .bg-neutral-100,
   .bg-stone-50, .bg-stone-100,
   .bg-emerald-50) {
-  background-color: #0b0b0b !important;
+  background-color: var(--bg) !important;
 }
 
 /* Override Tailwind/utility light text colors within dark theme */

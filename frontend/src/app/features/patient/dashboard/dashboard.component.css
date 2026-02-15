@@ -11,11 +11,10 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: var(--card-bg);
+  background: var(--surface);
   padding: 1.75rem 2.4rem;
   border-radius: 22px;
-  border: 1px solid var(--border);
-  box-shadow: 0 30px 80px -60px rgba(15, 23, 42, 0.55);
+  box-shadow: var(--shadow);
 }
 
 :host-context(.patient-shell.dark) .dashboard-header {
@@ -27,7 +26,7 @@
   margin: 0;
   font-size: 1.85rem;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--fg);
 }
 
 .eyebrow {
@@ -73,13 +72,13 @@
 }
 
 .vital-card {
-  background: #fff;
+  background: var(--surface);
   border-radius: 18px;
   padding: 1.25rem;
   display: flex;
   gap: 1rem;
   align-items: center;
-  box-shadow: 0 20px 45px -35px rgba(15, 15, 15, 0.6);
+  box-shadow: var(--shadow);
 }
 
 .vital-icon {
@@ -103,7 +102,7 @@
   margin: 0;
   font-size: 1.5rem;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--fg);
 }
 
 .vital-status {
@@ -121,13 +120,13 @@
 }
 
 .stat-pill {
-  background: #fff;
+  background: var(--surface);
   border-radius: 16px;
   padding: 1rem 1.25rem;
   display: flex;
   gap: 0.75rem;
   align-items: center;
-  box-shadow: 0 15px 40px -30px rgba(15, 15, 15, 0.5);
+  box-shadow: var(--shadow-sm);
 }
 
 .stat-pill i {
@@ -161,10 +160,10 @@
 }
 
 .panel {
-  background: #fff;
+  background: var(--surface);
   border-radius: 20px;
   padding: 1.5rem;
-  box-shadow: 0 40px 70px -55px rgba(15, 15, 15, 0.55);
+  box-shadow: var(--shadow);
 }
 
 .panel-header {
@@ -177,7 +176,7 @@
 .panel-header h2 {
   margin: 0;
   font-size: 1.25rem;
-  color: #0f172a;
+  color: var(--fg);
 }
 
 .text-link {
@@ -208,7 +207,7 @@
   display: flex;
   gap: 1rem;
   padding: 1rem 0;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid var(--border);
 }
 
 .appointment-card:last-child {
@@ -247,8 +246,8 @@
   padding: 0.25rem 0.8rem;
   border-radius: 999px;
   font-size: 0.75rem;
-  background: #e2e8f0;
-  color: #0f172a;
+  background: var(--bg);
+  color: var(--fg);
 }
 
 .badge-video {
@@ -281,7 +280,7 @@
   display: flex;
   justify-content: space-between;
   padding: 1rem 0;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid var(--border);
 }
 
 .prescription-name {
@@ -302,7 +301,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 0.75rem 0;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid var(--border);
 }
 
 .lab-title {
@@ -315,9 +314,9 @@
 .empty-state {
   text-align: center;
   padding: 1.5rem;
-  color: #94a3b8;
+  color: var(--text-muted);
   border-radius: 16px;
-  background: #f8fafc;
+  background: var(--bg);
 }
 
 .loading-state {
@@ -342,161 +341,25 @@
   }
 }
 
-/* Dark theme overrides */
-:host-context(.patient-shell.dark) {
-  --bg: #0b1423;
-  --surface: #0f1c2f;
-  --fg: #e2e8f0;
-  --muted: #9fb1c9;
-  --primary: #10b981;
-  --primary-light: rgba(16, 185, 129, 0.16);
-}
-
-:host-context(.patient-shell.dark) .dashboard-header {
-  background: var(--surface);
-  border-color: #1f2937;
-  box-shadow: 0 30px 80px -60px rgba(0, 0, 0, 0.7);
-}
-
-:host-context(.patient-shell.dark) .dashboard-header h1 {
-  color: var(--fg);
-}
-
-:host-context(.patient-shell.dark) .eyebrow {
-  color: var(--muted);
-}
-
-:host-context(.patient-shell.dark) .muted {
-  color: var(--muted);
-}
-
-:host-context(.patient-shell.dark) .primary-btn {
-  background: var(--primary);
-  color: #0b1423;
-  box-shadow: 0 18px 35px -20px rgba(16, 185, 129, 0.6);
-}
-
-:host-context(.patient-shell.dark) .primary-btn.subtle {
-  background: var(--primary-light);
-  color: #6ef3b0;
-}
-
-:host-context(.patient-shell.dark) .vital-card {
-  background: var(--surface);
-  border: 1px solid #1f2937;
-  box-shadow: 0 20px 45px -35px rgba(0, 0, 0, 0.7);
-}
-
-:host-context(.patient-shell.dark) .vital-value {
-  color: var(--fg);
-}
-
-:host-context(.patient-shell.dark) .vital-label {
-  color: var(--muted);
-}
-
-:host-context(.patient-shell.dark) .vital-status {
-  color: #6ef3b0;
-}
-
-:host-context(.patient-shell.dark) .vital-icon {
+/* Dark theme specific fixes for colors not covered by variables */
+.dark .vital-icon {
   background: rgba(16, 185, 129, 0.18);
   color: #6ef3b0;
 }
 
-:host-context(.patient-shell.dark) .stat-pill {
-  background: var(--bg);
-  box-shadow: 0 15px 40px -30px rgba(0, 0, 0, 0.6);
-  border: 1px solid #1f2937;
-}
-
-:host-context(.patient-shell.dark) .pill-label {
-  color: var(--muted);
-}
-
-:host-context(.patient-shell.dark) .pill-value {
-  color: var(--fg);
-}
-
-:host-context(.patient-shell.dark) .stat-pill i {
-  color: #6ef3b0;
-  background: rgba(16, 185, 129, 0.14);
-  border: 1px solid #123524;
-}
-
-:host-context(.patient-shell.dark) .panel {
-  background: var(--surface);
-  color: var(--fg);
-  border: 1px solid #1f2937;
-  box-shadow: 0 40px 70px -55px rgba(0, 0, 0, 0.7);
-}
-
-:host-context(.patient-shell.dark) .panel-header h2 {
-  color: var(--fg);
-}
-
-:host-context(.patient-shell.dark) .text-link {
+.dark .primary-btn.subtle {
+  background: rgba(16, 185, 129, 0.16);
   color: #6ef3b0;
 }
 
-:host-context(.patient-shell.dark) .appointment-card {
-  border-color: #1f2937;
-}
-
-:host-context(.patient-shell.dark) .appointment-doctor {
-  color: var(--fg);
-}
-
-:host-context(.patient-shell.dark) .appointment-details {
-  color: #cbd5e1;
-}
-
-:host-context(.patient-shell.dark) .appointment-details i {
+.dark .badge-video {
+  background: rgba(16, 185, 129, 0.16);
   color: #6ef3b0;
 }
 
-:host-context(.patient-shell.dark) .badge {
-  background: var(--bg);
-  color: var(--fg);
-  border: 1px solid #1f2937;
-}
-
-:host-context(.patient-shell.dark) .badge-video {
-  background: var(--primary-light);
+.dark .appointment-icon.video {
+  background: rgba(16, 185, 129, 0.12);
   color: #6ef3b0;
-}
-
-:host-context(.patient-shell.dark) .prescription-card {
-  border-color: #1f2937;
-}
-
-:host-context(.patient-shell.dark) .prescription-name {
-  color: var(--fg);
-}
-
-:host-context(.patient-shell.dark) .lab-item {
-  border-color: #1f2937;
-}
-
-:host-context(.patient-shell.dark) .lab-title {
-  color: var(--fg);
-}
-
-:host-context(.patient-shell.dark) .lab-results .badge {
-  background: var(--primary-light);
-  color: #6ef3b0;
-  border-color: transparent;
-}
-
-:host-context(.patient-shell.dark) .empty-state {
-  background: var(--bg);
-  color: var(--muted);
-  border: 1px solid #1f2937;
-}
-
-:host-context(.patient-shell.dark) .spinner {
-  border-color: #1f2937;
-  border-top-color: #6ef3b0;
 }
 
 /* Responsive */

@@ -106,7 +106,10 @@ export class MessagesComponent implements OnInit, AfterViewChecked, OnDestroy {
             senderType: msg.sender?.role || 'patient', // fallback
             createdAt: msg.createdAt || new Date().toISOString()
           };
-          this.messages.update(msgs => [...msgs, formattedMsg]);
+          this.messages.update(msgs => {
+            const exists = msgs.some(m => m.id === formattedMsg.id);
+            return exists ? msgs : [...msgs, formattedMsg];
+          });
 
           // Mark as read immediately if viewing
           // this.messageService.markAsRead(msg.id).subscribe(); // If implemented
@@ -126,6 +129,16 @@ export class MessagesComponent implements OnInit, AfterViewChecked, OnDestroy {
           if (data.userId !== this.currentUser()?.id) {
             this.typingUser.set(data.isTyping ? 'Typing...' : null);
           }
+        }
+      })
+    );
+
+    // Subscribe to message deletions
+    this.subscriptions.add(
+      this.wsService.messageDeleted$.subscribe((data: any) => {
+        if (!data) return;
+        if (this.selectedConversation()?.id === data.conversationId) {
+          this.messages.update(msgs => msgs.filter(m => m.id !== data.messageId));
         }
       })
     );
@@ -252,6 +265,16 @@ export class MessagesComponent implements OnInit, AfterViewChecked, OnDestroy {
 
     // update preview
     this.updateConversationPreview(tempMsg);
+  }
+
+  deleteMessage(messageId: string, event: MouseEvent): void {
+    event.stopPropagation();
+    if (messageId.startsWith('temp-')) return; // Can't delete temp messages yet
+
+    this.wsService.deleteMessage(messageId);
+    // Optimistic update
+    this.messages.update(msgs => msgs.filter(m => m.id !== messageId));
+    this.toast.success('Message deleted');
   }
 
   onTyping(): void {
@@ -433,6 +456,19 @@ export class MessagesComponent implements OnInit, AfterViewChecked, OnDestroy {
     navigator.clipboard.writeText(conversation.id);
     this.actionsMenuOpen.set(false);
     this.toast.success('Conversation ID copied');
+  }
+
+  triggerFileSelect(): void {
+    const fileInput = document.getElementById('message-file-input') as HTMLInputElement;
+    fileInput?.click();
+  }
+
+  onFileSelected(event: any): void {
+    const file = event.target.files?.[0];
+    if (file) {
+      this.toast.info(`File "${file.name}" selected. Upload started.`, { title: 'Attachment' });
+      // Logic for upload...
+    }
   }
 
   private scrollToBottom(): void {

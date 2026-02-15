@@ -37,8 +37,9 @@
 }
 
 .metric-card {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: var(--surface);
+    border: 1px solid rgba(255, 255, 255, 0.03);
+    box-shadow: var(--shadow);
     transition: all 0.3s ease;
 }
 

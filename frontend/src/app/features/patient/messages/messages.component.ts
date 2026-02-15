@@ -5,6 +5,7 @@ import { MessageService, Conversation, Message } from '@core/services/message.se
 import { MessagesSocketService } from '@core/services/messages-socket.service';
 import { AuthService } from '@core/services/auth.service';
 import { ToastService } from '@core/services/toast.service';
+import { Router } from '@angular/router';
 import { PatientShellComponent } from '../shared/patient-shell/patient-shell.component';
 
 @Component({
@@ -19,6 +20,7 @@ export class PatientMessagesComponent implements OnInit, OnDestroy {
   private readonly socketService = inject(MessagesSocketService);
   private readonly authService = inject(AuthService);
   private readonly toast = inject(ToastService);
+  private readonly router = inject(Router);
 
   conversations = signal<Conversation[]>([]);
   messages = signal<Message[]>([]);
@@ -26,6 +28,10 @@ export class PatientMessagesComponent implements OnInit, OnDestroy {
   messageContent = signal('');
   searchQuery = signal('');
   isLoadingConversations = signal(true);
+
+  // Functional UI state
+  showEmojiPicker = signal(false);
+  emojis = ['😊', '😂', '🥰', '😍', '🤔', '👍', '🙏', '💉', '🩹', '🌡️', '💊', '🩺', '🏥', '👋', '✨'];
 
   ngOnInit(): void {
     this.socketService.connect();
@@ -40,12 +46,20 @@ export class PatientMessagesComponent implements OnInit, OnDestroy {
   private registerSocketEvents(): void {
     this.socketService.onMessage((message) => {
       if (this.selectedConversation()?.id === message.conversationId) {
-        this.messages.update((current) => [...current, message]);
+        this.messages.update((current) => {
+          const exists = current.some(m => m.id === message.id);
+          return exists ? current : [...current, message];
+        });
       }
       this.loadConversations(false);
     });
     this.socketService.onConversationUpdated(() => {
       this.loadConversations(false);
+    });
+    this.socketService.onMessageDeleted((data) => {
+      if (this.selectedConversation()?.id === data.conversationId) {
+        this.messages.update((current) => current.filter(m => m.id !== data.messageId));
+      }
     });
   }
 
@@ -112,6 +126,14 @@ export class PatientMessagesComponent implements OnInit, OnDestroy {
       });
   }
 
+  deleteMessage(messageId: string, event: MouseEvent): void {
+    event.stopPropagation();
+    if (!messageId) return;
+    this.socketService.deleteMessage(messageId);
+    // Optimistic update
+    this.messages.update(msgs => msgs.filter(m => m.id !== messageId));
+  }
+
   getRecipientName(conversation: Conversation): string {
     if (conversation.doctor) {
       return `Dr. ${conversation.doctor.firstName} ${conversation.doctor.lastName}`;
@@ -122,6 +144,45 @@ export class PatientMessagesComponent implements OnInit, OnDestroy {
   isOwnMessage(message: Message): boolean {
     const currentUser = this.authService.currentUser();
     return message.senderId === currentUser?.id;
+  }
+
+  // --- NEW FUNCTIONAL HANDLERS ---
+
+  triggerCall(): void {
+    const conversation = this.selectedConversation();
+    if (!conversation) return;
+    this.toast.info('Starting audio call...', { title: 'Calling' });
+    this.router.navigate(['/call', conversation.id], { queryParams: { audio: true } });
+  }
+
+  triggerVideoCall(): void {
+    const conversation = this.selectedConversation();
+    if (!conversation) return;
+    this.toast.info('Starting video consultation...', { title: 'Video Call' });
+    this.router.navigate(['/call', conversation.id]);
+  }
+
+  toggleEmojiPicker(): void {
+    this.showEmojiPicker.update(v => !v);
+  }
+
+  addEmoji(emoji: string): void {
+    this.messageContent.update(v => v + emoji);
+    this.showEmojiPicker.set(false);
+    // Focus back to textarea if needed (could use ViewChild for this)
+  }
+
+  triggerFileSelect(): void {
+    const fileInput = document.getElementById('message-file-input') as HTMLInputElement;
+    fileInput?.click();
+  }
+
+  onFileSelected(event: any): void {
+    const file = event.target.files?.[0];
+    if (file) {
+      this.toast.info(`File "${file.name}" selected. Ready to upload (mock).`, { title: 'Attachment' });
+      // In a real app, you'd upload this to a storage service and send the URL in the message
+    }
   }
 }
 

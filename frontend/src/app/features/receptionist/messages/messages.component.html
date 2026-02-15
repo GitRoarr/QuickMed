@@ -104,7 +104,7 @@
             </div>
             <div class="header-right">
               <span class="role-chip">{{ selectedReceiverRole() | titlecase }}</span>
-              <button class="icon-btn"><i class="bi bi-telephone"></i></button>
+              <button class="icon-btn" (click)="startCall()"><i class="bi bi-telephone"></i></button>
               <button class="icon-btn"><i class="bi bi-three-dots-vertical"></i></button>
             </div>
           </div>
@@ -121,6 +121,12 @@
                   {{ msg.createdAt | date:'shortTime' }}
                   <i class="bi bi-check2-all" *ngIf="msg.senderId === authService.currentUser()?.id"></i>
                 </div>
+
+                <!-- Delete Button -->
+                <button *ngIf="msg.senderId === authService.currentUser()?.id" class="delete-msg-btn"
+                  (click)="deleteMessage(msg.id, $event)" title="Delete message">
+                  <i class="bi bi-trash-fill"></i>
+                </button>
               </div>
             </div>
 
@@ -135,9 +141,10 @@
 
           <div class="chat-composer" *ngIf="selectedReceiverId()">
             <div class="composer-actions">
+              <input type="file" id="message-file-input" style="display: none;" (change)="onFileSelected($event)">
               <button class="icon-btn" (click)="toggleEmojiPicker()"><i class="bi bi-emoji-smile"></i></button>
               <button class="icon-btn" (click)="toggleGifPicker()"><i class="bi bi-images"></i></button>
-              <button class="icon-btn"><i class="bi bi-paperclip"></i></button>
+              <button class="icon-btn" (click)="triggerFileSelect()"><i class="bi bi-paperclip"></i></button>
             </div>
 
             <div class="input-wrapper">
