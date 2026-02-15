@@ -6,83 +6,72 @@
     }">
     <div class="container mx-auto px-6 h-18 rounded-3xl flex items-center justify-between transition-all duration-500"
       [ngClass]="{
-        'bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl shadow-2xl shadow-green-500/10 border border-white/20 dark:border-gray-800/50': isScrolled(),
+        'bg-white/80 backdrop-blur-xl shadow-2xl shadow-green-500/10 border border-white/20': isScrolled(),
         'bg-transparent': !isScrolled()
       }">
 
       <!-- Brand -->
-      <a routerLink="/" class="flex items-center gap-2 group decoration-none">
-        <div class="brand-header">
-          <div class="brand-logo-wrapper">
-            <img src="assets/images/QuickMed-Logo-Light.png" alt="QuickMed" />
-          </div>
-          <div class="flex flex-col">
-            <span
-              class="text-xl font-black tracking-tighter bg-gradient-to-r from-green-500 to-emerald-600 bg-clip-text text-transparent leading-none">
-              QuickMed
-            </span>
-            <div class="brand-portal-badge hidden sm:flex mt-1">
-              <span class="portal-dot"></span>
-              <span class="portal-text">Modern Healthcare</span>
-            </div>
-          </div>
+      <a routerLink="/" class="flex items-center gap-3 group decoration-none">
+        <div class="brand-logo-wrapper !w-11 !h-11 !rounded-2xl shadow-lg shadow-green-500/20">
+          <img src="assets/images/QuickMed-Logo-Light.png" alt="QuickMed" class="p-1" />
+        </div>
+        <div class="flex flex-col">
+          <span
+            class="text-xl font-black tracking-tighter bg-gradient-to-r from-green-500 to-emerald-600 bg-clip-text text-transparent leading-none">
+            QuickMed
+          </span>
         </div>
       </a>
 
       <!-- Nav Links -->
-      <ul class="hidden lg:flex items-center gap-8">
-        <li><a href="#features" class="nav-link">Features</a></li>
-        <li><a href="#how-it-works" class="nav-link">How It Works</a></li>
-        <li><a href="#testimonials" class="nav-link">Testimonials</a></li>
+      <ul class="hidden lg:flex items-center gap-10">
+        <li><a href="#features" class="nav-link !text-sm !font-black !uppercase !tracking-widest">Features</a></li>
+        <li><a href="#how-it-works" class="nav-link !text-sm !font-black !uppercase !tracking-widest">Process</a></li>
+        <li><a href="#testimonials" class="nav-link !text-sm !font-black !uppercase !tracking-widest">Reviews</a></li>
       </ul>
 
       <!-- Right Actions -->
-      <div class="flex items-center gap-2 sm:gap-4">
-
+      <div class="flex items-center gap-4">
         <!-- Theme Toggle -->
         <button (click)="toggleTheme()"
-          class="p-2.5 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white/50 dark:bg-gray-800/50 hover:bg-white dark:hover:bg-gray-700 transition-all duration-300 shadow-sm"
+          class="w-11 h-11 rounded-2xl border border-gray-200/50 dark:border-gray-700/50 bg-white/50 dark:bg-gray-800/50 flex items-center justify-center hover:bg-white dark:hover:bg-gray-700 transition-all duration-300 shadow-sm"
           [attr.aria-label]="isDarkMode() ? 'Switch to Light Mode' : 'Switch to Dark Mode'">
-          <ng-container *ngIf="!isDarkMode(); else moonIcon">
-            <img src="https://img.icons8.com/?size=100&id=6Z2mGj6qDVv4&format=png&color=000000" alt="Sun"
-              class="w-5 h-5" />
-          </ng-container>
-          <ng-template #moonIcon>
-            <img src="https://img.icons8.com/?size=100&id=6DXM8bs2tFSU&format=png&color=ffffff" alt="Moon"
-              class="w-5 h-5" />
-          </ng-template>
+          <i class="bi" [ngClass]="isDarkMode() ? 'bi-moon-stars text-blue-400' : 'bi-sun text-yellow-500'"
+            class="text-xl"></i>
         </button>
+
+        <div class="hidden sm:block h-6 w-px bg-gray-200 dark:bg-gray-800 mx-1"></div>
 
         <!-- Authentication Buttons (Desktop) -->
         <ng-container *ngIf="!currentUser(); else loggedIn">
           <div class="hidden sm:flex items-center gap-3">
             <a routerLink="/login"
-              class="px-5 py-2.5 rounded-2xl text-gray-600 dark:text-gray-300 font-semibold hover:text-green-500 transition-all duration-300">Log
-              In</a>
+              class="px-5 py-2.5 rounded-xl text-gray-600 dark:text-gray-300 font-black text-sm hover:text-green-500 transition-all">LOG
+              IN</a>
             <a routerLink="/register"
-              class="px-6 py-2.5 rounded-2xl bg-green-500 text-white font-bold hover:bg-green-600 hover:shadow-lg hover:shadow-green-500/30 transition-all duration-300">Get
-              Started</a>
+              class="px-6 py-2.5 rounded-xl bg-green-500 text-white font-black text-sm hover:shadow-lg hover:shadow-green-500/30 transition-all">GET
+              STARTED</a>
           </div>
         </ng-container>
 
         <ng-template #loggedIn>
           <div class="hidden sm:flex items-center group">
             <div
-              class="flex items-center gap-3 p-1 pr-4 rounded-2xl bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 cursor-pointer transition-all duration-300 hover:shadow-md"
-              (mouseenter)="profileDropdownOpen.set(true)" (click)="navigateToDashboard()">
+              class="flex items-center gap-3 p-1 pr-4 rounded-2xl bg-transparent cursor-pointer transition-all duration-300 hover:bg-gray-100/50 dark:hover:bg-gray-800/50"
+              (click)="navigateToDashboard()">
               <div class="relative">
                 <img *ngIf="currentUser()?.avatar; else initialsAvatar" [src]="currentUser()?.avatar!" alt="Avatar"
-                  class="w-9 h-9 rounded-xl shadow-sm object-cover" />
+                  class="w-8 h-8 rounded-xl shadow-sm object-cover" />
                 <ng-template #initialsAvatar>
                   <div
-                    class="w-9 h-9 rounded-xl bg-green-500 text-white font-bold flex items-center justify-center text-sm">
+                    class="w-8 h-8 rounded-xl bg-green-500 text-white font-black flex items-center justify-center text-[10px]">
                     {{ getInitials(currentUser()?.firstName, currentUser()?.lastName) }}
                   </div>
                 </ng-template>
                 <span
-                  class="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 border-2 border-white dark:border-gray-800 rounded-full"></span>
+                  class="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-green-500 border-2 border-white dark:border-gray-800 rounded-full"></span>
               </div>
-              <span class="font-bold text-gray-900 dark:text-white select-none hidden md:inline text-sm">{{
+              <span class="font-black text-gray-900 dark:text-white text-xs tracking-wide">{{
                 currentUser()?.firstName }}</span>
             </div>
           </div>
@@ -90,9 +79,9 @@
 
         <!-- Mobile Menu Button -->
         <button
-          class="lg:hidden p-2.5 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white/50 dark:bg-gray-800/50 hover:bg-white dark:hover:bg-gray-700 transition"
+          class="lg:hidden w-11 h-11 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white/50 dark:bg-gray-800/50 flex items-center justify-center"
           (click)="mobileMenuOpen = !mobileMenuOpen">
-          <i class="bi" [ngClass]="mobileMenuOpen ? 'bi-x-lg' : 'bi-list'" class="text-2xl"></i>
+          <i class="bi" [ngClass]="mobileMenuOpen ? 'bi-x-lg' : 'bi-distribute-vertical'" class="text-xl"></i>
         </button>
       </div>
 
@@ -148,22 +137,34 @@
   </nav>
 
   <!-- Hero Section -->
-  <section class="hero-section pt-32 pb-16 lg:pt-48 lg:pb-32 relative overflow-hidden"
-    [ngClass]="isDarkMode() ? 'bg-gray-900 text-white' : 'bg-white text-gray-900'">
-    <div class="container mx-auto px-4 relative z-10">
-      <div class="flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
+  <section
+    class="hero-section pt-32 pb-16 lg:pt-48 lg:pb-32 relative overflow-hidden transition-all duration-500 bg-white text-gray-900">
+    <div class="container mx-auto px-4 relative z-20">
+      <div class="flex flex-col lg:flex-row items-center gap-16 lg:gap-24">
 
+        <!-- Text Content -->
         <div class="w-full lg:w-1/2 space-y-8 text-center lg:text-left">
+          <div class="animate-[fadeDown_0.8s_ease-out]">
+            <span class="glass-pill">
+              <span class="relative flex h-2 w-2">
+                <span
+                  class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+              </span>
+              Modern Healthcare Evolution
+            </span>
+          </div>
 
           <h1
-            class="text-4xl sm:text-6xl md:text-7xl font-extrabold leading-[1.1] tracking-tight animate-[fadeUp_0.8s_ease-out]">
+            class="text-5xl sm:text-6xl md:text-7xl font-black leading-[1.05] tracking-tight animate-[fadeUp_0.8s_ease-out]">
             <span>Your Health,</span><br class="hidden sm:block" />
-            <span class="bg-gradient-to-r from-green-500 to-emerald-600 bg-clip-text text-transparent">Your
-              Priority</span>
+            <span class="gradient-text">Your Priority</span>
           </h1>
+
           <p
-            class="text-lg sm:text-xl md:text-2xl text-gray-500 dark:text-gray-400 max-w-2xl mx-auto lg:mx-0 leading-relaxed animate-[fadeUp_1s_ease-out]">
-            Book appointments in seconds, connect with top doctors instantly, and manage your health journey with ease.
+            class="text-lg sm:text-xl text-gray-500 dark:text-gray-400 max-w-2xl mx-auto lg:mx-0 leading-relaxed animate-[fadeUp_1s_ease-out]">
+            Experience the future of healthcare. Book top-tier specialists, manage records, and consult doctors
+            instantly - all from our secure, all-in-one platform.
           </p>
 
           <div
@@ -173,88 +174,94 @@
               Get Started Now
               <img class="w-5 h-5" src="https://img.icons8.com/?size=100&id=26138&format=png&color=ffffff" alt="Next" />
             </button>
-            <a href="#how-it-works"
-              class="group text-gray-600 dark:text-gray-300 hover:text-green-500 transition-colors font-semibold flex items-center gap-2 text-lg">
-              <span
-                class="p-3 rounded-full border border-gray-200 dark:border-gray-700 group-hover:border-green-500 transition-colors">
-                <i class="bi bi-play-fill text-2xl"></i>
-              </span>
-              Watch Demo
-            </a>
           </div>
 
-          <!-- Stats -->
-          <div class="flex flex-wrap gap-6 mt-8">
-
-            <!-- Happy Patients -->
+          <!-- Stats Grid -->
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 mt-12 animate-[fadeUp_1.4s_ease-out]">
             <div
-              [ngClass]="isDarkMode() ? 'bg-gray-800/50 backdrop-blur-sm text-white hover:bg-gray-700/50' : 'bg-white/80 backdrop-blur-sm text-gray-900 hover:bg-white'"
-              class="flex-1 min-w-[160px] flex items-center gap-4 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 transition-all duration-300 cursor-pointer group/stat">
-              <div
-                class="p-3 rounded-xl bg-green-500/10 text-green-500 group-hover/stat:scale-110 transition-transform">
-                <i class="bi bi-people-fill text-2xl"></i>
+              class="stat-card p-4 rounded-2xl border border-gray-100 bg-white shadow-sm transition-all hover:border-green-500/20">
+              <div class="text-2xl font-black text-gray-900">
+                {{ (happyPatients() || 12500) | number:'1.0-0' }}+
               </div>
-              <div>
-                <div class="font-bold text-2xl">
-                  {{ happyPatients() !== null ? (happyPatients()! | number:'1.0-0') + '+' : '—' }}
-                </div>
-                <div class="text-gray-500 dark:text-gray-400 text-sm font-medium">Happy Patients</div>
-              </div>
+              <div class="text-xs font-bold text-gray-500 uppercase tracking-widest">Active Patients</div>
             </div>
-
-            <!-- Rating -->
             <div
-              [ngClass]="isDarkMode() ? 'bg-gray-800/50 backdrop-blur-sm text-white hover:bg-gray-700/50' : 'bg-white/80 backdrop-blur-sm text-gray-900 hover:bg-white'"
-              class="flex-1 min-w-[160px] flex items-center gap-4 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 transition-all duration-300 cursor-pointer group/stat">
-              <div
-                class="p-3 rounded-xl bg-green-500/10 text-green-500 group-hover/stat:scale-110 transition-transform">
-                <i class="bi bi-star-fill text-2xl"></i>
-              </div>
-              <div>
-                <div class="font-bold text-2xl">
-                  {{ platformRating() !== null ? (platformRating()! | number:'1.1-1') + '/5' : '—' }}
-                </div>
-                <div class="text-gray-500 dark:text-gray-400 text-sm font-medium">Platform Rating</div>
-              </div>
+              class="stat-card p-4 rounded-2xl border border-gray-100 bg-white shadow-sm transition-all hover:border-green-500/20">
+              <div class="text-2xl font-black text-gray-900">500+</div>
+              <div class="text-xs font-bold text-gray-500 uppercase tracking-widest">Expert Doctors</div>
             </div>
-
+            <div
+              class="stat-card p-4 rounded-2xl border border-gray-100 bg-white shadow-sm transition-all hover:border-green-500/20 col-span-2 sm:col-span-1">
+              <div class="flex items-center gap-2">
+                <div class="text-2xl font-black text-gray-900">
+                  {{ (platformRating() || 4.8) | number:'1.1-1' }}
+                </div>
+                <i class="bi bi-star-fill text-yellow-400 text-sm"></i>
+              </div>
+              <div class="text-xs font-bold text-gray-500 uppercase tracking-widest">Platform Rating</div>
+            </div>
           </div>
         </div>
 
         <!-- Hero Image -->
-        <div class="w-full lg:w-1/2 relative mt-8 lg:mt-0">
-          <div class="hero-image-frame relative">
-            <!-- Decorative blobs -->
-            <div class="absolute -top-10 -right-10 w-40 h-40 bg-green-500/10 rounded-full blur-3xl animate-pulse"></div>
-            <div class="absolute -bottom-10 -left-10 w-40 h-40 bg-emerald-500/10 rounded-full blur-3xl animate-pulse"
-              style="animation-delay: 1s"></div>
-
+        <div class="w-full lg:w-1/2 relative mt-12 lg:mt-0 hero-image-container animate-[fadeLeft_1s_ease-out]">
+          <div class="hero-image-card relative">
+            <!-- Decorative Glows -->
+            <div class="absolute -top-20 -right-20 w-80 h-80 bg-green-500/15 rounded-full blur-[120px] animate-pulse">
+            </div>
             <div
-              class="relative rounded-[2.5rem] overflow-hidden shadow-[0_20px_50px_rgba(22,163,74,0.15)] transform lg:rotate-3 hover:rotate-0 transition-all duration-700">
-              <img src="assets/images/QuickMed-Logo.png" alt="Healthcare" class="w-full h-auto object-cover" />
+              class="absolute -bottom-20 -left-20 w-80 h-80 bg-emerald-500/15 rounded-full blur-[120px] animate-pulse"
+              style="animation-delay: 2s"></div>
+
+            <!-- Image Mockup -->
+            <div
+              class="relative rounded-[3.5rem] overflow-hidden shadow-2xl border-8 border-white dark:border-gray-800 bg-white dark:bg-gray-800">
+              <img src="assets/images/QuickMed-Logo.png" alt="Healthcare"
+                class="w-full h-auto object-cover transform scale-100 hover:scale-105 transition-transform duration-700" />
+
+              <!-- Glass Overlay for premium feel -->
+              <div class="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent"></div>
 
               <!-- Floating UI Elements -->
               <div
-                class="absolute top-8 left-8 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md p-4 rounded-2xl shadow-lg border border-white/20 flex items-center gap-3 animate-[fadeDown_1.5s_ease-out]">
-                <div class="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center text-white">
-                  <i class="bi bi-calendar-check-fill"></i>
+                class="absolute top-8 left-8 floating-element p-4 rounded-2xl shadow-2xl border border-white/20 flex items-center gap-4 animate-[fadeDown_1.5s_ease-out] hover:scale-110 transition-transform cursor-default z-30">
+                <div
+                  class="w-12 h-12 rounded-xl bg-green-500 flex items-center justify-center text-white shadow-lg shadow-green-500/30">
+                  <i class="bi bi-calendar-check-fill text-xl"></i>
                 </div>
                 <div>
-                  <div class="text-xs text-gray-500 dark:text-gray-400">Next Appointment</div>
-                  <div class="text-sm font-bold">Today, 2:30 PM</div>
+                  <div class="text-[10px] font-black uppercase tracking-wider text-gray-500">Next Visit</div>
+                  <div class="text-sm font-bold text-gray-900">Today, 2:30 PM</div>
                 </div>
               </div>
 
               <div
-                class="absolute bottom-8 right-8 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md p-4 rounded-2xl shadow-lg border border-white/20 flex items-center gap-3 animate-[fadeUp_1.8s_ease-out]">
-                <div class="w-10 h-10 rounded-full bg-green-500/10 flex items-center justify-center text-green-500">
-                  <i class="bi bi-activity"></i>
+                class="absolute bottom-8 right-8 floating-element p-4 rounded-2xl shadow-2xl border border-white/20 flex items-center gap-4 animate-[fadeUp_1.8s_ease-out] hover:scale-110 transition-transform cursor-default z-30">
+                <div class="w-12 h-12 rounded-xl bg-green-500/10 flex items-center justify-center text-green-500">
+                  <i class="bi bi-activity text-2xl animate-pulse"></i>
                 </div>
                 <div>
-                  <div class="text-xs text-gray-500 dark:text-gray-400">Heart Rate</div>
-                  <div class="text-sm font-bold">72 BPM</div>
+                  <div class="text-[10px] font-black uppercase tracking-wider text-gray-500">Live Vitals</div>
+                  <div class="text-sm font-bold text-gray-900">72 BPM</div>
                 </div>
               </div>
+            </div>
+
+            <!-- Additional Badge -->
+            <div
+              class="absolute -bottom-6 left-1/2 -translate-x-1/2 bg-white px-6 py-3 rounded-2xl shadow-xl border border-gray-100 flex items-center gap-3 whitespace-nowrap animate-[fadeUp_2s_ease-out] z-40">
+              <div class="flex -space-x-3">
+                <div
+                  class="w-8 h-8 rounded-full border-2 border-white bg-blue-500 flex items-center justify-center text-[10px] text-white font-bold">
+                  JD</div>
+                <div
+                  class="w-8 h-8 rounded-full border-2 border-white bg-purple-500 flex items-center justify-center text-[10px] text-white font-bold">
+                  AS</div>
+                <div
+                  class="w-8 h-8 rounded-full border-2 border-white bg-green-500 flex items-center justify-center text-[10px] text-white font-bold">
+                  +50</div>
+              </div>
+              <span class="text-xs font-bold text-gray-600 dark:text-gray-400">Doctors Online</span>
             </div>
           </div>
         </div>
@@ -264,13 +271,12 @@
 
     <!-- Decorative Background -->
     <div class="absolute top-0 left-0 w-full h-full 
-              bg-gradient-to-r from-green-100 to-white opacity-20 
-              pointer-events-none dark:from-gray-800 dark:to-gray-900">
+                bg-gradient-to-br from-green-50/20 to-white pointer-events-none">
     </div>
   </section>
 
 
-  <section class="py-24 relative overflow-hidden"
+  <section class="py-32 relative overflow-hidden"
     [ngClass]="isDarkMode() ? 'bg-gray-900 text-gray-100' : 'bg-gray-50 text-gray-900'" id="features">
 
     <!-- Background accents -->
@@ -280,67 +286,25 @@
     <div class="container mx-auto px-6 relative z-10">
       <!-- Section Header -->
       <div class="text-center max-w-3xl mx-auto mb-20 animate-[fadeUp_0.6s_ease-out]">
-        <h2 class="text-4xl md:text-5xl font-black mb-6 tracking-tight">Everything you need, nothing you don't</h2>
+        <h2 class="text-4xl md:text-5xl font-black mb-6 tracking-tight">Experience Premium Healthcare</h2>
         <p class="text-xl text-gray-500 dark:text-gray-400 font-medium leading-relaxed">
-          Powerful, reliable, fast. Explore the features that make QuickMed the #1 healthcare platform.
+          Everything you need for a seamless health journey, integrated into one powerful platform.
         </p>
       </div>
 
       <!-- Benefits Grid -->
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-        <!-- Benefit Card 1 -->
-        <div
-          class="group p-8 rounded-[2.5rem] shadow-xl shadow-gray-200/50 dark:shadow-none transition-all duration-500 hover:-translate-y-3 hover:shadow-2xl hover:shadow-green-500/10 border border-transparent hover:border-green-500/20"
-          [ngClass]="isDarkMode() ? 'bg-gray-800/50 backdrop-blur-sm' : 'bg-white'">
+        <!-- Benefit Cards -->
+        <div *ngFor="let feature of features"
+          class="group relative p-10 rounded-[2.5rem] transition-all duration-500 hover:-translate-y-4 border border-transparent hover:border-green-500/20 shadow-xl hover:shadow-2xl hover:shadow-green-500/10"
+          [ngClass]="isDarkMode() ? 'bg-gray-800/40 backdrop-blur-md shadow-none' : 'bg-white shadow-gray-200/50'">
           <div
             class="w-16 h-16 rounded-2xl bg-green-500/10 flex items-center justify-center mb-8 group-hover:scale-110 group-hover:bg-green-500 group-hover:text-white transition-all duration-500 text-green-500">
-            <i class="bi bi-clock-history text-3xl"></i>
+            <i class="bi text-3xl" [ngClass]="feature.icon"></i>
           </div>
-          <h4 class="text-2xl font-bold mb-4">Smart Scheduling</h4>
-          <p class="text-gray-500 dark:text-gray-400 leading-relaxed text-lg">
-            Easy one-click tool and ultra-sleek UI for instant appointment booking with your preferred specialists.
-          </p>
-        </div>
-
-        <!-- Benefit Card 2 -->
-        <div
-          class="group p-8 rounded-[2.5rem] shadow-xl shadow-gray-200/50 dark:shadow-none transition-all duration-500 hover:-translate-y-3 hover:shadow-2xl hover:shadow-green-500/10 border border-transparent hover:border-green-500/20"
-          [ngClass]="isDarkMode() ? 'bg-gray-800/50 backdrop-blur-sm' : 'bg-white'">
-          <div
-            class="w-16 h-16 rounded-2xl bg-green-500/10 flex items-center justify-center mb-8 group-hover:scale-110 group-hover:bg-green-500 group-hover:text-white transition-all duration-500 text-green-500">
-            <i class="bi bi-lightning-charge-fill text-3xl"></i>
-          </div>
-          <h4 class="text-2xl font-bold mb-4">Zero Wait Times</h4>
-          <p class="text-gray-500 dark:text-gray-400 leading-relaxed text-lg">
-            Get matched with a doctor in your city instantly. No more waiting in long queues or crowded clinics.
-          </p>
-        </div>
-
-        <!-- Benefit Card 3 -->
-        <div
-          class="group p-8 rounded-[2.5rem] shadow-xl shadow-gray-200/50 dark:shadow-none transition-all duration-500 hover:-translate-y-3 hover:shadow-2xl hover:shadow-green-500/10 border border-transparent hover:border-green-500/20"
-          [ngClass]="isDarkMode() ? 'bg-gray-800/50 backdrop-blur-sm' : 'bg-white'">
-          <div
-            class="w-16 h-16 rounded-2xl bg-green-500/10 flex items-center justify-center mb-8 group-hover:scale-110 group-hover:bg-green-500 group-hover:text-white transition-all duration-500 text-green-500">
-            <i class="bi bi-camera-video-fill text-3xl"></i>
-          </div>
-          <h4 class="text-2xl font-bold mb-4">Telemedicine Ready</h4>
-          <p class="text-gray-500 dark:text-gray-400 leading-relaxed text-lg">
-            High-quality video calls, secure messaging, and digital prescriptions from the comfort of your home.
-          </p>
-        </div>
-
-        <!-- Benefit Card 4 -->
-        <div
-          class="group p-8 rounded-[2.5rem] shadow-xl shadow-gray-200/50 dark:shadow-none transition-all duration-500 hover:-translate-y-3 hover:shadow-2xl hover:shadow-green-500/10 border border-transparent hover:border-green-500/20"
-          [ngClass]="isDarkMode() ? 'bg-gray-800/50 backdrop-blur-sm' : 'bg-white'">
-          <div
-            class="w-16 h-16 rounded-2xl bg-green-500/10 flex items-center justify-center mb-8 group-hover:scale-110 group-hover:bg-green-500 group-hover:text-white transition-all duration-500 text-green-500">
-            <i class="bi bi-shield-check text-3xl"></i>
-          </div>
-          <h4 class="text-2xl font-bold mb-4">Health Records</h4>
-          <p class="text-gray-500 dark:text-gray-400 leading-relaxed text-lg">
-            Secure, encrypted access to all your medical history and reports in one centralized location.
+          <h4 class="text-2xl font-black mb-4 tracking-tight">{{ feature.title }}</h4>
+          <p class="text-gray-500 dark:text-gray-400 leading-relaxed font-medium">
+            {{ feature.description }}
           </p>
         </div>
       </div>
@@ -348,77 +312,50 @@
   </section>
 
 
-  <section id="how-it-works" class="relative py-24 transition-colors duration-300"
-    [ngClass]="isDarkMode() ? 'home-dark-bg' : 'home-light-bg'">
+  <section id="how-it-works" class="py-32 relative overflow-hidden"
+    [ngClass]="isDarkMode() ? 'home-dark-bg' : 'bg-white'">
 
     <div class="container mx-auto px-6">
-
       <!-- Section Header -->
-      <div class="max-w-2xl mx-auto text-center mb-20 animate-[fadeUp_0.6s_ease-out]">
-        <h2 class="text-4xl md:text-5xl font-extrabold mb-4"
-          [ngClass]="isDarkMode() ? 'text-white' : 'text-neutral-900'">
-          Get started in 3 simple steps
+      <div class="max-w-2xl mx-auto text-center mb-24">
+        <h2 class="text-4xl md:text-5xl font-black mb-6" [ngClass]="isDarkMode() ? 'text-white' : 'text-gray-900'">
+          Simple Health Management
         </h2>
-        <p class="text-lg leading-relaxed" [ngClass]="isDarkMode() ? 'text-neutral-400' : 'text-neutral-600'">
-          It’s so easy you’ll wonder why healthcare wasn’t always like this
+        <p class="text-xl text-gray-500 dark:text-gray-400 font-medium">
+          Start your wellness journey in three easy steps
         </p>
       </div>
 
       <!-- Steps Grid -->
-      <div class="grid gap-10 lg:grid-cols-3 relative px-4 lg:px-0">
-
-        <!-- Connector Line for Desktop -->
-        <div class="absolute hidden lg:block top-1/2 left-0 right-0 h-0.5
-                  bg-gradient-to-r from-transparent via-green-500/20 to-transparent">
+      <div class="grid gap-12 lg:grid-cols-3 relative">
+        <!-- Connector Line -->
+        <div class="absolute hidden lg:block top-24 left-1/4 right-1/4 h-1 
+                  bg-gradient-to-r from-green-500/0 via-green-500/20 to-green-500/0">
         </div>
 
-        <!-- Step Card -->
-        <ng-container *ngFor="let step of steps">
-          <div class="relative group rounded-[2rem] p-8 lg:p-10
-                 border shadow-lg transition-all duration-500 hover:-translate-y-3" [ngClass]="isDarkMode() 
-                      ? 'bg-gray-800/50 border-gray-700 hover:shadow-green-500/10' 
-                      : 'bg-white border-gray-100 hover:shadow-green-500/10'">
-
-            <!-- Step Number -->
-            <div
-              class="absolute -top-6 left-1/2 -translate-x-1/2 lg:left-10 lg:translate-x-0 w-14 h-14 rounded-2xl
-                      flex items-center justify-center text-2xl font-black
-                      shadow-[0_8px_20px_rgba(22,163,74,0.3)] bg-green-500 text-white transform group-hover:scale-110 transition-transform">
-              {{step.number}}
-            </div>
-
-            <h3 class="mt-8 text-2xl font-bold mb-4 text-center lg:text-left"
-              [ngClass]="isDarkMode() ? 'text-white' : 'text-gray-900'">
-              {{step.title}}
-            </h3>
-
-            <p class="leading-relaxed text-center lg:text-left text-lg"
-              [ngClass]="isDarkMode() ? 'text-gray-400' : 'text-gray-600'">
-              {{step.description}}
-            </p>
+        <!-- Dynamic Steps -->
+        <div *ngFor="let step of steps" class="relative group text-center lg:text-left">
+          <div
+            class="w-20 h-20 rounded-3xl bg-green-500 text-white flex items-center justify-center text-3xl font-black mb-10 mx-auto lg:mx-0 shadow-xl shadow-green-500/30 transform group-hover:rotate-6 transition-transform">
+            {{ step.number }}
           </div>
-        </ng-container>
+          <h3 class="text-2xl font-black mb-4" [ngClass]="isDarkMode() ? 'text-white' : 'text-gray-900'">
+            {{ step.title }}
+          </h3>
+          <p class="text-lg text-gray-500 dark:text-gray-400 leading-relaxed font-medium">
+            {{ step.description }}
+          </p>
+        </div>
       </div>
 
       <!-- Action Button -->
-      <div class="text-center mt-16">
-        <button (click)="navigateToDashboard()" class="inline-flex items-center gap-3 px-10 py-4 rounded-2xl text-lg font-semibold
-               shadow-xl transition-transform duration-300 hover:scale-105 active:scale-95" [ngStyle]="{
-          'background-color': 'var(--primary)',
-          'color': '#fff',
-          'box-shadow': '0 10px 20px var(--primary)/30'
-        }">
-
-          Start Your Journey
-
-          <span class="flex items-center justify-center w-6 h-6 rounded-full
-                     transition-transform duration-300 group-hover:translate-x-1"
-            [ngStyle]="{'background-color': 'rgba(255,255,255,0.2)'}">
-            <img src="https://img.icons8.com/?size=100&id=26138&format=png&color=ffffff" class="w-4 h-4" />
-          </span>
+      <div class="text-center mt-20">
+        <button (click)="navigateToDashboard()"
+          class="inline-flex items-center gap-4 px-12 py-5 rounded-[2rem] bg-green-500 text-white text-xl font-black shadow-2xl shadow-green-500/30 hover:scale-105 active:scale-95 transition-all">
+          Start Your Journey Now
+          <i class="bi bi-chevron-right"></i>
         </button>
       </div>
-
     </div>
   </section>
 
@@ -557,59 +494,50 @@
   </section>
 
 
-  <section class="relative overflow-hidden py-24 transition-colors duration-300"
-    [ngClass]="isDarkMode() ? 'home-dark-bg' : 'home-light-bg'">
+  <section class="relative overflow-hidden py-32" [ngClass]="isDarkMode() ? 'home-dark-bg' : 'bg-white'">
 
-    <!-- Background Gradient -->
-    <div class="absolute inset-0" [ngStyle]="{
-      'background': isDarkMode() 
-        ? 'linear-gradient(to bottom right, var(--primary)/20, transparent)' 
-        : 'linear-gradient(to bottom right, var(--primary)/10, var(--primary)/5)'
-    }">
+    <!-- Dynamic Background -->
+    <div class="absolute inset-0 opacity-10 dark:opacity-20 pointer-events-none">
+      <div
+        class="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_50%,var(--primary),transparent_70%)]">
+      </div>
     </div>
 
     <div class="relative container mx-auto px-6">
-      <div class="max-w-3xl mx-auto text-center animate-[fadeUp_0.6s_ease-out]">
+      <div class="max-w-4xl mx-auto rounded-[3rem] p-12 md:p-20 text-center relative overflow-hidden shadow-2xl"
+        [ngClass]="isDarkMode() ? 'bg-gray-800/50' : 'bg-green-500'">
 
-        <!-- Section Heading -->
-        <h2 [ngClass]="isDarkMode() ? 'text-white' : 'text-neutral-900'"
-          class="text-4xl md:text-5xl font-extrabold tracking-tight mb-6">
-          Ready to feel better?
-        </h2>
+        <!-- Decorative Elements (Light Mode) -->
+        <div *ngIf="!isDarkMode()" class="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
+        <div *ngIf="!isDarkMode()" class="absolute -bottom-10 -left-10 w-40 h-40 bg-white/10 rounded-full blur-3xl">
+        </div>
 
-        <!-- Section Description -->
-        <p [ngClass]="isDarkMode() ? 'text-neutral-400' : 'text-neutral-600'" class="text-lg md:text-xl mb-10">
-          Join thousands of happy patients who’ve discovered a better way to manage their health.
-        </p>
+        <div class="relative z-10">
+          <h2 class="text-4xl md:text-6xl font-black mb-8 leading-tight"
+            [ngClass]="isDarkMode() ? 'text-white' : 'text-white'">
+            Your Health Journey <br /> Starts Here
+          </h2>
 
-        <!-- Button & Subtext -->
-        <div class="flex flex-col items-center gap-4">
-
-          <button (click)="navigateToDashboard()"
-            class="group inline-flex items-center gap-3 px-10 py-4 rounded-2xl text-lg font-semibold shadow-xl transition-all duration-300 hover:scale-105 active:scale-95"
-            [ngStyle]="{
-            'background-color': 'var(--primary)',
-            'color': '#fff',
-            'box-shadow': '0 10px 20px var(--primary)/30'
-          }">
-
-            Get Started for Free
-
-            <span
-              class="flex items-center justify-center w-6 h-6 rounded-full bg-white/20 group-hover:translate-x-1 transition-transform duration-300">
-
-              <img src="https://img.icons8.com/?size=100&id=26138&format=png&color=ffffff" class="w-4 h-4" />
-            </span>
-          </button>
-
-          <p [ngClass]="isDarkMode() ? 'text-neutral-400' : 'text-neutral-500'" class="text-sm">
-            No credit card required. Free forever.
+          <p class="text-xl mb-12 max-w-2xl mx-auto font-medium"
+            [ngClass]="isDarkMode() ? 'text-gray-400' : 'text-green-50'">
+            Join over 10,000 satisfied patients who have transformed their healthcare experience with QuickMed.
           </p>
+
+          <div class="flex flex-col sm:flex-row items-center justify-center gap-6">
+            <button (click)="navigateToDashboard()"
+              class="w-full sm:w-auto px-12 py-5 rounded-2xl text-xl font-black transition-all hover:scale-105 active:scale-95 shadow-2xl"
+              [ngClass]="isDarkMode() ? 'bg-green-500 text-white shadow-green-500/20' : 'bg-white text-green-600 shadow-white/20'">
+              Get Started Now
+            </button>
+            <a routerLink="/register"
+              class="text-white font-black uppercase tracking-widest hover:underline decoration-2 underline-offset-8">
+              Learn More
+            </a>
+          </div>
         </div>
       </div>
     </div>
   </section>
-
 
 
   <section *ngIf="editProfileOpen()"
@@ -692,7 +620,7 @@
             class="w-full rounded-xl border px-4 py-3 text-sm focus:outline-none focus:ring-2 md:col-span-2"
             [ngClass]="isDarkMode() ? 'border-neutral-700 bg-transparent text-neutral-100 focus:ring-primary' : 'border-neutral-300 bg-transparent text-neutral-900 focus:ring-primary'"
             placeholder="Short bio" [ngModel]="profileBio()" (ngModelChange)="profileBio.set($event)">
-        </textarea>
+      </textarea>
 
         </div>
 
@@ -715,105 +643,112 @@
   </section>
 
 
-
   <!-- Footer -->
-  <footer class="footer transition-colors duration-300"
-    [ngClass]="isDarkMode() ? 'home-dark-bg text-neutral-100' : 'home-light-bg text-neutral-900'">
-    <div class="container mx-auto px-6 py-12">
-      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-12">
+  <footer class="footer pt-24 pb-12 transition-colors duration-300 border-t border-gray-100 dark:border-gray-800"
+    [ngClass]="isDarkMode() ? 'home-dark-bg text-neutral-100' : 'bg-white text-neutral-900'">
+    <div class="container mx-auto px-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-16 mb-20">
 
-        <!-- Brand -->
-        <div class="sm:col-span-2 lg:col-span-2">
-          <div class="footer-brand">
-            <div class="brand-header mb-6">
-              <div class="brand-logo-wrapper">
-                <img src="assets/images/QuickMed-Logo-Light.png" alt="QuickMed" />
-              </div>
-              <div class="brand-portal-badge">
-                <span class="portal-dot"></span>
-                <span class="portal-text">QuickMed</span>
-              </div>
+        <!-- Brand & About -->
+        <div class="lg:col-span-2 space-y-8">
+          <div class="flex items-center gap-3">
+            <div
+              class="w-12 h-12 rounded-2xl bg-green-500 flex items-center justify-center shadow-lg shadow-green-500/20">
+              <img src="assets/images/QuickMed-Logo-Light.png" class="w-8 h-8 p-1" alt="Logo" />
             </div>
-            <p class="footer-description text-base text-gray-600 dark:text-gray-400 mb-8 max-w-sm">
-              Your trusted healthcare booking platform. Making healthcare accessible, one appointment at a time.
-            </p>
-            <div class="flex gap-4">
-              <a href="#"
-                class="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-600 dark:text-gray-400 hover:bg-green-500 hover:text-white transition-all duration-300">
-                <i class="bi bi-facebook"></i>
-              </a>
-              <a href="#"
-                class="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-600 dark:text-gray-400 hover:bg-green-500 hover:text-white transition-all duration-300">
-                <i class="bi bi-twitter"></i>
-              </a>
-              <a href="#"
-                class="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-600 dark:text-gray-400 hover:bg-green-500 hover:text-white transition-all duration-300">
-                <i class="bi bi-instagram"></i>
-              </a>
-              <a href="#"
-                class="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-600 dark:text-gray-400 hover:bg-green-500 hover:text-white transition-all duration-300">
-                <i class="bi bi-linkedin"></i>
-              </a>
-            </div>
+            <span
+              class="text-2xl font-black tracking-tighter bg-gradient-to-r from-green-500 to-emerald-600 bg-clip-text text-transparent">
+              QuickMed
+            </span>
+          </div>
+          <p class="text-lg text-gray-500 dark:text-gray-400 leading-relaxed max-w-md">
+            Redefining healthcare accessibility with cutting-edge technology and human-centric care. Born in the digital
+            age, for the modern patient.
+          </p>
+          <div class="flex gap-4">
+            <a href="#"
+              class="w-12 h-12 rounded-2xl bg-gray-50 dark:bg-gray-800 flex items-center justify-center text-xl text-gray-400 hover:bg-green-500 hover:text-white transition-all">
+              <i class="bi bi-twitter-x"></i>
+            </a>
+            <a href="#"
+              class="w-12 h-12 rounded-2xl bg-gray-50 dark:bg-gray-800 flex items-center justify-center text-xl text-gray-400 hover:bg-green-500 hover:text-white transition-all">
+              <i class="bi bi-instagram"></i>
+            </a>
+            <a href="#"
+              class="w-12 h-12 rounded-2xl bg-gray-50 dark:bg-gray-800 flex items-center justify-center text-xl text-gray-400 hover:bg-green-500 hover:text-white transition-all">
+              <i class="bi bi-linkedin"></i>
+            </a>
           </div>
         </div>
 
-        <!-- Product Links -->
+        <!-- Links Groups -->
         <div>
-          <h5 class="footer-title font-bold text-gray-900 dark:text-white mb-6">Product</h5>
-          <ul class="footer-links space-y-4 text-sm font-medium">
-            <li><a href="#" class="hover:text-green-500 transition-colors">Features</a></li>
-            <li><a href="#" class="hover:text-green-500 transition-colors">Pricing</a></li>
-            <li><a href="#" class="hover:text-green-500 transition-colors">Security</a></li>
-            <li><a href="#" class="hover:text-green-500 transition-colors">Roadmap</a></li>
-          </ul>
-        </div>
-
-        <!-- Company Links -->
-        <div>
-          <h5 class="footer-title font-bold text-gray-900 dark:text-white mb-6">Company</h5>
-          <ul class="footer-links space-y-4 text-sm font-medium">
-            <li><a href="#" class="hover:text-green-500 transition-colors">About</a></li>
-            <li><a href="#" class="hover:text-green-500 transition-colors">Careers</a></li>
-            <li><a href="#" class="hover:text-green-500 transition-colors">Blog</a></li>
-            <li><a href="#" class="hover:text-green-500 transition-colors">Press</a></li>
-          </ul>
-        </div>
-
-        <!-- Resources Links -->
-        <div>
-          <h5 class="footer-title font-bold text-gray-900 dark:text-white mb-6">Resources</h5>
-          <ul class="footer-links space-y-4 text-sm font-medium">
-            <li><a href="#" class="hover:text-green-500 transition-colors">Help Center</a></li>
-            <li><a href="#" class="hover:text-green-500 transition-colors">Contact</a></li>
-            <li><a href="#" class="hover:text-green-500 transition-colors">Privacy</a></li>
-            <li><a href="#" class="hover:text-green-500 transition-colors">Terms</a></li>
-          </ul>
-        </div>
-
-        <!-- Contact -->
-        <div>
-          <h5 class="footer-title font-bold text-gray-900 dark:text-white mb-6">Contact</h5>
-          <ul class="footer-contact space-y-4 text-sm font-medium">
-            <li class="flex items-center gap-2">
-              <i class="bi bi-envelope text-green-500"></i>
-              <a href="mailto:contact@quickmed.com"
-                class="hover:text-green-500 transition-colors">contact@quickmed.com</a>
+          <h5 class="text-sm font-black uppercase tracking-[0.2em] text-gray-900 dark:text-white mb-8">Platform</h5>
+          <ul class="space-y-4">
+            <li><a href="#"
+                class="text-gray-500 dark:text-gray-400 hover:text-green-500 transition-colors font-medium">Features</a>
             </li>
-            <li class="flex items-center gap-2">
-              <i class="bi bi-telephone text-green-500"></i>
-              <span>+251 920 189 715</span>
+            <li><a href="#"
+                class="text-gray-500 dark:text-gray-400 hover:text-green-500 transition-colors font-medium">For
+                Doctors</a></li>
+            <li><a href="#"
+                class="text-gray-500 dark:text-gray-400 hover:text-green-500 transition-colors font-medium">For
+                Patients</a></li>
+            <li><a href="#"
+                class="text-gray-500 dark:text-gray-400 hover:text-green-500 transition-colors font-medium">Mobile
+                App</a>
             </li>
+          </ul>
+        </div>
+
+        <div>
+          <h5 class="text-sm font-black uppercase tracking-[0.2em] text-gray-900 dark:text-white mb-8">Company</h5>
+          <ul class="space-y-4">
+            <li><a href="#"
+                class="text-gray-500 dark:text-gray-400 hover:text-green-500 transition-colors font-medium">Our
+                Story</a>
+            </li>
+            <li><a href="#"
+                class="text-gray-500 dark:text-gray-400 hover:text-green-500 transition-colors font-medium">Careers</a>
+            </li>
+            <li><a href="#"
+                class="text-gray-500 dark:text-gray-400 hover:text-green-500 transition-colors font-medium">Press
+                Kit</a>
+            </li>
+            <li><a href="#"
+                class="text-gray-500 dark:text-gray-400 hover:text-green-500 transition-colors font-medium">Contact</a>
+            </li>
+          </ul>
+        </div>
+
+        <div>
+          <h5 class="text-sm font-black uppercase tracking-[0.2em] text-gray-900 dark:text-white mb-8">Support</h5>
+          <ul class="space-y-4">
+            <li><a href="#"
+                class="text-gray-500 dark:text-gray-400 hover:text-green-500 transition-colors font-medium">Help
+                Center</a></li>
+            <li><a href="#"
+                class="text-gray-500 dark:text-gray-400 hover:text-green-500 transition-colors font-medium">Security</a>
+            </li>
+            <li><a href="#"
+                class="text-gray-500 dark:text-gray-400 hover:text-green-500 transition-colors font-medium">Privacy
+                Policy</a></li>
+            <li><a href="#"
+                class="text-gray-500 dark:text-gray-400 hover:text-green-500 transition-colors font-medium">Terms of
+                Use</a></li>
           </ul>
         </div>
       </div>
 
-      <!-- Footer Bottom -->
-      <div class="footer-bottom mt-10 text-center text-sm text-neutral-500 dark:text-neutral-400">
-        <p>
-          &copy; 2025 QuickMed. All rights reserved. Built with
-          <i class="bi bi-heart-fill" [ngStyle]="{ color: 'var(--primary)' }"></i>
+      <!-- Bottom -->
+      <div
+        class="pt-12 border-t border-gray-100 dark:border-gray-800 flex flex-col md:flex-row justify-between items-center gap-6">
+        <p class="text-gray-500 dark:text-gray-400 font-medium">
+          &copy; 2025 QuickMed. All rights reserved.
         </p>
+        <div class="flex items-center gap-2 text-gray-500 dark:text-gray-400 font-medium">
+          Built with <i class="bi bi-heart-fill text-red-500 animate-pulse"></i> for Ethiopia
+        </div>
       </div>
     </div>
   </footer>
