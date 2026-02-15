@@ -62,7 +62,13 @@ export class HomeComponent implements OnInit {
   profilePhone = signal('')
   profileSpecialty = signal('')
   profileBio = signal('')
+  isScrolled = signal(false)
   private selectedAvatarFile: File | null = null
+
+  @HostListener('window:scroll', [])
+  onWindowScroll() {
+    this.isScrolled.set(window.scrollY > 20)
+  }
 
   constructor(
     private authService: AuthService,
