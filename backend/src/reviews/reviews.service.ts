@@ -119,33 +119,39 @@ export class ReviewsService {
     happyPatients: number;
     doctorCount: number;
   }> {
-    const reviews = await this.reviewsRepository.find({
-      select: ['doctorId', 'patientId', 'rating'],
-    });
-
-    if (reviews.length === 0) {
-      return { average: 0, count: 0, happyPatients: 0, doctorCount: 0 };
-    }
-
-    const sum = reviews.reduce((acc, review) => acc + review.rating, 0);
-    const average = parseFloat((sum / reviews.length).toFixed(1));
-
-    // Count distinct patients who left at least one review
-    const uniquePatients = new Set<string>();
-    reviews.forEach((r) => {
-      if (r.patientId) {
-        uniquePatients.add(r.patientId);
-      }
-    });
-
+    // 1. Get Doctor Count
     const doctorCount = await this.usersRepository.count({
       where: { role: UserRole.DOCTOR },
     });
 
+    // 2. Get Patient Count (active patients)
+    const patientCount = await this.usersRepository.count({
+      where: { role: UserRole.PATIENT },
+    });
+
+    // 3. Get Reviews Aggregates
+    const reviews = await this.reviewsRepository.find({
+      select: ['rating'],
+    });
+
+    let average = 0;
+    let count = 0;
+
+    if (reviews.length > 0) {
+      const sum = reviews.reduce((acc, review) => acc + review.rating, 0);
+      average = parseFloat((sum / reviews.length).toFixed(1));
+      count = reviews.length;
+    } else {
+      // Default to a good rating if no reviews yet, or 0
+      average = 5.0; // Startup optimism! Or make it 0
+      count = 0;
+    }
+
+    // "happyPatients" property maps to "Active Patients" on frontend
     return {
-      average,
-      count: reviews.length,
-      happyPatients: uniquePatients.size,
+      average: count > 0 ? average : 0, // Actually, let's return 0 if no reviews to be honest
+      count,
+      happyPatients: patientCount,
       doctorCount,
     };
   }

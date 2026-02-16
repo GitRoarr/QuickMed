@@ -55,24 +55,80 @@
         </ng-container>
 
         <ng-template #loggedIn>
-          <div class="hidden sm:flex items-center group">
+          <div class="hidden sm:flex items-center gap-3 relative profile-dropdown-container">
+            <!-- Profile Trigger -->
             <div
-              class="flex items-center gap-3 p-1 pr-4 rounded-2xl bg-transparent cursor-pointer transition-all duration-300 hover:bg-gray-100/50 dark:hover:bg-gray-800/50"
-              (click)="navigateToDashboard()">
+              class="flex items-center gap-3 p-1.5 pr-4 rounded-full border border-transparent hover:border-border/50 hover:bg-surface/50 cursor-pointer transition-all duration-300"
+              (click)="toggleProfileDropdown()">
+              <!-- Avatar -->
               <div class="relative">
                 <img *ngIf="currentUser()?.avatar; else initialsAvatar" [src]="currentUser()?.avatar!" alt="Avatar"
-                  class="w-8 h-8 rounded-xl shadow-sm object-cover" />
+                  class="w-9 h-9 rounded-full shadow-sm object-cover border border-border" />
                 <ng-template #initialsAvatar>
                   <div
-                    class="w-8 h-8 rounded-xl bg-green-500 text-white font-black flex items-center justify-center text-[10px]">
+                    class="w-9 h-9 rounded-full bg-gradient-to-br from-green-400 to-emerald-600 text-white font-black flex items-center justify-center text-xs shadow-lg shadow-green-500/20">
                     {{ getInitials(currentUser()?.firstName, currentUser()?.lastName) }}
                   </div>
                 </ng-template>
-                <span
-                  class="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-green-500 border-2 border-white dark:border-gray-800 rounded-full"></span>
+                <div
+                  class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border-2 border-white dark:border-gray-800 rounded-full">
+                </div>
               </div>
-              <span class="font-black text-gray-900 dark:text-white text-xs tracking-wide">{{
-                currentUser()?.firstName }}</span>
+
+              <div class="flex flex-col items-start -space-y-0.5">
+                <span class="font-bold text-text-primary text-sm leading-tight">{{ currentUser()?.firstName }}</span>
+                <span class="text-[10px] text-text-secondary font-bold uppercase tracking-wide">{{ currentUser()?.role
+                  ||
+                  'Patient' }}</span>
+              </div>
+
+              <i class="bi bi-chevron-down text-[10px] text-text-secondary transition-transform duration-300 ml-1"
+                [class.rotate-180]="profileDropdownOpen()"></i>
+            </div>
+
+            <!-- Dropdown Menu -->
+            <div *ngIf="profileDropdownOpen()"
+              class="absolute top-full right-0 mt-3 w-64 p-2 rounded-2xl shadow-xl border border-border bg-surface profile-dropdown-panel animate-[fadeUp_0.2s_ease-out] z-50 origin-top-right backdrop-blur-xl">
+
+              <!-- Dropdown Header -->
+              <div class="p-4 border-b border-border/50 mb-2 bg-surface-alt/50 rounded-xl">
+                <p class="font-black text-text-primary truncate">{{ currentUser()?.firstName }} {{
+                  currentUser()?.lastName
+                  }}</p>
+                <p class="text-xs text-text-secondary truncate font-medium">{{ currentUser()?.email }}</p>
+              </div>
+
+              <!-- Menu Items -->
+              <div class="space-y-1">
+                <button (click)="navigateToDashboard()"
+                  class="w-full text-left flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-surface-alt transition-colors text-sm font-bold text-text-secondary hover:text-primary group">
+                  <div
+                    class="w-8 h-8 rounded-lg bg-surface-alt group-hover:bg-primary/10 flex items-center justify-center transition-colors">
+                    <i class="bi bi-grid-fill text-text-secondary group-hover:text-primary"></i>
+                  </div>
+                  Dashboard
+                </button>
+
+                <button (click)="openEditProfile()"
+                  class="w-full text-left flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-surface-alt transition-colors text-sm font-bold text-text-secondary hover:text-primary group">
+                  <div
+                    class="w-8 h-8 rounded-lg bg-surface-alt group-hover:bg-primary/10 flex items-center justify-center transition-colors">
+                    <i class="bi bi-person-gear text-text-secondary group-hover:text-primary"></i>
+                  </div>
+                  Edit Profile
+                </button>
+              </div>
+
+              <div class="h-px bg-border/50 my-2 mx-2"></div>
+
+              <button (click)="logout()"
+                class="w-full text-left flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors text-sm font-bold text-red-500 group">
+                <div
+                  class="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-900/10 flex items-center justify-center transition-colors">
+                  <i class="bi bi-box-arrow-right text-red-500"></i>
+                </div>
+                Sign Out
+              </button>
             </div>
           </div>
         </ng-template>
@@ -183,20 +239,20 @@
             <div
               class="stat-card p-4 rounded-2xl border transition-all border-border bg-surface hover:border-primary/50 shadow-lg">
               <div class="text-2xl font-black text-text-primary">
-                {{ (happyPatients() || 12500) | number:'1.0-0' }}+
+                {{ (happyPatients() ?? 0) | number:'1.0-0' }}+
               </div>
               <div class="text-xs font-bold text-text-secondary uppercase tracking-widest">Active Patients</div>
             </div>
             <div
               class="stat-card p-4 rounded-2xl border transition-all border-border bg-surface hover:border-primary/50 shadow-lg">
-              <div class="text-2xl font-black text-text-primary">{{ (totalDoctors() || 0) | number:'1.0-0' }}+</div>
+              <div class="text-2xl font-black text-text-primary">{{ (totalDoctors() ?? 0) | number:'1.0-0' }}+</div>
               <div class="text-xs font-bold text-gray-500 uppercase tracking-widest">Expert Doctors</div>
             </div>
             <div
               class="stat-card p-4 rounded-2xl border transition-all col-span-2 sm:col-span-1 border-border bg-surface hover:border-primary/50 shadow-lg">
               <div class="flex items-center gap-2">
                 <div class="text-2xl font-black text-text-primary">
-                  {{ (platformRating() || 4.8) | number:'1.1-1' }}
+                  {{ (platformRating() ?? 0) | number:'1.1-1' }}
                 </div>
                 <i class="bi bi-star-fill text-yellow-400 text-sm"></i>
               </div>
