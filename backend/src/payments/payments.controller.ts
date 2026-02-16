@@ -90,6 +90,7 @@ export class PaymentsController {
       dto.amount,
       dto.currency,
       dto.note,
+      user.role,
     );
   }
 }

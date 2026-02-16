@@ -301,6 +301,14 @@ export class AppointmentsService {
       // allow receptionist updates — but we might restrict in future
     }
 
+    // Security Hardening: Prevent patients from self-confirming or marking as paid
+    if (user.role === UserRole.PATIENT) {
+      delete updateAppointmentDto.status;
+      delete updateAppointmentDto.paymentStatus;
+      delete updateAppointmentDto.receptionistId;
+      delete updateAppointmentDto.arrived;
+    }
+
     const originalDate = appointment.appointmentDate;
     const originalTime = appointment.appointmentTime;
 

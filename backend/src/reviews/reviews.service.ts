@@ -121,12 +121,12 @@ export class ReviewsService {
   }> {
     // 1. Get Doctor Count
     const doctorCount = await this.usersRepository.count({
-      where: { role: UserRole.DOCTOR },
+      where: { role: UserRole.DOCTOR, isActive: true },
     });
 
     // 2. Get Patient Count (active patients)
     const patientCount = await this.usersRepository.count({
-      where: { role: UserRole.PATIENT },
+      where: { role: UserRole.PATIENT, isActive: true },
     });
 
     // 3. Get Reviews Aggregates

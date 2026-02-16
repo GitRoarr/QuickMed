@@ -112,7 +112,9 @@ export class StripeService {
 
       await this.appointmentsRepository.update(payment.appointmentId, {
         paymentStatus: 'paid',
-        status: AppointmentStatus.CONFIRMED,
+        // Do NOT auto-confirm. Keep status as PENDING (or move from 'pending_payment' to 'pending').
+        // The doctor/receptionist must review and confirm.
+        status: AppointmentStatus.PENDING,
       });
     } else if (paymentIntent.status === 'canceled') {
       payment.status = PaymentStatus.FAILED;

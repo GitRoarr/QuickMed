@@ -1,29 +1,45 @@
 <app-admin-shell>
   <div class="page-shell">
     <section class="page-header">
-      <div>
-        <p class="eyebrow">Medical network</p>
+      <div class="header-content">
+        <span class="eyebrow">Medical Network</span>
         <h1>Doctors Management</h1>
-        <p class="subtitle">Track credentials, performance, and onboarding progress for every physician.</p>
+        <p class="subtitle">Empower your healthcare network by tracking credentials, performance, and onboarding in
+          real-time.</p>
       </div>
       <button class="primary-btn" (click)="onAdd()">
-        <span>+</span>
-        Add Doctor
+        <i class="bi bi-person-plus-fill"></i>
+        <span>Add New Physician</span>
       </button>
     </section>
 
     <section class="stats-grid" *ngIf="stats() as metric">
       <div class="stat-card">
-        <p>Total doctors</p>
-        <h3>{{ metric.totalDoctors }}</h3>
+        <div class="stat-icon">
+          <i class="bi bi-people-fill"></i>
+        </div>
+        <div class="stat-info">
+          <p>Total doctors</p>
+          <h3>{{ metric.totalDoctors }}</h3>
+        </div>
       </div>
       <div class="stat-card positive">
-        <p>Active</p>
-        <h3>{{ metric.activeDoctors }}</h3>
+        <div class="stat-icon">
+          <i class="bi bi-shield-check"></i>
+        </div>
+        <div class="stat-info">
+          <p>Active</p>
+          <h3>{{ metric.activeDoctors }}</h3>
+        </div>
       </div>
       <div class="stat-card warning">
-        <p>Pending onboarding</p>
-        <h3>{{ metric.pendingDoctors }}</h3>
+        <div class="stat-icon">
+          <i class="bi bi-hourglass-split"></i>
+        </div>
+        <div class="stat-info">
+          <p>Onboarding</p>
+          <h3>{{ metric.pendingDoctors }}</h3>
+        </div>
       </div>
     </section>
 
@@ -31,95 +47,109 @@
       <form [formGroup]="filterForm">
         <div class="search-field">
           <i class="bi bi-search"></i>
-          <input formControlName="search" placeholder="Search doctors by name, specialty, or email" />
+          <input formControlName="search" placeholder="Search by name, specialty, or email..." />
         </div>
-        <select formControlName="specialty">
-          <option value="all">All specialties</option>
-          <option *ngFor="let spec of specialties()" [value]="spec">{{ spec }}</option>
-        </select>
-        <select formControlName="status">
-          <option value="all">All statuses</option>
-          <option value="active">Active</option>
-          <option value="pending">Pending</option>
-        </select>
+        <div class="select-field">
+          <select formControlName="specialty">
+            <option value="all">All Specialties</option>
+            <option *ngFor="let spec of specialties()" [value]="spec">{{ spec }}</option>
+          </select>
+        </div>
+        <div class="select-field">
+          <select formControlName="status">
+            <option value="all">All Statuses</option>
+            <option value="active">Active</option>
+            <option value="pending">Pending</option>
+          </select>
+        </div>
       </form>
     </section>
 
-
-
     <section class="doctor-grid">
-      <div class="loader" *ngIf="loading()">Loading doctors...</div>
+      <div class="loader" *ngIf="loading()">
+        <i class="bi bi-arrow-repeat"></i>
+        <h3>Syncing Network...</h3>
+        <p>Retrieving the latest physician data</p>
+      </div>
+
       <div class="empty-state" *ngIf="!loading() && doctors().length === 0">
+        <i class="bi bi-person-x"></i>
         <h3>No doctors found</h3>
-        <p>Try adjusting your filters or invite a new doctor.</p>
+        <p>Try adjusting your filters or invite a new doctor to the platform.</p>
       </div>
 
       <article class="doctor-card" *ngFor="let doctor of doctors(); trackBy: trackByDoctor">
+        <div class="card-glint"></div>
+
         <div class="card-head">
-          <div class="avatar">
-            <img *ngIf="doctor.avatar" [src]="doctor.avatar" [alt]="doctor.firstName" />
-            <span *ngIf="!doctor.avatar">{{ getInitials(doctor) }}</span>
-          </div>
-          <div>
-            <div class="name">
-              Dr. {{ doctor.firstName }} {{ doctor.lastName }}
-              <span class="rating">
-                <i class="bi bi-star-fill"></i> {{ doctor.rating | number : "1.1-1" }}
-              </span>
+          <div class="avatar-wrapper">
+            <div class="avatar-ring"></div>
+            <div class="avatar">
+              <img *ngIf="doctor.avatar" [src]="doctor.avatar" [alt]="doctor.firstName" />
+              <span *ngIf="!doctor.avatar">{{ getInitials(doctor) }}</span>
             </div>
-            <div class="meta-flex">
-              <span class="meta truncate-tooltip" [title]="doctor.specialty || 'General Medicine'">
-                {{ doctor.specialty || 'General Medicine' }}
-              </span>
-              <span class="meta truncate-tooltip" [title]="doctor.licenseNumber || 'N/A'">
-                License {{ doctor.licenseNumber || 'N/A' }}
-              </span>
-            </div>
+            <div class="status-indicator" [ngClass]="doctor.status"></div>
           </div>
-          <span class="status-pill" [ngClass]="doctor.status">{{ doctor.status }}</span>
+
+          <div class="info">
+            <div class="name-row">
+              <span class="name">Dr. {{ doctor.firstName }} {{ doctor.lastName }}</span>
+              <div class="rating-badge">
+                <i class="bi bi-star-fill"></i>
+                {{ doctor.rating | number : "1.1-1" }}
+              </div>
+            </div>
+            <div class="specialty">{{ doctor.specialty || 'General Medicine' }}</div>
+            <div class="license">ID: {{ doctor.licenseNumber || 'N/A' }}</div>
+          </div>
         </div>
 
         <div class="card-body">
-          <div class="stat">
-            <p>Patients</p>
-            <strong>{{ doctor.stats.patients }}</strong>
+          <div class="stat-item">
+            <i class="bi bi-people-fill stat-mini-icon"></i>
+            <span class="val">{{ doctor.stats.patients }}</span>
+            <span class="lbl">Patients</span>
           </div>
-          <div class="stat">
-            <p>Appointments</p>
-            <strong>{{ doctor.stats.appointments }}</strong>
+          <div class="stat-item">
+            <i class="bi bi-calendar-check stat-mini-icon"></i>
+            <span class="val">{{ doctor.stats.appointments }}</span>
+            <span class="lbl">Appts</span>
           </div>
-          <div class="stat">
-            <p>Video visits</p>
-            <strong>{{ doctor.stats.videoVisits }}</strong>
+          <div class="stat-item">
+            <i class="bi bi-camera-video-fill stat-mini-icon"></i>
+            <span class="val">{{ doctor.stats.videoVisits }}</span>
+            <span class="lbl">Video</span>
           </div>
         </div>
 
         <div class="card-actions">
-          <button class="verify-btn validate-license" *ngIf="!doctor.verification.licenseValidated"
+          <button class="action-btn validate" *ngIf="!doctor.verification.licenseValidated"
             (click)="validateLicense(doctor.id)">
-            Validate license
+            <i class="bi bi-file-earmark-check"></i>
+            Validate License
           </button>
-          <button class="verify-btn confirm-employment" *ngIf="!doctor.verification.employmentConfirmed"
+
+          <button class="action-btn confirm" *ngIf="!doctor.verification.employmentConfirmed"
             (click)="confirmEmployment(doctor.id)">
-            Confirm employment
+            <i class="bi bi-building-check"></i>
+            Confirm Employment
           </button>
-          <button class="verify-btn activate-doctor" *ngIf="doctor.status !== 'active'"
+
+          <button class="action-btn activate" *ngIf="doctor.status !== 'active'"
             [disabled]="!doctor.verification.licenseValidated || !doctor.verification.employmentConfirmed"
             (click)="activateDoctor(doctor.id)">
+            <i class="bi bi-person-check-fill"></i>
             Activate
           </button>
         </div>
 
         <div class="card-footer">
-          <div class="footer-actions">
-            <button class="text-btn" (click)="onVerify(doctor.id)">
-             
-              Open profile
-            </button>
-            <button class="icon-btn delete" (click)="onDelete(doctor.id)">
-              <i class="bi bi-trash"></i>
-            </button>
-          </div>
+          <a class="profile-link" (click)="onVerify(doctor.id)">
+            View Profile <i class="bi bi-arrow-right"></i>
+          </a>
+          <button class="delete-btn" (click)="onDelete(doctor.id)">
+            <i class="bi bi-trash-fill"></i>
+          </button>
         </div>
       </article>
     </section>

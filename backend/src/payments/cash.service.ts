@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Payment, PaymentMethod, PaymentStatus } from './entities/payment.entity';
 import { Appointment } from '../appointments/entities/appointment.entity';
-
+import { UserRole } from '../common/index';
 import { DoctorSettings } from '../settings/entities/doctor-settings.entity';
 
 @Injectable()
@@ -23,6 +23,7 @@ export class CashService {
     amount?: number,
     currency: string = 'USD',
     note?: string,
+    role: UserRole = UserRole.RECEPTIONIST,
   ): Promise<Payment> {
     const appointment = await this.appointmentsRepo.findOne({ where: { id: appointmentId } });
     if (!appointment) throw new NotFoundException('Appointment not found');
@@ -40,21 +41,43 @@ export class CashService {
       paymentAmount = doctorSettings?.consultationFee ? Number(doctorSettings.consultationFee) : 50;
     }
 
+    const isPatientInitiated = role === UserRole.PATIENT;
+
+    // If patient initiates "Pay at Clinic", status depends on policy.
+    // Usually it means PENDING payment.
+    // If receptionist/admin initiates it, it means cash RECEIVED -> PAID.
+    const paymentStatus = isPatientInitiated ? PaymentStatus.PENDING : PaymentStatus.PAID;
+    const paidAt = isPatientInitiated ? null : new Date();
+
     const payment = this.paymentsRepo.create({
       transactionId: `CASH-${appointmentId}-${Date.now()}`,
       appointmentId,
       patientId: effectivePatientId,
       amount: paymentAmount,
-      status: PaymentStatus.PAID,
+      status: paymentStatus,
       method: PaymentMethod.CASH,
       currency,
-      description: note || `Cash payment for appointment ${appointmentId}`,
-      paidAt: new Date(),
+      description: note || (isPatientInitiated ? 'Patient chose to pay at clinic' : `Cash payment for appointment ${appointmentId}`),
+      paidAt: paidAt as any,
     });
 
     await this.paymentsRepo.save(payment);
 
-    await this.appointmentsRepo.update(appointmentId, { paymentStatus: 'paid', status: 'confirmed' } as any);
+    // Update appointment status
+    // If patient: keep appointment PENDING (waiting for doctor/admin confirmation or payment at clinic)
+    // If receptionist: CONFIRM appointment explicitly
+    if (!isPatientInitiated) {
+      await this.appointmentsRepo.update(appointmentId, {
+        paymentStatus: 'paid',
+        status: 'confirmed'
+      } as any);
+    } else {
+      // For patient, we might update paymentStatus to 'pending' just to track intent
+      // And keep status as 'pending' so doctor can review
+      await this.appointmentsRepo.update(appointmentId, {
+        paymentStatus: 'pending' // pending payment
+      } as any);
+    }
 
     return payment;
   }
