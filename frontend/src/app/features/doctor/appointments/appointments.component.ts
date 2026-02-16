@@ -188,6 +188,18 @@ export class AppointmentsComponent implements OnInit {
     });
   }
 
+  deleteAppointment(id: string | number): void {
+    if (!confirm('Are you sure you want to permanently delete this appointment?')) return;
+
+    this.appointmentService.delete(String(id)).subscribe({
+      next: () => {
+        this.toast.success('Appointment Deleted', { title: 'Success' });
+        this.loadAppointments();
+      },
+      error: () => this.toast.error('Failed to delete appointment', { title: 'Error' })
+    });
+  }
+
   startConsultation(appointmentId: string | number): void {
     const id = String(appointmentId);
     const appt = this.appointments().find(a => String(a.id) === id);
