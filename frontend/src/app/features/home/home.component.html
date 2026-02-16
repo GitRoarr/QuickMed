@@ -12,8 +12,8 @@
 
       <!-- Brand -->
       <a routerLink="/" class="flex items-center gap-3 group decoration-none">
-        <div class="brand-logo-wrapper !w-11 !h-11 !rounded-2xl shadow-lg shadow-green-500/20">
-          <img src="assets/images/QuickMed-Logo-Light.png" alt="QuickMed" class="p-1" />
+        <div class="brand-logo-wrapper">
+          <img [src]="isDarkMode() ? brandIconDarkUrl : brandIconLightUrl" alt="QuickMed" />
         </div>
         <div class="flex flex-col">
           <span
@@ -645,9 +645,8 @@
         <!-- Brand & About -->
         <div class="lg:col-span-2 space-y-8">
           <div class="flex items-center gap-3">
-            <div
-              class="w-12 h-12 rounded-2xl bg-green-500 flex items-center justify-center shadow-lg shadow-green-500/20">
-              <img src="assets/images/QuickMed-Logo-Light.png" class="w-8 h-8 p-1" alt="Logo" />
+            <div class="brand-logo-wrapper">
+              <img [src]="isDarkMode() ? brandIconDarkUrl : brandIconLightUrl" alt="QuickMed" />
             </div>
             <span
               class="text-2xl font-black tracking-tighter bg-gradient-to-r from-green-500 to-emerald-600 bg-clip-text text-transparent">

@@ -20,6 +20,8 @@ export class HomeComponent implements OnInit {
   steps = signal<LandingStep[]>([]);
   features = signal<LandingFeature[]>([]);
   mobileMenuOpen = false;
+  brandIconLightUrl = 'assets/images/QuickMed-Logo-Light.png';
+  brandIconDarkUrl = 'assets/images/QuickMed-Logo-Light.png';
   currentUser = this.authService.currentUser
   isDarkMode = this.themeService.isDarkMode
   happyPatients = signal<number | null>(null)
