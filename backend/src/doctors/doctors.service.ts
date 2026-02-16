@@ -212,7 +212,7 @@ export class DoctorsService {
       return {
         doctor: this.sanitizeDoctor(savedDoctor),
         emailSent: emailResult.sent,
-        inviteLink: emailResult.sent ? undefined : emailResult.fallbackLink || inviteLink,
+        inviteLink: emailResult.fallbackLink || inviteLink,
       };
     } catch (error) {
       await queryRunner.rollbackTransaction();

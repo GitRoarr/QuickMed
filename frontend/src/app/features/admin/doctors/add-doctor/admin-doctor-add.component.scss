@@ -1,172 +1,263 @@
-/* Medical Admin Dashboard - Add New Doctor Re-design */
+/* Medical Admin Dashboard - Add New Doctor Premium Re-design */
 
 :host {
-  --md-bg: #f8fafc;
-  --md-surface: #ffffff;
-  /* Global Primary Color #16a34a */
-  --md-primary: #16a34a;
-  --md-primary-hover: #15803d;
-  --md-text: #111827;
-  --md-text-muted: #6b7280;
-  --md-border: #e2e8f0;
-  /* Deep, premium shadows (Default) */
-  --md-shadow-card:
-    0 10px 15px -3px rgba(0, 0, 0, 0.05),
-    0 25px 50px -12px rgba(0, 0, 0, 0.15),
-    0 40px 80px -20px rgba(0, 0, 0, 0.15);
+  /* Common Variables */
+  --admin-accent: #10b981;
+  --admin-accent-glow: rgba(16, 185, 129, 0.4);
+  --radius-lg: 24px;
+  --radius-md: 16px;
+  --radius-sm: 12px;
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
-  --md-shadow-hover:
-    0 20px 25px -5px rgba(0, 0, 0, 0.1),
-    0 40px 60px -12px rgba(0, 0, 0, 0.2),
-    0 50px 90px -20px rgba(0, 0, 0, 0.2);
-
-  --md-radius: 20px;
-  /* Slightly more rounded */
+  /* Light Theme (Default) */
+  --admin-bg: #f8fafc;
+  --admin-bg-gradient: radial-gradient(circle at top right, #f1f5f9, #f8fafc);
+  --admin-card-bg: #ffffff;
+  --admin-glass: rgba(0, 0, 0, 0.02);
+  --admin-border: #e2e8f0;
+  --admin-text-main: #0f172a;
+  --admin-text-dim: #64748b;
+  --admin-input-bg: #fdfdfd;
+  --shadow-premium: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
+  --section-icon-bg: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.03));
+  --status-card-bg: linear-gradient(135deg, rgba(16, 185, 129, 0.08), rgba(16, 185, 129, 0.02));
+  --status-card-border: rgba(16, 185, 129, 0.15);
+  --copy-box-bg: rgba(0, 0, 0, 0.04);
 }
 
-/* Animations */
-@keyframes fadeInUp {
+/* Dark Theme Overrides */
+:host-context(body.dark) {
+  --admin-bg: #0f172a;
+  --admin-bg-gradient: radial-gradient(circle at top right, #1e293b, #0f172a);
+  --admin-card-bg: rgba(30, 41, 59, 0.7);
+  --admin-glass: rgba(255, 255, 255, 0.03);
+  --admin-border: rgba(255, 255, 255, 0.08);
+  --admin-text-main: #f8fafc;
+  --admin-text-dim: #94a3b8;
+  --admin-input-bg: rgba(15, 23, 42, 0.6);
+  --shadow-premium: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  --section-icon-bg: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(16, 185, 129, 0.05));
+  --status-card-bg: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(16, 185, 129, 0.05));
+  --status-card-border: rgba(16, 185, 129, 0.2);
+  --copy-box-bg: rgba(0, 0, 0, 0.3);
+}
+
+@keyframes float {
+  0% {
+    transform: translateY(0px) rotate(0deg);
+  }
+
+  50% {
+    transform: translateY(-10px) rotate(1deg);
+  }
+
+  100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+}
+
+@keyframes slideIn {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(30px);
+    filter: blur(10px);
   }
 
   to {
     opacity: 1;
     transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+@keyframes glowPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.2);
+  }
+
+  70% {
+    box-shadow: 0 0 0 15px rgba(16, 185, 129, 0);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
   }
 }
 
 .md-admin-page {
   min-height: 100vh;
-  background-color: var(--md-bg);
-  /* Changed from center to allow scrolling on smaller screens */
+  background: var(--admin-bg-gradient);
   display: flex;
   justify-content: center;
   align-items: flex-start;
   padding: 4rem 1.5rem;
   overflow-y: auto;
+  position: relative;
+  font-family: 'Outfit', 'Inter', sans-serif;
+  transition: background 0.5s ease;
+}
+
+/* Background Decoration */
+.md-admin-page::before {
+  content: '';
+  position: absolute;
+  top: -10%;
+  right: -5%;
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.08) 0%, transparent 70%);
+  filter: blur(60px);
+  pointer-events: none;
 }
 
 .md-admin-container {
   width: 100%;
-  max-width: 1000px;
-  margin: 0 auto;
+  max-width: 960px;
+  z-index: 1;
+  position: relative;
 }
 
-/* Header */
+/* Theme Toggle */
+.md-theme-toggle {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 1px solid var(--admin-border);
+  background: var(--admin-card-bg);
+  color: var(--admin-text-main);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--transition);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  z-index: 10;
+  box-shadow: var(--shadow-premium);
+}
+
+.md-theme-toggle:hover {
+  transform: rotate(15deg) scale(1.1);
+  border-color: var(--admin-accent);
+  color: var(--admin-accent);
+}
+
+.md-theme-toggle i {
+  font-size: 1.25rem;
+}
+
+/* Header Section */
 .md-header {
   text-align: center;
-  margin-bottom: 3rem;
-  animation: fadeInUp 0.6s ease-out forwards;
+  margin-bottom: 4rem;
+  animation: slideIn 0.8s ease-out forwards;
 }
 
 .md-title {
-  font-size: 2.75rem;
+  font-size: 3.5rem;
   font-weight: 800;
-  color: var(--md-text);
-  margin-bottom: 0.75rem;
-  letter-spacing: -0.025em;
-  background: linear-gradient(135deg, var(--md-text) 0%, var(--md-text-muted) 100%);
-  background-clip: text;
+  color: var(--admin-text-main);
+  margin-bottom: 1rem;
+  letter-spacing: -0.03em;
+  background: linear-gradient(to bottom right, var(--admin-text-main) 30%, var(--admin-text-dim) 100%);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
 .md-subtitle {
-  color: var(--md-text-muted);
-  font-size: 1.15rem;
-  font-weight: 500;
+  color: var(--admin-text-dim);
+  font-size: 1.25rem;
+  font-weight: 400;
 }
 
-/* Main Card */
+/* Glass Card */
 .md-card {
-  background: var(--md-surface);
-  border: 1px solid var(--md-border);
-  border-radius: var(--md-radius);
-  padding: 3.5rem;
-  box-shadow: var(--md-shadow-card);
-  animation: fadeInUp 0.6s ease-out 0.1s forwards;
-  /* Slight delay */
+  background: var(--admin-card-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--radius-lg);
+  padding: 4rem;
+  box-shadow: var(--shadow-premium);
+  animation: slideIn 0.8s ease-out 0.2s forwards;
   opacity: 0;
-  /* Initial state for animation */
-  transition: box-shadow 0.3s ease, transform 0.3s ease;
+  transition: var(--transition);
 }
 
 .md-card:hover {
-  box-shadow: var(--md-shadow-hover);
-}
-
-.md-form {
-  display: flex;
-  flex-direction: column;
+  border-color: rgba(16, 185, 129, 0.3);
+  transform: translateY(-5px);
 }
 
 /* Grid Layout */
 .md-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 5rem;
-  /* More breathing room */
-  margin-bottom: 3rem;
+  gap: 4rem;
+  margin-bottom: 3.5rem;
 }
 
 .md-col {
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: 2.5rem;
 }
 
-.md-section {
-  animation: fadeInUp 0.6s ease-out 0.3s forwards;
-  opacity: 0;
-}
-
-.md-col:nth-child(2) .md-section {
-  animation-delay: 0.4s;
-}
-
-/* Section Header */
 .md-section-header {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  padding-bottom: 1rem;
-  border-bottom: 2px solid #f1f5f9;
-  margin-bottom: 2rem;
+  gap: 1.25rem;
+  margin-bottom: 2.5rem;
 }
 
 .md-section-header i {
-  color: var(--md-primary);
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--section-icon-bg);
+  color: var(--admin-accent);
+  border-radius: 14px;
   font-size: 1.5rem;
-  background: rgba(22, 163, 74, 0.1);
-  padding: 0.6rem;
-  border-radius: 12px;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  transition: var(--transition);
+}
+
+.md-section:hover .md-section-header i {
+  transform: scale(1.1) rotate(5deg);
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.3), rgba(16, 185, 129, 0.1));
+  box-shadow: 0 0 15px rgba(16, 185, 129, 0.2);
 }
 
 .md-section-header span {
-  font-size: 0.95rem;
+  font-size: 1.1rem;
   font-weight: 700;
-  color: var(--md-text);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  color: var(--admin-text-main);
+  letter-spacing: 0.02em;
 }
 
-/* Fields */
+/* Form Controls */
 .md-field {
-  margin-bottom: 1.75rem;
+  margin-bottom: 2rem;
 }
 
 .md-field label {
   display: block;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   font-weight: 600;
-  color: var(--md-text-muted);
-  margin-bottom: 0.6rem;
+  color: var(--admin-text-dim);
+  margin-bottom: 0.75rem;
+  margin-left: 0.25rem;
 }
 
 .md-input-group {
   position: relative;
+  transition: var(--transition);
 }
 
 .md-input-group i {
@@ -174,262 +265,298 @@
   left: 1.25rem;
   top: 50%;
   transform: translateY(-50%);
-  color: #9ca3af;
+  color: var(--admin-text-dim);
   font-size: 1.2rem;
-  transition: color 0.3s ease;
   pointer-events: none;
+  transition: var(--transition);
+  opacity: 0.6;
 }
 
-.md-input-group.textarea-group i {
-  top: 1.25rem;
+.textarea-group i {
+  top: 1.5rem;
   transform: none;
 }
 
 .md-input-group input,
 .md-input-group textarea {
   width: 100%;
-  padding: 1rem 1rem 1rem 3.5rem;
-  border: 1.5px solid var(--md-border);
-  border-radius: 12px;
-  background: #ffffff;
-  color: var(--md-text);
+  padding: 1.1rem 1rem 1.1rem 3.5rem;
+  background: var(--admin-input-bg);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--radius-sm);
+  color: var(--admin-text-main);
   font-size: 1rem;
   font-family: inherit;
-  transition: all 0.25s ease;
+  transition: var(--transition);
   outline: none;
 }
 
 .md-input-group textarea {
-  resize: vertical;
-  min-height: 140px;
+  min-height: 160px;
+  resize: none;
+}
+
+.md-input-group:focus-within {
+  transform: translateX(5px);
 }
 
 .md-input-group input:focus,
 .md-input-group textarea:focus {
-  border-color: var(--md-primary);
-  box-shadow: 0 0 0 4px rgba(22, 163, 74, 0.1);
+  border-color: var(--admin-accent);
+  background: var(--admin-input-bg);
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
 }
 
-.md-input-group input:focus+i,
-/* Note: The original HTML has <i> before <input>, but CSS selector + works for siblings after. The HTML structure is i, input. So this selector 'input:focus + i' won't work if 'i' is before.
-   Let's check HTML structure:
-   <i class="bi bi-person"></i>
-   <input ...>
-   The CSS was using general sibling or just reliance on parent focus within which isn't possible purely with CSS parent selector yet. 
-   Wait, the previous CSS used `.md-input-group input:focus~i` which assumes `i` comes AFTER input.
-   In the HTML viewed earlier:
-   <div class="md-input-group">
-      <i class="bi bi-person"></i>
-      <input ...>
-   </div>
-   The icon is BEFORE the input. The previous CSS `~i` or `+i` would NOT work if icon is first.
-   Ah, checking the previous CSS again... 
-   Actually, previous CSS implementation might have been assuming icon is after or didn't work for color change.
-   Let's use :focus-within on the group parent to color the icon.
-*/
 .md-input-group:focus-within i {
-  color: var(--md-primary);
+  color: var(--admin-accent);
+  opacity: 1;
 }
 
-.md-input-group input::placeholder,
-.md-input-group textarea::placeholder {
-  color: #cbd5e1;
+.optional-badge {
+  font-size: 0.75rem;
+  color: var(--admin-text-dim);
+  font-weight: 400;
+  margin-left: 0.5rem;
+  opacity: 0.7;
 }
 
-/* Error States */
-.md-input-group input.error,
-.md-input-group textarea.error {
-  border-color: #ef4444;
-  background-color: #fef2f2;
-}
-
-.md-input-group input.error:focus,
-.md-input-group textarea.error:focus {
-  box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.15);
-}
-
-/* Actions */
+/* Action Buttons */
 .md-actions {
   display: flex;
   justify-content: flex-end;
   gap: 1.5rem;
-  margin-top: 2rem;
-  padding-top: 2.5rem;
-  border-top: 1px solid var(--md-border);
+  padding-top: 3rem;
+  border-top: 1px solid var(--admin-border);
 }
 
 .md-btn {
-  padding: 1rem 2.5rem;
-  border-radius: 12px;
+  padding: 1.1rem 2.8rem;
+  border-radius: var(--radius-md);
   font-weight: 700;
   font-size: 1rem;
   cursor: pointer;
-  border: none;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: var(--transition);
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.75rem;
+  border: 1px solid transparent;
 }
 
 .md-btn-secondary {
   background: transparent;
-  color: var(--md-text-muted);
-  border: 1.5px solid var(--md-border);
+  color: var(--admin-text-main);
+  border-color: var(--admin-border);
 }
 
 .md-btn-secondary:hover {
-  background: #f1f5f9;
-  color: var(--md-text);
-  border-color: #cbd5e1;
+  background: var(--admin-glass);
+  border-color: var(--admin-text-dim);
+  transform: translateX(-5px);
 }
 
 .md-btn-primary {
-  background: var(--md-primary);
-  color: white;
-  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.25);
+  background: var(--admin-accent);
+  color: #fff;
+  box-shadow: 0 10px 20px -5px var(--admin-accent-glow);
+  border: none;
+}
+
+body.dark .md-btn-primary {
+  color: #000;
 }
 
 .md-btn-primary:hover:not(:disabled) {
-  background: var(--md-primary-hover);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(22, 163, 74, 0.35);
+  transform: translateY(-3px) scale(1.02);
+  background: #34d399;
+  box-shadow: 0 15px 30px -10px var(--admin-accent-glow);
+}
+
+.md-btn-primary:active {
+  transform: translateY(-1px);
 }
 
 .md-btn:disabled {
-  opacity: 0.6;
+  opacity: 0.4;
   cursor: not-allowed;
-  filter: grayscale(0.5);
+  filter: grayscale(1);
 }
 
-/* Status Card (Generated Link) */
+/* Invitation Link Card */
 .md-status-card {
-  margin-top: 2.5rem;
-  background: #ffffff;
-  border-radius: var(--md-radius);
-  padding: 2rem;
-  border: 1px solid var(--md-border);
-  box-shadow: var(--md-shadow-card);
-  border-left: 6px solid var(--md-primary);
+  margin-top: 3rem;
+  background: var(--status-card-bg);
+  backdrop-filter: blur(20px);
+  border-radius: var(--radius-lg);
+  padding: 2.5rem;
+  border: 1px solid var(--status-card-border);
+  animation: slideIn 0.6s ease-out forwards;
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 2rem;
-  animation: fadeInUp 0.5s ease-out forwards;
 }
 
 .md-status-content {
   display: flex;
   align-items: center;
-  gap: 1.5rem;
-  flex: 1;
+  gap: 2rem;
+  width: 100%;
 }
 
 .md-status-content>i {
-  font-size: 2.5rem;
-  color: var(--md-primary);
-  background: rgba(22, 163, 74, 0.1);
-  padding: 1rem;
+  width: 64px;
+  height: 64px;
+  background: var(--admin-accent);
+  color: #fff;
   border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  box-shadow: 0 0 20px var(--admin-accent-glow);
+  animation: glowPulse 2s infinite;
+}
+
+body.dark .md-status-content>i {
+  color: #000;
 }
 
 .md-status-title {
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: var(--md-text);
-  margin: 0 0 0.25rem 0;
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--admin-text-main);
+  margin-bottom: 0.25rem;
 }
 
 .md-status-desc {
-  font-size: 0.95rem;
-  color: var(--md-text-muted);
-  margin: 0;
+  color: var(--admin-text-dim);
+  font-size: 1rem;
 }
 
 .md-copy-box {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  background: #f8fafc;
-  padding: 0.5rem;
-  border: 1px solid var(--md-border);
-  border-radius: 10px;
+  gap: 1rem;
+  background: var(--copy-box-bg);
+  padding: 0.6rem 0.6rem 0.6rem 1.25rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--admin-border);
+  margin-left: auto;
+  transition: var(--transition);
+}
+
+.md-copy-box:hover {
+  border-color: var(--admin-accent);
 }
 
 .md-copy-box input {
-  border: none;
   background: transparent;
-  font-family: 'Courier New', Courier, monospace;
-  font-size: 0.95rem;
-  color: var(--md-text);
-  padding: 0.5rem;
-  min-width: 250px;
+  border: none;
+  color: var(--admin-accent);
+  font-family: 'JetBrains Mono', 'Monospace', sans-serif;
+  font-size: 0.9rem;
+  width: 260px;
   outline: none;
+  cursor: copy;
 }
 
-.md-copy-box button {
-  background: var(--md-primary);
-  color: white;
-  border: none;
-  padding: 0.6rem 1.2rem;
-  border-radius: 8px;
-  font-weight: 600;
+.md-box-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.view-link-btn {
+  background: var(--admin-glass);
+  color: var(--admin-text-main);
+  border: 1px solid var(--admin-border);
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: var(--transition);
+}
+
+.view-link-btn:hover {
+  background: var(--admin-accent);
+  color: #000;
+  border-color: var(--admin-accent);
+}
+
+.md-copy-box button:not(.view-link-btn) {
+  background: var(--admin-accent);
+  color: #fff;
+  border: none;
+  padding: 0 1.5rem;
+  height: 42px;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+body.dark .md-copy-box button {
+  color: #000;
 }
 
 .md-copy-box button:hover {
-  background: var(--md-primary-hover);
+  background: #34d399;
+  transform: scale(1.05);
 }
 
 /* Spinner */
 .spinner-inline {
-  width: 1.25rem;
-  height: 1.25rem;
-  border: 2px solid white;
-  border-right-color: transparent;
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 3px solid rgba(0, 0, 0, 0.2);
+  border-top-color: currentColor;
   border-radius: 50%;
-  animation: spin 0.75s linear infinite;
+  animation: spin 0.8s linear infinite;
 }
 
 @keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-
   to {
     transform: rotate(360deg);
   }
 }
 
-/* Responsive */
-@media (max-width: 900px) {
-  .md-grid {
-    grid-template-columns: 1fr;
-    gap: 3rem;
-  }
-
+/* Responsive Design */
+@media (max-width: 1024px) {
   .md-card {
-    padding: 2.5rem 1.5rem;
-  }
-
-  .md-title {
-    font-size: 2rem;
+    padding: 3rem;
   }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 900px) {
+  .md-grid {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  .md-title {
+    font-size: 2.5rem;
+  }
+
   .md-status-card {
     flex-direction: column;
-    align-items: flex-start;
+    text-align: center;
+  }
+
+  .md-status-content {
+    flex-direction: column;
   }
 
   .md-copy-box {
+    margin-left: 0;
     width: 100%;
   }
 
   .md-copy-box input {
-    flex: 1;
-    min-width: 0;
+    width: 100%;
   }
 }

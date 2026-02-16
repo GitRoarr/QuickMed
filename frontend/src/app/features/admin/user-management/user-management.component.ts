@@ -34,7 +34,7 @@ export class UserManagementComponent implements OnInit, OnDestroy {
   users = signal<User[]>([]);
   filteredUsers = signal<User[]>([]);
   isLoading = signal(false);
-  
+
   // Stats
   totalUsers = signal(0);
   totalPatients = signal(0);
@@ -80,9 +80,15 @@ export class UserManagementComponent implements OnInit, OnDestroy {
   showDeleteConfirm = signal(false);
   deletingUser = signal<User | null>(null);
 
+  // Reset Password
+  showResetPassword = signal(false);
+  resettingUser = signal<User | null>(null);
+  newPassword = signal('');
+  resetPasswordMessage = signal<{ type: 'success' | 'error'; text: string } | null>(null);
+
   // Bulk Actions
   selectedUsers = signal<Set<string>>(new Set());
-  
+
   // User Menu
   showUserMenu = signal<string | null>(null);
 
@@ -96,7 +102,7 @@ export class UserManagementComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.loadUsers();
-    
+
     // Setup search debounce
     this.searchSubject.pipe(
       debounceTime(300),
@@ -115,13 +121,13 @@ export class UserManagementComponent implements OnInit, OnDestroy {
     this.isLoading.set(true);
     const role = this.selectedRole() !== 'all' ? this.selectedRole() : undefined;
     const search = this.searchQuery().trim() || undefined;
-    
+
     // Load all users for stats (with large limit)
     this.adminService.getAllUsers(1, 1000, undefined, undefined).subscribe({
       next: (allUsersResponse) => {
         // Calculate stats from all users
         this.calculateStatsFromUsers(allUsersResponse.data);
-        
+
         // Now load paginated/filtered users
         this.adminService.getAllUsers(this.currentPage(), this.pageSize(), role, search).subscribe({
           next: (response) => {
@@ -171,12 +177,12 @@ export class UserManagementComponent implements OnInit, OnDestroy {
 
   applyFilters() {
     let filtered = [...this.users()];
-    
+
     // Filter by role
     if (this.selectedRole() !== 'all') {
       filtered = filtered.filter(u => u.role === this.selectedRole());
     }
-    
+
     // Filter by status
     if (this.selectedStatus() !== 'all') {
       if (this.selectedStatus() === 'active') {
@@ -185,7 +191,7 @@ export class UserManagementComponent implements OnInit, OnDestroy {
         filtered = filtered.filter(u => !u.isActive);
       }
     }
-    
+
     // Apply search filter
     const searchTerm = this.searchQuery().toLowerCase().trim();
     if (searchTerm) {
@@ -194,14 +200,14 @@ export class UserManagementComponent implements OnInit, OnDestroy {
         const email = (u.email || '').toLowerCase();
         const phone = (u.phoneNumber || '').toLowerCase();
         const patientId = (u.patientId || '').toLowerCase();
-        
+
         return fullName.includes(searchTerm) ||
-               email.includes(searchTerm) ||
-               phone.includes(searchTerm) ||
-               patientId.includes(searchTerm);
+          email.includes(searchTerm) ||
+          phone.includes(searchTerm) ||
+          patientId.includes(searchTerm);
       });
     }
-    
+
     this.filteredUsers.set(filtered);
   }
 
@@ -376,6 +382,47 @@ export class UserManagementComponent implements OnInit, OnDestroy {
     });
   }
 
+  // Reset Password
+  openResetPasswordModal(user: User) {
+    this.resettingUser.set(user);
+    this.newPassword.set('');
+    this.resetPasswordMessage.set(null);
+    this.showResetPassword.set(true);
+  }
+
+  closeResetPasswordModal() {
+    this.showResetPassword.set(false);
+    this.resettingUser.set(null);
+    this.newPassword.set('');
+    this.resetPasswordMessage.set(null);
+  }
+
+  resetPassword() {
+    const user = this.resettingUser();
+    const password = this.newPassword();
+
+    if (!user || !password) {
+      this.resetPasswordMessage.set({ type: 'error', text: 'Please enter a new password' });
+      return;
+    }
+
+    if (password.length < 8) {
+      this.resetPasswordMessage.set({ type: 'error', text: 'Password must be at least 8 characters' });
+      return;
+    }
+
+    this.adminService.resetUserPassword(user.id, password).subscribe({
+      next: () => {
+        this.userMessage.set({ type: 'success', text: `Password for ${user.firstName} ${user.lastName} has been reset.` });
+        this.closeResetPasswordModal();
+      },
+      error: (err) => {
+        console.error('Reset password failed', err);
+        this.resetPasswordMessage.set({ type: 'error', text: err.error?.message || 'Failed to reset password' });
+      }
+    });
+  }
+
   // Utility Methods
   getInitials(firstName: string, lastName: string): string {
     const first = firstName?.charAt(0).toUpperCase() || '';
@@ -394,7 +441,7 @@ export class UserManagementComponent implements OnInit, OnDestroy {
   }
 
   getStatusClass(isActive: boolean): string {
-    return isActive 
+    return isActive
       ? 'px-2 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-full'
       : 'px-2 py-1 text-xs font-semibold text-gray-600 bg-gray-100 rounded-full';
   }
@@ -441,7 +488,7 @@ export class UserManagementComponent implements OnInit, OnDestroy {
 
     if (confirm(`Are you sure you want to delete ${selected.length} user(s)?`)) {
       try {
-        const deletePromises = selected.map(id => 
+        const deletePromises = selected.map(id =>
           firstValueFrom(this.adminService.deleteUser(id))
         );
 
@@ -461,7 +508,7 @@ export class UserManagementComponent implements OnInit, OnDestroy {
     if (selected.length === 0) return;
 
     try {
-      const updatePromises = selected.map(id => 
+      const updatePromises = selected.map(id =>
         firstValueFrom(this.adminService.updateUser(id, { isActive: true }))
       );
 
@@ -480,7 +527,7 @@ export class UserManagementComponent implements OnInit, OnDestroy {
     if (selected.length === 0) return;
 
     try {
-      const updatePromises = selected.map(id => 
+      const updatePromises = selected.map(id =>
         firstValueFrom(this.adminService.updateUser(id, { isActive: false }))
       );
 
@@ -517,7 +564,7 @@ export class UserManagementComponent implements OnInit, OnDestroy {
       u.isActive ? 'Active' : 'Inactive',
       this.formatDate(u.createdAt)
     ]);
-    
+
     return [
       headers.join(','),
       ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
@@ -528,7 +575,7 @@ export class UserManagementComponent implements OnInit, OnDestroy {
     const pages: number[] = [];
     const total = this.totalPages();
     const current = this.currentPage();
-    
+
     if (total <= 7) {
       for (let i = 1; i <= total; i++) {
         pages.push(i);
@@ -556,7 +603,7 @@ export class UserManagementComponent implements OnInit, OnDestroy {
         pages.push(total);
       }
     }
-    
+
     return pages;
   }
 
@@ -573,6 +620,11 @@ export class UserManagementComponent implements OnInit, OnDestroy {
 
   openDeleteConfirmWithTemplate(user: User, content: any) {
     this.openDeleteConfirm(user);
+    this.modalService.open(content, { size: 'md', centered: true });
+  }
+
+  openResetPasswordWithTemplate(user: User, content: any) {
+    this.openResetPasswordModal(user);
     this.modalService.open(content, { size: 'md', centered: true });
   }
 

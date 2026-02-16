@@ -1,23 +1,18 @@
 <app-admin-shell>
   <div class="admin-page-content user-management-page">
     <!-- Alert Message -->
-    <app-alert-message 
-      *ngIf="userMessage()" 
-      [type]="userMessage()!.type" 
-      [message]="userMessage()!.text">
+    <app-alert-message *ngIf="userMessage()" [type]="userMessage()!.type" [message]="userMessage()!.text">
     </app-alert-message>
 
     <div class="flex items-center justify-between mb-6">
       <h2 class="text-2xl font-bold">User Management</h2>
       <div class="flex gap-3">
-        <button 
-          (click)="exportUsers()"
+        <button (click)="exportUsers()"
           class="px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2">
           <i class="bi bi-download"></i>
           Export All
         </button>
-        <button 
-          (click)="openCreateModalWithTemplate(createModal)"
+        <button (click)="openCreateModalWithTemplate(createModal)"
           class="px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-semibold hover:bg-green-700 flex items-center gap-2">
           <i class="bi bi-plus-circle"></i>
           Add New User
@@ -61,17 +56,12 @@
     <div class="bg-white border border-gray-200 rounded-lg p-4 mb-6 um-card">
       <div class="flex flex-col md:flex-row items-center gap-4">
         <div class="flex-1 w-full">
-          <input 
-            type="text" 
-            [(ngModel)]="searchQuery"
-            (ngModelChange)="onSearchChange()"
-            placeholder="Search by name, email, phone, or patient ID..." 
+          <input type="text" [(ngModel)]="searchQuery" (ngModelChange)="onSearchChange()"
+            placeholder="Search by name, email, phone, or patient ID..."
             class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm shadow-sm">
         </div>
         <div class="flex items-center gap-3 w-full md:w-auto">
-          <select 
-            [(ngModel)]="selectedRole"
-            (ngModelChange)="onRoleChange()"
+          <select [(ngModel)]="selectedRole" (ngModelChange)="onRoleChange()"
             class="px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-700">
             <option value="all">All Roles</option>
             <option value="patient">Patient</option>
@@ -79,9 +69,7 @@
             <option value="admin">Admin</option>
             <option value="receptionist">Receptionist</option>
           </select>
-          <select 
-            [(ngModel)]="selectedStatus"
-            (ngModelChange)="onStatusChange()"
+          <select [(ngModel)]="selectedStatus" (ngModelChange)="onStatusChange()"
             class="px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-700">
             <option value="all">All Status</option>
             <option value="active">Active</option>
@@ -91,29 +79,23 @@
       </div>
 
       <!-- Bulk Actions -->
-      <div *ngIf="selectedUsers().size > 0" class="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg flex items-center justify-between">
+      <div *ngIf="selectedUsers().size > 0"
+        class="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg flex items-center justify-between">
         <span class="text-sm text-blue-700 font-medium">
           {{ selectedUsers().size }} user(s) selected
         </span>
         <div class="flex gap-2">
-          <button 
-            (click)="bulkActivate()"
-            class="px-3 py-1 bg-green-600 text-white rounded text-xs hover:bg-green-700">
+          <button (click)="bulkActivate()" class="px-3 py-1 bg-green-600 text-white rounded text-xs hover:bg-green-700">
             Activate
           </button>
-          <button 
-            (click)="bulkDeactivate()"
+          <button (click)="bulkDeactivate()"
             class="px-3 py-1 bg-orange-600 text-white rounded text-xs hover:bg-orange-700">
             Deactivate
           </button>
-          <button 
-            (click)="bulkDelete()"
-            class="px-3 py-1 bg-red-600 text-white rounded text-xs hover:bg-red-700">
+          <button (click)="bulkDelete()" class="px-3 py-1 bg-red-600 text-white rounded text-xs hover:bg-red-700">
             Delete
           </button>
-          <button 
-            (click)="deselectAll()"
-            class="px-3 py-1 bg-gray-600 text-white rounded text-xs hover:bg-gray-700">
+          <button (click)="deselectAll()" class="px-3 py-1 bg-gray-600 text-white rounded text-xs hover:bg-gray-700">
             Clear
           </button>
         </div>
@@ -131,8 +113,7 @@
       <div *ngIf="!isLoading()" class="space-y-3">
         <!-- Select All -->
         <div class="flex items-center gap-2 pb-3 border-b border-gray-200">
-          <input 
-            type="checkbox"
+          <input type="checkbox"
             [checked]="selectedUsers().size === filteredUsers().length && filteredUsers().length > 0"
             (change)="selectedUsers().size === filteredUsers().length ? deselectAll() : selectAll()"
             class="w-4 h-4 text-green-600 border-gray-300 rounded">
@@ -140,19 +121,16 @@
         </div>
 
         <!-- User Items -->
-        <div 
-          *ngFor="let user of filteredUsers()" 
+        <div *ngFor="let user of filteredUsers()"
           class="flex items-start gap-4 p-4 border border-gray-200 rounded-lg hover:border-green-500 hover:shadow-md transition user-item">
-          <input 
-            type="checkbox"
-            [checked]="selectedUsers().has(user.id)"
-            (change)="toggleUserSelection(user.id)"
+          <input type="checkbox" [checked]="selectedUsers().has(user.id)" (change)="toggleUserSelection(user.id)"
             class="w-4 h-4 text-green-600 border-gray-300 rounded mt-1">
-          
-          <div [class]="'w-12 h-12 rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0 bg-' + getRoleColor(user.role) + '-100 text-' + getRoleColor(user.role) + '-700'">
+
+          <div
+            [class]="'w-12 h-12 rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0 bg-' + getRoleColor(user.role) + '-100 text-' + getRoleColor(user.role) + '-700'">
             {{ getInitials(user.firstName, user.lastName) }}
           </div>
-          
+
           <div class="flex-1 min-w-0">
             <div class="font-semibold text-gray-900">
               {{ user.role === 'doctor' ? 'Dr. ' : '' }}{{ user.firstName }} {{ user.lastName }}
@@ -167,16 +145,12 @@
             </div>
             <div class="text-sm text-gray-600 space-y-1">
               <div>
-                <img
-                  src="https://img.icons8.com/ios-filled/50/circled-envelope.png"
-                  alt="email"
+                <img src="https://img.icons8.com/ios-filled/50/circled-envelope.png" alt="email"
                   class="inline-block w-4 h-4 mr-2 align-middle contact-icon">
                 <span class="align-middle">{{ user.email }}</span>
               </div>
               <div *ngIf="user.phoneNumber">
-                <img
-                  src="https://img.icons8.com/ios-filled/50/apple-phone.png"
-                  alt="phone"
+                <img src="https://img.icons8.com/ios-filled/50/apple-phone.png" alt="phone"
                   class="inline-block w-4 h-4 mr-2 align-middle contact-icon">
                 <span class="align-middle">{{ user.phoneNumber }}</span>
               </div>
@@ -191,31 +165,32 @@
               </div>
             </div>
           </div>
-          
+
           <div class="text-right text-sm text-gray-600">
             <div>Joined: <span class="font-medium">{{ formatDate(user.createdAt) }}</span></div>
             <div>Last: <span class="font-medium">{{ formatDate(user.updatedAt) }}</span></div>
           </div>
-          
+
           <div class="relative user-menu">
-            <button 
-              (click)="showUserMenu.set(showUserMenu() === user.id ? null : user.id)"
+            <button (click)="showUserMenu.set(showUserMenu() === user.id ? null : user.id)"
               class="text-gray-400 hover:text-gray-600 p-2">
               <i class="bi bi-three-dots-vertical"></i>
             </button>
-            
+
             <!-- Dropdown Menu -->
-            <div 
-              *ngIf="showUserMenu() === user.id"
+            <div *ngIf="showUserMenu() === user.id"
               class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-200 z-10">
-              <button 
-                (click)="openEditModalWithTemplate(user, editModal); showUserMenu.set(null)"
+              <button (click)="openEditModalWithTemplate(user, editModal); showUserMenu.set(null)"
                 class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2">
                 <i class="bi bi-pencil"></i>
                 Edit
               </button>
-              <button 
-                (click)="openDeleteConfirmWithTemplate(user, deleteModal); showUserMenu.set(null)"
+              <button (click)="openResetPasswordWithTemplate(user, resetPasswordModal); showUserMenu.set(null)"
+                class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2">
+                <i class="bi bi-key"></i>
+                Reset Password
+              </button>
+              <button (click)="openDeleteConfirmWithTemplate(user, deleteModal); showUserMenu.set(null)"
                 class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2">
                 <i class="bi bi-trash"></i>
                 Delete
@@ -238,27 +213,19 @@
           Showing {{ getStartIndex() }} to {{ getEndIndex() }} of {{ totalUsers() }} users
         </div>
         <div class="flex gap-2">
-          <button 
-            (click)="onPageChange(currentPage() - 1)"
-            [disabled]="currentPage() === 1"
+          <button (click)="onPageChange(currentPage() - 1)" [disabled]="currentPage() === 1"
             class="px-3 py-2 border border-gray-300 rounded-lg text-sm disabled:opacity-50 disabled:cursor-not-allowed">
             Previous
           </button>
           <ng-container *ngFor="let page of getPageNumbers()">
-            <button 
-              *ngIf="page !== -1"
-              (click)="onPageChange(page)"
-              [class.bg-green-600]="page === currentPage()"
-              [class.text-white]="page === currentPage()"
-              [class.bg-white]="page !== currentPage()"
+            <button *ngIf="page !== -1" (click)="onPageChange(page)" [class.bg-green-600]="page === currentPage()"
+              [class.text-white]="page === currentPage()" [class.bg-white]="page !== currentPage()"
               class="px-3 py-2 border border-gray-300 rounded-lg text-sm">
               {{ page }}
             </button>
             <span *ngIf="page === -1" class="px-2">...</span>
           </ng-container>
-          <button 
-            (click)="onPageChange(currentPage() + 1)"
-            [disabled]="currentPage() === totalPages()"
+          <button (click)="onPageChange(currentPage() + 1)" [disabled]="currentPage() === totalPages()"
             class="px-3 py-2 border border-gray-300 rounded-lg text-sm disabled:opacity-50 disabled:cursor-not-allowed">
             Next
           </button>
@@ -267,233 +234,202 @@
     </div>
   </div>
 
-<!-- Create User Modal -->
-<ng-template #createModal let-modal>
-  <div class="modal-header">
-    <h3 class="text-lg font-semibold text-gray-900">Create New User</h3>
-    <button type="button" class="text-gray-400 hover:text-gray-600" (click)="closeCreateModal(); modal.dismiss()">
-      <span aria-hidden="true">&times;</span>
-    </button>
-  </div>
-  <div class="modal-body">
-    <app-alert-message *ngIf="userMessage()" [type]="userMessage()!.type" [message]="userMessage()!.text"></app-alert-message>
+  <!-- Create User Modal -->
+  <ng-template #createModal let-modal>
+    <div class="modal-header">
+      <h3 class="text-lg font-semibold text-gray-900">Create New User</h3>
+      <button type="button" class="text-gray-400 hover:text-gray-600" (click)="closeCreateModal(); modal.dismiss()">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <app-alert-message *ngIf="userMessage()" [type]="userMessage()!.type"
+        [message]="userMessage()!.text"></app-alert-message>
 
-    <form (ngSubmit)="createUser(); modal.close()">
-      <div class="grid grid-cols-2 gap-4">
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">First Name *</label>
-          <input 
-            [(ngModel)]="userFirst"
-            (ngModelChange)="userFirst.set($event)"
-            name="firstName"
-            placeholder="First name" 
-            class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
-            required>
+      <form (ngSubmit)="createUser(); modal.close()">
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">First Name *</label>
+            <input [(ngModel)]="userFirst" (ngModelChange)="userFirst.set($event)" name="firstName"
+              placeholder="First name" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" required>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Last Name *</label>
+            <input [(ngModel)]="userLast" (ngModelChange)="userLast.set($event)" name="lastName" placeholder="Last name"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" required>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+            <input type="email" [(ngModel)]="userEmail" (ngModelChange)="userEmail.set($event)" name="email"
+              placeholder="Email" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" required>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+            <input type="tel" [(ngModel)]="userPhone" (ngModelChange)="userPhone.set($event)" name="phone"
+              placeholder="Phone number" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+          </div>
+          <div class="col-span-2">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Role *</label>
+            <select class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" [(ngModel)]="userRole"
+              (ngModelChange)="userRole.set($event)" name="role">
+              <option value="receptionist">Receptionist</option>
+              <option value="doctor">Doctor</option>
+              <option value="patient">Patient</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+          <div *ngIf="userRole() === 'doctor'" class="col-span-2">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Specialty</label>
+            <input [(ngModel)]="userSpecialty" (ngModelChange)="userSpecialty.set($event)" name="specialty"
+              placeholder="Specialty (doctor only)" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+          </div>
+          <div *ngIf="userRole() === 'doctor'" class="col-span-2">
+            <label class="block text-sm font-medium text-gray-700 mb-1">License Number</label>
+            <input [(ngModel)]="userLicense" (ngModelChange)="userLicense.set($event)" name="license"
+              placeholder="License number (doctor only)"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+          </div>
         </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Last Name *</label>
-          <input 
-            [(ngModel)]="userLast"
-            (ngModelChange)="userLast.set($event)"
-            name="lastName"
-            placeholder="Last name" 
-            class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
-            required>
+
+        <div class="modal-footer mt-6">
+          <button type="button" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+            (click)="closeCreateModal(); modal.dismiss()">
+            Cancel
+          </button>
+          <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+            Create User
+          </button>
         </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
-          <input 
-            type="email"
-            [(ngModel)]="userEmail"
-            (ngModelChange)="userEmail.set($event)"
-            name="email"
-            placeholder="Email" 
-            class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
-            required>
+      </form>
+    </div>
+  </ng-template>
+
+  <!-- Edit User Modal -->
+  <ng-template #editModal let-modal>
+    <div class="modal-header">
+      <h3 class="text-lg font-semibold text-gray-900">Edit User</h3>
+      <button type="button" class="text-gray-400 hover:text-gray-600" (click)="closeEditModal(); modal.dismiss()">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <app-alert-message *ngIf="editMessage()" [type]="editMessage()!.type"
+        [message]="editMessage()!.text"></app-alert-message>
+
+      <form (ngSubmit)="updateUser(); modal.close()">
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">First Name *</label>
+            <input [(ngModel)]="editFirst" (ngModelChange)="editFirst.set($event)" name="editFirstName"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" required>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Last Name *</label>
+            <input [(ngModel)]="editLast" (ngModelChange)="editLast.set($event)" name="editLastName"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" required>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+            <input type="email" [(ngModel)]="editEmail" (ngModelChange)="editEmail.set($event)" name="editEmail"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" required>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+            <input type="tel" [(ngModel)]="editPhone" (ngModelChange)="editPhone.set($event)" name="editPhone"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+          </div>
+          <div class="col-span-2">
+            <label class="flex items-center gap-2">
+              <input type="checkbox" [(ngModel)]="editIsActive" (ngModelChange)="editIsActive.set($event)"
+                name="editIsActive" class="w-4 h-4">
+              <span class="text-sm font-medium text-gray-700">Active User</span>
+            </label>
+          </div>
+          <div *ngIf="editRole() === 'doctor'" class="col-span-2">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Specialty</label>
+            <input [(ngModel)]="editSpecialty" (ngModelChange)="editSpecialty.set($event)" name="editSpecialty"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+          </div>
+          <div *ngIf="editRole() === 'doctor'" class="col-span-2">
+            <label class="block text-sm font-medium text-gray-700 mb-1">License Number</label>
+            <input [(ngModel)]="editLicense" (ngModelChange)="editLicense.set($event)" name="editLicense"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+          </div>
         </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
-          <input 
-            type="tel"
-            [(ngModel)]="userPhone"
-            (ngModelChange)="userPhone.set($event)"
-            name="phone"
-            placeholder="Phone number" 
-            class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+
+        <div class="modal-footer mt-6">
+          <button type="button" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+            (click)="closeEditModal(); modal.dismiss()">
+            Cancel
+          </button>
+          <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+            Update User
+          </button>
         </div>
-        <div class="col-span-2">
-          <label class="block text-sm font-medium text-gray-700 mb-1">Role *</label>
-          <select 
-            class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" 
-            [(ngModel)]="userRole"
-            (ngModelChange)="userRole.set($event)"
-            name="role">
-            <option value="receptionist">Receptionist</option>
-            <option value="doctor">Doctor</option>
-            <option value="patient">Patient</option>
-            <option value="admin">Admin</option>
-          </select>
-        </div>
-        <div *ngIf="userRole() === 'doctor'" class="col-span-2">
-          <label class="block text-sm font-medium text-gray-700 mb-1">Specialty</label>
-          <input 
-            [(ngModel)]="userSpecialty"
-            (ngModelChange)="userSpecialty.set($event)"
-            name="specialty"
-            placeholder="Specialty (doctor only)" 
-            class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
-        </div>
-        <div *ngIf="userRole() === 'doctor'" class="col-span-2">
-          <label class="block text-sm font-medium text-gray-700 mb-1">License Number</label>
-          <input 
-            [(ngModel)]="userLicense"
-            (ngModelChange)="userLicense.set($event)"
-            name="license"
-            placeholder="License number (doctor only)" 
-            class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
-        </div>
+      </form>
+    </div>
+  </ng-template>
+
+  <!-- Delete Confirmation Modal -->
+  <ng-template #deleteModal let-modal>
+    <div class="modal-header">
+      <h3 class="text-lg font-semibold text-gray-900">Delete User</h3>
+      <button type="button" class="text-gray-400 hover:text-gray-600" (click)="closeDeleteConfirm(); modal.dismiss()">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <p class="text-gray-700">
+        Are you sure you want to delete <strong>{{ deletingUser()?.firstName }} {{ deletingUser()?.lastName }}</strong>?
+      </p>
+      <p class="text-sm text-gray-500 mt-2">This action cannot be undone.</p>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+        (click)="closeDeleteConfirm(); modal.dismiss()">
+        Cancel
+      </button>
+      <button type="button" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+        (click)="confirmDelete(); modal.close()">
+        Delete
+      </button>
+    </div>
+  </ng-template>
+
+  <!-- Reset Password Modal -->
+  <ng-template #resetPasswordModal let-modal>
+    <div class="modal-header">
+      <h3 class="text-lg font-semibold text-gray-900">Reset Password</h3>
+      <button type="button" class="text-gray-400 hover:text-gray-600"
+        (click)="closeResetPasswordModal(); modal.dismiss()">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <app-alert-message *ngIf="resetPasswordMessage()" [type]="resetPasswordMessage()!.type"
+        [message]="resetPasswordMessage()!.text"></app-alert-message>
+
+      <p class="text-gray-700 mb-4">
+        Enter a new password for user <strong>{{ resettingUser()?.firstName }} {{ resettingUser()?.lastName }}</strong>.
+      </p>
+
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-700 mb-1">New Password</label>
+        <input type="password" [ngModel]="newPassword()" (ngModelChange)="newPassword.set($event)"
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="Enter at least 8 characters"
+          required>
+        <p class="text-xs text-gray-500 mt-1">Must be at least 8 characters long.</p>
       </div>
-
-      <div class="modal-footer mt-6">
-        <button 
-          type="button" 
-          class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
-          (click)="closeCreateModal(); modal.dismiss()">
-          Cancel
-        </button>
-        <button 
-          type="submit"
-          class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
-          Create User
-        </button>
-      </div>
-    </form>
-  </div>
-</ng-template>
-
-<!-- Edit User Modal -->
-<ng-template #editModal let-modal>
-  <div class="modal-header">
-    <h3 class="text-lg font-semibold text-gray-900">Edit User</h3>
-    <button type="button" class="text-gray-400 hover:text-gray-600" (click)="closeEditModal(); modal.dismiss()">
-      <span aria-hidden="true">&times;</span>
-    </button>
-  </div>
-  <div class="modal-body">
-    <app-alert-message *ngIf="editMessage()" [type]="editMessage()!.type" [message]="editMessage()!.text"></app-alert-message>
-
-    <form (ngSubmit)="updateUser(); modal.close()">
-      <div class="grid grid-cols-2 gap-4">
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">First Name *</label>
-          <input 
-            [(ngModel)]="editFirst"
-            (ngModelChange)="editFirst.set($event)"
-            name="editFirstName"
-            class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
-            required>
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Last Name *</label>
-          <input 
-            [(ngModel)]="editLast"
-            (ngModelChange)="editLast.set($event)"
-            name="editLastName"
-            class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
-            required>
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
-          <input 
-            type="email"
-            [(ngModel)]="editEmail"
-            (ngModelChange)="editEmail.set($event)"
-            name="editEmail"
-            class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
-            required>
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
-          <input 
-            type="tel"
-            [(ngModel)]="editPhone"
-            (ngModelChange)="editPhone.set($event)"
-            name="editPhone"
-            class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
-        </div>
-        <div class="col-span-2">
-          <label class="flex items-center gap-2">
-            <input 
-              type="checkbox"
-              [(ngModel)]="editIsActive"
-              (ngModelChange)="editIsActive.set($event)"
-              name="editIsActive"
-              class="w-4 h-4">
-            <span class="text-sm font-medium text-gray-700">Active User</span>
-          </label>
-        </div>
-        <div *ngIf="editRole() === 'doctor'" class="col-span-2">
-          <label class="block text-sm font-medium text-gray-700 mb-1">Specialty</label>
-          <input 
-            [(ngModel)]="editSpecialty"
-            (ngModelChange)="editSpecialty.set($event)"
-            name="editSpecialty"
-            class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
-        </div>
-        <div *ngIf="editRole() === 'doctor'" class="col-span-2">
-          <label class="block text-sm font-medium text-gray-700 mb-1">License Number</label>
-          <input 
-            [(ngModel)]="editLicense"
-            (ngModelChange)="editLicense.set($event)"
-            name="editLicense"
-            class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
-        </div>
-      </div>
-
-      <div class="modal-footer mt-6">
-        <button 
-          type="button" 
-          class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
-          (click)="closeEditModal(); modal.dismiss()">
-          Cancel
-        </button>
-        <button 
-          type="submit"
-          class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
-          Update User
-        </button>
-      </div>
-    </form>
-  </div>
-</ng-template>
-
-<!-- Delete Confirmation Modal -->
-<ng-template #deleteModal let-modal>
-  <div class="modal-header">
-    <h3 class="text-lg font-semibold text-gray-900">Delete User</h3>
-    <button type="button" class="text-gray-400 hover:text-gray-600" (click)="closeDeleteConfirm(); modal.dismiss()">
-      <span aria-hidden="true">&times;</span>
-    </button>
-  </div>
-  <div class="modal-body">
-    <p class="text-gray-700">
-      Are you sure you want to delete <strong>{{ deletingUser()?.firstName }} {{ deletingUser()?.lastName }}</strong>?
-    </p>
-    <p class="text-sm text-gray-500 mt-2">This action cannot be undone.</p>
-  </div>
-  <div class="modal-footer">
-    <button 
-      type="button" 
-      class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
-      (click)="closeDeleteConfirm(); modal.dismiss()">
-      Cancel
-    </button>
-    <button 
-      type="button"
-      class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
-      (click)="confirmDelete(); modal.close()">
-      Delete
-    </button>
-  </div>
-</ng-template>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+        (click)="closeResetPasswordModal(); modal.dismiss()">
+        Cancel
+      </button>
+      <button type="button" class="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700"
+        (click)="resetPassword(); modal.close()">
+        Reset Password
+      </button>
+    </div>
+  </ng-template>
 </app-admin-shell>

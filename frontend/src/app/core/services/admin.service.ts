@@ -354,6 +354,10 @@ export class AdminService {
     return this.http.get<{ slots: { startTime: string; status: string }[] }>(`${baseUrl}/doctors/schedule/public/${doctorId}/${date}`);
   }
 
+  resetUserPassword(id: string, newPassword: string): Observable<any> {
+    return this.http.patch<any>(`${this.apiUrl}/users/${id}/reset-password`, { newPassword });
+  }
+
   private generateTempPassword(length = 10): string {
     const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@$"
     let pwd = ""

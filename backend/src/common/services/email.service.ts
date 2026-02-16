@@ -154,4 +154,24 @@ export class EmailService {
     `;
     return this.sendEmail(to, subject, html);
   }
+  async sendAdminPasswordResetNotification(to: string, newPassword: string, firstName?: string): Promise<EmailResult> {
+    const subject = 'Your Password Has Been Reset - QuickMed';
+    const html = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <h2 style="color: #16a34a;">Password Reset by Administrator</h2>
+        <p>Hello ${firstName || 'there'},</p>
+        <p>Your QuickMed account password has been reset by an administrator.</p>
+        <p><strong>Your new temporary password is:</strong></p>
+        <div style="background-color: #f3f4f6; padding: 15px; border-radius: 8px; font-family: monospace; font-size: 18px; text-align: center; margin: 20px 0;">
+          ${newPassword}
+        </div>
+        <p>Please use this password to log in. We recommend changing it immediately after logging in.</p>
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="${process.env.FRONTEND_URL || 'http://localhost:4200'}/login" style="background-color: #16a34a; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: bold;">Login to QuickMed</a>
+        </div>
+        <p style="color: #6b7280; font-size: 14px;">If you have any questions, please contact your administrator.</p>
+      </div>
+    `;
+    return this.sendEmail(to, subject, html);
+  }
 }

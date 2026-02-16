@@ -5,6 +5,8 @@ import { Router } from '@angular/router';
 import { AdminService, DoctorInvitationResponse } from '@app/core/services/admin.service';
 import { ToastService } from '@app/core/services/toast.service';
 
+import { ThemeService } from '@app/core/services/theme.service';
+
 @Component({
   selector: 'app-admin-doctor-add',
   standalone: true,
@@ -22,7 +24,8 @@ export class AdminDoctorAddComponent {
     private fb: FormBuilder,
     private adminService: AdminService,
     private router: Router,
-    private toastService: ToastService
+    private toastService: ToastService,
+    public themeService: ThemeService
   ) {
     this.form = this.fb.group({
       firstName: ['', Validators.required],
@@ -51,19 +54,15 @@ export class AdminDoctorAddComponent {
         this.inviteLink = response.inviteLink || null;
 
         if (response.emailSent) {
-          this.toastService.success('Doctor invited successfully!');
-          // Auto-navigate back after 2 seconds if email was sent
-          setTimeout(() => {
-            this.back();
-          }, 2000);
+          this.toastService.success('Doctor invited successfully! Link is available below.');
+          // We don't auto-navigate if the admin might want to see/copy the link
         } else {
-          this.toastService.warning('Manual link generated. Please copy it before leaving.');
+          this.toastService.warning('Manual link generated. please share it with the doctor.');
         }
 
         this.loading = false;
         this.form.reset();
 
-        // Auto-hide the invitation link card after 10 seconds if they don't navigate away
         if (this.inviteLink) {
           setTimeout(() => {
             this.inviteLink = null;
@@ -85,5 +84,11 @@ export class AdminDoctorAddComponent {
     if (!this.inviteLink) return;
     navigator.clipboard.writeText(this.inviteLink);
     this.toastService.success('Invite link copied to clipboard!');
+  }
+
+  viewInviteLink() {
+    if (!this.inviteLink) return;
+    window.open(this.inviteLink, '_blank');
+    this.toastService.info('Viewing invitation link...');
   }
 }

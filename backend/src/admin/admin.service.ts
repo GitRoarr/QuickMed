@@ -240,6 +240,17 @@ export class AdminService {
     user.password = hashedPassword;
     user.mustChangePassword = false;
     await this.userRepository.save(user);
+
+    // Notify user
+    if (this.emailService) {
+      try {
+        await this.emailService.sendAdminPasswordResetNotification(user.email, newPassword, user.firstName);
+        console.log(`[AdminService] Password reset email sent to ${user.email}`);
+      } catch (emailErr) {
+        console.error(`[AdminService] Failed to send password reset email to ${user.email}`, emailErr);
+        // We don't throw here to avoid failing the password reset itself
+      }
+    }
   }
 
   async resetUserPasswordByEmail(email: string, newPassword: string): Promise<void> {

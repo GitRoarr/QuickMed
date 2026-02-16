@@ -1,5 +1,5 @@
 // create-doctor.dto.ts
-import { IsEmail, IsString, IsNotEmpty } from "class-validator";
+import { IsEmail, IsString, IsNotEmpty, IsOptional } from "class-validator";
 
 export class CreateDoctorDto {
   @IsString()
@@ -27,6 +27,6 @@ export class CreateDoctorDto {
   licenseNumber: string;
 
   @IsString()
-  @IsNotEmpty()
-  bio: string; 
+  @IsOptional()
+  bio?: string;
 }
