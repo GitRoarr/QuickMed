@@ -25,6 +25,7 @@ export interface Consultation {
   doctorId?: string;
   patientId?: string;
   notes: string;
+  diagnosis?: string;
   treatments: Treatment[];
   startTime?: Date;
   endTime?: Date;
@@ -41,6 +42,7 @@ export interface Consultation {
 export interface CreateConsultationDto {
   appointmentId: string;
   notes: string;
+  diagnosis?: string;
   treatments?: Omit<Treatment, 'id'>[];
 }
 

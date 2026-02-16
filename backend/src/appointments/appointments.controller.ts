@@ -6,7 +6,7 @@ import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard"
 import { RolesGuard } from "../auth/guards/roles.guard"
 import { CurrentUser } from "../auth/decorators/current-user.decorator"
 import { User } from "../users/entities/user.entity"
-import { UserRole } from "../common/index"
+import { UserRole, AppointmentStatus } from "../common/index"
 
 
 @Controller("appointments")
@@ -87,8 +87,17 @@ export class AppointmentsController {
 
   @Delete(':id')
   @UseGuards(RolesGuard)
-  remove(@Param('id') id: string, @CurrentUser() user: User) {
-    // As per requirement: DELETE /api/appointments/:id -> sets status = "cancelled"
+  async remove(@Param('id') id: string, @CurrentUser() user: User) {
+    const appointment = await this.appointmentsService.findOne(id);
+
+    if (user.role === UserRole.DOCTOR && appointment.doctorId !== user.id) {
+      throw new UnauthorizedException("You can only delete your own appointments");
+    }
+
+    if (appointment.status === AppointmentStatus.CANCELLED) {
+      return this.appointmentsService.remove(id);
+    }
+
     return this.appointmentsService.cancel(id, user);
   }
 }

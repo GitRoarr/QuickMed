@@ -121,35 +121,30 @@
             <span class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-3 block">Available Time
               Slots</span>
             <div class="slot-selector" *ngIf="availableSlots().length > 0; else noSlots">
+              <div class="custom-select-wrapper">
+                <i class="bi bi-clock select-icon"></i>
+                <select class="time-select-compact" formControlName="appointmentTime" (change)="manualTimeInput = ''">
+                  <option value="" disabled>Choose an available time slot</option>
 
-              <div *ngIf="morningSlots().length > 0" class="session-group mb-6">
-                <p class="session-label">🌅 MORNING</p>
-                <div class="slots-grid">
-                  <button type="button" *ngFor="let slot of morningSlots()" (click)="selectTimeSlot(slot)"
-                    [class.selected]="isTimeSlotSelected(slot)" class="slot-btn">
-                    {{ formatSlotTime(slot) }}
-                  </button>
-                </div>
-              </div>
+                  <optgroup label="🌅 MORNING" *ngIf="morningSlots().length > 0">
+                    <option *ngFor="let slot of morningSlots()" [value]="slot.startTime">
+                      {{ formatSlotTime(slot) }}
+                    </option>
+                  </optgroup>
 
-              <div *ngIf="afternoonSlots().length > 0" class="session-group mb-6">
-                <p class="session-label">☀️ AFTERNOON</p>
-                <div class="slots-grid">
-                  <button type="button" *ngFor="let slot of afternoonSlots()" (click)="selectTimeSlot(slot)"
-                    [class.selected]="isTimeSlotSelected(slot)" class="slot-btn">
-                    {{ formatSlotTime(slot) }}
-                  </button>
-                </div>
-              </div>
+                  <optgroup label="☀️ AFTERNOON" *ngIf="afternoonSlots().length > 0">
+                    <option *ngFor="let slot of afternoonSlots()" [value]="slot.startTime">
+                      {{ formatSlotTime(slot) }}
+                    </option>
+                  </optgroup>
 
-              <div *ngIf="eveningSlots().length > 0" class="session-group">
-                <p class="session-label">🌙 EVENING</p>
-                <div class="slots-grid">
-                  <button type="button" *ngFor="let slot of eveningSlots()" (click)="selectTimeSlot(slot)"
-                    [class.selected]="isTimeSlotSelected(slot)" class="slot-btn">
-                    {{ formatSlotTime(slot) }}
-                  </button>
-                </div>
+                  <optgroup label="🌙 EVENING" *ngIf="eveningSlots().length > 0">
+                    <option *ngFor="let slot of eveningSlots()" [value]="slot.startTime">
+                      {{ formatSlotTime(slot) }}
+                    </option>
+                  </optgroup>
+                </select>
+                <i class="bi bi-chevron-down dropdown-arrow"></i>
               </div>
 
               <div class="or-divider">
@@ -157,12 +152,15 @@
               </div>
 
               <div class="manual-time-picker">
-                <label class="time-picker-label">
-                  <span>Enter Custom Time</span>
-                  <input type="time" class="time-input" [(ngModel)]="manualTimeInput"
-                    [ngModelOptions]="{standalone: true}" (change)="onManualTimeChange()" placeholder="HH:MM" />
-                </label>
-                <p class="time-helper-text">Select a time within the doctor's available slots</p>
+                <div class="manual-picker-content">
+                  <i class="bi bi-keyboard-fill"></i>
+                  <div class="flex-1">
+                    <span class="manual-label">Enter Custom Time</span>
+                    <input type="time" class="time-input-compact" [(ngModel)]="manualTimeInput"
+                      [ngModelOptions]="{standalone: true}" (change)="onManualTimeChange()" placeholder="HH:MM" />
+                  </div>
+                </div>
+                <p class="time-helper-text">Select a time within the doctor's active hours</p>
               </div>
 
               <input type="hidden" formControlName="appointmentTime" />

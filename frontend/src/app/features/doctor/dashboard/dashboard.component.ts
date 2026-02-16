@@ -94,7 +94,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   getInitials(name?: string): string {
     const n = (name || '').trim();
     if (!n) return 'P';
-    const parts = n.split(' ');
+    const parts = n.split(' ').filter(p => p.length > 0);
     if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
     return n.substring(0, 2).toUpperCase();
   }

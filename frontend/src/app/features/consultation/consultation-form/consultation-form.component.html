@@ -65,6 +65,36 @@
     </div>
   </div>
 
+  <!-- Primary Diagnosis -->
+  <div class="qm-card">
+    <div class="qm-section-header">
+      <div class="qm-section-left">
+        <div class="qm-section-icon qm-section-icon--blue">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+          </svg>
+        </div>
+        <div>
+          <h2 class="qm-section-title">Primary Diagnosis</h2>
+          <p class="qm-section-desc">The specific disease or medical condition identified</p>
+        </div>
+      </div>
+    </div>
+    <div class="qm-section-body">
+      <input type="text" class="qm-input" placeholder="e.g. Type 2 Diabetes, Hypertension, Acute Bronchitis"
+        formControlName="diagnosis" />
+      <div *ngIf="consultationForm.get('diagnosis')?.touched && consultationForm.get('diagnosis')?.invalid"
+        class="qm-field-error">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        </svg>
+        <span>Primary diagnosis is required</span>
+      </div>
+    </div>
+  </div>
+
   <!-- Clinical Notes -->
   <div class="qm-card">
     <div class="qm-section-header">
@@ -225,6 +255,10 @@
 
       <!-- Summary of what will be saved -->
       <div class="qm-summary">
+        <div class="qm-summary-row">
+          <span class="qm-summary-label">Diagnosis</span>
+          <span class="qm-summary-value text-primary font-bold">{{ consultationForm.value.diagnosis || 'None' }}</span>
+        </div>
         <div class="qm-summary-row">
           <span class="qm-summary-label">Clinical Notes</span>
           <span class="qm-summary-value">{{ consultationForm.value.notes?.length || 0 }} characters</span>

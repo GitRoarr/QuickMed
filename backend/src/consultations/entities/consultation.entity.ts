@@ -41,6 +41,9 @@ export class Consultation {
   @Column('text', { nullable: true })
   notes: string; // Diagnosis, advice, etc.
 
+  @Column({ nullable: true })
+  diagnosis: string; // The primary disease/condition
+
   @OneToMany(() => Treatment, (treatment) => treatment.consultation, {
     cascade: true,
   })

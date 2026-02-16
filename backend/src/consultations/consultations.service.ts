@@ -42,6 +42,7 @@ export class ConsultationsService {
 
     if (existing) {
       existing.notes = dto.notes;
+      existing.diagnosis = dto.diagnosis;
       const savedConsultation = await this.repo.save(existing);
 
       await this.treatmentRepo.delete({ consultationId: existing.id });
@@ -64,6 +65,7 @@ export class ConsultationsService {
       doctorId,
       patientId: appointment.patientId,
       notes: dto.notes,
+      diagnosis: dto.diagnosis,
       startTime: new Date(),
       endTime: new Date(),
       durationMin: 0,
@@ -113,6 +115,24 @@ export class ConsultationsService {
       }
     }
 
+    // Create Medical Record for Primary Diagnosis
+    if (dto.diagnosis) {
+      try {
+        await this.medicalRecordsService.create({
+          title: `Diagnosis: ${dto.diagnosis}`,
+          type: MedicalRecordType.DIAGNOSIS,
+          recordDate: new Date().toISOString().split('T')[0],
+          patientId: appointment.patientId,
+          doctorId,
+          appointmentId: appointment.id,
+          notes: dto.notes,
+          status: 'verified',
+        });
+      } catch (error) {
+        console.error(`Failed to create medical record for diagnosis: ${dto.diagnosis}`, error);
+      }
+    }
+
     // Update appointment status to completed
     appointment.status = 'completed' as any;
     await this.appointmentRepo.save(appointment);
@@ -133,6 +153,10 @@ export class ConsultationsService {
 
     if (dto.notes) {
       consultation.notes = dto.notes;
+    }
+
+    if (dto.diagnosis) {
+      consultation.diagnosis = dto.diagnosis;
     }
 
     await this.repo.save(consultation);

@@ -77,7 +77,7 @@ export class ConsultationFormComponent implements OnInit {
 
   consultationForm!: FormGroup;
   appointmentId = signal<string | null>(null);
-  
+
   appointment = signal<Appointment | null>(null);
   patient = computed(() => this.appointment()?.patient);
   doctor = signal<User | null>(null);
@@ -85,7 +85,7 @@ export class ConsultationFormComponent implements OnInit {
   isLoading = signal(true);
   isSubmitting = signal(false);
   isModalOpen = signal(false);
-  
+
   treatmentTypes = Object.values(TreatmentType);
 
   // Treatment icon helper
@@ -112,6 +112,7 @@ export class ConsultationFormComponent implements OnInit {
   ngOnInit(): void {
     this.consultationForm = this.fb.group({
       notes: ['', [Validators.required, Validators.minLength(10)]],
+      diagnosis: ['', [Validators.required]],
       treatments: this.fb.array([]),
     });
 
@@ -124,7 +125,7 @@ export class ConsultationFormComponent implements OnInit {
         this.isLoading.set(false);
       }
     });
-    
+
     const currentUser = this.authService.currentUser();
     if (currentUser?.role === 'doctor') {
       this.doctor.set(currentUser);
@@ -182,7 +183,7 @@ export class ConsultationFormComponent implements OnInit {
       this.consultationForm.markAllAsTouched();
       return;
     }
-    
+
     this.isSubmitting.set(true);
     const appointmentId = this.appointmentId();
 
@@ -196,6 +197,7 @@ export class ConsultationFormComponent implements OnInit {
     const payload: CreateConsultationDto = {
       appointmentId,
       notes: formValue.notes,
+      diagnosis: formValue.diagnosis,
       treatments: formValue.treatments.map((t: any) => ({
         type: t.type,
         details: t.details,

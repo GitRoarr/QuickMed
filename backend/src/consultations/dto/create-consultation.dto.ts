@@ -30,6 +30,10 @@ export class CreateConsultationDto {
   @IsString()
   notes: string;
 
+  @IsOptional()
+  @IsString()
+  diagnosis?: string;
+
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => CreateTreatmentDto)
