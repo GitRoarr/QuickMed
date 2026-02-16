@@ -6,7 +6,7 @@
     }">
     <div class="container mx-auto px-6 h-18 rounded-3xl flex items-center justify-between transition-all duration-500"
       [ngClass]="{
-        'bg-white/80 backdrop-blur-xl shadow-2xl shadow-green-500/10 border border-white/20': isScrolled(),
+        'bg-surface/80 backdrop-blur-xl shadow-2xl shadow-green-500/10 border border-border': isScrolled(),
         'bg-transparent': !isScrolled()
       }">
 
@@ -34,7 +34,7 @@
       <div class="flex items-center gap-4">
         <!-- Theme Toggle -->
         <button (click)="toggleTheme()"
-          class="w-11 h-11 rounded-2xl border border-gray-200/50 dark:border-gray-700/50 bg-white/50 dark:bg-gray-800/50 flex items-center justify-center hover:bg-white dark:hover:bg-gray-700 transition-all duration-300 shadow-sm"
+          class="w-11 h-11 rounded-2xl border border-border bg-surface/50 flex items-center justify-center hover:bg-surface transition-all duration-300 shadow-sm"
           [attr.aria-label]="isDarkMode() ? 'Switch to Light Mode' : 'Switch to Dark Mode'">
           <i class="bi" [ngClass]="isDarkMode() ? 'bi-moon-stars text-blue-400' : 'bi-sun text-yellow-500'"
             class="text-xl"></i>
@@ -79,7 +79,7 @@
 
         <!-- Mobile Menu Button -->
         <button
-          class="lg:hidden w-11 h-11 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white/50 dark:bg-gray-800/50 flex items-center justify-center"
+          class="lg:hidden w-11 h-11 rounded-2xl border border-border bg-surface/50 flex items-center justify-center text-text-primary"
           (click)="mobileMenuOpen = !mobileMenuOpen">
           <i class="bi" [ngClass]="mobileMenuOpen ? 'bi-x-lg' : 'bi-distribute-vertical'" class="text-xl"></i>
         </button>
@@ -88,8 +88,8 @@
     </div>
 
     <!-- Mobile Menu -->
-    <div *ngIf="mobileMenuOpen" class="lg:hidden w-full px-4 py-6 space-y-4 animate-[fadeDown_0.3s_ease-out]"
-      [ngClass]="isDarkMode() ? 'bg-gray-900/95 backdrop-blur-lg' : 'bg-white/95 backdrop-blur-lg'">
+    <div *ngIf="mobileMenuOpen"
+      class="lg:hidden w-full px-4 py-6 space-y-4 animate-[fadeDown_0.3s_ease-out] bg-surface/95 backdrop-blur-lg border-b border-border">
       <div class="flex flex-col gap-4">
         <a href="#features" (click)="mobileMenuOpen = false"
           class="block py-2 px-2 text-lg font-medium rounded hover:bg-green-50 dark:hover:bg-gray-800">Features</a>
@@ -99,7 +99,7 @@
           class="block py-2 px-2 text-lg font-medium rounded hover:bg-green-50 dark:hover:bg-gray-800">Testimonials</a>
       </div>
 
-      <div class="pt-4 border-t border-gray-200 dark:border-gray-800">
+      <div class="pt-4 border-t border-border">
         <ng-container *ngIf="!currentUser()">
           <div class="grid grid-cols-2 gap-4">
             <a routerLink="/login" (click)="mobileMenuOpen = false"
@@ -118,18 +118,19 @@
               </div>
             </ng-template>
             <div>
-              <div class="font-bold">{{ currentUser()?.firstName }} {{ currentUser()?.lastName }}</div>
-              <div class="text-sm text-gray-500 dark:text-gray-400 capitalize">{{ currentUser()?.role }}</div>
+              <div class="font-bold text-text-primary">{{ currentUser()?.firstName }} {{ currentUser()?.lastName }}
+              </div>
+              <div class="text-sm text-text-secondary capitalize">{{ currentUser()?.role }}</div>
             </div>
           </div>
           <div class="space-y-2">
             <button (click)="navigateToDashboard(); mobileMenuOpen = false"
-              class="block w-full text-left py-3 px-3 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl font-medium">Dashboard</button>
+              class="block w-full text-left py-3 px-3 hover:bg-surface-alt rounded-xl font-medium text-text-primary">Dashboard</button>
             <button (click)="openEditProfile(); mobileMenuOpen = false"
-              class="block w-full text-left py-3 px-3 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl font-medium">Edit
+              class="block w-full text-left py-3 px-3 hover:bg-surface-alt rounded-xl font-medium text-text-primary">Edit
               Profile</button>
             <button (click)="logout(); mobileMenuOpen = false"
-              class="block w-full text-left py-3 px-3 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-xl font-medium">Logout</button>
+              class="block w-full text-left py-3 px-3 text-danger hover:bg-danger/10 rounded-xl font-medium">Logout</button>
           </div>
         </ng-container>
       </div>
@@ -138,7 +139,7 @@
 
   <!-- Hero Section -->
   <section
-    class="hero-section pt-32 pb-16 lg:pt-48 lg:pb-32 relative overflow-hidden transition-all duration-500 bg-white text-gray-900">
+    class="hero-section pt-32 pb-16 lg:pt-48 lg:pb-32 relative overflow-hidden transition-all duration-500 bg-bg text-text-primary">
     <div class="container mx-auto px-4 relative z-20">
       <div class="flex flex-col lg:flex-row items-center gap-16 lg:gap-24">
 
@@ -162,7 +163,7 @@
           </h1>
 
           <p
-            class="text-lg sm:text-xl text-gray-500 dark:text-gray-400 max-w-2xl mx-auto lg:mx-0 leading-relaxed animate-[fadeUp_1s_ease-out]">
+            class="text-lg sm:text-xl max-w-2xl mx-auto lg:mx-0 leading-relaxed animate-[fadeUp_1s_ease-out] text-text-secondary">
             Experience the future of healthcare. Book top-tier specialists, manage records, and consult doctors
             instantly - all from our secure, all-in-one platform.
           </p>
@@ -170,7 +171,8 @@
           <div
             class="flex flex-col sm:flex-row gap-4 items-center justify-center lg:justify-start animate-[fadeUp_1.2s_ease-out]">
             <button (click)="navigateToDashboard()"
-              class="w-full sm:w-auto bg-green-500 hover:bg-green-600 text-white px-8 py-4 rounded-2xl shadow-xl shadow-green-500/20 transition-all transform hover:scale-105 active:scale-95 flex items-center justify-center gap-3 text-lg font-bold">
+              class="w-full sm:w-auto text-white px-8 py-4 rounded-2xl transition-all transform hover:scale-105 active:scale-95 flex items-center justify-center gap-3 text-lg font-bold"
+              [style.background-color]="'var(--primary)'" [style.box-shadow]="'0 20px 40px -10px var(--primary-glow)'">
               Get Started Now
               <img class="w-5 h-5" src="https://img.icons8.com/?size=100&id=26138&format=png&color=ffffff" alt="Next" />
             </button>
@@ -179,26 +181,26 @@
           <!-- Stats Grid -->
           <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 mt-12 animate-[fadeUp_1.4s_ease-out]">
             <div
-              class="stat-card p-4 rounded-2xl border border-gray-100 bg-white shadow-sm transition-all hover:border-green-500/20">
-              <div class="text-2xl font-black text-gray-900">
+              class="stat-card p-4 rounded-2xl border transition-all border-border bg-surface hover:border-primary/50 shadow-lg">
+              <div class="text-2xl font-black text-text-primary">
                 {{ (happyPatients() || 12500) | number:'1.0-0' }}+
               </div>
-              <div class="text-xs font-bold text-gray-500 uppercase tracking-widest">Active Patients</div>
+              <div class="text-xs font-bold text-text-secondary uppercase tracking-widest">Active Patients</div>
             </div>
             <div
-              class="stat-card p-4 rounded-2xl border border-gray-100 bg-white shadow-sm transition-all hover:border-green-500/20">
-              <div class="text-2xl font-black text-gray-900">500+</div>
+              class="stat-card p-4 rounded-2xl border transition-all border-border bg-surface hover:border-primary/50 shadow-lg">
+              <div class="text-2xl font-black text-text-primary">{{ (totalDoctors() || 0) | number:'1.0-0' }}+</div>
               <div class="text-xs font-bold text-gray-500 uppercase tracking-widest">Expert Doctors</div>
             </div>
             <div
-              class="stat-card p-4 rounded-2xl border border-gray-100 bg-white shadow-sm transition-all hover:border-green-500/20 col-span-2 sm:col-span-1">
+              class="stat-card p-4 rounded-2xl border transition-all col-span-2 sm:col-span-1 border-border bg-surface hover:border-primary/50 shadow-lg">
               <div class="flex items-center gap-2">
-                <div class="text-2xl font-black text-gray-900">
+                <div class="text-2xl font-black text-text-primary">
                   {{ (platformRating() || 4.8) | number:'1.1-1' }}
                 </div>
                 <i class="bi bi-star-fill text-yellow-400 text-sm"></i>
               </div>
-              <div class="text-xs font-bold text-gray-500 uppercase tracking-widest">Platform Rating</div>
+              <div class="text-xs font-bold text-text-secondary uppercase tracking-widest">Platform Rating</div>
             </div>
           </div>
         </div>
@@ -215,53 +217,61 @@
 
             <!-- Image Mockup -->
             <div
-              class="relative rounded-[3.5rem] overflow-hidden shadow-2xl border-8 border-white dark:border-gray-800 bg-white dark:bg-gray-800">
+              class="relative rounded-[3.5rem] overflow-hidden shadow-2xl border-8 transition-colors duration-500 border-surface bg-surface">
               <img src="assets/images/QuickMed-Logo.png" alt="Healthcare"
                 class="w-full h-auto object-cover transform scale-100 hover:scale-105 transition-transform duration-700" />
 
               <!-- Glass Overlay for premium feel -->
               <div class="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent"></div>
 
-              <!-- Floating UI Elements -->
               <div
-                class="absolute top-8 left-8 floating-element p-4 rounded-2xl shadow-2xl border border-white/20 flex items-center gap-4 animate-[fadeDown_1.5s_ease-out] hover:scale-110 transition-transform cursor-default z-30">
+                class="absolute top-8 left-8 floating-element p-4 rounded-2xl shadow-2xl border flex items-center gap-4 animate-[fadeDown_1.5s_ease-out] hover:scale-110 transition-all cursor-default z-30"
+                [ngClass]="'border-border/50 bg-surface/90 backdrop-blur-md'">
                 <div
                   class="w-12 h-12 rounded-xl bg-green-500 flex items-center justify-center text-white shadow-lg shadow-green-500/30">
                   <i class="bi bi-calendar-check-fill text-xl"></i>
                 </div>
                 <div>
                   <div class="text-[10px] font-black uppercase tracking-wider text-gray-500">Next Visit</div>
-                  <div class="text-sm font-bold text-gray-900">Today, 2:30 PM</div>
+                  <div class="text-sm font-bold text-text-primary">{{
+                    nextVisit() }}</div>
                 </div>
               </div>
 
               <div
-                class="absolute bottom-8 right-8 floating-element p-4 rounded-2xl shadow-2xl border border-white/20 flex items-center gap-4 animate-[fadeUp_1.8s_ease-out] hover:scale-110 transition-transform cursor-default z-30">
+                class="absolute bottom-8 right-8 floating-element p-4 rounded-2xl shadow-2xl border flex items-center gap-4 animate-[fadeUp_1.8s_ease-out] hover:scale-110 transition-all cursor-default z-30"
+                [ngClass]="'border-border/50 bg-surface/80 backdrop-blur-md'">
                 <div class="w-12 h-12 rounded-xl bg-green-500/10 flex items-center justify-center text-green-500">
                   <i class="bi bi-activity text-2xl animate-pulse"></i>
                 </div>
                 <div>
                   <div class="text-[10px] font-black uppercase tracking-wider text-gray-500">Live Vitals</div>
-                  <div class="text-sm font-bold text-gray-900">72 BPM</div>
+                  <div class="text-sm font-bold text-text-primary">{{
+                    liveVitals() }}</div>
                 </div>
               </div>
             </div>
 
             <!-- Additional Badge -->
             <div
-              class="absolute -bottom-6 left-1/2 -translate-x-1/2 bg-white px-6 py-3 rounded-2xl shadow-xl border border-gray-100 flex items-center gap-3 whitespace-nowrap animate-[fadeUp_2s_ease-out] z-40">
+              class="absolute -bottom-6 left-1/2 -translate-x-1/2 px-6 py-3 rounded-2xl shadow-xl border flex items-center gap-3 whitespace-nowrap animate-[fadeUp_2s_ease-out] z-40"
+              [ngClass]="'bg-surface border-border shadow-2xl'">
               <div class="flex -space-x-3">
                 <div
-                  class="w-8 h-8 rounded-full border-2 border-white bg-blue-500 flex items-center justify-center text-[10px] text-white font-bold">
+                  class="w-8 h-8 rounded-full border-2 bg-blue-500 flex items-center justify-center text-[10px] text-white font-bold"
+                  [ngClass]="isDarkMode() ? 'border-gray-900' : 'border-white'">
                   JD</div>
                 <div
-                  class="w-8 h-8 rounded-full border-2 border-white bg-purple-500 flex items-center justify-center text-[10px] text-white font-bold">
+                  class="w-8 h-8 rounded-full border-2 bg-purple-500 flex items-center justify-center text-[10px] text-white font-bold"
+                  [ngClass]="isDarkMode() ? 'border-gray-900' : 'border-white'">
                   AS</div>
                 <div
-                  class="w-8 h-8 rounded-full border-2 border-white bg-green-500 flex items-center justify-center text-[10px] text-white font-bold">
-                  +50</div>
+                  class="w-8 h-8 rounded-full border-2 bg-green-500 flex items-center justify-center text-[10px] text-white font-bold"
+                  [ngClass]="isDarkMode() ? 'border-gray-900' : 'border-white'">
+                  +{{ doctorsOnlineCount() }}</div>
               </div>
-              <span class="text-xs font-bold text-gray-600 dark:text-gray-400">Doctors Online</span>
+              <span class="text-xs font-bold text-text-secondary">Doctors
+                Online</span>
             </div>
           </div>
         </div>
@@ -271,13 +281,12 @@
 
     <!-- Decorative Background -->
     <div class="absolute top-0 left-0 w-full h-full 
-                bg-gradient-to-br from-green-50/20 to-white pointer-events-none">
+                bg-gradient-to-br from-green-500/5 to-transparent pointer-events-none">
     </div>
   </section>
 
 
-  <section class="py-32 relative overflow-hidden"
-    [ngClass]="isDarkMode() ? 'bg-gray-900 text-gray-100' : 'bg-gray-50 text-gray-900'" id="features">
+  <section class="py-32 relative overflow-hidden transition-all duration-500 bg-bg text-text-primary" id="features">
 
     <!-- Background accents -->
     <div class="absolute top-0 right-0 w-96 h-96 bg-green-500/5 rounded-full blur-3xl"></div>
@@ -286,8 +295,9 @@
     <div class="container mx-auto px-6 relative z-10">
       <!-- Section Header -->
       <div class="text-center max-w-3xl mx-auto mb-20 animate-[fadeUp_0.6s_ease-out]">
-        <h2 class="text-4xl md:text-5xl font-black mb-6 tracking-tight">Experience Premium Healthcare</h2>
-        <p class="text-xl text-gray-500 dark:text-gray-400 font-medium leading-relaxed">
+        <h2 class="text-4xl md:text-5xl font-black mb-6 tracking-tight text-text-primary">Experience Premium Healthcare
+        </h2>
+        <p class="text-xl font-medium leading-relaxed text-text-secondary">
           Everything you need for a seamless health journey, integrated into one powerful platform.
         </p>
       </div>
@@ -295,15 +305,14 @@
       <!-- Benefits Grid -->
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
         <!-- Benefit Cards -->
-        <div *ngFor="let feature of features"
-          class="group relative p-10 rounded-[2.5rem] transition-all duration-500 hover:-translate-y-4 border border-transparent hover:border-green-500/20 shadow-xl hover:shadow-2xl hover:shadow-green-500/10"
-          [ngClass]="isDarkMode() ? 'bg-gray-800/40 backdrop-blur-md shadow-none' : 'bg-white shadow-gray-200/50'">
+        <div *ngFor="let feature of features()"
+          class="group relative p-10 rounded-[2.5rem] transition-all duration-500 hover:-translate-y-4 border border-border bg-surface shadow-xl hover:border-primary/30">
           <div
             class="w-16 h-16 rounded-2xl bg-green-500/10 flex items-center justify-center mb-8 group-hover:scale-110 group-hover:bg-green-500 group-hover:text-white transition-all duration-500 text-green-500">
             <i class="bi text-3xl" [ngClass]="feature.icon"></i>
           </div>
           <h4 class="text-2xl font-black mb-4 tracking-tight">{{ feature.title }}</h4>
-          <p class="text-gray-500 dark:text-gray-400 leading-relaxed font-medium">
+          <p class="text-text-secondary leading-relaxed font-medium">
             {{ feature.description }}
           </p>
         </div>
@@ -312,16 +321,14 @@
   </section>
 
 
-  <section id="how-it-works" class="py-32 relative overflow-hidden"
-    [ngClass]="isDarkMode() ? 'home-dark-bg' : 'bg-white'">
+  <section id="how-it-works" class="py-32 relative overflow-hidden bg-bg transition-colors duration-500">
 
     <div class="container mx-auto px-6">
-      <!-- Section Header -->
       <div class="max-w-2xl mx-auto text-center mb-24">
-        <h2 class="text-4xl md:text-5xl font-black mb-6" [ngClass]="isDarkMode() ? 'text-white' : 'text-gray-900'">
+        <h2 class="text-4xl md:text-5xl font-black mb-6 text-text-primary">
           Simple Health Management
         </h2>
-        <p class="text-xl text-gray-500 dark:text-gray-400 font-medium">
+        <p class="text-xl text-text-secondary font-medium">
           Start your wellness journey in three easy steps
         </p>
       </div>
@@ -334,15 +341,15 @@
         </div>
 
         <!-- Dynamic Steps -->
-        <div *ngFor="let step of steps" class="relative group text-center lg:text-left">
+        <div *ngFor="let step of steps()" class="relative group text-center lg:text-left">
           <div
             class="w-20 h-20 rounded-3xl bg-green-500 text-white flex items-center justify-center text-3xl font-black mb-10 mx-auto lg:mx-0 shadow-xl shadow-green-500/30 transform group-hover:rotate-6 transition-transform">
             {{ step.number }}
           </div>
-          <h3 class="text-2xl font-black mb-4" [ngClass]="isDarkMode() ? 'text-white' : 'text-gray-900'">
+          <h3 class="text-2xl font-black mb-4 text-text-primary">
             {{ step.title }}
           </h3>
-          <p class="text-lg text-gray-500 dark:text-gray-400 leading-relaxed font-medium">
+          <p class="text-lg text-text-secondary leading-relaxed font-medium">
             {{ step.description }}
           </p>
         </div>
@@ -351,7 +358,8 @@
       <!-- Action Button -->
       <div class="text-center mt-20">
         <button (click)="navigateToDashboard()"
-          class="inline-flex items-center gap-4 px-12 py-5 rounded-[2rem] bg-green-500 text-white text-xl font-black shadow-2xl shadow-green-500/30 hover:scale-105 active:scale-95 transition-all">
+          class="inline-flex items-center gap-4 px-12 py-5 rounded-[2rem] text-white text-xl font-black hover:scale-105 active:scale-95 transition-all"
+          [style.background-color]="'var(--primary)'" [style.box-shadow]="'0 20px 40px -10px var(--primary-glow)'">
           Start Your Journey Now
           <i class="bi bi-chevron-right"></i>
         </button>
@@ -359,18 +367,15 @@
     </div>
   </section>
 
-  <section id="testimonials" class="relative py-24 transition-colors duration-300"
-    [ngClass]="isDarkMode() ? 'home-dark-bg' : 'home-light-bg'">
+  <section id="testimonials" class="relative py-24 transition-colors duration-500 bg-bg">
 
     <div class="container mx-auto px-6">
 
-      <!-- Section Header -->
       <div class="text-center max-w-3xl mx-auto mb-20 animate-[fadeUp_0.6s_ease-out]">
-        <h2 class="text-4xl sm:text-5xl md:text-6xl font-black mb-6 tracking-tight"
-          [ngClass]="isDarkMode() ? 'text-white' : 'text-gray-900'">
+        <h2 class="text-4xl sm:text-5xl md:text-6xl font-black mb-6 tracking-tight text-text-primary">
           Loved by patients and doctors
         </h2>
-        <p class="text-xl text-gray-500 dark:text-gray-400 font-medium">
+        <p class="text-xl text-text-secondary font-medium">
           Join thousands of satisfied users who have transformed their healthcare experience.
         </p>
       </div>
@@ -379,9 +384,7 @@
       <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3" *ngIf="testimonials().length; else testimonialsFallback">
 
         <div *ngFor="let testimonial of testimonials(); trackBy: trackTestimonial"
-          class="rounded-3xl p-8 border shadow-lg transition-all duration-300 hover:-translate-y-2" [ngClass]="isDarkMode() 
-              ? 'bg-neutral-900 border-neutral-800 hover:shadow-xl' 
-              : 'bg-neutral-50 border-neutral-200 hover:shadow-xl'">
+          class="rounded-3xl p-8 border border-border shadow-2xl transition-all duration-300 hover:-translate-y-2 bg-surface">
 
           <!-- Rating Stars -->
           <div class="flex mb-4">
@@ -391,7 +394,7 @@
           </div>
 
           <!-- Comment -->
-          <p [ngClass]="isDarkMode() ? 'text-neutral-300' : 'text-neutral-700'" class="mb-6 leading-relaxed">
+          <p class="mb-6 leading-relaxed text-text-secondary">
             “{{ testimonial.comment }}”
           </p>
 
@@ -403,10 +406,10 @@
             </div>
 
             <div>
-              <div [ngClass]="isDarkMode() ? 'text-white' : 'text-neutral-900'" class="font-semibold">
+              <div class="font-semibold text-text-primary">
                 {{ testimonial.patientName || 'Patient' }}
               </div>
-              <div [ngClass]="isDarkMode() ? 'text-neutral-400' : 'text-neutral-500'" class="text-sm">
+              <div class="text-sm text-text-secondary">
                 {{ testimonial.patientRole || 'Patient' }}
               </div>
             </div>
@@ -414,9 +417,8 @@
         </div>
       </div>
 
-      <!-- Fallback -->
       <ng-template #testimonialsFallback>
-        <div [ngClass]="isDarkMode() ? 'text-neutral-400' : 'text-neutral-500'" class="text-center">
+        <div class="text-text-secondary text-center">
           Testimonials are loading. Check back shortly.
         </div>
       </ng-template>
@@ -437,8 +439,8 @@
     <div *ngIf="reviewModalOpen()"
       class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
 
-      <div class="w-full max-w-lg mx-4 rounded-3xl shadow-2xl animate-[fadeUp_0.35s_ease-out]"
-        [ngClass]="isDarkMode() ? 'bg-neutral-900 text-neutral-100' : 'bg-white text-neutral-900'">
+      <div
+        class="w-full max-w-lg mx-4 rounded-3xl shadow-2xl animate-[fadeUp_0.35s_ease-out] bg-surface text-text-primary">
 
         <!-- Close Button -->
         <button aria-label="Close" (click)="closeReviewModal()"
@@ -450,7 +452,7 @@
 
           <div class="text-center">
             <h3 class="text-2xl font-semibold">Share Your Experience</h3>
-            <p [ngClass]="isDarkMode() ? 'text-neutral-400' : 'text-neutral-500'" class="text-sm">
+            <p class="text-text-secondary text-sm">
               Help others by sharing your feedback
             </p>
           </div>
@@ -460,7 +462,7 @@
             <button *ngFor="let star of [1,2,3,4,5]" (mouseenter)="setReviewHover(star)" (click)="setReviewRating(star)"
               class="text-2xl transition-transform hover:scale-125" [ngClass]="reviewHover() >= star || reviewRating() >= star
               ? 'text-warning bi bi-star-fill'
-              : 'text-neutral-400 bi bi-star'">
+              : 'text-text-secondary bi bi-star'">
             </button>
           </div>
 
@@ -472,7 +474,7 @@
             (ngModelChange)="reviewText.set($event)" [maxLength]="reviewCharLimit">
         </textarea>
 
-          <div class="flex justify-between text-sm" [ngClass]="isDarkMode() ? 'text-neutral-400' : 'text-neutral-500'">
+          <div class="flex justify-between text-sm text-text-secondary">
             <span>Minimum 10 characters</span>
             <span>{{ reviewCharCount }}/{{ reviewCharLimit }}</span>
           </div>
@@ -494,7 +496,7 @@
   </section>
 
 
-  <section class="relative overflow-hidden py-32" [ngClass]="isDarkMode() ? 'home-dark-bg' : 'bg-white'">
+  <section class="relative overflow-hidden py-32 bg-bg transition-colors duration-500">
 
     <!-- Dynamic Background -->
     <div class="absolute inset-0 opacity-10 dark:opacity-20 pointer-events-none">
@@ -504,8 +506,8 @@
     </div>
 
     <div class="relative container mx-auto px-6">
-      <div class="max-w-4xl mx-auto rounded-[3rem] p-12 md:p-20 text-center relative overflow-hidden shadow-2xl"
-        [ngClass]="isDarkMode() ? 'bg-gray-800/50' : 'bg-green-500'">
+      <div
+        class="max-w-4xl mx-auto rounded-[3rem] p-12 md:p-20 text-center relative overflow-hidden shadow-2xl bg-surface border border-border">
 
         <!-- Decorative Elements (Light Mode) -->
         <div *ngIf="!isDarkMode()" class="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
@@ -513,24 +515,23 @@
         </div>
 
         <div class="relative z-10">
-          <h2 class="text-4xl md:text-6xl font-black mb-8 leading-tight"
-            [ngClass]="isDarkMode() ? 'text-white' : 'text-white'">
+          <h2 class="text-4xl md:text-6xl font-black mb-8 leading-tight text-text-primary">
             Your Health Journey <br /> Starts Here
           </h2>
 
-          <p class="text-xl mb-12 max-w-2xl mx-auto font-medium"
-            [ngClass]="isDarkMode() ? 'text-gray-400' : 'text-green-50'">
+          <p class="text-xl mb-12 max-w-2xl mx-auto font-medium text-text-secondary">
             Join over 10,000 satisfied patients who have transformed their healthcare experience with QuickMed.
           </p>
 
           <div class="flex flex-col sm:flex-row items-center justify-center gap-6">
             <button (click)="navigateToDashboard()"
-              class="w-full sm:w-auto px-12 py-5 rounded-2xl text-xl font-black transition-all hover:scale-105 active:scale-95 shadow-2xl"
-              [ngClass]="isDarkMode() ? 'bg-green-500 text-white shadow-green-500/20' : 'bg-white text-green-600 shadow-white/20'">
+              class="w-full sm:w-auto px-12 py-5 rounded-2xl text-xl font-black transition-all hover:scale-105 active:scale-95 shadow-2xl flex items-center justify-center gap-3"
+              [style.background-color]="'var(--primary)'" [style.color]="'#fff'"
+              [style.box-shadow]="'0 20px 40px -10px var(--primary-glow)'">
               Get Started Now
             </button>
             <a routerLink="/register"
-              class="text-white font-black uppercase tracking-widest hover:underline decoration-2 underline-offset-8">
+              class="font-black uppercase tracking-widest hover:underline decoration-2 underline-offset-8 text-primary">
               Learn More
             </a>
           </div>
@@ -545,8 +546,8 @@
     [ngClass]="isDarkMode() ? 'home-dark-bg' : 'home-light-bg'"
     style="background-color: rgba(0,0,0,0.6); backdrop-filter: blur(6px);">
 
-    <div class="relative w-full max-w-xl mx-4 rounded-3xl shadow-2xl animate-[fadeIn_0.35s_ease-out]"
-      [ngClass]="isDarkMode() ? 'bg-neutral-900 text-neutral-100' : 'bg-white text-neutral-900'">
+    <div
+      class="relative w-full max-w-xl mx-4 rounded-3xl shadow-2xl animate-[fadeIn_0.35s_ease-out] bg-surface text-text-primary">
 
       <!-- Close Button -->
       <button type="button" aria-label="Close" (click)="closeEditProfile()" class="absolute top-4 right-4 transition"
@@ -592,36 +593,30 @@
 
         <!-- Profile Inputs -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-
-          <input class="w-full rounded-xl border px-4 py-3 text-sm focus:outline-none focus:ring-2"
-            [ngClass]="isDarkMode() ? 'border-neutral-700 bg-transparent text-neutral-100 focus:ring-primary' : 'border-neutral-300 bg-transparent text-neutral-900 focus:ring-primary'"
+          <input
+            class="w-full rounded-xl border border-border bg-bg text-text-primary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
             placeholder="First Name" [ngModel]="profileFirstName()" (ngModelChange)="profileFirstName.set($event)" />
 
-          <input class="w-full rounded-xl border px-4 py-3 text-sm focus:outline-none focus:ring-2"
-            [ngClass]="isDarkMode() ? 'border-neutral-700 bg-transparent text-neutral-100 focus:ring-primary' : 'border-neutral-300 bg-transparent text-neutral-900 focus:ring-primary'"
+          <input
+            class="w-full rounded-xl border border-border bg-bg text-text-primary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
             placeholder="Last Name" [ngModel]="profileLastName()" (ngModelChange)="profileLastName.set($event)" />
 
           <input type="email"
-            class="w-full rounded-xl border px-4 py-3 text-sm focus:outline-none focus:ring-2 md:col-span-2"
-            [ngClass]="isDarkMode() ? 'border-neutral-700 bg-transparent text-neutral-100 focus:ring-primary' : 'border-neutral-300 bg-transparent text-neutral-900 focus:ring-primary'"
+            class="w-full rounded-xl border border-border bg-bg text-text-primary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 md:col-span-2"
             placeholder="Email Address" [ngModel]="profileEmail()" (ngModelChange)="profileEmail.set($event)" />
 
           <input type="tel"
-            class="w-full rounded-xl border px-4 py-3 text-sm focus:outline-none focus:ring-2 md:col-span-2"
-            [ngClass]="isDarkMode() ? 'border-neutral-700 bg-transparent text-neutral-100 focus:ring-primary' : 'border-neutral-300 bg-transparent text-neutral-900 focus:ring-primary'"
+            class="w-full rounded-xl border border-border bg-bg text-text-primary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 md:col-span-2"
             placeholder="Phone Number" [ngModel]="profilePhone()" (ngModelChange)="profilePhone.set($event)" />
 
           <input *ngIf="currentUser()?.role === 'doctor'"
-            class="w-full rounded-xl border px-4 py-3 text-sm focus:outline-none focus:ring-2 md:col-span-2"
-            [ngClass]="isDarkMode() ? 'border-neutral-700 bg-transparent text-neutral-100 focus:ring-primary' : 'border-neutral-300 bg-transparent text-neutral-900 focus:ring-primary'"
+            class="w-full rounded-xl border border-border bg-bg text-text-primary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 md:col-span-2"
             placeholder="Specialty" [ngModel]="profileSpecialty()" (ngModelChange)="profileSpecialty.set($event)" />
 
           <textarea *ngIf="currentUser()?.role === 'doctor'" rows="4"
-            class="w-full rounded-xl border px-4 py-3 text-sm focus:outline-none focus:ring-2 md:col-span-2"
-            [ngClass]="isDarkMode() ? 'border-neutral-700 bg-transparent text-neutral-100 focus:ring-primary' : 'border-neutral-300 bg-transparent text-neutral-900 focus:ring-primary'"
+            class="w-full rounded-xl border border-border bg-bg text-text-primary px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 md:col-span-2"
             placeholder="Short bio" [ngModel]="profileBio()" (ngModelChange)="profileBio.set($event)">
-      </textarea>
-
+          </textarea>
         </div>
 
         <!-- Error Message -->
@@ -643,9 +638,7 @@
   </section>
 
 
-  <!-- Footer -->
-  <footer class="footer pt-24 pb-12 transition-colors duration-300 border-t border-gray-100 dark:border-gray-800"
-    [ngClass]="isDarkMode() ? 'home-dark-bg text-neutral-100' : 'bg-white text-neutral-900'">
+  <footer class="footer pt-24 pb-12 transition-colors duration-500 border-t border-border bg-bg text-text-primary">
     <div class="container mx-auto px-6">
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-16 mb-20">
 
@@ -661,21 +654,21 @@
               QuickMed
             </span>
           </div>
-          <p class="text-lg text-gray-500 dark:text-gray-400 leading-relaxed max-w-md">
+          <p class="text-lg text-text-secondary leading-relaxed max-w-md">
             Redefining healthcare accessibility with cutting-edge technology and human-centric care. Born in the digital
             age, for the modern patient.
           </p>
           <div class="flex gap-4">
             <a href="#"
-              class="w-12 h-12 rounded-2xl bg-gray-50 dark:bg-gray-800 flex items-center justify-center text-xl text-gray-400 hover:bg-green-500 hover:text-white transition-all">
+              class="w-12 h-12 rounded-2xl bg-surface-alt border border-border flex items-center justify-center text-xl text-text-secondary hover:bg-primary hover:text-white transition-all">
               <i class="bi bi-twitter-x"></i>
             </a>
             <a href="#"
-              class="w-12 h-12 rounded-2xl bg-gray-50 dark:bg-gray-800 flex items-center justify-center text-xl text-gray-400 hover:bg-green-500 hover:text-white transition-all">
+              class="w-12 h-12 rounded-2xl bg-surface-alt border border-border flex items-center justify-center text-xl text-text-secondary hover:bg-primary hover:text-white transition-all">
               <i class="bi bi-instagram"></i>
             </a>
             <a href="#"
-              class="w-12 h-12 rounded-2xl bg-gray-50 dark:bg-gray-800 flex items-center justify-center text-xl text-gray-400 hover:bg-green-500 hover:text-white transition-all">
+              class="w-12 h-12 rounded-2xl bg-surface-alt border border-border flex items-center justify-center text-xl text-text-secondary hover:bg-primary hover:text-white transition-all">
               <i class="bi bi-linkedin"></i>
             </a>
           </div>
@@ -683,58 +676,46 @@
 
         <!-- Links Groups -->
         <div>
-          <h5 class="text-sm font-black uppercase tracking-[0.2em] text-gray-900 dark:text-white mb-8">Platform</h5>
+          <h5 class="text-sm font-black uppercase tracking-[0.2em] text-text-primary mb-8">Platform</h5>
           <ul class="space-y-4">
-            <li><a href="#"
-                class="text-gray-500 dark:text-gray-400 hover:text-green-500 transition-colors font-medium">Features</a>
+            <li><a href="#" class="text-text-secondary hover:text-primary transition-colors font-medium">Features</a>
             </li>
-            <li><a href="#"
-                class="text-gray-500 dark:text-gray-400 hover:text-green-500 transition-colors font-medium">For
+            <li><a href="#" class="text-text-secondary hover:text-primary transition-colors font-medium">For
                 Doctors</a></li>
-            <li><a href="#"
-                class="text-gray-500 dark:text-gray-400 hover:text-green-500 transition-colors font-medium">For
+            <li><a href="#" class="text-text-secondary hover:text-primary transition-colors font-medium">For
                 Patients</a></li>
-            <li><a href="#"
-                class="text-gray-500 dark:text-gray-400 hover:text-green-500 transition-colors font-medium">Mobile
+            <li><a href="#" class="text-text-secondary hover:text-primary transition-colors font-medium">Mobile
                 App</a>
             </li>
           </ul>
         </div>
 
         <div>
-          <h5 class="text-sm font-black uppercase tracking-[0.2em] text-gray-900 dark:text-white mb-8">Company</h5>
+          <h5 class="text-sm font-black uppercase tracking-[0.2em] text-text-primary mb-8">Company</h5>
           <ul class="space-y-4">
-            <li><a href="#"
-                class="text-gray-500 dark:text-gray-400 hover:text-green-500 transition-colors font-medium">Our
+            <li><a href="#" class="text-text-secondary hover:text-primary transition-colors font-medium">Our
                 Story</a>
             </li>
-            <li><a href="#"
-                class="text-gray-500 dark:text-gray-400 hover:text-green-500 transition-colors font-medium">Careers</a>
+            <li><a href="#" class="text-text-secondary hover:text-primary transition-colors font-medium">Careers</a>
             </li>
-            <li><a href="#"
-                class="text-gray-500 dark:text-gray-400 hover:text-green-500 transition-colors font-medium">Press
+            <li><a href="#" class="text-text-secondary hover:text-primary transition-colors font-medium">Press
                 Kit</a>
             </li>
-            <li><a href="#"
-                class="text-gray-500 dark:text-gray-400 hover:text-green-500 transition-colors font-medium">Contact</a>
+            <li><a href="#" class="text-text-secondary hover:text-primary transition-colors font-medium">Contact</a>
             </li>
           </ul>
         </div>
 
         <div>
-          <h5 class="text-sm font-black uppercase tracking-[0.2em] text-gray-900 dark:text-white mb-8">Support</h5>
+          <h5 class="text-sm font-black uppercase tracking-[0.2em] text-text-primary mb-8">Support</h5>
           <ul class="space-y-4">
-            <li><a href="#"
-                class="text-gray-500 dark:text-gray-400 hover:text-green-500 transition-colors font-medium">Help
+            <li><a href="#" class="text-text-secondary hover:text-primary transition-colors font-medium">Help
                 Center</a></li>
-            <li><a href="#"
-                class="text-gray-500 dark:text-gray-400 hover:text-green-500 transition-colors font-medium">Security</a>
+            <li><a href="#" class="text-text-secondary hover:text-primary transition-colors font-medium">Security</a>
             </li>
-            <li><a href="#"
-                class="text-gray-500 dark:text-gray-400 hover:text-green-500 transition-colors font-medium">Privacy
+            <li><a href="#" class="text-text-secondary hover:text-primary transition-colors font-medium">Privacy
                 Policy</a></li>
-            <li><a href="#"
-                class="text-gray-500 dark:text-gray-400 hover:text-green-500 transition-colors font-medium">Terms of
+            <li><a href="#" class="text-text-secondary hover:text-primary transition-colors font-medium">Terms of
                 Use</a></li>
           </ul>
         </div>
@@ -743,10 +724,10 @@
       <!-- Bottom -->
       <div
         class="pt-12 border-t border-gray-100 dark:border-gray-800 flex flex-col md:flex-row justify-between items-center gap-6">
-        <p class="text-gray-500 dark:text-gray-400 font-medium">
+        <p class="text-text-secondary font-medium">
           &copy; 2025 QuickMed. All rights reserved.
         </p>
-        <div class="flex items-center gap-2 text-gray-500 dark:text-gray-400 font-medium">
+        <div class="flex items-center gap-2 text-text-secondary font-medium">
           Built with <i class="bi bi-heart-fill text-red-500 animate-pulse"></i> for Ethiopia
         </div>
       </div>

@@ -4,7 +4,7 @@ import { FormsModule } from "@angular/forms"
 import { Router, RouterLink } from "@angular/router"
 import { AuthService } from "@core/services/auth.service"
 import { ThemeService } from "@core/services/theme.service"
-import { FeaturedTestimonial, LandingMetricsService, PlatformSummary } from "@core/services/landing-metrics.service"
+import { FeaturedTestimonial, LandingFeature, LandingMetricsService, LandingStep, PlatformSummary } from "@core/services/landing-metrics.service"
 import { ReviewService } from "@core/services/review.service"
 import { UserService } from "@core/services/user.service"
 import { OnInit, signal } from "@angular/core"
@@ -17,51 +17,17 @@ import { OnInit, signal } from "@angular/core"
   styleUrls: ["./home.component.css"],
 })
 export class HomeComponent implements OnInit {
-  steps = [
-    {
-      number: 1,
-      title: 'Create Profile',
-      description: 'Sign up and complete your health profile to get personalized recommendations.'
-    },
-    {
-      number: 2,
-      title: 'Find Specialist',
-      description: 'Search by specialty, location, or availability to find your perfect doctor.'
-    },
-    {
-      number: 3,
-      title: 'Book & Consult',
-      description: 'Confirm your appointment and connect with your doctor instantly via the app.'
-    }
-  ];
-
-  features = [
-    {
-      icon: 'bi-calendar-check',
-      title: 'Smart Booking',
-      description: 'Find and book the best specialists in seconds with our intelligent scheduling system.'
-    },
-    {
-      icon: 'bi-lightning-charge',
-      title: 'Instant Access',
-      description: 'Zero wait times. Get matched with top-tier doctors in your city instantly.'
-    },
-    {
-      icon: 'bi-shield-check',
-      title: 'Secure Vault',
-      description: 'Keep your medical history encrypted and safe. Accessible only by you and your doctors.'
-    },
-    {
-      icon: 'bi-camera-video',
-      title: 'Virtual Care',
-      description: 'Consult with doctors from the comfort of your home via HD video calls.'
-    }
-  ];
+  steps = signal<LandingStep[]>([]);
+  features = signal<LandingFeature[]>([]);
   mobileMenuOpen = false;
   currentUser = this.authService.currentUser
   isDarkMode = this.themeService.isDarkMode
   happyPatients = signal<number | null>(null)
   platformRating = signal<number | null>(null)
+  totalDoctors = signal<number | null>(null)
+  nextVisit = signal<string>('Today, 2:30 PM')
+  liveVitals = signal<string>('72 BPM')
+  doctorsOnlineCount = signal<number>(50)
   testimonials = signal<FeaturedTestimonial[]>([])
   reviewModalOpen = signal(false)
   reviewRating = signal(0)
@@ -104,6 +70,8 @@ export class HomeComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadSummary()
+    this.loadHeroMetrics()
+    this.loadLandingSections()
     this.loadTestimonials()
     this.preloadDoctors()
     this.syncReviewSubmissionState()
@@ -114,11 +82,24 @@ export class HomeComponent implements OnInit {
       next: (summary: PlatformSummary) => {
         this.happyPatients.set(summary.happyPatients)
         this.platformRating.set(summary.average)
+        this.totalDoctors.set(summary.doctorCount)
       },
       error: (err) => {
         console.error('Failed to load platform summary', err)
       },
     })
+  }
+
+  private loadLandingSections(): void {
+    this.landingMetrics.getFeatures().subscribe({
+      next: (features) => this.features.set(features),
+      error: (err) => console.error('Failed to load features', err)
+    });
+
+    this.landingMetrics.getSteps().subscribe({
+      next: (steps) => this.steps.set(steps),
+      error: (err) => console.error('Failed to load steps', err)
+    });
   }
 
   private loadTestimonials(): void {
@@ -134,6 +115,36 @@ export class HomeComponent implements OnInit {
         console.error('Failed to load testimonials', err)
       },
     })
+  }
+
+  private loadHeroMetrics(): void {
+    const userId = this.currentUser()?.id;
+    this.landingMetrics.getHeroMetrics(userId).subscribe({
+      next: (metrics) => {
+        this.nextVisit.set(metrics.nextVisit);
+        this.liveVitals.set(metrics.liveVitals);
+        this.doctorsOnlineCount.set(metrics.doctorsOnline);
+
+        // Simulate live vitals if authenticated
+        if (userId) {
+          this.startLiveVitalsSimulation();
+        }
+      },
+      error: (err) => {
+        console.error('Failed to load hero metrics', err);
+      }
+    });
+  }
+
+  private vitalsInterval: any;
+  private startLiveVitalsSimulation(): void {
+    if (this.vitalsInterval) clearInterval(this.vitalsInterval);
+    this.vitalsInterval = setInterval(() => {
+      const current = parseInt(this.liveVitals().split(' ')[0]);
+      const fluctuation = Math.floor(Math.random() * 3) - 1; // -1, 0, or 1
+      const newVal = Math.max(60, Math.min(100, current + fluctuation));
+      this.liveVitals.set(`${newVal} BPM`);
+    }, 3000);
   }
 
   private preloadDoctors(): void {

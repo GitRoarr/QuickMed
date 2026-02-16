@@ -22,6 +22,9 @@ import { PatientPortalModule } from "./patient-portal/patient-portal.module";
 import { SchedulesModule } from "./schedules/schedules.module";
 import { ConsultationsModule } from "./consultations/consultations.module";
 import { WebRtcModule } from "./webrtc/webrtc.module";
+import { LandingModule } from "./landing/landing.module";
+import { DoctorsService } from "./doctors/doctors.service";
+import { User } from "./users/entities/user.entity";
 
 @Module({
   imports: [
@@ -64,12 +67,38 @@ import { WebRtcModule } from "./webrtc/webrtc.module";
     PatientPortalModule,
     ConsultationsModule,
     WebRtcModule,
+    LandingModule,
   ],
 })
 export class AppModule implements OnModuleInit {
-  constructor(private dataSource: DataSource) { }
+  constructor(
+    private dataSource: DataSource,
+    private doctorsService: DoctorsService
+  ) { }
 
   async onModuleInit() {
+    // 1. One-time test invite for Ava Wilson
+    try {
+      const avaEmail = "ava.wilson@quickmed.com";
+      const userRepo = this.dataSource.getRepository(User);
+      const existing = await userRepo.findOne({ where: { email: avaEmail } });
+
+      if (!existing) {
+        console.log("\n[Init] Generating invitation for Ava Wilson...");
+        await this.doctorsService.createDoctorInvite({
+          firstName: "Ava",
+          lastName: "Wilson",
+          email: avaEmail,
+          specialty: "Cardiology",
+          licenseNumber: "MED-123456",
+          phoneNumber: "+1 555-0123",
+          bio: "Specialist in cardiovascular health with over 10 years of experience."
+        });
+      }
+    } catch (e) {
+      console.warn('Failed to generate test invite for Ava Wilson', e);
+    }
+
     try {
       if (this.dataSource.driver.options.type === 'postgres') {
         const queryRunner = this.dataSource.createQueryRunner();

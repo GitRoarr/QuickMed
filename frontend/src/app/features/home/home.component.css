@@ -4,26 +4,26 @@
   --primary-hover: hsl(142, 72%, 40%);
   --primary-light: hsl(142, 72%, 95%);
   --primary-glow: hsla(var(--primary-hsl), 0.35);
-  --home-light-bg: #ffffff;
-  --bg-dark: #0b0f1a;
-  --surface-light: rgba(255, 255, 255, 0.9);
-  --surface-dark: rgba(15, 23, 42, 0.9);
-  --text-main: #0f172a;
-  --text-muted: #64748b;
-  --glass-border: rgba(255, 255, 255, 0.1);
-  --glass-border-light: rgba(0, 0, 0, 0.05);
-  --shadow-premium: 0 25px 50px -12px rgba(0, 0, 0, 0.08);
+  --home-light-bg: var(--bg);
+  --bg-dark: var(--bg);
+  --surface-light: var(--glass-bg);
+  --surface-dark: var(--glass-bg);
+  --text-main: var(--text-primary);
+  --text-muted: var(--text-secondary);
+  --glass-border: var(--border);
+  --glass-border-light: var(--border-light);
+  --shadow-premium: var(--shadow);
   --shadow-glow: 0 0 20px var(--primary-glow);
 }
 
 .home-light-bg {
-  background-color: var(--home-light-bg);
-  color: var(--text-main);
+  background-color: var(--bg);
+  color: var(--text-primary);
 }
 
 .home-dark-bg {
-  background-color: var(--bg-dark);
-  color: #f8fafc;
+  background-color: var(--bg);
+  color: var(--text-primary);
 }
 
 /* Glassmorphism Navbar */

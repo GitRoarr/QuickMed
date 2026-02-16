@@ -8,7 +8,7 @@ import { User } from '../users/entities/user.entity';
 
 @Controller('reviews')
 export class ReviewsController {
-  constructor(private readonly reviewsService: ReviewsService) {}
+  constructor(private readonly reviewsService: ReviewsService) { }
 
   @Post()
   @UseGuards(JwtAuthGuard)
@@ -31,12 +31,17 @@ export class ReviewsController {
   getPlatformSummary() {
     return this.reviewsService.getPlatformSummary();
   }
-  
+
   @Get('featured')
   @HttpCode(HttpStatus.OK)
   async getFeaturedTestimonials(@Query('limit') limit?: string): Promise<FeaturedTestimonial[]> {
     const parsed = limit ? Number(limit) : undefined;
     const take = parsed && !Number.isNaN(parsed) ? parsed : undefined;
     return this.reviewsService.getFeaturedTestimonials(take);
+  }
+
+  @Get('hero-metrics')
+  getHeroMetrics(@Query('userId') userId?: string) {
+    return this.reviewsService.getHeroMetrics(userId);
   }
 }

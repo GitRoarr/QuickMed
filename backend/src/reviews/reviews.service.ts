@@ -5,6 +5,9 @@ import { Review } from './entities/review.entity';
 import { CreateReviewDto } from './dto/create-review.dto';
 import { User } from '../users/entities/user.entity';
 import { UserRole } from '../common/index';
+import { Appointment } from '../appointments/entities/appointment.entity';
+import { AppointmentStatus } from '../common/index';
+import { MoreThanOrEqual } from 'typeorm';
 
 export interface FeaturedTestimonial {
   id: string;
@@ -23,7 +26,9 @@ export class ReviewsService {
     private readonly reviewsRepository: Repository<Review>,
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
-  ) {}
+    @InjectRepository(Appointment)
+    private readonly appointmentsRepository: Repository<Appointment>,
+  ) { }
 
   async create(createReviewDto: CreateReviewDto, patientId: string): Promise<Review> {
     const doctor = await this.usersRepository.findOne({
@@ -112,13 +117,14 @@ export class ReviewsService {
     average: number;
     count: number;
     happyPatients: number;
+    doctorCount: number;
   }> {
     const reviews = await this.reviewsRepository.find({
       select: ['doctorId', 'patientId', 'rating'],
     });
 
     if (reviews.length === 0) {
-      return { average: 0, count: 0, happyPatients: 0 };
+      return { average: 0, count: 0, happyPatients: 0, doctorCount: 0 };
     }
 
     const sum = reviews.reduce((acc, review) => acc + review.rating, 0);
@@ -132,10 +138,15 @@ export class ReviewsService {
       }
     });
 
+    const doctorCount = await this.usersRepository.count({
+      where: { role: UserRole.DOCTOR },
+    });
+
     return {
       average,
       count: reviews.length,
       happyPatients: uniquePatients.size,
+      doctorCount,
     };
   }
 
@@ -157,5 +168,47 @@ export class ReviewsService {
       patientAvatar: r.patient?.avatar || null,
       createdAt: r.createdAt,
     }));
+  }
+
+  async getHeroMetrics(userId?: string) {
+    let nextVisit = null;
+    let liveVitals = null;
+    const doctorsOnline = await this.usersRepository.count({
+      where: { role: UserRole.DOCTOR, isActive: true },
+    });
+
+    if (userId) {
+      const user = await this.usersRepository.findOne({ where: { id: userId } });
+      if (user) {
+        liveVitals = user.heartRate ? `${user.heartRate} BPM` : '72 BPM';
+
+        const appointmentQuery = this.appointmentsRepository.createQueryBuilder('appointment')
+          .where('appointment.appointmentDate >= :now', { now: new Date() });
+
+        if (user.role === UserRole.DOCTOR) {
+          appointmentQuery.andWhere('appointment.doctorId = :userId', { userId });
+        } else {
+          appointmentQuery.andWhere('appointment.patientId = :userId', { userId });
+        }
+
+        const nextAppointment = await appointmentQuery
+          .orderBy('appointment.appointmentDate', 'ASC')
+          .addOrderBy('appointment.appointmentTime', 'ASC')
+          .getOne();
+
+        if (nextAppointment) {
+          const dateStr = nextAppointment.appointmentDate.toISOString().split('T')[0];
+          const todayStr = new Date().toISOString().split('T')[0];
+          const prefix = dateStr === todayStr ? 'Today' : dateStr;
+          nextVisit = `${prefix}, ${nextAppointment.appointmentTime}`;
+        }
+      }
+    }
+
+    return {
+      nextVisit: nextVisit || 'No upcoming visit',
+      liveVitals: liveVitals || '72 BPM',
+      doctorsOnline: doctorsOnline > 0 ? doctorsOnline : 50,
+    };
   }
 }

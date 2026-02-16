@@ -99,7 +99,9 @@
 
         <!-- Action Buttons -->
         <div class="md-actions">
-          <button type="button" class="md-btn md-btn-secondary" (click)="back()">Cancel</button>
+          <button type="button" class="md-btn md-btn-secondary" (click)="back()">
+            {{ (inviteLink || emailSent) ? 'Go Back' : 'Cancel' }}
+          </button>
           <button type="submit" class="md-btn md-btn-primary" [disabled]="form.invalid || loading">
             <span *ngIf="!loading">Save Doctor</span>
             <span *ngIf="loading" class="spinner-inline"></span>
@@ -114,11 +116,11 @@
         <i class="bi bi-link-45deg"></i>
         <div class="md-status-text">
           <p class="md-status-title">Invitation Link Generated</p>
-          <p class="md-status-desc">Click copy and share the link below manually.</p>
+          <p class="md-status-desc">Copy and share this link with the doctor.</p>
         </div>
         <div class="md-copy-box">
           <input type="text" [value]="inviteLink" readonly>
-          <button (click)="copyInviteLink()">Copy</button>
+          <button type="button" (click)="copyInviteLink()">Copy Link</button>
         </div>
       </div>
     </div>

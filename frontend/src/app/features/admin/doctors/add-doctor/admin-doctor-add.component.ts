@@ -31,7 +31,7 @@ export class AdminDoctorAddComponent {
       specialty: ['', Validators.required],
       licenseNumber: ['', Validators.required],
       phoneNumber: ['', Validators.required],
-      bio: ['', Validators.required]
+      bio: ['']
     });
   }
 
@@ -52,18 +52,22 @@ export class AdminDoctorAddComponent {
 
         if (response.emailSent) {
           this.toastService.success('Doctor invited successfully!');
+          // Auto-navigate back after 2 seconds if email was sent
+          setTimeout(() => {
+            this.back();
+          }, 2000);
         } else {
-          this.toastService.warning('Manual link generated.');
+          this.toastService.warning('Manual link generated. Please copy it before leaving.');
         }
 
         this.loading = false;
         this.form.reset();
 
-        // Auto-hide the invitation link card after 7 seconds
+        // Auto-hide the invitation link card after 10 seconds if they don't navigate away
         if (this.inviteLink) {
           setTimeout(() => {
             this.inviteLink = null;
-          }, 7000);
+          }, 10000);
         }
       },
       error: (err) => {

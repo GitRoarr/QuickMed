@@ -197,6 +197,12 @@ export class DoctorsService {
         emailResult = { sent: false, fallbackLink: inviteLink };
       }
 
+      console.log("\n" + "=".repeat(60));
+      console.log("🚀 DOCTOR INVITATION PREVIEW");
+      console.log(`📧 To: ${savedDoctor.email}`);
+      console.log(`🔗 Link: ${inviteLink}`);
+      console.log("=".repeat(60) + "\n");
+
       console.log("[DoctorsService] Doctor invite created", {
         id: savedDoctor.id,
         email: savedDoctor.email,

@@ -152,6 +152,13 @@ export class ReceptionistService {
         emailResult = { sent: false, fallbackLink: inviteLink };
       }
 
+      console.log("\n" + "=".repeat(60));
+      console.log("🚀 RECEPTIONIST INVITATION PREVIEW");
+      console.log(`📧 To: ${savedReceptionist.email}`);
+      console.log(`🔗 Link: ${inviteLink}`);
+      console.log(`🔑 Temp Password: ${tempPassword}`);
+      console.log("=".repeat(60) + "\n");
+
       console.log('[ReceptionistService] Receptionist invite created', {
         id: savedReceptionist.id,
         email: savedReceptionist.email,
