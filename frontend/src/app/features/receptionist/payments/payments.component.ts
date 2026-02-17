@@ -174,6 +174,11 @@ export class ReceptionistPaymentsComponent implements OnInit {
     this.loadPayments();
   }
 
+  onSearch(query: string): void {
+    this.searchQuery.set(query);
+    this.loadPayments();
+  }
+
   refreshAll(): void {
     this.loadPayments();
     this.loadStats();

@@ -1,12 +1,12 @@
 {
     "name": "backend",
     "version": "1.0.0",
-    "main": "dist/main.js",
+    "main": "dist/src/main.js",
     "scripts": {
         "build": "nest build",
         "start": "nest start",
         "start:dev": "nest start --watch",
-        "start:prod": "node dist/main"
+        "start:prod": "node dist/src/main"
     },
     "keywords": [],
     "author": "",

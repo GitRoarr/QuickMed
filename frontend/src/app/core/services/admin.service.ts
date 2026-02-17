@@ -155,7 +155,7 @@ export class AdminService {
     if (role) params = params.set("role", role)
     if (search) params = params.set("search", search)
 
-    const token = localStorage.getItem("carehub_token") || ""
+    const token = localStorage.getItem("quickmed_token") || ""
     if (token) {
       try {
         const payload = JSON.parse(atob(token.split(".")[1]))

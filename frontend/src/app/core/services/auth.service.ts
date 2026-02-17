@@ -12,9 +12,9 @@ import { createClient, SupabaseClient, User as SupabaseUser, Session } from "@su
 export class AuthService {
   private readonly API_URL = `${environment.apiUrl}/auth`;
   private readonly USERS_URL = `${environment.apiUrl}/users`;
-  private readonly TOKEN_KEY = "carehub_token";
-  private readonly USER_KEY = "carehub_user";
-  private readonly SUPABASE_TOKEN_KEY = "carehub_supabase_token";
+  private readonly TOKEN_KEY = "quickmed_token";
+  private readonly USER_KEY = "quickmed_user";
+  private readonly SUPABASE_TOKEN_KEY = "quickmed_supabase_token";
   private supabase: SupabaseClient | null = null;
 
   currentUser = signal<User | null>(this.getUserFromStorage());
