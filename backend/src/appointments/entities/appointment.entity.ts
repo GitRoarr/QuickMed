@@ -7,7 +7,7 @@ import { AppointmentStatus, AppointmentType } from '../../common/index';
 export class Appointment extends BaseEntity {
   @Column({ type: 'date' })
   appointmentDate: Date;
-  
+
 
   @Column({ type: 'time' })
   appointmentTime: string;
@@ -46,7 +46,7 @@ export class Appointment extends BaseEntity {
 
   @Column({
     type: 'enum',
-    enum: ['paid','not_paid','pending'],
+    enum: ['paid', 'not_paid', 'pending', 'awaiting_payment', 'pay_at_clinic', 'failed'],
     default: 'not_paid',
   })
   paymentStatus: string;
@@ -81,4 +81,10 @@ export class Appointment extends BaseEntity {
 
   @Column({ type: 'json', nullable: true })
   consultation?: any;
+
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  amount: number;
+
+  @Column({ nullable: true })
+  serviceName: string;
 }

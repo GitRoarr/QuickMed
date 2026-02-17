@@ -35,7 +35,7 @@
     <!-- Pricing Summary -->
     <div class="pricing-section">
       <span class="price-label">Total Amount Due</span>
-      <span class="price-value">USD 50.00</span>
+      <span class="price-value">{{ consultationFee | currency:'USD' }}</span>
     </div>
 
     <!-- Payment Method Selector -->
@@ -44,11 +44,19 @@
       <div class="method-options">
         <div class="method-card" [class.active]="paymentMethod() === 'CARD'" (click)="setPaymentMethod('CARD')">
           <i class="bi bi-credit-card-2-front"></i>
-          <span>Pay with Card</span>
+          <span>Stripe / Card</span>
         </div>
         <div class="method-card" [class.active]="paymentMethod() === 'CASH'" (click)="setPaymentMethod('CASH')">
-          <i class="bi bi-cash-stack"></i>
+          <i class="bi bi-hospital"></i>
           <span>Pay at Clinic</span>
+        </div>
+        <div class="method-card disabled">
+          <i class="bi bi-phone"></i>
+          <span>Telebirr</span>
+        </div>
+        <div class="method-card disabled">
+          <i class="bi bi-shield-lock"></i>
+          <span>Chapa</span>
         </div>
       </div>
     </div>

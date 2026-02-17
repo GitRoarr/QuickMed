@@ -9,6 +9,7 @@ import { ReceptionistTask } from './entities/receptionist-task.entity';
 import { ReceptionistMessage } from './entities/receptionist-message.entity';
 import { ReceptionistInvitation } from './entities/receptionist-invitation.entity';
 import { Payment } from '../payments/entities/payment.entity';
+import { DoctorService } from '../settings/entities/doctor-service.entity';
 import { EmailModule } from '@/common/services/email.module';
 import { SmsModule } from '@/common/services/sms.module';
 import { CloudinaryModule } from '@/profile/cloudinary.module';
@@ -28,6 +29,7 @@ import { MessagesModule } from '../messages/messages.module';
       ReceptionistInvitation,
       Payment,
       ReceptionistTask,
+      DoctorService,
     ]),
     EmailModule,
     SmsModule,

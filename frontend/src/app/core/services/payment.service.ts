@@ -47,7 +47,7 @@ export class PaymentService {
     return this.http.get<PaymentDetails | null>(`${this.apiUrl}/stripe/transaction/${transactionId}`);
   }
 
-  createCashPayment(data: { appointmentId: string; amount?: number; currency?: string; note?: string }): Observable<PaymentDetails> {
+  createCashPayment(data: { appointmentId: string; amount?: number; currency?: string; note?: string; serviceId?: string }): Observable<PaymentDetails> {
     return this.http.post<PaymentDetails>(`${this.apiUrl}/cash`, data);
   }
 }

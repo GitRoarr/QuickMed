@@ -23,13 +23,22 @@ export interface DoctorSettings {
   shareDataWithPatients: boolean;
 }
 
+export interface DoctorService {
+  id: string;
+  name: string;
+  description?: string;
+  price: number;
+  duration: number;
+  isActive: boolean;
+}
+
 @Injectable({
   providedIn: 'root',
 })
 export class SettingsService {
   private readonly API_URL = `${environment.apiUrl}/settings`;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   getSettings(): Observable<DoctorSettings> {
     return this.http.get<DoctorSettings>(this.API_URL);
@@ -45,5 +54,22 @@ export class SettingsService {
 
   updateProfile(data: Partial<User>): Observable<User> {
     return this.http.patch<User>(`${this.API_URL}/profile`, data);
+  }
+
+  // Doctor Services
+  getServices(): Observable<DoctorService[]> {
+    return this.http.get<DoctorService[]>(`${this.API_URL}/services`);
+  }
+
+  addService(data: Partial<DoctorService>): Observable<DoctorService> {
+    return this.http.patch<DoctorService>(`${this.API_URL}/services/add`, data);
+  }
+
+  updateService(id: string, data: Partial<DoctorService>): Observable<DoctorService> {
+    return this.http.patch<DoctorService>(`${this.API_URL}/services/${id}`, data);
+  }
+
+  deleteService(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.API_URL}/services/${id}`);
   }
 }

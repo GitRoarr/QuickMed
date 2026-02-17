@@ -311,22 +311,31 @@ export class MessagesComponent implements OnInit, AfterViewChecked, OnDestroy {
   }
 
   getPatientName(conversation: Conversation): string {
+    let name = 'Unknown';
     if (conversation.patient) {
-      return `${conversation.patient.firstName} ${conversation.patient.lastName}`;
+      name = `${conversation.patient.firstName || ''} ${conversation.patient.lastName || ''}`;
+    } else if (conversation.receptionist) {
+      name = `${conversation.receptionist.firstName || ''} ${conversation.receptionist.lastName || ''} (Receptionist)`;
     }
-    if (conversation.receptionist) {
-      return `${conversation.receptionist.firstName} ${conversation.receptionist.lastName} (Receptionist)`;
-    }
-    return 'Unknown';
-    // Logic needs to adapt if chatting with someone else
+
+    // Remove "undefined" string if it accidentally got in
+    return name.replace(/undefined/gi, '').trim() || 'Unknown';
   }
 
   getPatientInitials(conversation: Conversation): string {
     const name = this.getPatientName(conversation);
-    const parts = name.replace('(Receptionist)', '').trim().split(' ');
+    // Remove (Receptionist) and split by spaces
+    const parts = name.replace('(Receptionist)', '')
+      .replace(/undefined/gi, '')
+      .trim()
+      .split(/\s+/)
+      .filter(p => p && p.length > 0);
+
+    if (parts.length === 0) return '?';
+
     return parts.length >= 2
       ? (parts[0][0] + parts[1][0]).toUpperCase()
-      : name.charAt(0).toUpperCase() || '?';
+      : name.substring(0, 2).toUpperCase();
   }
 
   getTimeAgo(date: string | undefined): string {
@@ -348,8 +357,10 @@ export class MessagesComponent implements OnInit, AfterViewChecked, OnDestroy {
   getDoctorInitials(): string {
     const user = this.currentUser();
     if (!user) return 'DR';
-    const name = `${user.firstName} ${user.lastName}`;
-    const parts = name.trim().split(' ');
+    const name = `${user.firstName || ''} ${user.lastName || ''}`.replace(/undefined/gi, '').trim();
+    if (!name) return 'DR';
+
+    const parts = name.split(/\s+/).filter(p => p && p.length > 0);
     return parts.length >= 2
       ? (parts[0][0] + parts[1][0]).toUpperCase()
       : name.substring(0, 2).toUpperCase();

@@ -59,4 +59,8 @@ export class AppointmentService {
   getPendingCount(): Observable<{ count: number }> {
     return this.http.get<{ count: number }>(`${this.API_URL}/pending-count`)
   }
+
+  getDoctorServices(doctorId: string): Observable<any[]> {
+    return this.http.get<any[]>(`${environment.apiUrl}/settings/services?doctorId=${doctorId}`)
+  }
 }

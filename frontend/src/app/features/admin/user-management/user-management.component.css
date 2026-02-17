@@ -9,16 +9,22 @@
   --admin-primary-light: #d1fae5;
   --admin-primary-dark: #15803d;
   --admin-shadow: rgba(0, 0, 0, 0.1);
+  --admin-glow: rgba(22, 163, 74, 0.08);
+  --admin-input-bg: #f8fafc;
 }
 
-/* Force black sections in dark theme (per request) */
-:host-context(.admin-shell.dark) {
-  --admin-bg: #000000;
-  --admin-fg: #ffffff;
-  --admin-surface: #000000;
-  --admin-border: #1f2937; /* subtle dark border */
-  --admin-muted: #b3b3b3;
-  --admin-shadow: rgba(0, 0, 0, 0.7);
+/* Dark theme variables */
+:host-context(.admin-shell.dark),
+:host-context(.dark) {
+  --admin-bg: #020617;
+  --admin-fg: #f1f5f9;
+  --admin-surface: #0f172a;
+  --admin-border: rgba(255, 255, 255, 0.06);
+  --admin-muted: #94a3b8;
+  --admin-primary-light: rgba(22, 163, 74, 0.12);
+  --admin-shadow: rgba(0, 0, 0, 0.6);
+  --admin-glow: rgba(22, 163, 74, 0.08);
+  --admin-input-bg: #0f172a;
 }
 
 .user-management-page {
@@ -167,9 +173,8 @@
 .um-stat-card,
 .user-item {
   background: var(--admin-surface) !important;
-  border: 1px solid transparent !important;
+  border: 1px solid var(--admin-border) !important;
   position: relative;
-  animation: cardGlow 7s ease-in-out infinite;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -177,50 +182,317 @@
 .um-stat-card:hover,
 .user-item:hover {
   border-color: var(--admin-primary) !important;
-  box-shadow: 0 12px 26px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(22, 163, 74, 0.18);
+  box-shadow: 0 12px 26px var(--admin-shadow), 0 0 0 1px rgba(22, 163, 74, 0.18);
 }
 
-@keyframes cardGlow {
-  0%, 100% { box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35), 0 0 0 rgba(22, 163, 74, 0); }
-  50% { box-shadow: 0 10px 28px rgba(0, 0, 0, 0.55), 0 0 18px rgba(22, 163, 74, 0.14); }
+/* ─────────────────────────────────────────────── */
+/*  DARK THEME — comprehensive overrides          */
+/* ─────────────────────────────────────────────── */
+
+/* Page background override */
+:host-context(.admin-shell.dark) .admin-page-content,
+:host-context(.dark) .admin-page-content {
+  background: var(--admin-bg);
 }
 
-/* Dark theme utility overrides inside component */
-:host-context(.admin-shell.dark) .bg-white { background: var(--admin-surface) !important; }
-:host-context(.admin-shell.dark) .border-gray-200, 
-:host-context(.admin-shell.dark) .border-gray-300 { border-color: var(--admin-border) !important; }
+/* All bg-white elements → dark surface */
+:host-context(.admin-shell.dark) .bg-white,
+:host-context(.dark) .bg-white {
+  background: var(--admin-surface) !important;
+}
+
+/* All border-gray-* → dark border */
+:host-context(.admin-shell.dark) .border-gray-200,
+:host-context(.admin-shell.dark) .border-gray-300,
+:host-context(.dark) .border-gray-200,
+:host-context(.dark) .border-gray-300 {
+  border-color: var(--admin-border) !important;
+}
+
+/* Dark text → light foreground */
 :host-context(.admin-shell.dark) .text-gray-900,
-:host-context(.admin-shell.dark) .text-gray-700 { color: var(--admin-fg) !important; }
+:host-context(.admin-shell.dark) .text-gray-700,
+:host-context(.dark) .text-gray-900,
+:host-context(.dark) .text-gray-700 {
+  color: var(--admin-fg) !important;
+}
+
+/* Muted text */
 :host-context(.admin-shell.dark) .text-gray-600,
-:host-context(.admin-shell.dark) .text-gray-500 { color: var(--admin-muted) !important; }
-:host-context(.admin-shell.dark) .hover\:bg-gray-50:hover { background: #0f1623 !important; }
+:host-context(.admin-shell.dark) .text-gray-500,
+:host-context(.admin-shell.dark) .text-gray-400,
+:host-context(.dark) .text-gray-600,
+:host-context(.dark) .text-gray-500,
+:host-context(.dark) .text-gray-400 {
+  color: var(--admin-muted) !important;
+}
+
+/* Hover backgrounds */
+:host-context(.admin-shell.dark) .hover\:bg-gray-50:hover,
+:host-context(.dark) .hover\:bg-gray-50:hover {
+  background: rgba(255, 255, 255, 0.04) !important;
+}
+
+/* ── Stat cards ─────────────────────────────── */
+:host-context(.dark) .um-stat-card {
+  background: var(--admin-surface) !important;
+  border-color: var(--admin-border) !important;
+  box-shadow: 0 4px 15px var(--admin-shadow);
+}
+
+:host-context(.dark) .um-stat-card:hover {
+  box-shadow: 0 12px 32px var(--admin-shadow), 0 0 20px var(--admin-glow);
+  background: linear-gradient(135deg, var(--admin-surface), var(--admin-primary-light)) !important;
+}
+
+/* ── Search / filter area ───────────────────── */
+:host-context(.dark) .um-card {
+  background: var(--admin-surface) !important;
+  border-color: var(--admin-border) !important;
+  box-shadow: 0 4px 15px var(--admin-shadow);
+}
+
+/* Input & select dark styling */
+:host-context(.dark) .um-card input,
+:host-context(.dark) .um-card select,
+:host-context(.dark) input.bg-white,
+:host-context(.dark) select.bg-white,
+:host-context(.dark) input[type="text"],
+:host-context(.dark) input[type="email"],
+:host-context(.dark) input[type="tel"],
+:host-context(.dark) input[type="password"],
+:host-context(.dark) select {
+  background: var(--admin-input-bg) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  color: var(--admin-fg) !important;
+}
+
+:host-context(.dark) input::placeholder {
+  color: var(--admin-muted) !important;
+}
+
+:host-context(.dark) input:focus,
+:host-context(.dark) select:focus {
+  border-color: var(--admin-primary) !important;
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.15) !important;
+}
+
+/* Select option dropdown */
+:host-context(.dark) select option {
+  background: #1e293b;
+  color: var(--admin-fg);
+}
+
+/* ── Bulk actions bar ───────────────────────── */
+:host-context(.dark) .bg-blue-50 {
+  background: rgba(59, 130, 246, 0.08) !important;
+}
+
+:host-context(.dark) .border-blue-200 {
+  border-color: rgba(59, 130, 246, 0.2) !important;
+}
+
+:host-context(.dark) .text-blue-700 {
+  color: #93c5fd !important;
+}
+
+/* ── User item rows ─────────────────────────── */
+:host-context(.dark) .user-item {
+  background: rgba(255, 255, 255, 0.02) !important;
+  border-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+:host-context(.dark) .user-item:hover {
+  background: rgba(255, 255, 255, 0.04) !important;
+  border-color: var(--admin-primary) !important;
+  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.12);
+}
+
+/* User name in dark mode */
+:host-context(.dark) .user-item .font-semibold,
+:host-context(.dark) .user-item .font-medium {
+  color: var(--admin-fg) !important;
+}
 
 /* Contact icons in dark theme */
-:host-context(.admin-shell.dark) .contact-icon {
+:host-context(.dark) .contact-icon {
   filter: brightness(0) invert(1);
 }
 
-/* Dark polish: black surfaces, subtle borders */
-:host-context(.admin-shell.dark) :where(.um-card, .um-stat-card, .user-item, .stat-card, .card, .user-row) {
-  background: #0b0b0b !important;
-  border-color: transparent !important;
-  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.6), 0 0 24px rgba(22, 163, 74, 0.06);
+/* ── Three-dots contextual menu ─────────────── */
+:host-context(.dark) .user-menu .bg-white,
+:host-context(.dark) .user-menu>div[class*="bg-white"] {
+  background: #1e293b !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6) !important;
 }
 
-/* Dropdowns within dark theme */
-:host-context(.admin-shell.dark) .shadow-xl { box-shadow: 0 12px 30px rgba(0,0,0,0.6) !important; }
+:host-context(.dark) .user-menu button {
+  color: var(--admin-fg) !important;
+}
 
+:host-context(.dark) .user-menu button:hover {
+  background: rgba(255, 255, 255, 0.06) !important;
+}
+
+:host-context(.dark) .user-menu button.text-red-600,
+:host-context(.dark) .user-menu .text-red-600 {
+  color: #f87171 !important;
+}
+
+:host-context(.dark) .user-menu button.text-red-600:hover,
+:host-context(.dark) .hover\:bg-red-50:hover {
+  background: rgba(239, 68, 68, 0.08) !important;
+}
+
+/* ── Checkbox dark styling ──────────────────── */
+:host-context(.dark) input[type="checkbox"] {
+  accent-color: var(--admin-primary);
+}
+
+/* ── Pagination ─────────────────────────────── */
+:host-context(.dark) .border-gray-300 {
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+:host-context(.dark) button.bg-white,
+:host-context(.dark) button[class*="bg-white"] {
+  background: var(--admin-surface) !important;
+  color: var(--admin-fg) !important;
+}
+
+:host-context(.dark) button.bg-green-600 {
+  background: var(--admin-primary) !important;
+  color: #fff !important;
+}
+
+:host-context(.dark) button:disabled {
+  opacity: 0.4 !important;
+}
+
+/* ── Section border lines ───────────────────── */
+:host-context(.dark) .border-b {
+  border-color: rgba(255, 255, 255, 0.06) !important;
+}
+
+/* ── Heading / title ────────────────────────── */
+:host-context(.dark) .text-2xl {
+  color: var(--admin-fg) !important;
+}
+
+/* ── Export button border ───────────────────── */
+:host-context(.dark) button.border {
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  color: var(--admin-muted) !important;
+}
+
+:host-context(.dark) button.border:hover {
+  background: rgba(255, 255, 255, 0.04) !important;
+  color: var(--admin-fg) !important;
+}
+
+/* ── Shadow overrides ───────────────────────── */
+:host-context(.dark) .shadow-xl {
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6) !important;
+}
+
+:host-context(.dark) .shadow-sm {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4) !important;
+}
+
+:host-context(.dark) .shadow-md {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* ── Modals ─────────────────────────────────── */
+:host-context(.dark) .modal-header {
+  background: #1e293b;
+  border-color: rgba(255, 255, 255, 0.06);
+  color: var(--admin-fg);
+}
+
+:host-context(.dark) .modal-header h3 {
+  color: var(--admin-fg) !important;
+}
+
+:host-context(.dark) .modal-body {
+  background: #1e293b;
+  color: var(--admin-fg);
+}
+
+:host-context(.dark) .modal-body label,
+:host-context(.dark) .modal-body .text-sm {
+  color: var(--admin-muted) !important;
+}
+
+:host-context(.dark) .modal-body .text-gray-700,
+:host-context(.dark) .modal-body p {
+  color: var(--admin-fg) !important;
+}
+
+:host-context(.dark) .modal-body .text-gray-500 {
+  color: var(--admin-muted) !important;
+}
+
+:host-context(.dark) .modal-footer {
+  background: #1e293b;
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+:host-context(.dark) .modal-footer button.border {
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  color: var(--admin-muted) !important;
+}
+
+:host-context(.dark) .modal-footer button.border:hover {
+  background: rgba(255, 255, 255, 0.06) !important;
+  color: var(--admin-fg) !important;
+}
+
+/* ── Role / status badge adjustments for dark ── */
+:host-context(.dark) .bg-green-100 {
+  background: rgba(22, 163, 74, 0.15) !important;
+}
+
+:host-context(.dark) .bg-green-50 {
+  background: rgba(22, 163, 74, 0.1) !important;
+}
+
+:host-context(.dark) .bg-blue-100 {
+  background: rgba(59, 130, 246, 0.15) !important;
+}
+
+:host-context(.dark) .bg-blue-50 {
+  background: rgba(59, 130, 246, 0.1) !important;
+}
+
+:host-context(.dark) .bg-purple-100 {
+  background: rgba(168, 85, 247, 0.15) !important;
+}
+
+:host-context(.dark) .bg-gray-100 {
+  background: rgba(255, 255, 255, 0.06) !important;
+}
+
+:host-context(.dark) .bg-gray-50 {
+  background: rgba(255, 255, 255, 0.04) !important;
+}
+
+/* ── Empty state ────────────────────────────── */
+:host-context(.dark) .text-gray-400 i {
+  color: var(--admin-muted) !important;
+}
 
 /* Responsive */
 @media (max-width: 768px) {
   .user-stats {
     grid-template-columns: 1fr;
   }
-  
+
   .search-filters {
     flex-direction: column;
   }
-  
+
   .search-input,
   .filter-select {
     width: 100%;

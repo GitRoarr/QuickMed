@@ -211,6 +211,12 @@ export class ReceptionistController {
     return this.receptionistService.listPayments({ status, date, search });
   }
 
+  @Get('payments/stats')
+  @Roles(UserRole.RECEPTIONIST, UserRole.ADMIN)
+  async getPaymentStats() {
+    return this.receptionistService.getPaymentStats();
+  }
+
   @Get('doctors/availability')
   @Roles(UserRole.RECEPTIONIST, UserRole.ADMIN)
   async listDoctorAvailability(@Query('date') date?: string) {
@@ -227,6 +233,12 @@ export class ReceptionistController {
   @Roles(UserRole.RECEPTIONIST, UserRole.ADMIN)
   async addDoctorSlot(@Param('id') doctorId: string, @Body() body: { date: string, slot: any }) {
     return this.receptionistService.addDoctorSlot(doctorId, body.date, body.slot);
+  }
+
+  @Get('doctors/:id/services')
+  @Roles(UserRole.RECEPTIONIST, UserRole.ADMIN, UserRole.DOCTOR)
+  async getDoctorServices(@Param('id') doctorId: string) {
+    return this.receptionistService.getDoctorServices(doctorId);
   }
 
   // ============================================================

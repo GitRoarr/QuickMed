@@ -49,5 +49,7 @@ export enum PaymentStatus {
   PAID = 'paid',
   NOT_PAID = 'not_paid',
   PENDING = 'pending',
+  AWAITING_PAYMENT = 'awaiting_payment',
+  PAY_AT_CLINIC = 'pay_at_clinic',
   FAILED = 'failed',
 }

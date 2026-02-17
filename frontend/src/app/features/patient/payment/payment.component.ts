@@ -101,6 +101,12 @@ export class PaymentComponent implements OnInit, OnDestroy {
     });
   }
 
+  get consultationFee(): number {
+    // Return doctor's fee if set, otherwise default to 50
+    const fee = (this.appointment()?.doctor as any)?.consultationFee;
+    return fee ? Number(fee) : 50.00;
+  }
+
   confirmPayment() {
     const method = this.paymentMethod();
     if (method === 'CARD') {
@@ -118,8 +124,10 @@ export class PaymentComponent implements OnInit, OnDestroy {
     const paymentData = {
       appointmentId: this.appointmentId(),
       email: user?.email,
-      amount: 50,
+      amount: this.consultationFee,
     };
+
+    console.log('Initiating payment with amount:', this.consultationFee);
 
     this.paymentService.createStripePaymentIntent(paymentData).subscribe({
       next: ({ clientSecret }) => {
@@ -154,7 +162,7 @@ export class PaymentComponent implements OnInit, OnDestroy {
 
     const payload = {
       appointmentId: this.appointmentId(),
-      amount: 50,
+      amount: this.consultationFee,
       note: 'Patient selected to pay at clinic.'
     };
 

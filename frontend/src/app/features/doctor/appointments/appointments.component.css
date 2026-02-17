@@ -54,7 +54,6 @@
 
 .gradient-card-accent {
     background: linear-gradient(135deg, #FF6B6B 0%, #EE5253 100%);
-    /* Example reddish gradient */
     color: white;
 }
 
@@ -65,9 +64,83 @@
     -webkit-text-fill-color: transparent;
 }
 
-/* Custom Scrollbar for the filter list */
+/* ARROW-FIX: Appointments Page Dark Theme Refresh (Admin Match) */
+:host {
+    display: block;
+}
+
+:host-context(.dark) {
+    --bg: #000000;
+    --fg: #ffffff;
+    --surface: #0b0b0b;
+    --surface-secondary: #0f1623;
+    --bg-secondary: #0f1623;
+    --border-color: #1f2937;
+    --text-muted: #a1a1aa;
+}
+
+/* Force black background on main container in dark mode */
+:host-context(.dark) .min-h-screen {
+    background-color: #000000 !important;
+}
+
+/* Card Styling for Dark Theme - Matching User Management Admin Page */
+:host-context(.dark) .glass-panel {
+    background: #0b0b0b !important;
+    backdrop-filter: none !important;
+    border: 1px solid transparent !important;
+    box-shadow: 0 14px 36px rgba(0, 0, 0, 0.6), 0 0 24px rgba(22, 163, 74, 0.06);
+    animation: cardGlow 7s ease-in-out infinite;
+    transition: all 0.3s ease;
+}
+
+:host-context(.dark) .glass-panel:hover {
+    border-color: var(--primary) !important;
+    box-shadow: 0 12px 26px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(22, 163, 74, 0.18);
+    transform: translateY(-2px);
+}
+
+@keyframes cardGlow {
+
+    0%,
+    100% {
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35), 0 0 0 rgba(22, 163, 74, 0);
+    }
+
+    50% {
+        box-shadow: 0 10px 28px rgba(0, 0, 0, 0.55), 0 0 18px rgba(22, 163, 74, 0.14);
+    }
+}
+
+/* Text Overrides to ensure legibility on black */
+:host-context(.dark) .text-\[var\(--fg\)\] {
+    color: #ffffff !important;
+}
+
+:host-context(.dark) .text-\[var\(--text-secondary\)\] {
+    color: #9ca3af !important;
+}
+
+:host-context(.dark) .text-\[var\(--text-muted\)\] {
+    color: #6b7280 !important;
+}
+
+/* Input/Search Specifics */
+:host-context(.dark) input,
+:host-context(.dark) select {
+    background-color: #0f1623 !important;
+    border-color: #1f2937 !important;
+    color: white !important;
+}
+
+:host-context(.dark) input::placeholder {
+    color: #6b7280;
+}
+
+/* Custom Scrollbar */
 .custom-scrollbar::-webkit-scrollbar {
-    height: 4px;
+    height: 6px;
+    width: 6px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
@@ -75,8 +148,12 @@
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: var(--border-default);
-    border-radius: 10px;
+    background: var(--surface-secondary);
+    border-radius: 3px;
+}
+
+:host-context(.dark) .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #1f2937;
 }
 
 /* Status Pills */

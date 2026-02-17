@@ -72,10 +72,8 @@ export class CashService {
         status: 'confirmed'
       } as any);
     } else {
-      // For patient, we might update paymentStatus to 'pending' just to track intent
-      // And keep status as 'pending' so doctor can review
       await this.appointmentsRepo.update(appointmentId, {
-        paymentStatus: 'pending' // pending payment
+        paymentStatus: 'pay_at_clinic'
       } as any);
     }
 

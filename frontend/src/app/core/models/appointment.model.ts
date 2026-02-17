@@ -16,7 +16,7 @@ export interface Appointment {
   appointmentDate: string
   appointmentTime: string
   status: AppointmentStatus
-  paymentStatus?: 'paid' | 'not_paid' | 'pending'
+  paymentStatus?: 'paid' | 'not_paid' | 'pending' | 'awaiting_payment' | 'pay_at_clinic' | 'failed'
   notes?: string
   patientId: string
   doctorId: string

@@ -82,7 +82,9 @@ export class DoctorSidebarComponent implements OnInit {
 
   getDoctorName(): string {
     const user = this.currentUser();
-    return user ? `${user.firstName} ${user.lastName}` : 'Doctor';
+    // Return sanitized name
+    const n = user ? `${user.firstName || ''} ${user.lastName || ''}`.replace(/undefined/gi, '').trim() : 'Doctor';
+    return n || 'Doctor';
   }
 
   getDoctorSpecialty(): string {
@@ -91,7 +93,7 @@ export class DoctorSidebarComponent implements OnInit {
 
   getDoctorInitials(): string {
     const name = this.getDoctorName();
-    const parts = name.split(' ');
+    const parts = name.split(/\s+/).filter(p => p && p.length > 0);
     return parts.length >= 2 ? (parts[0][0] + parts[1][0]).toUpperCase() : name.substring(0, 2).toUpperCase();
   }
 

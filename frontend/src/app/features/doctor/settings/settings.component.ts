@@ -5,7 +5,7 @@ import { FormsModule } from '@angular/forms';
 
 import { DoctorHeaderComponent } from '../shared/doctor-header/doctor-header.component';
 import { AuthService } from '@core/services/auth.service';
-import { SettingsService, DoctorSettings } from '@core/services/settings.service';
+import { SettingsService, DoctorSettings, DoctorService } from '@core/services/settings.service';
 import { NotificationService } from '@core/services/notification.service';
 import { ThemeService } from '@core/services/theme.service';
 import { ToastService } from '@core/services/toast.service';
@@ -31,10 +31,21 @@ export class SettingsComponent implements OnInit {
 
   currentUser = signal<any>(null);
   settings = signal<DoctorSettings | null>(null);
+  services = signal<DoctorService[]>([]);
   isLoading = signal(true);
   isSaving = signal(false);
   activeTab = signal<'profile' | 'availability' | 'billing' | 'privacy'>('profile');
   unreadNotificationCount = signal(0);
+
+  // Service Form State
+  showServiceModal = signal(false);
+  editingService = signal<DoctorService | null>(null);
+  serviceForm = {
+    name: '',
+    price: 0,
+    duration: 30,
+    description: ''
+  };
 
   tabs = [
     { label: 'Profile', value: 'profile' as const, icon: 'bi-person-circle' },
@@ -73,6 +84,7 @@ export class SettingsComponent implements OnInit {
   ngOnInit(): void {
     this.loadUserData();
     this.loadSettings();
+    this.loadServices();
     this.loadUnreadNotifications();
   }
 
@@ -114,6 +126,76 @@ export class SettingsComponent implements OnInit {
         this.toast.error('Failed to load settings', { title: 'Settings' });
         this.isLoading.set(false);
       }
+    });
+  }
+
+  loadServices(): void {
+    this.settingsService.getServices().subscribe({
+      next: (data) => this.services.set(data),
+      error: () => this.toast.error('Failed to load services')
+    });
+  }
+
+  openAddService(): void {
+    this.editingService.set(null);
+    this.serviceForm = { name: '', price: 0, duration: 30, description: '' };
+    this.showServiceModal.set(true);
+  }
+
+  openEditService(service: DoctorService): void {
+    this.editingService.set(service);
+    this.serviceForm = {
+      name: service.name,
+      price: service.price,
+      duration: service.duration,
+      description: service.description || ''
+    };
+    this.showServiceModal.set(true);
+  }
+
+  saveService(): void {
+    if (!this.serviceForm.name || this.serviceForm.price < 0) {
+      this.toast.error('Please enter valid service details');
+      return;
+    }
+
+    const payload: Partial<DoctorService> = {
+      name: this.serviceForm.name,
+      price: this.serviceForm.price,
+      duration: this.serviceForm.duration,
+      description: this.serviceForm.description || ''
+    };
+
+    const editId = this.editingService()?.id;
+    if (editId) {
+      this.settingsService.updateService(editId, payload).subscribe({
+        next: () => {
+          this.toast.success('Service updated');
+          this.loadServices();
+          this.showServiceModal.set(false);
+        },
+        error: () => this.toast.error('Failed to update service')
+      });
+    } else {
+      this.settingsService.addService(payload).subscribe({
+        next: () => {
+          this.toast.success('Service added');
+          this.loadServices();
+          this.showServiceModal.set(false);
+        },
+        error: () => this.toast.error('Failed to add service')
+      });
+    }
+  }
+
+  deleteService(id: string): void {
+    if (!confirm('Are you sure you want to delete this service?')) return;
+    this.settingsService.deleteService(id).subscribe({
+      next: () => {
+        this.toast.success('Service deleted');
+        this.loadServices();
+      },
+      error: () => this.toast.error('Failed to delete service')
     });
   }
 

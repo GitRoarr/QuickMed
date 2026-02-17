@@ -76,8 +76,8 @@ export class AppointmentsController {
   }
 
   @Patch(":id/confirm")
-  confirm(@Param('id') id: string, @CurrentUser() user: User) {
-    return this.appointmentsService.confirm(id, user)
+  confirm(@Param('id') id: string, @CurrentUser() user: User, @Body() data?: { serviceId?: string; amount?: number }) {
+    return this.appointmentsService.confirm(id, user, data)
   }
 
   @Patch(":id/cancel")

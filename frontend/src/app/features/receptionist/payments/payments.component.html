@@ -6,8 +6,8 @@
     <main class="panel">
       <!-- Feedback Toast -->
       <div class="feedback-toast" *ngIf="feedback()" [class.error]="feedback()?.type === 'error'">
-        <i class="bi" [class.bi-check-circle]="feedback()?.type === 'success'"
-          [class.bi-exclamation-circle]="feedback()?.type === 'error'"></i>
+        <i class="bi" [class.bi-check-circle-fill]="feedback()?.type === 'success'"
+          [class.bi-exclamation-triangle-fill]="feedback()?.type === 'error'"></i>
         {{ feedback()?.message }}
       </div>
 
@@ -23,10 +23,84 @@
             <input type="text" placeholder="Search patient or doctor..." [ngModel]="searchQuery()"
               (ngModelChange)="onSearch($event)" />
           </div>
-          <button class="action-btn secondary" type="button" (click)="loadPayments()" [class.loading]="loading()">
+          <button class="action-btn secondary" type="button" (click)="refreshAll()" [class.loading]="loading()">
             <i class="bi bi-arrow-clockwise"></i>
             <span>Refresh</span>
           </button>
+        </div>
+      </section>
+
+      <!-- Stats Cards -->
+      <section class="stats-grid" *ngIf="stats()">
+        <div class="stat-card">
+          <div class="stat-icon revenue">
+            <i class="bi bi-currency-dollar"></i>
+          </div>
+          <div class="stat-content">
+            <span class="stat-label">Revenue Today</span>
+            <span class="stat-value">${{ stats()?.today?.revenue?.toFixed(2) || '0.00' }}</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon paid">
+            <i class="bi bi-check-circle-fill"></i>
+          </div>
+          <div class="stat-content">
+            <span class="stat-label">Paid Today</span>
+            <span class="stat-value">{{ stats()?.today?.paid || 0 }}</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon pending">
+            <i class="bi bi-clock-history"></i>
+          </div>
+          <div class="stat-content">
+            <span class="stat-label">Pending Today</span>
+            <span class="stat-value">{{ stats()?.today?.pending || 0 }}</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon unpaid">
+            <i class="bi bi-exclamation-circle"></i>
+          </div>
+          <div class="stat-content">
+            <span class="stat-label">Unpaid Today</span>
+            <span class="stat-value">{{ stats()?.today?.unpaid || 0 }}</span>
+          </div>
+        </div>
+        <div class="stat-card wide">
+          <div class="stat-icon total-revenue">
+            <i class="bi bi-graph-up-arrow"></i>
+          </div>
+          <div class="stat-content">
+            <span class="stat-label">Total Revenue (All Time)</span>
+            <span class="stat-value">${{ stats()?.overall?.totalRevenue?.toFixed(2) || '0.00' }}</span>
+          </div>
+          <div class="stat-breakdown">
+            <span class="breakdown-item">
+              <i class="bi bi-check-circle-fill text-success"></i>
+              {{ stats()?.overall?.paid || 0 }} Paid
+            </span>
+            <span class="breakdown-item">
+              <i class="bi bi-clock-history text-warning"></i>
+              {{ stats()?.overall?.pending || 0 }} Pending
+            </span>
+            <span class="breakdown-item">
+              <i class="bi bi-exclamation-circle text-danger"></i>
+              {{ stats()?.overall?.unpaid || 0 }} Unpaid
+            </span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Loading Stats Skeleton -->
+      <section class="stats-grid" *ngIf="loadingStats() && !stats()">
+        <div class="stat-card skeleton" *ngFor="let s of [1,2,3,4]">
+          <div class="skeleton-block icon-skel"></div>
+          <div class="skeleton-content">
+            <div class="skeleton-block line-skel short"></div>
+            <div class="skeleton-block line-skel"></div>
+          </div>
         </div>
       </section>
 
@@ -37,12 +111,13 @@
             <span>Status</span>
           </label>
           <div class="segmented-control">
-            <button [class.active]="statusFilter() === 'not_paid'"
-              (click)="statusFilter.set('not_paid'); loadPayments()">Not Paid</button>
-            <button [class.active]="statusFilter() === 'pending'"
-              (click)="statusFilter.set('pending'); loadPayments()">Pending</button>
-            <button [class.active]="statusFilter() === 'paid'"
-              (click)="statusFilter.set('paid'); loadPayments()">Paid</button>
+            <button [class.active]="statusFilter() === 'not_paid'" (click)="setStatus('not_paid')">Not Paid</button>
+            <button [class.active]="statusFilter() === 'awaiting_payment'"
+              (click)="setStatus('awaiting_payment')">Awaiting Pay</button>
+            <button [class.active]="statusFilter() === 'pay_at_clinic'" (click)="setStatus('pay_at_clinic')">At
+              Clinic</button>
+            <button [class.active]="statusFilter() === 'paid'" (click)="setStatus('paid')">Paid</button>
+            <button [class.active]="statusFilter() === ''" (click)="setStatus('')">All</button>
           </div>
         </div>
 
@@ -51,8 +126,12 @@
             <i class="bi bi-calendar3"></i>
             <span>Date Filter</span>
           </label>
-          <input type="date" class="date-input" [ngModel]="dateFilter()"
-            (ngModelChange)="dateFilter.set($event); loadPayments()" />
+          <div class="date-row">
+            <input type="date" class="date-input" [ngModel]="dateFilter()" (ngModelChange)="onDateChange($event)" />
+            <button class="clear-date" *ngIf="dateFilter()" (click)="clearDateFilter()" title="Clear date">
+              <i class="bi bi-x-lg"></i>
+            </button>
+          </div>
         </div>
       </section>
 
@@ -64,6 +143,11 @@
           </div>
         </div>
 
+        <!-- Loading Indicator -->
+        <div class="table-loading" *ngIf="loading()">
+          <div class="loading-bar"></div>
+        </div>
+
         <div class="table-wrapper" *ngIf="filteredPayments().length > 0; else emptyState">
           <table class="premium-table">
             <thead>
@@ -71,6 +155,8 @@
                 <th>Patient Details</th>
                 <th>Doctor</th>
                 <th>Schedule</th>
+                <th>Amount</th>
+                <th>Method</th>
                 <th>Payment Status</th>
                 <th class="text-right">Action</th>
               </tr>
@@ -80,7 +166,7 @@
                 <td>
                   <div class="patient-cell">
                     <div class="avatar-mini">
-                      {{ row.patient?.firstName?.[0] }}{{ row.patient?.lastName?.[0] }}
+                      {{ row.patient?.firstName?.[0] || '' }}{{ row.patient?.lastName?.[0] || '' }}
                     </div>
                     <div class="info">
                       <span class="name">{{ row.patient?.firstName }} {{ row.patient?.lastName }}</span>
@@ -91,6 +177,7 @@
                 <td>
                   <div class="doctor-info">
                     <span class="name">Dr. {{ row.doctor?.firstName }} {{ row.doctor?.lastName }}</span>
+                    <span class="subtext" *ngIf="row.doctor?.specialty">{{ row.doctor?.specialty }}</span>
                   </div>
                 </td>
                 <td>
@@ -100,20 +187,50 @@
                   </div>
                 </td>
                 <td>
+                  <div class="amount-cell">
+                    <span class="amount-value" [class.highlight]="selectedService()[row.id]">{{ getPaymentDisplay(row)
+                      }}</span>
+                    <div class="service-selector-wrapper" *ngIf="row.paymentStatus !== 'paid'">
+                      <select class="service-select" (change)="onServiceChange(row.id, $any($event.target).value)"
+                        [value]="selectedService()[row.id] || ''">
+                        <option value="">Default Consultation</option>
+                        <option *ngFor="let s of doctorServices()[row.doctorId]" [value]="s.id">{{ s.name }}</option>
+                      </select>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <span class="method-badge" [attr.data-method]="row.paymentMethod">
+                    <i class="bi" [ngClass]="{
+                      'bi-cash': row.paymentMethod === 'cash',
+                      'bi-credit-card': row.paymentMethod === 'card' || row.paymentMethod === 'stripe',
+                      'bi-dash': !row.paymentMethod
+                    }"></i>
+                    {{ row.paymentStatus === 'paid' ? getMethodLabel(row.paymentMethod) : 'Cash/Clinic' }}
+                  </span>
+                </td>
+                <td>
                   <span class="status-pill" [attr.data-status]="row.paymentStatus">
                     <i class="bi" [ngClass]="{
-                      'bi-clock-history': row.paymentStatus === 'pending',
+                      'bi-clock-history': row.paymentStatus === 'pending' || row.paymentStatus === 'awaiting_payment',
                       'bi-check-circle-fill': row.paymentStatus === 'paid',
-                      'bi-exclamation-circle': row.paymentStatus === 'not_paid'
+                      'bi-exclamation-circle': row.paymentStatus === 'not_paid',
+                      'bi-hospital': row.paymentStatus === 'pay_at_clinic'
                     }"></i>
-                    {{ row.paymentStatus | titlecase }}
+                    {{ row.paymentStatus === 'awaiting_payment' ? 'Awaiting Pay' : (row.paymentStatus ===
+                    'pay_at_clinic' ? 'At Clinic' : (row.paymentStatus === 'not_paid' ? 'Not Paid' : (row.paymentStatus
+                    | titlecase))) }}
+                  </span>
+                  <span class="paid-date" *ngIf="row.paymentPaidAt">
+                    {{ row.paymentPaidAt | date:'short' }}
                   </span>
                 </td>
                 <td class="text-right">
                   <button *ngIf="row.paymentStatus !== 'paid'" class="pay-btn" (click)="markCashPaid(row)"
-                    [disabled]="loading()">
-                    <i class="bi bi-cash"></i>
-                    Mark Paid
+                    [disabled]="processingId() === row.id">
+                    <span class="btn-spinner" *ngIf="processingId() === row.id"></span>
+                    <i class="bi bi-cash" *ngIf="processingId() !== row.id"></i>
+                    {{ processingId() === row.id ? 'Processing...' : 'Mark Paid' }}
                   </button>
                   <span *ngIf="row.paymentStatus === 'paid'" class="paid-check">
                     <i class="bi bi-check2-all"></i>
@@ -125,7 +242,7 @@
         </div>
 
         <ng-template #emptyState>
-          <div class="empty-placeholder">
+          <div class="empty-placeholder" *ngIf="!loading()">
             <div class="icon-circle">
               <i class="bi bi-cash-stack"></i>
             </div>

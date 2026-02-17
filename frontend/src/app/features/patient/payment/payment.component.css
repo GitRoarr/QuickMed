@@ -152,6 +152,19 @@
   text-align: center;
 }
 
+.method-card.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  filter: grayscale(0.8);
+  background: #f1f5f9;
+  border-style: dashed;
+}
+
+.method-card.disabled:hover {
+  border-color: #e2e8f0;
+  transform: none;
+}
+
 .method-card:hover {
   border-color: #cbd5e1;
   background: #f8fafc;

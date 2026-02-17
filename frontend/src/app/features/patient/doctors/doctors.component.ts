@@ -47,6 +47,8 @@ export class DoctorsComponent implements OnInit {
   eveningSlots = computed(() => this.groupSlotsByRange(17, 24));
 
   appointmentForm: FormGroup;
+  doctorServices = signal<any[]>([]);
+  selectedServiceId = signal<string>('');
 
   specialties = [
     { value: 'all', label: 'All Specialties' },
@@ -69,6 +71,7 @@ export class DoctorsComponent implements OnInit {
     this.appointmentForm = this.fb.group({
       appointmentDate: ['', Validators.required],
       appointmentTime: ['', Validators.required],
+      serviceId: [''],
       notes: ['']
     });
   }
@@ -157,10 +160,36 @@ export class DoctorsComponent implements OnInit {
   selectDoctor(doctor: Doctor): void {
     this.selectedDoctor.set(doctor);
     this.showBookingForm.set(true);
+    // Load doctor services
+    this.loadDoctorServices(doctor.id);
     // Default date = today or next available date; start by loading today's slots
     const date = this.getCurrentDate();
-    this.appointmentForm.patchValue({ appointmentDate: date, appointmentTime: '' });
+    this.appointmentForm.patchValue({ appointmentDate: date, appointmentTime: '', serviceId: '' });
     this.loadAvailableSlots(date);
+  }
+
+  loadDoctorServices(doctorId: string): void {
+    // We can use SchedulingService or a specific settings endpoint.
+    // Assuming a generic endpoint exists or adding one.
+    this.appointmentService.getDoctorServices(doctorId).subscribe({
+      next: (services: any[]) => this.doctorServices.set(services || []),
+      error: () => this.doctorServices.set([])
+    });
+  }
+
+  onServiceSelect(serviceId: string): void {
+    this.selectedServiceId.set(serviceId);
+    this.appointmentForm.patchValue({ serviceId });
+  }
+
+  getSelectedService(): any {
+    return this.doctorServices().find(s => s.id === this.selectedServiceId());
+  }
+
+  getDisplayFee(): number {
+    const service = this.getSelectedService();
+    if (service) return Number(service.price);
+    return Number(this.selectedDoctor()?.consultationFee || 50);
   }
 
   closeBookingForm(): void {
@@ -196,6 +225,7 @@ export class DoctorsComponent implements OnInit {
       doctorId: this.selectedDoctor()!.id,
       appointmentDate: date,
       appointmentTime: time,
+      serviceId: this.appointmentForm.value.serviceId,
       notes: this.appointmentForm.value.notes,
     };
 

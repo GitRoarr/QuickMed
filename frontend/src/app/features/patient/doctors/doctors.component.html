@@ -105,14 +105,28 @@
             </ng-container>
             <ng-template #selectedInitial>{{ getSelectedDoctorInitial() }}</ng-template>
           </div>
-          <div>
+          <div class="flex-1">
             <p class="doctor-name">Dr. {{ selectedDoctor()?.firstName }} {{ selectedDoctor()?.lastName }}</p>
             <p class="muted">{{ selectedDoctor()?.specialty }}</p>
+          </div>
+          <div class="fee-badge shadow-sm" [class.highlight]="selectedServiceId()">
+            <span class="fee-label">{{ getSelectedService()?.name || 'Service Fee' }}</span>
+            <span class="fee-value">{{ getDisplayFee() | currency:'USD' }}</span>
           </div>
         </div>
 
         <form [formGroup]="appointmentForm" (ngSubmit)="bookAppointment()">
-          <label>
+          <label *ngIf="doctorServices().length > 0">
+            <span>Medical Service</span>
+            <select formControlName="serviceId" (change)="onServiceSelect($any($event.target).value)">
+              <option value="">Default Consultation (Base Fee)</option>
+              <option *ngFor="let s of doctorServices()" [value]="s.id">
+                {{ s.name }} — {{ s.price | currency:'USD' }} ({{ s.duration }} min)
+              </option>
+            </select>
+          </label>
+
+          <label class="mt-4">
             <span>Appointment Date</span>
             <input type="date" formControlName="appointmentDate" [min]="getCurrentDate()" (change)="onDateChange()" />
           </label>

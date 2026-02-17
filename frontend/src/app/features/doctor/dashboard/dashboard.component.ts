@@ -82,17 +82,17 @@ export class DashboardComponent implements OnInit, OnDestroy {
   getDoctorInitials(): string {
     const user = this.currentUser();
     if (!user) return 'DR';
-    const name = `${user.firstName} ${user.lastName}`;
-    const parts = name.trim().split(' ');
+    const name = `${user.firstName || ''} ${user.lastName || ''}`.replace(/undefined/gi, '').trim();
+    if (!name) return 'DR';
+
+    const parts = name.split(/\s+/).filter(p => p && p.length > 0);
     return parts.length >= 2
       ? (parts[0][0] + parts[1][0]).toUpperCase()
       : name.substring(0, 2).toUpperCase();
   }
 
-
-
   getInitials(name?: string): string {
-    const n = (name || '').trim();
+    const n = (name || '').replace(/undefined/gi, '').trim();
     if (!n) return 'P';
     const parts = n.split(' ').filter(p => p.length > 0);
     if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();

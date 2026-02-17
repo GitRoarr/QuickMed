@@ -10,6 +10,7 @@ import { ReceptionistInvitation, InviteStatus } from './entities/receptionist-in
 import { SendReceptionistMessageDto } from './dto/send-receptionist-message.dto';
 import { SchedulesService } from '../schedules/schedules.service';
 import { Payment } from '../payments/entities/payment.entity';
+import { DoctorService } from '../settings/entities/doctor-service.entity';
 import { CreateReceptionistInviteDto, ResendInviteDto, RevokeInviteDto, BulkInviteDto } from './dto/create-receptionist-invite.dto';
 import { ReceptionistTask } from './entities/receptionist-task.entity';
 import { EmailService } from '../common/services/email.service';
@@ -27,10 +28,20 @@ export class ReceptionistService {
     @InjectRepository(Payment) private readonly paymentRepo: Repository<Payment>,
     @InjectRepository(ReceptionistInvitation) private readonly invitationRepo: Repository<ReceptionistInvitation>,
     @InjectRepository(ReceptionistTask) private readonly taskRepo: Repository<ReceptionistTask>,
+    @InjectRepository(DoctorService) private readonly serviceRepo: Repository<DoctorService>,
     private readonly emailService: EmailService,
     private readonly schedulesService: SchedulesService,
     private readonly messagesService: MessagesService,
   ) { }
+
+  /**
+   * Get all services for a specific doctor
+   */
+  async getDoctorServices(doctorId: string): Promise<DoctorService[]> {
+    return this.serviceRepo.find({
+      where: { doctorId, isActive: true },
+    });
+  }
 
   // ============================================================
   // INVITATION MANAGEMENT — Production-Level
@@ -880,7 +891,110 @@ export class ReceptionistService {
       );
     }
 
-    return qb.getMany();
+    const appointments = await qb.getMany();
+
+    // Enrich with payment records (amount, method, paidAt)
+    const appointmentIds = appointments.map(a => a.id);
+    let paymentMap = new Map<string, Payment>();
+    if (appointmentIds.length > 0) {
+      const payments = await this.paymentRepo.find({
+        where: { appointmentId: In(appointmentIds) },
+        order: { createdAt: 'DESC' },
+      });
+      for (const p of payments) {
+        // Keep the latest payment per appointment
+        if (!paymentMap.has(p.appointmentId)) {
+          paymentMap.set(p.appointmentId, p);
+        }
+      }
+    }
+
+    return appointments.map(a => {
+      const payment = paymentMap.get(a.id);
+      return {
+        ...a,
+        paymentAmount: payment ? Number(payment.amount) : null,
+        paymentMethod: payment?.method || null,
+        paymentPaidAt: payment?.paidAt || null,
+        paymentTransactionId: payment?.transactionId || null,
+      };
+    });
+  }
+
+  async getPaymentStats() {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    // Today's stats
+    const [totalToday, paidToday, pendingToday, unpaidToday] = await Promise.all([
+      this.appointmentRepo.createQueryBuilder('a')
+        .where('a.appointmentDate >= :today AND a.appointmentDate < :tomorrow', { today, tomorrow })
+        .getCount(),
+      this.appointmentRepo.createQueryBuilder('a')
+        .where('a.appointmentDate >= :today AND a.appointmentDate < :tomorrow', { today, tomorrow })
+        .andWhere('a.paymentStatus = :s', { s: PaymentStatus.PAID })
+        .getCount(),
+      this.appointmentRepo.createQueryBuilder('a')
+        .where('a.appointmentDate >= :today AND a.appointmentDate < :tomorrow', { today, tomorrow })
+        .andWhere('a.paymentStatus IN (:...statuses)', { statuses: [PaymentStatus.PENDING, PaymentStatus.AWAITING_PAYMENT, PaymentStatus.PAY_AT_CLINIC] })
+        .getCount(),
+      this.appointmentRepo.createQueryBuilder('a')
+        .where('a.appointmentDate >= :today AND a.appointmentDate < :tomorrow', { today, tomorrow })
+        .andWhere('a.paymentStatus IN (:...statuses)', { statuses: [PaymentStatus.NOT_PAID, PaymentStatus.FAILED] })
+        .getCount(),
+    ]);
+
+    // All-time totals
+    const [totalPaid, totalPending, totalUnpaid] = await Promise.all([
+      this.appointmentRepo.count({ where: { paymentStatus: PaymentStatus.PAID } }),
+      this.appointmentRepo.count({
+        where: [
+          { paymentStatus: PaymentStatus.PENDING },
+          { paymentStatus: PaymentStatus.AWAITING_PAYMENT },
+          { paymentStatus: PaymentStatus.PAY_AT_CLINIC }
+        ]
+      }),
+      this.appointmentRepo.count({
+        where: [
+          { paymentStatus: PaymentStatus.NOT_PAID },
+          { paymentStatus: PaymentStatus.FAILED }
+        ]
+      }),
+    ]);
+
+    // Revenue today
+    const todayPayments = await this.paymentRepo
+      .createQueryBuilder('p')
+      .where('p.status = :status', { status: PaymentStatus.PAID })
+      .andWhere('p.paidAt >= :today AND p.paidAt < :tomorrow', { today, tomorrow })
+      .getMany();
+    const revenueToday = todayPayments.reduce((sum, p) => sum + Number(p.amount || 0), 0);
+
+    // Total revenue
+    const allPaidPayments = await this.paymentRepo
+      .createQueryBuilder('p')
+      .select('SUM(p.amount)', 'total')
+      .where('p.status = :status', { status: PaymentStatus.PAID })
+      .getRawOne();
+    const totalRevenue = Number(allPaidPayments?.total || 0);
+
+    return {
+      today: {
+        total: totalToday,
+        paid: paidToday,
+        pending: pendingToday,
+        unpaid: unpaidToday,
+        revenue: revenueToday,
+      },
+      overall: {
+        paid: totalPaid,
+        pending: totalPending,
+        unpaid: totalUnpaid,
+        totalRevenue,
+      },
+    };
   }
 
   async listDoctorAvailability(date?: string) {

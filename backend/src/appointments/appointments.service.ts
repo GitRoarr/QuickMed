@@ -10,6 +10,7 @@ import { User } from "../users/entities/user.entity";
 import { SettingsService } from "../settings/settings.service";
 import { SchedulesService } from '../schedules/schedules.service';
 import { NotificationIntegrationService } from '../notifications/notification-integration.service';
+import { DoctorService } from "../settings/entities/doctor-service.entity";
 
 @Injectable()
 export class AppointmentsService {
@@ -364,7 +365,7 @@ export class AppointmentsService {
   }
 
 
-  async confirm(id: string, user: User): Promise<Appointment> {
+  async confirm(id: string, user: User, data?: { serviceId?: string; amount?: number }): Promise<Appointment> {
     const appointment = await this.findOne(id);
 
     if (user.role === UserRole.PATIENT) {
@@ -379,7 +380,28 @@ export class AppointmentsService {
       throw new BadRequestException("Cannot confirm a cancelled appointment");
     }
 
+    // Dynamic Pricing Logic
+    let appointmentAmount = data?.amount;
+    let serviceName = appointment.serviceName || 'Consultation';
+
+    if (data?.serviceId) {
+      const services = await this.settingsService.getDoctorServices(appointment.doctorId);
+      const service = services.find(s => s.id === data.serviceId);
+      if (service) {
+        appointmentAmount = Number(service.price);
+        serviceName = service.name;
+      }
+    }
+
+    if (!appointmentAmount) {
+      const settings = await this.settingsService.getSettings(appointment.doctorId);
+      appointmentAmount = settings.consultationFee ? Number(settings.consultationFee) : 50;
+    }
+
     appointment.status = AppointmentStatus.CONFIRMED;
+    appointment.paymentStatus = PaymentStatus.AWAITING_PAYMENT;
+    appointment.amount = appointmentAmount;
+    appointment.serviceName = serviceName;
     const confirmedAppointment = await this.appointmentsRepository.save(appointment);
 
     try {

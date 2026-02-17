@@ -138,52 +138,196 @@
 
         <!-- Billing Tab -->
         <div *ngIf="activeTab() === 'billing'" class="settings-card p-8 md:p-12">
-          <div class="flex items-center gap-4 mb-10">
-            <div
-              class="w-16 h-16 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center text-3xl shadow-sm">
-              <i class="bi bi-credit-card"></i>
-            </div>
-            <div>
-              <h2 class="text-2xl font-extrabold text-[var(--text-primary)]">Billing & Payments</h2>
-              <p class="text-sm text-[var(--text-muted)] mt-1 font-medium">Manage consultation fees and payouts.</p>
-            </div>
-          </div>
+          <!-- Billing Tab -->
+          <div *ngIf="activeTab() === 'billing'" class="space-y-8">
+            <!-- Multi-Service Management Section -->
+            <div class="settings-card p-8 md:p-12 overflow-hidden">
+              <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
+                <div class="flex items-center gap-4">
+                  <div
+                    class="w-16 h-16 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-3xl shadow-sm">
+                    <i class="bi bi-briefcase"></i>
+                  </div>
+                  <div>
+                    <h2 class="text-2xl font-extrabold text-[var(--text-primary)]">Medical Services</h2>
+                    <p class="text-sm text-[var(--text-muted)] mt-1 font-medium">Define treatment types and specialized
+                      fees.</p>
+                  </div>
+                </div>
+                <button (click)="openAddService()"
+                  class="save-btn bg-indigo-600 hover:bg-indigo-700 shadow-indigo-100 flex items-center gap-2">
+                  <i class="bi bi-plus-lg"></i>
+                  <span>Add Service</span>
+                </button>
+              </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
-            <div class="space-y-3">
-              <label class="form-label">Consultation Fee (USD)</label>
-              <div class="relative">
-                <span class="absolute left-5 top-1/2 -translate-y-1/2 font-bold text-[var(--text-muted)]">$</span>
-                <input type="number" [(ngModel)]="billingSettings.consultationFee" placeholder="150"
-                  class="form-input pl-10" />
+              <!-- Services Grid -->
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div *ngFor="let service of services()"
+                  class="group relative bg-[var(--surface-secondary)] p-6 rounded-3xl border border-transparent hover:border-indigo-200 transition-all duration-300">
+                  <div class="flex justify-between items-start mb-4">
+                    <div
+                      class="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-xl shadow-sm text-indigo-600">
+                      <i class="bi bi-activity"></i>
+                    </div>
+                    <div class="flex gap-2">
+                      <button (click)="openEditService(service)"
+                        class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+                        <i class="bi bi-pencil-square"></i>
+                      </button>
+                      <button (click)="deleteService(service.id)"
+                        class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                        <i class="bi bi-trash"></i>
+                      </button>
+                    </div>
+                  </div>
+
+                  <h3 class="font-bold text-lg mb-1">{{ service.name }}</h3>
+                  <p class="text-xs font-medium text-[var(--text-muted)] mb-4 line-clamp-2">{{ service.description ||
+                    'No description provided' }}</p>
+
+                  <div class="flex items-center justify-between pt-4 border-t border-[var(--border-light)]">
+                    <div class="flex flex-col">
+                      <span class="text-[10px] uppercase font-bold text-[var(--text-muted)] tracking-wider">Price</span>
+                      <span class="text-lg font-black text-indigo-600">{{ service.price | currency }}</span>
+                    </div>
+                    <div class="flex flex-col items-end">
+                      <span
+                        class="text-[10px] uppercase font-bold text-[var(--text-muted)] tracking-wider">Duration</span>
+                      <span class="text-sm font-bold">{{ service.duration }} min</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Empty State for Services -->
+                <div *ngIf="services().length === 0"
+                  class="col-span-full py-16 flex flex-col items-center justify-center text-center bg-[var(--surface-secondary)] rounded-3xl border-2 border-dashed border-[var(--border-light)]">
+                  <div
+                    class="w-16 h-16 rounded-full bg-indigo-50 text-indigo-300 flex items-center justify-center text-3xl mb-4">
+                    <i class="bi bi-inbox"></i>
+                  </div>
+                  <h4 class="font-bold text-lg">No services defined</h4>
+                  <p class="text-sm text-[var(--text-muted)] mt-1 max-w-xs">Start by adding different procedures or
+                    consultation types you offer.</p>
+                </div>
               </div>
             </div>
-            <div class="space-y-3">
-              <label class="form-label">Preferred Payout Method</label>
-              <select [(ngModel)]="billingSettings.paymentMethod" class="form-input form-select">
-                <option value="bank">Bank Transfer (Swift)</option>
-                <option value="card">Credit/Debit Card</option>
-                <option value="insurance">Direct Insurance Billing</option>
-              </select>
+
+            <!-- Existing Payout Settings -->
+            <div class="settings-card p-8 md:p-12">
+              <div class="flex items-center gap-4 mb-10">
+                <div
+                  class="w-16 h-16 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center text-3xl shadow-sm">
+                  <i class="bi bi-credit-card"></i>
+                </div>
+                <div>
+                  <h2 class="text-2xl font-extrabold text-[var(--text-primary)]">Payout Preferences</h2>
+                  <p class="text-sm text-[var(--text-muted)] mt-1 font-medium">Manage how you receive your earnings.</p>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+                <div class="space-y-3">
+                  <label class="form-label">Preferred Payout Method</label>
+                  <select [(ngModel)]="billingSettings.paymentMethod" class="form-input form-select">
+                    <option value="bank">Bank Transfer (Swift)</option>
+                    <option value="card">Credit/Debit Card</option>
+                    <option value="insurance">Direct Insurance Billing</option>
+                  </select>
+                </div>
+                <div class="space-y-3">
+                  <label class="form-label">Consultation Fee (Base Legacy Fee)</label>
+                  <div class="relative">
+                    <span class="absolute left-5 top-1/2 -translate-y-1/2 font-bold text-[var(--text-muted)]">$</span>
+                    <input type="number" [(ngModel)]="billingSettings.consultationFee" placeholder="150"
+                      class="form-input pl-10" />
+                  </div>
+                </div>
+              </div>
+
+              <div class="mt-12 p-6 bg-amber-50 rounded-2xl border border-amber-100">
+                <div class="flex gap-4">
+                  <i class="bi bi-info-circle text-amber-600 text-xl"></i>
+                  <p class="text-sm text-amber-800 font-medium leading-relaxed">
+                    Service prices define specific treatments. The base fee is used as a fallback for general
+                    consultations without specific service tags.
+                  </p>
+                </div>
+              </div>
+
+              <div class="mt-12 flex justify-end border-t border-[var(--border-light)] pt-8">
+                <button (click)="saveSettings()" [disabled]="isSaving()"
+                  class="save-btn bg-amber-600 hover:bg-amber-700 shadow-amber-100">
+                  <i class="bi bi-check2-all" *ngIf="!isSaving()"></i>
+                  {{ isSaving() ? 'Updating...' : 'Save Preferences' }}
+                </button>
+              </div>
             </div>
           </div>
 
-          <div class="mt-12 p-6 bg-amber-50 rounded-2xl border border-amber-100">
-            <div class="flex gap-4">
-              <i class="bi bi-info-circle text-amber-600 text-xl"></i>
-              <p class="text-sm text-amber-800 font-medium leading-relaxed">
-                Fees are updated immediately but will only apply to new appointments booked after the change. Your
-                current active appointments will retain their original pricing.
-              </p>
-            </div>
-          </div>
+          <!-- Service Modal -->
+          <div *ngIf="showServiceModal()" class="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" (click)="showServiceModal.set(false)"></div>
 
-          <div class="mt-12 flex justify-end border-t border-[var(--border-light)] pt-8">
-            <button (click)="saveSettings()" [disabled]="isSaving()"
-              class="save-btn bg-amber-600 hover:bg-amber-700 shadow-amber-100">
-              <i class="bi bi-shield-check" *ngIf="!isSaving()"></i>
-              Update Billing
-            </button>
+            <div
+              class="relative bg-[var(--bg)] w-full max-w-xl rounded-3xl shadow-2xl overflow-hidden border border-[var(--border-light)] animate-fade-in-up">
+              <div class="p-8 border-b border-[var(--border-light)] flex justify-between items-center">
+                <div>
+                  <h3 class="text-2xl font-extrabold text-[var(--text-primary)]">
+                    {{ editingService() ? 'Edit Service' : 'Add New Service' }}
+                  </h3>
+                  <p class="text-sm text-[var(--text-muted)] font-medium mt-1">Define service pricing and duration</p>
+                </div>
+                <button (click)="showServiceModal.set(false)"
+                  class="w-10 h-10 rounded-full hover:bg-[var(--surface-secondary)] flex items-center justify-center transition-colors">
+                  <i class="bi bi-x-lg"></i>
+                </button>
+              </div>
+
+              <div class="p-8 space-y-6">
+                <div class="space-y-2">
+                  <label class="form-label">Service Name</label>
+                  <input type="text" [(ngModel)]="serviceForm.name" placeholder="e.g. Heart Rate Ultrasound"
+                    class="form-input" />
+                </div>
+
+                <div class="grid grid-cols-2 gap-6">
+                  <div class="space-y-2">
+                    <label class="form-label">Price (USD)</label>
+                    <div class="relative">
+                      <span class="absolute left-5 top-1/2 -translate-y-1/2 font-bold text-[var(--text-muted)]">$</span>
+                      <input type="number" [(ngModel)]="serviceForm.price" class="form-input pl-10" />
+                    </div>
+                  </div>
+                  <div class="space-y-2">
+                    <label class="form-label">Duration (min)</label>
+                    <select [(ngModel)]="serviceForm.duration" class="form-input">
+                      <option [value]="15">15 Minutes</option>
+                      <option [value]="30">30 Minutes</option>
+                      <option [value]="45">45 Minutes</option>
+                      <option [value]="60">60 Minutes</option>
+                      <option [value]="90">90 Minutes</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="space-y-2">
+                  <label class="form-label">Description (Optional)</label>
+                  <textarea [(ngModel)]="serviceForm.description" rows="3"
+                    placeholder="Brief details about the procedure..." class="form-input resize-none"></textarea>
+                </div>
+              </div>
+
+              <div class="p-8 bg-[var(--surface-secondary)] flex justify-end gap-4">
+                <button (click)="showServiceModal.set(false)"
+                  class="px-6 py-3 font-bold text-sm text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors">
+                  Cancel
+                </button>
+                <button (click)="saveService()" class="save-btn min-w-[140px]">
+                  Confirm & Save
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 

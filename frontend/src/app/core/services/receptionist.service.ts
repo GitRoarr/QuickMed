@@ -78,6 +78,10 @@ export class ReceptionistService {
     return this.http.get<any[]>(`${this.API_URL}/payments${qs ? `?${qs}` : ''}`);
   }
 
+  getPaymentStats(): Observable<any> {
+    return this.http.get<any>(`${this.API_URL}/payments/stats`);
+  }
+
   listDoctorAvailability(date?: string): Observable<any[]> {
     const qs = date ? `?date=${encodeURIComponent(date)}` : '';
     return this.http.get<any[]>(`${this.API_URL}/doctors/availability${qs}`);
@@ -148,5 +152,9 @@ export class ReceptionistService {
 
   sendMessage(payload: { receiverId: string; receiverRole: 'patient' | 'doctor'; content: string }): Observable<any> {
     return this.http.post<any>(`${this.API_URL}/messages`, payload);
+  }
+
+  getDoctorServices(doctorId: string): Observable<any[]> {
+    return this.http.get<any[]>(`${environment.apiUrl}/settings/services?doctorId=${doctorId}`);
   }
 }
