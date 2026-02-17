@@ -12,11 +12,26 @@ dotenv.config() // fallback to CWD
 async function bootstrap() {
   const app = await NestFactory.create(AppModule)
 
-  // Explicitly restrict CORS to defined origins for production
+  // Flexible CORS configuration
   const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:4200';
+  const allowedOrigins = frontendUrl.split(',').map(url => url.trim());
 
   app.enableCors({
-    origin: frontendUrl.split(','), // Support comma-separated list of origins
+    origin: (origin, callback) => {
+      // Allow requests with no origin (like mobile apps or curl)
+      if (!origin) return callback(null, true);
+
+      const isAllowed = allowedOrigins.some(u => origin === u) ||
+        origin.endsWith('.vercel.app') ||
+        origin.includes('localhost');
+
+      if (isAllowed) {
+        callback(null, true);
+      } else {
+        console.warn(`CORS blocked for origin: ${origin}`);
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     credentials: true,
     allowedHeaders: ['Authorization', 'Content-Type', 'Accept', 'x-doctor-id'],
     methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
